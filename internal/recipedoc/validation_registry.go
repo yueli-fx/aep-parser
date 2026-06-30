@@ -21,6 +21,22 @@ var fieldValidation = map[string]FieldMeta{
 		Validation: "Supported values create the corresponding layer type.",
 		Enum:       []string{"solid", "text", "shape", "camera", "light", "null", "adjustment"},
 	},
+	"comps[].layers[].text_animators[].property": {
+		Validation: "The first recipe slice supports opacity text animators only.",
+		Enum:       []string{"opacity"},
+	},
+	"comps[].layers[].text_animators[].value": {
+		Validation: "Opacity animator value must be a number.",
+	},
+	"comps[].layers[].text_animators[].range_start": {
+		Validation: "Range selector start is required.",
+	},
+	"comps[].layers[].text_animators[].range_end": {
+		Validation: "Range selector end is required.",
+	},
+	"comps[].layers[].text_animators[].range_offset": {
+		Validation: "Range selector offset is required.",
+	},
 	"comps[].layers[].matte": {
 		Validation: "Requires project.target_version AE2025, a non-none track_matte mode, and a same-comp source layer name.",
 	},

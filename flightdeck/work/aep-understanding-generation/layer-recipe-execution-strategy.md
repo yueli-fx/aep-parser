@@ -66,6 +66,7 @@ flags, and refs.
 | Transform keyframes/ease | `transform.*_keyframes` | `SetLayerTransform` | `properties[].keyframes[]` | `expected_profile.keyframes[]` | L3 | keep separate |
 | Transform expressions | `transform.expressions.*` | `Property.SetExpression` / `Property.SetExpressionEnabled` | `properties[].expression` / `expression_enabled` | `expected_profile.properties[].expression` / `expression_enabled` | L3 | keep separate |
 | Text style | `text_style.*` | text run/paragraph setters | `layers[].text.*` | `expected_profile.text_styles[]` | L3 | keep separate |
+| Text animators | `text_animators[].property: opacity` static Range Selector | `AddTextOpacityAnimator` | `properties[]` | `expected_profile.properties[]` | L3/L4 | first opacity slice done |
 | Shape contents | `shape.*` | vector group writers | `layers[].shapes[]` / `properties[]` | `expected_profile.properties[]` | L3/L4 | keep separate |
 | Effects | `effects[]` | `AddEffect` / `SetEffectParam` | `layers[].effects[]` | `expected_profile.effects[]` | L3/L4 | keep separate |
 | Camera/light layer identity | `type: camera` / `type: light` | layer constructors | `layers[].name` / `type` | `expected_profile.layers[].name` / `type` | L3 | done |
@@ -244,11 +245,20 @@ layer, and asserts them through `expected_profile.text_styles[]`. The larger
 `minimal-text-shape.json` still exercises text style in a mixed content scene,
 but it is no longer the only profile contract for text style.
 
+Text animators now have a first minimal recipe/profile baseline:
+`minimal-text-animator-opacity.json` authors a static opacity Range Selector
+through `layers[].text_animators[]` and asserts the resulting
+`ADBE Text Opacity` property through `expected_profile.properties[]`. Later
+text animator slices should extend this family by property kind and animated
+Range Offset only when the expected-profile property/keyframe contract stays
+explicit.
+
 Nested content examples also require the matching expected-profile family:
 shape/camera/light property content must assert `properties[]`, text style
-content must assert `text_styles[]`, and effect content must assert
-`effects[]`. A solid layer's `shape.fill_color` remains source-generation
-metadata and is not treated as shape-layer property content.
+content must assert `text_styles[]`, text animator content must assert
+`properties[]`, and effect content must assert `effects[]`. A solid layer's
+`shape.fill_color` remains source-generation metadata and is not treated as
+shape-layer property content.
 
 Shape filter coverage has been split into dedicated minimal recipes for the
 stable filter families that were previously exercised mainly through the larger

@@ -76,6 +76,12 @@
     "comps[].layers[].text_style.stroke_color",
     "comps[].layers[].text_style.stroke_width",
     "comps[].layers[].text_style.justification",
+    "comps[].layers[].text_animators[]",
+    "comps[].layers[].text_animators[].property",
+    "comps[].layers[].text_animators[].value",
+    "comps[].layers[].text_animators[].range_start",
+    "comps[].layers[].text_animators[].range_end",
+    "comps[].layers[].text_animators[].range_offset",
     "comps[].layers[].camera",
     "comps[].layers[].camera.zoom",
     "comps[].layers[].camera.depth_of_field",
@@ -3188,6 +3194,80 @@
       ],
       "example": "examples/recipes/minimal-adjustment-layer.json"
     },
+    "comps[].layers[].text_animators[]": {
+      "path": "comps[].layers[].text_animators[]",
+      "json_name": "text_animators",
+      "source_type": "Layer",
+      "source_field": "TextAnimators",
+      "type": "array\u003crecipe.TextAnimatorSpec\u003e",
+      "go_type": "[]recipe.TextAnimatorSpec",
+      "summary": "Text animator definitions.",
+      "capability_keys": [
+        "text_animator.add_opacity"
+      ],
+      "example": "examples/recipes/minimal-text-animator-opacity.json"
+    },
+    "comps[].layers[].text_animators[].property": {
+      "path": "comps[].layers[].text_animators[].property",
+      "json_name": "property",
+      "source_type": "TextAnimatorSpec",
+      "source_field": "Property",
+      "type": "string",
+      "go_type": "string",
+      "requiredness": [
+        "structural"
+      ],
+      "summary": "Text animator property to add.",
+      "validation": "The first recipe slice supports opacity text animators only.",
+      "enum": [
+        "opacity"
+      ],
+      "example": "examples/recipes/minimal-text-animator-opacity.json"
+    },
+    "comps[].layers[].text_animators[].range_end": {
+      "path": "comps[].layers[].text_animators[].range_end",
+      "json_name": "range_end",
+      "source_type": "TextAnimatorSpec",
+      "source_field": "RangeEnd",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Text animator range selector end percentage.",
+      "validation": "Range selector end is required.",
+      "example": "examples/recipes/minimal-text-animator-opacity.json"
+    },
+    "comps[].layers[].text_animators[].range_offset": {
+      "path": "comps[].layers[].text_animators[].range_offset",
+      "json_name": "range_offset",
+      "source_type": "TextAnimatorSpec",
+      "source_field": "RangeOffset",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Text animator range selector offset percentage.",
+      "validation": "Range selector offset is required.",
+      "example": "examples/recipes/minimal-text-animator-opacity.json"
+    },
+    "comps[].layers[].text_animators[].range_start": {
+      "path": "comps[].layers[].text_animators[].range_start",
+      "json_name": "range_start",
+      "source_type": "TextAnimatorSpec",
+      "source_field": "RangeStart",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Text animator range selector start percentage.",
+      "validation": "Range selector start is required.",
+      "example": "examples/recipes/minimal-text-animator-opacity.json"
+    },
+    "comps[].layers[].text_animators[].value": {
+      "path": "comps[].layers[].text_animators[].value",
+      "json_name": "value",
+      "source_type": "TextAnimatorSpec",
+      "source_field": "Value",
+      "type": "any",
+      "go_type": "interface {}",
+      "summary": "Text animator property value.",
+      "validation": "Opacity animator value must be a number.",
+      "example": "examples/recipes/minimal-text-animator-opacity.json"
+    },
     "comps[].layers[].text_style": {
       "path": "comps[].layers[].text_style",
       "json_name": "text_style",
@@ -6018,6 +6098,7 @@
       "comps[].layers[].parent",
       "comps[].layers[].text",
       "comps[].layers[].text_style",
+      "comps[].layers[].text_animators[]",
       "comps[].layers[].camera",
       "comps[].layers[].light",
       "comps[].layers[].shape",
@@ -6185,6 +6266,13 @@
       "comps[].layers[].transform.opacity_keyframes[].in_ease.influence",
       "comps[].layers[].transform.opacity_keyframes[].out_ease.speed",
       "comps[].layers[].transform.opacity_keyframes[].out_ease.influence"
+    ],
+    "TextAnimatorSpec": [
+      "comps[].layers[].text_animators[].property",
+      "comps[].layers[].text_animators[].value",
+      "comps[].layers[].text_animators[].range_start",
+      "comps[].layers[].text_animators[].range_end",
+      "comps[].layers[].text_animators[].range_offset"
     ],
     "TextStyleSpec": [
       "comps[].layers[].text_style.run_index",

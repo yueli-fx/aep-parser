@@ -459,6 +459,11 @@ Done:
   `layers[].track_matte`; `minimal-layer-explicit-matte.json` asserts both
   the matte mode and profile `matte_ref`, and the verifier passes for that
   example.
+- First text animator recipe slice is implemented for static opacity Range
+  Selector animators through `layers[].text_animators[]`. The dedicated
+  `examples/recipes/minimal-text-animator-opacity.json` example compiles an
+  opacity text animator, asserts the `ADBE Text Opacity` profile property, and
+  passes recipe profile verification.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven

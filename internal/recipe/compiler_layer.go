@@ -26,6 +26,11 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) (*aep.La
 				return nil, fmt.Errorf("recipe: text layer %q style: %w", spec.Name, err)
 			}
 		}
+		if len(spec.TextAnimators) > 0 {
+			if err := applyTextAnimators(l, spec.TextAnimators); err != nil {
+				return nil, fmt.Errorf("recipe: text layer %q animators: %w", spec.Name, err)
+			}
+		}
 		layer = l
 	case "shape":
 		l, err := aep.NewShapeLayer(comp, spec.Name)
@@ -464,6 +469,27 @@ func applyTextStyle(layer *aep.Layer, spec TextStyleSpec) error {
 		}
 		if err := layer.SetParagraphJustification(spec.ParagraphIndex, justification); err != nil {
 			return err
+		}
+	}
+	return nil
+}
+
+func applyTextAnimators(layer *aep.Layer, animators []TextAnimatorSpec) error {
+	for i, animator := range animators {
+		switch animator.Property {
+		case "opacity":
+			value, ok := animator.Value.(float64)
+			if !ok {
+				return fmt.Errorf("text_animators[%d].value must be a number", i)
+			}
+			if animator.RangeStart == nil || animator.RangeEnd == nil || animator.RangeOffset == nil {
+				return fmt.Errorf("text_animators[%d] range_start, range_end, and range_offset are required", i)
+			}
+			if _, err := aep.AddTextOpacityAnimator(layer, value, *animator.RangeStart, *animator.RangeEnd, *animator.RangeOffset); err != nil {
+				return err
+			}
+		default:
+			return fmt.Errorf("text_animators[%d].property %q is not supported", i, animator.Property)
 		}
 	}
 	return nil

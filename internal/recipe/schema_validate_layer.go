@@ -222,6 +222,13 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 			validateTextStyle(*layer.TextStyle, layerPath+".text_style", recordCapability, addRefusal)
 		}
 	}
+	for i, animator := range layer.TextAnimators {
+		animatorPath := fmt.Sprintf("%s.text_animators[%d]", layerPath, i)
+		if layer.Type != "text" {
+			addRefusal("text_animator_on_non_text_layer", animatorPath, "text_animators are only supported on text layers")
+		}
+		validateTextAnimator(animator, animatorPath, recordCapability, addRefusal)
+	}
 	if layer.Type == "shape" && layer.Shape != nil {
 		switch layer.Shape.Kind {
 		case "rect", "ellipse":

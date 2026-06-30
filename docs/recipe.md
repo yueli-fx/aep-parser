@@ -98,6 +98,7 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].parent` | `string` | - | Parent layer name. | - | `layer.set_parent` (`Layer.SetParent`) | examples/recipes/minimal-layer-null-flag.json |
 | `comps[].layers[].text` | `string` | - | Source text for a text layer. | - | `layer.set_text` (`Layer.SetText`) | examples/recipes/minimal-adjustment-layer.json |
 | `comps[].layers[].text_style` | `object<TextStyleSpec>` | - | Text layer style overrides. | - | - | examples/recipes/minimal-text-shape.json |
+| `comps[].layers[].text_animators[]` | `array<recipe.TextAnimatorSpec>` | - | Text animator definitions. | - | `text_animator.add_opacity` (`AddTextOpacityAnimator`) | examples/recipes/minimal-text-animator-opacity.json |
 | `comps[].layers[].camera` | `object<CameraSpec>` | - | Camera layer options. | - | - | examples/recipes/minimal-camera-aperture.json |
 | `comps[].layers[].light` | `object<LightSpec>` | - | Light layer options. | - | - | examples/recipes/minimal-light-casts-shadows.json |
 | `comps[].layers[].shape` | `object<ShapeSpec>` | - | Shape layer primitive and operators. | - | - | examples/recipes/minimal-layer-explicit-matte.json |
@@ -120,6 +121,16 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].text_style.stroke_color` | `array<float64>` | - | Layer text style stroke color as RGB channels. | - | `text.set_run_stroke_color` (`Layer.SetRunStrokeColor`) | examples/recipes/minimal-text-shape.json |
 | `comps[].layers[].text_style.stroke_width` | `number` | - | Layer text style stroke width. | - | `text.set_run_stroke_width` (`Layer.SetRunStrokeWidth`) | examples/recipes/minimal-text-shape.json |
 | `comps[].layers[].text_style.justification` | `string` | - | Layer text style paragraph justification mode. | - | `text.set_paragraph_justification` (`Layer.SetParagraphJustification`) | examples/recipes/minimal-text-shape.json |
+
+## TextAnimatorSpec
+
+| Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
+| --- | --- | --- | --- | --- | --- | --- |
+| `comps[].layers[].text_animators[].property` | `string` | structural | Text animator property to add. | The first recipe slice supports opacity text animators only. | - | examples/recipes/minimal-text-animator-opacity.json |
+| `comps[].layers[].text_animators[].value` | `any` | - | Text animator property value. | Opacity animator value must be a number. | - | examples/recipes/minimal-text-animator-opacity.json |
+| `comps[].layers[].text_animators[].range_start` | `number` | - | Text animator range selector start percentage. | Range selector start is required. | - | examples/recipes/minimal-text-animator-opacity.json |
+| `comps[].layers[].text_animators[].range_end` | `number` | - | Text animator range selector end percentage. | Range selector end is required. | - | examples/recipes/minimal-text-animator-opacity.json |
+| `comps[].layers[].text_animators[].range_offset` | `number` | - | Text animator range selector offset percentage. | Range selector offset is required. | - | examples/recipes/minimal-text-animator-opacity.json |
 
 ## CameraSpec
 

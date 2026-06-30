@@ -1862,6 +1862,93 @@
       "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
+      "x-aep-path": "comps[].layers[].text_animators[]",
+      "json_name": "text_animators",
+      "source_type": "Layer",
+      "source_field": "TextAnimators",
+      "type": "array",
+      "go_type": "[]recipe.TextAnimatorSpec",
+      "element": "recipe.TextAnimatorSpec",
+      "object_type": "TextAnimatorSpec",
+      "description": "Text animator definitions.",
+      "x-aep-capabilities": [
+        {
+          "key": "text_animator.add_opacity",
+          "query": "AddTextOpacityAnimator",
+          "status": "supported",
+          "symbol": "AddTextOpacityAnimator",
+          "domain": "text",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "boundary": "typed parameter accessors are not yet wired (tune via Reopen); un-Reopened fresh layers are refused",
+          "gate": [
+            "TestTextAnimator_AEShipGate_AE2020",
+            "TestTextAnimator_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-animator-opacity.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_animators[].property",
+      "json_name": "property",
+      "source_type": "TextAnimatorSpec",
+      "source_field": "Property",
+      "type": "string",
+      "go_type": "string",
+      "x-aep-structural-required": true,
+      "description": "Text animator property to add.",
+      "x-aep-validation": "The first recipe slice supports opacity text animators only.",
+      "enum": [
+        "opacity"
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-animator-opacity.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_animators[].value",
+      "json_name": "value",
+      "source_type": "TextAnimatorSpec",
+      "source_field": "Value",
+      "type": "object",
+      "go_type": "interface {}",
+      "description": "Text animator property value.",
+      "x-aep-validation": "Opacity animator value must be a number.",
+      "x-aep-example": "examples/recipes/minimal-text-animator-opacity.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_animators[].range_start",
+      "json_name": "range_start",
+      "source_type": "TextAnimatorSpec",
+      "source_field": "RangeStart",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Text animator range selector start percentage.",
+      "x-aep-validation": "Range selector start is required.",
+      "x-aep-example": "examples/recipes/minimal-text-animator-opacity.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_animators[].range_end",
+      "json_name": "range_end",
+      "source_type": "TextAnimatorSpec",
+      "source_field": "RangeEnd",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Text animator range selector end percentage.",
+      "x-aep-validation": "Range selector end is required.",
+      "x-aep-example": "examples/recipes/minimal-text-animator-opacity.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_animators[].range_offset",
+      "json_name": "range_offset",
+      "source_type": "TextAnimatorSpec",
+      "source_field": "RangeOffset",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Text animator range selector offset percentage.",
+      "x-aep-validation": "Range selector offset is required.",
+      "x-aep-example": "examples/recipes/minimal-text-animator-opacity.json"
+    },
+    {
       "x-aep-path": "comps[].layers[].camera",
       "json_name": "camera",
       "source_type": "Layer",

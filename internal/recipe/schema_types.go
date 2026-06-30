@@ -51,44 +51,45 @@ type CompMotionBlurSpec struct {
 }
 
 type Layer struct {
-	Type                  string         `json:"type"`
-	Name                  string         `json:"name"`
-	Label                 *float64       `json:"label,omitempty"`
-	Comment               string         `json:"comment,omitempty"`
-	Visible               *bool          `json:"visible,omitempty"`
-	Solo                  *bool          `json:"solo,omitempty"`
-	Locked                *bool          `json:"locked,omitempty"`
-	MotionBlur            *bool          `json:"motion_blur,omitempty"`
-	Shy                   *bool          `json:"shy,omitempty"`
-	EffectsEnabled        *bool          `json:"effects_enabled,omitempty"`
-	AudioEnabled          *bool          `json:"audio_enabled,omitempty"`
-	FrameBlendEnabled     *bool          `json:"frame_blend_enabled,omitempty"`
-	MarkersLocked         *bool          `json:"markers_locked,omitempty"`
-	CollapseTransform     *bool          `json:"collapse_transform,omitempty"`
-	Is3D                  *bool          `json:"is_3d,omitempty"`
-	IsAdjust              *bool          `json:"is_adjust,omitempty"`
-	IsNull                *bool          `json:"is_null,omitempty"`
-	IsGuide               *bool          `json:"is_guide,omitempty"`
-	SamplingBicubic       *bool          `json:"sampling_bicubic,omitempty"`
-	FrameBlendPixelMotion *bool          `json:"frame_blend_pixel_motion,omitempty"`
-	PreserveTransparency  *bool          `json:"preserve_transparency,omitempty"`
-	Quality               string         `json:"quality,omitempty"`
-	BlendingMode          string         `json:"blending_mode,omitempty"`
-	TrackMatte            string         `json:"track_matte,omitempty"`
-	Matte                 string         `json:"matte,omitempty"`
-	AutoOrient            string         `json:"auto_orient,omitempty"`
-	StartTime             *float64       `json:"start_time,omitempty"`
-	InPoint               *float64       `json:"in_point,omitempty"`
-	OutPoint              *float64       `json:"out_point,omitempty"`
-	Parent                string         `json:"parent,omitempty"`
-	Text                  string         `json:"text,omitempty"`
-	TextStyle             *TextStyleSpec `json:"text_style,omitempty"`
-	Camera                *CameraSpec    `json:"camera,omitempty"`
-	Light                 *LightSpec     `json:"light,omitempty"`
-	Shape                 *ShapeSpec     `json:"shape,omitempty"`
-	Masks                 []MaskSpec     `json:"masks,omitempty"`
-	Transform             Transform      `json:"transform,omitempty"`
-	Effects               []Effect       `json:"effects,omitempty"`
+	Type                  string             `json:"type"`
+	Name                  string             `json:"name"`
+	Label                 *float64           `json:"label,omitempty"`
+	Comment               string             `json:"comment,omitempty"`
+	Visible               *bool              `json:"visible,omitempty"`
+	Solo                  *bool              `json:"solo,omitempty"`
+	Locked                *bool              `json:"locked,omitempty"`
+	MotionBlur            *bool              `json:"motion_blur,omitempty"`
+	Shy                   *bool              `json:"shy,omitempty"`
+	EffectsEnabled        *bool              `json:"effects_enabled,omitempty"`
+	AudioEnabled          *bool              `json:"audio_enabled,omitempty"`
+	FrameBlendEnabled     *bool              `json:"frame_blend_enabled,omitempty"`
+	MarkersLocked         *bool              `json:"markers_locked,omitempty"`
+	CollapseTransform     *bool              `json:"collapse_transform,omitempty"`
+	Is3D                  *bool              `json:"is_3d,omitempty"`
+	IsAdjust              *bool              `json:"is_adjust,omitempty"`
+	IsNull                *bool              `json:"is_null,omitempty"`
+	IsGuide               *bool              `json:"is_guide,omitempty"`
+	SamplingBicubic       *bool              `json:"sampling_bicubic,omitempty"`
+	FrameBlendPixelMotion *bool              `json:"frame_blend_pixel_motion,omitempty"`
+	PreserveTransparency  *bool              `json:"preserve_transparency,omitempty"`
+	Quality               string             `json:"quality,omitempty"`
+	BlendingMode          string             `json:"blending_mode,omitempty"`
+	TrackMatte            string             `json:"track_matte,omitempty"`
+	Matte                 string             `json:"matte,omitempty"`
+	AutoOrient            string             `json:"auto_orient,omitempty"`
+	StartTime             *float64           `json:"start_time,omitempty"`
+	InPoint               *float64           `json:"in_point,omitempty"`
+	OutPoint              *float64           `json:"out_point,omitempty"`
+	Parent                string             `json:"parent,omitempty"`
+	Text                  string             `json:"text,omitempty"`
+	TextStyle             *TextStyleSpec     `json:"text_style,omitempty"`
+	TextAnimators         []TextAnimatorSpec `json:"text_animators,omitempty"`
+	Camera                *CameraSpec        `json:"camera,omitempty"`
+	Light                 *LightSpec         `json:"light,omitempty"`
+	Shape                 *ShapeSpec         `json:"shape,omitempty"`
+	Masks                 []MaskSpec         `json:"masks,omitempty"`
+	Transform             Transform          `json:"transform,omitempty"`
+	Effects               []Effect           `json:"effects,omitempty"`
 }
 
 type MaskSpec struct {
@@ -155,6 +156,14 @@ type TextStyleSpec struct {
 	StrokeColor    []float64 `json:"stroke_color,omitempty"`
 	StrokeWidth    *float64  `json:"stroke_width,omitempty"`
 	Justification  string    `json:"justification,omitempty"`
+}
+
+type TextAnimatorSpec struct {
+	Property    string   `json:"property"`
+	Value       any      `json:"value,omitempty"`
+	RangeStart  *float64 `json:"range_start,omitempty"`
+	RangeEnd    *float64 `json:"range_end,omitempty"`
+	RangeOffset *float64 `json:"range_offset,omitempty"`
 }
 
 type ShapeSpec struct {

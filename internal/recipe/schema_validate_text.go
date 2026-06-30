@@ -250,6 +250,29 @@ func validateTransformExpression(expression *ExpressionSpec, path string, record
 	}
 }
 
+func validateTextAnimator(animator TextAnimatorSpec, path string, recordCapability func(string, string) CapabilityLookup, addRefusal func(string, string, string)) {
+	switch animator.Property {
+	case "opacity":
+		recordCapability("AddTextOpacityAnimator", path)
+	default:
+		addRefusal("unsupported_text_animator_property", path+".property", "text animator property must be opacity")
+	}
+	if animator.Value == nil {
+		addRefusal("missing_text_animator_value", path+".value", "text animator value is required")
+	} else if _, ok := animator.Value.(float64); !ok {
+		addRefusal("invalid_text_animator_value", path+".value", "text animator opacity value must be a number")
+	}
+	if animator.RangeStart == nil {
+		addRefusal("missing_text_animator_range_start", path+".range_start", "range_start is required")
+	}
+	if animator.RangeEnd == nil {
+		addRefusal("missing_text_animator_range_end", path+".range_end", "range_end is required")
+	}
+	if animator.RangeOffset == nil {
+		addRefusal("missing_text_animator_range_offset", path+".range_offset", "range_offset is required")
+	}
+}
+
 func validateColor(values []float64, path, code string, addRefusal func(string, string, string)) {
 	if len(values) != 3 && len(values) != 4 {
 		addRefusal(code, path, "color must have 3 or 4 channels")
