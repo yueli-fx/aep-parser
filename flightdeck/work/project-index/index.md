@@ -5,11 +5,13 @@
 This work package tracks the dedicated lookup/search/index layer that sits
 outside the core `scene.Project` model.
 
-Status: lookup first slice complete, and the first narrow single-project search
-slice is implemented. `internal/projectindex` exists, recipe/profile hotspots
-are wired to it, search/corpus result models are specified, and callers can now
-obtain stable hit locations for source-layer and effect-match searches. Later
-work should add broader search/corpus APIs only when a caller needs them.
+Status: lookup first slice complete, first narrow single-project search slice
+implemented, and first corpus fact extraction slice implemented.
+`internal/projectindex` exists, recipe/profile hotspots are wired to it, callers
+can obtain stable hit locations for source-layer and effect-match searches, and
+batch workflows can now extract durable layer-source/effect-usage facts without
+retaining parsed project graphs. Later work should add broader search/corpus
+APIs only when a caller needs them.
 
 The current architecture decision from `work/scene-architecture/index.md` is:
 keep `Project.Compositions`, `Project.Footage`, `Project.Folders`, and
@@ -370,6 +372,12 @@ Memory rules:
   - [x] Search hits serialize with stable snake_case JSON names and do not
         serialize raw Go pointers.
 - [x] Design corpus-level learning/search index.
+- [x] Implement first corpus fact extraction slice.
+  - [x] `NewCorpusBuilder` ingests projects one at a time and emits
+        serializable `CorpusProject` summaries plus `CorpusFact` rows.
+  - [x] First facts cover layer source references and effect usage.
+  - [x] Corpus JSON contains stable project IDs, locations, matches, and
+        summaries, but no `Project`, `Index`, or pointer graph.
 
 ## Verification
 
@@ -384,4 +392,9 @@ Current first implementation slice:
 Current search slice:
 
 - `go test ./internal/projectindex -run 'TestSearch' -count=1`
+- `go test ./internal/projectindex -count=1`
+
+Current corpus slice:
+
+- `go test ./internal/projectindex -run 'TestCorpus' -count=1`
 - `go test ./internal/projectindex -count=1`
