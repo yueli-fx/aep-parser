@@ -1305,8 +1305,8 @@ try {
     if ($watchDryRunText -notmatch "DRY RUN") {
         throw "watch technique selfhost dry run missing DRY RUN marker"
     }
-    if ($watchDryRunText -notmatch "verify_technique_selfhost.ps1") {
-        throw "watch technique selfhost dry run missing verify command"
+    if ($watchDryRunText -notmatch "aepselfhost verify") {
+        throw "watch technique selfhost dry run missing go verify command"
     }
     if ($watchDryRunText -notmatch "aepselfhost outcome") {
         throw "watch technique selfhost dry run missing go outcome command"

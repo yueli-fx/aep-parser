@@ -25,6 +25,8 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return 2
 	}
 	switch args[0] {
+	case "verify":
+		return runVerify(args[1:], stdout, stderr)
 	case "outcome":
 		return runOutcome(args[1:], stdout, stderr)
 	case "status":
@@ -72,6 +74,14 @@ func runStatus(args []string, stdout, stderr io.Writer) int {
 	return 0
 }
 
+func runVerify(args []string, stdout, stderr io.Writer) int {
+	opts, ok := parseVerifyOptions("aepselfhost verify", args, stderr)
+	if !ok {
+		return 2
+	}
+	return verifySelfhost(opts, stdout, stderr)
+}
+
 func runWatch(args []string, stdout, stderr io.Writer) int {
 	opts, ok := parseWatchOptions("aepselfhost watch", args, stderr)
 	if !ok {
@@ -94,6 +104,37 @@ func runStartWatch(args []string, stdout, stderr io.Writer) int {
 		return 1
 	}
 	return startWatch(opts, stdout, stderr)
+}
+
+type verifyOptions struct {
+	OutRoot string
+	Limit   int
+	Open    bool
+	DryRun  bool
+}
+
+func parseVerifyOptions(name string, args []string, stderr io.Writer) (verifyOptions, bool) {
+	fs := flag.NewFlagSet(name, flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	opts := verifyOptions{}
+	fs.StringVar(&opts.OutRoot, "out-root", filepath.Join("tmp", "technique_selfhost_gate"), "selfhost output root")
+	fs.IntVar(&opts.Limit, "limit", 0, "optional sample limit")
+	fs.BoolVar(&opts.Open, "open", false, "open the generated outcome page")
+	fs.BoolVar(&opts.DryRun, "dry-run", false, "print the underlying gate command without running")
+	if err := fs.Parse(args); err != nil {
+		return verifyOptions{}, false
+	}
+	return opts, true
+}
+
+func verifySelfhost(opts verifyOptions, stdout, stderr io.Writer) int {
+	args := psVerifyArgs(opts)
+	if opts.DryRun {
+		fmt.Fprintln(stdout, "DRY RUN technique selfhost verify")
+		fmt.Fprintf(stdout, "command: pwsh %s\n", strings.Join(args, " "))
+		return 0
+	}
+	return runCommand(stdout, stderr, "pwsh", args...)
 }
 
 type watchOptions struct {
@@ -141,11 +182,11 @@ func (opts watchOptions) validate() error {
 
 func watchSelfhost(opts watchOptions, stdout, stderr io.Writer) int {
 	startedAt := utcNow()
-	verifyArgs := verifyCommandArgs(opts, opts.OpenFirst)
+	verifyArgs := verifyCLIArgs(opts, opts.OpenFirst)
 	showArgs := []string{"outcome", "-out-root", opts.OutRoot}
 	if opts.DryRun {
 		fmt.Fprintln(stdout, "DRY RUN technique selfhost watch")
-		fmt.Fprintf(stdout, "verify command: pwsh %s\n", strings.Join(verifyArgs, " "))
+		fmt.Fprintf(stdout, "verify command: aepselfhost %s\n", strings.Join(verifyArgs, " "))
 		fmt.Fprintf(stdout, "show command:   aepselfhost %s\n", strings.Join(showArgs, " "))
 		status := watchFile{
 			Mode:              "dry_run",
@@ -153,7 +194,7 @@ func watchSelfhost(opts watchOptions, stdout, stderr io.Writer) int {
 			PlannedIterations: opts.Iterations,
 			DurationMinutes:   opts.DurationMinutes,
 			IntervalSeconds:   opts.IntervalSeconds,
-			VerifyCommand:     "pwsh " + strings.Join(verifyArgs, " "),
+			VerifyCommand:     "aepselfhost " + strings.Join(verifyArgs, " "),
 			ShowCommand:       "aepselfhost " + strings.Join(showArgs, " "),
 		}
 		if err := writeWatchStatus(opts.OutRoot, status); err != nil {
@@ -177,7 +218,11 @@ func watchSelfhost(opts watchOptions, stdout, stderr io.Writer) int {
 		iteration++
 		iterationStartedAt := utcNow()
 		fmt.Fprintf(stdout, "watch iteration %d started at %s\n", iteration, iterationStartedAt)
-		lastExit = runCommand(stdout, stderr, "pwsh", verifyCommandArgs(opts, opts.OpenFirst && iteration == 1)...)
+		lastExit = verifySelfhost(verifyOptions{
+			OutRoot: opts.OutRoot,
+			Limit:   opts.Limit,
+			Open:    opts.OpenFirst && iteration == 1,
+		}, stdout, stderr)
 		if lastExit == 0 {
 			lastExit = runOutcome([]string{"-out-root", opts.OutRoot}, stdout, stderr)
 		}
@@ -190,7 +235,7 @@ func watchSelfhost(opts watchOptions, stdout, stderr io.Writer) int {
 			IntervalSeconds:     opts.IntervalSeconds,
 			CompletedIterations: ptrInt(iteration),
 			LastExitCode:        ptrInt(lastExit),
-			VerifyCommand:       "pwsh " + strings.Join(verifyCommandArgs(opts, opts.OpenFirst && iteration == 1), " "),
+			VerifyCommand:       "aepselfhost " + strings.Join(verifyCLIArgs(opts, opts.OpenFirst && iteration == 1), " "),
 			ShowCommand:         "aepselfhost outcome -out-root " + opts.OutRoot,
 			LatestOutcomeJSON:   filepath.Join(opts.OutRoot, "latest_outcome.json"),
 			LatestOutcomeHTML:   filepath.Join(opts.OutRoot, "latest_outcome.html"),
@@ -291,13 +336,24 @@ func startWatch(opts watchOptions, stdout, stderr io.Writer) int {
 	return 0
 }
 
-func verifyCommandArgs(opts watchOptions, open bool) []string {
+func psVerifyArgs(opts verifyOptions) []string {
 	args := []string{"-NoProfile", "-File", filepath.Join("scripts", "verify_technique_selfhost.ps1"), "-OutRoot", opts.OutRoot}
 	if opts.Limit > 0 {
 		args = append(args, "-Limit", strconv.Itoa(opts.Limit))
 	}
-	if open {
+	if opts.Open {
 		args = append(args, "-Open")
+	}
+	return args
+}
+
+func verifyCLIArgs(opts watchOptions, open bool) []string {
+	args := []string{"verify", "-out-root", opts.OutRoot}
+	if opts.Limit > 0 {
+		args = append(args, "-limit", strconv.Itoa(opts.Limit))
+	}
+	if open {
+		args = append(args, "-open")
 	}
 	return args
 }
@@ -605,5 +661,5 @@ func ptrIntValue(v *int) string {
 }
 
 func usage(stderr io.Writer) {
-	fmt.Fprintln(stderr, "usage: aepselfhost <outcome|status> -out-root tmp\\technique_selfhost_gate")
+	fmt.Fprintln(stderr, "usage: aepselfhost <verify|outcome|status|watch|start-watch> -out-root tmp\\technique_selfhost_gate")
 }

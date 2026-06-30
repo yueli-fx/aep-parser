@@ -123,6 +123,30 @@ func TestRunStatusPrintsProcessWatchOutcomeAndLogs(t *testing.T) {
 	}
 }
 
+func TestRunVerifyDryRunPrintsPowerShellGate(t *testing.T) {
+	root := t.TempDir()
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"verify", "-out-root", root, "-limit", "3", "-open", "-dry-run"}, &stdout, &stderr)
+
+	if code != 0 {
+		t.Fatalf("run verify dry-run = %d, stderr=%s", code, stderr.String())
+	}
+	out := stdout.String()
+	for _, want := range []string{
+		"DRY RUN technique selfhost verify",
+		"pwsh -NoProfile -File",
+		"verify_technique_selfhost.ps1",
+		"-OutRoot " + root,
+		"-Limit 3",
+		"-Open",
+	} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("stdout missing %q:\n%s", want, out)
+		}
+	}
+}
+
 func TestRunRejectsMissingOutcome(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 
@@ -158,8 +182,9 @@ func TestRunWatchDryRunWritesStatus(t *testing.T) {
 	for _, want := range []string{
 		"DRY RUN technique selfhost watch",
 		"verify command:",
-		"-Limit 7",
-		"-Open",
+		"aepselfhost verify",
+		"-limit 7",
+		"-open",
 	} {
 		if !strings.Contains(out, want) {
 			t.Fatalf("stdout missing %q:\n%s", want, out)
@@ -173,7 +198,7 @@ func TestRunWatchDryRunWritesStatus(t *testing.T) {
 	if status.DurationMinutes != 10 || status.IntervalSeconds != 15 || status.PlannedIterations != 2 {
 		t.Fatalf("watch status = %+v", status)
 	}
-	if !strings.Contains(status.VerifyCommand, "-Limit 7") {
+	if !strings.Contains(status.VerifyCommand, "-limit 7") {
 		t.Fatalf("verify command = %q, want limit", status.VerifyCommand)
 	}
 }
