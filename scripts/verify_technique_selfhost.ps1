@@ -1359,6 +1359,28 @@ try {
     if ($statusCliText -notmatch "Logs") {
         throw "show technique selfhost status missing Logs"
     }
+    $goOutcomeOutput = & go run ./cmd/aepselfhost outcome -out-root $OutRoot 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        throw "go aepselfhost outcome failed: $goOutcomeOutput"
+    }
+    $goOutcomeText = $goOutcomeOutput -join "`n"
+    if ($goOutcomeText -notmatch [regex]::Escape([string]$latestOutcomeJson.outcome_summary.headline)) {
+        throw "go aepselfhost outcome missing headline"
+    }
+    if ($goOutcomeText -notmatch "Next Actions") {
+        throw "go aepselfhost outcome missing Next Actions"
+    }
+    $goStatusOutput = & go run ./cmd/aepselfhost status -out-root $OutRoot 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        throw "go aepselfhost status failed: $goStatusOutput"
+    }
+    $goStatusText = $goStatusOutput -join "`n"
+    if ($goStatusText -notmatch "Self-Hosted Status") {
+        throw "go aepselfhost status missing title"
+    }
+    if ($goStatusText -notmatch "Latest Outcome") {
+        throw "go aepselfhost status missing Latest Outcome"
+    }
     if (-not (Test-Path -LiteralPath $latestOutcomeHtmlPath)) {
         throw "latest outcome html missing: $latestOutcomeHtmlPath"
     }
