@@ -297,6 +297,8 @@ func TestBuildDocumentIncludesTextStyleValidationMetadata(t *testing.T) {
 		"comps[].layers[].text_style.paragraph_index",
 		"comps[].layers[].text_style.font_size",
 		"comps[].layers[].text_style.fill_color",
+		"comps[].layers[].text_style.horizontal_scale",
+		"comps[].layers[].text_style.vertical_scale",
 		"comps[].layers[].text_style.tsume",
 		"comps[].layers[].text_style.stroke_width",
 		"comps[].layers[].text_style.justification",

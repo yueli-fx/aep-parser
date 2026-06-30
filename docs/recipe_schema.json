@@ -2317,6 +2317,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Layer text style horizontal text scale.",
+      "x-aep-validation": "Text horizontal scale must be non-negative.",
       "x-aep-capabilities": [
         {
           "key": "text.set_run_horizontal_scale",
@@ -2343,6 +2344,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Layer text style vertical text scale.",
+      "x-aep-validation": "Text vertical scale must be non-negative.",
       "x-aep-capabilities": [
         {
           "key": "text.set_run_vertical_scale",

@@ -37,9 +37,15 @@ func validateTextStyle(style TextStyleSpec, stylePath string, recordCapability f
 	}
 	if style.HorizontalScale != nil {
 		recordCapability("Layer.SetRunHorizontalScale", stylePath+".horizontal_scale")
+		if *style.HorizontalScale < 0 {
+			addRefusal("invalid_text_horizontal_scale", stylePath+".horizontal_scale", "horizontal_scale must be non-negative")
+		}
 	}
 	if style.VerticalScale != nil {
 		recordCapability("Layer.SetRunVerticalScale", stylePath+".vertical_scale")
+		if *style.VerticalScale < 0 {
+			addRefusal("invalid_text_vertical_scale", stylePath+".vertical_scale", "vertical_scale must be non-negative")
+		}
 	}
 	if style.Tsume != nil {
 		recordCapability("Layer.SetRunTsume", stylePath+".tsume")

@@ -3012,6 +3012,22 @@ func TestValidateRejectsInvalidTextStyle(t *testing.T) {
 	assertRefusal(t, report, "invalid_text_paragraph_direction")
 }
 
+func TestValidateRejectsInvalidTextStyleScale(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].TextStyle = &recipe.TextStyleSpec{
+		HorizontalScale: ptr(-1),
+		VerticalScale:   ptr(-1),
+	}
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusalAt(t, report, "invalid_text_horizontal_scale", "comps[0].layers[0].text_style.horizontal_scale")
+	assertRefusalAt(t, report, "invalid_text_vertical_scale", "comps[0].layers[0].text_style.vertical_scale")
+}
+
 func TestValidateRejectsInvalidShapeDetail(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Position = []float64{12}

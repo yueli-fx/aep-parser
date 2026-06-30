@@ -297,6 +297,12 @@ var fieldValidation = map[string]FieldMeta{
 	"comps[].layers[].text_style.fill_color": {
 		Validation: "Text fill color must contain RGB or RGBA channels in the 0..255 range.",
 	},
+	"comps[].layers[].text_style.horizontal_scale": {
+		Validation: "Text horizontal scale must be non-negative.",
+	},
+	"comps[].layers[].text_style.vertical_scale": {
+		Validation: "Text vertical scale must be non-negative.",
+	},
 	"comps[].layers[].text_style.tsume": {
 		Validation: "Text tsume must be between 0 and 100.",
 	},

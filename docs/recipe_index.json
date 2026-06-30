@@ -4291,6 +4291,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Layer text style horizontal text scale.",
+      "validation": "Text horizontal scale must be non-negative.",
       "capability_keys": [
         "text.set_run_horizontal_scale"
       ],
@@ -4533,6 +4534,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Layer text style vertical text scale.",
+      "validation": "Text vertical scale must be non-negative.",
       "capability_keys": [
         "text.set_run_vertical_scale"
       ],
