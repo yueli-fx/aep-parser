@@ -84,6 +84,7 @@ It defaults to `flightdeck\showcase` and writes generated output under
 - `study_queue.csv`
 - `study_tasks.csv`
 - `recreation_blockers.csv`
+- `signal_layers.csv`
 - `learning_actions.csv`
 - `mechanisms.csv`
 - `mechanism_examples.csv`
@@ -122,6 +123,9 @@ and action text into a concrete queue of project/focus pairs to study next.
 `recreation_blockers.csv` extracts plugin and reverse-engineering blockers into
 one table so exact-recreation gaps can be reviewed independently from project
 ranking.
+`signal_layers.csv` exports the highest-signal layers per project with role,
+score, and evidence signals so technique review can start from the layer stack
+that actually drives the look.
 `learning_actions.csv` turns each repeated pattern into a review action with
 representative project, common steps, top mechanisms, and risk.
 `mechanisms.csv` expands effect, plugin-effect, shape, text-animator, layer-role,

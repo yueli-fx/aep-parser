@@ -31,6 +31,7 @@ $patternsCsvPath = Join-Path $OutDir "patterns.csv"
 $studyQueueCsvPath = Join-Path $OutDir "study_queue.csv"
 $studyTasksCsvPath = Join-Path $OutDir "study_tasks.csv"
 $recreationBlockersCsvPath = Join-Path $OutDir "recreation_blockers.csv"
+$signalLayersCsvPath = Join-Path $OutDir "signal_layers.csv"
 $learningActionsCsvPath = Join-Path $OutDir "learning_actions.csv"
 $mechanismsCsvPath = Join-Path $OutDir "mechanisms.csv"
 $mechanismExamplesCsvPath = Join-Path $OutDir "mechanism_examples.csv"
@@ -39,7 +40,7 @@ $manifestPath = Join-Path $OutDir "manifest.json"
 $reportPath = Join-Path $OutDir "report.md"
 $htmlPath = Join-Path $OutDir "report.html"
 
-foreach ($path in @($summaryPath, $corpusPath, $digestPath, $learningPath, $projectsCsvPath, $patternsCsvPath, $studyQueueCsvPath, $studyTasksCsvPath, $recreationBlockersCsvPath, $learningActionsCsvPath, $mechanismsCsvPath, $mechanismExamplesCsvPath, $errorsCsvPath, $manifestPath, $reportPath, $htmlPath)) {
+foreach ($path in @($summaryPath, $corpusPath, $digestPath, $learningPath, $projectsCsvPath, $patternsCsvPath, $studyQueueCsvPath, $studyTasksCsvPath, $recreationBlockersCsvPath, $signalLayersCsvPath, $learningActionsCsvPath, $mechanismsCsvPath, $mechanismExamplesCsvPath, $errorsCsvPath, $manifestPath, $reportPath, $htmlPath)) {
     Require-File -Path $path
 }
 
@@ -53,6 +54,7 @@ $patternRows = @(Import-Csv -LiteralPath $patternsCsvPath)
 $studyQueueRows = @(Import-Csv -LiteralPath $studyQueueCsvPath)
 $studyTaskRows = @(Import-Csv -LiteralPath $studyTasksCsvPath)
 $recreationBlockerRows = @(Import-Csv -LiteralPath $recreationBlockersCsvPath)
+$signalLayerRows = @(Import-Csv -LiteralPath $signalLayersCsvPath)
 $learningActionRows = @(Import-Csv -LiteralPath $learningActionsCsvPath)
 $mechanismRows = @(Import-Csv -LiteralPath $mechanismsCsvPath)
 $mechanismExampleRows = @(Import-Csv -LiteralPath $mechanismExamplesCsvPath)
@@ -108,6 +110,14 @@ foreach ($row in $recreationBlockerRows) {
 $projectsWithBlockers = @($projectRows | Where-Object { [string]$_.readiness_blockers -ne "" })
 if ($projectsWithBlockers.Count -gt 0 -and $recreationBlockerRows.Count -eq 0) {
     throw "recreation_blockers.csv has no rows but projects.csv reports readiness blockers"
+}
+if ($signalLayerRows.Count -eq 0) {
+    throw "signal_layers.csv has no rows"
+}
+foreach ($row in $signalLayerRows) {
+    if ([string]$row.project_path -eq "" -or [string]$row.layer_name -eq "" -or [string]$row.role -eq "" -or [int]$row.score -le 0 -or [string]$row.signals -eq "") {
+        throw "signal_layers.csv contains incomplete row: $($row | ConvertTo-Json -Compress)"
+    }
 }
 if ($errorRows.Count -ne [int]$summary.error_count) {
     throw "errors.csv row count $($errorRows.Count) does not match summary error_count $($summary.error_count)"
@@ -171,6 +181,7 @@ Require-Text -Path $htmlPath -Pattern "projects\.csv"
 Require-Text -Path $htmlPath -Pattern "study_queue\.csv"
 Require-Text -Path $htmlPath -Pattern "study_tasks\.csv"
 Require-Text -Path $htmlPath -Pattern "recreation_blockers\.csv"
+Require-Text -Path $htmlPath -Pattern "signal_layers\.csv"
 Require-Text -Path $htmlPath -Pattern "learning_actions\.csv"
 Require-Text -Path $htmlPath -Pattern "mechanisms\.csv"
 Require-Text -Path $htmlPath -Pattern "mechanism_examples\.csv"

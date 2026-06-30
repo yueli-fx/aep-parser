@@ -93,6 +93,7 @@ try {
     $studyRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "study_queue.csv") | Select-Object -First 5)
     $patternRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "patterns.csv") | Select-Object -First 5)
     $recreationBlockerRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "recreation_blockers.csv") | Select-Object -First 5)
+    $signalLayerRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "signal_layers.csv") | Select-Object -First 5)
     $learningActionRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "learning_actions.csv") | Select-Object -First 5)
     $mechanismRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "mechanisms.csv") | Select-Object -First 8)
 
@@ -212,6 +213,11 @@ try {
         [void]$index.AppendLine("<tr><td colspan=""3"">No blockers reported.</td></tr>")
     }
     [void]$index.AppendLine("</tbody></table></section>")
+    [void]$index.AppendLine("<section class=""panel"" style=""margin-top:16px""><h2>Signal Layers Preview</h2><table><thead><tr><th>Project</th><th>Layer</th><th>Score</th></tr></thead><tbody>")
+    foreach ($row in $signalLayerRows) {
+        [void]$index.AppendLine("<tr><td>$(Escape-Html $row.project_path)</td><td>$(Escape-Html $row.layer_name)</td><td>$(Escape-Html $row.score)</td></tr>")
+    }
+    [void]$index.AppendLine("</tbody></table></section>")
     [void]$index.AppendLine("<section class=""panel"" style=""margin-top:16px""><h2>Mechanism Catalog Preview</h2><table><thead><tr><th>Category</th><th>Name</th><th>Count</th></tr></thead><tbody>")
     foreach ($row in $mechanismRows) {
         [void]$index.AppendLine("<tr><td>$(Escape-Html $row.category)</td><td>$(Escape-Html $row.name)</td><td>$(Escape-Html $row.count)</td></tr>")
@@ -223,6 +229,7 @@ try {
     [void]$index.AppendLine("<a href=""$runRel/full_report/study_queue.csv"">Study queue CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/study_tasks.csv"">Study tasks CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/recreation_blockers.csv"">Recreation blockers CSV</a>")
+    [void]$index.AppendLine("<a href=""$runRel/full_report/signal_layers.csv"">Signal layers CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/learning_actions.csv"">Learning actions CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/mechanisms.csv"">Mechanisms CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/mechanism_examples.csv"">Mechanism examples CSV</a>")
@@ -254,6 +261,9 @@ try {
     if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Recreation Blockers Preview" -Quiet)) {
         throw "latest index missing Recreation Blockers Preview"
     }
+    if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Signal Layers Preview" -Quiet)) {
+        throw "latest index missing Signal Layers Preview"
+    }
     if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Mechanism Catalog Preview" -Quiet)) {
         throw "latest index missing Mechanism Catalog Preview"
     }
@@ -262,6 +272,7 @@ try {
     Require-LatestIndexLink -Label "study queue" -RelativePath "$runRel/full_report/study_queue.csv"
     Require-LatestIndexLink -Label "study tasks" -RelativePath "$runRel/full_report/study_tasks.csv"
     Require-LatestIndexLink -Label "recreation blockers" -RelativePath "$runRel/full_report/recreation_blockers.csv"
+    Require-LatestIndexLink -Label "signal layers" -RelativePath "$runRel/full_report/signal_layers.csv"
     Require-LatestIndexLink -Label "learning actions" -RelativePath "$runRel/full_report/learning_actions.csv"
     Require-LatestIndexLink -Label "mechanisms" -RelativePath "$runRel/full_report/mechanisms.csv"
     Require-LatestIndexLink -Label "mechanism examples" -RelativePath "$runRel/full_report/mechanism_examples.csv"

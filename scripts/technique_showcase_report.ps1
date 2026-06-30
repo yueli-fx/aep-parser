@@ -22,6 +22,7 @@ try {
     $studyQueueCsvPath = Join-Path $OutDir "study_queue.csv"
     $studyTasksCsvPath = Join-Path $OutDir "study_tasks.csv"
     $recreationBlockersCsvPath = Join-Path $OutDir "recreation_blockers.csv"
+    $signalLayersCsvPath = Join-Path $OutDir "signal_layers.csv"
     $learningActionsCsvPath = Join-Path $OutDir "learning_actions.csv"
     $mechanismsCsvPath = Join-Path $OutDir "mechanisms.csv"
     $mechanismExamplesCsvPath = Join-Path $OutDir "mechanism_examples.csv"
@@ -631,6 +632,33 @@ try {
     } else {
         '"project_path","readiness","blocker_type","blocker","action"' | Set-Content -LiteralPath $recreationBlockersCsvPath -Encoding UTF8
     }
+    $signalLayerRows = @()
+    foreach ($record in $records) {
+        $explanation = $record.explanation
+        if ($null -eq $explanation -or $null -eq $explanation.top_signal_layers) {
+            continue
+        }
+        $rank = 1
+        foreach ($layer in @($explanation.top_signal_layers)) {
+            $signalLayerRows += [pscustomobject]@{
+                project_path = [string]$record.path
+                rank         = [int]$rank
+                comp_name    = [string]$layer.comp_name
+                layer_name   = [string]$layer.layer_name
+                role         = [string]$layer.role
+                score        = [int]$layer.score
+                signals      = ((@($layer.signals) | ForEach-Object { [string]$_ }) -join "; ")
+            }
+            $rank++
+        }
+    }
+    if ($signalLayerRows.Count -gt 0) {
+        $signalLayerRows |
+            Sort-Object project_path, @{ Expression = { [int]$_.rank }; Ascending = $true } |
+            Export-Csv -LiteralPath $signalLayersCsvPath -NoTypeInformation -Encoding UTF8
+    } else {
+        '"project_path","rank","comp_name","layer_name","role","score","signals"' | Set-Content -LiteralPath $signalLayersCsvPath -Encoding UTF8
+    }
     $mechanismExampleIndex = @{}
     foreach ($example in $mechanismExampleRows) {
         $key = "$($example.category)`u{1f}$($example.name)"
@@ -914,7 +942,7 @@ try {
     [void]$h.AppendLine("</head><body><main>")
     [void]$h.AppendLine("<h1>Technique Corpus Report</h1>")
     [void]$h.AppendLine("<p class=""muted"">input <code>$(Escape-Html $InputPath)</code></p>")
-    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""manifest.json"">manifest.json</a> · <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""study_queue.csv"">study_queue.csv</a> · <a href=""study_tasks.csv"">study_tasks.csv</a> · <a href=""recreation_blockers.csv"">recreation_blockers.csv</a> · <a href=""learning_actions.csv"">learning_actions.csv</a> · <a href=""mechanisms.csv"">mechanisms.csv</a> · <a href=""mechanism_examples.csv"">mechanism_examples.csv</a> · <a href=""errors.csv"">errors.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
+    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""manifest.json"">manifest.json</a> · <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""study_queue.csv"">study_queue.csv</a> · <a href=""study_tasks.csv"">study_tasks.csv</a> · <a href=""recreation_blockers.csv"">recreation_blockers.csv</a> · <a href=""signal_layers.csv"">signal_layers.csv</a> · <a href=""learning_actions.csv"">learning_actions.csv</a> · <a href=""mechanisms.csv"">mechanisms.csv</a> · <a href=""mechanism_examples.csv"">mechanism_examples.csv</a> · <a href=""errors.csv"">errors.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
     [void]$h.AppendLine("<div class=""grid"">")
     foreach ($metric in @(
         @{ Label = "Projects"; Value = $summary.project_count },
@@ -971,6 +999,15 @@ try {
     }
     if ($recreationBlockerRows.Count -eq 0) {
         [void]$h.AppendLine("<tr><td colspan=""5"" class=""empty"">No recreation blockers reported.</td></tr>")
+    }
+    [void]$h.AppendLine("</tbody></table></section>")
+    [void]$h.AppendLine("<h2 style=""margin-top:28px"">Signal Layers</h2>")
+    [void]$h.AppendLine("<section class=""panel"" style=""margin-top:14px""><table><thead><tr><th>Project</th><th>Layer</th><th>Role</th><th>Score</th><th>Signals</th></tr></thead><tbody>")
+    foreach ($layer in @($signalLayerRows | Sort-Object @{ Expression = { [int]$_.score }; Descending = $true }, project_path | Select-Object -First 80)) {
+        [void]$h.AppendLine("<tr><td>$(Escape-Html $layer.project_path)</td><td>$(Escape-Html $layer.layer_name)</td><td>$(Escape-Html $layer.role)</td><td>$($layer.score)</td><td>$(Escape-Html $layer.signals)</td></tr>")
+    }
+    if ($signalLayerRows.Count -eq 0) {
+        [void]$h.AppendLine("<tr><td colspan=""5"" class=""empty"">No signal layers reported.</td></tr>")
     }
     [void]$h.AppendLine("</tbody></table></section>")
     [void]$h.AppendLine("<h2 style=""margin-top:28px"">Study Queue</h2>")
@@ -1178,6 +1215,7 @@ try {
         $studyQueueCsvPath,
         $studyTasksCsvPath,
         $recreationBlockersCsvPath,
+        $signalLayersCsvPath,
         $learningActionsCsvPath,
         $mechanismsCsvPath,
         $mechanismExamplesCsvPath,
@@ -1238,6 +1276,7 @@ try {
     Write-Host "study queue csv: $studyQueueCsvPath"
     Write-Host "study tasks csv: $studyTasksCsvPath"
     Write-Host "recreation blockers csv: $recreationBlockersCsvPath"
+    Write-Host "signal layers csv: $signalLayersCsvPath"
     Write-Host "learning actions csv: $learningActionsCsvPath"
     Write-Host "mechanisms csv: $mechanismsCsvPath"
     Write-Host "mechanism examples csv: $mechanismExamplesCsvPath"
