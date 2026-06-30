@@ -96,6 +96,7 @@ It defaults to `flightdeck\showcase` and writes generated output under
 - `learning_actions.csv`
 - `mechanisms.csv`
 - `mechanism_examples.csv`
+- `coverage_scorecard.csv`
 - `errors.csv`
 - `manifest.json`
 - `report.md`
@@ -158,6 +159,9 @@ graph-edge, and hint counts into a filterable technique mechanism catalog.
 `mechanism_examples.csv` keeps up to five representative projects per mechanism
 so a mechanism can be traced back to concrete source projects without scanning
 the full corpus JSONL.
+`coverage_scorecard.csv` records expected and actual row counts for each major
+artifact so report coverage can be checked directly from the browser entry or a
+spreadsheet.
 `errors.csv` lists failed corpus records for retry or manual inspection.
 `manifest.json` records the input path, git revision, scan timing, project/error
 counts, and generated artifact inventory for repeatable self-hosted runs.

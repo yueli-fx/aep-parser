@@ -104,6 +104,7 @@ try {
     $dependencyEdgeRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "dependency_edges.csv") | Select-Object -First 5)
     $learningActionRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "learning_actions.csv") | Select-Object -First 5)
     $mechanismRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "mechanisms.csv") | Select-Object -First 8)
+    $coverageScorecardRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "coverage_scorecard.csv") | Select-Object -First 12)
 
     $selfCountDiffs = @($compareSelf.count_diffs).Count
     $partialCountDiffs = @($comparePartial.count_diffs).Count
@@ -271,6 +272,11 @@ try {
         [void]$index.AppendLine("<tr><td>$(Escape-Html $row.category)</td><td>$(Escape-Html $row.name)</td><td>$(Escape-Html $row.count)</td></tr>")
     }
     [void]$index.AppendLine("</tbody></table></section>")
+    [void]$index.AppendLine("<section class=""panel"" style=""margin-top:16px""><h2>Coverage Scorecard Preview</h2><table><thead><tr><th>Artifact</th><th>Expected</th><th>Actual</th><th>Status</th></tr></thead><tbody>")
+    foreach ($row in $coverageScorecardRows) {
+        [void]$index.AppendLine("<tr><td>$(Escape-Html $row.artifact)</td><td>$(Escape-Html $row.expected_count)</td><td>$(Escape-Html $row.actual_count)</td><td>$(Escape-Html $row.status)</td></tr>")
+    }
+    [void]$index.AppendLine("</tbody></table></section>")
     [void]$index.AppendLine("<section class=""panel""><h2>Artifacts</h2><div class=""links"">")
     [void]$index.AppendLine("<a href=""$runRel/full_report/report.html"">Full report HTML</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/learning.md"">Learning index</a>")
@@ -289,6 +295,7 @@ try {
     [void]$index.AppendLine("<a href=""$runRel/full_report/learning_actions.csv"">Learning actions CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/mechanisms.csv"">Mechanisms CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/mechanism_examples.csv"">Mechanism examples CSV</a>")
+    [void]$index.AppendLine("<a href=""$runRel/full_report/coverage_scorecard.csv"">Coverage scorecard CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/projects.csv"">Projects CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/patterns.csv"">Patterns CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/errors.csv"">Errors CSV</a>")
@@ -347,6 +354,9 @@ try {
     if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Mechanism Catalog Preview" -Quiet)) {
         throw "latest index missing Mechanism Catalog Preview"
     }
+    if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Coverage Scorecard Preview" -Quiet)) {
+        throw "latest index missing Coverage Scorecard Preview"
+    }
     Require-LatestIndexLink -Label "full report" -RelativePath "$runRel/full_report/report.html"
     Require-LatestIndexLink -Label "learning index" -RelativePath "$runRel/full_report/learning.md"
     Require-LatestIndexLink -Label "project playbooks" -RelativePath "$runRel/full_report/project_playbooks.csv"
@@ -364,6 +374,7 @@ try {
     Require-LatestIndexLink -Label "learning actions" -RelativePath "$runRel/full_report/learning_actions.csv"
     Require-LatestIndexLink -Label "mechanisms" -RelativePath "$runRel/full_report/mechanisms.csv"
     Require-LatestIndexLink -Label "mechanism examples" -RelativePath "$runRel/full_report/mechanism_examples.csv"
+    Require-LatestIndexLink -Label "coverage scorecard" -RelativePath "$runRel/full_report/coverage_scorecard.csv"
     Require-LatestIndexLink -Label "partial report" -RelativePath "$runRel/partial_report/report.html"
     Require-LatestIndexLink -Label "partial compare" -RelativePath "$runRel/compare_partial_to_full/compare.md"
 

@@ -43,12 +43,13 @@ $dependencyEdgesCsvPath = Join-Path $OutDir "dependency_edges.csv"
 $learningActionsCsvPath = Join-Path $OutDir "learning_actions.csv"
 $mechanismsCsvPath = Join-Path $OutDir "mechanisms.csv"
 $mechanismExamplesCsvPath = Join-Path $OutDir "mechanism_examples.csv"
+$coverageScorecardCsvPath = Join-Path $OutDir "coverage_scorecard.csv"
 $errorsCsvPath = Join-Path $OutDir "errors.csv"
 $manifestPath = Join-Path $OutDir "manifest.json"
 $reportPath = Join-Path $OutDir "report.md"
 $htmlPath = Join-Path $OutDir "report.html"
 
-foreach ($path in @($summaryPath, $corpusPath, $digestPath, $learningPath, $projectsCsvPath, $projectPlaybooksCsvPath, $compositionsCsvPath, $layersCsvPath, $recreationStepsCsvPath, $patternsCsvPath, $studyQueueCsvPath, $studyTasksCsvPath, $recreationBlockersCsvPath, $signalLayersCsvPath, $effectStacksCsvPath, $shapeOperatorsCsvPath, $textAnimatorsCsvPath, $dependencyEdgesCsvPath, $learningActionsCsvPath, $mechanismsCsvPath, $mechanismExamplesCsvPath, $errorsCsvPath, $manifestPath, $reportPath, $htmlPath)) {
+foreach ($path in @($summaryPath, $corpusPath, $digestPath, $learningPath, $projectsCsvPath, $projectPlaybooksCsvPath, $compositionsCsvPath, $layersCsvPath, $recreationStepsCsvPath, $patternsCsvPath, $studyQueueCsvPath, $studyTasksCsvPath, $recreationBlockersCsvPath, $signalLayersCsvPath, $effectStacksCsvPath, $shapeOperatorsCsvPath, $textAnimatorsCsvPath, $dependencyEdgesCsvPath, $learningActionsCsvPath, $mechanismsCsvPath, $mechanismExamplesCsvPath, $coverageScorecardCsvPath, $errorsCsvPath, $manifestPath, $reportPath, $htmlPath)) {
     Require-File -Path $path
 }
 
@@ -74,6 +75,7 @@ $dependencyEdgeRows = @(Import-Csv -LiteralPath $dependencyEdgesCsvPath)
 $learningActionRows = @(Import-Csv -LiteralPath $learningActionsCsvPath)
 $mechanismRows = @(Import-Csv -LiteralPath $mechanismsCsvPath)
 $mechanismExampleRows = @(Import-Csv -LiteralPath $mechanismExamplesCsvPath)
+$coverageScorecardRows = @(Import-Csv -LiteralPath $coverageScorecardCsvPath)
 $errorRows = @(Import-Csv -LiteralPath $errorsCsvPath)
 
 if ([int]$summary.project_count -lt $MinProjects) {
@@ -235,6 +237,26 @@ foreach ($row in $mechanismExampleRows) {
         throw "mechanism_examples.csv contains incomplete row: $($row | ConvertTo-Json -Compress)"
     }
 }
+if ($coverageScorecardRows.Count -eq 0) {
+    throw "coverage_scorecard.csv has no rows"
+}
+foreach ($row in $coverageScorecardRows) {
+    if ([string]$row.artifact -eq "" -or [string]$row.metric -eq "" -or [string]$row.status -eq "") {
+        throw "coverage_scorecard.csv contains incomplete row: $($row | ConvertTo-Json -Compress)"
+    }
+    if ([string]$row.status -ne "ok") {
+        throw "coverage_scorecard.csv contains non-ok row: $($row | ConvertTo-Json -Compress)"
+    }
+    if ([int]$row.expected_count -ne [int]$row.actual_count) {
+        throw "coverage_scorecard.csv count mismatch: $($row | ConvertTo-Json -Compress)"
+    }
+}
+$coverageArtifacts = @($coverageScorecardRows | ForEach-Object { [string]$_.artifact })
+foreach ($artifact in @("projects.csv", "project_playbooks.csv", "compositions.csv", "layers.csv", "recreation_steps.csv", "effect_stacks.csv", "shape_operators.csv", "text_animators.csv", "dependency_edges.csv")) {
+    if ($coverageArtifacts -notcontains $artifact) {
+        throw "coverage_scorecard.csv missing artifact row: $artifact"
+    }
+}
 $recordsWithSteps = @($corpusRecords | Where-Object {
     $null -ne $_.explanation -and
     $null -ne $_.explanation.recreation_steps -and
@@ -279,7 +301,9 @@ Require-Text -Path $htmlPath -Pattern "dependency_edges\.csv"
 Require-Text -Path $htmlPath -Pattern "learning_actions\.csv"
 Require-Text -Path $htmlPath -Pattern "mechanisms\.csv"
 Require-Text -Path $htmlPath -Pattern "mechanism_examples\.csv"
+Require-Text -Path $htmlPath -Pattern "coverage_scorecard\.csv"
 Require-Text -Path $htmlPath -Pattern "errors\.csv"
+Require-Text -Path $htmlPath -Pattern "Coverage Scorecard"
 Require-Text -Path $htmlPath -Pattern "Mechanism Explorer"
 Require-Text -Path $htmlPath -Pattern "mechanismFilter"
 Require-Text -Path $htmlPath -Pattern "Study Task Queue"

@@ -34,6 +34,7 @@ try {
     $learningActionsCsvPath = Join-Path $OutDir "learning_actions.csv"
     $mechanismsCsvPath = Join-Path $OutDir "mechanisms.csv"
     $mechanismExamplesCsvPath = Join-Path $OutDir "mechanism_examples.csv"
+    $coverageScorecardCsvPath = Join-Path $OutDir "coverage_scorecard.csv"
     $errorsCsvPath = Join-Path $OutDir "errors.csv"
     $manifestPath = Join-Path $OutDir "manifest.json"
     $reportPath = Join-Path $OutDir "report.md"
@@ -96,6 +97,28 @@ try {
             [void]$Builder.AppendLine("| $($row.Name) | $($row.Value) |")
         }
         [void]$Builder.AppendLine("")
+    }
+
+    function New-CoverageRow {
+        param(
+            [string]$Artifact,
+            [string]$Metric,
+            [int]$Expected,
+            [int]$Actual,
+            [string]$Notes
+        )
+        $status = "ok"
+        if ($Expected -ne $Actual) {
+            $status = "mismatch"
+        }
+        [pscustomobject]@{
+            artifact       = $Artifact
+            metric         = $Metric
+            expected_count = [int]$Expected
+            actual_count   = [int]$Actual
+            status         = $status
+            notes          = $Notes
+        }
     }
 
     function Get-CountRows {
@@ -991,6 +1014,28 @@ try {
     })
     $studyRows | Export-Csv -LiteralPath $studyQueueCsvPath -NoTypeInformation -Encoding UTF8
 
+    $coverageScorecardRows = @(
+        New-CoverageRow -Artifact "projects.csv" -Metric "project rows" -Expected ([int]$summary.project_count) -Actual $projectRowsForCsv.Count -Notes "one explainable project row per parsed project"
+        New-CoverageRow -Artifact "project_playbooks.csv" -Metric "project playbooks" -Expected ([int]$summary.project_count) -Actual $projectPlaybookRows.Count -Notes "one recreation playbook per parsed project"
+        New-CoverageRow -Artifact "compositions.csv" -Metric "composition rows" -Expected ([int]$summary.totals.comp_count) -Actual $compositionRows.Count -Notes "one row per parsed composition"
+        New-CoverageRow -Artifact "layers.csv" -Metric "layer rows" -Expected ([int]$summary.totals.layer_count) -Actual $layerRowsForCsv.Count -Notes "one row per parsed layer"
+        New-CoverageRow -Artifact "recreation_steps.csv" -Metric "recreation steps" -Expected $recreationStepRows.Count -Actual $recreationStepRows.Count -Notes "one row per generated project recreation step"
+        New-CoverageRow -Artifact "patterns.csv" -Metric "pattern rows" -Expected (@($digest.patterns).Count) -Actual $patternRowsForCsv.Count -Notes "one row per digest pattern"
+        New-CoverageRow -Artifact "study_queue.csv" -Metric "study queue rows" -Expected ([int]$summary.project_count) -Actual $studyRows.Count -Notes "one ranked study target per parsed project"
+        New-CoverageRow -Artifact "study_tasks.csv" -Metric "study tasks" -Expected $studyTaskRows.Count -Actual $studyTaskRows.Count -Notes "task count depends on observed mechanisms"
+        New-CoverageRow -Artifact "recreation_blockers.csv" -Metric "blockers" -Expected $recreationBlockerRows.Count -Actual $recreationBlockerRows.Count -Notes "blocker count depends on readiness analysis"
+        New-CoverageRow -Artifact "signal_layers.csv" -Metric "signal layers" -Expected $signalLayerRows.Count -Actual $signalLayerRows.Count -Notes "top explanatory layers selected from each project"
+        New-CoverageRow -Artifact "effect_stacks.csv" -Metric "effect rows" -Expected ([int]$summary.totals.effect_count) -Actual $effectStackRows.Count -Notes "one row per parsed effect"
+        New-CoverageRow -Artifact "shape_operators.csv" -Metric "shape operator rows" -Expected ([int]$summary.totals.shape_operator_count) -Actual $shapeOperatorRows.Count -Notes "one row per parsed shape operator"
+        New-CoverageRow -Artifact "text_animators.csv" -Metric "text animator rows" -Expected ([int]$summary.totals.text_animator_count) -Actual $textAnimatorRows.Count -Notes "one row per parsed text animator property"
+        New-CoverageRow -Artifact "dependency_edges.csv" -Metric "dependency edges" -Expected ([int]$summary.totals.dependency_count) -Actual $dependencyEdgeRows.Count -Notes "one row per parsed dependency relation"
+        New-CoverageRow -Artifact "learning_actions.csv" -Metric "learning actions" -Expected (@($digest.patterns).Count) -Actual $learningActionRows.Count -Notes "one recommended action per digest pattern"
+        New-CoverageRow -Artifact "mechanisms.csv" -Metric "mechanism rows" -Expected $mechanismRows.Count -Actual $mechanismRows.Count -Notes "mechanism count depends on corpus signals"
+        New-CoverageRow -Artifact "mechanism_examples.csv" -Metric "mechanism examples" -Expected $mechanismExampleRows.Count -Actual $mechanismExampleRows.Count -Notes "example count depends on mechanism/project intersections"
+        New-CoverageRow -Artifact "errors.csv" -Metric "parse errors" -Expected ([int]$errorCount) -Actual $errorRowsForCsv.Count -Notes "one row per per-file parse error"
+    )
+    $coverageScorecardRows | Export-Csv -LiteralPath $coverageScorecardCsvPath -NoTypeInformation -Encoding UTF8
+
     $learn = [System.Text.StringBuilder]::new()
     [void]$learn.AppendLine("# Technique Learning Index")
     [void]$learn.AppendLine("")
@@ -1183,7 +1228,7 @@ try {
     [void]$h.AppendLine("</head><body><main>")
     [void]$h.AppendLine("<h1>Technique Corpus Report</h1>")
     [void]$h.AppendLine("<p class=""muted"">input <code>$(Escape-Html $InputPath)</code></p>")
-    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""manifest.json"">manifest.json</a> · <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""project_playbooks.csv"">project_playbooks.csv</a> · <a href=""compositions.csv"">compositions.csv</a> · <a href=""layers.csv"">layers.csv</a> · <a href=""recreation_steps.csv"">recreation_steps.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""study_queue.csv"">study_queue.csv</a> · <a href=""study_tasks.csv"">study_tasks.csv</a> · <a href=""recreation_blockers.csv"">recreation_blockers.csv</a> · <a href=""signal_layers.csv"">signal_layers.csv</a> · <a href=""effect_stacks.csv"">effect_stacks.csv</a> · <a href=""shape_operators.csv"">shape_operators.csv</a> · <a href=""text_animators.csv"">text_animators.csv</a> · <a href=""dependency_edges.csv"">dependency_edges.csv</a> · <a href=""learning_actions.csv"">learning_actions.csv</a> · <a href=""mechanisms.csv"">mechanisms.csv</a> · <a href=""mechanism_examples.csv"">mechanism_examples.csv</a> · <a href=""errors.csv"">errors.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
+    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""manifest.json"">manifest.json</a> · <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""project_playbooks.csv"">project_playbooks.csv</a> · <a href=""compositions.csv"">compositions.csv</a> · <a href=""layers.csv"">layers.csv</a> · <a href=""recreation_steps.csv"">recreation_steps.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""study_queue.csv"">study_queue.csv</a> · <a href=""study_tasks.csv"">study_tasks.csv</a> · <a href=""recreation_blockers.csv"">recreation_blockers.csv</a> · <a href=""signal_layers.csv"">signal_layers.csv</a> · <a href=""effect_stacks.csv"">effect_stacks.csv</a> · <a href=""shape_operators.csv"">shape_operators.csv</a> · <a href=""text_animators.csv"">text_animators.csv</a> · <a href=""dependency_edges.csv"">dependency_edges.csv</a> · <a href=""learning_actions.csv"">learning_actions.csv</a> · <a href=""mechanisms.csv"">mechanisms.csv</a> · <a href=""mechanism_examples.csv"">mechanism_examples.csv</a> · <a href=""coverage_scorecard.csv"">coverage_scorecard.csv</a> · <a href=""errors.csv"">errors.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
     [void]$h.AppendLine("<div class=""grid"">")
     foreach ($metric in @(
         @{ Label = "Projects"; Value = $summary.project_count },
@@ -1211,6 +1256,12 @@ try {
     Write-HtmlCountTable -Builder $h -Title "Layer Roles" -Counts $summary.layer_roles
     Write-HtmlCountTable -Builder $h -Title "Graph Edges" -Counts $summary.graph_edges
     [void]$h.AppendLine("</div>")
+    [void]$h.AppendLine("<h2 style=""margin-top:28px"">Coverage Scorecard</h2>")
+    [void]$h.AppendLine("<section class=""panel"" style=""margin-top:14px""><table><thead><tr><th>Artifact</th><th>Metric</th><th>Expected</th><th>Actual</th><th>Status</th></tr></thead><tbody>")
+    foreach ($row in @($coverageScorecardRows)) {
+        [void]$h.AppendLine("<tr><td>$(Escape-Html $row.artifact)</td><td>$(Escape-Html $row.metric)</td><td>$($row.expected_count)</td><td>$($row.actual_count)</td><td>$(Escape-Html $row.status)</td></tr>")
+    }
+    [void]$h.AppendLine("</tbody></table></section>")
     [void]$h.AppendLine("<h2 style=""margin-top:28px"">Mechanism Explorer</h2>")
     [void]$h.AppendLine("<div class=""toolbar""><input id=""mechanismFilter"" type=""search"" aria-label=""Filter mechanisms"" placeholder=""Filter by category, name, risk, or action""><span id=""mechanismCount"" class=""muted""></span></div>")
     [void]$h.AppendLine("<section class=""panel"" style=""margin-top:14px""><table><thead><tr><th>Category</th><th>Name</th><th>Risk</th><th>Action</th><th>Representative Projects</th><th>Count</th></tr></thead><tbody>")
@@ -1524,6 +1575,7 @@ try {
         $learningActionsCsvPath,
         $mechanismsCsvPath,
         $mechanismExamplesCsvPath,
+        $coverageScorecardCsvPath,
         $errorsCsvPath,
         $reportPath,
         $htmlPath
@@ -1593,6 +1645,7 @@ try {
     Write-Host "learning actions csv: $learningActionsCsvPath"
     Write-Host "mechanisms csv: $mechanismsCsvPath"
     Write-Host "mechanism examples csv: $mechanismExamplesCsvPath"
+    Write-Host "coverage scorecard csv: $coverageScorecardCsvPath"
     Write-Host "errors csv: $errorsCsvPath"
     Write-Host "manifest: $manifestPath"
     Write-Host "report:  $reportPath"
