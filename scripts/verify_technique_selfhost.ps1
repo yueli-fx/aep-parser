@@ -450,6 +450,7 @@ try {
         run_root = $runRoot
         latest_index = $latestIndexPath
         stable_outputs = [ordered]@{
+            open_target = $latestOutcomeHtmlPath
             latest_run = $latestRunPath
             latest_acceptance = $latestAcceptancePath
             latest_outcome = $latestOutcomePath
@@ -1077,6 +1078,12 @@ try {
     if ($null -eq $latestEffectivenessJson.history_delta.parsed_projects_delta) {
         throw "latest effectiveness json missing history_delta.parsed_projects_delta"
     }
+    if ($null -eq $latestEffectivenessJson.stable_outputs.open_target) {
+        throw "latest effectiveness json missing stable_outputs.open_target"
+    }
+    if ([string]$latestEffectivenessJson.stable_outputs.open_target -ne $latestOutcomeHtmlPath) {
+        throw "latest effectiveness json open target = $($latestEffectivenessJson.stable_outputs.open_target), want $latestOutcomeHtmlPath"
+    }
     if ($null -eq $latestEffectivenessJson.outcome_status) {
         throw "latest effectiveness json missing outcome_status"
     }
@@ -1117,13 +1124,14 @@ try {
     Write-Host "latest summary:  $latestAcceptancePath"
     Write-Host "latest outcome:  $latestOutcomePath"
     Write-Host "latest outcome h: $latestOutcomeHtmlPath"
+    Write-Host "open target:     $latestOutcomeHtmlPath"
     Write-Host "latest effect:   $latestEffectivenessPath"
     Write-Host "latest effect j: $latestEffectivenessJsonPath"
     Write-Host "latest index:    $latestIndexPath"
     Write-Host "full report:     $fullReportDir"
     Write-Host "partial report:  $partialReportDir"
     if ($Open) {
-        Invoke-Item $latestIndexPath
+        Invoke-Item $latestOutcomeHtmlPath
     }
 }
 finally {

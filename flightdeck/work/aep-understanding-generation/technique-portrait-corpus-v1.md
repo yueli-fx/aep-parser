@@ -203,7 +203,9 @@ queue, learning actions, and coverage scorecard. The history files append one co
 gate run for trend checks across repeated self-hosted validation, and the latest
 HTML index renders the outcome, current run delta, and recent rows in Outcome
 Status, History Delta, and Effectiveness History Preview panels.
-Passing `-Open` opens the latest HTML index after the gate finishes.
+Passing `-Open` opens `latest_outcome.html`, the shortest effectiveness page,
+after the gate finishes. Use `latest_index.html` when the full artifact browser
+is needed.
 
 ## Non-Goals
 
