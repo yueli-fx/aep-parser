@@ -351,6 +351,11 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) (*aep.La
 				return nil, fmt.Errorf("recipe: layer %q out_point: %w", spec.Name, err)
 			}
 		}
+		if spec.Stretch != nil {
+			if err := layer.SetStretch(*spec.Stretch); err != nil {
+				return nil, fmt.Errorf("recipe: layer %q stretch: %w", spec.Name, err)
+			}
+		}
 		if err := applyTransform(layer, spec.Transform); err != nil {
 			return nil, fmt.Errorf("recipe: layer %q transform: %w", spec.Name, err)
 		}

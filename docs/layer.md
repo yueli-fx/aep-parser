@@ -128,7 +128,7 @@ read-only
 Stretch float64
 ```
 
-time-stretch percentage (100 = normal speed)
+time-stretch ratio (1.0 = normal speed)
 
 read-write
 

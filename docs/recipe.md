@@ -110,6 +110,7 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].start_time` | `number` | - | Layer start time in seconds. | - | `layer.set_start_time` (`Layer.SetStartTime`) | examples/recipes/minimal-layer-object-profile.json |
 | `comps[].layers[].in_point` | `number` | - | Layer in point in seconds. | - | `layer.set_in_point` (`Layer.SetInPoint`) | examples/recipes/minimal-layer-object-profile.json |
 | `comps[].layers[].out_point` | `number` | - | Layer out point in seconds. | - | `layer.set_out_point` (`Layer.SetOutPoint`) | examples/recipes/minimal-layer-object-profile.json |
+| `comps[].layers[].stretch` | `number` | - | Layer time stretch ratio. | - | `layer.set_stretch` (`Layer.SetStretch`) | examples/recipes/minimal-layer-timing.json |
 | `comps[].layers[].parent` | `string` | - | Parent layer name. | - | `layer.set_parent` (`Layer.SetParent`) | examples/recipes/minimal-layer-null-flag.json |
 | `comps[].layers[].text` | `string` | - | Source text for a text layer. | - | `layer.set_text` (`Layer.SetText`) | examples/recipes/minimal-adjustment-layer.json |
 | `comps[].layers[].text_style` | `object<TextStyleSpec>` | - | Text layer style overrides. | - | - | examples/recipes/minimal-text-shape.json |
@@ -701,7 +702,7 @@ This reference is generated from the canonical recipe field model.
 | `expected_profile.layers[].timing.in_point` | `number` | - | Expected layer in point in seconds. | - | - | examples/recipes/minimal-layer-object-profile.json |
 | `expected_profile.layers[].timing.out_point` | `number` | - | Expected layer out point in seconds. | - | - | examples/recipes/minimal-layer-object-profile.json |
 | `expected_profile.layers[].timing.duration` | `number` | - | Expected layer duration in seconds. | - | - | examples/recipes/minimal-layer-object-profile.json |
-| `expected_profile.layers[].timing.stretch` | `number` | - | Expected layer stretch percentage. | - | - | examples/recipes/minimal-layer-object-profile.json |
+| `expected_profile.layers[].timing.stretch` | `number` | - | Expected layer stretch ratio. | - | - | examples/recipes/minimal-layer-object-profile.json |
 
 ## ExpectedLayerFlags
 

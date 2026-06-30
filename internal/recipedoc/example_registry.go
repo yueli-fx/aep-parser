@@ -27,6 +27,7 @@ var fieldExamples = map[string]string{
 	"comps[].layers[].shape.repeater":                         "examples/recipes/minimal-shape-repeater.json",
 	"comps[].layers[].masks[]":                                "examples/recipes/minimal-layer-mask.json",
 	"comps[].layers[].transform.position_keyframes[]":         "examples/recipes/minimal-transform-keyframes.json",
+	"comps[].layers[].stretch":                                "examples/recipes/minimal-layer-timing.json",
 	"comps[].layers[].transform.expressions.position.source":  "examples/recipes/minimal-transform-expression.json",
 	"comps[].layers[].effects[]":                              "examples/recipes/minimal-text-effect.json",
 	"comps[].layers[].effects[].params[].keyframes[]":         "examples/recipes/minimal-effect-param-vector-keyframes.json",

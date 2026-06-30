@@ -3338,7 +3338,7 @@
       "anchor": "#layerstretch",
       "signature": "Stretch float64",
       "rw": "read-write",
-      "summary": "time-stretch percentage (100 = normal speed)"
+      "summary": "time-stretch ratio (1.0 = normal speed)"
     },
     "Layer.TextPropertiesGroup": {
       "kind": "getter",

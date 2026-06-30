@@ -18,6 +18,7 @@
           "start_time": 0.25,
           "in_point": 0.1,
           "out_point": 0.9,
+          "stretch": 0.5,
           "text": "Layer timing",
           "transform": {
             "position": [960, 540]
@@ -39,7 +40,7 @@
           "in_point": 0.1,
           "out_point": 0.9,
           "duration": 0.8,
-          "stretch": 1
+          "stretch": 0.5
         }
       }
     ]

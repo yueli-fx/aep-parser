@@ -30,7 +30,7 @@ type Layer struct {
 
 	StartTime float64 // in-point in seconds (timeline start of the layer)
 	Duration  float64 // layer duration in seconds
-	Stretch   float64 // time-stretch percentage (100 = normal speed)
+	Stretch   float64 // time-stretch ratio (1.0 = normal speed)
 
 	Quality              LayerQuality   // ldta @0x04
 	Label                uint8          // timeline label color index (0..16) @0x3D

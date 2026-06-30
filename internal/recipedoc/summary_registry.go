@@ -107,6 +107,7 @@ func addLayerSummaries(out map[string]string, prefix string) {
 		"start_time":                    "Layer start time in seconds.",
 		"in_point":                      "Layer in point in seconds.",
 		"out_point":                     "Layer out point in seconds.",
+		"stretch":                       "Layer time stretch ratio.",
 		"parent":                        "Parent layer name.",
 		"text":                          "Source text for a text layer.",
 		"text_style":                    "Text layer style overrides.",
@@ -586,7 +587,7 @@ func addExpectedLayerSummaries(out map[string]string, prefix string) {
 		"timing.in_point":   "Expected layer in point in seconds.",
 		"timing.out_point":  "Expected layer out point in seconds.",
 		"timing.duration":   "Expected layer duration in seconds.",
-		"timing.stretch":    "Expected layer stretch percentage.",
+		"timing.stretch":    "Expected layer stretch ratio.",
 		"flags":             "Expected layer switch checks.",
 	})
 	addExpectedFlagSummaries(out, prefix+".flags")

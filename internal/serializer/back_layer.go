@@ -378,11 +378,18 @@ func (b *layerBackrefs) SetStretch(ratio float64) error {
 	if len(b.ldta.Data) < 0x70 {
 		return fmt.Errorf("layer: ldta too short for Stretch write (len=%d)", len(b.ldta.Data))
 	}
+	if ratio <= 0 || math.IsNaN(ratio) || math.IsInf(ratio, 0) {
+		return fmt.Errorf("layer: invalid Stretch ratio %g", ratio)
+	}
 	divisor := binary.BigEndian.Uint32(b.ldta.Data[0x6C:0x70])
 	if divisor == 0 {
 		divisor = 100 // AE writes 100 for stretch (1.0 → dividend=100)
 	}
 	dividend := int32(math.Round(ratio * float64(divisor)))
+	if math.Abs(float64(dividend)/float64(divisor)-ratio) > 1e-6 {
+		divisor = 1_000_000
+		dividend = int32(math.Round(ratio * float64(divisor)))
+	}
 	binary.BigEndian.PutUint32(b.ldta.Data[0x08:0x0C], uint32(dividend))
 	binary.BigEndian.PutUint32(b.ldta.Data[0x6C:0x70], divisor)
 	return nil

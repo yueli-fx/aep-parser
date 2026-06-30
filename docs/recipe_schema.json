@@ -1961,6 +1961,28 @@
       "x-aep-example": "examples/recipes/minimal-layer-object-profile.json"
     },
     {
+      "x-aep-path": "comps[].layers[].stretch",
+      "json_name": "stretch",
+      "source_type": "Layer",
+      "source_field": "Stretch",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Layer time stretch ratio.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_stretch",
+          "query": "Layer.SetStretch",
+          "status": "supported",
+          "symbol": "Layer.SetStretch",
+          "domain": "layer-set",
+          "verify": "roundtrip",
+          "minver": "2020",
+          "boundary": "confirmed false-green: the dividend/divisor pair round-trips\nthrough this library, but AE recomputes the stretch value from the\nin/out point span rather than trusting these bytes directly, so the\nwritten ratio is not honored unless the in/out points are coordinated\nto match. See incident layer-setstretch-ae-recomputes-span."
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-timing.json"
+    },
+    {
       "x-aep-path": "comps[].layers[].parent",
       "json_name": "parent",
       "source_type": "Layer",
@@ -9498,7 +9520,7 @@
       "source_field": "Stretch",
       "type": "number",
       "go_type": "*float64",
-      "description": "Expected layer stretch percentage.",
+      "description": "Expected layer stretch ratio.",
       "x-aep-example": "examples/recipes/minimal-layer-object-profile.json"
     },
     {

@@ -215,6 +215,12 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 			addRefusal("invalid_layer_out_point", layerPath+".out_point", "out_point must be greater than or equal to in_point")
 		}
 	}
+	if layer.Stretch != nil {
+		recordCapability("Layer.SetStretch", layerPath+".stretch")
+		if *layer.Stretch <= 0 {
+			addRefusal("invalid_layer_stretch", layerPath+".stretch", "stretch must be greater than 0")
+		}
+	}
 	if layer.TextStyle != nil {
 		if layer.Type != "text" {
 			addRefusal("text_style_on_non_text_layer", layerPath+".text_style", "text_style is only supported on text layers")

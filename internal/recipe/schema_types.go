@@ -95,6 +95,7 @@ type Layer struct {
 	StartTime             *float64           `json:"start_time,omitempty"`
 	InPoint               *float64           `json:"in_point,omitempty"`
 	OutPoint              *float64           `json:"out_point,omitempty"`
+	Stretch               *float64           `json:"stretch,omitempty"`
 	Parent                string             `json:"parent,omitempty"`
 	Text                  string             `json:"text,omitempty"`
 	TextStyle             *TextStyleSpec     `json:"text_style,omitempty"`

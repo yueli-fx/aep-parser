@@ -1046,12 +1046,14 @@ func TestValidateReportsLayerTimingCapabilities(t *testing.T) {
 	rec.Comps[0].Layers[0].StartTime = ptr(0.25)
 	rec.Comps[0].Layers[0].InPoint = ptr(0.1)
 	rec.Comps[0].Layers[0].OutPoint = ptr(0.9)
+	rec.Comps[0].Layers[0].Stretch = ptr(0.5)
 
 	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
 
 	assertCapability(t, report, "Layer.SetStartTime")
 	assertCapability(t, report, "Layer.SetInPoint")
 	assertCapability(t, report, "Layer.SetOutPoint")
+	assertCapability(t, report, "Layer.SetStretch")
 }
 
 func TestValidateRejectsInvalidLayerTiming(t *testing.T) {
@@ -1066,6 +1068,18 @@ func TestValidateRejectsInvalidLayerTiming(t *testing.T) {
 	}
 	assertRefusal(t, report, "invalid_layer_in_point")
 	assertRefusal(t, report, "invalid_layer_out_point")
+}
+
+func TestValidateRejectsInvalidLayerStretch(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Stretch = ptr(0)
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_layer_stretch")
 }
 
 func TestValidateReportsLayerParentCapability(t *testing.T) {

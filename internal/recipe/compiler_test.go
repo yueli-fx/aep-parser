@@ -1948,6 +1948,18 @@ func TestCompileToFileSetsLayerTiming(t *testing.T) {
 	rec.Comps[0].Layers[0].StartTime = ptr(0.25)
 	rec.Comps[0].Layers[0].InPoint = ptr(0.1)
 	rec.Comps[0].Layers[0].OutPoint = ptr(0.9)
+	rec.Comps[0].Layers[0].Stretch = ptr(0.5)
+	rec.ExpectedProfile = recipe.ExpectedProfile{
+		Layers: []recipe.ExpectedLayer{{
+			Name: "Title",
+			Timing: &recipe.ExpectedLayerTiming{
+				StartTime: ptr(0.25),
+				InPoint:   ptr(0.1),
+				OutPoint:  ptr(0.9),
+				Stretch:   ptr(0.5),
+			},
+		}},
+	}
 	outPath := filepath.Join(t.TempDir(), "recipe.aep")
 
 	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
@@ -1971,6 +1983,10 @@ func TestCompileToFileSetsLayerTiming(t *testing.T) {
 	if math.Abs(got.OutPoint()-0.9) > 1e-6 {
 		t.Fatalf("layer out_point = %g, want 0.9", got.OutPoint())
 	}
+	if math.Abs(got.Stretch-0.5) > 1e-6 {
+		t.Fatalf("layer stretch = %g, want 0.5", got.Stretch)
+	}
+	assertProfileCheck(t, report, "expected_profile.layers[0].timing.stretch", true)
 }
 
 func TestCompileToFileSetsLayerParent(t *testing.T) {

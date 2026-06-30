@@ -77,6 +77,7 @@
     "comps[].layers[].start_time",
     "comps[].layers[].in_point",
     "comps[].layers[].out_point",
+    "comps[].layers[].stretch",
     "comps[].layers[].parent",
     "comps[].layers[].text",
     "comps[].layers[].text_style",
@@ -3432,6 +3433,19 @@
       ],
       "example": "examples/recipes/minimal-layer-object-profile.json"
     },
+    "comps[].layers[].stretch": {
+      "path": "comps[].layers[].stretch",
+      "json_name": "stretch",
+      "source_type": "Layer",
+      "source_field": "Stretch",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Layer time stretch ratio.",
+      "capability_keys": [
+        "layer.set_stretch"
+      ],
+      "example": "examples/recipes/minimal-layer-timing.json"
+    },
     "comps[].layers[].text": {
       "path": "comps[].layers[].text",
       "json_name": "text",
@@ -6132,7 +6146,7 @@
       "source_field": "Stretch",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Expected layer stretch percentage.",
+      "summary": "Expected layer stretch ratio.",
       "example": "examples/recipes/minimal-layer-object-profile.json"
     },
     "expected_profile.layers[].track_matte": {
@@ -7735,6 +7749,7 @@
       "comps[].layers[].start_time",
       "comps[].layers[].in_point",
       "comps[].layers[].out_point",
+      "comps[].layers[].stretch",
       "comps[].layers[].parent",
       "comps[].layers[].text",
       "comps[].layers[].text_style",
