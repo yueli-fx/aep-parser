@@ -242,6 +242,30 @@ func TestRunEmitsCorpusExplanationSummary(t *testing.T) {
 	}
 }
 
+func TestRunEmitsPatternPluginProfiles(t *testing.T) {
+	fixture := filepath.Join("..", "..", "flightdeck", "showcase", "pseudo-effect", "pseudo_default.aep")
+	root := t.TempDir()
+	writeFixtureCopy(t, fixture, filepath.Join(root, "pseudo_default.aep"))
+
+	var stdout, stderr bytes.Buffer
+	code := run([]string{"-in", root, "-mode", "explain", "-corpus", "-recursive", "-summary"}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("run exit = %d, stderr=%s", code, stderr.String())
+	}
+
+	var summary corpusSummary
+	if err := json.Unmarshal(stdout.Bytes(), &summary); err != nil {
+		t.Fatalf("json.Unmarshal: %v\nstdout=%s", err, stdout.String())
+	}
+	profile := summary.PatternProfiles["plugin_dependent_effect_stack"]
+	if profile == nil {
+		t.Fatalf("plugin pattern profile missing from %+v", summary.PatternProfiles)
+	}
+	if len(profile.PluginEffectCounts) == 0 {
+		t.Fatalf("plugin pattern profile has no plugin effects: %+v", profile)
+	}
+}
+
 func TestRunWritesOutputFile(t *testing.T) {
 	input := filepath.Join("..", "..", "flightdeck", "showcase", "text", "text.aep")
 	outPath := filepath.Join(t.TempDir(), "portrait.json")

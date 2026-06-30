@@ -289,6 +289,7 @@ try {
             representatives = @(Get-PatternExamples -Summary $summary -PatternID $row.Name -Max 5)
             readiness       = @(Convert-CountRows -Rows (Get-CountRows -Counts $profile.readiness_counts -Max 5))
             effects         = @(Convert-CountRows -Rows (Get-CountRows -Counts $profile.effect_counts -Max 8))
+            plugin_effects  = @(Convert-CountRows -Rows (Get-CountRows -Counts $profile.plugin_effect_counts -Max 8))
             shape_families  = @(Convert-CountRows -Rows (Get-CountRows -Counts $profile.shape_families -Max 8))
             text_animators  = @(Convert-CountRows -Rows (Get-CountRows -Counts $profile.text_animators -Max 8))
         }
@@ -333,6 +334,7 @@ try {
         foreach ($line in @(
             @{ Label = "readiness"; Value = Format-CountList -Rows $group.readiness },
             @{ Label = "effects"; Value = Format-CountList -Rows $group.effects },
+            @{ Label = "plugin effects"; Value = Format-CountList -Rows $group.plugin_effects },
             @{ Label = "shape families"; Value = Format-CountList -Rows $group.shape_families },
             @{ Label = "text animators"; Value = Format-CountList -Rows $group.text_animators }
         )) {
@@ -439,6 +441,7 @@ try {
         foreach ($line in @(
             @{ Label = "readiness"; Value = Format-CountList -Rows $group.readiness },
             @{ Label = "effects"; Value = Format-CountList -Rows $group.effects },
+            @{ Label = "plugin effects"; Value = Format-CountList -Rows $group.plugin_effects },
             @{ Label = "shape families"; Value = Format-CountList -Rows $group.shape_families },
             @{ Label = "text animators"; Value = Format-CountList -Rows $group.text_animators }
         )) {

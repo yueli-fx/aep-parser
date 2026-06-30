@@ -36,7 +36,7 @@ mode the embedded portrait is used for aggregate counts:
 - archetype counts for explain mode
 - pattern counts for repeated technique combinations in explain mode
 - pattern representative projects for high-signal examples in explain mode
-- pattern mechanism profiles for readiness, effects, shapes, and text animators
+- pattern mechanism profiles for readiness, effects, plugin effects, shapes, and text animators
 - third-party plugin effect counts for explain mode
 - hint counts
 - effect match counts
