@@ -27,6 +27,7 @@ try {
     $effectStacksCsvPath = Join-Path $OutDir "effect_stacks.csv"
     $shapeOperatorsCsvPath = Join-Path $OutDir "shape_operators.csv"
     $textAnimatorsCsvPath = Join-Path $OutDir "text_animators.csv"
+    $dependencyEdgesCsvPath = Join-Path $OutDir "dependency_edges.csv"
     $learningActionsCsvPath = Join-Path $OutDir "learning_actions.csv"
     $mechanismsCsvPath = Join-Path $OutDir "mechanisms.csv"
     $mechanismExamplesCsvPath = Join-Path $OutDir "mechanism_examples.csv"
@@ -767,6 +768,32 @@ try {
     } else {
         '"project_path","comp_name","layer_name","property_kind","property_name","match_name","has_static_value","has_expression","has_keyframes"' | Set-Content -LiteralPath $textAnimatorsCsvPath -Encoding UTF8
     }
+    $dependencyEdgeRows = @()
+    foreach ($record in $records) {
+        if ($null -eq $record.facts -or $null -eq $record.facts.dependencies) {
+            continue
+        }
+        foreach ($edge in @($record.facts.dependencies)) {
+            $dependencyEdgeRows += [pscustomobject]@{
+                project_path = [string]$record.path
+                comp_name    = [string]$edge.comp_name
+                relation     = [string]$edge.relation
+                source_name  = [string]$edge.source_name
+                source_id    = [uint32]$edge.source_id
+                target_name  = [string]$edge.target_name
+                target_id    = [uint32]$edge.target_id
+                target_kind  = [string]$edge.target_kind
+                property     = [string]$edge.property
+            }
+        }
+    }
+    if ($dependencyEdgeRows.Count -gt 0) {
+        $dependencyEdgeRows |
+            Sort-Object project_path, comp_name, relation, source_name, target_name, property |
+            Export-Csv -LiteralPath $dependencyEdgesCsvPath -NoTypeInformation -Encoding UTF8
+    } else {
+        '"project_path","comp_name","relation","source_name","source_id","target_name","target_id","target_kind","property"' | Set-Content -LiteralPath $dependencyEdgesCsvPath -Encoding UTF8
+    }
     $mechanismExampleIndex = @{}
     foreach ($example in $mechanismExampleRows) {
         $key = "$($example.category)`u{1f}$($example.name)"
@@ -1086,7 +1113,7 @@ try {
     [void]$h.AppendLine("</head><body><main>")
     [void]$h.AppendLine("<h1>Technique Corpus Report</h1>")
     [void]$h.AppendLine("<p class=""muted"">input <code>$(Escape-Html $InputPath)</code></p>")
-    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""manifest.json"">manifest.json</a> · <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""project_playbooks.csv"">project_playbooks.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""study_queue.csv"">study_queue.csv</a> · <a href=""study_tasks.csv"">study_tasks.csv</a> · <a href=""recreation_blockers.csv"">recreation_blockers.csv</a> · <a href=""signal_layers.csv"">signal_layers.csv</a> · <a href=""effect_stacks.csv"">effect_stacks.csv</a> · <a href=""shape_operators.csv"">shape_operators.csv</a> · <a href=""text_animators.csv"">text_animators.csv</a> · <a href=""learning_actions.csv"">learning_actions.csv</a> · <a href=""mechanisms.csv"">mechanisms.csv</a> · <a href=""mechanism_examples.csv"">mechanism_examples.csv</a> · <a href=""errors.csv"">errors.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
+    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""manifest.json"">manifest.json</a> · <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""project_playbooks.csv"">project_playbooks.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""study_queue.csv"">study_queue.csv</a> · <a href=""study_tasks.csv"">study_tasks.csv</a> · <a href=""recreation_blockers.csv"">recreation_blockers.csv</a> · <a href=""signal_layers.csv"">signal_layers.csv</a> · <a href=""effect_stacks.csv"">effect_stacks.csv</a> · <a href=""shape_operators.csv"">shape_operators.csv</a> · <a href=""text_animators.csv"">text_animators.csv</a> · <a href=""dependency_edges.csv"">dependency_edges.csv</a> · <a href=""learning_actions.csv"">learning_actions.csv</a> · <a href=""mechanisms.csv"">mechanisms.csv</a> · <a href=""mechanism_examples.csv"">mechanism_examples.csv</a> · <a href=""errors.csv"">errors.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
     [void]$h.AppendLine("<div class=""grid"">")
     foreach ($metric in @(
         @{ Label = "Projects"; Value = $summary.project_count },
@@ -1184,6 +1211,12 @@ try {
         if ($animator.has_expression) { $flags += "expression" }
         if ($animator.has_keyframes) { $flags += "keyframes" }
         [void]$h.AppendLine("<tr><td>$(Escape-Html $animator.project_path)</td><td>$(Escape-Html $animator.layer_name)</td><td>$(Escape-Html $animator.property_kind)</td><td>$(Escape-Html $animator.match_name)</td><td>$(Escape-Html ($flags -join ', '))</td></tr>")
+    }
+    [void]$h.AppendLine("</tbody></table></section>")
+    [void]$h.AppendLine("<h2 style=""margin-top:28px"">Dependency Edges</h2>")
+    [void]$h.AppendLine("<section class=""panel"" style=""margin-top:14px""><table><thead><tr><th>Project</th><th>Relation</th><th>Source</th><th>Target</th><th>Property</th></tr></thead><tbody>")
+    foreach ($edge in @($dependencyEdgeRows | Select-Object -First 120)) {
+        [void]$h.AppendLine("<tr><td>$(Escape-Html $edge.project_path)</td><td>$(Escape-Html $edge.relation)</td><td>$(Escape-Html $edge.source_name)</td><td>$(Escape-Html $edge.target_name)</td><td>$(Escape-Html $edge.property)</td></tr>")
     }
     [void]$h.AppendLine("</tbody></table></section>")
     [void]$h.AppendLine("<h2 style=""margin-top:28px"">Study Queue</h2>")
@@ -1396,6 +1429,7 @@ try {
         $effectStacksCsvPath,
         $shapeOperatorsCsvPath,
         $textAnimatorsCsvPath,
+        $dependencyEdgesCsvPath,
         $learningActionsCsvPath,
         $mechanismsCsvPath,
         $mechanismExamplesCsvPath,
@@ -1461,6 +1495,7 @@ try {
     Write-Host "effect stacks csv: $effectStacksCsvPath"
     Write-Host "shape operators csv: $shapeOperatorsCsvPath"
     Write-Host "text animators csv: $textAnimatorsCsvPath"
+    Write-Host "dependency edges csv: $dependencyEdgesCsvPath"
     Write-Host "learning actions csv: $learningActionsCsvPath"
     Write-Host "mechanisms csv: $mechanismsCsvPath"
     Write-Host "mechanism examples csv: $mechanismExamplesCsvPath"

@@ -36,6 +36,7 @@ $signalLayersCsvPath = Join-Path $OutDir "signal_layers.csv"
 $effectStacksCsvPath = Join-Path $OutDir "effect_stacks.csv"
 $shapeOperatorsCsvPath = Join-Path $OutDir "shape_operators.csv"
 $textAnimatorsCsvPath = Join-Path $OutDir "text_animators.csv"
+$dependencyEdgesCsvPath = Join-Path $OutDir "dependency_edges.csv"
 $learningActionsCsvPath = Join-Path $OutDir "learning_actions.csv"
 $mechanismsCsvPath = Join-Path $OutDir "mechanisms.csv"
 $mechanismExamplesCsvPath = Join-Path $OutDir "mechanism_examples.csv"
@@ -44,7 +45,7 @@ $manifestPath = Join-Path $OutDir "manifest.json"
 $reportPath = Join-Path $OutDir "report.md"
 $htmlPath = Join-Path $OutDir "report.html"
 
-foreach ($path in @($summaryPath, $corpusPath, $digestPath, $learningPath, $projectsCsvPath, $projectPlaybooksCsvPath, $patternsCsvPath, $studyQueueCsvPath, $studyTasksCsvPath, $recreationBlockersCsvPath, $signalLayersCsvPath, $effectStacksCsvPath, $shapeOperatorsCsvPath, $textAnimatorsCsvPath, $learningActionsCsvPath, $mechanismsCsvPath, $mechanismExamplesCsvPath, $errorsCsvPath, $manifestPath, $reportPath, $htmlPath)) {
+foreach ($path in @($summaryPath, $corpusPath, $digestPath, $learningPath, $projectsCsvPath, $projectPlaybooksCsvPath, $patternsCsvPath, $studyQueueCsvPath, $studyTasksCsvPath, $recreationBlockersCsvPath, $signalLayersCsvPath, $effectStacksCsvPath, $shapeOperatorsCsvPath, $textAnimatorsCsvPath, $dependencyEdgesCsvPath, $learningActionsCsvPath, $mechanismsCsvPath, $mechanismExamplesCsvPath, $errorsCsvPath, $manifestPath, $reportPath, $htmlPath)) {
     Require-File -Path $path
 }
 
@@ -63,6 +64,7 @@ $signalLayerRows = @(Import-Csv -LiteralPath $signalLayersCsvPath)
 $effectStackRows = @(Import-Csv -LiteralPath $effectStacksCsvPath)
 $shapeOperatorRows = @(Import-Csv -LiteralPath $shapeOperatorsCsvPath)
 $textAnimatorRows = @(Import-Csv -LiteralPath $textAnimatorsCsvPath)
+$dependencyEdgeRows = @(Import-Csv -LiteralPath $dependencyEdgesCsvPath)
 $learningActionRows = @(Import-Csv -LiteralPath $learningActionsCsvPath)
 $mechanismRows = @(Import-Csv -LiteralPath $mechanismsCsvPath)
 $mechanismExampleRows = @(Import-Csv -LiteralPath $mechanismExamplesCsvPath)
@@ -159,6 +161,14 @@ foreach ($row in $textAnimatorRows) {
         throw "text_animators.csv contains incomplete row: $($row | ConvertTo-Json -Compress)"
     }
 }
+if ($dependencyEdgeRows.Count -ne [int]$summary.totals.dependency_count) {
+    throw "dependency_edges.csv row count $($dependencyEdgeRows.Count) does not match summary totals.dependency_count $($summary.totals.dependency_count)"
+}
+foreach ($row in $dependencyEdgeRows) {
+    if ([string]$row.project_path -eq "" -or [string]$row.comp_name -eq "" -or [string]$row.relation -eq "") {
+        throw "dependency_edges.csv contains incomplete row: $($row | ConvertTo-Json -Compress)"
+    }
+}
 if ($errorRows.Count -ne [int]$summary.error_count) {
     throw "errors.csv row count $($errorRows.Count) does not match summary error_count $($summary.error_count)"
 }
@@ -226,6 +236,7 @@ Require-Text -Path $htmlPath -Pattern "signal_layers\.csv"
 Require-Text -Path $htmlPath -Pattern "effect_stacks\.csv"
 Require-Text -Path $htmlPath -Pattern "shape_operators\.csv"
 Require-Text -Path $htmlPath -Pattern "text_animators\.csv"
+Require-Text -Path $htmlPath -Pattern "dependency_edges\.csv"
 Require-Text -Path $htmlPath -Pattern "learning_actions\.csv"
 Require-Text -Path $htmlPath -Pattern "mechanisms\.csv"
 Require-Text -Path $htmlPath -Pattern "mechanism_examples\.csv"
@@ -239,6 +250,7 @@ Require-Text -Path $htmlPath -Pattern "Recreation Blockers"
 Require-Text -Path $htmlPath -Pattern "Effect Stacks"
 Require-Text -Path $htmlPath -Pattern "Shape Operators"
 Require-Text -Path $htmlPath -Pattern "Text Animators"
+Require-Text -Path $htmlPath -Pattern "Dependency Edges"
 Require-Text -Path $htmlPath -Pattern "Representative Projects"
 Require-Text -Path $htmlPath -Pattern "mechanism-representatives"
 

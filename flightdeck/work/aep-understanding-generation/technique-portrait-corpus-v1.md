@@ -89,6 +89,7 @@ It defaults to `flightdeck\showcase` and writes generated output under
 - `effect_stacks.csv`
 - `shape_operators.csv`
 - `text_animators.csv`
+- `dependency_edges.csv`
 - `learning_actions.csv`
 - `mechanisms.csv`
 - `mechanism_examples.csv`
@@ -139,6 +140,9 @@ keyframe, and layer-reference flags.
 `shape_operators.csv` and `text_animators.csv` expand every parsed shape
 operator and text animator property by project, comp, layer, family/kind, and
 match name so shape-motion and text-motion techniques can be studied directly.
+`dependency_edges.csv` expands parent, matte, source, and effect-parameter layer
+references by project, comp, relation, source, target, and property so
+reconstruction order and controller wiring can be reviewed directly.
 `learning_actions.csv` turns each repeated pattern into a review action with
 representative project, common steps, top mechanisms, and risk.
 `mechanisms.csv` expands effect, plugin-effect, shape, text-animator, layer-role,
