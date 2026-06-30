@@ -27,6 +27,14 @@ ongoing state inconsistency, but also do not break callers for cosmetic moves.
 - `scene_shape_graph.go` and `serializer/lower_shape_node.go` are the largest
   maintainability risks. They should be mechanically split by shape-node family
   before further behavior expansion.
+- Rechecking the public scene model after the cleanup showed
+  `Project.Compositions`, `Project.Footage`, `Project.Folders`, and
+  `Composition.Layers` are already the dominant read API across parser tests,
+  recipe/profile code, showcase generators, and debug tools. A repository scan
+  found roughly 1.5k direct field references. Privatizing those slices only to
+  make persistent ID indexes safe would be a major API migration with weak
+  immediate payoff; keep the public model stable for now and use local indexes
+  in proven hotspots.
 
 ## Execution Order
 
@@ -53,6 +61,13 @@ ongoing state inconsistency, but also do not break callers for cosmetic moves.
         `Warnings []string`.
   - [x] Keep mutator-local warning rollback on the existing string signal.
   - [x] Copy structured warnings into project profiles.
+- [x] Revisit public model breaking changes.
+  - [x] Keep public item/layer slices as the canonical read model for this
+        phase.
+  - [x] Do not add persistent Project ID indexes while those public mutable
+        slices remain writable by callers.
+  - [x] Treat slice privatization as a future major API migration only if a
+        concrete feature needs it.
 
 ## Verification
 
