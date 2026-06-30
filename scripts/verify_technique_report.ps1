@@ -284,7 +284,7 @@ if ($recipeDraftRows.Count -ne [int]$summary.project_count) {
     throw "recipe_drafts.jsonl line count $($recipeDraftRows.Count) does not match summary project_count $($summary.project_count)"
 }
 foreach ($row in $recipeDraftRows) {
-    if ([string]$row.project_path -eq "" -or [string]$row.readiness -eq "" -or $null -eq $row.recipe -or $null -eq $row.gaps) {
+    if ([string]$row.project_path -eq "" -or [string]$row.readiness -eq "" -or $null -eq $row.counts -or $null -eq $row.recipe -or $null -eq $row.gaps) {
         throw "recipe_drafts.jsonl contains incomplete row: $($row | ConvertTo-Json -Compress -Depth 8)"
     }
     if ([int]$row.recipe.schema_version -ne 1 -or $null -eq $row.recipe.project -or $null -eq $row.recipe.comps -or $null -eq $row.recipe.expected_profile) {
@@ -295,6 +295,9 @@ foreach ($row in $recipeDraftRows) {
     }
     if ([int]$row.recipe.expected_profile.comp_count -ne @($row.recipe.comps).Count) {
         throw "recipe_drafts.jsonl expected_profile comp_count mismatch: $($row.project_path)"
+    }
+    if ($null -ne $row.recipe.expected_profile.layer_count -or $null -ne $row.recipe.expected_profile.text_layer_count -or $null -ne $row.recipe.expected_profile.shape_layer_count) {
+        throw "recipe_drafts.jsonl recipe expected_profile must only claim materialized fields: $($row.project_path)"
     }
     if (@($row.gaps).Count -le 0) {
         throw "recipe_drafts.jsonl row has no explicit gaps: $($row.project_path)"

@@ -20,6 +20,7 @@ try {
     $partialReportDir = Join-Path $runRoot "partial_report"
     $compareSelfDir = Join-Path $runRoot "compare_self"
     $comparePartialDir = Join-Path $runRoot "compare_partial_to_full"
+    $recipeDraftCompileDir = Join-Path $runRoot "recipe_draft_compile"
     $acceptanceJsonPath = Join-Path $runRoot "acceptance.json"
     $acceptanceMdPath = Join-Path $runRoot "acceptance.md"
     $latestRunPath = Join-Path $OutRoot "latest_run.txt"
@@ -85,11 +86,46 @@ try {
     Invoke-GateStep -Name "partial-to-full compare" -Body {
         & pwsh -NoProfile -File (Join-Path $PSScriptRoot "compare_technique_reports.ps1") -BaseDir $partialReportDir -NewDir $fullReportDir -OutDir $comparePartialDir -Top 5
     }
+    Invoke-GateStep -Name "recipe draft compile smoke" -Body {
+        New-Item -ItemType Directory -Force -Path $recipeDraftCompileDir | Out-Null
+        $draftRecipePath = Join-Path $recipeDraftCompileDir "recipe_draft.json"
+        $compiledAEP = Join-Path $recipeDraftCompileDir "recipe_draft.aep"
+        $validateJsonPath = Join-Path $recipeDraftCompileDir "validate.json"
+        $compileJsonPath = Join-Path $recipeDraftCompileDir "compile.json"
+        $draftLine = Get-Content -LiteralPath (Join-Path $fullReportDir "recipe_drafts.jsonl") | Where-Object { $_.Trim() -ne "" } | Select-Object -First 1
+        if ([string]::IsNullOrWhiteSpace($draftLine)) {
+            Write-Error "recipe_drafts.jsonl has no rows"
+            exit 1
+        }
+        $draft = $draftLine | ConvertFrom-Json
+        $draft.recipe | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $draftRecipePath -Encoding UTF8
+        $validateOutput = & go run ./cmd/aeprecipe validate -recipe $draftRecipePath -json 2>&1
+        $validateExit = $LASTEXITCODE
+        $validateOutput | Set-Content -LiteralPath $validateJsonPath -Encoding UTF8
+        if ($validateExit -ne 0) {
+            Write-Error "recipe draft validate failed with exit code $validateExit"
+            exit $validateExit
+        }
+        $compileOutput = & go run ./cmd/aeprecipe compile -recipe $draftRecipePath -out $compiledAEP -json 2>&1
+        $compileExit = $LASTEXITCODE
+        $compileOutput | Set-Content -LiteralPath $compileJsonPath -Encoding UTF8
+        if ($compileExit -ne 0) {
+            Write-Error "recipe draft compile failed with exit code $compileExit"
+            exit $compileExit
+        }
+        $compiledAEP = Join-Path $recipeDraftCompileDir "recipe_draft.aep"
+        if (-not (Test-Path -LiteralPath $compiledAEP)) {
+            Write-Error "missing compiled recipe draft: $compiledAEP"
+            exit 1
+        }
+    }
 
     $fullManifest = Get-Content -Raw -LiteralPath (Join-Path $fullReportDir "manifest.json") | ConvertFrom-Json
     $partialManifest = Get-Content -Raw -LiteralPath (Join-Path $partialReportDir "manifest.json") | ConvertFrom-Json
     $compareSelf = Get-Content -Raw -LiteralPath (Join-Path $compareSelfDir "compare.json") | ConvertFrom-Json
     $comparePartial = Get-Content -Raw -LiteralPath (Join-Path $comparePartialDir "compare.json") | ConvertFrom-Json
+    $recipeDraftCompileJson = Get-Content -Raw -LiteralPath (Join-Path $recipeDraftCompileDir "compile.json") | ConvertFrom-Json
+    $compiledRecipeDraftAEP = Get-Item -LiteralPath (Join-Path $recipeDraftCompileDir "recipe_draft.aep")
     $studyRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "study_queue.csv") | Select-Object -First 5)
     $projectPlaybookRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "project_playbooks.csv") | Select-Object -First 5)
     $compositionRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "compositions.csv") | Select-Object -First 5)
@@ -142,6 +178,15 @@ try {
             partial_to_full = $comparePartialDir
             partial_to_full_count_diffs = $partialCountDiffs
         }
+        recipe_draft_compile = [ordered]@{
+            path = $recipeDraftCompileDir
+            recipe = Join-Path $recipeDraftCompileDir "recipe_draft.json"
+            output = Join-Path $recipeDraftCompileDir "recipe_draft.aep"
+            output_bytes = [int64]$compiledRecipeDraftAEP.Length
+            validate_json = Join-Path $recipeDraftCompileDir "validate.json"
+            compile_json = Join-Path $recipeDraftCompileDir "compile.json"
+            valid = [bool]$recipeDraftCompileJson.valid
+        }
         steps = @($steps)
     }
     $acceptance | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $acceptanceJsonPath -Encoding UTF8
@@ -157,6 +202,8 @@ try {
     [void]$b.AppendLine("- patterns: $($fullManifest.pattern_count)")
     [void]$b.AppendLine("- partial report errors: $($partialManifest.error_count)")
     [void]$b.AppendLine("- partial-to-full count diffs: $partialCountDiffs")
+    [void]$b.AppendLine("- recipe draft compile: ``$recipeDraftCompileDir``")
+    [void]$b.AppendLine("- compiled recipe draft bytes: $($compiledRecipeDraftAEP.Length)")
     [void]$b.AppendLine("")
     [void]$b.AppendLine("## Steps")
     [void]$b.AppendLine("")
@@ -285,11 +332,16 @@ try {
         [void]$index.AppendLine("<tr><td>$(Escape-Html $row.project_path)</td><td>$(Escape-Html $row.readiness)</td><td>$(Escape-Html $phaseText)</td></tr>")
     }
     [void]$index.AppendLine("</tbody></table></section>")
-    [void]$index.AppendLine("<section class=""panel"" style=""margin-top:16px""><h2>Recipe Drafts Preview</h2><table><thead><tr><th>Project</th><th>Comps</th><th>Gaps</th></tr></thead><tbody>")
+    [void]$index.AppendLine("<section class=""panel"" style=""margin-top:16px""><h2>Recipe Drafts Preview</h2><table><thead><tr><th>Project</th><th>Comps</th><th>Layers</th><th>Gaps</th></tr></thead><tbody>")
     foreach ($row in $recipeDraftRows) {
         $gapText = ((@($row.gaps) | ForEach-Object { "$($_.id)=$($_.count)" }) -join "; ")
-        [void]$index.AppendLine("<tr><td>$(Escape-Html $row.project_path)</td><td>$(@($row.recipe.comps).Count)</td><td>$(Escape-Html $gapText)</td></tr>")
+        [void]$index.AppendLine("<tr><td>$(Escape-Html $row.project_path)</td><td>$(@($row.recipe.comps).Count)</td><td>$(Escape-Html $row.counts.layers)</td><td>$(Escape-Html $gapText)</td></tr>")
     }
+    [void]$index.AppendLine("</tbody></table></section>")
+    [void]$index.AppendLine("<section class=""panel"" style=""margin-top:16px""><h2>Recipe Draft Compile Smoke</h2><table><thead><tr><th>Artifact</th><th>Value</th></tr></thead><tbody>")
+    [void]$index.AppendLine("<tr><td>compile valid</td><td>$(Escape-Html $recipeDraftCompileJson.valid)</td></tr>")
+    [void]$index.AppendLine("<tr><td>compiled bytes</td><td>$($compiledRecipeDraftAEP.Length)</td></tr>")
+    [void]$index.AppendLine("<tr><td>output</td><td>$(Escape-Html $compiledRecipeDraftAEP.FullName)</td></tr>")
     [void]$index.AppendLine("</tbody></table></section>")
     [void]$index.AppendLine("<section class=""panel""><h2>Artifacts</h2><div class=""links"">")
     [void]$index.AppendLine("<a href=""$runRel/full_report/report.html"">Full report HTML</a>")
@@ -312,6 +364,10 @@ try {
     [void]$index.AppendLine("<a href=""$runRel/full_report/coverage_scorecard.csv"">Coverage scorecard CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/reconstruction_blueprints.jsonl"">Reconstruction blueprints JSONL</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/recipe_drafts.jsonl"">Recipe drafts JSONL</a>")
+    [void]$index.AppendLine("<a href=""$runRel/recipe_draft_compile/recipe_draft.json"">Compiled recipe draft JSON</a>")
+    [void]$index.AppendLine("<a href=""$runRel/recipe_draft_compile/recipe_draft.aep"">Compiled recipe draft AEP</a>")
+    [void]$index.AppendLine("<a href=""$runRel/recipe_draft_compile/validate.json"">Recipe draft validate JSON</a>")
+    [void]$index.AppendLine("<a href=""$runRel/recipe_draft_compile/compile.json"">Recipe draft compile JSON</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/projects.csv"">Projects CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/patterns.csv"">Patterns CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/errors.csv"">Errors CSV</a>")
@@ -379,6 +435,9 @@ try {
     if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Recipe Drafts Preview" -Quiet)) {
         throw "latest index missing Recipe Drafts Preview"
     }
+    if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Recipe Draft Compile Smoke" -Quiet)) {
+        throw "latest index missing Recipe Draft Compile Smoke"
+    }
     Require-LatestIndexLink -Label "full report" -RelativePath "$runRel/full_report/report.html"
     Require-LatestIndexLink -Label "learning index" -RelativePath "$runRel/full_report/learning.md"
     Require-LatestIndexLink -Label "project playbooks" -RelativePath "$runRel/full_report/project_playbooks.csv"
@@ -399,6 +458,10 @@ try {
     Require-LatestIndexLink -Label "coverage scorecard" -RelativePath "$runRel/full_report/coverage_scorecard.csv"
     Require-LatestIndexLink -Label "reconstruction blueprints" -RelativePath "$runRel/full_report/reconstruction_blueprints.jsonl"
     Require-LatestIndexLink -Label "recipe drafts" -RelativePath "$runRel/full_report/recipe_drafts.jsonl"
+    Require-LatestIndexLink -Label "compiled recipe draft json" -RelativePath "$runRel/recipe_draft_compile/recipe_draft.json"
+    Require-LatestIndexLink -Label "compiled recipe draft aep" -RelativePath "$runRel/recipe_draft_compile/recipe_draft.aep"
+    Require-LatestIndexLink -Label "recipe draft validate json" -RelativePath "$runRel/recipe_draft_compile/validate.json"
+    Require-LatestIndexLink -Label "recipe draft compile json" -RelativePath "$runRel/recipe_draft_compile/compile.json"
     Require-LatestIndexLink -Label "partial report" -RelativePath "$runRel/partial_report/report.html"
     Require-LatestIndexLink -Label "partial compare" -RelativePath "$runRel/compare_partial_to_full/compare.md"
 

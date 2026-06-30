@@ -1166,6 +1166,14 @@ try {
             schema_version = 1
             project_path   = [string]$record.path
             readiness      = $readiness
+            counts         = [ordered]@{
+                compositions     = [int]$portrait.fingerprint.comp_count
+                layers           = [int]$portrait.fingerprint.layer_count
+                effects          = [int]$portrait.fingerprint.effect_count
+                shape_operators  = [int]$portrait.fingerprint.shape_operator_count
+                text_animators   = [int]$portrait.fingerprint.text_animator_count
+                dependency_edges = [int]$portrait.fingerprint.dependency_count
+            }
             recipe         = [ordered]@{
                 schema_version   = 1
                 project          = [ordered]@{
@@ -1174,11 +1182,8 @@ try {
                 }
                 comps            = $recipeComps
                 expected_profile = [ordered]@{
-                    comp_count       = [int]$portrait.fingerprint.comp_count
-                    layer_count      = [int]$portrait.fingerprint.layer_count
-                    text_layer_count = [int]$portrait.fingerprint.text_layer_count
-                    shape_layer_count = [int]$portrait.fingerprint.shape_layer_count
-                    comps            = $expectedComps
+                    comp_count = [int]$portrait.fingerprint.comp_count
+                    comps      = $expectedComps
                 }
             }
             gaps           = $gaps
@@ -1450,7 +1455,7 @@ try {
     [void]$h.AppendLine("<section class=""panel"" style=""margin-top:14px""><table><thead><tr><th>Project</th><th>Comps</th><th>Layers</th><th>Gaps</th></tr></thead><tbody>")
     foreach ($draft in @($recipeDraftRows | Select-Object -First 80)) {
         $gapText = ((@($draft.gaps) | ForEach-Object { "$($_.id)=$($_.count)" }) -join "; ")
-        [void]$h.AppendLine("<tr><td>$(Escape-Html $draft.project_path)</td><td>$(@($draft.recipe.comps).Count)</td><td>$($draft.recipe.expected_profile.layer_count)</td><td>$(Escape-Html $gapText)</td></tr>")
+        [void]$h.AppendLine("<tr><td>$(Escape-Html $draft.project_path)</td><td>$(@($draft.recipe.comps).Count)</td><td>$($draft.counts.layers)</td><td>$(Escape-Html $gapText)</td></tr>")
     }
     [void]$h.AppendLine("</tbody></table></section>")
     [void]$h.AppendLine("<h2 style=""margin-top:28px"">Mechanism Explorer</h2>")

@@ -185,8 +185,9 @@ layer roles, and graph edges.
 `scripts/verify_technique_selfhost.ps1` is the one-command self-hosted
 acceptance gate. It runs the technique Go tests, generates and verifies the full
 sample report, generates and verifies an intentional partial-error report,
-compares a report to itself, compares the partial report to the full report, and
-writes `acceptance.json` plus `acceptance.md`. It also writes
+compares a report to itself, compares the partial report to the full report,
+validates and compiles one generated recipe draft into a smoke `.aep`, and writes
+`acceptance.json` plus `acceptance.md`. It also writes
 `latest_run.txt`, `latest_acceptance.md`, and `latest_index.html` at the selected
 output root so the most recent result has a stable path. Passing `-Open` opens
 the latest HTML index after the gate finishes.
