@@ -276,6 +276,12 @@ var fieldValidation = map[string]FieldMeta{
 	"comps[].layers[].text_animators[].value_keyframes[].out_ease.influence": {
 		Validation: "Keyframe ease influence must be greater than 0 and at most 1.",
 	},
+	"comps[].layers[].text_style.run_index": {
+		Validation: "Text style run_index must be non-negative.",
+	},
+	"comps[].layers[].text_style.paragraph_index": {
+		Validation: "Text style paragraph_index must be non-negative.",
+	},
 	"comps[].layers[].text_style.font_size": {
 		Validation: "Text font size must be positive.",
 	},

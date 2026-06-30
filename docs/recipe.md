@@ -127,8 +127,8 @@ This reference is generated from the canonical recipe field model.
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].text_style.run_index` | `number` | - | Layer text style text run index. | - | - | examples/recipes/minimal-text-style.json |
-| `comps[].layers[].text_style.paragraph_index` | `number` | - | Layer text style paragraph index. | - | - | examples/recipes/minimal-text-style.json |
+| `comps[].layers[].text_style.run_index` | `number` | - | Layer text style text run index. | Text style run_index must be non-negative. | - | examples/recipes/minimal-text-style.json |
+| `comps[].layers[].text_style.paragraph_index` | `number` | - | Layer text style paragraph index. | Text style paragraph_index must be non-negative. | - | examples/recipes/minimal-text-style.json |
 | `comps[].layers[].text_style.font_size` | `number` | - | Layer text style font size. | Text font size must be positive. | `text.set_run_font_size` (`Layer.SetRunFontSize`) | examples/recipes/minimal-text-style.json |
 | `comps[].layers[].text_style.fill_color` | `array<float64>` | - | Layer text style fill color as RGB channels. | Text fill color must contain RGB or RGBA channels in the 0..255 range. | `text.set_run_fill_color` (`Layer.SetRunFillColor`) | examples/recipes/minimal-text-shape.json |
 | `comps[].layers[].text_style.auto_leading` | `boolean` | - | Layer text style auto-leading switch. | - | `text.set_run_auto_leading` (`Layer.SetRunAutoLeading`) | examples/recipes/minimal-text-style.json |

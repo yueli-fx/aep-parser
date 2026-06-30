@@ -2134,6 +2134,7 @@
       "type": "number",
       "go_type": "int",
       "description": "Layer text style text run index.",
+      "x-aep-validation": "Text style run_index must be non-negative.",
       "x-aep-example": "examples/recipes/minimal-text-style.json"
     },
     {
@@ -2144,6 +2145,7 @@
       "type": "number",
       "go_type": "int",
       "description": "Layer text style paragraph index.",
+      "x-aep-validation": "Text style paragraph_index must be non-negative.",
       "x-aep-example": "examples/recipes/minimal-text-style.json"
     },
     {

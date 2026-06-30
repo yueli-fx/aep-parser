@@ -4396,6 +4396,7 @@
       "type": "number",
       "go_type": "int",
       "summary": "Layer text style paragraph index.",
+      "validation": "Text style paragraph_index must be non-negative.",
       "example": "examples/recipes/minimal-text-style.json"
     },
     "comps[].layers[].text_style.run_index": {
@@ -4406,6 +4407,7 @@
       "type": "number",
       "go_type": "int",
       "summary": "Layer text style text run index.",
+      "validation": "Text style run_index must be non-negative.",
       "example": "examples/recipes/minimal-text-style.json"
     },
     "comps[].layers[].text_style.space_after": {

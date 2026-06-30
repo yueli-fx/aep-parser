@@ -264,6 +264,29 @@ func TestBuildDocumentIncludesKeyframeValidationMetadata(t *testing.T) {
 	}
 }
 
+func TestBuildDocumentIncludesTextStyleValidationMetadata(t *testing.T) {
+	doc, err := BuildDocument()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []string{
+		"comps[].layers[].text_style.run_index",
+		"comps[].layers[].text_style.paragraph_index",
+		"comps[].layers[].text_style.font_size",
+		"comps[].layers[].text_style.fill_color",
+		"comps[].layers[].text_style.tsume",
+		"comps[].layers[].text_style.stroke_width",
+		"comps[].layers[].text_style.justification",
+	}
+	for _, path := range tests {
+		field := requireField(t, doc, path)
+		if field.Validation == "" && len(field.Enum) == 0 {
+			t.Fatalf("%s has no validation metadata: %+v", path, field)
+		}
+	}
+}
+
 func TestBuildDocumentIncludesMaskValidationMetadata(t *testing.T) {
 	doc, err := BuildDocument()
 	if err != nil {
