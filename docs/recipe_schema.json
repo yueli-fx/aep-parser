@@ -34,7 +34,8 @@
       "go_type": "int",
       "x-aep-structural-required": true,
       "description": "Recipe schema version.",
-      "x-aep-validation": "Must equal the supported recipe schema version."
+      "x-aep-validation": "Must equal the supported recipe schema version.",
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "project",
@@ -45,7 +46,8 @@
       "go_type": "recipe.ProjectSpec",
       "object_type": "ProjectSpec",
       "x-aep-structural-required": true,
-      "description": "Project-level metadata used when materializing the recipe."
+      "description": "Project-level metadata used when materializing the recipe.",
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "project.name",
@@ -54,7 +56,8 @@
       "source_field": "Name",
       "type": "string",
       "go_type": "string",
-      "description": "Project display name."
+      "description": "Project display name.",
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "comps[]",
@@ -82,7 +85,8 @@
             "TestV2_1_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "comps[].name",
@@ -92,7 +96,8 @@
       "type": "string",
       "go_type": "string",
       "x-aep-structural-required": true,
-      "description": "Composition display name."
+      "description": "Composition display name.",
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "comps[].width",
@@ -103,7 +108,8 @@
       "go_type": "int",
       "x-aep-structural-required": true,
       "description": "Composition width in pixels.",
-      "x-aep-validation": "Pixel width must fit the composition writer's uint16 range."
+      "x-aep-validation": "Pixel width must fit the composition writer's uint16 range.",
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "comps[].height",
@@ -114,7 +120,8 @@
       "go_type": "int",
       "x-aep-structural-required": true,
       "description": "Composition height in pixels.",
-      "x-aep-validation": "Pixel height must fit the composition writer's uint16 range."
+      "x-aep-validation": "Pixel height must fit the composition writer's uint16 range.",
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "comps[].frame_rate",
@@ -124,7 +131,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Composition frame rate in frames per second."
+      "description": "Composition frame rate in frames per second.",
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "comps[].duration",
@@ -134,7 +142,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Composition duration in seconds."
+      "description": "Composition duration in seconds.",
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "comps[].background_color",
@@ -187,7 +196,8 @@
             "TestCompIdta_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-comp-label.json"
     },
     {
       "x-aep-path": "comps[].comment",
@@ -212,7 +222,8 @@
             "TestCompIdta_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-comp-comment.json"
     },
     {
       "x-aep-path": "comps[].renderer",
@@ -264,7 +275,8 @@
             "TestCompSettings_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-comp-object-profile.json"
     },
     {
       "x-aep-path": "comps[].pixel_aspect",
@@ -289,7 +301,8 @@
             "TestCompSettings_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-comp-object-profile.json"
     },
     {
       "x-aep-path": "comps[].display_start_time",
@@ -314,7 +327,8 @@
             "TestCompSettings_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-comp-display-start-time.json"
     },
     {
       "x-aep-path": "comps[].frame_blending",
@@ -339,7 +353,8 @@
             "TestCompSettings_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-comp-flag-profile.json"
     },
     {
       "x-aep-path": "comps[].draft_3d",
@@ -360,7 +375,8 @@
           "minver": "2020",
           "boundary": "length-preserving, a single bit at cdta offset 0x8A bit 0; the\nwritten byte matches AE's own draft3d=true encoding bit-for-bit, but the\nDOM does not reflect this bit back on reopen (a derived/runtime state, not\nindependently value-verifiable through the DOM) — acceptance is capped at\nbyte-preservation rather than a DOM readback check"
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-comp-draft-3d.json"
     },
     {
       "x-aep-path": "comps[].hide_shy_layers",
@@ -385,7 +401,8 @@
             "TestCompSettings_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-comp-flag-profile.json"
     },
     {
       "x-aep-path": "comps[].preserve_nested_frame_rate",
@@ -410,7 +427,8 @@
             "TestCompSettings_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-comp-flag-profile.json"
     },
     {
       "x-aep-path": "comps[].preserve_nested_resolution",
@@ -435,7 +453,8 @@
             "TestCompSettings_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-comp-flag-profile.json"
     },
     {
       "x-aep-path": "comps[].motion_blur",
@@ -445,7 +464,8 @@
       "type": "object",
       "go_type": "*recipe.CompMotionBlurSpec",
       "object_type": "CompMotionBlurSpec",
-      "description": "Composition motion blur settings."
+      "description": "Composition motion blur settings.",
+      "x-aep-example": "examples/recipes/minimal-comp-flag-profile.json"
     },
     {
       "x-aep-path": "comps[].motion_blur.enabled",
@@ -470,7 +490,8 @@
             "TestCompSettings_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-comp-flag-profile.json"
     },
     {
       "x-aep-path": "comps[].motion_blur.shutter_angle",
@@ -495,7 +516,8 @@
             "TestCompSettings_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-comp-motion-blur.json"
     },
     {
       "x-aep-path": "comps[].motion_blur.shutter_phase",
@@ -520,7 +542,8 @@
             "TestCompSettings_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-comp-motion-blur.json"
     },
     {
       "x-aep-path": "comps[].motion_blur.adaptive_sample_limit",
@@ -545,7 +568,8 @@
             "TestCompSettings_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-comp-motion-blur.json"
     },
     {
       "x-aep-path": "comps[].motion_blur.samples_per_frame",
@@ -570,7 +594,8 @@
             "TestCompSettings_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-comp-motion-blur.json"
     },
     {
       "x-aep-path": "comps[].work_area",
@@ -622,7 +647,8 @@
             "TestCompSettings_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-comp-object-profile.json"
     },
     {
       "x-aep-path": "comps[].work_area.end",
@@ -647,7 +673,8 @@
             "TestCompSettings_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-comp-object-profile.json"
     },
     {
       "x-aep-path": "comps[].layers[]",
@@ -658,7 +685,8 @@
       "go_type": "[]recipe.Layer",
       "element": "recipe.Layer",
       "object_type": "Layer",
-      "description": "Composition layer definitions."
+      "description": "Composition layer definitions.",
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "comps[].layers[].type",
@@ -772,7 +800,8 @@
             "TestNewSolidNull_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "comps[].layers[].name",
@@ -782,7 +811,8 @@
       "type": "string",
       "go_type": "string",
       "x-aep-structural-required": true,
-      "description": "Layer display name."
+      "description": "Layer display name.",
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "comps[].layers[].label",
@@ -807,7 +837,8 @@
             "TestLayerAVFields2_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-label.json"
     },
     {
       "x-aep-path": "comps[].layers[].comment",
@@ -832,7 +863,8 @@
             "TestLayerAVFields3_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-comment.json"
     },
     {
       "x-aep-path": "comps[].layers[].visible",
@@ -857,7 +889,8 @@
             "TestLayerAVFlags_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-common-switches.json"
     },
     {
       "x-aep-path": "comps[].layers[].solo",
@@ -882,7 +915,8 @@
             "TestLayerAVFlags_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-common-switches.json"
     },
     {
       "x-aep-path": "comps[].layers[].locked",
@@ -907,7 +941,8 @@
             "TestLayerAVFlags_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-common-switches.json"
     },
     {
       "x-aep-path": "comps[].layers[].motion_blur",
@@ -932,7 +967,8 @@
             "TestLayerAVFlags_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-motion-blur.json"
     },
     {
       "x-aep-path": "comps[].layers[].shy",
@@ -957,7 +993,8 @@
             "TestLayerAVFlags_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-object-profile.json"
     },
     {
       "x-aep-path": "comps[].layers[].effects_enabled",
@@ -982,7 +1019,8 @@
             "TestLayerFlags2_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-common-switches.json"
     },
     {
       "x-aep-path": "comps[].layers[].audio_enabled",
@@ -1007,7 +1045,8 @@
             "TestLayerAudio_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-common-switches.json"
     },
     {
       "x-aep-path": "comps[].layers[].frame_blend_enabled",
@@ -1032,7 +1071,8 @@
             "TestLayerFrameBlend_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     {
       "x-aep-path": "comps[].layers[].markers_locked",
@@ -1053,7 +1093,8 @@
           "minver": "2020",
           "boundary": "length-preserving, a single bit at ldta offset 0x26"
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-object-profile.json"
     },
     {
       "x-aep-path": "comps[].layers[].collapse_transform",
@@ -1078,7 +1119,8 @@
             "TestLayerBool_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     {
       "x-aep-path": "comps[].layers[].is_3d",
@@ -1103,7 +1145,8 @@
             "TestLayer3DEnable_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     {
       "x-aep-path": "comps[].layers[].is_adjust",
@@ -1128,7 +1171,8 @@
             "TestLayerAVFields2_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     {
       "x-aep-path": "comps[].layers[].is_null",
@@ -1153,7 +1197,8 @@
             "TestLayerFlags2_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-null-flag.json"
     },
     {
       "x-aep-path": "comps[].layers[].is_guide",
@@ -1178,7 +1223,8 @@
             "TestLayerAVFields2_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     {
       "x-aep-path": "comps[].layers[].sampling_bicubic",
@@ -1203,7 +1249,8 @@
             "TestLayerAVFields2_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     {
       "x-aep-path": "comps[].layers[].frame_blend_pixel_motion",
@@ -1228,7 +1275,8 @@
             "TestLayerFrameBlend_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     {
       "x-aep-path": "comps[].layers[].preserve_transparency",
@@ -1253,7 +1301,8 @@
             "TestLayerAVFields2_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     {
       "x-aep-path": "comps[].layers[].quality",
@@ -1278,7 +1327,8 @@
             "TestLayerAVFlags_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-object-profile.json"
     },
     {
       "x-aep-path": "comps[].layers[].blending_mode",
@@ -1303,7 +1353,8 @@
             "TestLayerAVFlags_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-object-profile.json"
     },
     {
       "x-aep-path": "comps[].layers[].track_matte",
@@ -1328,7 +1379,8 @@
             "TestTrackMatteClassic_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-track-matte.json"
     },
     {
       "x-aep-path": "comps[].layers[].auto_orient",
@@ -1353,7 +1405,8 @@
             "TestLayerBool_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-auto-orient.json"
     },
     {
       "x-aep-path": "comps[].layers[].start_time",
@@ -1378,7 +1431,8 @@
             "TestLayerAVFields3_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-object-profile.json"
     },
     {
       "x-aep-path": "comps[].layers[].in_point",
@@ -1403,7 +1457,8 @@
             "TestLayerAVFields2_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-object-profile.json"
     },
     {
       "x-aep-path": "comps[].layers[].out_point",
@@ -1428,7 +1483,8 @@
             "TestLayerAVFields2_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-object-profile.json"
     },
     {
       "x-aep-path": "comps[].layers[].parent",
@@ -1453,7 +1509,8 @@
             "TestLayerAVFields3_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-null-flag.json"
     },
     {
       "x-aep-path": "comps[].layers[].text",
@@ -1478,7 +1535,8 @@
             "TestSetTextVariable_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_style",
@@ -1488,7 +1546,8 @@
       "type": "object",
       "go_type": "*recipe.TextStyleSpec",
       "object_type": "TextStyleSpec",
-      "description": "Text layer style overrides."
+      "description": "Text layer style overrides.",
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_style.run_index",
@@ -1558,7 +1617,8 @@
             "TestTextRun_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_style.tracking",
@@ -1583,7 +1643,8 @@
             "TestMGTextStyle_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_style.faux_bold",
@@ -1608,7 +1669,8 @@
             "TestTextRun_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_style.faux_italic",
@@ -1633,7 +1695,8 @@
             "TestTextRun_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_style.apply_stroke",
@@ -1658,7 +1721,8 @@
             "TestTextRun_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_style.stroke_color",
@@ -1684,7 +1748,8 @@
             "TestTextRun_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_style.stroke_width",
@@ -1709,7 +1774,8 @@
             "TestTextRun_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_style.justification",
@@ -1734,7 +1800,8 @@
             "TestMGTextStyle_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "comps[].layers[].camera",
@@ -1744,7 +1811,8 @@
       "type": "object",
       "go_type": "*recipe.CameraSpec",
       "object_type": "CameraSpec",
-      "description": "Camera layer options."
+      "description": "Camera layer options.",
+      "x-aep-example": "examples/recipes/minimal-camera-aperture.json"
     },
     {
       "x-aep-path": "comps[].layers[].camera.zoom",
@@ -1794,7 +1862,8 @@
             "TestLayer3DDoF_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-camera-depth-of-field.json"
     },
     {
       "x-aep-path": "comps[].layers[].camera.focus_distance",
@@ -1818,7 +1887,8 @@
             "TestLayer3DDoF_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-camera-focus-distance.json"
     },
     {
       "x-aep-path": "comps[].layers[].camera.aperture",
@@ -1842,7 +1912,8 @@
             "TestLayer3DDoF_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-camera-aperture.json"
     },
     {
       "x-aep-path": "comps[].layers[].camera.blur_level",
@@ -1866,7 +1937,8 @@
             "TestLayer3DDoF_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-camera-blur-level.json"
     },
     {
       "x-aep-path": "comps[].layers[].camera.iris_shape",
@@ -1891,7 +1963,8 @@
             "TestNewCameraLight_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-camera-iris-shape.json"
     },
     {
       "x-aep-path": "comps[].layers[].camera.iris_rotation",
@@ -1916,7 +1989,8 @@
             "TestNewCameraLight_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-camera-iris-rotation.json"
     },
     {
       "x-aep-path": "comps[].layers[].camera.iris_roundness",
@@ -1941,7 +2015,8 @@
             "TestNewCameraLight_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-camera-iris-roundness.json"
     },
     {
       "x-aep-path": "comps[].layers[].camera.iris_aspect_ratio",
@@ -1966,7 +2041,8 @@
             "TestNewCameraLight_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-camera-iris-aspect-ratio.json"
     },
     {
       "x-aep-path": "comps[].layers[].camera.iris_diffraction_fringe",
@@ -1991,7 +2067,8 @@
             "TestNewCameraLight_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-camera-iris-diffraction-fringe.json"
     },
     {
       "x-aep-path": "comps[].layers[].camera.iris_highlight_gain",
@@ -2016,7 +2093,8 @@
             "TestNewCameraLight_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-camera-iris-highlight-gain.json"
     },
     {
       "x-aep-path": "comps[].layers[].camera.iris_highlight_threshold",
@@ -2041,7 +2119,8 @@
             "TestNewCameraLight_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-camera-iris-highlight-threshold.json"
     },
     {
       "x-aep-path": "comps[].layers[].camera.iris_highlight_saturation",
@@ -2066,7 +2145,8 @@
             "TestNewCameraLight_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-camera-iris-highlight-saturation.json"
     },
     {
       "x-aep-path": "comps[].layers[].light",
@@ -2076,7 +2156,8 @@
       "type": "object",
       "go_type": "*recipe.LightSpec",
       "object_type": "LightSpec",
-      "description": "Light layer options."
+      "description": "Light layer options.",
+      "x-aep-example": "examples/recipes/minimal-light-casts-shadows.json"
     },
     {
       "x-aep-path": "comps[].layers[].light.kind",
@@ -2123,7 +2204,8 @@
           "minver": "2025",
           "boundary": "length-preserving, a 4-byte field at ldta offset 0x28;\nonly applies to environment lights on newer AE versions"
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-light-source.json"
     },
     {
       "x-aep-path": "comps[].layers[].light.intensity",
@@ -2147,7 +2229,8 @@
             "TestLayer3DLight_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-light-intensity.json"
     },
     {
       "x-aep-path": "comps[].layers[].light.color",
@@ -2173,7 +2256,8 @@
             "TestNewCameraLight_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-light-color.json"
     },
     {
       "x-aep-path": "comps[].layers[].light.casts_shadows",
@@ -2197,7 +2281,8 @@
             "TestLayer3DShadow_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-light-casts-shadows.json"
     },
     {
       "x-aep-path": "comps[].layers[].light.shadow_darkness",
@@ -2222,7 +2307,8 @@
             "TestNewCameraLight_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-light-object-profile.json"
     },
     {
       "x-aep-path": "comps[].layers[].light.shadow_diffusion",
@@ -2247,7 +2333,8 @@
             "TestNewCameraLight_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-light-object-profile.json"
     },
     {
       "x-aep-path": "comps[].layers[].light.falloff_type",
@@ -2272,7 +2359,8 @@
             "TestNewCameraLight_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-light-falloff-distance.json"
     },
     {
       "x-aep-path": "comps[].layers[].light.falloff_start",
@@ -2297,7 +2385,8 @@
             "TestNewCameraLight_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-light-falloff-start.json"
     },
     {
       "x-aep-path": "comps[].layers[].light.falloff_distance",
@@ -2322,7 +2411,8 @@
             "TestNewCameraLight_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-light-falloff-distance.json"
     },
     {
       "x-aep-path": "comps[].layers[].light.cone_angle",
@@ -2347,7 +2437,8 @@
             "TestNewCameraLight_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-light-cone-angle.json"
     },
     {
       "x-aep-path": "comps[].layers[].light.cone_feather",
@@ -2372,7 +2463,8 @@
             "TestNewCameraLight_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-light-cone-feather.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape",
@@ -2382,7 +2474,8 @@
       "type": "object",
       "go_type": "*recipe.ShapeSpec",
       "object_type": "ShapeSpec",
-      "description": "Shape layer primitive and operators."
+      "description": "Shape layer primitive and operators.",
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.kind",
@@ -2420,7 +2513,8 @@
             "TestMGPolygon_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-fill-blend-mode.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.size",
@@ -2458,7 +2552,8 @@
             "TestV2_2_Ellipse_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-fill-blend-mode.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.position",
@@ -2511,7 +2606,8 @@
             "TestShapeGeom_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-polystar.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.roundness",
@@ -2536,7 +2632,8 @@
             "TestShapeGeom_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.points",
@@ -2560,7 +2657,8 @@
             "TestMGStar_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-polystar.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.rotation",
@@ -2584,7 +2682,8 @@
             "TestMGPolygon_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-polystar.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.inner_radius",
@@ -2608,7 +2707,8 @@
             "TestMGStar_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-polystar.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.outer_radius",
@@ -2632,7 +2732,8 @@
             "TestMGStar_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-polystar.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.inner_roundness",
@@ -2657,7 +2758,8 @@
             "TestShapeGeom_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-polystar.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.outer_roundness",
@@ -2682,7 +2784,8 @@
             "TestShapeGeom_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-polystar.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.fill_color",
@@ -2707,7 +2810,8 @@
             "TestV2_2_Ellipse_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.fill_opacity",
@@ -2731,7 +2835,8 @@
             "TestV2_2_FillKf_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.fill_blend_mode",
@@ -2755,7 +2860,8 @@
             "TestV2_2_ShapeEnums_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-fill-blend-mode.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.fill_composite_order",
@@ -2779,7 +2885,8 @@
             "TestV2_2_ShapeEnums_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-fill-composite-order.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.fill_rule",
@@ -2803,7 +2910,8 @@
             "TestMGOffsetCopies_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-fill-rule.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill",
@@ -2853,7 +2961,8 @@
             "TestMGGradientRadial_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill.start_point",
@@ -2878,7 +2987,8 @@
             "TestMGGradientDir_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill.end_point",
@@ -2903,7 +3013,8 @@
             "TestMGGradientDir_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill.highlight_length",
@@ -2927,7 +3038,8 @@
             "TestMGGradientHilite_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-fill-highlight.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill.highlight_angle",
@@ -2951,7 +3063,8 @@
             "TestMGGradientHilite_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-fill-highlight.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill.color_stops[]",
@@ -2977,7 +3090,8 @@
             "TestV2_2_GradientFill_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill.color_stops[].offset",
@@ -2987,7 +3101,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Gradient fill color stop offset."
+      "description": "Gradient fill color stop offset.",
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill.color_stops[].midpoint",
@@ -2996,7 +3111,8 @@
       "source_field": "Midpoint",
       "type": "number",
       "go_type": "*float64",
-      "description": "Gradient fill color stop midpoint."
+      "description": "Gradient fill color stop midpoint.",
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill.color_stops[].color",
@@ -3007,7 +3123,8 @@
       "go_type": "[]float64",
       "element": "float64",
       "x-aep-structural-required": true,
-      "description": "Gradient fill color stop RGB color."
+      "description": "Gradient fill color stop RGB color.",
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill.alpha_stops[]",
@@ -3033,7 +3150,8 @@
             "TestV2_2_GradientFill_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill.alpha_stops[].offset",
@@ -3043,7 +3161,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Gradient fill alpha stop offset."
+      "description": "Gradient fill alpha stop offset.",
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill.alpha_stops[].midpoint",
@@ -3052,7 +3171,8 @@
       "source_field": "Midpoint",
       "type": "number",
       "go_type": "*float64",
-      "description": "Gradient fill alpha stop midpoint."
+      "description": "Gradient fill alpha stop midpoint.",
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill.alpha_stops[].alpha",
@@ -3062,7 +3182,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Gradient fill alpha stop opacity value."
+      "description": "Gradient fill alpha stop opacity value.",
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke",
@@ -3087,7 +3208,8 @@
             "TestV2_2_GradientStroke_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.type",
@@ -3111,7 +3233,8 @@
             "TestMGGradStrokeGeom_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.start_point",
@@ -3136,7 +3259,8 @@
             "TestMGGradStrokeGeom_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.end_point",
@@ -3161,7 +3285,8 @@
             "TestMGGradStrokeGeom_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.highlight_length",
@@ -3185,7 +3310,8 @@
             "TestMGGradStrokeGeom_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-stroke-highlight.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.highlight_angle",
@@ -3209,7 +3335,8 @@
             "TestMGGradStrokeGeom_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-stroke-highlight.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.width",
@@ -3233,7 +3360,8 @@
             "TestMGGradStrokeGeom_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.line_cap",
@@ -3257,7 +3385,8 @@
             "TestMGGradStrokeStyle_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-stroke-style.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.line_join",
@@ -3281,7 +3410,8 @@
             "TestMGGradStrokeStyle_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-stroke-style.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.miter_limit",
@@ -3305,7 +3435,8 @@
             "TestMGGradStrokeStyle_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-stroke-style.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.color_stops[]",
@@ -3331,7 +3462,8 @@
             "TestV2_2_GradientStroke_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.color_stops[].offset",
@@ -3341,7 +3473,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Gradient stroke color stop offset."
+      "description": "Gradient stroke color stop offset.",
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.color_stops[].midpoint",
@@ -3350,7 +3483,8 @@
       "source_field": "Midpoint",
       "type": "number",
       "go_type": "*float64",
-      "description": "Gradient stroke color stop midpoint."
+      "description": "Gradient stroke color stop midpoint.",
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.color_stops[].color",
@@ -3361,7 +3495,8 @@
       "go_type": "[]float64",
       "element": "float64",
       "x-aep-structural-required": true,
-      "description": "Gradient stroke color stop RGB color."
+      "description": "Gradient stroke color stop RGB color.",
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.alpha_stops[]",
@@ -3387,7 +3522,8 @@
             "TestV2_2_GradientStroke_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.alpha_stops[].offset",
@@ -3397,7 +3533,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Gradient stroke alpha stop offset."
+      "description": "Gradient stroke alpha stop offset.",
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.alpha_stops[].midpoint",
@@ -3406,7 +3543,8 @@
       "source_field": "Midpoint",
       "type": "number",
       "go_type": "*float64",
-      "description": "Gradient stroke alpha stop midpoint."
+      "description": "Gradient stroke alpha stop midpoint.",
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.alpha_stops[].alpha",
@@ -3416,7 +3554,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Gradient stroke alpha stop opacity value."
+      "description": "Gradient stroke alpha stop opacity value.",
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke",
@@ -3441,7 +3580,8 @@
             "TestV2_2_Stroke_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-stroke-composite-order.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.color",
@@ -3466,7 +3606,8 @@
             "TestV2_2_Stroke_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-stroke-composite-order.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.width",
@@ -3490,7 +3631,8 @@
             "TestV2_2_Stroke_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-stroke-composite-order.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.opacity",
@@ -3514,7 +3656,8 @@
             "TestV2_2_StrokeKf_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-stroke-dashes.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.line_cap",
@@ -3538,7 +3681,8 @@
             "TestV2_2_Stroke_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-stroke-style.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.line_join",
@@ -3562,7 +3706,8 @@
             "TestV2_2_Stroke_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-stroke-style.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.miter_limit",
@@ -3586,7 +3731,8 @@
             "TestV2_2_Stroke_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-stroke-style.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.composite_order",
@@ -3610,7 +3756,8 @@
             "TestV2_2_ShapeEnums_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-stroke-composite-order.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.taper",
@@ -3620,7 +3767,8 @@
       "type": "object",
       "go_type": "*recipe.StrokeTaperSpec",
       "object_type": "StrokeTaperSpec",
-      "description": "Stroke taper settings."
+      "description": "Stroke taper settings.",
+      "x-aep-example": "examples/recipes/minimal-shape-stroke-taper.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.taper.start_length",
@@ -3644,7 +3792,8 @@
             "TestV2_2_StrokeTaperWave_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-stroke-taper.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.taper.end_length",
@@ -3668,7 +3817,8 @@
             "TestV2_2_StrokeTaperWave_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-stroke-taper.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.taper.start_width",
@@ -3692,7 +3842,8 @@
             "TestV2_2_StrokeTaperWave_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-stroke-taper.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.taper.end_width",
@@ -3716,7 +3867,8 @@
             "TestV2_2_StrokeTaperWave_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-stroke-taper.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.taper.start_ease",
@@ -3740,7 +3892,8 @@
             "TestV2_2_StrokeTaperWave_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-stroke-taper.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.taper.end_ease",
@@ -3764,7 +3917,8 @@
             "TestV2_2_StrokeTaperWave_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-stroke-taper.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.wave",
@@ -3774,7 +3928,8 @@
       "type": "object",
       "go_type": "*recipe.StrokeWaveSpec",
       "object_type": "StrokeWaveSpec",
-      "description": "Stroke wave settings."
+      "description": "Stroke wave settings.",
+      "x-aep-example": "examples/recipes/minimal-shape-stroke-wave.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.wave.amount",
@@ -3798,7 +3953,8 @@
             "TestV2_2_StrokeTaperWave_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-stroke-wave.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.wave.wavelength",
@@ -3822,7 +3978,8 @@
             "TestV2_2_StrokeTaperWave_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-stroke-wave.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.wave.phase",
@@ -3846,7 +4003,8 @@
             "TestV2_2_StrokeTaperWave_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-stroke-wave.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.dashes",
@@ -3856,7 +4014,8 @@
       "type": "object",
       "go_type": "*recipe.StrokeDashesSpec",
       "object_type": "StrokeDashesSpec",
-      "description": "Stroke dash pattern settings."
+      "description": "Stroke dash pattern settings.",
+      "x-aep-example": "examples/recipes/minimal-shape-stroke-dashes.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.dashes.dash",
@@ -3905,7 +4064,8 @@
             "TestV2_2_StrokeDashes_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-stroke-dashes.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.trim",
@@ -3930,7 +4090,8 @@
             "TestMGTrim_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-trim.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.trim.start",
@@ -3939,7 +4100,8 @@
       "source_field": "Start",
       "type": "number",
       "go_type": "*float64",
-      "description": "Trim paths start percentage."
+      "description": "Trim paths start percentage.",
+      "x-aep-example": "examples/recipes/minimal-shape-trim.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.trim.end",
@@ -3948,7 +4110,8 @@
       "source_field": "End",
       "type": "number",
       "go_type": "*float64",
-      "description": "Trim paths end percentage."
+      "description": "Trim paths end percentage.",
+      "x-aep-example": "examples/recipes/minimal-shape-trim.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.trim.offset",
@@ -3957,7 +4120,8 @@
       "source_field": "Offset",
       "type": "number",
       "go_type": "*float64",
-      "description": "Trim paths offset."
+      "description": "Trim paths offset.",
+      "x-aep-example": "examples/recipes/minimal-shape-trim.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.round_corners",
@@ -3982,7 +4146,8 @@
             "TestMGRoundCorners_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-round-corners.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.round_corners.radius",
@@ -4006,7 +4171,8 @@
             "TestMGRoundCorners_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-round-corners.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.offset_paths",
@@ -4031,7 +4197,8 @@
             "TestMGOffset_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-offset-paths.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.offset_paths.amount",
@@ -4055,7 +4222,8 @@
             "TestMGOffset_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-offset-paths.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.offset_paths.line_join",
@@ -4079,7 +4247,8 @@
             "TestMGOffsetExtras_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-offset-paths.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.offset_paths.miter_limit",
@@ -4103,7 +4272,8 @@
             "TestMGOffsetExtras_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-offset-paths.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.offset_paths.copies",
@@ -4127,7 +4297,8 @@
             "TestMGOffsetCopies_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-offset-paths.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.offset_paths.copy_offset",
@@ -4151,7 +4322,8 @@
             "TestMGOffsetExtras_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-offset-paths.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.repeater",
@@ -4201,7 +4373,8 @@
             "TestMGRepeater_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-repeater.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.repeater.offset",
@@ -4226,7 +4399,8 @@
             "TestShapeGeom_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-repeater.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.repeater.order",
@@ -4250,7 +4424,8 @@
             "TestMGRepeaterOrder_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-repeater.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.repeater.anchor",
@@ -4276,7 +4451,8 @@
             "TestShapeGeom_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-repeater.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.repeater.position",
@@ -4301,7 +4477,8 @@
             "TestMGRepeater_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-repeater.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.repeater.scale",
@@ -4326,7 +4503,8 @@
             "TestMGRepeaterOrder_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-repeater.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.repeater.rotation",
@@ -4351,7 +4529,8 @@
             "TestShapeGeom_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-repeater.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.repeater.start_opacity",
@@ -4375,7 +4554,8 @@
             "TestMGRepeaterOrder_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-repeater.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.repeater.end_opacity",
@@ -4399,7 +4579,8 @@
             "TestMGRepeaterOrder_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-repeater.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.merge_paths",
@@ -4424,7 +4605,8 @@
             "TestMGMerge_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-merge-paths.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.merge_paths.type",
@@ -4448,7 +4630,8 @@
             "TestMGMerge_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-merge-paths.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.zigzag",
@@ -4473,7 +4656,8 @@
             "TestMGZigZag_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-zigzag.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.zigzag.size",
@@ -4497,7 +4681,8 @@
             "TestMGZigZag_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-zigzag.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.zigzag.detail",
@@ -4521,7 +4706,8 @@
             "TestMGZigZag_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-zigzag.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.zigzag.points",
@@ -4545,7 +4731,8 @@
             "TestMGZigZagPoints_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-zigzag.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.pucker_bloat",
@@ -4570,7 +4757,8 @@
             "TestMGPuckerBloat_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-pucker-bloat.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.pucker_bloat.amount",
@@ -4594,7 +4782,8 @@
             "TestMGPuckerBloat_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-pucker-bloat.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.twist",
@@ -4619,7 +4808,8 @@
             "TestMGTwist_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-twist.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.twist.angle",
@@ -4643,7 +4833,8 @@
             "TestMGTwist_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-twist.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.twist.center",
@@ -4668,7 +4859,8 @@
             "TestMGTwistCenter_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-twist.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_paths",
@@ -4693,7 +4885,8 @@
             "TestMGWiggle_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-wiggle-paths.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_paths.size",
@@ -4717,7 +4910,8 @@
             "TestMGWiggle_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-wiggle-paths.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_paths.detail",
@@ -4741,7 +4935,8 @@
             "TestMGWiggle_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-wiggle-paths.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_paths.wiggles_per_second",
@@ -4766,7 +4961,8 @@
             "TestMGWiggle_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-wiggle-paths.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_paths.random_seed",
@@ -4791,7 +4987,8 @@
             "TestMGWiggle_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-wiggle-paths.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_paths.points",
@@ -4815,7 +5012,8 @@
             "TestMGWiggleMod_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-wiggle-paths.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_paths.correlation",
@@ -4839,7 +5037,8 @@
             "TestMGWiggleMod_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-wiggle-paths.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_paths.temporal_phase",
@@ -4864,7 +5063,8 @@
             "TestMGWiggleModRT_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-wiggle-paths.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_paths.spatial_phase",
@@ -4889,7 +5089,8 @@
             "TestMGWiggleModRT_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-wiggle-paths.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_transform",
@@ -4914,7 +5115,8 @@
             "TestMGWiggleTransform_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-wiggle-transform.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_transform.anchor",
@@ -4940,7 +5142,8 @@
             "TestShapeGeom_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-wiggle-transform.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_transform.position",
@@ -4965,7 +5168,8 @@
             "TestMGWiggleTransform_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-wiggle-transform.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_transform.scale",
@@ -4991,7 +5195,8 @@
             "TestShapeGeom_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-wiggle-transform.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_transform.rotation",
@@ -5015,7 +5220,8 @@
             "TestMGWiggleTransform_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-wiggle-transform.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_transform.wiggles_per_second",
@@ -5040,7 +5246,8 @@
             "TestMGWiggleTransform_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-wiggle-transform.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_transform.random_seed",
@@ -5065,7 +5272,8 @@
             "TestMGWiggleTransform_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-wiggle-transform.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_transform.correlation",
@@ -5090,7 +5298,8 @@
             "TestMGWiggleModRT_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-wiggle-transform.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_transform.temporal_phase",
@@ -5115,7 +5324,8 @@
             "TestMGWiggleModRT_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-wiggle-transform.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_transform.spatial_phase",
@@ -5140,7 +5350,8 @@
             "TestMGWiggleModRT_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-wiggle-transform.json"
     },
     {
       "x-aep-path": "comps[].layers[].masks[]",
@@ -5193,7 +5404,8 @@
             "TestAddMask_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "comps[].layers[].masks[].mode",
@@ -5218,7 +5430,8 @@
             "TestMaskOpts_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "comps[].layers[].masks[].inverted",
@@ -5243,7 +5456,8 @@
             "TestMaskOpts_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "comps[].layers[].masks[].locked",
@@ -5268,7 +5482,8 @@
             "TestMaskOpts_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "comps[].layers[].masks[].color",
@@ -5294,7 +5509,8 @@
             "TestMaskOpts_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "comps[].layers[].masks[].motion_blur",
@@ -5319,7 +5535,8 @@
             "TestMaskOpts_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "comps[].layers[].masks[].feather_falloff",
@@ -5344,7 +5561,8 @@
             "TestMaskFeatherFalloff_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "comps[].layers[].masks[].opacity",
@@ -5369,7 +5587,8 @@
             "TestMGMaskOpacity_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "comps[].layers[].masks[].feather",
@@ -5395,7 +5614,8 @@
             "TestMaskOpts_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "comps[].layers[].masks[].expansion",
@@ -5420,7 +5640,8 @@
             "TestMaskOpts_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "comps[].layers[].masks[].closed",
@@ -5445,7 +5666,8 @@
             "TestAddMask_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "comps[].layers[].masks[].vertices",
@@ -5472,7 +5694,8 @@
             "TestAddMask_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "comps[].layers[].masks[].path_keyframes[]",
@@ -5499,7 +5722,8 @@
             "TestMGMaskPathKf_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "comps[].layers[].masks[].path_keyframes[].time",
@@ -5525,7 +5749,8 @@
             "TestMGMaskPathKf_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "comps[].layers[].masks[].path_keyframes[].vertices",
@@ -5552,7 +5777,8 @@
             "TestMGMaskPathKf_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform",
@@ -5578,7 +5804,8 @@
             "TestSetLayerTransform_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.position",
@@ -5588,7 +5815,8 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "description": "Static position value."
+      "description": "Static position value.",
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.scale",
@@ -5598,7 +5826,8 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "description": "Static scale value."
+      "description": "Static scale value.",
+      "x-aep-example": "examples/recipes/minimal-text-effect.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.anchor_point",
@@ -5626,7 +5855,8 @@
       "source_field": "Opacity",
       "type": "number",
       "go_type": "*float64",
-      "description": "Static opacity value."
+      "description": "Static opacity value.",
+      "x-aep-example": "examples/recipes/minimal-text-effect.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.position_keyframes[]",
@@ -5648,7 +5878,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Position keyframe time in seconds."
+      "description": "Position keyframe time in seconds.",
+      "x-aep-example": "examples/recipes/minimal-layer-auto-orient.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.position_keyframes[].value",
@@ -5659,7 +5890,8 @@
       "go_type": "[]float64",
       "element": "float64",
       "x-aep-structural-required": true,
-      "description": "Position keyframe vector value."
+      "description": "Position keyframe vector value.",
+      "x-aep-example": "examples/recipes/minimal-layer-auto-orient.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.position_keyframes[].in_ease",
@@ -5669,7 +5901,8 @@
       "type": "object",
       "go_type": "*recipe.TemporalEase",
       "object_type": "TemporalEase",
-      "description": "Position keyframe incoming temporal ease."
+      "description": "Position keyframe incoming temporal ease.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.position_keyframes[].in_ease.speed",
@@ -5678,7 +5911,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "description": "Position keyframe incoming ease speed."
+      "description": "Position keyframe incoming ease speed.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.position_keyframes[].in_ease.influence",
@@ -5688,7 +5922,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Position keyframe incoming ease influence."
+      "description": "Position keyframe incoming ease influence.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.position_keyframes[].out_ease",
@@ -5698,7 +5933,8 @@
       "type": "object",
       "go_type": "*recipe.TemporalEase",
       "object_type": "TemporalEase",
-      "description": "Position keyframe outgoing temporal ease."
+      "description": "Position keyframe outgoing temporal ease.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.position_keyframes[].out_ease.speed",
@@ -5707,7 +5943,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "description": "Position keyframe outgoing ease speed."
+      "description": "Position keyframe outgoing ease speed.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.position_keyframes[].out_ease.influence",
@@ -5717,7 +5954,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Position keyframe outgoing ease influence."
+      "description": "Position keyframe outgoing ease influence.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.anchor_point_keyframes[]",
@@ -5728,7 +5966,8 @@
       "go_type": "[]recipe.VectorKeyframe",
       "element": "recipe.VectorKeyframe",
       "object_type": "VectorKeyframe",
-      "description": "Anchor point keyframe list."
+      "description": "Anchor point keyframe list.",
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.anchor_point_keyframes[].time",
@@ -5738,7 +5977,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Anchor point keyframe time in seconds."
+      "description": "Anchor point keyframe time in seconds.",
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.anchor_point_keyframes[].value",
@@ -5749,7 +5989,8 @@
       "go_type": "[]float64",
       "element": "float64",
       "x-aep-structural-required": true,
-      "description": "Anchor point keyframe vector value."
+      "description": "Anchor point keyframe vector value.",
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.anchor_point_keyframes[].in_ease",
@@ -5818,7 +6059,8 @@
       "go_type": "[]recipe.VectorKeyframe",
       "element": "recipe.VectorKeyframe",
       "object_type": "VectorKeyframe",
-      "description": "Scale keyframe list."
+      "description": "Scale keyframe list.",
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.scale_keyframes[].time",
@@ -5828,7 +6070,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Scale keyframe time in seconds."
+      "description": "Scale keyframe time in seconds.",
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.scale_keyframes[].value",
@@ -5839,7 +6082,8 @@
       "go_type": "[]float64",
       "element": "float64",
       "x-aep-structural-required": true,
-      "description": "Scale keyframe vector value."
+      "description": "Scale keyframe vector value.",
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.scale_keyframes[].in_ease",
@@ -5908,7 +6152,8 @@
       "go_type": "[]recipe.ScalarKeyframe",
       "element": "recipe.ScalarKeyframe",
       "object_type": "ScalarKeyframe",
-      "description": "Rotation keyframe list."
+      "description": "Rotation keyframe list.",
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.rotation_keyframes[].time",
@@ -5918,7 +6163,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Rotation keyframe time in seconds."
+      "description": "Rotation keyframe time in seconds.",
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.rotation_keyframes[].value",
@@ -5928,7 +6174,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Rotation keyframe value."
+      "description": "Rotation keyframe value.",
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.rotation_keyframes[].in_ease",
@@ -5997,7 +6244,8 @@
       "go_type": "[]recipe.ScalarKeyframe",
       "element": "recipe.ScalarKeyframe",
       "object_type": "ScalarKeyframe",
-      "description": "Opacity keyframe list."
+      "description": "Opacity keyframe list.",
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.opacity_keyframes[].time",
@@ -6007,7 +6255,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Opacity keyframe time in seconds."
+      "description": "Opacity keyframe time in seconds.",
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.opacity_keyframes[].value",
@@ -6017,7 +6266,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Opacity keyframe value."
+      "description": "Opacity keyframe value.",
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.opacity_keyframes[].in_ease",
@@ -6027,7 +6277,8 @@
       "type": "object",
       "go_type": "*recipe.TemporalEase",
       "object_type": "TemporalEase",
-      "description": "Opacity keyframe incoming temporal ease."
+      "description": "Opacity keyframe incoming temporal ease.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.opacity_keyframes[].in_ease.speed",
@@ -6036,7 +6287,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "description": "Opacity keyframe incoming ease speed."
+      "description": "Opacity keyframe incoming ease speed.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.opacity_keyframes[].in_ease.influence",
@@ -6046,7 +6298,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Opacity keyframe incoming ease influence."
+      "description": "Opacity keyframe incoming ease influence.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.opacity_keyframes[].out_ease",
@@ -6056,7 +6309,8 @@
       "type": "object",
       "go_type": "*recipe.TemporalEase",
       "object_type": "TemporalEase",
-      "description": "Opacity keyframe outgoing temporal ease."
+      "description": "Opacity keyframe outgoing temporal ease.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.opacity_keyframes[].out_ease.speed",
@@ -6065,7 +6319,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "description": "Opacity keyframe outgoing ease speed."
+      "description": "Opacity keyframe outgoing ease speed.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.opacity_keyframes[].out_ease.influence",
@@ -6075,7 +6330,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Opacity keyframe outgoing ease influence."
+      "description": "Opacity keyframe outgoing ease influence.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions",
@@ -6085,7 +6341,8 @@
       "type": "object",
       "go_type": "recipe.TransformExpressions",
       "object_type": "TransformExpressions",
-      "description": "Transform property expressions."
+      "description": "Transform property expressions.",
+      "x-aep-example": "examples/recipes/minimal-transform-expression.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.position",
@@ -6095,7 +6352,8 @@
       "type": "object",
       "go_type": "*recipe.ExpressionSpec",
       "object_type": "ExpressionSpec",
-      "description": "Position expression settings."
+      "description": "Position expression settings.",
+      "x-aep-example": "examples/recipes/minimal-transform-expression.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.position.source",
@@ -6332,7 +6590,8 @@
       "type": "object",
       "go_type": "*recipe.ExpressionSpec",
       "object_type": "ExpressionSpec",
-      "description": "Opacity expression settings."
+      "description": "Opacity expression settings.",
+      "x-aep-example": "examples/recipes/minimal-transform-expression.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.opacity.source",
@@ -6360,7 +6619,8 @@
             "TestExprEffect_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-transform-expression.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.opacity.enabled",
@@ -6381,7 +6641,8 @@
           "minver": "2020",
           "boundary": "length-preserving, 1 byte at tdb4 offset 0x77 (the disabled\nflag; 0 = AE evaluates, 1 = expression kept but off). The neighboring\noffset 0x78 is a separate has-expression marker kept in sync by\nSetExpression — the two bytes are distinct and must not be conflated.\nRequires the property's tdbs to contain a tdb4 chunk, which is always\npresent for properties parsed from real files; returns an error\notherwise."
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-transform-expression.json"
     },
     {
       "x-aep-path": "comps[].layers[].effects[]",
@@ -6434,7 +6695,8 @@
       "go_type": "string",
       "x-aep-structural-required": true,
       "description": "Layer effect match name.",
-      "x-aep-validation": "Must be a supported effect match name for recipe compilation."
+      "x-aep-validation": "Must be a supported effect match name for recipe compilation.",
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "comps[].layers[].effects[].params[]",
@@ -6461,7 +6723,8 @@
             "TestSetEffectParam_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "comps[].layers[].effects[].params[].match_name",
@@ -6472,7 +6735,8 @@
       "go_type": "string",
       "x-aep-structural-required": true,
       "description": "Effect parameter match name.",
-      "x-aep-validation": "Must match a parameter exposed by the chosen effect."
+      "x-aep-validation": "Must match a parameter exposed by the chosen effect.",
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "comps[].layers[].effects[].params[].value",
@@ -6482,7 +6746,8 @@
       "type": "object",
       "go_type": "interface {}",
       "description": "Effect parameter value.",
-      "x-aep-validation": "Supported values are numbers, booleans, or numeric arrays."
+      "x-aep-validation": "Supported values are numbers, booleans, or numeric arrays.",
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "comps[].layers[].effects[].params[].expression",
@@ -6492,7 +6757,8 @@
       "type": "object",
       "go_type": "*recipe.ExpressionSpec",
       "object_type": "ExpressionSpec",
-      "description": "Effect parameter expression settings."
+      "description": "Effect parameter expression settings.",
+      "x-aep-example": "examples/recipes/minimal-effect-param-expression.json"
     },
     {
       "x-aep-path": "comps[].layers[].effects[].params[].expression.source",
@@ -6543,7 +6809,8 @@
           "minver": "2020",
           "boundary": "length-preserving, 1 byte at tdb4 offset 0x77 (the disabled\nflag; 0 = AE evaluates, 1 = expression kept but off). The neighboring\noffset 0x78 is a separate has-expression marker kept in sync by\nSetExpression — the two bytes are distinct and must not be conflated.\nRequires the property's tdbs to contain a tdb4 chunk, which is always\npresent for properties parsed from real files; returns an error\notherwise."
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-effect-param-expression.json"
     },
     {
       "x-aep-path": "expected_profile",
@@ -6553,7 +6820,8 @@
       "type": "object",
       "go_type": "recipe.ExpectedProfile",
       "object_type": "ExpectedProfile",
-      "description": "Optional assertions used to compare the generated project against expected structure."
+      "description": "Optional assertions used to compare the generated project against expected structure.",
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "expected_profile.comp_count",
@@ -6563,7 +6831,8 @@
       "type": "number",
       "go_type": "*int",
       "description": "Expected number of compositions.",
-      "x-aep-validation": "Expected count must be non-negative."
+      "x-aep-validation": "Expected count must be non-negative.",
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "expected_profile.layer_count",
@@ -6573,7 +6842,8 @@
       "type": "number",
       "go_type": "*int",
       "description": "Expected total number of layers.",
-      "x-aep-validation": "Expected count must be non-negative."
+      "x-aep-validation": "Expected count must be non-negative.",
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "expected_profile.text_layer_count",
@@ -6583,7 +6853,8 @@
       "type": "number",
       "go_type": "*int",
       "description": "Expected number of text layers.",
-      "x-aep-validation": "Expected count must be non-negative."
+      "x-aep-validation": "Expected count must be non-negative.",
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "expected_profile.shape_layer_count",
@@ -6593,7 +6864,8 @@
       "type": "number",
       "go_type": "*int",
       "description": "Expected number of shape layers.",
-      "x-aep-validation": "Expected count must be non-negative."
+      "x-aep-validation": "Expected count must be non-negative.",
+      "x-aep-example": "examples/recipes/minimal-shape-fill-blend-mode.json"
     },
     {
       "x-aep-path": "expected_profile.name",
@@ -6602,7 +6874,8 @@
       "source_field": "Name",
       "type": "string",
       "go_type": "string",
-      "description": "Expected composition display name."
+      "description": "Expected composition display name.",
+      "x-aep-example": "examples/recipes/minimal-comp-object-profile.json"
     },
     {
       "x-aep-path": "expected_profile.width",
@@ -6612,7 +6885,8 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Expected composition width in pixels.",
-      "x-aep-validation": "Expected width must be a positive integer."
+      "x-aep-validation": "Expected width must be a positive integer.",
+      "x-aep-example": "examples/recipes/minimal-comp-object-profile.json"
     },
     {
       "x-aep-path": "expected_profile.height",
@@ -6622,7 +6896,8 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Expected composition height in pixels.",
-      "x-aep-validation": "Expected height must be a positive integer."
+      "x-aep-validation": "Expected height must be a positive integer.",
+      "x-aep-example": "examples/recipes/minimal-comp-object-profile.json"
     },
     {
       "x-aep-path": "expected_profile.frame_rate",
@@ -6632,7 +6907,8 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Expected composition frame rate in frames per second.",
-      "x-aep-validation": "Expected frame rate must be positive."
+      "x-aep-validation": "Expected frame rate must be positive.",
+      "x-aep-example": "examples/recipes/minimal-comp-object-profile.json"
     },
     {
       "x-aep-path": "expected_profile.duration",
@@ -6642,7 +6918,8 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Expected composition duration in seconds.",
-      "x-aep-validation": "Expected duration must be positive."
+      "x-aep-validation": "Expected duration must be positive.",
+      "x-aep-example": "examples/recipes/minimal-comp-object-profile.json"
     },
     {
       "x-aep-path": "expected_profile.label",
@@ -6652,7 +6929,8 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Expected composition label color index.",
-      "x-aep-validation": "Expected label must be a valid AE label index."
+      "x-aep-validation": "Expected label must be a valid AE label index.",
+      "x-aep-example": "examples/recipes/minimal-comp-label.json"
     },
     {
       "x-aep-path": "expected_profile.comment",
@@ -6661,7 +6939,8 @@
       "source_field": "Comment",
       "type": "string",
       "go_type": "string",
-      "description": "Expected composition comment text."
+      "description": "Expected composition comment text.",
+      "x-aep-example": "examples/recipes/minimal-comp-comment.json"
     },
     {
       "x-aep-path": "expected_profile.background_color",
@@ -6684,7 +6963,8 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Expected composition preview resolution factor.",
-      "x-aep-validation": "Expected resolution factor must contain two positive integer factors."
+      "x-aep-validation": "Expected resolution factor must contain two positive integer factors.",
+      "x-aep-example": "examples/recipes/minimal-comp-object-profile.json"
     },
     {
       "x-aep-path": "expected_profile.pixel_aspect",
@@ -6694,7 +6974,8 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Expected composition pixel aspect ratio.",
-      "x-aep-validation": "Expected pixel aspect ratio must be positive."
+      "x-aep-validation": "Expected pixel aspect ratio must be positive.",
+      "x-aep-example": "examples/recipes/minimal-comp-object-profile.json"
     },
     {
       "x-aep-path": "expected_profile.display_start_time",
@@ -6703,7 +6984,8 @@
       "source_field": "DisplayStartTime",
       "type": "number",
       "go_type": "*float64",
-      "description": "Expected composition display start time in seconds."
+      "description": "Expected composition display start time in seconds.",
+      "x-aep-example": "examples/recipes/minimal-comp-display-start-time.json"
     },
     {
       "x-aep-path": "expected_profile.renderer",
@@ -6712,7 +6994,8 @@
       "source_field": "Renderer",
       "type": "string",
       "go_type": "string",
-      "description": "Expected composition renderer identifier."
+      "description": "Expected composition renderer identifier.",
+      "x-aep-example": "examples/recipes/minimal-comp-object-profile.json"
     },
     {
       "x-aep-path": "expected_profile.draft_3d",
@@ -6721,7 +7004,8 @@
       "source_field": "Draft3D",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected composition draft 3D switch."
+      "description": "Expected composition draft 3D switch.",
+      "x-aep-example": "examples/recipes/minimal-comp-draft-3d.json"
     },
     {
       "x-aep-path": "expected_profile.frame_blending",
@@ -6730,7 +7014,8 @@
       "source_field": "FrameBlending",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected composition frame blending switch."
+      "description": "Expected composition frame blending switch.",
+      "x-aep-example": "examples/recipes/minimal-comp-flag-profile.json"
     },
     {
       "x-aep-path": "expected_profile.hide_shy_layers",
@@ -6739,7 +7024,8 @@
       "source_field": "HideShyLayers",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected composition shy layer visibility switch."
+      "description": "Expected composition shy layer visibility switch.",
+      "x-aep-example": "examples/recipes/minimal-comp-flag-profile.json"
     },
     {
       "x-aep-path": "expected_profile.preserve_nested_frame_rate",
@@ -6748,7 +7034,8 @@
       "source_field": "PreserveNestedFrameRate",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected composition nested frame-rate preservation switch."
+      "description": "Expected composition nested frame-rate preservation switch.",
+      "x-aep-example": "examples/recipes/minimal-comp-flag-profile.json"
     },
     {
       "x-aep-path": "expected_profile.preserve_nested_resolution",
@@ -6757,7 +7044,8 @@
       "source_field": "PreserveNestedResolution",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected composition nested resolution preservation switch."
+      "description": "Expected composition nested resolution preservation switch.",
+      "x-aep-example": "examples/recipes/minimal-comp-flag-profile.json"
     },
     {
       "x-aep-path": "expected_profile.motion_blur",
@@ -6767,7 +7055,8 @@
       "type": "object",
       "go_type": "*recipe.ExpectedMotionBlurSpec",
       "object_type": "ExpectedMotionBlurSpec",
-      "description": "Expected composition motion blur settings."
+      "description": "Expected composition motion blur settings.",
+      "x-aep-example": "examples/recipes/minimal-comp-flag-profile.json"
     },
     {
       "x-aep-path": "expected_profile.motion_blur.enabled",
@@ -6776,7 +7065,8 @@
       "source_field": "Enabled",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected composition motion blur enable switch."
+      "description": "Expected composition motion blur enable switch.",
+      "x-aep-example": "examples/recipes/minimal-comp-flag-profile.json"
     },
     {
       "x-aep-path": "expected_profile.motion_blur.shutter_angle",
@@ -6785,7 +7075,8 @@
       "source_field": "ShutterAngle",
       "type": "number",
       "go_type": "*float64",
-      "description": "Expected composition motion blur shutter angle."
+      "description": "Expected composition motion blur shutter angle.",
+      "x-aep-example": "examples/recipes/minimal-comp-motion-blur.json"
     },
     {
       "x-aep-path": "expected_profile.motion_blur.shutter_phase",
@@ -6794,7 +7085,8 @@
       "source_field": "ShutterPhase",
       "type": "number",
       "go_type": "*float64",
-      "description": "Expected composition motion blur shutter phase."
+      "description": "Expected composition motion blur shutter phase.",
+      "x-aep-example": "examples/recipes/minimal-comp-motion-blur.json"
     },
     {
       "x-aep-path": "expected_profile.motion_blur.adaptive_sample_limit",
@@ -6803,7 +7095,8 @@
       "source_field": "AdaptiveSampleLimit",
       "type": "number",
       "go_type": "*float64",
-      "description": "Expected composition motion blur adaptive sample limit."
+      "description": "Expected composition motion blur adaptive sample limit.",
+      "x-aep-example": "examples/recipes/minimal-comp-motion-blur.json"
     },
     {
       "x-aep-path": "expected_profile.motion_blur.samples_per_frame",
@@ -6812,7 +7105,8 @@
       "source_field": "SamplesPerFrame",
       "type": "number",
       "go_type": "*float64",
-      "description": "Expected composition motion blur samples per frame."
+      "description": "Expected composition motion blur samples per frame.",
+      "x-aep-example": "examples/recipes/minimal-comp-motion-blur.json"
     },
     {
       "x-aep-path": "expected_profile.work_area",
@@ -6822,7 +7116,8 @@
       "type": "object",
       "go_type": "*recipe.ExpectedWorkAreaSpec",
       "object_type": "ExpectedWorkAreaSpec",
-      "description": "Expected composition work area range."
+      "description": "Expected composition work area range.",
+      "x-aep-example": "examples/recipes/minimal-comp-object-profile.json"
     },
     {
       "x-aep-path": "expected_profile.work_area.start",
@@ -6831,7 +7126,8 @@
       "source_field": "Start",
       "type": "number",
       "go_type": "*float64",
-      "description": "Expected composition work area start time in seconds."
+      "description": "Expected composition work area start time in seconds.",
+      "x-aep-example": "examples/recipes/minimal-comp-object-profile.json"
     },
     {
       "x-aep-path": "expected_profile.work_area.end",
@@ -6840,7 +7136,8 @@
       "source_field": "End",
       "type": "number",
       "go_type": "*float64",
-      "description": "Expected composition work area end time in seconds."
+      "description": "Expected composition work area end time in seconds.",
+      "x-aep-example": "examples/recipes/minimal-comp-object-profile.json"
     },
     {
       "x-aep-path": "expected_profile.layers[]",
@@ -6863,7 +7160,8 @@
       "go_type": "string",
       "x-aep-structural-required": true,
       "description": "Expected layer name.",
-      "x-aep-validation": "Layer profile checks require a target layer name."
+      "x-aep-validation": "Layer profile checks require a target layer name.",
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].type",
@@ -6872,7 +7170,8 @@
       "source_field": "Type",
       "type": "string",
       "go_type": "string",
-      "description": "Expected layer type."
+      "description": "Expected layer type.",
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].quality",
@@ -6887,7 +7186,8 @@
         "wireframe",
         "draft",
         "best"
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-object-profile.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].blending_mode",
@@ -6897,7 +7197,8 @@
       "type": "string",
       "go_type": "string",
       "description": "Expected layer blending mode.",
-      "x-aep-validation": "Expected blending mode must use a supported recipe blending mode value."
+      "x-aep-validation": "Expected blending mode must use a supported recipe blending mode value.",
+      "x-aep-example": "examples/recipes/minimal-layer-object-profile.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].auto_orient",
@@ -6913,7 +7214,8 @@
         "along_path",
         "camera_or_point_of_interest",
         "characters_toward_camera"
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-auto-orient.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].light_kind",
@@ -6922,7 +7224,8 @@
       "source_field": "LightKind",
       "type": "string",
       "go_type": "string",
-      "description": "Expected light type."
+      "description": "Expected light type.",
+      "x-aep-example": "examples/recipes/minimal-light-kind.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].source",
@@ -6931,7 +7234,8 @@
       "source_field": "Source",
       "type": "string",
       "go_type": "string",
-      "description": "Expected source item name."
+      "description": "Expected source item name.",
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].source_kind",
@@ -6940,7 +7244,8 @@
       "source_field": "SourceKind",
       "type": "string",
       "go_type": "string",
-      "description": "Expected source item type."
+      "description": "Expected source item type.",
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].light_source",
@@ -6949,7 +7254,8 @@
       "source_field": "LightSource",
       "type": "string",
       "go_type": "string",
-      "description": "Expected source layer for light data."
+      "description": "Expected source layer for light data.",
+      "x-aep-example": "examples/recipes/minimal-light-source.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].parent",
@@ -6958,7 +7264,8 @@
       "source_field": "Parent",
       "type": "string",
       "go_type": "string",
-      "description": "Expected parent layer name."
+      "description": "Expected parent layer name.",
+      "x-aep-example": "examples/recipes/minimal-layer-null-flag.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].track_matte",
@@ -6975,7 +7282,8 @@
         "alpha_inverse",
         "luma",
         "luma_inverse"
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-track-matte.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].matte",
@@ -6984,7 +7292,8 @@
       "source_field": "Matte",
       "type": "string",
       "go_type": "string",
-      "description": "Expected matte layer name."
+      "description": "Expected matte layer name.",
+      "x-aep-example": "examples/recipes/minimal-layer-track-matte.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].label",
@@ -6994,7 +7303,8 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Expected layer label color index.",
-      "x-aep-validation": "Expected layer label must be a valid AE label index."
+      "x-aep-validation": "Expected layer label must be a valid AE label index.",
+      "x-aep-example": "examples/recipes/minimal-layer-label.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].comment",
@@ -7003,7 +7313,8 @@
       "source_field": "Comment",
       "type": "string",
       "go_type": "string",
-      "description": "Expected layer comment text."
+      "description": "Expected layer comment text.",
+      "x-aep-example": "examples/recipes/minimal-layer-comment.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].timing",
@@ -7013,7 +7324,8 @@
       "type": "object",
       "go_type": "*recipe.ExpectedLayerTiming",
       "object_type": "ExpectedLayerTiming",
-      "description": "Expected layer timing checks."
+      "description": "Expected layer timing checks.",
+      "x-aep-example": "examples/recipes/minimal-layer-object-profile.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].timing.start_time",
@@ -7022,7 +7334,8 @@
       "source_field": "StartTime",
       "type": "number",
       "go_type": "*float64",
-      "description": "Expected layer start time in seconds."
+      "description": "Expected layer start time in seconds.",
+      "x-aep-example": "examples/recipes/minimal-layer-object-profile.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].timing.in_point",
@@ -7031,7 +7344,8 @@
       "source_field": "InPoint",
       "type": "number",
       "go_type": "*float64",
-      "description": "Expected layer in point in seconds."
+      "description": "Expected layer in point in seconds.",
+      "x-aep-example": "examples/recipes/minimal-layer-object-profile.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].timing.out_point",
@@ -7040,7 +7354,8 @@
       "source_field": "OutPoint",
       "type": "number",
       "go_type": "*float64",
-      "description": "Expected layer out point in seconds."
+      "description": "Expected layer out point in seconds.",
+      "x-aep-example": "examples/recipes/minimal-layer-object-profile.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].timing.duration",
@@ -7049,7 +7364,8 @@
       "source_field": "Duration",
       "type": "number",
       "go_type": "*float64",
-      "description": "Expected layer duration in seconds."
+      "description": "Expected layer duration in seconds.",
+      "x-aep-example": "examples/recipes/minimal-layer-object-profile.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].timing.stretch",
@@ -7058,7 +7374,8 @@
       "source_field": "Stretch",
       "type": "number",
       "go_type": "*float64",
-      "description": "Expected layer stretch percentage."
+      "description": "Expected layer stretch percentage.",
+      "x-aep-example": "examples/recipes/minimal-layer-object-profile.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].flags",
@@ -7068,7 +7385,8 @@
       "type": "object",
       "go_type": "*recipe.ExpectedLayerFlags",
       "object_type": "ExpectedLayerFlags",
-      "description": "Expected layer switch checks."
+      "description": "Expected layer switch checks.",
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.visible",
@@ -7077,7 +7395,8 @@
       "source_field": "Visible",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected layer video visibility switch."
+      "description": "Expected layer video visibility switch.",
+      "x-aep-example": "examples/recipes/minimal-layer-common-switches.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.solo",
@@ -7086,7 +7405,8 @@
       "source_field": "Solo",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected layer solo switch."
+      "description": "Expected layer solo switch.",
+      "x-aep-example": "examples/recipes/minimal-layer-common-switches.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.shy",
@@ -7095,7 +7415,8 @@
       "source_field": "Shy",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected layer shy switch."
+      "description": "Expected layer shy switch.",
+      "x-aep-example": "examples/recipes/minimal-layer-object-profile.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.locked",
@@ -7104,7 +7425,8 @@
       "source_field": "Locked",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected layer lock switch."
+      "description": "Expected layer lock switch.",
+      "x-aep-example": "examples/recipes/minimal-layer-common-switches.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.is_3d",
@@ -7113,7 +7435,8 @@
       "source_field": "Is3D",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected layer 3D switch."
+      "description": "Expected layer 3D switch.",
+      "x-aep-example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.is_adjustment",
@@ -7122,7 +7445,8 @@
       "source_field": "IsAdjustment",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected adjustment-layer switch."
+      "description": "Expected adjustment-layer switch.",
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.is_null",
@@ -7131,7 +7455,8 @@
       "source_field": "IsNull",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected null-layer switch."
+      "description": "Expected null-layer switch.",
+      "x-aep-example": "examples/recipes/minimal-layer-null-flag.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.is_guide",
@@ -7140,7 +7465,8 @@
       "source_field": "IsGuide",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected guide-layer switch."
+      "description": "Expected guide-layer switch.",
+      "x-aep-example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.motion_blur",
@@ -7149,7 +7475,8 @@
       "source_field": "MotionBlur",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected layer motion blur switch."
+      "description": "Expected layer motion blur switch.",
+      "x-aep-example": "examples/recipes/minimal-layer-motion-blur.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.effects_enabled",
@@ -7158,7 +7485,8 @@
       "source_field": "EffectsEnabled",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected layer effects enable switch."
+      "description": "Expected layer effects enable switch.",
+      "x-aep-example": "examples/recipes/minimal-layer-common-switches.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.audio_enabled",
@@ -7167,7 +7495,8 @@
       "source_field": "AudioEnabled",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected layer audio enable switch."
+      "description": "Expected layer audio enable switch.",
+      "x-aep-example": "examples/recipes/minimal-layer-common-switches.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.frame_blend_enabled",
@@ -7176,7 +7505,8 @@
       "source_field": "FrameBlendEnabled",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected layer frame blending switch."
+      "description": "Expected layer frame blending switch.",
+      "x-aep-example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.markers_locked",
@@ -7185,7 +7515,8 @@
       "source_field": "MarkersLocked",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected layer marker lock switch."
+      "description": "Expected layer marker lock switch.",
+      "x-aep-example": "examples/recipes/minimal-layer-object-profile.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.frame_blend_pixel_motion",
@@ -7194,7 +7525,8 @@
       "source_field": "FrameBlendPixelMotion",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected pixel-motion frame blending switch."
+      "description": "Expected pixel-motion frame blending switch.",
+      "x-aep-example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.collapse_transform",
@@ -7203,7 +7535,8 @@
       "source_field": "CollapseTransform",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected collapse transformations switch."
+      "description": "Expected collapse transformations switch.",
+      "x-aep-example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.sampling_bicubic",
@@ -7212,7 +7545,8 @@
       "source_field": "SamplingBicubic",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected bicubic sampling switch."
+      "description": "Expected bicubic sampling switch.",
+      "x-aep-example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.preserve_transparency",
@@ -7221,7 +7555,8 @@
       "source_field": "PreserveTransparency",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected preserve transparency switch."
+      "description": "Expected preserve transparency switch.",
+      "x-aep-example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     {
       "x-aep-path": "expected_profile.effects[]",
@@ -7244,7 +7579,8 @@
       "go_type": "string",
       "x-aep-structural-required": true,
       "description": "Layer name to inspect for the expected effect.",
-      "x-aep-validation": "Effect profile checks require a target layer name."
+      "x-aep-validation": "Effect profile checks require a target layer name.",
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "expected_profile.effects[].match_name",
@@ -7255,7 +7591,8 @@
       "go_type": "string",
       "x-aep-structural-required": true,
       "description": "Expected effect match name.",
-      "x-aep-validation": "Effect profile checks require an effect match name."
+      "x-aep-validation": "Effect profile checks require an effect match name.",
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "expected_profile.effects[].params[]",
@@ -7279,7 +7616,8 @@
       "go_type": "string",
       "x-aep-structural-required": true,
       "description": "Expected effect parameter match name.",
-      "x-aep-validation": "Expected effect parameter checks require a parameter match name."
+      "x-aep-validation": "Expected effect parameter checks require a parameter match name.",
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "expected_profile.effects[].params[].value",
@@ -7289,7 +7627,8 @@
       "type": "object",
       "go_type": "interface {}",
       "description": "Expected effect parameter value.",
-      "x-aep-validation": "Expected parameter value must be a number, boolean, or numeric array."
+      "x-aep-validation": "Expected parameter value must be a number, boolean, or numeric array.",
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "expected_profile.effects[].params[].expression",
@@ -7298,7 +7637,8 @@
       "source_field": "Expression",
       "type": "string",
       "go_type": "string",
-      "description": "Expected effect parameter expression source."
+      "description": "Expected effect parameter expression source.",
+      "x-aep-example": "examples/recipes/minimal-effect-param-expression.json"
     },
     {
       "x-aep-path": "expected_profile.effects[].params[].expression_enabled",
@@ -7307,7 +7647,8 @@
       "source_field": "ExpressionEnabled",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected effect parameter expression enable switch."
+      "description": "Expected effect parameter expression enable switch.",
+      "x-aep-example": "examples/recipes/minimal-effect-param-expression.json"
     },
     {
       "x-aep-path": "expected_profile.properties[]",
@@ -7318,7 +7659,8 @@
       "go_type": "[]recipe.ExpectedProperty",
       "element": "recipe.ExpectedProperty",
       "object_type": "ExpectedProperty",
-      "description": "Expected property checks."
+      "description": "Expected property checks.",
+      "x-aep-example": "examples/recipes/minimal-camera-aperture.json"
     },
     {
       "x-aep-path": "expected_profile.properties[].layer_name",
@@ -7329,7 +7671,8 @@
       "go_type": "string",
       "x-aep-structural-required": true,
       "description": "Expected property layer name.",
-      "x-aep-validation": "Property profile checks require a target layer name."
+      "x-aep-validation": "Property profile checks require a target layer name.",
+      "x-aep-example": "examples/recipes/minimal-camera-aperture.json"
     },
     {
       "x-aep-path": "expected_profile.properties[].match_name",
@@ -7340,7 +7683,8 @@
       "go_type": "string",
       "x-aep-structural-required": true,
       "description": "Expected property match name.",
-      "x-aep-validation": "Property profile checks require a property match name."
+      "x-aep-validation": "Property profile checks require a property match name.",
+      "x-aep-example": "examples/recipes/minimal-camera-aperture.json"
     },
     {
       "x-aep-path": "expected_profile.properties[].value",
@@ -7350,7 +7694,8 @@
       "type": "object",
       "go_type": "interface {}",
       "description": "Expected property value.",
-      "x-aep-validation": "Expected property value must be a number, boolean, or numeric array."
+      "x-aep-validation": "Expected property value must be a number, boolean, or numeric array.",
+      "x-aep-example": "examples/recipes/minimal-camera-aperture.json"
     },
     {
       "x-aep-path": "expected_profile.properties[].expression",
@@ -7359,7 +7704,8 @@
       "source_field": "Expression",
       "type": "string",
       "go_type": "string",
-      "description": "Expected property expression source."
+      "description": "Expected property expression source.",
+      "x-aep-example": "examples/recipes/minimal-transform-expression.json"
     },
     {
       "x-aep-path": "expected_profile.properties[].expression_enabled",
@@ -7368,7 +7714,8 @@
       "source_field": "ExpressionEnabled",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected property expression enable switch."
+      "description": "Expected property expression enable switch.",
+      "x-aep-example": "examples/recipes/minimal-transform-expression.json"
     },
     {
       "x-aep-path": "expected_profile.text_styles[]",
@@ -7391,7 +7738,8 @@
       "go_type": "string",
       "x-aep-structural-required": true,
       "description": "Layer name to inspect for the expected text style.",
-      "x-aep-validation": "Text style profile checks require a target layer name."
+      "x-aep-validation": "Text style profile checks require a target layer name.",
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "expected_profile.text_styles[].run_index",
@@ -7421,7 +7769,8 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Expected text style font size.",
-      "x-aep-validation": "Expected font size must be positive."
+      "x-aep-validation": "Expected font size must be positive.",
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "expected_profile.text_styles[].fill_color",
@@ -7432,7 +7781,8 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Expected text style fill color as RGB channels.",
-      "x-aep-validation": "Expected fill color must contain RGB or RGBA channels in the 0..1 range."
+      "x-aep-validation": "Expected fill color must contain RGB or RGBA channels in the 0..1 range.",
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "expected_profile.text_styles[].tracking",
@@ -7441,7 +7791,8 @@
       "source_field": "Tracking",
       "type": "number",
       "go_type": "*float64",
-      "description": "Expected text style character tracking amount."
+      "description": "Expected text style character tracking amount.",
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "expected_profile.text_styles[].faux_bold",
@@ -7450,7 +7801,8 @@
       "source_field": "FauxBold",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected text style faux bold switch."
+      "description": "Expected text style faux bold switch.",
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "expected_profile.text_styles[].faux_italic",
@@ -7459,7 +7811,8 @@
       "source_field": "FauxItalic",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected text style faux italic switch."
+      "description": "Expected text style faux italic switch.",
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "expected_profile.text_styles[].apply_stroke",
@@ -7468,7 +7821,8 @@
       "source_field": "ApplyStroke",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected text style stroke enable switch."
+      "description": "Expected text style stroke enable switch.",
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "expected_profile.text_styles[].stroke_color",
@@ -7479,7 +7833,8 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Expected text style stroke color as RGB channels.",
-      "x-aep-validation": "Expected stroke color must contain RGB or RGBA channels in the 0..1 range."
+      "x-aep-validation": "Expected stroke color must contain RGB or RGBA channels in the 0..1 range.",
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "expected_profile.text_styles[].stroke_width",
@@ -7489,7 +7844,8 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Expected text style stroke width.",
-      "x-aep-validation": "Expected stroke width must be non-negative."
+      "x-aep-validation": "Expected stroke width must be non-negative.",
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "expected_profile.text_styles[].justification",
@@ -7504,7 +7860,8 @@
         "left",
         "right",
         "center"
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
       "x-aep-path": "expected_profile.keyframes[]",
@@ -7527,7 +7884,8 @@
       "go_type": "string",
       "x-aep-structural-required": true,
       "description": "Layer name to inspect for expected keyframes.",
-      "x-aep-validation": "Keyframe profile checks require a target layer name."
+      "x-aep-validation": "Keyframe profile checks require a target layer name.",
+      "x-aep-example": "examples/recipes/minimal-layer-auto-orient.json"
     },
     {
       "x-aep-path": "expected_profile.keyframes[].match_name",
@@ -7538,7 +7896,8 @@
       "go_type": "string",
       "x-aep-structural-required": true,
       "description": "Expected keyframed property match name.",
-      "x-aep-validation": "Keyframe profile checks require a property match name."
+      "x-aep-validation": "Keyframe profile checks require a property match name.",
+      "x-aep-example": "examples/recipes/minimal-layer-auto-orient.json"
     },
     {
       "x-aep-path": "expected_profile.keyframes[].keyframes[]",
@@ -7551,7 +7910,8 @@
       "object_type": "ExpectedKeyframe",
       "x-aep-structural-required": true,
       "description": "Expected property keyframes.",
-      "x-aep-validation": "Expected keyframes must contain at least one keyframe and be sorted by time."
+      "x-aep-validation": "Expected keyframes must contain at least one keyframe and be sorted by time.",
+      "x-aep-example": "examples/recipes/minimal-layer-auto-orient.json"
     },
     {
       "x-aep-path": "expected_profile.keyframes[].keyframes[].time",
@@ -7562,7 +7922,8 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Expected property keyframe time in seconds.",
-      "x-aep-validation": "Expected keyframe time must be non-negative and sorted in ascending order."
+      "x-aep-validation": "Expected keyframe time must be non-negative and sorted in ascending order.",
+      "x-aep-example": "examples/recipes/minimal-layer-auto-orient.json"
     },
     {
       "x-aep-path": "expected_profile.keyframes[].keyframes[].value",
@@ -7572,7 +7933,8 @@
       "type": "object",
       "go_type": "interface {}",
       "description": "Expected property keyframe value.",
-      "x-aep-validation": "Expected keyframe value must be a number, boolean, or numeric array."
+      "x-aep-validation": "Expected keyframe value must be a number, boolean, or numeric array.",
+      "x-aep-example": "examples/recipes/minimal-layer-auto-orient.json"
     },
     {
       "x-aep-path": "expected_profile.masks[]",
@@ -7595,7 +7957,8 @@
       "go_type": "string",
       "x-aep-structural-required": true,
       "description": "Layer name to inspect for the expected mask.",
-      "x-aep-validation": "Mask profile checks require a target layer name."
+      "x-aep-validation": "Mask profile checks require a target layer name.",
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "expected_profile.masks[].name",
@@ -7604,7 +7967,8 @@
       "source_field": "Name",
       "type": "string",
       "go_type": "string",
-      "description": "Expected mask name."
+      "description": "Expected mask name.",
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "expected_profile.masks[].mode",
@@ -7623,7 +7987,8 @@
         "darken",
         "difference",
         "none"
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "expected_profile.masks[].inverted",
@@ -7632,7 +7997,8 @@
       "source_field": "Inverted",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected mask inverted switch."
+      "description": "Expected mask inverted switch.",
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "expected_profile.masks[].locked",
@@ -7641,7 +8007,8 @@
       "source_field": "Locked",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected mask lock switch."
+      "description": "Expected mask lock switch.",
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "expected_profile.masks[].color",
@@ -7652,7 +8019,8 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Expected mask UI color as RGB channels.",
-      "x-aep-validation": "Expected mask color must contain exactly three channels in the 0..255 range."
+      "x-aep-validation": "Expected mask color must contain exactly three channels in the 0..255 range.",
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "expected_profile.masks[].motion_blur",
@@ -7667,7 +8035,8 @@
         "same_as_layer",
         "on",
         "off"
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "expected_profile.masks[].feather_falloff",
@@ -7681,7 +8050,8 @@
       "enum": [
         "smooth",
         "linear"
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "expected_profile.masks[].opacity",
@@ -7691,7 +8061,8 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Expected mask opacity.",
-      "x-aep-validation": "Expected mask opacity must be between 0 and 1."
+      "x-aep-validation": "Expected mask opacity must be between 0 and 1.",
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "expected_profile.masks[].feather",
@@ -7701,7 +8072,8 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "description": "Expected mask feather vector."
+      "description": "Expected mask feather vector.",
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "expected_profile.masks[].expansion",
@@ -7710,7 +8082,8 @@
       "source_field": "Expansion",
       "type": "number",
       "go_type": "*float64",
-      "description": "Expected mask expansion."
+      "description": "Expected mask expansion.",
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "expected_profile.masks[].closed",
@@ -7719,7 +8092,8 @@
       "source_field": "Closed",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected mask closed path switch."
+      "description": "Expected mask closed path switch.",
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "expected_profile.masks[].vertex_count",
@@ -7729,7 +8103,8 @@
       "type": "number",
       "go_type": "*int",
       "description": "Expected mask vertex count.",
-      "x-aep-validation": "Expected mask vertex count must be non-negative."
+      "x-aep-validation": "Expected mask vertex count must be non-negative.",
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "expected_profile.masks[].path_keyframes[]",
@@ -7740,7 +8115,8 @@
       "go_type": "[]recipe.ExpectedMaskPathKeyframe",
       "element": "recipe.ExpectedMaskPathKeyframe",
       "object_type": "ExpectedMaskPathKeyframe",
-      "description": "Expected mask path keyframes."
+      "description": "Expected mask path keyframes.",
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "expected_profile.masks[].path_keyframes[].time",
@@ -7751,7 +8127,8 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Expected mask path keyframe time in seconds.",
-      "x-aep-validation": "Expected mask path keyframe time must be non-negative and sorted in ascending order."
+      "x-aep-validation": "Expected mask path keyframe time must be non-negative and sorted in ascending order.",
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "expected_profile.masks[].path_keyframes[].vertex_count",
@@ -7761,7 +8138,8 @@
       "type": "number",
       "go_type": "*int",
       "description": "Expected mask path keyframe vertex count.",
-      "x-aep-validation": "Expected mask path keyframe vertex count must be non-negative."
+      "x-aep-validation": "Expected mask path keyframe vertex count must be non-negative.",
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     }
   ]
 }

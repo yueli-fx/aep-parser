@@ -1,7 +1,11 @@
 package recipedoc
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/yueli-fx/aep-parser/internal/capindex"
@@ -17,6 +21,14 @@ type registries struct {
 
 func BuildDocument() (Document, error) {
 	return buildDocumentWithRegistries(registries{})
+}
+
+func BuildDocumentWithExampleDir(exampleDir, pathPrefix string) (Document, error) {
+	doc, err := BuildDocument()
+	if err != nil {
+		return Document{}, err
+	}
+	return addDiscoveredExamples(doc, exampleDir, pathPrefix)
 }
 
 func BuildDocumentWithCapabilities(capabilitiesPath string) (Document, error) {
@@ -57,6 +69,14 @@ func BuildDocumentWithCapabilities(capabilitiesPath string) (Document, error) {
 		}
 	}
 	return doc, nil
+}
+
+func BuildDocumentWithCapabilitiesAndExamples(capabilitiesPath, exampleDir, pathPrefix string) (Document, error) {
+	doc, err := BuildDocumentWithCapabilities(capabilitiesPath)
+	if err != nil {
+		return Document{}, err
+	}
+	return addDiscoveredExamples(doc, exampleDir, pathPrefix)
 }
 
 func buildDocumentWithRegistries(overrides registries) (Document, error) {
@@ -103,6 +123,61 @@ func buildDocumentWithRegistries(overrides registries) (Document, error) {
 		field.MissingSemanticSummary = field.Summary == ""
 	}
 	return doc, nil
+}
+
+func addDiscoveredExamples(doc Document, exampleDir, pathPrefix string) (Document, error) {
+	matches, err := discoverExampleCoverage(doc, exampleDir, pathPrefix)
+	if err != nil {
+		return Document{}, err
+	}
+	for i := range doc.Fields {
+		field := &doc.Fields[i]
+		if field.Example != "" {
+			continue
+		}
+		if example, ok := matches[field.Path]; ok {
+			field.Example = example
+		}
+	}
+	return doc, nil
+}
+
+func discoverExampleCoverage(doc Document, exampleDir, pathPrefix string) (map[string]string, error) {
+	entries, err := os.ReadDir(exampleDir)
+	if err != nil {
+		return nil, err
+	}
+	names := make([]string, 0, len(entries))
+	for _, entry := range entries {
+		if entry.IsDir() || filepath.Ext(entry.Name()) != ".json" {
+			continue
+		}
+		names = append(names, entry.Name())
+	}
+	sort.Strings(names)
+
+	out := map[string]string{}
+	for _, name := range names {
+		path := filepath.Join(exampleDir, name)
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return nil, err
+		}
+		var recipe any
+		if err := json.Unmarshal(data, &recipe); err != nil {
+			return nil, err
+		}
+		examplePath := filepath.ToSlash(filepath.Join(pathPrefix, name))
+		for _, field := range doc.Fields {
+			if _, ok := out[field.Path]; ok {
+				continue
+			}
+			if jsonPathExists(recipe, field.Path) {
+				out[field.Path] = examplePath
+			}
+		}
+	}
+	return out, nil
 }
 
 func defaultRegistries() registries {

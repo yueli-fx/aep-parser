@@ -418,10 +418,14 @@ Done:
 - `cmd/aeprecipe explain -field <recipe.path>` now reads
   `docs/recipe_index.json` and prints field metadata/capability/example details,
   giving the generated index a direct CLI integration point.
+- `cmd/recipedocgen` now auto-discovers example coverage from
+  `examples/recipes/*.json` for fields not explicitly listed in
+  `example_registry.go`; generated docs now expose example references for 399
+  recipe fields without expanding the manual registry.
 
 Current:
 
-- Ready for broader example coverage or deeper editor integration.
+- Ready for deeper editor integration or the next recipe-owned feature family.
 
 ## Open questions
 

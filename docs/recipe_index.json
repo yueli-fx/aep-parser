@@ -449,7 +449,8 @@
       "summary": "Composition definitions to create or validate.",
       "capability_keys": [
         "comp.create"
-      ]
+      ],
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "comps[].background_color": {
       "path": "comps[].background_color",
@@ -475,7 +476,8 @@
       "summary": "Composition comment text.",
       "capability_keys": [
         "comp.set_comment"
-      ]
+      ],
+      "example": "examples/recipes/minimal-comp-comment.json"
     },
     "comps[].display_start_time": {
       "path": "comps[].display_start_time",
@@ -487,7 +489,8 @@
       "summary": "Composition display start time in seconds.",
       "capability_keys": [
         "comp.set_display_start_time"
-      ]
+      ],
+      "example": "examples/recipes/minimal-comp-display-start-time.json"
     },
     "comps[].draft_3d": {
       "path": "comps[].draft_3d",
@@ -499,7 +502,8 @@
       "summary": "Composition draft 3D switch.",
       "capability_keys": [
         "comp.set_draft_3d"
-      ]
+      ],
+      "example": "examples/recipes/minimal-comp-draft-3d.json"
     },
     "comps[].duration": {
       "path": "comps[].duration",
@@ -511,7 +515,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Composition duration in seconds."
+      "summary": "Composition duration in seconds.",
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "comps[].frame_blending": {
       "path": "comps[].frame_blending",
@@ -523,7 +528,8 @@
       "summary": "Composition frame blending switch.",
       "capability_keys": [
         "comp.set_frame_blending"
-      ]
+      ],
+      "example": "examples/recipes/minimal-comp-flag-profile.json"
     },
     "comps[].frame_rate": {
       "path": "comps[].frame_rate",
@@ -535,7 +541,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Composition frame rate in frames per second."
+      "summary": "Composition frame rate in frames per second.",
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "comps[].height": {
       "path": "comps[].height",
@@ -548,7 +555,8 @@
         "structural"
       ],
       "summary": "Composition height in pixels.",
-      "validation": "Pixel height must fit the composition writer's uint16 range."
+      "validation": "Pixel height must fit the composition writer's uint16 range.",
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "comps[].hide_shy_layers": {
       "path": "comps[].hide_shy_layers",
@@ -560,7 +568,8 @@
       "summary": "Composition shy layer visibility switch.",
       "capability_keys": [
         "comp.set_hide_shy_layers"
-      ]
+      ],
+      "example": "examples/recipes/minimal-comp-flag-profile.json"
     },
     "comps[].label": {
       "path": "comps[].label",
@@ -572,7 +581,8 @@
       "summary": "Composition label color index.",
       "capability_keys": [
         "comp.set_label"
-      ]
+      ],
+      "example": "examples/recipes/minimal-comp-label.json"
     },
     "comps[].layers[]": {
       "path": "comps[].layers[]",
@@ -581,7 +591,8 @@
       "source_field": "Layers",
       "type": "array\u003crecipe.Layer\u003e",
       "go_type": "[]recipe.Layer",
-      "summary": "Composition layer definitions."
+      "summary": "Composition layer definitions.",
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "comps[].layers[].audio_enabled": {
       "path": "comps[].layers[].audio_enabled",
@@ -593,7 +604,8 @@
       "summary": "Layer audio enable switch.",
       "capability_keys": [
         "layer.set_audio_enabled"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-common-switches.json"
     },
     "comps[].layers[].auto_orient": {
       "path": "comps[].layers[].auto_orient",
@@ -605,7 +617,8 @@
       "summary": "Layer auto-orientation mode.",
       "capability_keys": [
         "layer.set_auto_orient"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-auto-orient.json"
     },
     "comps[].layers[].blending_mode": {
       "path": "comps[].layers[].blending_mode",
@@ -617,7 +630,8 @@
       "summary": "Layer blending mode.",
       "capability_keys": [
         "layer.set_blending_mode"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-object-profile.json"
     },
     "comps[].layers[].camera": {
       "path": "comps[].layers[].camera",
@@ -626,7 +640,8 @@
       "source_field": "Camera",
       "type": "object\u003cCameraSpec\u003e",
       "go_type": "*recipe.CameraSpec",
-      "summary": "Camera layer options."
+      "summary": "Camera layer options.",
+      "example": "examples/recipes/minimal-camera-aperture.json"
     },
     "comps[].layers[].camera.aperture": {
       "path": "comps[].layers[].camera.aperture",
@@ -638,7 +653,8 @@
       "summary": "Camera aperture.",
       "capability_keys": [
         "camera.set_aperture"
-      ]
+      ],
+      "example": "examples/recipes/minimal-camera-aperture.json"
     },
     "comps[].layers[].camera.blur_level": {
       "path": "comps[].layers[].camera.blur_level",
@@ -650,7 +666,8 @@
       "summary": "Camera blur level.",
       "capability_keys": [
         "camera.set_blur_level"
-      ]
+      ],
+      "example": "examples/recipes/minimal-camera-blur-level.json"
     },
     "comps[].layers[].camera.depth_of_field": {
       "path": "comps[].layers[].camera.depth_of_field",
@@ -662,7 +679,8 @@
       "summary": "Depth of field enable switch.",
       "capability_keys": [
         "camera.set_depth_of_field"
-      ]
+      ],
+      "example": "examples/recipes/minimal-camera-depth-of-field.json"
     },
     "comps[].layers[].camera.focus_distance": {
       "path": "comps[].layers[].camera.focus_distance",
@@ -674,7 +692,8 @@
       "summary": "Camera focus distance.",
       "capability_keys": [
         "camera.set_focus_distance"
-      ]
+      ],
+      "example": "examples/recipes/minimal-camera-focus-distance.json"
     },
     "comps[].layers[].camera.iris_aspect_ratio": {
       "path": "comps[].layers[].camera.iris_aspect_ratio",
@@ -686,7 +705,8 @@
       "summary": "Camera iris aspect ratio.",
       "capability_keys": [
         "camera.set_iris_aspect_ratio"
-      ]
+      ],
+      "example": "examples/recipes/minimal-camera-iris-aspect-ratio.json"
     },
     "comps[].layers[].camera.iris_diffraction_fringe": {
       "path": "comps[].layers[].camera.iris_diffraction_fringe",
@@ -698,7 +718,8 @@
       "summary": "Camera iris diffraction fringe amount.",
       "capability_keys": [
         "camera.set_iris_diffraction_fringe"
-      ]
+      ],
+      "example": "examples/recipes/minimal-camera-iris-diffraction-fringe.json"
     },
     "comps[].layers[].camera.iris_highlight_gain": {
       "path": "comps[].layers[].camera.iris_highlight_gain",
@@ -710,7 +731,8 @@
       "summary": "Camera iris highlight gain.",
       "capability_keys": [
         "camera.set_iris_highlight_gain"
-      ]
+      ],
+      "example": "examples/recipes/minimal-camera-iris-highlight-gain.json"
     },
     "comps[].layers[].camera.iris_highlight_saturation": {
       "path": "comps[].layers[].camera.iris_highlight_saturation",
@@ -722,7 +744,8 @@
       "summary": "Camera iris highlight saturation.",
       "capability_keys": [
         "camera.set_iris_highlight_saturation"
-      ]
+      ],
+      "example": "examples/recipes/minimal-camera-iris-highlight-saturation.json"
     },
     "comps[].layers[].camera.iris_highlight_threshold": {
       "path": "comps[].layers[].camera.iris_highlight_threshold",
@@ -734,7 +757,8 @@
       "summary": "Camera iris highlight threshold.",
       "capability_keys": [
         "camera.set_iris_highlight_threshold"
-      ]
+      ],
+      "example": "examples/recipes/minimal-camera-iris-highlight-threshold.json"
     },
     "comps[].layers[].camera.iris_rotation": {
       "path": "comps[].layers[].camera.iris_rotation",
@@ -746,7 +770,8 @@
       "summary": "Camera iris rotation.",
       "capability_keys": [
         "camera.set_iris_rotation"
-      ]
+      ],
+      "example": "examples/recipes/minimal-camera-iris-rotation.json"
     },
     "comps[].layers[].camera.iris_roundness": {
       "path": "comps[].layers[].camera.iris_roundness",
@@ -758,7 +783,8 @@
       "summary": "Camera iris roundness.",
       "capability_keys": [
         "camera.set_iris_roundness"
-      ]
+      ],
+      "example": "examples/recipes/minimal-camera-iris-roundness.json"
     },
     "comps[].layers[].camera.iris_shape": {
       "path": "comps[].layers[].camera.iris_shape",
@@ -770,7 +796,8 @@
       "summary": "Camera iris shape.",
       "capability_keys": [
         "camera.set_iris_shape"
-      ]
+      ],
+      "example": "examples/recipes/minimal-camera-iris-shape.json"
     },
     "comps[].layers[].camera.zoom": {
       "path": "comps[].layers[].camera.zoom",
@@ -795,7 +822,8 @@
       "summary": "Layer collapse transformations switch.",
       "capability_keys": [
         "layer.set_collapse_transform"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     "comps[].layers[].comment": {
       "path": "comps[].layers[].comment",
@@ -807,7 +835,8 @@
       "summary": "Layer comment text.",
       "capability_keys": [
         "layer.set_comment"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-comment.json"
     },
     "comps[].layers[].effects[]": {
       "path": "comps[].layers[].effects[]",
@@ -833,7 +862,8 @@
         "structural"
       ],
       "summary": "Layer effect match name.",
-      "validation": "Must be a supported effect match name for recipe compilation."
+      "validation": "Must be a supported effect match name for recipe compilation.",
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "comps[].layers[].effects[].params[]": {
       "path": "comps[].layers[].effects[].params[]",
@@ -845,7 +875,8 @@
       "summary": "Layer effect parameter assignments.",
       "capability_keys": [
         "effect.set_param"
-      ]
+      ],
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "comps[].layers[].effects[].params[].expression": {
       "path": "comps[].layers[].effects[].params[].expression",
@@ -854,7 +885,8 @@
       "source_field": "Expression",
       "type": "object\u003cExpressionSpec\u003e",
       "go_type": "*recipe.ExpressionSpec",
-      "summary": "Effect parameter expression settings."
+      "summary": "Effect parameter expression settings.",
+      "example": "examples/recipes/minimal-effect-param-expression.json"
     },
     "comps[].layers[].effects[].params[].expression.enabled": {
       "path": "comps[].layers[].effects[].params[].expression.enabled",
@@ -866,7 +898,8 @@
       "summary": "effect parameter expression enable switch.",
       "capability_keys": [
         "property.set_expression_enabled"
-      ]
+      ],
+      "example": "examples/recipes/minimal-effect-param-expression.json"
     },
     "comps[].layers[].effects[].params[].expression.source": {
       "path": "comps[].layers[].effects[].params[].expression.source",
@@ -896,7 +929,8 @@
         "structural"
       ],
       "summary": "Effect parameter match name.",
-      "validation": "Must match a parameter exposed by the chosen effect."
+      "validation": "Must match a parameter exposed by the chosen effect.",
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "comps[].layers[].effects[].params[].value": {
       "path": "comps[].layers[].effects[].params[].value",
@@ -906,7 +940,8 @@
       "type": "any",
       "go_type": "interface {}",
       "summary": "Effect parameter value.",
-      "validation": "Supported values are numbers, booleans, or numeric arrays."
+      "validation": "Supported values are numbers, booleans, or numeric arrays.",
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "comps[].layers[].effects_enabled": {
       "path": "comps[].layers[].effects_enabled",
@@ -918,7 +953,8 @@
       "summary": "Layer effects enable switch.",
       "capability_keys": [
         "layer.set_effects_enabled"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-common-switches.json"
     },
     "comps[].layers[].frame_blend_enabled": {
       "path": "comps[].layers[].frame_blend_enabled",
@@ -930,7 +966,8 @@
       "summary": "Layer frame blending switch.",
       "capability_keys": [
         "layer.set_frame_blend_enabled"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     "comps[].layers[].frame_blend_pixel_motion": {
       "path": "comps[].layers[].frame_blend_pixel_motion",
@@ -942,7 +979,8 @@
       "summary": "Pixel-motion frame blending switch.",
       "capability_keys": [
         "layer.set_frame_blend_pixel_motion"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     "comps[].layers[].in_point": {
       "path": "comps[].layers[].in_point",
@@ -954,7 +992,8 @@
       "summary": "Layer in point in seconds.",
       "capability_keys": [
         "layer.set_in_point"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-object-profile.json"
     },
     "comps[].layers[].is_3d": {
       "path": "comps[].layers[].is_3d",
@@ -966,7 +1005,8 @@
       "summary": "Layer 3D switch.",
       "capability_keys": [
         "layer.set_is_3d"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     "comps[].layers[].is_adjust": {
       "path": "comps[].layers[].is_adjust",
@@ -978,7 +1018,8 @@
       "summary": "Adjustment-layer switch.",
       "capability_keys": [
         "layer.set_is_adjust"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     "comps[].layers[].is_guide": {
       "path": "comps[].layers[].is_guide",
@@ -990,7 +1031,8 @@
       "summary": "Guide-layer switch.",
       "capability_keys": [
         "layer.set_is_guide"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     "comps[].layers[].is_null": {
       "path": "comps[].layers[].is_null",
@@ -1002,7 +1044,8 @@
       "summary": "Null-layer switch.",
       "capability_keys": [
         "layer.set_is_null"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-null-flag.json"
     },
     "comps[].layers[].label": {
       "path": "comps[].layers[].label",
@@ -1014,7 +1057,8 @@
       "summary": "Layer label color index.",
       "capability_keys": [
         "layer.set_label"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-label.json"
     },
     "comps[].layers[].light": {
       "path": "comps[].layers[].light",
@@ -1023,7 +1067,8 @@
       "source_field": "Light",
       "type": "object\u003cLightSpec\u003e",
       "go_type": "*recipe.LightSpec",
-      "summary": "Light layer options."
+      "summary": "Light layer options.",
+      "example": "examples/recipes/minimal-light-casts-shadows.json"
     },
     "comps[].layers[].light.casts_shadows": {
       "path": "comps[].layers[].light.casts_shadows",
@@ -1035,7 +1080,8 @@
       "summary": "Light shadow-casting switch.",
       "capability_keys": [
         "light.set_casts_shadows"
-      ]
+      ],
+      "example": "examples/recipes/minimal-light-casts-shadows.json"
     },
     "comps[].layers[].light.color": {
       "path": "comps[].layers[].light.color",
@@ -1047,7 +1093,8 @@
       "summary": "Light color as RGB channels.",
       "capability_keys": [
         "light.set_color"
-      ]
+      ],
+      "example": "examples/recipes/minimal-light-color.json"
     },
     "comps[].layers[].light.cone_angle": {
       "path": "comps[].layers[].light.cone_angle",
@@ -1059,7 +1106,8 @@
       "summary": "Spotlight cone angle.",
       "capability_keys": [
         "light.set_cone_angle"
-      ]
+      ],
+      "example": "examples/recipes/minimal-light-cone-angle.json"
     },
     "comps[].layers[].light.cone_feather": {
       "path": "comps[].layers[].light.cone_feather",
@@ -1071,7 +1119,8 @@
       "summary": "Spotlight cone feather amount.",
       "capability_keys": [
         "light.set_cone_feather"
-      ]
+      ],
+      "example": "examples/recipes/minimal-light-cone-feather.json"
     },
     "comps[].layers[].light.falloff_distance": {
       "path": "comps[].layers[].light.falloff_distance",
@@ -1083,7 +1132,8 @@
       "summary": "Light falloff distance.",
       "capability_keys": [
         "light.set_falloff_distance"
-      ]
+      ],
+      "example": "examples/recipes/minimal-light-falloff-distance.json"
     },
     "comps[].layers[].light.falloff_start": {
       "path": "comps[].layers[].light.falloff_start",
@@ -1095,7 +1145,8 @@
       "summary": "Light falloff start distance.",
       "capability_keys": [
         "light.set_falloff_start"
-      ]
+      ],
+      "example": "examples/recipes/minimal-light-falloff-start.json"
     },
     "comps[].layers[].light.falloff_type": {
       "path": "comps[].layers[].light.falloff_type",
@@ -1107,7 +1158,8 @@
       "summary": "Light falloff type.",
       "capability_keys": [
         "light.set_falloff_type"
-      ]
+      ],
+      "example": "examples/recipes/minimal-light-falloff-distance.json"
     },
     "comps[].layers[].light.intensity": {
       "path": "comps[].layers[].light.intensity",
@@ -1119,7 +1171,8 @@
       "summary": "Light intensity.",
       "capability_keys": [
         "light.set_intensity"
-      ]
+      ],
+      "example": "examples/recipes/minimal-light-intensity.json"
     },
     "comps[].layers[].light.kind": {
       "path": "comps[].layers[].light.kind",
@@ -1144,7 +1197,8 @@
       "summary": "Light shadow darkness.",
       "capability_keys": [
         "light.set_shadow_darkness"
-      ]
+      ],
+      "example": "examples/recipes/minimal-light-object-profile.json"
     },
     "comps[].layers[].light.shadow_diffusion": {
       "path": "comps[].layers[].light.shadow_diffusion",
@@ -1156,7 +1210,8 @@
       "summary": "Light shadow diffusion.",
       "capability_keys": [
         "light.set_shadow_diffusion"
-      ]
+      ],
+      "example": "examples/recipes/minimal-light-object-profile.json"
     },
     "comps[].layers[].light.source_layer": {
       "path": "comps[].layers[].light.source_layer",
@@ -1168,7 +1223,8 @@
       "summary": "Source layer for environment light data.",
       "capability_keys": [
         "light.set_source_layer"
-      ]
+      ],
+      "example": "examples/recipes/minimal-light-source.json"
     },
     "comps[].layers[].locked": {
       "path": "comps[].layers[].locked",
@@ -1180,7 +1236,8 @@
       "summary": "Layer lock switch.",
       "capability_keys": [
         "layer.set_locked"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-common-switches.json"
     },
     "comps[].layers[].markers_locked": {
       "path": "comps[].layers[].markers_locked",
@@ -1192,7 +1249,8 @@
       "summary": "Layer marker lock switch.",
       "capability_keys": [
         "layer.set_markers_locked"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-object-profile.json"
     },
     "comps[].layers[].masks[]": {
       "path": "comps[].layers[].masks[]",
@@ -1217,7 +1275,8 @@
       "summary": "Layer mask closed path switch.",
       "capability_keys": [
         "mask.add"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "comps[].layers[].masks[].color": {
       "path": "comps[].layers[].masks[].color",
@@ -1229,7 +1288,8 @@
       "summary": "Layer mask UI color as RGB channels.",
       "capability_keys": [
         "mask.set_color"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "comps[].layers[].masks[].expansion": {
       "path": "comps[].layers[].masks[].expansion",
@@ -1241,7 +1301,8 @@
       "summary": "Layer mask expansion.",
       "capability_keys": [
         "mask.set_expansion"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "comps[].layers[].masks[].feather": {
       "path": "comps[].layers[].masks[].feather",
@@ -1253,7 +1314,8 @@
       "summary": "Layer mask feather vector.",
       "capability_keys": [
         "mask.set_feather"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "comps[].layers[].masks[].feather_falloff": {
       "path": "comps[].layers[].masks[].feather_falloff",
@@ -1265,7 +1327,8 @@
       "summary": "Layer mask feather falloff mode.",
       "capability_keys": [
         "mask.set_feather_falloff"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "comps[].layers[].masks[].inverted": {
       "path": "comps[].layers[].masks[].inverted",
@@ -1277,7 +1340,8 @@
       "summary": "Layer mask inverted switch.",
       "capability_keys": [
         "mask.set_inverted"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "comps[].layers[].masks[].locked": {
       "path": "comps[].layers[].masks[].locked",
@@ -1289,7 +1353,8 @@
       "summary": "Layer mask lock switch.",
       "capability_keys": [
         "mask.set_locked"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "comps[].layers[].masks[].mode": {
       "path": "comps[].layers[].masks[].mode",
@@ -1301,7 +1366,8 @@
       "summary": "Layer mask mode.",
       "capability_keys": [
         "mask.set_mode"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "comps[].layers[].masks[].motion_blur": {
       "path": "comps[].layers[].masks[].motion_blur",
@@ -1313,7 +1379,8 @@
       "summary": "Layer mask motion blur mode.",
       "capability_keys": [
         "mask.set_motion_blur"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "comps[].layers[].masks[].name": {
       "path": "comps[].layers[].masks[].name",
@@ -1325,7 +1392,8 @@
       "summary": "Layer mask name.",
       "capability_keys": [
         "mask.add"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "comps[].layers[].masks[].opacity": {
       "path": "comps[].layers[].masks[].opacity",
@@ -1337,7 +1405,8 @@
       "summary": "Layer mask opacity.",
       "capability_keys": [
         "mask.set_opacity"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "comps[].layers[].masks[].path_keyframes[]": {
       "path": "comps[].layers[].masks[].path_keyframes[]",
@@ -1349,7 +1418,8 @@
       "summary": "Layer mask path keyframes.",
       "capability_keys": [
         "mask.set_path_keyframes"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "comps[].layers[].masks[].path_keyframes[].time": {
       "path": "comps[].layers[].masks[].path_keyframes[].time",
@@ -1364,7 +1434,8 @@
       "summary": "Layer mask path keyframe time in seconds.",
       "capability_keys": [
         "mask.set_path_keyframes"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "comps[].layers[].masks[].path_keyframes[].vertices": {
       "path": "comps[].layers[].masks[].path_keyframes[].vertices",
@@ -1379,7 +1450,8 @@
       "summary": "Layer mask path keyframe vertices.",
       "capability_keys": [
         "mask.set_path_keyframes"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "comps[].layers[].masks[].vertices": {
       "path": "comps[].layers[].masks[].vertices",
@@ -1394,7 +1466,8 @@
       "summary": "Layer mask path vertices.",
       "capability_keys": [
         "mask.add"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "comps[].layers[].motion_blur": {
       "path": "comps[].layers[].motion_blur",
@@ -1406,7 +1479,8 @@
       "summary": "Layer motion blur switch.",
       "capability_keys": [
         "layer.set_motion_blur"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-motion-blur.json"
     },
     "comps[].layers[].name": {
       "path": "comps[].layers[].name",
@@ -1418,7 +1492,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Layer display name."
+      "summary": "Layer display name.",
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "comps[].layers[].out_point": {
       "path": "comps[].layers[].out_point",
@@ -1430,7 +1505,8 @@
       "summary": "Layer out point in seconds.",
       "capability_keys": [
         "layer.set_out_point"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-object-profile.json"
     },
     "comps[].layers[].parent": {
       "path": "comps[].layers[].parent",
@@ -1442,7 +1518,8 @@
       "summary": "Parent layer name.",
       "capability_keys": [
         "layer.set_parent"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-null-flag.json"
     },
     "comps[].layers[].preserve_transparency": {
       "path": "comps[].layers[].preserve_transparency",
@@ -1454,7 +1531,8 @@
       "summary": "Preserve transparency switch.",
       "capability_keys": [
         "layer.set_preserve_transparency"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     "comps[].layers[].quality": {
       "path": "comps[].layers[].quality",
@@ -1466,7 +1544,8 @@
       "summary": "Layer quality mode.",
       "capability_keys": [
         "layer.set_quality"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-object-profile.json"
     },
     "comps[].layers[].sampling_bicubic": {
       "path": "comps[].layers[].sampling_bicubic",
@@ -1478,7 +1557,8 @@
       "summary": "Bicubic sampling switch.",
       "capability_keys": [
         "layer.set_sampling_bicubic"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     "comps[].layers[].shape": {
       "path": "comps[].layers[].shape",
@@ -1487,7 +1567,8 @@
       "source_field": "Shape",
       "type": "object\u003cShapeSpec\u003e",
       "go_type": "*recipe.ShapeSpec",
-      "summary": "Shape layer primitive and operators."
+      "summary": "Shape layer primitive and operators.",
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "comps[].layers[].shape.fill_blend_mode": {
       "path": "comps[].layers[].shape.fill_blend_mode",
@@ -1499,7 +1580,8 @@
       "summary": "Solid fill blend mode.",
       "capability_keys": [
         "shape.fill.set_blend_mode"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-fill-blend-mode.json"
     },
     "comps[].layers[].shape.fill_color": {
       "path": "comps[].layers[].shape.fill_color",
@@ -1511,7 +1593,8 @@
       "summary": "Solid fill color as RGB channels.",
       "capability_keys": [
         "shape.fill.set_color"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "comps[].layers[].shape.fill_composite_order": {
       "path": "comps[].layers[].shape.fill_composite_order",
@@ -1523,7 +1606,8 @@
       "summary": "Solid fill composite order.",
       "capability_keys": [
         "shape.fill.set_composite_order"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-fill-composite-order.json"
     },
     "comps[].layers[].shape.fill_opacity": {
       "path": "comps[].layers[].shape.fill_opacity",
@@ -1535,7 +1619,8 @@
       "summary": "Solid fill opacity.",
       "capability_keys": [
         "shape.fill.set_opacity"
-      ]
+      ],
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].shape.fill_rule": {
       "path": "comps[].layers[].shape.fill_rule",
@@ -1547,7 +1632,8 @@
       "summary": "Solid fill rule.",
       "capability_keys": [
         "shape.fill.set_fill_rule"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-fill-rule.json"
     },
     "comps[].layers[].shape.gradient_fill": {
       "path": "comps[].layers[].shape.gradient_fill",
@@ -1572,7 +1658,8 @@
       "summary": "Gradient fill alpha stops.",
       "capability_keys": [
         "shape.gradient_fill.set_alpha_stops"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_fill.alpha_stops[].alpha": {
       "path": "comps[].layers[].shape.gradient_fill.alpha_stops[].alpha",
@@ -1584,7 +1671,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Gradient fill alpha stop opacity value."
+      "summary": "Gradient fill alpha stop opacity value.",
+      "example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_fill.alpha_stops[].midpoint": {
       "path": "comps[].layers[].shape.gradient_fill.alpha_stops[].midpoint",
@@ -1593,7 +1681,8 @@
       "source_field": "Midpoint",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Gradient fill alpha stop midpoint."
+      "summary": "Gradient fill alpha stop midpoint.",
+      "example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_fill.alpha_stops[].offset": {
       "path": "comps[].layers[].shape.gradient_fill.alpha_stops[].offset",
@@ -1605,7 +1694,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Gradient fill alpha stop offset."
+      "summary": "Gradient fill alpha stop offset.",
+      "example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_fill.color_stops[]": {
       "path": "comps[].layers[].shape.gradient_fill.color_stops[]",
@@ -1617,7 +1707,8 @@
       "summary": "Gradient fill color stops.",
       "capability_keys": [
         "shape.gradient_fill.set_color_stops"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_fill.color_stops[].color": {
       "path": "comps[].layers[].shape.gradient_fill.color_stops[].color",
@@ -1629,7 +1720,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Gradient fill color stop RGB color."
+      "summary": "Gradient fill color stop RGB color.",
+      "example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_fill.color_stops[].midpoint": {
       "path": "comps[].layers[].shape.gradient_fill.color_stops[].midpoint",
@@ -1638,7 +1730,8 @@
       "source_field": "Midpoint",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Gradient fill color stop midpoint."
+      "summary": "Gradient fill color stop midpoint.",
+      "example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_fill.color_stops[].offset": {
       "path": "comps[].layers[].shape.gradient_fill.color_stops[].offset",
@@ -1650,7 +1743,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Gradient fill color stop offset."
+      "summary": "Gradient fill color stop offset.",
+      "example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_fill.end_point": {
       "path": "comps[].layers[].shape.gradient_fill.end_point",
@@ -1662,7 +1756,8 @@
       "summary": "Gradient fill end point.",
       "capability_keys": [
         "shape.gradient_fill.set_end_point"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_fill.highlight_angle": {
       "path": "comps[].layers[].shape.gradient_fill.highlight_angle",
@@ -1674,7 +1769,8 @@
       "summary": "Radial gradient fill highlight angle.",
       "capability_keys": [
         "shape.gradient_fill.set_highlight_angle"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-gradient-fill-highlight.json"
     },
     "comps[].layers[].shape.gradient_fill.highlight_length": {
       "path": "comps[].layers[].shape.gradient_fill.highlight_length",
@@ -1686,7 +1782,8 @@
       "summary": "Radial gradient fill highlight length.",
       "capability_keys": [
         "shape.gradient_fill.set_highlight_length"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-gradient-fill-highlight.json"
     },
     "comps[].layers[].shape.gradient_fill.start_point": {
       "path": "comps[].layers[].shape.gradient_fill.start_point",
@@ -1698,7 +1795,8 @@
       "summary": "Gradient fill start point.",
       "capability_keys": [
         "shape.gradient_fill.set_start_point"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_fill.type": {
       "path": "comps[].layers[].shape.gradient_fill.type",
@@ -1710,7 +1808,8 @@
       "summary": "Gradient fill type.",
       "capability_keys": [
         "shape.gradient_fill.set_type"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_stroke": {
       "path": "comps[].layers[].shape.gradient_stroke",
@@ -1722,7 +1821,8 @@
       "summary": "Gradient stroke settings.",
       "capability_keys": [
         "shape.gradient_stroke.add"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_stroke.alpha_stops[]": {
       "path": "comps[].layers[].shape.gradient_stroke.alpha_stops[]",
@@ -1734,7 +1834,8 @@
       "summary": "Gradient stroke alpha stops.",
       "capability_keys": [
         "shape.gradient_stroke.set_alpha_stops"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_stroke.alpha_stops[].alpha": {
       "path": "comps[].layers[].shape.gradient_stroke.alpha_stops[].alpha",
@@ -1746,7 +1847,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Gradient stroke alpha stop opacity value."
+      "summary": "Gradient stroke alpha stop opacity value.",
+      "example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_stroke.alpha_stops[].midpoint": {
       "path": "comps[].layers[].shape.gradient_stroke.alpha_stops[].midpoint",
@@ -1755,7 +1857,8 @@
       "source_field": "Midpoint",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Gradient stroke alpha stop midpoint."
+      "summary": "Gradient stroke alpha stop midpoint.",
+      "example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_stroke.alpha_stops[].offset": {
       "path": "comps[].layers[].shape.gradient_stroke.alpha_stops[].offset",
@@ -1767,7 +1870,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Gradient stroke alpha stop offset."
+      "summary": "Gradient stroke alpha stop offset.",
+      "example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_stroke.color_stops[]": {
       "path": "comps[].layers[].shape.gradient_stroke.color_stops[]",
@@ -1779,7 +1883,8 @@
       "summary": "Gradient stroke color stops.",
       "capability_keys": [
         "shape.gradient_stroke.set_color_stops"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_stroke.color_stops[].color": {
       "path": "comps[].layers[].shape.gradient_stroke.color_stops[].color",
@@ -1791,7 +1896,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Gradient stroke color stop RGB color."
+      "summary": "Gradient stroke color stop RGB color.",
+      "example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_stroke.color_stops[].midpoint": {
       "path": "comps[].layers[].shape.gradient_stroke.color_stops[].midpoint",
@@ -1800,7 +1906,8 @@
       "source_field": "Midpoint",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Gradient stroke color stop midpoint."
+      "summary": "Gradient stroke color stop midpoint.",
+      "example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_stroke.color_stops[].offset": {
       "path": "comps[].layers[].shape.gradient_stroke.color_stops[].offset",
@@ -1812,7 +1919,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Gradient stroke color stop offset."
+      "summary": "Gradient stroke color stop offset.",
+      "example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_stroke.end_point": {
       "path": "comps[].layers[].shape.gradient_stroke.end_point",
@@ -1824,7 +1932,8 @@
       "summary": "Gradient stroke end point.",
       "capability_keys": [
         "shape.gradient_stroke.set_end_point"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_stroke.highlight_angle": {
       "path": "comps[].layers[].shape.gradient_stroke.highlight_angle",
@@ -1836,7 +1945,8 @@
       "summary": "Radial gradient stroke highlight angle.",
       "capability_keys": [
         "shape.gradient_stroke.set_highlight_angle"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-gradient-stroke-highlight.json"
     },
     "comps[].layers[].shape.gradient_stroke.highlight_length": {
       "path": "comps[].layers[].shape.gradient_stroke.highlight_length",
@@ -1848,7 +1958,8 @@
       "summary": "Radial gradient stroke highlight length.",
       "capability_keys": [
         "shape.gradient_stroke.set_highlight_length"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-gradient-stroke-highlight.json"
     },
     "comps[].layers[].shape.gradient_stroke.line_cap": {
       "path": "comps[].layers[].shape.gradient_stroke.line_cap",
@@ -1860,7 +1971,8 @@
       "summary": "Gradient stroke line cap mode.",
       "capability_keys": [
         "shape.gradient_stroke.set_line_cap"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-gradient-stroke-style.json"
     },
     "comps[].layers[].shape.gradient_stroke.line_join": {
       "path": "comps[].layers[].shape.gradient_stroke.line_join",
@@ -1872,7 +1984,8 @@
       "summary": "Gradient stroke line join mode.",
       "capability_keys": [
         "shape.gradient_stroke.set_line_join"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-gradient-stroke-style.json"
     },
     "comps[].layers[].shape.gradient_stroke.miter_limit": {
       "path": "comps[].layers[].shape.gradient_stroke.miter_limit",
@@ -1884,7 +1997,8 @@
       "summary": "Gradient stroke miter limit.",
       "capability_keys": [
         "shape.gradient_stroke.set_miter_limit"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-gradient-stroke-style.json"
     },
     "comps[].layers[].shape.gradient_stroke.start_point": {
       "path": "comps[].layers[].shape.gradient_stroke.start_point",
@@ -1896,7 +2010,8 @@
       "summary": "Gradient stroke start point.",
       "capability_keys": [
         "shape.gradient_stroke.set_start_point"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_stroke.type": {
       "path": "comps[].layers[].shape.gradient_stroke.type",
@@ -1908,7 +2023,8 @@
       "summary": "Gradient stroke type.",
       "capability_keys": [
         "shape.gradient_stroke.set_type"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_stroke.width": {
       "path": "comps[].layers[].shape.gradient_stroke.width",
@@ -1920,7 +2036,8 @@
       "summary": "Gradient stroke width.",
       "capability_keys": [
         "shape.gradient_stroke.set_width"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     "comps[].layers[].shape.inner_radius": {
       "path": "comps[].layers[].shape.inner_radius",
@@ -1932,7 +2049,8 @@
       "summary": "Star inner radius.",
       "capability_keys": [
         "shape.star.set_inner_radius"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-polystar.json"
     },
     "comps[].layers[].shape.inner_roundness": {
       "path": "comps[].layers[].shape.inner_roundness",
@@ -1944,7 +2062,8 @@
       "summary": "Star inner roundness.",
       "capability_keys": [
         "shape.star.set_inner_roundness"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-polystar.json"
     },
     "comps[].layers[].shape.kind": {
       "path": "comps[].layers[].shape.kind",
@@ -1960,7 +2079,8 @@
       "capability_keys": [
         "shape.star.add",
         "shape.star.set_type"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-fill-blend-mode.json"
     },
     "comps[].layers[].shape.merge_paths": {
       "path": "comps[].layers[].shape.merge_paths",
@@ -1972,7 +2092,8 @@
       "summary": "Merge paths operator settings.",
       "capability_keys": [
         "shape.merge_paths.add"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-merge-paths.json"
     },
     "comps[].layers[].shape.merge_paths.type": {
       "path": "comps[].layers[].shape.merge_paths.type",
@@ -1984,7 +2105,8 @@
       "summary": "Merge paths mode.",
       "capability_keys": [
         "shape.merge_paths.set_type"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-merge-paths.json"
     },
     "comps[].layers[].shape.offset_paths": {
       "path": "comps[].layers[].shape.offset_paths",
@@ -1996,7 +2118,8 @@
       "summary": "Offset paths operator settings.",
       "capability_keys": [
         "shape.offset_paths.add"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-offset-paths.json"
     },
     "comps[].layers[].shape.offset_paths.amount": {
       "path": "comps[].layers[].shape.offset_paths.amount",
@@ -2008,7 +2131,8 @@
       "summary": "Offset paths amount.",
       "capability_keys": [
         "shape.offset_paths.set_amount"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-offset-paths.json"
     },
     "comps[].layers[].shape.offset_paths.copies": {
       "path": "comps[].layers[].shape.offset_paths.copies",
@@ -2020,7 +2144,8 @@
       "summary": "Offset paths copy count.",
       "capability_keys": [
         "shape.offset_paths.set_copies"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-offset-paths.json"
     },
     "comps[].layers[].shape.offset_paths.copy_offset": {
       "path": "comps[].layers[].shape.offset_paths.copy_offset",
@@ -2032,7 +2157,8 @@
       "summary": "Offset paths copy offset.",
       "capability_keys": [
         "shape.offset_paths.set_copy_offset"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-offset-paths.json"
     },
     "comps[].layers[].shape.offset_paths.line_join": {
       "path": "comps[].layers[].shape.offset_paths.line_join",
@@ -2044,7 +2170,8 @@
       "summary": "Offset paths line join mode.",
       "capability_keys": [
         "shape.offset_paths.set_line_join"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-offset-paths.json"
     },
     "comps[].layers[].shape.offset_paths.miter_limit": {
       "path": "comps[].layers[].shape.offset_paths.miter_limit",
@@ -2056,7 +2183,8 @@
       "summary": "Offset paths miter limit.",
       "capability_keys": [
         "shape.offset_paths.set_miter_limit"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-offset-paths.json"
     },
     "comps[].layers[].shape.outer_radius": {
       "path": "comps[].layers[].shape.outer_radius",
@@ -2068,7 +2196,8 @@
       "summary": "Star or polygon outer radius.",
       "capability_keys": [
         "shape.star.set_outer_radius"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-polystar.json"
     },
     "comps[].layers[].shape.outer_roundness": {
       "path": "comps[].layers[].shape.outer_roundness",
@@ -2080,7 +2209,8 @@
       "summary": "Star or polygon outer roundness.",
       "capability_keys": [
         "shape.star.set_outer_roundness"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-polystar.json"
     },
     "comps[].layers[].shape.points": {
       "path": "comps[].layers[].shape.points",
@@ -2092,7 +2222,8 @@
       "summary": "Star or polygon point count.",
       "capability_keys": [
         "shape.star.set_points"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-polystar.json"
     },
     "comps[].layers[].shape.position": {
       "path": "comps[].layers[].shape.position",
@@ -2106,7 +2237,8 @@
         "shape.rect.set_position",
         "shape.ellipse.set_position",
         "shape.star.set_position"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-polystar.json"
     },
     "comps[].layers[].shape.pucker_bloat": {
       "path": "comps[].layers[].shape.pucker_bloat",
@@ -2118,7 +2250,8 @@
       "summary": "Pucker and Bloat operator settings.",
       "capability_keys": [
         "shape.pucker_bloat.add"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-pucker-bloat.json"
     },
     "comps[].layers[].shape.pucker_bloat.amount": {
       "path": "comps[].layers[].shape.pucker_bloat.amount",
@@ -2130,7 +2263,8 @@
       "summary": "Pucker and Bloat amount.",
       "capability_keys": [
         "shape.pucker_bloat.set_amount"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-pucker-bloat.json"
     },
     "comps[].layers[].shape.repeater": {
       "path": "comps[].layers[].shape.repeater",
@@ -2155,7 +2289,8 @@
       "summary": "Repeater transform anchor point.",
       "capability_keys": [
         "shape.repeater_transform.set_anchor"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-repeater.json"
     },
     "comps[].layers[].shape.repeater.copies": {
       "path": "comps[].layers[].shape.repeater.copies",
@@ -2167,7 +2302,8 @@
       "summary": "Repeater copy count.",
       "capability_keys": [
         "shape.repeater.set_copies"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-repeater.json"
     },
     "comps[].layers[].shape.repeater.end_opacity": {
       "path": "comps[].layers[].shape.repeater.end_opacity",
@@ -2179,7 +2315,8 @@
       "summary": "Repeater ending opacity.",
       "capability_keys": [
         "shape.repeater_transform.set_end_opacity"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-repeater.json"
     },
     "comps[].layers[].shape.repeater.offset": {
       "path": "comps[].layers[].shape.repeater.offset",
@@ -2191,7 +2328,8 @@
       "summary": "Repeater copy offset.",
       "capability_keys": [
         "shape.repeater.set_offset"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-repeater.json"
     },
     "comps[].layers[].shape.repeater.order": {
       "path": "comps[].layers[].shape.repeater.order",
@@ -2203,7 +2341,8 @@
       "summary": "Repeater composite order.",
       "capability_keys": [
         "shape.repeater.set_order"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-repeater.json"
     },
     "comps[].layers[].shape.repeater.position": {
       "path": "comps[].layers[].shape.repeater.position",
@@ -2215,7 +2354,8 @@
       "summary": "Repeater transform position.",
       "capability_keys": [
         "shape.repeater_transform.set_position"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-repeater.json"
     },
     "comps[].layers[].shape.repeater.rotation": {
       "path": "comps[].layers[].shape.repeater.rotation",
@@ -2227,7 +2367,8 @@
       "summary": "Repeater transform rotation.",
       "capability_keys": [
         "shape.repeater_transform.set_rotation"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-repeater.json"
     },
     "comps[].layers[].shape.repeater.scale": {
       "path": "comps[].layers[].shape.repeater.scale",
@@ -2239,7 +2380,8 @@
       "summary": "Repeater transform scale.",
       "capability_keys": [
         "shape.repeater_transform.set_scale"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-repeater.json"
     },
     "comps[].layers[].shape.repeater.start_opacity": {
       "path": "comps[].layers[].shape.repeater.start_opacity",
@@ -2251,7 +2393,8 @@
       "summary": "Repeater starting opacity.",
       "capability_keys": [
         "shape.repeater_transform.set_start_opacity"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-repeater.json"
     },
     "comps[].layers[].shape.rotation": {
       "path": "comps[].layers[].shape.rotation",
@@ -2263,7 +2406,8 @@
       "summary": "Shape local rotation.",
       "capability_keys": [
         "shape.star.set_rotation"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-polystar.json"
     },
     "comps[].layers[].shape.round_corners": {
       "path": "comps[].layers[].shape.round_corners",
@@ -2275,7 +2419,8 @@
       "summary": "Round corners operator settings.",
       "capability_keys": [
         "shape.round_corners.add"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-round-corners.json"
     },
     "comps[].layers[].shape.round_corners.radius": {
       "path": "comps[].layers[].shape.round_corners.radius",
@@ -2287,7 +2432,8 @@
       "summary": "Round corners radius.",
       "capability_keys": [
         "shape.round_corners.set_radius"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-round-corners.json"
     },
     "comps[].layers[].shape.roundness": {
       "path": "comps[].layers[].shape.roundness",
@@ -2299,7 +2445,8 @@
       "summary": "Rectangle corner roundness.",
       "capability_keys": [
         "shape.rect.set_roundness"
-      ]
+      ],
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].shape.size": {
       "path": "comps[].layers[].shape.size",
@@ -2312,7 +2459,8 @@
       "capability_keys": [
         "shape.rect.set_size",
         "shape.ellipse.set_size"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-fill-blend-mode.json"
     },
     "comps[].layers[].shape.stroke": {
       "path": "comps[].layers[].shape.stroke",
@@ -2324,7 +2472,8 @@
       "summary": "Solid stroke settings.",
       "capability_keys": [
         "shape.stroke.add"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-stroke-composite-order.json"
     },
     "comps[].layers[].shape.stroke.color": {
       "path": "comps[].layers[].shape.stroke.color",
@@ -2336,7 +2485,8 @@
       "summary": "Stroke color as RGB channels.",
       "capability_keys": [
         "shape.stroke.set_color"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-stroke-composite-order.json"
     },
     "comps[].layers[].shape.stroke.composite_order": {
       "path": "comps[].layers[].shape.stroke.composite_order",
@@ -2348,7 +2498,8 @@
       "summary": "Stroke composite order.",
       "capability_keys": [
         "shape.stroke.set_composite_order"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-stroke-composite-order.json"
     },
     "comps[].layers[].shape.stroke.dashes": {
       "path": "comps[].layers[].shape.stroke.dashes",
@@ -2357,7 +2508,8 @@
       "source_field": "Dashes",
       "type": "object\u003cStrokeDashesSpec\u003e",
       "go_type": "*recipe.StrokeDashesSpec",
-      "summary": "Stroke dash pattern settings."
+      "summary": "Stroke dash pattern settings.",
+      "example": "examples/recipes/minimal-shape-stroke-dashes.json"
     },
     "comps[].layers[].shape.stroke.dashes.dash": {
       "path": "comps[].layers[].shape.stroke.dashes.dash",
@@ -2382,7 +2534,8 @@
       "summary": "Stroke gap length.",
       "capability_keys": [
         "shape.stroke_dashes.set_gap"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-stroke-dashes.json"
     },
     "comps[].layers[].shape.stroke.line_cap": {
       "path": "comps[].layers[].shape.stroke.line_cap",
@@ -2394,7 +2547,8 @@
       "summary": "Stroke line cap mode.",
       "capability_keys": [
         "shape.stroke.set_line_cap"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-stroke-style.json"
     },
     "comps[].layers[].shape.stroke.line_join": {
       "path": "comps[].layers[].shape.stroke.line_join",
@@ -2406,7 +2560,8 @@
       "summary": "Stroke line join mode.",
       "capability_keys": [
         "shape.stroke.set_line_join"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-stroke-style.json"
     },
     "comps[].layers[].shape.stroke.miter_limit": {
       "path": "comps[].layers[].shape.stroke.miter_limit",
@@ -2418,7 +2573,8 @@
       "summary": "Stroke miter limit.",
       "capability_keys": [
         "shape.stroke.set_miter_limit"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-stroke-style.json"
     },
     "comps[].layers[].shape.stroke.opacity": {
       "path": "comps[].layers[].shape.stroke.opacity",
@@ -2430,7 +2586,8 @@
       "summary": "Stroke opacity.",
       "capability_keys": [
         "shape.stroke.set_opacity"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-stroke-dashes.json"
     },
     "comps[].layers[].shape.stroke.taper": {
       "path": "comps[].layers[].shape.stroke.taper",
@@ -2439,7 +2596,8 @@
       "source_field": "Taper",
       "type": "object\u003cStrokeTaperSpec\u003e",
       "go_type": "*recipe.StrokeTaperSpec",
-      "summary": "Stroke taper settings."
+      "summary": "Stroke taper settings.",
+      "example": "examples/recipes/minimal-shape-stroke-taper.json"
     },
     "comps[].layers[].shape.stroke.taper.end_ease": {
       "path": "comps[].layers[].shape.stroke.taper.end_ease",
@@ -2451,7 +2609,8 @@
       "summary": "Stroke taper end ease.",
       "capability_keys": [
         "shape.stroke_taper.set_end_ease"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-stroke-taper.json"
     },
     "comps[].layers[].shape.stroke.taper.end_length": {
       "path": "comps[].layers[].shape.stroke.taper.end_length",
@@ -2463,7 +2622,8 @@
       "summary": "Stroke taper end length.",
       "capability_keys": [
         "shape.stroke_taper.set_end_length"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-stroke-taper.json"
     },
     "comps[].layers[].shape.stroke.taper.end_width": {
       "path": "comps[].layers[].shape.stroke.taper.end_width",
@@ -2475,7 +2635,8 @@
       "summary": "Stroke taper end width.",
       "capability_keys": [
         "shape.stroke_taper.set_end_width"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-stroke-taper.json"
     },
     "comps[].layers[].shape.stroke.taper.start_ease": {
       "path": "comps[].layers[].shape.stroke.taper.start_ease",
@@ -2487,7 +2648,8 @@
       "summary": "Stroke taper start ease.",
       "capability_keys": [
         "shape.stroke_taper.set_start_ease"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-stroke-taper.json"
     },
     "comps[].layers[].shape.stroke.taper.start_length": {
       "path": "comps[].layers[].shape.stroke.taper.start_length",
@@ -2499,7 +2661,8 @@
       "summary": "Stroke taper start length.",
       "capability_keys": [
         "shape.stroke_taper.set_start_length"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-stroke-taper.json"
     },
     "comps[].layers[].shape.stroke.taper.start_width": {
       "path": "comps[].layers[].shape.stroke.taper.start_width",
@@ -2511,7 +2674,8 @@
       "summary": "Stroke taper start width.",
       "capability_keys": [
         "shape.stroke_taper.set_start_width"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-stroke-taper.json"
     },
     "comps[].layers[].shape.stroke.wave": {
       "path": "comps[].layers[].shape.stroke.wave",
@@ -2520,7 +2684,8 @@
       "source_field": "Wave",
       "type": "object\u003cStrokeWaveSpec\u003e",
       "go_type": "*recipe.StrokeWaveSpec",
-      "summary": "Stroke wave settings."
+      "summary": "Stroke wave settings.",
+      "example": "examples/recipes/minimal-shape-stroke-wave.json"
     },
     "comps[].layers[].shape.stroke.wave.amount": {
       "path": "comps[].layers[].shape.stroke.wave.amount",
@@ -2532,7 +2697,8 @@
       "summary": "Stroke wave amount.",
       "capability_keys": [
         "shape.stroke_wave.set_amount"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-stroke-wave.json"
     },
     "comps[].layers[].shape.stroke.wave.phase": {
       "path": "comps[].layers[].shape.stroke.wave.phase",
@@ -2544,7 +2710,8 @@
       "summary": "Stroke wave phase.",
       "capability_keys": [
         "shape.stroke_wave.set_phase"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-stroke-wave.json"
     },
     "comps[].layers[].shape.stroke.wave.wavelength": {
       "path": "comps[].layers[].shape.stroke.wave.wavelength",
@@ -2556,7 +2723,8 @@
       "summary": "Stroke wave wavelength.",
       "capability_keys": [
         "shape.stroke_wave.set_wavelength"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-stroke-wave.json"
     },
     "comps[].layers[].shape.stroke.width": {
       "path": "comps[].layers[].shape.stroke.width",
@@ -2568,7 +2736,8 @@
       "summary": "Stroke width.",
       "capability_keys": [
         "shape.stroke.set_width"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-stroke-composite-order.json"
     },
     "comps[].layers[].shape.trim": {
       "path": "comps[].layers[].shape.trim",
@@ -2580,7 +2749,8 @@
       "summary": "Trim paths operator settings.",
       "capability_keys": [
         "shape.trim.add"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-trim.json"
     },
     "comps[].layers[].shape.trim.end": {
       "path": "comps[].layers[].shape.trim.end",
@@ -2589,7 +2759,8 @@
       "source_field": "End",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Trim paths end percentage."
+      "summary": "Trim paths end percentage.",
+      "example": "examples/recipes/minimal-shape-trim.json"
     },
     "comps[].layers[].shape.trim.offset": {
       "path": "comps[].layers[].shape.trim.offset",
@@ -2598,7 +2769,8 @@
       "source_field": "Offset",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Trim paths offset."
+      "summary": "Trim paths offset.",
+      "example": "examples/recipes/minimal-shape-trim.json"
     },
     "comps[].layers[].shape.trim.start": {
       "path": "comps[].layers[].shape.trim.start",
@@ -2607,7 +2779,8 @@
       "source_field": "Start",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Trim paths start percentage."
+      "summary": "Trim paths start percentage.",
+      "example": "examples/recipes/minimal-shape-trim.json"
     },
     "comps[].layers[].shape.twist": {
       "path": "comps[].layers[].shape.twist",
@@ -2619,7 +2792,8 @@
       "summary": "Twist operator settings.",
       "capability_keys": [
         "shape.twist.add"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-twist.json"
     },
     "comps[].layers[].shape.twist.angle": {
       "path": "comps[].layers[].shape.twist.angle",
@@ -2631,7 +2805,8 @@
       "summary": "Twist angle.",
       "capability_keys": [
         "shape.twist.set_angle"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-twist.json"
     },
     "comps[].layers[].shape.twist.center": {
       "path": "comps[].layers[].shape.twist.center",
@@ -2643,7 +2818,8 @@
       "summary": "Twist center point.",
       "capability_keys": [
         "shape.twist.set_center"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-twist.json"
     },
     "comps[].layers[].shape.wiggle_paths": {
       "path": "comps[].layers[].shape.wiggle_paths",
@@ -2655,7 +2831,8 @@
       "summary": "Wiggle Paths operator settings.",
       "capability_keys": [
         "shape.wiggle_paths.add"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-wiggle-paths.json"
     },
     "comps[].layers[].shape.wiggle_paths.correlation": {
       "path": "comps[].layers[].shape.wiggle_paths.correlation",
@@ -2667,7 +2844,8 @@
       "summary": "Wiggle Paths correlation.",
       "capability_keys": [
         "shape.wiggle_paths.set_correlation"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-wiggle-paths.json"
     },
     "comps[].layers[].shape.wiggle_paths.detail": {
       "path": "comps[].layers[].shape.wiggle_paths.detail",
@@ -2679,7 +2857,8 @@
       "summary": "Wiggle Paths detail.",
       "capability_keys": [
         "shape.wiggle_paths.set_detail"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-wiggle-paths.json"
     },
     "comps[].layers[].shape.wiggle_paths.points": {
       "path": "comps[].layers[].shape.wiggle_paths.points",
@@ -2691,7 +2870,8 @@
       "summary": "Wiggle Paths point mode.",
       "capability_keys": [
         "shape.wiggle_paths.set_points"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-wiggle-paths.json"
     },
     "comps[].layers[].shape.wiggle_paths.random_seed": {
       "path": "comps[].layers[].shape.wiggle_paths.random_seed",
@@ -2703,7 +2883,8 @@
       "summary": "Wiggle Paths random seed.",
       "capability_keys": [
         "shape.wiggle_paths.set_random_seed"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-wiggle-paths.json"
     },
     "comps[].layers[].shape.wiggle_paths.size": {
       "path": "comps[].layers[].shape.wiggle_paths.size",
@@ -2715,7 +2896,8 @@
       "summary": "Wiggle Paths size.",
       "capability_keys": [
         "shape.wiggle_paths.set_size"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-wiggle-paths.json"
     },
     "comps[].layers[].shape.wiggle_paths.spatial_phase": {
       "path": "comps[].layers[].shape.wiggle_paths.spatial_phase",
@@ -2727,7 +2909,8 @@
       "summary": "Wiggle Paths spatial phase.",
       "capability_keys": [
         "shape.wiggle_paths.set_spatial_phase"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-wiggle-paths.json"
     },
     "comps[].layers[].shape.wiggle_paths.temporal_phase": {
       "path": "comps[].layers[].shape.wiggle_paths.temporal_phase",
@@ -2739,7 +2922,8 @@
       "summary": "Wiggle Paths temporal phase.",
       "capability_keys": [
         "shape.wiggle_paths.set_temporal_phase"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-wiggle-paths.json"
     },
     "comps[].layers[].shape.wiggle_paths.wiggles_per_second": {
       "path": "comps[].layers[].shape.wiggle_paths.wiggles_per_second",
@@ -2751,7 +2935,8 @@
       "summary": "Wiggle Paths frequency.",
       "capability_keys": [
         "shape.wiggle_paths.set_wiggles_per_second"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-wiggle-paths.json"
     },
     "comps[].layers[].shape.wiggle_transform": {
       "path": "comps[].layers[].shape.wiggle_transform",
@@ -2763,7 +2948,8 @@
       "summary": "Wiggle Transform operator settings.",
       "capability_keys": [
         "shape.wiggle_transform.add"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-wiggle-transform.json"
     },
     "comps[].layers[].shape.wiggle_transform.anchor": {
       "path": "comps[].layers[].shape.wiggle_transform.anchor",
@@ -2775,7 +2961,8 @@
       "summary": "Wiggle Transform anchor amount.",
       "capability_keys": [
         "shape.wiggler_transform.set_anchor"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-wiggle-transform.json"
     },
     "comps[].layers[].shape.wiggle_transform.correlation": {
       "path": "comps[].layers[].shape.wiggle_transform.correlation",
@@ -2787,7 +2974,8 @@
       "summary": "Wiggle Transform correlation.",
       "capability_keys": [
         "shape.wiggle_transform.set_correlation"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-wiggle-transform.json"
     },
     "comps[].layers[].shape.wiggle_transform.position": {
       "path": "comps[].layers[].shape.wiggle_transform.position",
@@ -2799,7 +2987,8 @@
       "summary": "Wiggle Transform position amount.",
       "capability_keys": [
         "shape.wiggler_transform.set_position"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-wiggle-transform.json"
     },
     "comps[].layers[].shape.wiggle_transform.random_seed": {
       "path": "comps[].layers[].shape.wiggle_transform.random_seed",
@@ -2811,7 +3000,8 @@
       "summary": "Wiggle Transform random seed.",
       "capability_keys": [
         "shape.wiggle_transform.set_random_seed"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-wiggle-transform.json"
     },
     "comps[].layers[].shape.wiggle_transform.rotation": {
       "path": "comps[].layers[].shape.wiggle_transform.rotation",
@@ -2823,7 +3013,8 @@
       "summary": "Wiggle Transform rotation amount.",
       "capability_keys": [
         "shape.wiggler_transform.set_rotation"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-wiggle-transform.json"
     },
     "comps[].layers[].shape.wiggle_transform.scale": {
       "path": "comps[].layers[].shape.wiggle_transform.scale",
@@ -2835,7 +3026,8 @@
       "summary": "Wiggle Transform scale amount.",
       "capability_keys": [
         "shape.wiggler_transform.set_scale"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-wiggle-transform.json"
     },
     "comps[].layers[].shape.wiggle_transform.spatial_phase": {
       "path": "comps[].layers[].shape.wiggle_transform.spatial_phase",
@@ -2847,7 +3039,8 @@
       "summary": "Wiggle Transform spatial phase.",
       "capability_keys": [
         "shape.wiggle_transform.set_spatial_phase"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-wiggle-transform.json"
     },
     "comps[].layers[].shape.wiggle_transform.temporal_phase": {
       "path": "comps[].layers[].shape.wiggle_transform.temporal_phase",
@@ -2859,7 +3052,8 @@
       "summary": "Wiggle Transform temporal phase.",
       "capability_keys": [
         "shape.wiggle_transform.set_temporal_phase"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-wiggle-transform.json"
     },
     "comps[].layers[].shape.wiggle_transform.wiggles_per_second": {
       "path": "comps[].layers[].shape.wiggle_transform.wiggles_per_second",
@@ -2871,7 +3065,8 @@
       "summary": "Wiggle Transform frequency.",
       "capability_keys": [
         "shape.wiggle_transform.set_wiggles_per_second"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-wiggle-transform.json"
     },
     "comps[].layers[].shape.zigzag": {
       "path": "comps[].layers[].shape.zigzag",
@@ -2883,7 +3078,8 @@
       "summary": "Zig Zag operator settings.",
       "capability_keys": [
         "shape.zigzag.add"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-zigzag.json"
     },
     "comps[].layers[].shape.zigzag.detail": {
       "path": "comps[].layers[].shape.zigzag.detail",
@@ -2895,7 +3091,8 @@
       "summary": "Zig Zag detail.",
       "capability_keys": [
         "shape.zigzag.set_detail"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-zigzag.json"
     },
     "comps[].layers[].shape.zigzag.points": {
       "path": "comps[].layers[].shape.zigzag.points",
@@ -2907,7 +3104,8 @@
       "summary": "Zig Zag point mode.",
       "capability_keys": [
         "shape.zigzag.set_points"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-zigzag.json"
     },
     "comps[].layers[].shape.zigzag.size": {
       "path": "comps[].layers[].shape.zigzag.size",
@@ -2919,7 +3117,8 @@
       "summary": "Zig Zag size.",
       "capability_keys": [
         "shape.zigzag.set_size"
-      ]
+      ],
+      "example": "examples/recipes/minimal-shape-zigzag.json"
     },
     "comps[].layers[].shy": {
       "path": "comps[].layers[].shy",
@@ -2931,7 +3130,8 @@
       "summary": "Layer shy switch.",
       "capability_keys": [
         "layer.set_shy"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-object-profile.json"
     },
     "comps[].layers[].solo": {
       "path": "comps[].layers[].solo",
@@ -2943,7 +3143,8 @@
       "summary": "Layer solo switch.",
       "capability_keys": [
         "layer.set_solo"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-common-switches.json"
     },
     "comps[].layers[].start_time": {
       "path": "comps[].layers[].start_time",
@@ -2955,7 +3156,8 @@
       "summary": "Layer start time in seconds.",
       "capability_keys": [
         "layer.set_start_time"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-object-profile.json"
     },
     "comps[].layers[].text": {
       "path": "comps[].layers[].text",
@@ -2967,7 +3169,8 @@
       "summary": "Source text for a text layer.",
       "capability_keys": [
         "layer.set_text"
-      ]
+      ],
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "comps[].layers[].text_style": {
       "path": "comps[].layers[].text_style",
@@ -2976,7 +3179,8 @@
       "source_field": "TextStyle",
       "type": "object\u003cTextStyleSpec\u003e",
       "go_type": "*recipe.TextStyleSpec",
-      "summary": "Text layer style overrides."
+      "summary": "Text layer style overrides.",
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].text_style.apply_stroke": {
       "path": "comps[].layers[].text_style.apply_stroke",
@@ -2988,7 +3192,8 @@
       "summary": "Layer text style stroke enable switch.",
       "capability_keys": [
         "text.set_run_apply_stroke"
-      ]
+      ],
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].text_style.faux_bold": {
       "path": "comps[].layers[].text_style.faux_bold",
@@ -3000,7 +3205,8 @@
       "summary": "Layer text style faux bold switch.",
       "capability_keys": [
         "text.set_run_faux_bold"
-      ]
+      ],
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].text_style.faux_italic": {
       "path": "comps[].layers[].text_style.faux_italic",
@@ -3012,7 +3218,8 @@
       "summary": "Layer text style faux italic switch.",
       "capability_keys": [
         "text.set_run_faux_italic"
-      ]
+      ],
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].text_style.fill_color": {
       "path": "comps[].layers[].text_style.fill_color",
@@ -3024,7 +3231,8 @@
       "summary": "Layer text style fill color as RGB channels.",
       "capability_keys": [
         "text.set_run_fill_color"
-      ]
+      ],
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].text_style.font_size": {
       "path": "comps[].layers[].text_style.font_size",
@@ -3049,7 +3257,8 @@
       "summary": "Layer text style paragraph justification mode.",
       "capability_keys": [
         "text.set_paragraph_justification"
-      ]
+      ],
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].text_style.paragraph_index": {
       "path": "comps[].layers[].text_style.paragraph_index",
@@ -3079,7 +3288,8 @@
       "summary": "Layer text style stroke color as RGB channels.",
       "capability_keys": [
         "text.set_run_stroke_color"
-      ]
+      ],
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].text_style.stroke_width": {
       "path": "comps[].layers[].text_style.stroke_width",
@@ -3091,7 +3301,8 @@
       "summary": "Layer text style stroke width.",
       "capability_keys": [
         "text.set_run_stroke_width"
-      ]
+      ],
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].text_style.tracking": {
       "path": "comps[].layers[].text_style.tracking",
@@ -3103,7 +3314,8 @@
       "summary": "Layer text style character tracking amount.",
       "capability_keys": [
         "text.set_run_tracking"
-      ]
+      ],
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].track_matte": {
       "path": "comps[].layers[].track_matte",
@@ -3115,7 +3327,8 @@
       "summary": "Layer track matte mode.",
       "capability_keys": [
         "layer.set_track_matte"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-track-matte.json"
     },
     "comps[].layers[].transform": {
       "path": "comps[].layers[].transform",
@@ -3127,7 +3340,8 @@
       "summary": "Layer transform block.",
       "capability_keys": [
         "layer.set_transform"
-      ]
+      ],
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "comps[].layers[].transform.anchor_point": {
       "path": "comps[].layers[].transform.anchor_point",
@@ -3145,7 +3359,8 @@
       "source_field": "AnchorPointKeyframes",
       "type": "array\u003crecipe.VectorKeyframe\u003e",
       "go_type": "[]recipe.VectorKeyframe",
-      "summary": "Anchor point keyframe list."
+      "summary": "Anchor point keyframe list.",
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].transform.anchor_point_keyframes[].in_ease": {
       "path": "comps[].layers[].transform.anchor_point_keyframes[].in_ease",
@@ -3217,7 +3432,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Anchor point keyframe time in seconds."
+      "summary": "Anchor point keyframe time in seconds.",
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].transform.anchor_point_keyframes[].value": {
       "path": "comps[].layers[].transform.anchor_point_keyframes[].value",
@@ -3229,7 +3445,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Anchor point keyframe vector value."
+      "summary": "Anchor point keyframe vector value.",
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].transform.expressions": {
       "path": "comps[].layers[].transform.expressions",
@@ -3238,7 +3455,8 @@
       "source_field": "Expressions",
       "type": "object\u003cTransformExpressions\u003e",
       "go_type": "recipe.TransformExpressions",
-      "summary": "Transform property expressions."
+      "summary": "Transform property expressions.",
+      "example": "examples/recipes/minimal-transform-expression.json"
     },
     "comps[].layers[].transform.expressions.anchor_point": {
       "path": "comps[].layers[].transform.expressions.anchor_point",
@@ -3283,7 +3501,8 @@
       "source_field": "Opacity",
       "type": "object\u003cExpressionSpec\u003e",
       "go_type": "*recipe.ExpressionSpec",
-      "summary": "Opacity expression settings."
+      "summary": "Opacity expression settings.",
+      "example": "examples/recipes/minimal-transform-expression.json"
     },
     "comps[].layers[].transform.expressions.opacity.enabled": {
       "path": "comps[].layers[].transform.expressions.opacity.enabled",
@@ -3295,7 +3514,8 @@
       "summary": "opacity transform expression enable switch.",
       "capability_keys": [
         "property.set_expression_enabled"
-      ]
+      ],
+      "example": "examples/recipes/minimal-transform-expression.json"
     },
     "comps[].layers[].transform.expressions.opacity.source": {
       "path": "comps[].layers[].transform.expressions.opacity.source",
@@ -3310,7 +3530,8 @@
       "summary": "opacity transform expression source code.",
       "capability_keys": [
         "property.set_expression"
-      ]
+      ],
+      "example": "examples/recipes/minimal-transform-expression.json"
     },
     "comps[].layers[].transform.expressions.position": {
       "path": "comps[].layers[].transform.expressions.position",
@@ -3319,7 +3540,8 @@
       "source_field": "Position",
       "type": "object\u003cExpressionSpec\u003e",
       "go_type": "*recipe.ExpressionSpec",
-      "summary": "Position expression settings."
+      "summary": "Position expression settings.",
+      "example": "examples/recipes/minimal-transform-expression.json"
     },
     "comps[].layers[].transform.expressions.position.enabled": {
       "path": "comps[].layers[].transform.expressions.position.enabled",
@@ -3428,7 +3650,8 @@
       "source_field": "Opacity",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Static opacity value."
+      "summary": "Static opacity value.",
+      "example": "examples/recipes/minimal-text-effect.json"
     },
     "comps[].layers[].transform.opacity_keyframes[]": {
       "path": "comps[].layers[].transform.opacity_keyframes[]",
@@ -3437,7 +3660,8 @@
       "source_field": "OpacityKeyframes",
       "type": "array\u003crecipe.ScalarKeyframe\u003e",
       "go_type": "[]recipe.ScalarKeyframe",
-      "summary": "Opacity keyframe list."
+      "summary": "Opacity keyframe list.",
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].transform.opacity_keyframes[].in_ease": {
       "path": "comps[].layers[].transform.opacity_keyframes[].in_ease",
@@ -3446,7 +3670,8 @@
       "source_field": "InEase",
       "type": "object\u003cTemporalEase\u003e",
       "go_type": "*recipe.TemporalEase",
-      "summary": "Opacity keyframe incoming temporal ease."
+      "summary": "Opacity keyframe incoming temporal ease.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.opacity_keyframes[].in_ease.influence": {
       "path": "comps[].layers[].transform.opacity_keyframes[].in_ease.influence",
@@ -3458,7 +3683,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Opacity keyframe incoming ease influence."
+      "summary": "Opacity keyframe incoming ease influence.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.opacity_keyframes[].in_ease.speed": {
       "path": "comps[].layers[].transform.opacity_keyframes[].in_ease.speed",
@@ -3467,7 +3693,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "summary": "Opacity keyframe incoming ease speed."
+      "summary": "Opacity keyframe incoming ease speed.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.opacity_keyframes[].out_ease": {
       "path": "comps[].layers[].transform.opacity_keyframes[].out_ease",
@@ -3476,7 +3703,8 @@
       "source_field": "OutEase",
       "type": "object\u003cTemporalEase\u003e",
       "go_type": "*recipe.TemporalEase",
-      "summary": "Opacity keyframe outgoing temporal ease."
+      "summary": "Opacity keyframe outgoing temporal ease.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.opacity_keyframes[].out_ease.influence": {
       "path": "comps[].layers[].transform.opacity_keyframes[].out_ease.influence",
@@ -3488,7 +3716,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Opacity keyframe outgoing ease influence."
+      "summary": "Opacity keyframe outgoing ease influence.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.opacity_keyframes[].out_ease.speed": {
       "path": "comps[].layers[].transform.opacity_keyframes[].out_ease.speed",
@@ -3497,7 +3726,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "summary": "Opacity keyframe outgoing ease speed."
+      "summary": "Opacity keyframe outgoing ease speed.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.opacity_keyframes[].time": {
       "path": "comps[].layers[].transform.opacity_keyframes[].time",
@@ -3509,7 +3739,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Opacity keyframe time in seconds."
+      "summary": "Opacity keyframe time in seconds.",
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].transform.opacity_keyframes[].value": {
       "path": "comps[].layers[].transform.opacity_keyframes[].value",
@@ -3521,7 +3752,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Opacity keyframe value."
+      "summary": "Opacity keyframe value.",
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].transform.position": {
       "path": "comps[].layers[].transform.position",
@@ -3530,7 +3762,8 @@
       "source_field": "Position",
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
-      "summary": "Static position value."
+      "summary": "Static position value.",
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "comps[].layers[].transform.position_keyframes[]": {
       "path": "comps[].layers[].transform.position_keyframes[]",
@@ -3549,7 +3782,8 @@
       "source_field": "InEase",
       "type": "object\u003cTemporalEase\u003e",
       "go_type": "*recipe.TemporalEase",
-      "summary": "Position keyframe incoming temporal ease."
+      "summary": "Position keyframe incoming temporal ease.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.position_keyframes[].in_ease.influence": {
       "path": "comps[].layers[].transform.position_keyframes[].in_ease.influence",
@@ -3561,7 +3795,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Position keyframe incoming ease influence."
+      "summary": "Position keyframe incoming ease influence.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.position_keyframes[].in_ease.speed": {
       "path": "comps[].layers[].transform.position_keyframes[].in_ease.speed",
@@ -3570,7 +3805,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "summary": "Position keyframe incoming ease speed."
+      "summary": "Position keyframe incoming ease speed.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.position_keyframes[].out_ease": {
       "path": "comps[].layers[].transform.position_keyframes[].out_ease",
@@ -3579,7 +3815,8 @@
       "source_field": "OutEase",
       "type": "object\u003cTemporalEase\u003e",
       "go_type": "*recipe.TemporalEase",
-      "summary": "Position keyframe outgoing temporal ease."
+      "summary": "Position keyframe outgoing temporal ease.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.position_keyframes[].out_ease.influence": {
       "path": "comps[].layers[].transform.position_keyframes[].out_ease.influence",
@@ -3591,7 +3828,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Position keyframe outgoing ease influence."
+      "summary": "Position keyframe outgoing ease influence.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.position_keyframes[].out_ease.speed": {
       "path": "comps[].layers[].transform.position_keyframes[].out_ease.speed",
@@ -3600,7 +3838,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "summary": "Position keyframe outgoing ease speed."
+      "summary": "Position keyframe outgoing ease speed.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.position_keyframes[].time": {
       "path": "comps[].layers[].transform.position_keyframes[].time",
@@ -3612,7 +3851,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Position keyframe time in seconds."
+      "summary": "Position keyframe time in seconds.",
+      "example": "examples/recipes/minimal-layer-auto-orient.json"
     },
     "comps[].layers[].transform.position_keyframes[].value": {
       "path": "comps[].layers[].transform.position_keyframes[].value",
@@ -3624,7 +3864,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Position keyframe vector value."
+      "summary": "Position keyframe vector value.",
+      "example": "examples/recipes/minimal-layer-auto-orient.json"
     },
     "comps[].layers[].transform.rotation": {
       "path": "comps[].layers[].transform.rotation",
@@ -3642,7 +3883,8 @@
       "source_field": "RotationKeyframes",
       "type": "array\u003crecipe.ScalarKeyframe\u003e",
       "go_type": "[]recipe.ScalarKeyframe",
-      "summary": "Rotation keyframe list."
+      "summary": "Rotation keyframe list.",
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].transform.rotation_keyframes[].in_ease": {
       "path": "comps[].layers[].transform.rotation_keyframes[].in_ease",
@@ -3714,7 +3956,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Rotation keyframe time in seconds."
+      "summary": "Rotation keyframe time in seconds.",
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].transform.rotation_keyframes[].value": {
       "path": "comps[].layers[].transform.rotation_keyframes[].value",
@@ -3726,7 +3969,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Rotation keyframe value."
+      "summary": "Rotation keyframe value.",
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].transform.scale": {
       "path": "comps[].layers[].transform.scale",
@@ -3735,7 +3979,8 @@
       "source_field": "Scale",
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
-      "summary": "Static scale value."
+      "summary": "Static scale value.",
+      "example": "examples/recipes/minimal-text-effect.json"
     },
     "comps[].layers[].transform.scale_keyframes[]": {
       "path": "comps[].layers[].transform.scale_keyframes[]",
@@ -3744,7 +3989,8 @@
       "source_field": "ScaleKeyframes",
       "type": "array\u003crecipe.VectorKeyframe\u003e",
       "go_type": "[]recipe.VectorKeyframe",
-      "summary": "Scale keyframe list."
+      "summary": "Scale keyframe list.",
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].transform.scale_keyframes[].in_ease": {
       "path": "comps[].layers[].transform.scale_keyframes[].in_ease",
@@ -3816,7 +4062,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Scale keyframe time in seconds."
+      "summary": "Scale keyframe time in seconds.",
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].transform.scale_keyframes[].value": {
       "path": "comps[].layers[].transform.scale_keyframes[].value",
@@ -3828,7 +4075,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Scale keyframe vector value."
+      "summary": "Scale keyframe vector value.",
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].type": {
       "path": "comps[].layers[].type",
@@ -3859,7 +4107,8 @@
         "layer.create_light",
         "layer.create_null",
         "layer.create_adjustment"
-      ]
+      ],
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "comps[].layers[].visible": {
       "path": "comps[].layers[].visible",
@@ -3871,7 +4120,8 @@
       "summary": "Layer video visibility switch.",
       "capability_keys": [
         "layer.set_visible"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-common-switches.json"
     },
     "comps[].motion_blur": {
       "path": "comps[].motion_blur",
@@ -3880,7 +4130,8 @@
       "source_field": "MotionBlur",
       "type": "object\u003cCompMotionBlurSpec\u003e",
       "go_type": "*recipe.CompMotionBlurSpec",
-      "summary": "Composition motion blur settings."
+      "summary": "Composition motion blur settings.",
+      "example": "examples/recipes/minimal-comp-flag-profile.json"
     },
     "comps[].motion_blur.adaptive_sample_limit": {
       "path": "comps[].motion_blur.adaptive_sample_limit",
@@ -3892,7 +4143,8 @@
       "summary": "Composition motion blur adaptive sample limit.",
       "capability_keys": [
         "comp.set_motion_blur_adaptive_sample_limit"
-      ]
+      ],
+      "example": "examples/recipes/minimal-comp-motion-blur.json"
     },
     "comps[].motion_blur.enabled": {
       "path": "comps[].motion_blur.enabled",
@@ -3904,7 +4156,8 @@
       "summary": "Composition motion blur enable switch.",
       "capability_keys": [
         "comp.set_motion_blur"
-      ]
+      ],
+      "example": "examples/recipes/minimal-comp-flag-profile.json"
     },
     "comps[].motion_blur.samples_per_frame": {
       "path": "comps[].motion_blur.samples_per_frame",
@@ -3916,7 +4169,8 @@
       "summary": "Composition motion blur samples per frame.",
       "capability_keys": [
         "comp.set_motion_blur_samples_per_frame"
-      ]
+      ],
+      "example": "examples/recipes/minimal-comp-motion-blur.json"
     },
     "comps[].motion_blur.shutter_angle": {
       "path": "comps[].motion_blur.shutter_angle",
@@ -3928,7 +4182,8 @@
       "summary": "Composition motion blur shutter angle.",
       "capability_keys": [
         "comp.set_motion_blur_shutter_angle"
-      ]
+      ],
+      "example": "examples/recipes/minimal-comp-motion-blur.json"
     },
     "comps[].motion_blur.shutter_phase": {
       "path": "comps[].motion_blur.shutter_phase",
@@ -3940,7 +4195,8 @@
       "summary": "Composition motion blur shutter phase.",
       "capability_keys": [
         "comp.set_motion_blur_shutter_phase"
-      ]
+      ],
+      "example": "examples/recipes/minimal-comp-motion-blur.json"
     },
     "comps[].name": {
       "path": "comps[].name",
@@ -3952,7 +4208,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Composition display name."
+      "summary": "Composition display name.",
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "comps[].pixel_aspect": {
       "path": "comps[].pixel_aspect",
@@ -3964,7 +4221,8 @@
       "summary": "Composition pixel aspect ratio.",
       "capability_keys": [
         "comp.set_pixel_aspect"
-      ]
+      ],
+      "example": "examples/recipes/minimal-comp-object-profile.json"
     },
     "comps[].preserve_nested_frame_rate": {
       "path": "comps[].preserve_nested_frame_rate",
@@ -3976,7 +4234,8 @@
       "summary": "Composition nested frame-rate preservation switch.",
       "capability_keys": [
         "comp.set_preserve_nested_frame_rate"
-      ]
+      ],
+      "example": "examples/recipes/minimal-comp-flag-profile.json"
     },
     "comps[].preserve_nested_resolution": {
       "path": "comps[].preserve_nested_resolution",
@@ -3988,7 +4247,8 @@
       "summary": "Composition nested resolution preservation switch.",
       "capability_keys": [
         "comp.set_preserve_nested_resolution"
-      ]
+      ],
+      "example": "examples/recipes/minimal-comp-flag-profile.json"
     },
     "comps[].renderer": {
       "path": "comps[].renderer",
@@ -4013,7 +4273,8 @@
       "summary": "Composition preview resolution factor.",
       "capability_keys": [
         "comp.set_resolution_factor"
-      ]
+      ],
+      "example": "examples/recipes/minimal-comp-object-profile.json"
     },
     "comps[].width": {
       "path": "comps[].width",
@@ -4026,7 +4287,8 @@
         "structural"
       ],
       "summary": "Composition width in pixels.",
-      "validation": "Pixel width must fit the composition writer's uint16 range."
+      "validation": "Pixel width must fit the composition writer's uint16 range.",
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "comps[].work_area": {
       "path": "comps[].work_area",
@@ -4051,7 +4313,8 @@
       "summary": "Composition work area end time in seconds.",
       "capability_keys": [
         "comp.set_work_area"
-      ]
+      ],
+      "example": "examples/recipes/minimal-comp-object-profile.json"
     },
     "comps[].work_area.start": {
       "path": "comps[].work_area.start",
@@ -4063,7 +4326,8 @@
       "summary": "Composition work area start time in seconds.",
       "capability_keys": [
         "comp.set_work_area"
-      ]
+      ],
+      "example": "examples/recipes/minimal-comp-object-profile.json"
     },
     "expected_profile": {
       "path": "expected_profile",
@@ -4072,7 +4336,8 @@
       "source_field": "ExpectedProfile",
       "type": "object\u003cExpectedProfile\u003e",
       "go_type": "recipe.ExpectedProfile",
-      "summary": "Optional assertions used to compare the generated project against expected structure."
+      "summary": "Optional assertions used to compare the generated project against expected structure.",
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "expected_profile.background_color": {
       "path": "expected_profile.background_color",
@@ -4092,7 +4357,8 @@
       "source_field": "Comment",
       "type": "string",
       "go_type": "string",
-      "summary": "Expected composition comment text."
+      "summary": "Expected composition comment text.",
+      "example": "examples/recipes/minimal-comp-comment.json"
     },
     "expected_profile.comp_count": {
       "path": "expected_profile.comp_count",
@@ -4102,7 +4368,8 @@
       "type": "number",
       "go_type": "*int",
       "summary": "Expected number of compositions.",
-      "validation": "Expected count must be non-negative."
+      "validation": "Expected count must be non-negative.",
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "expected_profile.display_start_time": {
       "path": "expected_profile.display_start_time",
@@ -4111,7 +4378,8 @@
       "source_field": "DisplayStartTime",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Expected composition display start time in seconds."
+      "summary": "Expected composition display start time in seconds.",
+      "example": "examples/recipes/minimal-comp-display-start-time.json"
     },
     "expected_profile.draft_3d": {
       "path": "expected_profile.draft_3d",
@@ -4120,7 +4388,8 @@
       "source_field": "Draft3D",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected composition draft 3D switch."
+      "summary": "Expected composition draft 3D switch.",
+      "example": "examples/recipes/minimal-comp-draft-3d.json"
     },
     "expected_profile.duration": {
       "path": "expected_profile.duration",
@@ -4130,7 +4399,8 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected composition duration in seconds.",
-      "validation": "Expected duration must be positive."
+      "validation": "Expected duration must be positive.",
+      "example": "examples/recipes/minimal-comp-object-profile.json"
     },
     "expected_profile.effects[]": {
       "path": "expected_profile.effects[]",
@@ -4153,7 +4423,8 @@
         "structural"
       ],
       "summary": "Layer name to inspect for the expected effect.",
-      "validation": "Effect profile checks require a target layer name."
+      "validation": "Effect profile checks require a target layer name.",
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "expected_profile.effects[].match_name": {
       "path": "expected_profile.effects[].match_name",
@@ -4166,7 +4437,8 @@
         "structural"
       ],
       "summary": "Expected effect match name.",
-      "validation": "Effect profile checks require an effect match name."
+      "validation": "Effect profile checks require an effect match name.",
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "expected_profile.effects[].params[]": {
       "path": "expected_profile.effects[].params[]",
@@ -4186,7 +4458,8 @@
       "source_field": "Expression",
       "type": "string",
       "go_type": "string",
-      "summary": "Expected effect parameter expression source."
+      "summary": "Expected effect parameter expression source.",
+      "example": "examples/recipes/minimal-effect-param-expression.json"
     },
     "expected_profile.effects[].params[].expression_enabled": {
       "path": "expected_profile.effects[].params[].expression_enabled",
@@ -4195,7 +4468,8 @@
       "source_field": "ExpressionEnabled",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected effect parameter expression enable switch."
+      "summary": "Expected effect parameter expression enable switch.",
+      "example": "examples/recipes/minimal-effect-param-expression.json"
     },
     "expected_profile.effects[].params[].match_name": {
       "path": "expected_profile.effects[].params[].match_name",
@@ -4208,7 +4482,8 @@
         "structural"
       ],
       "summary": "Expected effect parameter match name.",
-      "validation": "Expected effect parameter checks require a parameter match name."
+      "validation": "Expected effect parameter checks require a parameter match name.",
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "expected_profile.effects[].params[].value": {
       "path": "expected_profile.effects[].params[].value",
@@ -4218,7 +4493,8 @@
       "type": "any",
       "go_type": "interface {}",
       "summary": "Expected effect parameter value.",
-      "validation": "Expected parameter value must be a number, boolean, or numeric array."
+      "validation": "Expected parameter value must be a number, boolean, or numeric array.",
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "expected_profile.frame_blending": {
       "path": "expected_profile.frame_blending",
@@ -4227,7 +4503,8 @@
       "source_field": "FrameBlending",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected composition frame blending switch."
+      "summary": "Expected composition frame blending switch.",
+      "example": "examples/recipes/minimal-comp-flag-profile.json"
     },
     "expected_profile.frame_rate": {
       "path": "expected_profile.frame_rate",
@@ -4237,7 +4514,8 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected composition frame rate in frames per second.",
-      "validation": "Expected frame rate must be positive."
+      "validation": "Expected frame rate must be positive.",
+      "example": "examples/recipes/minimal-comp-object-profile.json"
     },
     "expected_profile.height": {
       "path": "expected_profile.height",
@@ -4247,7 +4525,8 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected composition height in pixels.",
-      "validation": "Expected height must be a positive integer."
+      "validation": "Expected height must be a positive integer.",
+      "example": "examples/recipes/minimal-comp-object-profile.json"
     },
     "expected_profile.hide_shy_layers": {
       "path": "expected_profile.hide_shy_layers",
@@ -4256,7 +4535,8 @@
       "source_field": "HideShyLayers",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected composition shy layer visibility switch."
+      "summary": "Expected composition shy layer visibility switch.",
+      "example": "examples/recipes/minimal-comp-flag-profile.json"
     },
     "expected_profile.keyframes[]": {
       "path": "expected_profile.keyframes[]",
@@ -4279,7 +4559,8 @@
         "structural"
       ],
       "summary": "Expected property keyframes.",
-      "validation": "Expected keyframes must contain at least one keyframe and be sorted by time."
+      "validation": "Expected keyframes must contain at least one keyframe and be sorted by time.",
+      "example": "examples/recipes/minimal-layer-auto-orient.json"
     },
     "expected_profile.keyframes[].keyframes[].time": {
       "path": "expected_profile.keyframes[].keyframes[].time",
@@ -4292,7 +4573,8 @@
         "structural"
       ],
       "summary": "Expected property keyframe time in seconds.",
-      "validation": "Expected keyframe time must be non-negative and sorted in ascending order."
+      "validation": "Expected keyframe time must be non-negative and sorted in ascending order.",
+      "example": "examples/recipes/minimal-layer-auto-orient.json"
     },
     "expected_profile.keyframes[].keyframes[].value": {
       "path": "expected_profile.keyframes[].keyframes[].value",
@@ -4302,7 +4584,8 @@
       "type": "any",
       "go_type": "interface {}",
       "summary": "Expected property keyframe value.",
-      "validation": "Expected keyframe value must be a number, boolean, or numeric array."
+      "validation": "Expected keyframe value must be a number, boolean, or numeric array.",
+      "example": "examples/recipes/minimal-layer-auto-orient.json"
     },
     "expected_profile.keyframes[].layer_name": {
       "path": "expected_profile.keyframes[].layer_name",
@@ -4315,7 +4598,8 @@
         "structural"
       ],
       "summary": "Layer name to inspect for expected keyframes.",
-      "validation": "Keyframe profile checks require a target layer name."
+      "validation": "Keyframe profile checks require a target layer name.",
+      "example": "examples/recipes/minimal-layer-auto-orient.json"
     },
     "expected_profile.keyframes[].match_name": {
       "path": "expected_profile.keyframes[].match_name",
@@ -4328,7 +4612,8 @@
         "structural"
       ],
       "summary": "Expected keyframed property match name.",
-      "validation": "Keyframe profile checks require a property match name."
+      "validation": "Keyframe profile checks require a property match name.",
+      "example": "examples/recipes/minimal-layer-auto-orient.json"
     },
     "expected_profile.label": {
       "path": "expected_profile.label",
@@ -4338,7 +4623,8 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected composition label color index.",
-      "validation": "Expected label must be a valid AE label index."
+      "validation": "Expected label must be a valid AE label index.",
+      "example": "examples/recipes/minimal-comp-label.json"
     },
     "expected_profile.layer_count": {
       "path": "expected_profile.layer_count",
@@ -4348,7 +4634,8 @@
       "type": "number",
       "go_type": "*int",
       "summary": "Expected total number of layers.",
-      "validation": "Expected count must be non-negative."
+      "validation": "Expected count must be non-negative.",
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "expected_profile.layers[]": {
       "path": "expected_profile.layers[]",
@@ -4374,7 +4661,8 @@
         "along_path",
         "camera_or_point_of_interest",
         "characters_toward_camera"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-auto-orient.json"
     },
     "expected_profile.layers[].blending_mode": {
       "path": "expected_profile.layers[].blending_mode",
@@ -4384,7 +4672,8 @@
       "type": "string",
       "go_type": "string",
       "summary": "Expected layer blending mode.",
-      "validation": "Expected blending mode must use a supported recipe blending mode value."
+      "validation": "Expected blending mode must use a supported recipe blending mode value.",
+      "example": "examples/recipes/minimal-layer-object-profile.json"
     },
     "expected_profile.layers[].comment": {
       "path": "expected_profile.layers[].comment",
@@ -4393,7 +4682,8 @@
       "source_field": "Comment",
       "type": "string",
       "go_type": "string",
-      "summary": "Expected layer comment text."
+      "summary": "Expected layer comment text.",
+      "example": "examples/recipes/minimal-layer-comment.json"
     },
     "expected_profile.layers[].flags": {
       "path": "expected_profile.layers[].flags",
@@ -4402,7 +4692,8 @@
       "source_field": "Flags",
       "type": "object\u003cExpectedLayerFlags\u003e",
       "go_type": "*recipe.ExpectedLayerFlags",
-      "summary": "Expected layer switch checks."
+      "summary": "Expected layer switch checks.",
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "expected_profile.layers[].flags.audio_enabled": {
       "path": "expected_profile.layers[].flags.audio_enabled",
@@ -4411,7 +4702,8 @@
       "source_field": "AudioEnabled",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected layer audio enable switch."
+      "summary": "Expected layer audio enable switch.",
+      "example": "examples/recipes/minimal-layer-common-switches.json"
     },
     "expected_profile.layers[].flags.collapse_transform": {
       "path": "expected_profile.layers[].flags.collapse_transform",
@@ -4420,7 +4712,8 @@
       "source_field": "CollapseTransform",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected collapse transformations switch."
+      "summary": "Expected collapse transformations switch.",
+      "example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     "expected_profile.layers[].flags.effects_enabled": {
       "path": "expected_profile.layers[].flags.effects_enabled",
@@ -4429,7 +4722,8 @@
       "source_field": "EffectsEnabled",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected layer effects enable switch."
+      "summary": "Expected layer effects enable switch.",
+      "example": "examples/recipes/minimal-layer-common-switches.json"
     },
     "expected_profile.layers[].flags.frame_blend_enabled": {
       "path": "expected_profile.layers[].flags.frame_blend_enabled",
@@ -4438,7 +4732,8 @@
       "source_field": "FrameBlendEnabled",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected layer frame blending switch."
+      "summary": "Expected layer frame blending switch.",
+      "example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     "expected_profile.layers[].flags.frame_blend_pixel_motion": {
       "path": "expected_profile.layers[].flags.frame_blend_pixel_motion",
@@ -4447,7 +4742,8 @@
       "source_field": "FrameBlendPixelMotion",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected pixel-motion frame blending switch."
+      "summary": "Expected pixel-motion frame blending switch.",
+      "example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     "expected_profile.layers[].flags.is_3d": {
       "path": "expected_profile.layers[].flags.is_3d",
@@ -4456,7 +4752,8 @@
       "source_field": "Is3D",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected layer 3D switch."
+      "summary": "Expected layer 3D switch.",
+      "example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     "expected_profile.layers[].flags.is_adjustment": {
       "path": "expected_profile.layers[].flags.is_adjustment",
@@ -4465,7 +4762,8 @@
       "source_field": "IsAdjustment",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected adjustment-layer switch."
+      "summary": "Expected adjustment-layer switch.",
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "expected_profile.layers[].flags.is_guide": {
       "path": "expected_profile.layers[].flags.is_guide",
@@ -4474,7 +4772,8 @@
       "source_field": "IsGuide",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected guide-layer switch."
+      "summary": "Expected guide-layer switch.",
+      "example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     "expected_profile.layers[].flags.is_null": {
       "path": "expected_profile.layers[].flags.is_null",
@@ -4483,7 +4782,8 @@
       "source_field": "IsNull",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected null-layer switch."
+      "summary": "Expected null-layer switch.",
+      "example": "examples/recipes/minimal-layer-null-flag.json"
     },
     "expected_profile.layers[].flags.locked": {
       "path": "expected_profile.layers[].flags.locked",
@@ -4492,7 +4792,8 @@
       "source_field": "Locked",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected layer lock switch."
+      "summary": "Expected layer lock switch.",
+      "example": "examples/recipes/minimal-layer-common-switches.json"
     },
     "expected_profile.layers[].flags.markers_locked": {
       "path": "expected_profile.layers[].flags.markers_locked",
@@ -4501,7 +4802,8 @@
       "source_field": "MarkersLocked",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected layer marker lock switch."
+      "summary": "Expected layer marker lock switch.",
+      "example": "examples/recipes/minimal-layer-object-profile.json"
     },
     "expected_profile.layers[].flags.motion_blur": {
       "path": "expected_profile.layers[].flags.motion_blur",
@@ -4510,7 +4812,8 @@
       "source_field": "MotionBlur",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected layer motion blur switch."
+      "summary": "Expected layer motion blur switch.",
+      "example": "examples/recipes/minimal-layer-motion-blur.json"
     },
     "expected_profile.layers[].flags.preserve_transparency": {
       "path": "expected_profile.layers[].flags.preserve_transparency",
@@ -4519,7 +4822,8 @@
       "source_field": "PreserveTransparency",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected preserve transparency switch."
+      "summary": "Expected preserve transparency switch.",
+      "example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     "expected_profile.layers[].flags.sampling_bicubic": {
       "path": "expected_profile.layers[].flags.sampling_bicubic",
@@ -4528,7 +4832,8 @@
       "source_field": "SamplingBicubic",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected bicubic sampling switch."
+      "summary": "Expected bicubic sampling switch.",
+      "example": "examples/recipes/minimal-layer-advanced-switches.json"
     },
     "expected_profile.layers[].flags.shy": {
       "path": "expected_profile.layers[].flags.shy",
@@ -4537,7 +4842,8 @@
       "source_field": "Shy",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected layer shy switch."
+      "summary": "Expected layer shy switch.",
+      "example": "examples/recipes/minimal-layer-object-profile.json"
     },
     "expected_profile.layers[].flags.solo": {
       "path": "expected_profile.layers[].flags.solo",
@@ -4546,7 +4852,8 @@
       "source_field": "Solo",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected layer solo switch."
+      "summary": "Expected layer solo switch.",
+      "example": "examples/recipes/minimal-layer-common-switches.json"
     },
     "expected_profile.layers[].flags.visible": {
       "path": "expected_profile.layers[].flags.visible",
@@ -4555,7 +4862,8 @@
       "source_field": "Visible",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected layer video visibility switch."
+      "summary": "Expected layer video visibility switch.",
+      "example": "examples/recipes/minimal-layer-common-switches.json"
     },
     "expected_profile.layers[].label": {
       "path": "expected_profile.layers[].label",
@@ -4565,7 +4873,8 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected layer label color index.",
-      "validation": "Expected layer label must be a valid AE label index."
+      "validation": "Expected layer label must be a valid AE label index.",
+      "example": "examples/recipes/minimal-layer-label.json"
     },
     "expected_profile.layers[].light_kind": {
       "path": "expected_profile.layers[].light_kind",
@@ -4574,7 +4883,8 @@
       "source_field": "LightKind",
       "type": "string",
       "go_type": "string",
-      "summary": "Expected light type."
+      "summary": "Expected light type.",
+      "example": "examples/recipes/minimal-light-kind.json"
     },
     "expected_profile.layers[].light_source": {
       "path": "expected_profile.layers[].light_source",
@@ -4583,7 +4893,8 @@
       "source_field": "LightSource",
       "type": "string",
       "go_type": "string",
-      "summary": "Expected source layer for light data."
+      "summary": "Expected source layer for light data.",
+      "example": "examples/recipes/minimal-light-source.json"
     },
     "expected_profile.layers[].matte": {
       "path": "expected_profile.layers[].matte",
@@ -4592,7 +4903,8 @@
       "source_field": "Matte",
       "type": "string",
       "go_type": "string",
-      "summary": "Expected matte layer name."
+      "summary": "Expected matte layer name.",
+      "example": "examples/recipes/minimal-layer-track-matte.json"
     },
     "expected_profile.layers[].name": {
       "path": "expected_profile.layers[].name",
@@ -4605,7 +4917,8 @@
         "structural"
       ],
       "summary": "Expected layer name.",
-      "validation": "Layer profile checks require a target layer name."
+      "validation": "Layer profile checks require a target layer name.",
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "expected_profile.layers[].parent": {
       "path": "expected_profile.layers[].parent",
@@ -4614,7 +4927,8 @@
       "source_field": "Parent",
       "type": "string",
       "go_type": "string",
-      "summary": "Expected parent layer name."
+      "summary": "Expected parent layer name.",
+      "example": "examples/recipes/minimal-layer-null-flag.json"
     },
     "expected_profile.layers[].quality": {
       "path": "expected_profile.layers[].quality",
@@ -4629,7 +4943,8 @@
         "wireframe",
         "draft",
         "best"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-object-profile.json"
     },
     "expected_profile.layers[].source": {
       "path": "expected_profile.layers[].source",
@@ -4638,7 +4953,8 @@
       "source_field": "Source",
       "type": "string",
       "go_type": "string",
-      "summary": "Expected source item name."
+      "summary": "Expected source item name.",
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "expected_profile.layers[].source_kind": {
       "path": "expected_profile.layers[].source_kind",
@@ -4647,7 +4963,8 @@
       "source_field": "SourceKind",
       "type": "string",
       "go_type": "string",
-      "summary": "Expected source item type."
+      "summary": "Expected source item type.",
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "expected_profile.layers[].timing": {
       "path": "expected_profile.layers[].timing",
@@ -4656,7 +4973,8 @@
       "source_field": "Timing",
       "type": "object\u003cExpectedLayerTiming\u003e",
       "go_type": "*recipe.ExpectedLayerTiming",
-      "summary": "Expected layer timing checks."
+      "summary": "Expected layer timing checks.",
+      "example": "examples/recipes/minimal-layer-object-profile.json"
     },
     "expected_profile.layers[].timing.duration": {
       "path": "expected_profile.layers[].timing.duration",
@@ -4665,7 +4983,8 @@
       "source_field": "Duration",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Expected layer duration in seconds."
+      "summary": "Expected layer duration in seconds.",
+      "example": "examples/recipes/minimal-layer-object-profile.json"
     },
     "expected_profile.layers[].timing.in_point": {
       "path": "expected_profile.layers[].timing.in_point",
@@ -4674,7 +4993,8 @@
       "source_field": "InPoint",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Expected layer in point in seconds."
+      "summary": "Expected layer in point in seconds.",
+      "example": "examples/recipes/minimal-layer-object-profile.json"
     },
     "expected_profile.layers[].timing.out_point": {
       "path": "expected_profile.layers[].timing.out_point",
@@ -4683,7 +5003,8 @@
       "source_field": "OutPoint",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Expected layer out point in seconds."
+      "summary": "Expected layer out point in seconds.",
+      "example": "examples/recipes/minimal-layer-object-profile.json"
     },
     "expected_profile.layers[].timing.start_time": {
       "path": "expected_profile.layers[].timing.start_time",
@@ -4692,7 +5013,8 @@
       "source_field": "StartTime",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Expected layer start time in seconds."
+      "summary": "Expected layer start time in seconds.",
+      "example": "examples/recipes/minimal-layer-object-profile.json"
     },
     "expected_profile.layers[].timing.stretch": {
       "path": "expected_profile.layers[].timing.stretch",
@@ -4701,7 +5023,8 @@
       "source_field": "Stretch",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Expected layer stretch percentage."
+      "summary": "Expected layer stretch percentage.",
+      "example": "examples/recipes/minimal-layer-object-profile.json"
     },
     "expected_profile.layers[].track_matte": {
       "path": "expected_profile.layers[].track_matte",
@@ -4718,7 +5041,8 @@
         "alpha_inverse",
         "luma",
         "luma_inverse"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-track-matte.json"
     },
     "expected_profile.layers[].type": {
       "path": "expected_profile.layers[].type",
@@ -4727,7 +5051,8 @@
       "source_field": "Type",
       "type": "string",
       "go_type": "string",
-      "summary": "Expected layer type."
+      "summary": "Expected layer type.",
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "expected_profile.masks[]": {
       "path": "expected_profile.masks[]",
@@ -4746,7 +5071,8 @@
       "source_field": "Closed",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected mask closed path switch."
+      "summary": "Expected mask closed path switch.",
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "expected_profile.masks[].color": {
       "path": "expected_profile.masks[].color",
@@ -4756,7 +5082,8 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Expected mask UI color as RGB channels.",
-      "validation": "Expected mask color must contain exactly three channels in the 0..255 range."
+      "validation": "Expected mask color must contain exactly three channels in the 0..255 range.",
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "expected_profile.masks[].expansion": {
       "path": "expected_profile.masks[].expansion",
@@ -4765,7 +5092,8 @@
       "source_field": "Expansion",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Expected mask expansion."
+      "summary": "Expected mask expansion.",
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "expected_profile.masks[].feather": {
       "path": "expected_profile.masks[].feather",
@@ -4774,7 +5102,8 @@
       "source_field": "Feather",
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
-      "summary": "Expected mask feather vector."
+      "summary": "Expected mask feather vector.",
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "expected_profile.masks[].feather_falloff": {
       "path": "expected_profile.masks[].feather_falloff",
@@ -4788,7 +5117,8 @@
       "enum": [
         "smooth",
         "linear"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "expected_profile.masks[].inverted": {
       "path": "expected_profile.masks[].inverted",
@@ -4797,7 +5127,8 @@
       "source_field": "Inverted",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected mask inverted switch."
+      "summary": "Expected mask inverted switch.",
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "expected_profile.masks[].layer_name": {
       "path": "expected_profile.masks[].layer_name",
@@ -4810,7 +5141,8 @@
         "structural"
       ],
       "summary": "Layer name to inspect for the expected mask.",
-      "validation": "Mask profile checks require a target layer name."
+      "validation": "Mask profile checks require a target layer name.",
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "expected_profile.masks[].locked": {
       "path": "expected_profile.masks[].locked",
@@ -4819,7 +5151,8 @@
       "source_field": "Locked",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected mask lock switch."
+      "summary": "Expected mask lock switch.",
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "expected_profile.masks[].mode": {
       "path": "expected_profile.masks[].mode",
@@ -4838,7 +5171,8 @@
         "darken",
         "difference",
         "none"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "expected_profile.masks[].motion_blur": {
       "path": "expected_profile.masks[].motion_blur",
@@ -4853,7 +5187,8 @@
         "same_as_layer",
         "on",
         "off"
-      ]
+      ],
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "expected_profile.masks[].name": {
       "path": "expected_profile.masks[].name",
@@ -4862,7 +5197,8 @@
       "source_field": "Name",
       "type": "string",
       "go_type": "string",
-      "summary": "Expected mask name."
+      "summary": "Expected mask name.",
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "expected_profile.masks[].opacity": {
       "path": "expected_profile.masks[].opacity",
@@ -4872,7 +5208,8 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected mask opacity.",
-      "validation": "Expected mask opacity must be between 0 and 1."
+      "validation": "Expected mask opacity must be between 0 and 1.",
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "expected_profile.masks[].path_keyframes[]": {
       "path": "expected_profile.masks[].path_keyframes[]",
@@ -4881,7 +5218,8 @@
       "source_field": "PathKeyframes",
       "type": "array\u003crecipe.ExpectedMaskPathKeyframe\u003e",
       "go_type": "[]recipe.ExpectedMaskPathKeyframe",
-      "summary": "Expected mask path keyframes."
+      "summary": "Expected mask path keyframes.",
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "expected_profile.masks[].path_keyframes[].time": {
       "path": "expected_profile.masks[].path_keyframes[].time",
@@ -4894,7 +5232,8 @@
         "structural"
       ],
       "summary": "Expected mask path keyframe time in seconds.",
-      "validation": "Expected mask path keyframe time must be non-negative and sorted in ascending order."
+      "validation": "Expected mask path keyframe time must be non-negative and sorted in ascending order.",
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "expected_profile.masks[].path_keyframes[].vertex_count": {
       "path": "expected_profile.masks[].path_keyframes[].vertex_count",
@@ -4904,7 +5243,8 @@
       "type": "number",
       "go_type": "*int",
       "summary": "Expected mask path keyframe vertex count.",
-      "validation": "Expected mask path keyframe vertex count must be non-negative."
+      "validation": "Expected mask path keyframe vertex count must be non-negative.",
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "expected_profile.masks[].vertex_count": {
       "path": "expected_profile.masks[].vertex_count",
@@ -4914,7 +5254,8 @@
       "type": "number",
       "go_type": "*int",
       "summary": "Expected mask vertex count.",
-      "validation": "Expected mask vertex count must be non-negative."
+      "validation": "Expected mask vertex count must be non-negative.",
+      "example": "examples/recipes/minimal-layer-mask.json"
     },
     "expected_profile.motion_blur": {
       "path": "expected_profile.motion_blur",
@@ -4923,7 +5264,8 @@
       "source_field": "MotionBlur",
       "type": "object\u003cExpectedMotionBlurSpec\u003e",
       "go_type": "*recipe.ExpectedMotionBlurSpec",
-      "summary": "Expected composition motion blur settings."
+      "summary": "Expected composition motion blur settings.",
+      "example": "examples/recipes/minimal-comp-flag-profile.json"
     },
     "expected_profile.motion_blur.adaptive_sample_limit": {
       "path": "expected_profile.motion_blur.adaptive_sample_limit",
@@ -4932,7 +5274,8 @@
       "source_field": "AdaptiveSampleLimit",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Expected composition motion blur adaptive sample limit."
+      "summary": "Expected composition motion blur adaptive sample limit.",
+      "example": "examples/recipes/minimal-comp-motion-blur.json"
     },
     "expected_profile.motion_blur.enabled": {
       "path": "expected_profile.motion_blur.enabled",
@@ -4941,7 +5284,8 @@
       "source_field": "Enabled",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected composition motion blur enable switch."
+      "summary": "Expected composition motion blur enable switch.",
+      "example": "examples/recipes/minimal-comp-flag-profile.json"
     },
     "expected_profile.motion_blur.samples_per_frame": {
       "path": "expected_profile.motion_blur.samples_per_frame",
@@ -4950,7 +5294,8 @@
       "source_field": "SamplesPerFrame",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Expected composition motion blur samples per frame."
+      "summary": "Expected composition motion blur samples per frame.",
+      "example": "examples/recipes/minimal-comp-motion-blur.json"
     },
     "expected_profile.motion_blur.shutter_angle": {
       "path": "expected_profile.motion_blur.shutter_angle",
@@ -4959,7 +5304,8 @@
       "source_field": "ShutterAngle",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Expected composition motion blur shutter angle."
+      "summary": "Expected composition motion blur shutter angle.",
+      "example": "examples/recipes/minimal-comp-motion-blur.json"
     },
     "expected_profile.motion_blur.shutter_phase": {
       "path": "expected_profile.motion_blur.shutter_phase",
@@ -4968,7 +5314,8 @@
       "source_field": "ShutterPhase",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Expected composition motion blur shutter phase."
+      "summary": "Expected composition motion blur shutter phase.",
+      "example": "examples/recipes/minimal-comp-motion-blur.json"
     },
     "expected_profile.name": {
       "path": "expected_profile.name",
@@ -4977,7 +5324,8 @@
       "source_field": "Name",
       "type": "string",
       "go_type": "string",
-      "summary": "Expected composition display name."
+      "summary": "Expected composition display name.",
+      "example": "examples/recipes/minimal-comp-object-profile.json"
     },
     "expected_profile.pixel_aspect": {
       "path": "expected_profile.pixel_aspect",
@@ -4987,7 +5335,8 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected composition pixel aspect ratio.",
-      "validation": "Expected pixel aspect ratio must be positive."
+      "validation": "Expected pixel aspect ratio must be positive.",
+      "example": "examples/recipes/minimal-comp-object-profile.json"
     },
     "expected_profile.preserve_nested_frame_rate": {
       "path": "expected_profile.preserve_nested_frame_rate",
@@ -4996,7 +5345,8 @@
       "source_field": "PreserveNestedFrameRate",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected composition nested frame-rate preservation switch."
+      "summary": "Expected composition nested frame-rate preservation switch.",
+      "example": "examples/recipes/minimal-comp-flag-profile.json"
     },
     "expected_profile.preserve_nested_resolution": {
       "path": "expected_profile.preserve_nested_resolution",
@@ -5005,7 +5355,8 @@
       "source_field": "PreserveNestedResolution",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected composition nested resolution preservation switch."
+      "summary": "Expected composition nested resolution preservation switch.",
+      "example": "examples/recipes/minimal-comp-flag-profile.json"
     },
     "expected_profile.properties[]": {
       "path": "expected_profile.properties[]",
@@ -5014,7 +5365,8 @@
       "source_field": "Properties",
       "type": "array\u003crecipe.ExpectedProperty\u003e",
       "go_type": "[]recipe.ExpectedProperty",
-      "summary": "Expected property checks."
+      "summary": "Expected property checks.",
+      "example": "examples/recipes/minimal-camera-aperture.json"
     },
     "expected_profile.properties[].expression": {
       "path": "expected_profile.properties[].expression",
@@ -5023,7 +5375,8 @@
       "source_field": "Expression",
       "type": "string",
       "go_type": "string",
-      "summary": "Expected property expression source."
+      "summary": "Expected property expression source.",
+      "example": "examples/recipes/minimal-transform-expression.json"
     },
     "expected_profile.properties[].expression_enabled": {
       "path": "expected_profile.properties[].expression_enabled",
@@ -5032,7 +5385,8 @@
       "source_field": "ExpressionEnabled",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected property expression enable switch."
+      "summary": "Expected property expression enable switch.",
+      "example": "examples/recipes/minimal-transform-expression.json"
     },
     "expected_profile.properties[].layer_name": {
       "path": "expected_profile.properties[].layer_name",
@@ -5045,7 +5399,8 @@
         "structural"
       ],
       "summary": "Expected property layer name.",
-      "validation": "Property profile checks require a target layer name."
+      "validation": "Property profile checks require a target layer name.",
+      "example": "examples/recipes/minimal-camera-aperture.json"
     },
     "expected_profile.properties[].match_name": {
       "path": "expected_profile.properties[].match_name",
@@ -5058,7 +5413,8 @@
         "structural"
       ],
       "summary": "Expected property match name.",
-      "validation": "Property profile checks require a property match name."
+      "validation": "Property profile checks require a property match name.",
+      "example": "examples/recipes/minimal-camera-aperture.json"
     },
     "expected_profile.properties[].value": {
       "path": "expected_profile.properties[].value",
@@ -5068,7 +5424,8 @@
       "type": "any",
       "go_type": "interface {}",
       "summary": "Expected property value.",
-      "validation": "Expected property value must be a number, boolean, or numeric array."
+      "validation": "Expected property value must be a number, boolean, or numeric array.",
+      "example": "examples/recipes/minimal-camera-aperture.json"
     },
     "expected_profile.renderer": {
       "path": "expected_profile.renderer",
@@ -5077,7 +5434,8 @@
       "source_field": "Renderer",
       "type": "string",
       "go_type": "string",
-      "summary": "Expected composition renderer identifier."
+      "summary": "Expected composition renderer identifier.",
+      "example": "examples/recipes/minimal-comp-object-profile.json"
     },
     "expected_profile.resolution_factor": {
       "path": "expected_profile.resolution_factor",
@@ -5087,7 +5445,8 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Expected composition preview resolution factor.",
-      "validation": "Expected resolution factor must contain two positive integer factors."
+      "validation": "Expected resolution factor must contain two positive integer factors.",
+      "example": "examples/recipes/minimal-comp-object-profile.json"
     },
     "expected_profile.shape_layer_count": {
       "path": "expected_profile.shape_layer_count",
@@ -5097,7 +5456,8 @@
       "type": "number",
       "go_type": "*int",
       "summary": "Expected number of shape layers.",
-      "validation": "Expected count must be non-negative."
+      "validation": "Expected count must be non-negative.",
+      "example": "examples/recipes/minimal-shape-fill-blend-mode.json"
     },
     "expected_profile.text_layer_count": {
       "path": "expected_profile.text_layer_count",
@@ -5107,7 +5467,8 @@
       "type": "number",
       "go_type": "*int",
       "summary": "Expected number of text layers.",
-      "validation": "Expected count must be non-negative."
+      "validation": "Expected count must be non-negative.",
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "expected_profile.text_styles[]": {
       "path": "expected_profile.text_styles[]",
@@ -5126,7 +5487,8 @@
       "source_field": "ApplyStroke",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected text style stroke enable switch."
+      "summary": "Expected text style stroke enable switch.",
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "expected_profile.text_styles[].faux_bold": {
       "path": "expected_profile.text_styles[].faux_bold",
@@ -5135,7 +5497,8 @@
       "source_field": "FauxBold",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected text style faux bold switch."
+      "summary": "Expected text style faux bold switch.",
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "expected_profile.text_styles[].faux_italic": {
       "path": "expected_profile.text_styles[].faux_italic",
@@ -5144,7 +5507,8 @@
       "source_field": "FauxItalic",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected text style faux italic switch."
+      "summary": "Expected text style faux italic switch.",
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "expected_profile.text_styles[].fill_color": {
       "path": "expected_profile.text_styles[].fill_color",
@@ -5154,7 +5518,8 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Expected text style fill color as RGB channels.",
-      "validation": "Expected fill color must contain RGB or RGBA channels in the 0..1 range."
+      "validation": "Expected fill color must contain RGB or RGBA channels in the 0..1 range.",
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "expected_profile.text_styles[].font_size": {
       "path": "expected_profile.text_styles[].font_size",
@@ -5164,7 +5529,8 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected text style font size.",
-      "validation": "Expected font size must be positive."
+      "validation": "Expected font size must be positive.",
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "expected_profile.text_styles[].justification": {
       "path": "expected_profile.text_styles[].justification",
@@ -5179,7 +5545,8 @@
         "left",
         "right",
         "center"
-      ]
+      ],
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "expected_profile.text_styles[].layer_name": {
       "path": "expected_profile.text_styles[].layer_name",
@@ -5192,7 +5559,8 @@
         "structural"
       ],
       "summary": "Layer name to inspect for the expected text style.",
-      "validation": "Text style profile checks require a target layer name."
+      "validation": "Text style profile checks require a target layer name.",
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "expected_profile.text_styles[].paragraph_index": {
       "path": "expected_profile.text_styles[].paragraph_index",
@@ -5222,7 +5590,8 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Expected text style stroke color as RGB channels.",
-      "validation": "Expected stroke color must contain RGB or RGBA channels in the 0..1 range."
+      "validation": "Expected stroke color must contain RGB or RGBA channels in the 0..1 range.",
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "expected_profile.text_styles[].stroke_width": {
       "path": "expected_profile.text_styles[].stroke_width",
@@ -5232,7 +5601,8 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected text style stroke width.",
-      "validation": "Expected stroke width must be non-negative."
+      "validation": "Expected stroke width must be non-negative.",
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "expected_profile.text_styles[].tracking": {
       "path": "expected_profile.text_styles[].tracking",
@@ -5241,7 +5611,8 @@
       "source_field": "Tracking",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Expected text style character tracking amount."
+      "summary": "Expected text style character tracking amount.",
+      "example": "examples/recipes/minimal-text-shape.json"
     },
     "expected_profile.width": {
       "path": "expected_profile.width",
@@ -5251,7 +5622,8 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected composition width in pixels.",
-      "validation": "Expected width must be a positive integer."
+      "validation": "Expected width must be a positive integer.",
+      "example": "examples/recipes/minimal-comp-object-profile.json"
     },
     "expected_profile.work_area": {
       "path": "expected_profile.work_area",
@@ -5260,7 +5632,8 @@
       "source_field": "WorkArea",
       "type": "object\u003cExpectedWorkAreaSpec\u003e",
       "go_type": "*recipe.ExpectedWorkAreaSpec",
-      "summary": "Expected composition work area range."
+      "summary": "Expected composition work area range.",
+      "example": "examples/recipes/minimal-comp-object-profile.json"
     },
     "expected_profile.work_area.end": {
       "path": "expected_profile.work_area.end",
@@ -5269,7 +5642,8 @@
       "source_field": "End",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Expected composition work area end time in seconds."
+      "summary": "Expected composition work area end time in seconds.",
+      "example": "examples/recipes/minimal-comp-object-profile.json"
     },
     "expected_profile.work_area.start": {
       "path": "expected_profile.work_area.start",
@@ -5278,7 +5652,8 @@
       "source_field": "Start",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Expected composition work area start time in seconds."
+      "summary": "Expected composition work area start time in seconds.",
+      "example": "examples/recipes/minimal-comp-object-profile.json"
     },
     "project": {
       "path": "project",
@@ -5290,7 +5665,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Project-level metadata used when materializing the recipe."
+      "summary": "Project-level metadata used when materializing the recipe.",
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "project.name": {
       "path": "project.name",
@@ -5299,7 +5675,8 @@
       "source_field": "Name",
       "type": "string",
       "go_type": "string",
-      "summary": "Project display name."
+      "summary": "Project display name.",
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "schema_version": {
       "path": "schema_version",
@@ -5312,7 +5689,8 @@
         "structural"
       ],
       "summary": "Recipe schema version.",
-      "validation": "Must equal the supported recipe schema version."
+      "validation": "Must equal the supported recipe schema version.",
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     }
   },
   "by_source_type": {

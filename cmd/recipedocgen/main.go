@@ -38,7 +38,12 @@ func main() {
 }
 
 func generate(docsDir string) (string, string, string, error) {
-	doc, err := recipedoc.BuildDocumentWithCapabilities(filepath.Join(docsDir, "capabilities.json"))
+	root := filepath.Dir(docsDir)
+	doc, err := recipedoc.BuildDocumentWithCapabilitiesAndExamples(
+		filepath.Join(docsDir, "capabilities.json"),
+		filepath.Join(root, "examples", "recipes"),
+		"examples/recipes",
+	)
 	if err != nil {
 		return "", "", "", err
 	}
