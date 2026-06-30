@@ -29,10 +29,13 @@ try {
         $baseArgs += @("-limit", "$Limit")
     }
 
+    $scanTimer = [System.Diagnostics.Stopwatch]::StartNew()
     & go @baseArgs "-out" $corpusPath "-summary-out" $summaryPath
+    $scanTimer.Stop()
     if ($LASTEXITCODE -ne 0) {
         throw "aeptechnique corpus failed with exit code $LASTEXITCODE"
     }
+    $scanSeconds = [Math]::Round($scanTimer.Elapsed.TotalSeconds, 2)
 
     $summary = Get-Content -Raw -Path $summaryPath | ConvertFrom-Json
     $errorCount = 0
@@ -243,6 +246,7 @@ try {
     [void]$b.AppendLine("- input: ``$InputPath``")
     [void]$b.AppendLine("- projects: $($summary.project_count)")
     [void]$b.AppendLine("- errors: $errorCount")
+    [void]$b.AppendLine("- scan seconds: $scanSeconds")
     [void]$b.AppendLine("- comps: $($summary.totals.comp_count)")
     [void]$b.AppendLine("- layers: $($summary.totals.layer_count)")
     [void]$b.AppendLine("- effects: $($summary.totals.effect_count)")
@@ -317,6 +321,7 @@ try {
     [void]$learn.AppendLine("- input: ``$InputPath``")
     [void]$learn.AppendLine("- projects: $($summary.project_count)")
     [void]$learn.AppendLine("- errors: $errorCount")
+    [void]$learn.AppendLine("- scan seconds: $scanSeconds")
     [void]$learn.AppendLine("")
     [void]$learn.AppendLine("## Pattern Playbook")
     [void]$learn.AppendLine("")
@@ -460,6 +465,7 @@ try {
     foreach ($metric in @(
         @{ Label = "Projects"; Value = $summary.project_count },
         @{ Label = "Errors"; Value = $errorCount },
+        @{ Label = "Scan Seconds"; Value = $scanSeconds },
         @{ Label = "Comps"; Value = $summary.totals.comp_count },
         @{ Label = "Layers"; Value = $summary.totals.layer_count },
         @{ Label = "Effects"; Value = $summary.totals.effect_count },
