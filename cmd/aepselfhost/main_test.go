@@ -2,11 +2,14 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/yueli-fx/aep-parser/internal/host"
 )
 
 func TestRunOutcomePrintsLatestOutcome(t *testing.T) {
@@ -23,7 +26,7 @@ func TestRunOutcomePrintsLatestOutcome(t *testing.T) {
 }`)
 	var stdout, stderr bytes.Buffer
 
-	code := run([]string{"outcome", "-out-root", root}, &stdout, &stderr)
+	code := run([]string{"outcome", "-out-root", root}, &stdout, &stderr, testPlatform())
 
 	if code != 0 {
 		t.Fatalf("run outcome = %d, stderr=%s", code, stderr.String())
@@ -56,7 +59,7 @@ func TestRunOutcomePrintsExplicitJSONPath(t *testing.T) {
 }`)
 	var stdout, stderr bytes.Buffer
 
-	code := run([]string{"outcome", "-json-path", jsonPath}, &stdout, &stderr)
+	code := run([]string{"outcome", "-json-path", jsonPath}, &stdout, &stderr, testPlatform())
 
 	if code != 0 {
 		t.Fatalf("run outcome = %d, stderr=%s", code, stderr.String())
@@ -96,7 +99,7 @@ func TestRunStatusPrintsProcessWatchOutcomeAndLogs(t *testing.T) {
 }`)
 	var stdout, stderr bytes.Buffer
 
-	code := run([]string{"status", "-out-root", root}, &stdout, &stderr)
+	code := run([]string{"status", "-out-root", root}, &stdout, &stderr, testPlatform())
 
 	if code != 0 {
 		t.Fatalf("run status = %d, stderr=%s", code, stderr.String())
@@ -127,7 +130,7 @@ func TestRunVerifyDryRunPrintsPowerShellGate(t *testing.T) {
 	root := t.TempDir()
 	var stdout, stderr bytes.Buffer
 
-	code := run([]string{"verify", "-out-root", root, "-limit", "3", "-open", "-dry-run"}, &stdout, &stderr)
+	code := run([]string{"verify", "-out-root", root, "-limit", "3", "-open", "-dry-run"}, &stdout, &stderr, testPlatform())
 
 	if code != 0 {
 		t.Fatalf("run verify dry-run = %d, stderr=%s", code, stderr.String())
@@ -150,7 +153,7 @@ func TestRunVerifyDryRunPrintsPowerShellGate(t *testing.T) {
 func TestRunRejectsMissingOutcome(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 
-	code := run([]string{"outcome", "-out-root", t.TempDir()}, &stdout, &stderr)
+	code := run([]string{"outcome", "-out-root", t.TempDir()}, &stdout, &stderr, testPlatform())
 
 	if code != 1 {
 		t.Fatalf("run outcome missing = %d, want 1", code)
@@ -173,7 +176,7 @@ func TestRunWatchDryRunWritesStatus(t *testing.T) {
 		"-limit", "7",
 		"-open-first",
 		"-dry-run",
-	}, &stdout, &stderr)
+	}, &stdout, &stderr, testPlatform())
 
 	if code != 0 {
 		t.Fatalf("run watch dry-run = %d, stderr=%s", code, stderr.String())
@@ -216,7 +219,7 @@ func TestRunStartWatchDryRunWritesProcessStatus(t *testing.T) {
 		"-limit", "7",
 		"-open-first",
 		"-dry-run",
-	}, &stdout, &stderr)
+	}, &stdout, &stderr, testPlatform())
 
 	if code != 0 {
 		t.Fatalf("run start-watch dry-run = %d, stderr=%s", code, stderr.String())
@@ -247,7 +250,7 @@ func TestRunStartWatchDryRunWritesProcessStatus(t *testing.T) {
 func TestRunWatchRejectsZeroWork(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 
-	code := run([]string{"watch", "-out-root", t.TempDir(), "-duration-minutes", "0"}, &stdout, &stderr)
+	code := run([]string{"watch", "-out-root", t.TempDir(), "-duration-minutes", "0"}, &stdout, &stderr, testPlatform())
 
 	if code != 1 {
 		t.Fatalf("run watch zero work = %d, want 1", code)
@@ -276,4 +279,40 @@ func readFileJSON(t *testing.T, path string, target any) {
 	if err := json.Unmarshal(data, target); err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
+}
+
+func testPlatform() host.Platform {
+	return host.Platform{
+		Runner:           fakeRunner{},
+		ProcessInspector: fakeInspector{},
+		BrowserOpener:    host.NoopBrowserOpener{},
+	}
+}
+
+type fakeRunner struct{}
+
+func (fakeRunner) Run(context.Context, host.Command) host.Result {
+	return host.Result{ExitCode: 0}
+}
+
+func (fakeRunner) Start(context.Context, host.Command) (host.Process, error) {
+	return fakeProcess{pid: 12345}, nil
+}
+
+type fakeProcess struct {
+	pid int
+}
+
+func (p fakeProcess) PID() int {
+	return p.pid
+}
+
+func (p fakeProcess) Release() error {
+	return nil
+}
+
+type fakeInspector struct{}
+
+func (fakeInspector) IsRunning(pid int) bool {
+	return pid == os.Getpid()
 }

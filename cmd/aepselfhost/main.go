@@ -1,40 +1,40 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
-	"errors"
 	"flag"
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/yueli-fx/aep-parser/internal/host"
 )
 
 func main() {
-	os.Exit(run(os.Args[1:], os.Stdout, os.Stderr))
+	os.Exit(run(os.Args[1:], os.Stdout, os.Stderr, host.DefaultPlatform()))
 }
 
-func run(args []string, stdout, stderr io.Writer) int {
+func run(args []string, stdout, stderr io.Writer, platform host.Platform) int {
 	if len(args) == 0 {
 		usage(stderr)
 		return 2
 	}
 	switch args[0] {
 	case "verify":
-		return runVerify(args[1:], stdout, stderr)
+		return runVerify(args[1:], stdout, stderr, platform)
 	case "outcome":
 		return runOutcome(args[1:], stdout, stderr)
 	case "status":
-		return runStatus(args[1:], stdout, stderr)
+		return runStatus(args[1:], stdout, stderr, platform)
 	case "watch":
-		return runWatch(args[1:], stdout, stderr)
+		return runWatch(args[1:], stdout, stderr, platform)
 	case "start-watch":
-		return runStartWatch(args[1:], stdout, stderr)
+		return runStartWatch(args[1:], stdout, stderr, platform)
 	default:
 		usage(stderr)
 		return 2
@@ -58,7 +58,7 @@ func runOutcome(args []string, stdout, stderr io.Writer) int {
 	return 0
 }
 
-func runStatus(args []string, stdout, stderr io.Writer) int {
+func runStatus(args []string, stdout, stderr io.Writer, platform host.Platform) int {
 	fs := flag.NewFlagSet("aepselfhost status", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	outRoot := fs.String("out-root", filepath.Join("tmp", "technique_selfhost_gate"), "selfhost output root")
@@ -70,19 +70,19 @@ func runStatus(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintln(stderr, err)
 		return 1
 	}
-	printStatus(stdout, status)
+	printStatus(stdout, status, platform.ProcessInspector)
 	return 0
 }
 
-func runVerify(args []string, stdout, stderr io.Writer) int {
+func runVerify(args []string, stdout, stderr io.Writer, platform host.Platform) int {
 	opts, ok := parseVerifyOptions("aepselfhost verify", args, stderr)
 	if !ok {
 		return 2
 	}
-	return verifySelfhost(opts, stdout, stderr)
+	return verifySelfhost(opts, stdout, stderr, platform)
 }
 
-func runWatch(args []string, stdout, stderr io.Writer) int {
+func runWatch(args []string, stdout, stderr io.Writer, platform host.Platform) int {
 	opts, ok := parseWatchOptions("aepselfhost watch", args, stderr)
 	if !ok {
 		return 2
@@ -91,10 +91,10 @@ func runWatch(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintln(stderr, err)
 		return 1
 	}
-	return watchSelfhost(opts, stdout, stderr)
+	return watchSelfhost(opts, stdout, stderr, platform)
 }
 
-func runStartWatch(args []string, stdout, stderr io.Writer) int {
+func runStartWatch(args []string, stdout, stderr io.Writer, platform host.Platform) int {
 	opts, ok := parseWatchOptions("aepselfhost start-watch", args, stderr)
 	if !ok {
 		return 2
@@ -103,7 +103,7 @@ func runStartWatch(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintln(stderr, err)
 		return 1
 	}
-	return startWatch(opts, stdout, stderr)
+	return startWatch(opts, stdout, stderr, platform)
 }
 
 type verifyOptions struct {
@@ -127,14 +127,14 @@ func parseVerifyOptions(name string, args []string, stderr io.Writer) (verifyOpt
 	return opts, true
 }
 
-func verifySelfhost(opts verifyOptions, stdout, stderr io.Writer) int {
+func verifySelfhost(opts verifyOptions, stdout, stderr io.Writer, platform host.Platform) int {
 	args := psVerifyArgs(opts)
 	if opts.DryRun {
 		fmt.Fprintln(stdout, "DRY RUN technique selfhost verify")
 		fmt.Fprintf(stdout, "command: pwsh %s\n", strings.Join(args, " "))
 		return 0
 	}
-	return runCommand(stdout, stderr, "pwsh", args...)
+	return runCommand(stdout, stderr, platform, "pwsh", args...)
 }
 
 type watchOptions struct {
@@ -180,7 +180,7 @@ func (opts watchOptions) validate() error {
 	return nil
 }
 
-func watchSelfhost(opts watchOptions, stdout, stderr io.Writer) int {
+func watchSelfhost(opts watchOptions, stdout, stderr io.Writer, platform host.Platform) int {
 	startedAt := utcNow()
 	verifyArgs := verifyCLIArgs(opts, opts.OpenFirst)
 	showArgs := []string{"outcome", "-out-root", opts.OutRoot}
@@ -222,7 +222,7 @@ func watchSelfhost(opts watchOptions, stdout, stderr io.Writer) int {
 			OutRoot: opts.OutRoot,
 			Limit:   opts.Limit,
 			Open:    opts.OpenFirst && iteration == 1,
-		}, stdout, stderr)
+		}, stdout, stderr, platform)
 		if lastExit == 0 {
 			lastExit = runOutcome([]string{"-out-root", opts.OutRoot}, stdout, stderr)
 		}
@@ -258,7 +258,7 @@ func watchSelfhost(opts watchOptions, stdout, stderr io.Writer) int {
 	return lastExit
 }
 
-func startWatch(opts watchOptions, stdout, stderr io.Writer) int {
+func startWatch(opts watchOptions, stdout, stderr io.Writer, platform host.Platform) int {
 	if err := os.MkdirAll(opts.OutRoot, 0o755); err != nil {
 		fmt.Fprintln(stderr, err)
 		return 1
@@ -311,16 +311,19 @@ func startWatch(opts watchOptions, stdout, stderr io.Writer) int {
 		return 1
 	}
 	defer errFile.Close()
-	cmd := exec.Command(exe, watchArgs...)
-	cmd.Stdout = outFile
-	cmd.Stderr = errFile
-	cmd.Dir = mustGetwd()
-	if err := cmd.Start(); err != nil {
+	started, err := platform.Runner.Start(context.Background(), host.Command{
+		Name:   exe,
+		Args:   watchArgs,
+		Dir:    mustGetwd(),
+		Stdout: outFile,
+		Stderr: errFile,
+	})
+	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return 1
 	}
 	process.Mode = "started"
-	process.PID = cmd.Process.Pid
+	process.PID = started.PID()
 	process.WatchStatus = filepath.Join(opts.OutRoot, "watch_status.json")
 	process.LatestOutcomeHTML = filepath.Join(opts.OutRoot, "latest_outcome.html")
 	process.LatestOutcomeJSON = filepath.Join(opts.OutRoot, "latest_outcome.json")
@@ -328,7 +331,7 @@ func startWatch(opts watchOptions, stdout, stderr io.Writer) int {
 		fmt.Fprintln(stderr, err)
 		return 1
 	}
-	_ = cmd.Process.Release()
+	_ = started.Release()
 	fmt.Fprintf(stdout, "started technique selfhost watch pid=%d\n", process.PID)
 	fmt.Fprintf(stdout, "stdout: %s\n", stdoutLog)
 	fmt.Fprintf(stdout, "stderr: %s\n", stderrLog)
@@ -377,19 +380,14 @@ func watchCommandArgs(opts watchOptions) []string {
 	return args
 }
 
-func runCommand(stdout, stderr io.Writer, name string, args ...string) int {
-	cmd := exec.Command(name, args...)
-	cmd.Stdout = stdout
-	cmd.Stderr = stderr
-	if err := cmd.Run(); err != nil {
-		var exitErr *exec.ExitError
-		if errors.As(err, &exitErr) {
-			return exitErr.ExitCode()
-		}
-		fmt.Fprintln(stderr, err)
-		return 1
-	}
-	return 0
+func runCommand(stdout, stderr io.Writer, platform host.Platform, name string, args ...string) int {
+	result := platform.Runner.Run(context.Background(), host.Command{
+		Name:   name,
+		Args:   args,
+		Stdout: stdout,
+		Stderr: stderr,
+	})
+	return result.ExitCode
 }
 
 func writeWatchStatus(outRoot string, status watchFile) error {
@@ -564,7 +562,7 @@ func printOutcome(w io.Writer, outcome outcomeFile, path string) {
 	}
 }
 
-func printStatus(w io.Writer, status statusView) {
+func printStatus(w io.Writer, status statusView, inspector host.ProcessInspector) {
 	fmt.Fprintln(w, "Self-Hosted Status")
 	fmt.Fprintf(w, "OutRoot: %s\n\n", status.OutRoot)
 	fmt.Fprintln(w, "Watch Process")
@@ -575,7 +573,7 @@ func printStatus(w io.Writer, status statusView) {
 		fmt.Fprintf(w, "- file: %s\n", status.Process.Path)
 		fmt.Fprintf(w, "- mode: %s\n", value(process.Mode))
 		fmt.Fprintf(w, "- pid: %s\n", intValue(process.PID))
-		fmt.Fprintf(w, "- state: %s\n", processState(process))
+		fmt.Fprintf(w, "- state: %s\n", processState(process, inspector))
 		fmt.Fprintf(w, "- command: %s\n", value(process.Command))
 	}
 	fmt.Fprintln(w)
@@ -611,32 +609,17 @@ func printStatus(w io.Writer, status statusView) {
 	fmt.Fprintf(w, "- stderr: %s\n", value(status.Process.Value.StderrLog))
 }
 
-func processState(process processFile) string {
+func processState(process processFile, inspector host.ProcessInspector) string {
 	if process.Mode == "dry_run" {
 		return "dry-run"
 	}
 	if process.PID <= 0 {
 		return "n/a"
 	}
-	if processRunning(process.PID) {
+	if inspector != nil && inspector.IsRunning(process.PID) {
 		return "running"
 	}
 	return "not-running"
-}
-
-func processRunning(pid int) bool {
-	if runtime.GOOS == "windows" {
-		out, err := exec.Command("tasklist", "/FI", "PID eq "+strconv.Itoa(pid), "/FO", "CSV", "/NH").Output()
-		if err != nil {
-			return false
-		}
-		return strings.Contains(string(out), strconv.Itoa(pid))
-	}
-	proc, err := os.FindProcess(pid)
-	if err != nil {
-		return false
-	}
-	return proc.Signal(os.Signal(nil)) == nil
 }
 
 func value(s string) string {
