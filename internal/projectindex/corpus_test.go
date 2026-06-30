@@ -105,6 +105,51 @@ func TestCorpusBuilderExtractsExpressionFacts(t *testing.T) {
 	}
 }
 
+func TestCorpusBuilderExtractsTextStyleFacts(t *testing.T) {
+	project := &aep.Project{
+		Compositions: []*aep.Composition{
+			{ID: 7, Name: "Main", Layers: []*aep.Layer{
+				{
+					ID:    21,
+					Index: 0,
+					Name:  "Title",
+					Type:  aep.LayerTypeText,
+					TextSource: &aep.TextSource{
+						Fonts: []string{"Inter-Regular", "Helvetica-Bold"},
+						Runs: []aep.TextStyleRun{
+							{FontIndex: 0, FontName: "Inter-Regular"},
+							{FontIndex: 1},
+						},
+					},
+				},
+			}},
+		},
+	}
+	builder := NewCorpusBuilder()
+
+	if err := builder.AddProject("samples/text.aep", project); err != nil {
+		t.Fatalf("AddProject: %v", err)
+	}
+	corpus, err := builder.Build()
+	if err != nil {
+		t.Fatalf("Build: %v", err)
+	}
+
+	projectID := corpus.Projects[0].ID
+	textFacts := factsByKind(corpus.Facts, FactTextStyle)
+	if len(textFacts) != 2 {
+		t.Fatalf("len(textFacts) = %d, want 2; facts=%+v", len(textFacts), corpus.Facts)
+	}
+	assertCorpusFact(t, textFacts[0], projectID, FactTextStyle, "text.font", "Inter-Regular", "Title")
+	if textFacts[0].Location.PropertyPath != "layers[].text.runs[1]" {
+		t.Fatalf("first text fact location = %+v, want first run", textFacts[0].Location)
+	}
+	assertCorpusFact(t, textFacts[1], projectID, FactTextStyle, "text.font", "Helvetica-Bold", "Title")
+	if textFacts[1].Location.PropertyPath != "layers[].text.runs[2]" {
+		t.Fatalf("second text fact location = %+v, want second run", textFacts[1].Location)
+	}
+}
+
 func TestCorpusJSONDoesNotExposeProjectPointers(t *testing.T) {
 	builder := NewCorpusBuilder()
 	if err := builder.AddProject("", &aep.Project{

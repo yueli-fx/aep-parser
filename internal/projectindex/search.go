@@ -187,6 +187,61 @@ func (idx *Index) SearchExpressionsContaining(query string) []Hit {
 	return hits
 }
 
+// SearchTextStylesByFont returns text-style run hits whose resolved font name
+// equals fontName.
+func (idx *Index) SearchTextStylesByFont(fontName string) []Hit {
+	if idx == nil || idx.project == nil || fontName == "" {
+		return nil
+	}
+	hits := []Hit{}
+	idx.walkTextStyles(func(comp *aep.Composition, layer *aep.Layer, runIndex int, font string) {
+		if font != fontName {
+			return
+		}
+		hits = append(hits, textStyleHit(comp, layer, runIndex, font))
+	})
+	return hits
+}
+
+func (idx *Index) walkTextStyles(visit func(*aep.Composition, *aep.Layer, int, string)) {
+	for _, comp := range idx.project.Compositions {
+		if comp == nil {
+			continue
+		}
+		for _, layer := range comp.Layers {
+			if layer == nil || layer.TextSource == nil {
+				continue
+			}
+			for i, run := range layer.TextSource.Runs {
+				font := resolvedTextRunFont(layer.TextSource, run)
+				if font == "" {
+					continue
+				}
+				visit(comp, layer, i+1, font)
+			}
+		}
+	}
+}
+
+func textStyleHit(comp *aep.Composition, layer *aep.Layer, runIndex int, fontName string) Hit {
+	return Hit{
+		Kind:  HitTextStyle,
+		Match: Match{Field: "text.font", Value: fontName},
+		Location: Location{
+			CompID:       comp.ID,
+			CompName:     comp.Name,
+			LayerID:      layer.ID,
+			LayerIndex:   layer.Index,
+			LayerName:    layer.Name,
+			PropertyPath: "layers[].text.runs[" + strconv.Itoa(runIndex) + "]",
+		},
+		Pointers: HitPointers{
+			Comp:  comp,
+			Layer: layer,
+		},
+	}
+}
+
 func (idx *Index) walkProperties(visit func(*aep.Composition, *aep.Layer, *aep.Effect, int, *aep.Property, int, string)) {
 	for _, comp := range idx.project.Compositions {
 		if comp == nil {
@@ -223,6 +278,16 @@ func (idx *Index) walkProperties(visit func(*aep.Composition, *aep.Layer, *aep.E
 			}
 		}
 	}
+}
+
+func resolvedTextRunFont(source *aep.TextSource, run aep.TextStyleRun) string {
+	if run.FontName != "" {
+		return run.FontName
+	}
+	if source == nil || run.FontIndex < 0 || run.FontIndex >= len(source.Fonts) {
+		return ""
+	}
+	return source.Fonts[run.FontIndex]
 }
 
 func propertyHit(kind HitKind, match Match, comp *aep.Composition, layer *aep.Layer, effect *aep.Effect, effectOccurrence int, property *aep.Property, propertyPath string) Hit {

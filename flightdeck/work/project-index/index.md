@@ -9,10 +9,10 @@ Status: lookup first slice complete, first narrow single-project search slice
 implemented, and first corpus fact extraction slice implemented.
 `internal/projectindex` exists, recipe/profile hotspots are wired to it, callers
 can obtain stable hit locations for source-layer, effect-match, property-match,
-and expression-substring searches, and batch workflows can now extract durable
-layer-source/effect-usage/expression facts without retaining parsed project
-graphs. Later work should add broader search/corpus APIs only when a caller
-needs them.
+expression-substring, and text-font searches, and batch workflows can now
+extract durable layer-source/effect-usage/expression/text-style facts without
+retaining parsed project graphs. Later work should add broader search/corpus
+APIs only when a caller needs them.
 
 The current architecture decision from `work/scene-architecture/index.md` is:
 keep `Project.Compositions`, `Project.Footage`, `Project.Folders`, and
@@ -374,14 +374,16 @@ Memory rules:
         hits with stable property paths.
   - [x] `SearchExpressionsContaining` returns layer-property and effect-param
         expression hits using case-sensitive substring matching.
+  - [x] `SearchTextStylesByFont` returns text-style run hits with stable run
+        paths and font resolution from either `FontName` or `Fonts[FontIndex]`.
   - [x] Search hits serialize with stable snake_case JSON names and do not
         serialize raw Go pointers.
 - [x] Design corpus-level learning/search index.
 - [x] Implement first corpus fact extraction slice.
   - [x] `NewCorpusBuilder` ingests projects one at a time and emits
         serializable `CorpusProject` summaries plus `CorpusFact` rows.
-  - [x] First facts cover layer source references, effect usage, and property
-        expressions.
+  - [x] First facts cover layer source references, effect usage, property
+        expressions, and text style font usage.
   - [x] Corpus JSON contains stable project IDs, locations, matches, and
         summaries, but no `Project`, `Index`, or pointer graph.
 

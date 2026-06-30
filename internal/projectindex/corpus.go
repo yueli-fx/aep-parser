@@ -102,6 +102,9 @@ func (b *Builder) AddProject(path string, project *aep.Project) error {
 		hit := propertyHit(HitExpression, Match{Field: "property.expression", Value: property.Expression}, comp, layer, effect, effectOccurrence, property, propertyPath)
 		b.facts = append(b.facts, expressionFact(meta.ID, hit))
 	})
+	idx.walkTextStyles(func(comp *aep.Composition, layer *aep.Layer, runIndex int, font string) {
+		b.facts = append(b.facts, textStyleFact(meta.ID, textStyleHit(comp, layer, runIndex, font)))
+	})
 	return nil
 }
 
@@ -207,6 +210,16 @@ func expressionFact(projectID string, hit Hit) CorpusFact {
 		Location:  hit.Location,
 		Match:     hit.Match,
 		Summary:   fmt.Sprintf("layer %q uses expression on %q", hit.Location.LayerName, hit.Location.PropertyMatchName),
+	}
+}
+
+func textStyleFact(projectID string, hit Hit) CorpusFact {
+	return CorpusFact{
+		ProjectID: projectID,
+		Kind:      FactTextStyle,
+		Location:  hit.Location,
+		Match:     hit.Match,
+		Summary:   fmt.Sprintf("layer %q uses font %q", hit.Location.LayerName, hit.Match.Value),
 	}
 }
 

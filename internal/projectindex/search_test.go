@@ -243,22 +243,91 @@ func TestSearchExpressionsContainingReturnsLayerAndEffectParamHits(t *testing.T)
 	}
 }
 
+func TestSearchTextStylesByFontReturnsRunHits(t *testing.T) {
+	title := &aep.Layer{
+		ID:    41,
+		Index: 0,
+		Name:  "Title",
+		Type:  aep.LayerTypeText,
+		TextSource: &aep.TextSource{
+			Fonts: []string{"Inter-Regular", "Helvetica-Bold"},
+			Runs: []aep.TextStyleRun{
+				{FontIndex: 0, FontName: "Inter-Regular"},
+				{FontIndex: 1},
+			},
+		},
+	}
+	subtitle := &aep.Layer{
+		ID:    42,
+		Index: 1,
+		Name:  "Subtitle",
+		Type:  aep.LayerTypeText,
+		TextSource: &aep.TextSource{
+			Fonts: []string{"Inter-Regular"},
+			Runs:  []aep.TextStyleRun{{FontIndex: 0, FontName: "Inter-Regular"}},
+		},
+	}
+	project := &aep.Project{
+		Compositions: []*aep.Composition{{ID: 12, Name: "Main", Layers: []*aep.Layer{title, subtitle}}},
+	}
+
+	interHits := Build(project).SearchTextStylesByFont("Inter-Regular")
+	if len(interHits) != 2 {
+		t.Fatalf("len(interHits) = %d, want 2", len(interHits))
+	}
+	assertHit(t, interHits[0], HitTextStyle, "text.font", "Inter-Regular", Location{
+		CompID:       12,
+		CompName:     "Main",
+		LayerID:      41,
+		LayerIndex:   0,
+		LayerName:    "Title",
+		PropertyPath: "layers[].text.runs[1]",
+	})
+	assertHit(t, interHits[1], HitTextStyle, "text.font", "Inter-Regular", Location{
+		CompID:       12,
+		CompName:     "Main",
+		LayerID:      42,
+		LayerIndex:   1,
+		LayerName:    "Subtitle",
+		PropertyPath: "layers[].text.runs[1]",
+	})
+	if interHits[0].Pointers.Layer != title || interHits[1].Pointers.Layer != subtitle {
+		t.Fatalf("text hit layer pointers = %p/%p, want %p/%p", interHits[0].Pointers.Layer, interHits[1].Pointers.Layer, title, subtitle)
+	}
+
+	helveticaHits := Build(project).SearchTextStylesByFont("Helvetica-Bold")
+	if len(helveticaHits) != 1 {
+		t.Fatalf("len(helveticaHits) = %d, want 1", len(helveticaHits))
+	}
+	assertHit(t, helveticaHits[0], HitTextStyle, "text.font", "Helvetica-Bold", Location{
+		CompID:       12,
+		CompName:     "Main",
+		LayerID:      41,
+		LayerIndex:   0,
+		LayerName:    "Title",
+		PropertyPath: "layers[].text.runs[2]",
+	})
+}
+
 func TestSearchNilOrInvalidInputReturnsNoHits(t *testing.T) {
 	var idx *Index
 	assertNoHits(t, "nil SearchLayersBySourceID", idx.SearchLayersBySourceID(100))
 	assertNoHits(t, "nil SearchEffectsByMatchName", idx.SearchEffectsByMatchName("ADBE Glo2"))
 	assertNoHits(t, "nil SearchPropertiesByMatchName", idx.SearchPropertiesByMatchName("ADBE Opacity"))
 	assertNoHits(t, "nil SearchExpressionsContaining", idx.SearchExpressionsContaining("time"))
+	assertNoHits(t, "nil SearchTextStylesByFont", idx.SearchTextStylesByFont("Inter-Regular"))
 
 	empty := Build(nil)
 	assertNoHits(t, "empty SearchLayersBySourceID", empty.SearchLayersBySourceID(100))
 	assertNoHits(t, "empty SearchEffectsByMatchName", empty.SearchEffectsByMatchName("ADBE Glo2"))
 	assertNoHits(t, "empty SearchPropertiesByMatchName", empty.SearchPropertiesByMatchName("ADBE Opacity"))
 	assertNoHits(t, "empty SearchExpressionsContaining", empty.SearchExpressionsContaining("time"))
+	assertNoHits(t, "empty SearchTextStylesByFont", empty.SearchTextStylesByFont("Inter-Regular"))
 	assertNoHits(t, "zero source ID", empty.SearchLayersBySourceID(0))
 	assertNoHits(t, "empty effect match name", empty.SearchEffectsByMatchName(""))
 	assertNoHits(t, "empty property match name", empty.SearchPropertiesByMatchName(""))
 	assertNoHits(t, "empty expression query", empty.SearchExpressionsContaining(""))
+	assertNoHits(t, "empty font name", empty.SearchTextStylesByFont(""))
 }
 
 func TestSearchHitJSONUsesStableSchemaNames(t *testing.T) {
