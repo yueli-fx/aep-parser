@@ -1,6 +1,7 @@
 package recipedoc
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -197,6 +198,53 @@ func TestBuildDocumentExampleReferencesExist(t *testing.T) {
 	}
 }
 
+func TestBuildDocumentExampleReferencesCoverFieldPath(t *testing.T) {
+	doc, err := BuildDocument()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, field := range doc.Fields {
+		if field.Example == "" {
+			continue
+		}
+		path := filepath.Join("..", "..", filepath.FromSlash(field.Example))
+		data, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatalf("read %s example %q: %v", field.Path, field.Example, err)
+		}
+		var recipe any
+		if err := json.Unmarshal(data, &recipe); err != nil {
+			t.Fatalf("parse %s example %q: %v", field.Path, field.Example, err)
+		}
+		if !jsonPathExists(recipe, field.Path) {
+			t.Fatalf("%s example %q does not contain field path", field.Path, field.Example)
+		}
+	}
+}
+
+func TestJSONPathExistsHandlesRecipeArrayPaths(t *testing.T) {
+	value := map[string]any{
+		"comps": []any{
+			map[string]any{
+				"layers": []any{
+					map[string]any{
+						"transform": map[string]any{
+							"position": []any{1.0, 2.0},
+						},
+					},
+				},
+			},
+		},
+	}
+	if !jsonPathExists(value, "comps[].layers[].transform.position") {
+		t.Fatal("expected nested array path to exist")
+	}
+	if jsonPathExists(value, "comps[].layers[].effects[]") {
+		t.Fatal("missing nested array path should not exist")
+	}
+}
+
 func TestNoUnexpectedMissingSemanticSummaries(t *testing.T) {
 	doc, err := BuildDocument()
 	if err != nil {
@@ -223,4 +271,48 @@ func hasCapability(field FieldModel, key string) bool {
 		}
 	}
 	return false
+}
+
+func jsonPathExists(value any, path string) bool {
+	if path == "" {
+		return true
+	}
+	parts := strings.SplitN(path, ".", 2)
+	head := parts[0]
+	tail := ""
+	if len(parts) == 2 {
+		tail = parts[1]
+	}
+	if strings.HasSuffix(head, "[]") {
+		key := strings.TrimSuffix(head, "[]")
+		obj, ok := value.(map[string]any)
+		if !ok {
+			return false
+		}
+		items, ok := obj[key].([]any)
+		if !ok || len(items) == 0 {
+			return false
+		}
+		if tail == "" {
+			return true
+		}
+		for _, item := range items {
+			if jsonPathExists(item, tail) {
+				return true
+			}
+		}
+		return false
+	}
+	obj, ok := value.(map[string]any)
+	if !ok {
+		return false
+	}
+	next, ok := obj[head]
+	if !ok {
+		return false
+	}
+	if tail == "" {
+		return true
+	}
+	return jsonPathExists(next, tail)
 }

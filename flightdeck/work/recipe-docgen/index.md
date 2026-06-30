@@ -413,6 +413,8 @@ Done:
 - Compact `docs/recipe_index.json` output added for editor/agent lookup by
   stable recipe field path; generated from the same canonical model and covered
   by the recipedocgen up-to-date drift gate.
+- Example-reference drift gate now verifies each referenced recipe JSON actually
+  contains the documented field path, not just that the file exists.
 
 Current:
 
