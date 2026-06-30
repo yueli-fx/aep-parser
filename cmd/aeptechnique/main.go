@@ -54,6 +54,9 @@ func run(args []string, stdout, stderr io.Writer) int {
 	if code != 0 {
 		return code
 	}
+	if value, ok := output.(*explanationOutput); ok {
+		output = value.Explanation
+	}
 	out, closeOut, err := outputWriter(*outPath, stdout)
 	if err != nil {
 		fmt.Fprintln(stderr, err)
@@ -118,6 +121,11 @@ type corpusPattern struct {
 	ArchetypeCounts      map[string]int  `json:"archetype_counts,omitempty"`
 }
 
+type explanationOutput struct {
+	Facts       *technique.FactSet
+	Explanation *technique.Explanation
+}
+
 func newCorpusSummary(mode string) *corpusSummary {
 	return &corpusSummary{
 		SchemaVersion: technique.SchemaVersion,
@@ -177,7 +185,7 @@ func buildOutput(input, mode string, stderr io.Writer) (any, int) {
 			fmt.Fprintf(stderr, "explain %q: %v\n", input, err)
 			return nil, 1
 		}
-		return explanation, 0
+		return &explanationOutput{Facts: facts, Explanation: explanation}, 0
 	default:
 		fmt.Fprintf(stderr, "invalid -mode %q; want facts, portrait, or explain\n", mode)
 		return nil, 2
@@ -217,6 +225,20 @@ func runCorpus(input, mode string, recursive bool, limit int, summaryMode bool, 
 			case *technique.Portrait:
 				record.Portrait = value
 				addPortraitToSummary(summary, value)
+			case *explanationOutput:
+				record.Facts = value.Facts
+				record.Explanation = value.Explanation
+				addPortraitToSummary(summary, &value.Explanation.Portrait)
+				for _, archetype := range value.Explanation.Archetypes {
+					summary.ArchetypeCounts[archetype.ID]++
+				}
+				for _, pattern := range value.Explanation.Patterns {
+					summary.PatternCounts[pattern.ID]++
+					addPatternProfile(summary, pattern, value.Explanation, path)
+				}
+				if value.Explanation.RecreationReadiness.Status != "" {
+					summary.ReadinessCounts[value.Explanation.RecreationReadiness.Status]++
+				}
 			case *technique.Explanation:
 				record.Explanation = value
 				addPortraitToSummary(summary, &value.Portrait)

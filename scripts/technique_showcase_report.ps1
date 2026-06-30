@@ -24,6 +24,7 @@ try {
     $studyTasksCsvPath = Join-Path $OutDir "study_tasks.csv"
     $recreationBlockersCsvPath = Join-Path $OutDir "recreation_blockers.csv"
     $signalLayersCsvPath = Join-Path $OutDir "signal_layers.csv"
+    $effectStacksCsvPath = Join-Path $OutDir "effect_stacks.csv"
     $learningActionsCsvPath = Join-Path $OutDir "learning_actions.csv"
     $mechanismsCsvPath = Join-Path $OutDir "mechanisms.csv"
     $mechanismExamplesCsvPath = Join-Path $OutDir "mechanism_examples.csv"
@@ -685,6 +686,36 @@ try {
     } else {
         '"project_path","rank","comp_name","layer_name","role","score","signals"' | Set-Content -LiteralPath $signalLayersCsvPath -Encoding UTF8
     }
+    $effectStackRows = @()
+    foreach ($record in $records) {
+        if ($null -eq $record.facts -or $null -eq $record.facts.effects) {
+            continue
+        }
+        foreach ($effect in @($record.facts.effects)) {
+            $effectStackRows += [pscustomobject]@{
+                project_path        = [string]$record.path
+                comp_name           = [string]$effect.comp_name
+                layer_name          = [string]$effect.layer_name
+                occurrence          = [int]$effect.occurrence
+                match_name          = [string]$effect.match_name
+                display_name        = [string]$effect.display_name
+                dependency_class    = [string]$effect.dependency_class
+                changed_param_count = [int]$effect.changed_param_count
+                tuned_param_count   = [int]$effect.tuned_param_count
+                unknown_param_count = [int]$effect.unknown_param_count
+                has_expression      = [bool]$effect.has_expression
+                has_keyframes       = [bool]$effect.has_keyframes
+                has_layer_ref       = [bool]$effect.has_layer_ref
+            }
+        }
+    }
+    if ($effectStackRows.Count -gt 0) {
+        $effectStackRows |
+            Sort-Object project_path, comp_name, layer_name, occurrence, match_name |
+            Export-Csv -LiteralPath $effectStacksCsvPath -NoTypeInformation -Encoding UTF8
+    } else {
+        '"project_path","comp_name","layer_name","occurrence","match_name","display_name","dependency_class","changed_param_count","tuned_param_count","unknown_param_count","has_expression","has_keyframes","has_layer_ref"' | Set-Content -LiteralPath $effectStacksCsvPath -Encoding UTF8
+    }
     $mechanismExampleIndex = @{}
     foreach ($example in $mechanismExampleRows) {
         $key = "$($example.category)`u{1f}$($example.name)"
@@ -1004,7 +1035,7 @@ try {
     [void]$h.AppendLine("</head><body><main>")
     [void]$h.AppendLine("<h1>Technique Corpus Report</h1>")
     [void]$h.AppendLine("<p class=""muted"">input <code>$(Escape-Html $InputPath)</code></p>")
-    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""manifest.json"">manifest.json</a> · <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""project_playbooks.csv"">project_playbooks.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""study_queue.csv"">study_queue.csv</a> · <a href=""study_tasks.csv"">study_tasks.csv</a> · <a href=""recreation_blockers.csv"">recreation_blockers.csv</a> · <a href=""signal_layers.csv"">signal_layers.csv</a> · <a href=""learning_actions.csv"">learning_actions.csv</a> · <a href=""mechanisms.csv"">mechanisms.csv</a> · <a href=""mechanism_examples.csv"">mechanism_examples.csv</a> · <a href=""errors.csv"">errors.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
+    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""manifest.json"">manifest.json</a> · <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""project_playbooks.csv"">project_playbooks.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""study_queue.csv"">study_queue.csv</a> · <a href=""study_tasks.csv"">study_tasks.csv</a> · <a href=""recreation_blockers.csv"">recreation_blockers.csv</a> · <a href=""signal_layers.csv"">signal_layers.csv</a> · <a href=""effect_stacks.csv"">effect_stacks.csv</a> · <a href=""learning_actions.csv"">learning_actions.csv</a> · <a href=""mechanisms.csv"">mechanisms.csv</a> · <a href=""mechanism_examples.csv"">mechanism_examples.csv</a> · <a href=""errors.csv"">errors.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
     [void]$h.AppendLine("<div class=""grid"">")
     foreach ($metric in @(
         @{ Label = "Projects"; Value = $summary.project_count },
@@ -1076,6 +1107,16 @@ try {
     }
     if ($signalLayerRows.Count -eq 0) {
         [void]$h.AppendLine("<tr><td colspan=""5"" class=""empty"">No signal layers reported.</td></tr>")
+    }
+    [void]$h.AppendLine("</tbody></table></section>")
+    [void]$h.AppendLine("<h2 style=""margin-top:28px"">Effect Stacks</h2>")
+    [void]$h.AppendLine("<section class=""panel"" style=""margin-top:14px""><table><thead><tr><th>Project</th><th>Layer</th><th>Effect</th><th>Params</th><th>Flags</th></tr></thead><tbody>")
+    foreach ($effect in @($effectStackRows | Sort-Object @{ Expression = { [int]$_.tuned_param_count }; Descending = $true }, project_path | Select-Object -First 100)) {
+        $flags = @()
+        if ($effect.has_expression) { $flags += "expression" }
+        if ($effect.has_keyframes) { $flags += "keyframes" }
+        if ($effect.has_layer_ref) { $flags += "layer_ref" }
+        [void]$h.AppendLine("<tr><td>$(Escape-Html $effect.project_path)</td><td>$(Escape-Html $effect.layer_name)</td><td>$(Escape-Html $effect.match_name)</td><td>changed=$($effect.changed_param_count), tuned=$($effect.tuned_param_count), unknown=$($effect.unknown_param_count)</td><td>$(Escape-Html ($flags -join ', '))</td></tr>")
     }
     [void]$h.AppendLine("</tbody></table></section>")
     [void]$h.AppendLine("<h2 style=""margin-top:28px"">Study Queue</h2>")
@@ -1285,6 +1326,7 @@ try {
         $studyTasksCsvPath,
         $recreationBlockersCsvPath,
         $signalLayersCsvPath,
+        $effectStacksCsvPath,
         $learningActionsCsvPath,
         $mechanismsCsvPath,
         $mechanismExamplesCsvPath,
@@ -1347,6 +1389,7 @@ try {
     Write-Host "study tasks csv: $studyTasksCsvPath"
     Write-Host "recreation blockers csv: $recreationBlockersCsvPath"
     Write-Host "signal layers csv: $signalLayersCsvPath"
+    Write-Host "effect stacks csv: $effectStacksCsvPath"
     Write-Host "learning actions csv: $learningActionsCsvPath"
     Write-Host "mechanisms csv: $mechanismsCsvPath"
     Write-Host "mechanism examples csv: $mechanismExamplesCsvPath"

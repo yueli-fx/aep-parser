@@ -86,6 +86,7 @@ It defaults to `flightdeck\showcase` and writes generated output under
 - `study_tasks.csv`
 - `recreation_blockers.csv`
 - `signal_layers.csv`
+- `effect_stacks.csv`
 - `learning_actions.csv`
 - `mechanisms.csv`
 - `mechanism_examples.csv`
@@ -130,6 +131,9 @@ ranking.
 `signal_layers.csv` exports the highest-signal layers per project with role,
 score, and evidence signals so technique review can start from the layer stack
 that actually drives the look.
+`effect_stacks.csv` expands every parsed effect occurrence with project, comp,
+layer, match name, changed/tuned/unknown parameter counts, and expression,
+keyframe, and layer-reference flags.
 `learning_actions.csv` turns each repeated pattern into a review action with
 representative project, common steps, top mechanisms, and risk.
 `mechanisms.csv` expands effect, plugin-effect, shape, text-animator, layer-role,

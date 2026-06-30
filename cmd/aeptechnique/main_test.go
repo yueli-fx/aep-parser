@@ -245,6 +245,33 @@ func TestRunEmitsCorpusExplanationSummary(t *testing.T) {
 	}
 }
 
+func TestRunEmitsCorpusExplanationRecordsWithFacts(t *testing.T) {
+	fixture := filepath.Join("..", "..", "flightdeck", "showcase", "pseudo-effect", "pseudo_default.aep")
+	root := t.TempDir()
+	writeFixtureCopy(t, fixture, filepath.Join(root, "pseudo_default.aep"))
+
+	var stdout, stderr bytes.Buffer
+	code := run([]string{"-in", root, "-mode", "explain", "-corpus", "-recursive"}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("run exit = %d, stderr=%s", code, stderr.String())
+	}
+
+	lines := nonEmptyLines(stdout.String())
+	if len(lines) != 1 {
+		t.Fatalf("jsonl lines = %d, stdout=%s", len(lines), stdout.String())
+	}
+	var record corpusRecord
+	if err := json.Unmarshal([]byte(lines[0]), &record); err != nil {
+		t.Fatalf("unmarshal record: %v\n%s", err, lines[0])
+	}
+	if record.Explanation == nil || record.Explanation.Portrait.Fingerprint.EffectCount == 0 {
+		t.Fatalf("record explanation missing effect fingerprint: %+v", record.Explanation)
+	}
+	if record.Facts == nil || len(record.Facts.Effects) == 0 {
+		t.Fatalf("record facts missing effects: %+v", record.Facts)
+	}
+}
+
 func TestRunEmitsPatternPluginProfiles(t *testing.T) {
 	fixture := filepath.Join("..", "..", "flightdeck", "showcase", "pseudo-effect", "pseudo_default.aep")
 	root := t.TempDir()
