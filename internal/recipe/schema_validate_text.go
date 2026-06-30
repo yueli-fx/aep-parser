@@ -47,6 +47,9 @@ func validateTextStyle(style TextStyleSpec, stylePath string, recordCapability f
 			addRefusal("invalid_text_tsume", stylePath+".tsume", "tsume must be between 0 and 100")
 		}
 	}
+	if style.NoBreak != nil {
+		recordCapability("Layer.SetRunNoBreak", stylePath+".no_break")
+	}
 	if style.FauxBold != nil {
 		recordCapability("Layer.SetRunFauxBold", stylePath+".faux_bold")
 	}
@@ -65,6 +68,9 @@ func validateTextStyle(style TextStyleSpec, stylePath string, recordCapability f
 		if *style.StrokeWidth < 0 {
 			addRefusal("invalid_text_stroke_width", stylePath+".stroke_width", "stroke_width must be non-negative")
 		}
+	}
+	if style.StrokeOverFill != nil {
+		recordCapability("Layer.SetRunStrokeOverFill", stylePath+".stroke_over_fill")
 	}
 	if style.Justification != "" {
 		recordCapability("Layer.SetParagraphJustification", stylePath+".justification")

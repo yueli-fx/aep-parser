@@ -142,6 +142,11 @@ Done:
   `TextStyleRun` preserves these parsed run fields, `minimal-text-style.json`
   asserts them through `expected_profile.text_styles[]`, and whole-recipe
   profile verification passes with 127 recipes and 161 covered profile paths.
+- Text-style recipe/profile coverage now also includes the run `no_break` and
+  `stroke_over_fill` switches. Scene JSON and profile output preserve both
+  parsed flags, `minimal-text-style.json` asserts them through
+  `expected_profile.text_styles[]`, and whole-recipe profile verification
+  passes with 127 recipes and 163 covered profile paths.
 - Recipe embedded profile contracts now support `expected_profile.keyframes[]`
   for property keyframe count/time/value checks. The updated shape/text example
   animates the title Position across three keyframes, passed `go test ./...`,

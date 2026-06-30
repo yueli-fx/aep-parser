@@ -356,6 +356,13 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 			})
 			add(path, *expectedStyle.Tsume, actual, ok && math.Abs(actual-*expectedStyle.Tsume) < 1e-9)
 		}
+		if expectedStyle.NoBreak != nil {
+			path := stylePath + ".no_break"
+			actual, ok := profileRunBool(layer.Text.Runs, expectedStyle.RunIndex, func(run profile.TextStyleRun) bool {
+				return run.NoBreak
+			})
+			add(path, *expectedStyle.NoBreak, actual, ok && actual == *expectedStyle.NoBreak)
+		}
 		if expectedStyle.FauxBold != nil {
 			path := stylePath + ".faux_bold"
 			actual, ok := profileRunBool(layer.Text.Runs, expectedStyle.RunIndex, func(run profile.TextStyleRun) bool {
@@ -390,6 +397,13 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 				return run.StrokeWidth
 			})
 			add(path, *expectedStyle.StrokeWidth, actual, ok && math.Abs(actual-*expectedStyle.StrokeWidth) < 1e-9)
+		}
+		if expectedStyle.StrokeOverFill != nil {
+			path := stylePath + ".stroke_over_fill"
+			actual, ok := profileRunBool(layer.Text.Runs, expectedStyle.RunIndex, func(run profile.TextStyleRun) bool {
+				return run.StrokeOverFill
+			})
+			add(path, *expectedStyle.StrokeOverFill, actual, ok && actual == *expectedStyle.StrokeOverFill)
 		}
 		if expectedStyle.Justification != "" {
 			path := stylePath + ".justification"

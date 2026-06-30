@@ -142,11 +142,13 @@ func addTextStyleSummaries(out map[string]string, prefix, label string) {
 		"horizontal_scale": label + " horizontal text scale.",
 		"vertical_scale":   label + " vertical text scale.",
 		"tsume":            label + " CJK tsume spacing adjustment.",
+		"no_break":         label + " no-break line wrapping flag.",
 		"faux_bold":        label + " faux bold switch.",
 		"faux_italic":      label + " faux italic switch.",
 		"apply_stroke":     label + " stroke enable switch.",
 		"stroke_color":     label + " stroke color as RGB channels.",
 		"stroke_width":     label + " stroke width.",
+		"stroke_over_fill": label + " stroke-over-fill render order flag.",
 		"justification":    label + " paragraph justification mode.",
 	})
 }

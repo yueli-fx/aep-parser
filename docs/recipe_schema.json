@@ -2024,6 +2024,58 @@
       "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
+      "x-aep-path": "comps[].layers[].text_style.stroke_over_fill",
+      "json_name": "stroke_over_fill",
+      "source_type": "TextStyleSpec",
+      "source_field": "StrokeOverFill",
+      "type": "boolean",
+      "go_type": "*bool",
+      "description": "Layer text style stroke-over-fill render order flag.",
+      "x-aep-capabilities": [
+        {
+          "key": "text.set_run_stroke_over_fill",
+          "query": "Layer.SetRunStrokeOverFill",
+          "status": "supported",
+          "symbol": "Layer.SetRunStrokeOverFill",
+          "domain": "text",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-variable btdk PostScript body splice; verified against\na single-run DOM fixture on both AE versions",
+          "gate": [
+            "TestTextRun_AEShipGate_AE2020",
+            "TestTextRun_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_style.no_break",
+      "json_name": "no_break",
+      "source_type": "TextStyleSpec",
+      "source_field": "NoBreak",
+      "type": "boolean",
+      "go_type": "*bool",
+      "description": "Layer text style no-break line wrapping flag.",
+      "x-aep-capabilities": [
+        {
+          "key": "text.set_run_no_break",
+          "query": "Layer.SetRunNoBreak",
+          "status": "supported",
+          "symbol": "Layer.SetRunNoBreak",
+          "domain": "text",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-variable btdk PostScript body splice; only writeable\nthrough the AE 24+ scripting API; on AE 2020 the enum round-trips as an\nopaque preserved value, while AE 2025 exposes it through the DOM —\nverified by re-saving and re-reading on both AE versions",
+          "gate": [
+            "TestTextEnum_AEShipGate_AE2020",
+            "TestTextEnum_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
       "x-aep-path": "comps[].layers[].text_style.justification",
       "json_name": "justification",
       "source_type": "TextStyleSpec",
@@ -9005,6 +9057,26 @@
       "description": "Expected text style stroke width.",
       "x-aep-validation": "Expected stroke width must be non-negative.",
       "x-aep-example": "examples/recipes/minimal-text-shape.json"
+    },
+    {
+      "x-aep-path": "expected_profile.text_styles[].stroke_over_fill",
+      "json_name": "stroke_over_fill",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "StrokeOverFill",
+      "type": "boolean",
+      "go_type": "*bool",
+      "description": "Expected text style stroke-over-fill render order flag.",
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
+      "x-aep-path": "expected_profile.text_styles[].no_break",
+      "json_name": "no_break",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "NoBreak",
+      "type": "boolean",
+      "go_type": "*bool",
+      "description": "Expected text style no-break line wrapping flag.",
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
     },
     {
       "x-aep-path": "expected_profile.text_styles[].justification",

@@ -82,6 +82,8 @@
     "comps[].layers[].text_style.apply_stroke",
     "comps[].layers[].text_style.stroke_color",
     "comps[].layers[].text_style.stroke_width",
+    "comps[].layers[].text_style.stroke_over_fill",
+    "comps[].layers[].text_style.no_break",
     "comps[].layers[].text_style.justification",
     "comps[].layers[].text_animators[]",
     "comps[].layers[].text_animators[].property",
@@ -466,6 +468,8 @@
     "expected_profile.text_styles[].apply_stroke",
     "expected_profile.text_styles[].stroke_color",
     "expected_profile.text_styles[].stroke_width",
+    "expected_profile.text_styles[].stroke_over_fill",
+    "expected_profile.text_styles[].no_break",
     "expected_profile.text_styles[].justification",
     "expected_profile.keyframes[]",
     "expected_profile.keyframes[].layer_name",
@@ -3839,6 +3843,19 @@
       ],
       "example": "examples/recipes/minimal-text-style.json"
     },
+    "comps[].layers[].text_style.no_break": {
+      "path": "comps[].layers[].text_style.no_break",
+      "json_name": "no_break",
+      "source_type": "TextStyleSpec",
+      "source_field": "NoBreak",
+      "type": "boolean",
+      "go_type": "*bool",
+      "summary": "Layer text style no-break line wrapping flag.",
+      "capability_keys": [
+        "text.set_run_no_break"
+      ],
+      "example": "examples/recipes/minimal-text-style.json"
+    },
     "comps[].layers[].text_style.paragraph_index": {
       "path": "comps[].layers[].text_style.paragraph_index",
       "json_name": "paragraph_index",
@@ -3870,6 +3887,19 @@
         "text.set_run_stroke_color"
       ],
       "example": "examples/recipes/minimal-text-shape.json"
+    },
+    "comps[].layers[].text_style.stroke_over_fill": {
+      "path": "comps[].layers[].text_style.stroke_over_fill",
+      "json_name": "stroke_over_fill",
+      "source_type": "TextStyleSpec",
+      "source_field": "StrokeOverFill",
+      "type": "boolean",
+      "go_type": "*bool",
+      "summary": "Layer text style stroke-over-fill render order flag.",
+      "capability_keys": [
+        "text.set_run_stroke_over_fill"
+      ],
+      "example": "examples/recipes/minimal-text-style.json"
     },
     "comps[].layers[].text_style.stroke_width": {
       "path": "comps[].layers[].text_style.stroke_width",
@@ -6293,6 +6323,16 @@
       "summary": "Expected text style explicit leading value.",
       "example": "examples/recipes/minimal-text-style.json"
     },
+    "expected_profile.text_styles[].no_break": {
+      "path": "expected_profile.text_styles[].no_break",
+      "json_name": "no_break",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "NoBreak",
+      "type": "boolean",
+      "go_type": "*bool",
+      "summary": "Expected text style no-break line wrapping flag.",
+      "example": "examples/recipes/minimal-text-style.json"
+    },
     "expected_profile.text_styles[].paragraph_index": {
       "path": "expected_profile.text_styles[].paragraph_index",
       "json_name": "paragraph_index",
@@ -6323,6 +6363,16 @@
       "summary": "Expected text style stroke color as RGB channels.",
       "validation": "Expected stroke color must contain RGB or RGBA channels in the 0..1 range.",
       "example": "examples/recipes/minimal-text-shape.json"
+    },
+    "expected_profile.text_styles[].stroke_over_fill": {
+      "path": "expected_profile.text_styles[].stroke_over_fill",
+      "json_name": "stroke_over_fill",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "StrokeOverFill",
+      "type": "boolean",
+      "go_type": "*bool",
+      "summary": "Expected text style stroke-over-fill render order flag.",
+      "example": "examples/recipes/minimal-text-style.json"
     },
     "expected_profile.text_styles[].stroke_width": {
       "path": "expected_profile.text_styles[].stroke_width",
@@ -6683,6 +6733,8 @@
       "expected_profile.text_styles[].apply_stroke",
       "expected_profile.text_styles[].stroke_color",
       "expected_profile.text_styles[].stroke_width",
+      "expected_profile.text_styles[].stroke_over_fill",
+      "expected_profile.text_styles[].no_break",
       "expected_profile.text_styles[].justification"
     ],
     "ExpectedWorkAreaSpec": [
@@ -6985,6 +7037,8 @@
       "comps[].layers[].text_style.apply_stroke",
       "comps[].layers[].text_style.stroke_color",
       "comps[].layers[].text_style.stroke_width",
+      "comps[].layers[].text_style.stroke_over_fill",
+      "comps[].layers[].text_style.no_break",
       "comps[].layers[].text_style.justification"
     ],
     "Transform": [

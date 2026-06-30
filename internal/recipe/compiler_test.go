@@ -4678,6 +4678,8 @@ func TestCompileToFileChecksExpectedTextStyleProfile(t *testing.T) {
 		HorizontalScale: ptr(80),
 		VerticalScale:   ptr(120),
 		Tsume:           ptr(50),
+		StrokeOverFill:  boolPtr(false),
+		NoBreak:         boolPtr(true),
 		FauxBold:        boolPtr(true),
 		FauxItalic:      boolPtr(true),
 		ApplyStroke:     boolPtr(true),
@@ -4699,6 +4701,8 @@ func TestCompileToFileChecksExpectedTextStyleProfile(t *testing.T) {
 			HorizontalScale: ptr(80),
 			VerticalScale:   ptr(120),
 			Tsume:           ptr(50),
+			StrokeOverFill:  boolPtr(false),
+			NoBreak:         boolPtr(true),
 			FauxBold:        boolPtr(true),
 			FauxItalic:      boolPtr(true),
 			ApplyStroke:     boolPtr(true),
@@ -4725,6 +4729,8 @@ func TestCompileToFileChecksExpectedTextStyleProfile(t *testing.T) {
 	assertProfileCheck(t, report, "expected_profile.text_styles[0].horizontal_scale", true)
 	assertProfileCheck(t, report, "expected_profile.text_styles[0].vertical_scale", true)
 	assertProfileCheck(t, report, "expected_profile.text_styles[0].tsume", true)
+	assertProfileCheck(t, report, "expected_profile.text_styles[0].stroke_over_fill", true)
+	assertProfileCheck(t, report, "expected_profile.text_styles[0].no_break", true)
 	assertProfileCheck(t, report, "expected_profile.text_styles[0].faux_bold", true)
 	assertProfileCheck(t, report, "expected_profile.text_styles[0].faux_italic", true)
 	assertProfileCheck(t, report, "expected_profile.text_styles[0].apply_stroke", true)

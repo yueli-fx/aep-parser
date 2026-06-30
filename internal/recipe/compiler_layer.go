@@ -467,6 +467,11 @@ func applyTextStyle(layer *aep.Layer, spec TextStyleSpec) error {
 			return err
 		}
 	}
+	if spec.NoBreak != nil {
+		if err := layer.SetRunNoBreak(spec.RunIndex, *spec.NoBreak); err != nil {
+			return err
+		}
+	}
 	if spec.FauxBold != nil {
 		if err := layer.SetRunFauxBold(spec.RunIndex, *spec.FauxBold); err != nil {
 			return err
@@ -489,6 +494,11 @@ func applyTextStyle(layer *aep.Layer, spec TextStyleSpec) error {
 	}
 	if spec.StrokeWidth != nil {
 		if err := layer.SetRunStrokeWidth(spec.RunIndex, *spec.StrokeWidth); err != nil {
+			return err
+		}
+	}
+	if spec.StrokeOverFill != nil {
+		if err := layer.SetRunStrokeOverFill(spec.RunIndex, *spec.StrokeOverFill); err != nil {
 			return err
 		}
 	}

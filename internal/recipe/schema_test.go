@@ -2179,6 +2179,8 @@ func TestValidateReportsTextStyleCapabilities(t *testing.T) {
 		HorizontalScale: ptr(80),
 		VerticalScale:   ptr(120),
 		Tsume:           ptr(50),
+		StrokeOverFill:  boolPtr(false),
+		NoBreak:         boolPtr(true),
 		FauxBold:        boolPtr(true),
 		FauxItalic:      boolPtr(true),
 		ApplyStroke:     boolPtr(true),
@@ -2201,6 +2203,8 @@ func TestValidateReportsTextStyleCapabilities(t *testing.T) {
 	assertCapability(t, report, "Layer.SetRunHorizontalScale")
 	assertCapability(t, report, "Layer.SetRunVerticalScale")
 	assertCapability(t, report, "Layer.SetRunTsume")
+	assertCapability(t, report, "Layer.SetRunStrokeOverFill")
+	assertCapability(t, report, "Layer.SetRunNoBreak")
 	assertCapability(t, report, "Layer.SetRunFauxBold")
 	assertCapability(t, report, "Layer.SetRunFauxItalic")
 	assertCapability(t, report, "Layer.SetRunApplyStroke")

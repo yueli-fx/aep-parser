@@ -127,6 +127,8 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].text_style.apply_stroke` | `boolean` | - | Layer text style stroke enable switch. | - | `text.set_run_apply_stroke` (`Layer.SetRunApplyStroke`) | examples/recipes/minimal-text-shape.json |
 | `comps[].layers[].text_style.stroke_color` | `array<float64>` | - | Layer text style stroke color as RGB channels. | Text stroke color must contain RGB or RGBA channels in the 0..255 range. | `text.set_run_stroke_color` (`Layer.SetRunStrokeColor`) | examples/recipes/minimal-text-shape.json |
 | `comps[].layers[].text_style.stroke_width` | `number` | - | Layer text style stroke width. | Text stroke width must be non-negative. | `text.set_run_stroke_width` (`Layer.SetRunStrokeWidth`) | examples/recipes/minimal-text-shape.json |
+| `comps[].layers[].text_style.stroke_over_fill` | `boolean` | - | Layer text style stroke-over-fill render order flag. | - | `text.set_run_stroke_over_fill` (`Layer.SetRunStrokeOverFill`) | examples/recipes/minimal-text-style.json |
+| `comps[].layers[].text_style.no_break` | `boolean` | - | Layer text style no-break line wrapping flag. | - | `text.set_run_no_break` (`Layer.SetRunNoBreak`) | examples/recipes/minimal-text-style.json |
 | `comps[].layers[].text_style.justification` | `string` | - | Layer text style paragraph justification mode. | Text justification must use a supported value. | `text.set_paragraph_justification` (`Layer.SetParagraphJustification`) | examples/recipes/minimal-text-shape.json |
 
 ## TextAnimatorSpec
@@ -730,6 +732,8 @@ This reference is generated from the canonical recipe field model.
 | `expected_profile.text_styles[].apply_stroke` | `boolean` | - | Expected text style stroke enable switch. | - | - | examples/recipes/minimal-text-shape.json |
 | `expected_profile.text_styles[].stroke_color` | `array<float64>` | - | Expected text style stroke color as RGB channels. | Expected stroke color must contain RGB or RGBA channels in the 0..1 range. | - | examples/recipes/minimal-text-shape.json |
 | `expected_profile.text_styles[].stroke_width` | `number` | - | Expected text style stroke width. | Expected stroke width must be non-negative. | - | examples/recipes/minimal-text-shape.json |
+| `expected_profile.text_styles[].stroke_over_fill` | `boolean` | - | Expected text style stroke-over-fill render order flag. | - | - | examples/recipes/minimal-text-style.json |
+| `expected_profile.text_styles[].no_break` | `boolean` | - | Expected text style no-break line wrapping flag. | - | - | examples/recipes/minimal-text-style.json |
 | `expected_profile.text_styles[].justification` | `string` | - | Expected text style paragraph justification mode. | Expected justification must use a supported text justification value. | - | examples/recipes/minimal-text-shape.json |
 
 ## ExpectedKeyframedProperty

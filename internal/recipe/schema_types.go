@@ -162,6 +162,8 @@ type TextStyleSpec struct {
 	ApplyStroke     *bool     `json:"apply_stroke,omitempty"`
 	StrokeColor     []float64 `json:"stroke_color,omitempty"`
 	StrokeWidth     *float64  `json:"stroke_width,omitempty"`
+	StrokeOverFill  *bool     `json:"stroke_over_fill,omitempty"`
+	NoBreak         *bool     `json:"no_break,omitempty"`
 	Justification   string    `json:"justification,omitempty"`
 }
 
@@ -543,6 +545,8 @@ type ExpectedTextStyle struct {
 	ApplyStroke     *bool     `json:"apply_stroke,omitempty"`
 	StrokeColor     []float64 `json:"stroke_color,omitempty"`
 	StrokeWidth     *float64  `json:"stroke_width,omitempty"`
+	StrokeOverFill  *bool     `json:"stroke_over_fill,omitempty"`
+	NoBreak         *bool     `json:"no_break,omitempty"`
 	Justification   string    `json:"justification,omitempty"`
 }
 

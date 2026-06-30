@@ -354,6 +354,8 @@ type TextStyleRun struct {
 	ApplyStroke     bool       `json:"apply_stroke,omitempty"`
 	StrokeColor     [4]float64 `json:"stroke_color,omitempty"`
 	StrokeWidth     float64    `json:"stroke_width,omitempty"`
+	StrokeOverFill  bool       `json:"stroke_over_fill,omitempty"`
+	NoBreak         bool       `json:"no_break,omitempty"`
 }
 
 type TextParagraph struct {
@@ -865,6 +867,7 @@ func buildText(c *aep.JSONComposition, l *aep.JSONLayer, ts *aep.JSONTextSource)
 			BaselineShift: r.BaselineShift, HorizontalScale: r.HorizontalScale,
 			VerticalScale: r.VerticalScale, Tsume: r.Tsume, ApplyStroke: r.ApplyStroke,
 			StrokeColor: r.StrokeColor, StrokeWidth: r.StrokeWidth,
+			StrokeOverFill: r.StrokeOverFill, NoBreak: r.NoBreak,
 		})
 	}
 	for _, p := range ts.Paragraphs {
