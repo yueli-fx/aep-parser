@@ -1,6 +1,7 @@
 {
   "schema_version": 1,
   "project": {
+    "target_version": "AE2020",
     "name": "Minimal project preferences",
     "expression_engine": "javascript-1.0",
     "audio_sample_rate": 44100,

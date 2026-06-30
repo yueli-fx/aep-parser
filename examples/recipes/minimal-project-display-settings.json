@@ -1,6 +1,7 @@
 {
   "schema_version": 1,
   "project": {
+    "target_version": "AE2020",
     "name": "Minimal project display settings",
     "time_display_type": "frames",
     "frames_count_type": "start_1",

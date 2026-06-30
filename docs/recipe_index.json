@@ -8027,7 +8027,7 @@
       "capability_keys": [
         "project.create_target"
       ],
-      "example": "examples/recipes/minimal-layer-explicit-matte.json"
+      "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "project.time_display_type": {
       "path": "project.time_display_type",

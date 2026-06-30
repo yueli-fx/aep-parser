@@ -89,7 +89,7 @@
           ]
         }
       ],
-      "x-aep-example": "examples/recipes/minimal-layer-explicit-matte.json"
+      "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
       "x-aep-path": "project.bits_per_channel",

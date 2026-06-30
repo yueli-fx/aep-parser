@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "project": {"name": "minimal-text-animator-position-value-keyframes"},
+  "project": {"target_version": "AE2020", "name": "minimal-text-animator-position-value-keyframes"},
   "comps": [{
     "name": "Text Animator Position Value Keyframes",
     "width": 640,

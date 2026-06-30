@@ -170,6 +170,36 @@ func TestRecipeExamplesExpectedProfilesAreNotCountOnly(t *testing.T) {
 	}
 }
 
+func TestRecipeExamplesDeclareTargetVersion(t *testing.T) {
+	recipePaths, err := filepath.Glob(filepath.Join("..", "..", "examples", "recipes", "*.json"))
+	if err != nil {
+		t.Fatalf("Glob recipe examples: %v", err)
+	}
+	if len(recipePaths) == 0 {
+		t.Fatal("no recipe examples found")
+	}
+	for _, recipePath := range recipePaths {
+		t.Run(filepath.Base(recipePath), func(t *testing.T) {
+			raw, err := os.ReadFile(recipePath)
+			if err != nil {
+				t.Fatalf("ReadFile: %v", err)
+			}
+			var doc map[string]any
+			if err := json.Unmarshal(raw, &doc); err != nil {
+				t.Fatalf("Unmarshal: %v", err)
+			}
+			project, ok := doc["project"].(map[string]any)
+			if !ok {
+				t.Fatal("project is required")
+			}
+			targetVersion, ok := project["target_version"].(string)
+			if !ok || targetVersion == "" {
+				t.Fatal("project.target_version is required for recipe examples")
+			}
+		})
+	}
+}
+
 func TestRecipeExamplesWithLayersAssertLayerProfiles(t *testing.T) {
 	recipePaths, err := filepath.Glob(filepath.Join("..", "..", "examples", "recipes", "*.json"))
 	if err != nil {

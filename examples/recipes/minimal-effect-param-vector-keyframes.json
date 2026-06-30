@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "project": {"name": "minimal-effect-param-vector-keyframes"},
+  "project": {"target_version": "AE2020", "name": "minimal-effect-param-vector-keyframes"},
   "comps": [{
     "name": "Effect Param Vector Keyframes",
     "width": 640,

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "project": {"name": "minimal-effect-layer-param"},
+  "project": {"target_version": "AE2020", "name": "minimal-effect-layer-param"},
   "comps": [{
     "name": "Effect Layer Param",
     "width": 640,
