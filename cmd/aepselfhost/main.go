@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/yueli-fx/aep-parser/internal/host"
+	"github.com/yueli-fx/aep-parser/internal/selfhost"
 )
 
 func main() {
@@ -130,8 +131,11 @@ func parseVerifyOptions(name string, args []string, stderr io.Writer) (verifyOpt
 func verifySelfhost(opts verifyOptions, stdout, stderr io.Writer, platform host.Platform) int {
 	args := psVerifyArgs(opts)
 	if opts.DryRun {
-		fmt.Fprintln(stdout, "DRY RUN technique selfhost verify")
-		fmt.Fprintf(stdout, "command: pwsh %s\n", strings.Join(args, " "))
+		fmt.Fprint(stdout, selfhost.FormatVerifyDryRun(selfhost.VerifyOptions{
+			OutRoot: opts.OutRoot,
+			Limit:   opts.Limit,
+			Open:    opts.Open,
+		}))
 		return 0
 	}
 	return runCommand(stdout, stderr, platform, "pwsh", args...)

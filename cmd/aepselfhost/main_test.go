@@ -126,7 +126,7 @@ func TestRunStatusPrintsProcessWatchOutcomeAndLogs(t *testing.T) {
 	}
 }
 
-func TestRunVerifyDryRunPrintsPowerShellGate(t *testing.T) {
+func TestRunVerifyDryRunUsesGoGate(t *testing.T) {
 	root := t.TempDir()
 	var stdout, stderr bytes.Buffer
 
@@ -136,13 +136,15 @@ func TestRunVerifyDryRunPrintsPowerShellGate(t *testing.T) {
 		t.Fatalf("run verify dry-run = %d, stderr=%s", code, stderr.String())
 	}
 	out := stdout.String()
+	if strings.Contains(out, "pwsh") {
+		t.Fatalf("dry-run should not depend on pwsh:\n%s", out)
+	}
 	for _, want := range []string{
 		"DRY RUN technique selfhost verify",
-		"pwsh -NoProfile -File",
-		"verify_technique_selfhost.ps1",
-		"-OutRoot " + root,
-		"-Limit 3",
-		"-Open",
+		"out_root: " + root,
+		"limit: 3",
+		"open: true",
+		"gate engine: go",
 	} {
 		if !strings.Contains(out, want) {
 			t.Fatalf("stdout missing %q:\n%s", want, out)
