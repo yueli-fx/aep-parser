@@ -5,6 +5,10 @@
 This work package tracks the dedicated lookup/search/index layer that sits
 outside the core `scene.Project` model.
 
+Status: first slice complete. `internal/projectindex` exists, recipe/profile
+hotspots are wired to it, and search/corpus result models are specified. Later
+work should add concrete search APIs only when a caller needs them.
+
 The current architecture decision from `work/scene-architecture/index.md` is:
 keep `Project.Compositions`, `Project.Footage`, `Project.Folders`, and
 `Composition.Layers` as the canonical public read model for this phase. Do not
