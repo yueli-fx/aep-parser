@@ -13,8 +13,10 @@ func TestRenderMarkdownIncludesFieldReference(t *testing.T) {
 	out := RenderMarkdown(doc)
 	requireSubstring(t, out, "# Recipe Field Reference")
 	requireSubstring(t, out, "## CompSpec")
+	requireSubstring(t, out, "| Field Path | Type | Requiredness | Summary | Validation | Capability | Example |")
 	requireSubstring(t, out, "`comps[].background_color`")
 	requireSubstring(t, out, "`comp.set_background_color`")
+	requireSubstring(t, out, "examples/recipes/minimal-comp-background-color.json")
 	requireSubstring(t, out, "structural")
 }
 

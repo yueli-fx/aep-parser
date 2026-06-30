@@ -21,18 +21,19 @@ func RenderMarkdown(doc Document) string {
 	}
 	for _, sourceType := range order {
 		fmt.Fprintf(&b, "## %s\n\n", sourceType)
-		b.WriteString("| Field Path | Type | Requiredness | Summary | Validation | Capability |\n")
-		b.WriteString("| --- | --- | --- | --- | --- | --- |\n")
+		b.WriteString("| Field Path | Type | Requiredness | Summary | Validation | Capability | Example |\n")
+		b.WriteString("| --- | --- | --- | --- | --- | --- | --- |\n")
 		for _, field := range groups[sourceType] {
 			fmt.Fprintf(
 				&b,
-				"| `%s` | `%s` | %s | %s | %s | %s |\n",
+				"| `%s` | `%s` | %s | %s | %s | %s | %s |\n",
 				escapeMD(field.Path),
 				escapeMD(typeLabel(field.Type)),
 				escapeMD(requirednessLabel(field)),
 				escapeMD(summaryLabel(field)),
 				escapeMD(emptyDash(field.Validation)),
 				escapeMD(capabilityLabel(field.Capabilities)),
+				escapeMD(emptyDash(field.Example)),
 			)
 		}
 		b.WriteString("\n")

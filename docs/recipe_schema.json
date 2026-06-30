@@ -161,7 +161,8 @@
             "TestCompSettings_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-comp-background-color.json"
     },
     {
       "x-aep-path": "comps[].label",
@@ -236,7 +237,8 @@
             "TestSetRenderer_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-comp-renderer.json"
     },
     {
       "x-aep-path": "comps[].resolution_factor",
@@ -594,7 +596,8 @@
             "TestCompSettings_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-comp-work-area.json"
     },
     {
       "x-aep-path": "comps[].work_area.start",
@@ -1528,7 +1531,8 @@
             "TestMGTextStyle_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_style.fill_color",
@@ -1765,7 +1769,8 @@
             "TestNewCameraLight_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-camera-zoom.json"
     },
     {
       "x-aep-path": "comps[].layers[].camera.depth_of_field",
@@ -2096,7 +2101,8 @@
             "TestLayer3DLight_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-light-kind.json"
     },
     {
       "x-aep-path": "comps[].layers[].light.source_layer",
@@ -2822,7 +2828,8 @@
             "TestV2_2_GradientFill_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-gradient-fill.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill.type",
@@ -3873,7 +3880,8 @@
             "TestV2_2_StrokeDashes_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-stroke-dashes.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.dashes.gap",
@@ -4168,7 +4176,8 @@
             "TestMGRepeater_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-shape-repeater.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.repeater.copies",
@@ -5158,7 +5167,8 @@
             "TestAddMask_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "comps[].layers[].masks[].name",
@@ -5627,7 +5637,8 @@
       "go_type": "[]recipe.VectorKeyframe",
       "element": "recipe.VectorKeyframe",
       "object_type": "VectorKeyframe",
-      "description": "Position keyframe list."
+      "description": "Position keyframe list.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframes.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.position_keyframes[].time",
@@ -6112,7 +6123,8 @@
             "TestExprEffect_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-transform-expression.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.position.enabled",
@@ -6410,7 +6422,8 @@
             "TestAddEffectWave12_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-effect.json"
     },
     {
       "x-aep-path": "comps[].layers[].effects[].match_name",
@@ -6508,7 +6521,8 @@
             "TestExprEffect_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-effect-param-expression.json"
     },
     {
       "x-aep-path": "comps[].layers[].effects[].params[].expression.enabled",
@@ -6658,7 +6672,8 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Expected composition background color as RGB channels.",
-      "x-aep-validation": "Expected RGB color must contain exactly three channels in the 0..255 range."
+      "x-aep-validation": "Expected RGB color must contain exactly three channels in the 0..255 range.",
+      "x-aep-example": "examples/recipes/minimal-comp-background-color.json"
     },
     {
       "x-aep-path": "expected_profile.resolution_factor",
@@ -6836,7 +6851,8 @@
       "go_type": "[]recipe.ExpectedLayer",
       "element": "recipe.ExpectedLayer",
       "object_type": "ExpectedLayer",
-      "description": "Expected composition layer definitions."
+      "description": "Expected composition layer definitions.",
+      "x-aep-example": "examples/recipes/minimal-layer-object-profile.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].name",
@@ -7216,7 +7232,8 @@
       "go_type": "[]recipe.ExpectedEffect",
       "element": "recipe.ExpectedEffect",
       "object_type": "ExpectedEffect",
-      "description": "Expected effect checks."
+      "description": "Expected effect checks.",
+      "x-aep-example": "examples/recipes/minimal-text-effect.json"
     },
     {
       "x-aep-path": "expected_profile.effects[].layer_name",
@@ -7250,7 +7267,8 @@
       "element": "recipe.ExpectedEffectParam",
       "object_type": "ExpectedEffectParam",
       "description": "Expected effect parameter checks.",
-      "x-aep-validation": "Each expected effect parameter needs at least one of value, expression, or expression_enabled."
+      "x-aep-validation": "Each expected effect parameter needs at least one of value, expression, or expression_enabled.",
+      "x-aep-example": "examples/recipes/minimal-effect-param-expression.json"
     },
     {
       "x-aep-path": "expected_profile.effects[].params[].match_name",
@@ -7361,7 +7379,8 @@
       "go_type": "[]recipe.ExpectedTextStyle",
       "element": "recipe.ExpectedTextStyle",
       "object_type": "ExpectedTextStyle",
-      "description": "Expected text style checks."
+      "description": "Expected text style checks.",
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
     },
     {
       "x-aep-path": "expected_profile.text_styles[].layer_name",
@@ -7496,7 +7515,8 @@
       "go_type": "[]recipe.ExpectedKeyframedProperty",
       "element": "recipe.ExpectedKeyframedProperty",
       "object_type": "ExpectedKeyframedProperty",
-      "description": "Expected keyframes for a layer property."
+      "description": "Expected keyframes for a layer property.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframes.json"
     },
     {
       "x-aep-path": "expected_profile.keyframes[].layer_name",
@@ -7563,7 +7583,8 @@
       "go_type": "[]recipe.ExpectedMask",
       "element": "recipe.ExpectedMask",
       "object_type": "ExpectedMask",
-      "description": "Expected mask checks."
+      "description": "Expected mask checks.",
+      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
       "x-aep-path": "expected_profile.masks[].layer_name",

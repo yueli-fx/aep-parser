@@ -408,10 +408,12 @@ Done:
 - Mask capability metadata expanded for mask creation, options, static path, and
   path keyframes; generated docs now join capability details for 218 recipe
   fields.
+- Example-reference metadata added for 21 high-value recipe fields, and
+  markdown output now exposes an Example column backed by file-existence tests.
 
 Current:
 
-- Ready for editor integration or example-reference metadata.
+- Ready for editor integration or broader example coverage.
 
 ## Open questions
 

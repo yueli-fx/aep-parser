@@ -1,3 +1,25 @@
 package recipedoc
 
-var fieldExamples = map[string]string{}
+var fieldExamples = map[string]string{
+	"comps[].background_color":                               "examples/recipes/minimal-comp-background-color.json",
+	"comps[].renderer":                                       "examples/recipes/minimal-comp-renderer.json",
+	"comps[].work_area":                                      "examples/recipes/minimal-comp-work-area.json",
+	"comps[].layers[].text_style.font_size":                  "examples/recipes/minimal-text-style.json",
+	"comps[].layers[].camera.zoom":                           "examples/recipes/minimal-camera-zoom.json",
+	"comps[].layers[].light.kind":                            "examples/recipes/minimal-light-kind.json",
+	"comps[].layers[].shape.gradient_fill":                   "examples/recipes/minimal-shape-gradient-fill.json",
+	"comps[].layers[].shape.stroke.dashes.dash":              "examples/recipes/minimal-shape-stroke-dashes.json",
+	"comps[].layers[].shape.repeater":                        "examples/recipes/minimal-shape-repeater.json",
+	"comps[].layers[].masks[]":                               "examples/recipes/minimal-layer-mask.json",
+	"comps[].layers[].transform.position_keyframes[]":        "examples/recipes/minimal-transform-keyframes.json",
+	"comps[].layers[].transform.expressions.position.source": "examples/recipes/minimal-transform-expression.json",
+	"comps[].layers[].effects[]":                             "examples/recipes/minimal-text-effect.json",
+	"comps[].layers[].effects[].params[].expression.source":  "examples/recipes/minimal-effect-param-expression.json",
+	"expected_profile.background_color":                      "examples/recipes/minimal-comp-background-color.json",
+	"expected_profile.layers[]":                              "examples/recipes/minimal-layer-object-profile.json",
+	"expected_profile.effects[]":                             "examples/recipes/minimal-text-effect.json",
+	"expected_profile.effects[].params[]":                    "examples/recipes/minimal-effect-param-expression.json",
+	"expected_profile.text_styles[]":                         "examples/recipes/minimal-text-style.json",
+	"expected_profile.keyframes[]":                           "examples/recipes/minimal-transform-keyframes.json",
+	"expected_profile.masks[]":                               "examples/recipes/minimal-layer-mask.json",
+}

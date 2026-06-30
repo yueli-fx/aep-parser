@@ -1,6 +1,8 @@
 package recipedoc
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -151,6 +153,46 @@ func TestBuildDocumentIncludesExpectedProfileValidationMetadata(t *testing.T) {
 		field := requireField(t, doc, path)
 		if field.Validation == "" && len(field.Enum) == 0 {
 			t.Fatalf("%s has no validation metadata: %+v", path, field)
+		}
+	}
+}
+
+func TestBuildDocumentIncludesExampleMetadata(t *testing.T) {
+	doc, err := BuildDocument()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tests := map[string]string{
+		"comps[].background_color":                               "examples/recipes/minimal-comp-background-color.json",
+		"comps[].layers[].transform.position_keyframes[]":        "examples/recipes/minimal-transform-keyframes.json",
+		"comps[].layers[].transform.expressions.position.source": "examples/recipes/minimal-transform-expression.json",
+		"comps[].layers[].effects[]":                             "examples/recipes/minimal-text-effect.json",
+		"comps[].layers[].effects[].params[].expression.source":  "examples/recipes/minimal-effect-param-expression.json",
+		"comps[].layers[].masks[]":                               "examples/recipes/minimal-layer-mask.json",
+		"expected_profile.masks[]":                               "examples/recipes/minimal-layer-mask.json",
+	}
+	for path, want := range tests {
+		field := requireField(t, doc, path)
+		if field.Example != want {
+			t.Fatalf("%s example = %q, want %q", path, field.Example, want)
+		}
+	}
+}
+
+func TestBuildDocumentExampleReferencesExist(t *testing.T) {
+	doc, err := BuildDocument()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, field := range doc.Fields {
+		if field.Example == "" {
+			continue
+		}
+		path := filepath.Join("..", "..", filepath.FromSlash(field.Example))
+		if _, err := os.Stat(path); err != nil {
+			t.Fatalf("%s example %q is not readable: %v", field.Path, field.Example, err)
 		}
 	}
 }
