@@ -1342,6 +1342,23 @@ try {
     if ($null -eq $startProcess.stdout_log -or $null -eq $startProcess.stderr_log) {
         throw "start technique selfhost watch dry run missing log paths"
     }
+    $statusCliOutput = & pwsh -NoProfile -File scripts\show_technique_selfhost_status.ps1 -OutRoot $OutRoot 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        throw "show technique selfhost status failed: $statusCliOutput"
+    }
+    $statusCliText = $statusCliOutput -join "`n"
+    if ($statusCliText -notmatch "Self-Hosted Status") {
+        throw "show technique selfhost status missing title"
+    }
+    if ($statusCliText -notmatch "Watch Process") {
+        throw "show technique selfhost status missing Watch Process"
+    }
+    if ($statusCliText -notmatch "Latest Outcome") {
+        throw "show technique selfhost status missing Latest Outcome"
+    }
+    if ($statusCliText -notmatch "Logs") {
+        throw "show technique selfhost status missing Logs"
+    }
     if (-not (Test-Path -LiteralPath $latestOutcomeHtmlPath)) {
         throw "latest outcome html missing: $latestOutcomeHtmlPath"
     }
