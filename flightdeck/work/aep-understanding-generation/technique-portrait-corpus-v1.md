@@ -186,8 +186,8 @@ layer roles, and graph edges.
 acceptance gate. It runs the technique Go tests, generates and verifies the full
 sample report, generates and verifies an intentional partial-error report,
 compares a report to itself, compares the partial report to the full report,
-validates and compiles one generated recipe draft into a smoke `.aep`, reparses
-that compiled `.aep` with `aeptechnique`, and writes `acceptance.json` plus
+validates and compiles generated recipe drafts into smoke `.aep` files, reparses
+those compiled `.aep` files with `aeptechnique`, and writes `acceptance.json` plus
 `acceptance.md`. It also writes
 `latest_run.txt`, `latest_effectiveness.md`, `latest_effectiveness.json`,
 `latest_acceptance.md`, and `latest_index.html` at the selected output root so
