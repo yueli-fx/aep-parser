@@ -1970,6 +1970,7 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Solid fill color as RGB channels.",
+      "validation": "Fill color must contain RGB or RGBA channels in the 0..255 range.",
       "capability_keys": [
         "shape.fill.set_color"
       ],

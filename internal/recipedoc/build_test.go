@@ -366,6 +366,7 @@ func TestBuildDocumentIncludesShapePaintValidationMetadata(t *testing.T) {
 		"comps[].layers[].shape.points",
 		"comps[].layers[].shape.inner_radius",
 		"comps[].layers[].shape.outer_radius",
+		"comps[].layers[].shape.fill_color",
 		"comps[].layers[].shape.fill_opacity",
 		"comps[].layers[].shape.fill_blend_mode",
 		"comps[].layers[].shape.fill_composite_order",

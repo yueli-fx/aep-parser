@@ -3016,6 +3016,7 @@ func TestValidateRejectsInvalidShapeDetail(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Position = []float64{12}
 	rec.Comps[0].Layers[1].Shape.Roundness = ptr(-1)
+	rec.Comps[0].Layers[1].Shape.FillColor = []float64{255, 0, 300}
 	rec.Comps[0].Layers[1].Shape.FillOpacity = ptr(101)
 	rec.Comps[0].Layers[1].Shape.FillBlendMode = ptr(0)
 	rec.Comps[0].Layers[1].Shape.FillCompositeOrder = "middle"
@@ -3028,6 +3029,7 @@ func TestValidateRejectsInvalidShapeDetail(t *testing.T) {
 	}
 	assertRefusal(t, report, "invalid_vector_size")
 	assertRefusal(t, report, "invalid_shape_roundness")
+	assertRefusal(t, report, "invalid_shape_fill_color")
 	assertRefusal(t, report, "invalid_shape_fill_opacity")
 	assertRefusal(t, report, "invalid_shape_fill_blend_mode")
 	assertRefusal(t, report, "invalid_shape_fill_composite_order")

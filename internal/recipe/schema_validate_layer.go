@@ -304,6 +304,7 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 		validateVec(layer.Shape.Position, 2, layerPath+".shape.position", addRefusal)
 		if len(layer.Shape.FillColor) > 0 {
 			recordCapability("FillNode.SetColor", layerPath+".shape.fill_color")
+			validateColor(layer.Shape.FillColor, layerPath+".shape.fill_color", "invalid_shape_fill_color", addRefusal)
 		}
 		if layer.Shape.FillOpacity != nil {
 			recordCapability("FillNode.SetOpacity", layerPath+".shape.fill_opacity")

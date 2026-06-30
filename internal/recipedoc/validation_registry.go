@@ -360,6 +360,9 @@ var fieldValidation = map[string]FieldMeta{
 	"comps[].layers[].shape.outer_radius": {
 		Validation: "Star outer_radius must be non-negative.",
 	},
+	"comps[].layers[].shape.fill_color": {
+		Validation: "Fill color must contain RGB or RGBA channels in the 0..255 range.",
+	},
 	"comps[].layers[].shape.fill_opacity": {
 		Validation: "Fill opacity must be between 0 and 100.",
 	},

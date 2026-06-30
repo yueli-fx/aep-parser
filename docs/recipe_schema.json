@@ -4613,6 +4613,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Solid fill color as RGB channels.",
+      "x-aep-validation": "Fill color must contain RGB or RGBA channels in the 0..255 range.",
       "x-aep-capabilities": [
         {
           "key": "shape.fill.set_color",
