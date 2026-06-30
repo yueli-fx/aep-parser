@@ -8,10 +8,10 @@ outside the core `scene.Project` model.
 Status: lookup first slice complete, first narrow single-project search slice
 implemented, and first corpus fact extraction slice implemented.
 `internal/projectindex` exists, recipe/profile hotspots are wired to it, callers
-can obtain stable hit locations for source-layer and effect-match searches, and
-batch workflows can now extract durable layer-source/effect-usage facts without
-retaining parsed project graphs. Later work should add broader search/corpus
-APIs only when a caller needs them.
+can obtain stable hit locations for source-layer, effect-match, property-match,
+and expression-substring searches, and batch workflows can now extract durable
+layer-source/effect-usage facts without retaining parsed project graphs. Later
+work should add broader search/corpus APIs only when a caller needs them.
 
 The current architecture decision from `work/scene-architecture/index.md` is:
 keep `Project.Compositions`, `Project.Footage`, `Project.Folders`, and
@@ -369,6 +369,10 @@ Memory rules:
         evidence and pointers for single-project convenience.
   - [x] `SearchEffectsByMatchName` returns stable effect hits with deterministic
         per-layer effect occurrence.
+  - [x] `SearchPropertiesByMatchName` returns layer-property and effect-param
+        hits with stable property paths.
+  - [x] `SearchExpressionsContaining` returns layer-property and effect-param
+        expression hits using case-sensitive substring matching.
   - [x] Search hits serialize with stable snake_case JSON names and do not
         serialize raw Go pointers.
 - [x] Design corpus-level learning/search index.

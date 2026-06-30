@@ -109,16 +109,156 @@ func TestSearchEffectsByMatchNameReturnsEffectOccurrenceHits(t *testing.T) {
 	}
 }
 
+func TestSearchPropertiesByMatchNameReturnsLayerAndEffectParamHits(t *testing.T) {
+	layerOpacity := &aep.Property{MatchName: "ADBE Opacity", Name: "Opacity"}
+	layerOpacity2 := &aep.Property{MatchName: "ADBE Opacity", Name: "Opacity Copy"}
+	blurAmount := &aep.Property{MatchName: "ADBE Gaussian Blur 2-0001", Name: "Blurriness"}
+	blur := &aep.Effect{
+		MatchName:  "ADBE Gaussian Blur 2",
+		Name:       "Gaussian Blur",
+		Parameters: []*aep.Property{blurAmount},
+	}
+	layer := &aep.Layer{
+		ID:         31,
+		Index:      0,
+		Name:       "Title",
+		Properties: []*aep.Property{layerOpacity, layerOpacity2},
+		Effects:    []*aep.Effect{blur},
+	}
+	project := &aep.Project{
+		Compositions: []*aep.Composition{{ID: 10, Name: "Main", Layers: []*aep.Layer{layer}}},
+	}
+
+	opacityHits := Build(project).SearchPropertiesByMatchName("ADBE Opacity")
+	if len(opacityHits) != 2 {
+		t.Fatalf("len(opacityHits) = %d, want 2", len(opacityHits))
+	}
+	assertHit(t, opacityHits[0], HitProperty, "property.match_name", "ADBE Opacity", Location{
+		CompID:            10,
+		CompName:          "Main",
+		LayerID:           31,
+		LayerIndex:        0,
+		LayerName:         "Title",
+		PropertyMatchName: "ADBE Opacity",
+		PropertyName:      "Opacity",
+		PropertyPath:      "layers[].properties[1]",
+	})
+	assertHit(t, opacityHits[1], HitProperty, "property.match_name", "ADBE Opacity", Location{
+		CompID:            10,
+		CompName:          "Main",
+		LayerID:           31,
+		LayerIndex:        0,
+		LayerName:         "Title",
+		PropertyMatchName: "ADBE Opacity",
+		PropertyName:      "Opacity Copy",
+		PropertyPath:      "layers[].properties[2]",
+	})
+	if opacityHits[0].Pointers.Property != layerOpacity || opacityHits[1].Pointers.Property != layerOpacity2 {
+		t.Fatalf("opacity property pointers = %p/%p, want %p/%p", opacityHits[0].Pointers.Property, opacityHits[1].Pointers.Property, layerOpacity, layerOpacity2)
+	}
+
+	paramHits := Build(project).SearchPropertiesByMatchName("ADBE Gaussian Blur 2-0001")
+	if len(paramHits) != 1 {
+		t.Fatalf("len(paramHits) = %d, want 1", len(paramHits))
+	}
+	assertHit(t, paramHits[0], HitProperty, "property.match_name", "ADBE Gaussian Blur 2-0001", Location{
+		CompID:            10,
+		CompName:          "Main",
+		LayerID:           31,
+		LayerIndex:        0,
+		LayerName:         "Title",
+		EffectMatchName:   "ADBE Gaussian Blur 2",
+		EffectName:        "Gaussian Blur",
+		EffectOccurrence:  1,
+		PropertyMatchName: "ADBE Gaussian Blur 2-0001",
+		PropertyName:      "Blurriness",
+		PropertyPath:      "layers[].effects[1].params[1]",
+	})
+	if paramHits[0].Pointers.Effect != blur || paramHits[0].Pointers.Property != blurAmount {
+		t.Fatalf("param hit pointers = effect %p property %p, want %p/%p", paramHits[0].Pointers.Effect, paramHits[0].Pointers.Property, blur, blurAmount)
+	}
+}
+
+func TestSearchExpressionsContainingReturnsLayerAndEffectParamHits(t *testing.T) {
+	position := &aep.Property{
+		MatchName:  "ADBE Position",
+		Name:       "Position",
+		Expression: "wiggle(2, 20)",
+	}
+	blurAmount := &aep.Property{
+		MatchName:  "ADBE Gaussian Blur 2-0001",
+		Name:       "Blurriness",
+		Expression: "time * 12",
+	}
+	blur := &aep.Effect{
+		MatchName:  "ADBE Gaussian Blur 2",
+		Name:       "Gaussian Blur",
+		Parameters: []*aep.Property{blurAmount},
+	}
+	layer := &aep.Layer{
+		ID:         32,
+		Index:      0,
+		Name:       "Title",
+		Properties: []*aep.Property{position},
+		Effects:    []*aep.Effect{blur},
+	}
+	project := &aep.Project{
+		Compositions: []*aep.Composition{{ID: 11, Name: "Main", Layers: []*aep.Layer{layer}}},
+	}
+
+	wiggleHits := Build(project).SearchExpressionsContaining("wiggle")
+	if len(wiggleHits) != 1 {
+		t.Fatalf("len(wiggleHits) = %d, want 1", len(wiggleHits))
+	}
+	assertHit(t, wiggleHits[0], HitExpression, "property.expression", "wiggle(2, 20)", Location{
+		CompID:            11,
+		CompName:          "Main",
+		LayerID:           32,
+		LayerIndex:        0,
+		LayerName:         "Title",
+		PropertyMatchName: "ADBE Position",
+		PropertyName:      "Position",
+		PropertyPath:      "layers[].properties[1]",
+	})
+
+	timeHits := Build(project).SearchExpressionsContaining("time")
+	if len(timeHits) != 1 {
+		t.Fatalf("len(timeHits) = %d, want 1", len(timeHits))
+	}
+	assertHit(t, timeHits[0], HitExpression, "property.expression", "time * 12", Location{
+		CompID:            11,
+		CompName:          "Main",
+		LayerID:           32,
+		LayerIndex:        0,
+		LayerName:         "Title",
+		EffectMatchName:   "ADBE Gaussian Blur 2",
+		EffectName:        "Gaussian Blur",
+		EffectOccurrence:  1,
+		PropertyMatchName: "ADBE Gaussian Blur 2-0001",
+		PropertyName:      "Blurriness",
+		PropertyPath:      "layers[].effects[1].params[1]",
+	})
+	if timeHits[0].Pointers.Effect != blur || timeHits[0].Pointers.Property != blurAmount {
+		t.Fatalf("expression param pointers = %p/%p, want %p/%p", timeHits[0].Pointers.Effect, timeHits[0].Pointers.Property, blur, blurAmount)
+	}
+}
+
 func TestSearchNilOrInvalidInputReturnsNoHits(t *testing.T) {
 	var idx *Index
 	assertNoHits(t, "nil SearchLayersBySourceID", idx.SearchLayersBySourceID(100))
 	assertNoHits(t, "nil SearchEffectsByMatchName", idx.SearchEffectsByMatchName("ADBE Glo2"))
+	assertNoHits(t, "nil SearchPropertiesByMatchName", idx.SearchPropertiesByMatchName("ADBE Opacity"))
+	assertNoHits(t, "nil SearchExpressionsContaining", idx.SearchExpressionsContaining("time"))
 
 	empty := Build(nil)
 	assertNoHits(t, "empty SearchLayersBySourceID", empty.SearchLayersBySourceID(100))
 	assertNoHits(t, "empty SearchEffectsByMatchName", empty.SearchEffectsByMatchName("ADBE Glo2"))
+	assertNoHits(t, "empty SearchPropertiesByMatchName", empty.SearchPropertiesByMatchName("ADBE Opacity"))
+	assertNoHits(t, "empty SearchExpressionsContaining", empty.SearchExpressionsContaining("time"))
 	assertNoHits(t, "zero source ID", empty.SearchLayersBySourceID(0))
 	assertNoHits(t, "empty effect match name", empty.SearchEffectsByMatchName(""))
+	assertNoHits(t, "empty property match name", empty.SearchPropertiesByMatchName(""))
+	assertNoHits(t, "empty expression query", empty.SearchExpressionsContaining(""))
 }
 
 func TestSearchHitJSONUsesStableSchemaNames(t *testing.T) {

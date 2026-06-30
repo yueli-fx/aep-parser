@@ -2,6 +2,7 @@ package projectindex
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/yueli-fx/aep-parser/internal/aep"
 )
@@ -152,6 +153,105 @@ func (idx *Index) SearchEffectsByMatchName(matchName string) []Hit {
 		}
 	}
 	return hits
+}
+
+// SearchPropertiesByMatchName returns property hits whose MatchName equals
+// matchName. It searches both layer-level properties and effect parameters.
+func (idx *Index) SearchPropertiesByMatchName(matchName string) []Hit {
+	if idx == nil || idx.project == nil || matchName == "" {
+		return nil
+	}
+	hits := []Hit{}
+	idx.walkProperties(func(comp *aep.Composition, layer *aep.Layer, effect *aep.Effect, effectOccurrence int, property *aep.Property, propertyOccurrence int, propertyPath string) {
+		if property.MatchName != matchName {
+			return
+		}
+		hits = append(hits, propertyHit(HitProperty, Match{Field: "property.match_name", Value: matchName}, comp, layer, effect, effectOccurrence, property, propertyPath))
+	})
+	return hits
+}
+
+// SearchExpressionsContaining returns property-expression hits whose expression
+// source contains query. Matching is case-sensitive.
+func (idx *Index) SearchExpressionsContaining(query string) []Hit {
+	if idx == nil || idx.project == nil || query == "" {
+		return nil
+	}
+	hits := []Hit{}
+	idx.walkProperties(func(comp *aep.Composition, layer *aep.Layer, effect *aep.Effect, effectOccurrence int, property *aep.Property, propertyOccurrence int, propertyPath string) {
+		if property.Expression == "" || !strings.Contains(property.Expression, query) {
+			return
+		}
+		hits = append(hits, propertyHit(HitExpression, Match{Field: "property.expression", Value: property.Expression}, comp, layer, effect, effectOccurrence, property, propertyPath))
+	})
+	return hits
+}
+
+func (idx *Index) walkProperties(visit func(*aep.Composition, *aep.Layer, *aep.Effect, int, *aep.Property, int, string)) {
+	for _, comp := range idx.project.Compositions {
+		if comp == nil {
+			continue
+		}
+		for _, layer := range comp.Layers {
+			if layer == nil {
+				continue
+			}
+			layerPropertyOccurrences := map[string]int{}
+			for _, property := range layer.Properties {
+				if property == nil || property.MatchName == "" {
+					continue
+				}
+				layerPropertyOccurrences[property.MatchName]++
+				propertyPath := "layers[].properties[" + strconv.Itoa(layerPropertyOccurrences[property.MatchName]) + "]"
+				visit(comp, layer, nil, 0, property, layerPropertyOccurrences[property.MatchName], propertyPath)
+			}
+			effectOccurrences := map[string]int{}
+			for _, effect := range layer.Effects {
+				if effect == nil || effect.MatchName == "" {
+					continue
+				}
+				effectOccurrences[effect.MatchName]++
+				paramOccurrences := map[string]int{}
+				for _, property := range effect.Parameters {
+					if property == nil || property.MatchName == "" {
+						continue
+					}
+					paramOccurrences[property.MatchName]++
+					propertyPath := "layers[].effects[" + strconv.Itoa(effectOccurrences[effect.MatchName]) + "].params[" + strconv.Itoa(paramOccurrences[property.MatchName]) + "]"
+					visit(comp, layer, effect, effectOccurrences[effect.MatchName], property, paramOccurrences[property.MatchName], propertyPath)
+				}
+			}
+		}
+	}
+}
+
+func propertyHit(kind HitKind, match Match, comp *aep.Composition, layer *aep.Layer, effect *aep.Effect, effectOccurrence int, property *aep.Property, propertyPath string) Hit {
+	location := Location{
+		CompID:            comp.ID,
+		CompName:          comp.Name,
+		LayerID:           layer.ID,
+		LayerIndex:        layer.Index,
+		LayerName:         layer.Name,
+		PropertyMatchName: property.MatchName,
+		PropertyName:      property.Name,
+		PropertyPath:      propertyPath,
+	}
+	if effect != nil {
+		location.EffectMatchName = effect.MatchName
+		location.EffectName = effect.Name
+		location.EffectOccurrence = effectOccurrence
+	}
+	return Hit{
+		Kind:     kind,
+		Match:    match,
+		Location: location,
+		Pointers: HitPointers{
+			Comp:     comp,
+			Layer:    layer,
+			Effect:   effect,
+			Property: property,
+		},
+	}
 }
 
 func itemLocation(item aep.AVItem) (string, string) {
