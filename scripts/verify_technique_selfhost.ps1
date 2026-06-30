@@ -1308,8 +1308,8 @@ try {
     if ($watchDryRunText -notmatch "verify_technique_selfhost.ps1") {
         throw "watch technique selfhost dry run missing verify command"
     }
-    if ($watchDryRunText -notmatch "show_technique_outcome.ps1") {
-        throw "watch technique selfhost dry run missing show command"
+    if ($watchDryRunText -notmatch "aepselfhost outcome") {
+        throw "watch technique selfhost dry run missing go outcome command"
     }
     $watchStatusPath = Join-Path $watchDryRunRoot "watch_status.json"
     if (-not (Test-Path -LiteralPath $watchStatusPath)) {
@@ -1328,8 +1328,8 @@ try {
     if ($startDryRunText -notmatch "DRY RUN") {
         throw "start technique selfhost watch dry run missing DRY RUN marker"
     }
-    if ($startDryRunText -notmatch "Start-Process") {
-        throw "start technique selfhost watch dry run missing Start-Process marker"
+    if ($startDryRunText -notmatch "aepselfhost watch") {
+        throw "start technique selfhost watch dry run missing go watch marker"
     }
     $startProcessPath = Join-Path $startDryRunRoot "watch_process.json"
     if (-not (Test-Path -LiteralPath $startProcessPath)) {

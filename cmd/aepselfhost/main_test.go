@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -135,6 +136,102 @@ func TestRunRejectsMissingOutcome(t *testing.T) {
 	}
 }
 
+func TestRunWatchDryRunWritesStatus(t *testing.T) {
+	root := t.TempDir()
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{
+		"watch",
+		"-out-root", root,
+		"-duration-minutes", "10",
+		"-interval-seconds", "15",
+		"-iterations", "2",
+		"-limit", "7",
+		"-open-first",
+		"-dry-run",
+	}, &stdout, &stderr)
+
+	if code != 0 {
+		t.Fatalf("run watch dry-run = %d, stderr=%s", code, stderr.String())
+	}
+	out := stdout.String()
+	for _, want := range []string{
+		"DRY RUN technique selfhost watch",
+		"verify command:",
+		"-Limit 7",
+		"-Open",
+	} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("stdout missing %q:\n%s", want, out)
+		}
+	}
+	var status watchFile
+	readFileJSON(t, filepath.Join(root, "watch_status.json"), &status)
+	if status.Mode != "dry_run" {
+		t.Fatalf("watch status mode = %q, want dry_run", status.Mode)
+	}
+	if status.DurationMinutes != 10 || status.IntervalSeconds != 15 || status.PlannedIterations != 2 {
+		t.Fatalf("watch status = %+v", status)
+	}
+	if !strings.Contains(status.VerifyCommand, "-Limit 7") {
+		t.Fatalf("verify command = %q, want limit", status.VerifyCommand)
+	}
+}
+
+func TestRunStartWatchDryRunWritesProcessStatus(t *testing.T) {
+	root := t.TempDir()
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{
+		"start-watch",
+		"-out-root", root,
+		"-duration-minutes", "10",
+		"-interval-seconds", "15",
+		"-iterations", "2",
+		"-limit", "7",
+		"-open-first",
+		"-dry-run",
+	}, &stdout, &stderr)
+
+	if code != 0 {
+		t.Fatalf("run start-watch dry-run = %d, stderr=%s", code, stderr.String())
+	}
+	out := stdout.String()
+	for _, want := range []string{
+		"DRY RUN technique selfhost background start",
+		"stdout:",
+		"stderr:",
+	} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("stdout missing %q:\n%s", want, out)
+		}
+	}
+	var status processFile
+	readFileJSON(t, filepath.Join(root, "watch_process.json"), &status)
+	if status.Mode != "dry_run" {
+		t.Fatalf("process status mode = %q, want dry_run", status.Mode)
+	}
+	if !strings.Contains(status.Command, "watch") {
+		t.Fatalf("process command = %q, want watch", status.Command)
+	}
+	if status.StdoutLog == "" || status.StderrLog == "" {
+		t.Fatalf("process logs = stdout %q stderr %q", status.StdoutLog, status.StderrLog)
+	}
+}
+
+func TestRunWatchRejectsZeroWork(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"watch", "-out-root", t.TempDir(), "-duration-minutes", "0"}, &stdout, &stderr)
+
+	if code != 1 {
+		t.Fatalf("run watch zero work = %d, want 1", code)
+	}
+	if !strings.Contains(stderr.String(), "Iterations and DurationMinutes cannot both be 0") {
+		t.Fatalf("stderr = %q", stderr.String())
+	}
+}
+
 func writeFile(t *testing.T, path, text string) {
 	t.Helper()
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
@@ -142,5 +239,16 @@ func writeFile(t *testing.T, path, text string) {
 	}
 	if err := os.WriteFile(path, []byte(text), 0o644); err != nil {
 		t.Fatalf("WriteFile: %v", err)
+	}
+}
+
+func readFileJSON(t *testing.T, path string, target any) {
+	t.Helper()
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("ReadFile: %v", err)
+	}
+	if err := json.Unmarshal(data, target); err != nil {
+		t.Fatalf("Unmarshal: %v", err)
 	}
 }
