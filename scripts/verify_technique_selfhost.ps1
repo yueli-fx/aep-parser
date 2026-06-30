@@ -356,6 +356,56 @@ try {
     $acceptance | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $acceptanceJsonPath -Encoding UTF8
 
     $generatedAtUtc = [DateTime]::UtcNow.ToString("o")
+    $historyEntry = [ordered]@{
+        schema_version = 1
+        generated_at_utc = $generatedAtUtc
+        run_id = $runID
+        run_root = $runRoot
+        input_path = $InputPath
+        parsed_projects = [int]$fullManifest.project_count
+        parse_errors = [int]$fullManifest.error_count
+        technique_patterns = [int]$fullManifest.pattern_count
+        partial_error_gate_errors = [int]$partialManifest.error_count
+        partial_to_full_count_diffs = [int]$partialCountDiffs
+        recipe_draft_compile_valid = [bool]$recipeDraftCompileJson.valid
+        compiled_draft_reparse_passed = [bool]$recipeDraftReparseSummary.passed
+        batch_requested = [int]$recipeDraftBatchSummary.requested
+        batch_attempted = [int]$recipeDraftBatchSummary.attempted
+        batch_passed = [int]$recipeDraftBatchSummary.passed
+        study_queue_top = [int]$studyRows.Count
+        learning_actions_top = [int]$learningActionRows.Count
+        coverage_summary = [int]$coverageScorecardRows.Count
+    }
+    $historyEntryObject = [pscustomobject]$historyEntry
+    $existingHistoryRows = @()
+    if (Test-Path -LiteralPath $historyCsvPath) {
+        $existingHistoryRows = @(Import-Csv -LiteralPath $historyCsvPath)
+    }
+    $previousHistoryRow = $null
+    if ($existingHistoryRows.Count -gt 0) {
+        $previousHistoryRow = $existingHistoryRows | Select-Object -Last 1
+    }
+    $historyDelta = [ordered]@{
+        has_previous = ($null -ne $previousHistoryRow)
+        previous_run_id = $null
+        parsed_projects_delta = 0
+        technique_patterns_delta = 0
+        batch_attempted_delta = 0
+        batch_passed_delta = 0
+        partial_to_full_count_diffs_delta = 0
+    }
+    if ($null -ne $previousHistoryRow) {
+        $historyDelta.previous_run_id = [string]$previousHistoryRow.run_id
+        $historyDelta.parsed_projects_delta = [int]$historyEntry.parsed_projects - [int]$previousHistoryRow.parsed_projects
+        $historyDelta.technique_patterns_delta = [int]$historyEntry.technique_patterns - [int]$previousHistoryRow.technique_patterns
+        $historyDelta.batch_attempted_delta = [int]$historyEntry.batch_attempted - [int]$previousHistoryRow.batch_attempted
+        $historyDelta.batch_passed_delta = [int]$historyEntry.batch_passed - [int]$previousHistoryRow.batch_passed
+        $historyDelta.partial_to_full_count_diffs_delta = [int]$historyEntry.partial_to_full_count_diffs - [int]$previousHistoryRow.partial_to_full_count_diffs
+    }
+    $historyPreviewRows = @($existingHistoryRows)
+    $historyPreviewRows += $historyEntryObject
+    $historyPreviewRows = @($historyPreviewRows | Select-Object -Last 5)
+
     $effectiveness = [ordered]@{
         schema_version = 1
         generated_at_utc = $generatedAtUtc
@@ -441,37 +491,10 @@ try {
                 }
             })
         }
+        history_delta = $historyDelta
         steps = @($steps)
     }
     $effectiveness | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $effectivenessJsonPath -Encoding UTF8
-
-    $historyEntry = [ordered]@{
-        schema_version = 1
-        generated_at_utc = $generatedAtUtc
-        run_id = $runID
-        run_root = $runRoot
-        input_path = $InputPath
-        parsed_projects = [int]$fullManifest.project_count
-        parse_errors = [int]$fullManifest.error_count
-        technique_patterns = [int]$fullManifest.pattern_count
-        partial_error_gate_errors = [int]$partialManifest.error_count
-        partial_to_full_count_diffs = [int]$partialCountDiffs
-        recipe_draft_compile_valid = [bool]$recipeDraftCompileJson.valid
-        compiled_draft_reparse_passed = [bool]$recipeDraftReparseSummary.passed
-        batch_requested = [int]$recipeDraftBatchSummary.requested
-        batch_attempted = [int]$recipeDraftBatchSummary.attempted
-        batch_passed = [int]$recipeDraftBatchSummary.passed
-        study_queue_top = [int]$studyRows.Count
-        learning_actions_top = [int]$learningActionRows.Count
-        coverage_summary = [int]$coverageScorecardRows.Count
-    }
-    $historyEntryObject = [pscustomobject]$historyEntry
-    $historyPreviewRows = @()
-    if (Test-Path -LiteralPath $historyCsvPath) {
-        $historyPreviewRows += @(Import-Csv -LiteralPath $historyCsvPath)
-    }
-    $historyPreviewRows += $historyEntryObject
-    $historyPreviewRows = @($historyPreviewRows | Select-Object -Last 5)
 
     $b = [System.Text.StringBuilder]::new()
     [void]$b.AppendLine("# Technique Self-Hosted Acceptance")
@@ -522,6 +545,7 @@ try {
     [void]$e.AppendLine("- reparse comp count: $($recipeDraftReparseSummary.actual_comp_count)/$($recipeDraftReparseSummary.expected_comp_count)")
     [void]$e.AppendLine("- reparse layer count: $($recipeDraftReparseSummary.actual_layer_count)/$($recipeDraftReparseSummary.expected_layer_count)")
     [void]$e.AppendLine("- recipe draft batch smoke: $($recipeDraftBatchSummary.passed)/$($recipeDraftBatchSummary.attempted) passed")
+    [void]$e.AppendLine("- history delta: projects $($historyDelta.parsed_projects_delta), patterns $($historyDelta.technique_patterns_delta), batch passed $($historyDelta.batch_passed_delta)")
     [void]$e.AppendLine("")
     [void]$e.AppendLine("## Primary Artifacts")
     [void]$e.AppendLine("")
@@ -583,6 +607,13 @@ try {
     [void]$index.AppendLine("<tr><td>Compiled draft reparse</td><td>$(Escape-Html $recipeDraftReparseSummary.passed)</td></tr>")
     [void]$index.AppendLine("<tr><td>Reparse comps</td><td>$($recipeDraftReparseSummary.actual_comp_count) / $($recipeDraftReparseSummary.expected_comp_count)</td></tr>")
     [void]$index.AppendLine("<tr><td>Reparse layers</td><td>$($recipeDraftReparseSummary.actual_layer_count) / $($recipeDraftReparseSummary.expected_layer_count)</td></tr>")
+    [void]$index.AppendLine("</tbody></table></section>")
+    [void]$index.AppendLine("<section class=""panel"" style=""margin-top:16px""><h2>History Delta</h2><table><thead><tr><th>Metric</th><th>Delta</th></tr></thead><tbody>")
+    [void]$index.AppendLine("<tr><td>Previous run</td><td>$(Escape-Html $historyDelta.previous_run_id)</td></tr>")
+    [void]$index.AppendLine("<tr><td>Parsed projects</td><td>$(Escape-Html $historyDelta.parsed_projects_delta)</td></tr>")
+    [void]$index.AppendLine("<tr><td>Technique patterns</td><td>$(Escape-Html $historyDelta.technique_patterns_delta)</td></tr>")
+    [void]$index.AppendLine("<tr><td>Batch attempted</td><td>$(Escape-Html $historyDelta.batch_attempted_delta)</td></tr>")
+    [void]$index.AppendLine("<tr><td>Batch passed</td><td>$(Escape-Html $historyDelta.batch_passed_delta)</td></tr>")
     [void]$index.AppendLine("</tbody></table></section>")
     [void]$index.AppendLine("<section class=""panel"" style=""margin-top:16px""><h2>Effectiveness History Preview</h2><table><thead><tr><th>Run</th><th>Projects</th><th>Patterns</th><th>Batch</th></tr></thead><tbody>")
     foreach ($row in $historyPreviewRows) {
@@ -752,6 +783,9 @@ try {
     if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Effectiveness History Preview" -Quiet)) {
         throw "latest index missing Effectiveness History Preview"
     }
+    if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "History Delta" -Quiet)) {
+        throw "latest index missing History Delta"
+    }
     if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Project Playbooks Preview" -Quiet)) {
         throw "latest index missing Project Playbooks Preview"
     }
@@ -864,6 +898,12 @@ try {
     }
     if ($null -eq $latestEffectivenessJson.learning_signals.coverage_summary) {
         throw "latest effectiveness json missing learning_signals.coverage_summary"
+    }
+    if ($null -eq $latestEffectivenessJson.history_delta) {
+        throw "latest effectiveness json missing history_delta"
+    }
+    if ($null -eq $latestEffectivenessJson.history_delta.parsed_projects_delta) {
+        throw "latest effectiveness json missing history_delta.parsed_projects_delta"
     }
     $historyEntryJson = $historyEntry | ConvertTo-Json -Depth 6 -Compress
     Add-Content -LiteralPath $historyJsonlPath -Value $historyEntryJson -Encoding UTF8
