@@ -41,6 +41,14 @@ The index is a snapshot:
 - Fast to query for the duration of one workflow.
 - Not automatically synchronized after project mutation.
 - Rebuild after structural mutation or `aep.Reopen`.
+- The index becomes stale after any structural or semantic mutation that affects
+  indexed fields. Examples include adding/removing comps or layers, changing a
+  layer name, changing `Layer.SourceID`, changing layer effects, or replacing
+  footage identity. Callers are responsible for rebuilding it.
+- `Build(nil)` returns a non-nil empty index so callers can query safely without
+  nil checks.
+- Implementations may build secondary indexes lazily if behavior remains
+  deterministic and query results do not mutate the project.
 
 This keeps `Project` simple and AST-like while giving analysis and generation
 code the indexing tools they need.
@@ -51,7 +59,7 @@ Single-project lookup index:
 
 ```go
 type Index struct {
-	Project *aep.Project
+	project *aep.Project
 }
 
 func Build(project *aep.Project) *Index
@@ -73,6 +81,9 @@ Rules:
 - Effect and source lookups are inverted indexes and return all matching layers.
 - The index must tolerate nil projects, nil comps, nil layers, and ID `0`.
 - The index must not mutate the project.
+- The source project pointer is kept private. Query callers should use index
+  methods instead of reaching back through `idx.Project`, which would encourage
+  stale-index bugs.
 
 ## Later Slices
 
