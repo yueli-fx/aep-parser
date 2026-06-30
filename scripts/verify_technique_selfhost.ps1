@@ -27,12 +27,14 @@ try {
     $acceptanceMdPath = Join-Path $runRoot "acceptance.md"
     $outcomeMdPath = Join-Path $runRoot "outcome.md"
     $outcomeHtmlPath = Join-Path $runRoot "outcome.html"
+    $outcomeJsonPath = Join-Path $runRoot "outcome.json"
     $effectivenessMdPath = Join-Path $runRoot "effectiveness.md"
     $effectivenessJsonPath = Join-Path $runRoot "effectiveness.json"
     $latestRunPath = Join-Path $OutRoot "latest_run.txt"
     $latestAcceptancePath = Join-Path $OutRoot "latest_acceptance.md"
     $latestOutcomePath = Join-Path $OutRoot "latest_outcome.md"
     $latestOutcomeHtmlPath = Join-Path $OutRoot "latest_outcome.html"
+    $latestOutcomeJsonPath = Join-Path $OutRoot "latest_outcome.json"
     $latestEffectivenessPath = Join-Path $OutRoot "latest_effectiveness.md"
     $latestEffectivenessJsonPath = Join-Path $OutRoot "latest_effectiveness.json"
     $historyJsonlPath = Join-Path $OutRoot "history.jsonl"
@@ -529,6 +531,7 @@ try {
             latest_acceptance = $latestAcceptancePath
             latest_outcome = $latestOutcomePath
             latest_outcome_html = $latestOutcomeHtmlPath
+            latest_outcome_json = $latestOutcomeJsonPath
             latest_effectiveness = $latestEffectivenessPath
             latest_effectiveness_json = $latestEffectivenessJsonPath
             history_jsonl = $historyJsonlPath
@@ -633,6 +636,57 @@ try {
         steps = @($steps)
     }
     $effectiveness | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $effectivenessJsonPath -Encoding UTF8
+
+    $outcomeJson = [ordered]@{
+        schema_version = 1
+        generated_at_utc = $generatedAtUtc
+        input_path = $InputPath
+        run_id = $runID
+        run_root = $runRoot
+        stable_outputs = [ordered]@{
+            open_target = $latestOutcomeHtmlPath
+            latest_outcome = $latestOutcomePath
+            latest_outcome_html = $latestOutcomeHtmlPath
+            latest_outcome_json = $latestOutcomeJsonPath
+            latest_effectiveness_json = $latestEffectivenessJsonPath
+            latest_index = $latestIndexPath
+        }
+        outcome_status = $outcomeStatusInfo
+        outcome_summary = [ordered]@{
+            headline = $outcomeHeadline
+            analysis_ready_projects = [int]$analysisReadyProjects
+            plugin_blocked_projects = [int]$pluginBlockedProjects
+            recipe_smoke = "$($recipeDraftBatchSummary.passed)/$($recipeDraftBatchSummary.attempted)"
+        }
+        action_plan = [ordered]@{
+            next_actions = @($nextActionRows)
+        }
+        reconstruction_status = [ordered]@{
+            readiness_summary = $readinessSummaryRows
+            plugin_blockers_top = $pluginBlockerTopRows
+            blocker_count = [int]$allRecreationBlockerRows.Count
+        }
+        corpus = [ordered]@{
+            parsed_projects = [int]$fullManifest.project_count
+            parse_errors = [int]$fullManifest.error_count
+            technique_patterns = [int]$fullManifest.pattern_count
+        }
+        closed_loop = [ordered]@{
+            batch_passed = [int]$recipeDraftBatchSummary.passed
+            batch_attempted = [int]$recipeDraftBatchSummary.attempted
+        }
+        history_delta = $historyDelta
+        history_recent = @($historyPreviewRows | ForEach-Object {
+            [ordered]@{
+                run_id = $_.run_id
+                parsed_projects = [int]$_.parsed_projects
+                technique_patterns = [int]$_.technique_patterns
+                batch_passed = [int]$_.batch_passed
+                batch_attempted = [int]$_.batch_attempted
+            }
+        })
+    }
+    $outcomeJson | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $outcomeJsonPath -Encoding UTF8
 
     function Escape-Html {
         param([AllowNull()][object]$Value)
@@ -1053,6 +1107,7 @@ try {
     [void]$index.AppendLine("<a href=""latest_effectiveness.md"">Latest effectiveness snapshot</a>")
     [void]$index.AppendLine("<a href=""latest_outcome.md"">Latest outcome</a>")
     [void]$index.AppendLine("<a href=""latest_outcome.html"">Latest outcome HTML</a>")
+    [void]$index.AppendLine("<a href=""latest_outcome.json"">Latest outcome JSON</a>")
     [void]$index.AppendLine("<a href=""latest_effectiveness.json"">Latest effectiveness JSON</a>")
     [void]$index.AppendLine("<a href=""history.jsonl"">Effectiveness history JSONL</a>")
     [void]$index.AppendLine("<a href=""history.csv"">Effectiveness history CSV</a>")
@@ -1065,6 +1120,7 @@ try {
     [void]$index.AppendLine("<a href=""$runRel/acceptance.md"">Acceptance markdown</a>")
     [void]$index.AppendLine("<a href=""$runRel/outcome.md"">Outcome markdown</a>")
     [void]$index.AppendLine("<a href=""$runRel/outcome.html"">Outcome HTML</a>")
+    [void]$index.AppendLine("<a href=""$runRel/outcome.json"">Outcome JSON</a>")
     [void]$index.AppendLine("<a href=""$runRel/acceptance.json"">Acceptance JSON</a>")
     [void]$index.AppendLine("</div></section>")
     [void]$index.AppendLine("<section class=""panel"" style=""margin-top:16px""><h2>Steps</h2><table><thead><tr><th>Step</th><th>Seconds</th></tr></thead><tbody>")
@@ -1178,11 +1234,13 @@ try {
     Require-LatestIndexLink -Label "partial compare" -RelativePath "$runRel/compare_partial_to_full/compare.md"
     Require-LatestIndexLink -Label "outcome markdown" -RelativePath "$runRel/outcome.md"
     Require-LatestIndexLink -Label "outcome html" -RelativePath "$runRel/outcome.html"
+    Require-LatestIndexLink -Label "outcome json" -RelativePath "$runRel/outcome.json"
 
     $runRoot | Set-Content -LiteralPath $latestRunPath -Encoding UTF8
     Copy-Item -LiteralPath $acceptanceMdPath -Destination $latestAcceptancePath -Force
     Copy-Item -LiteralPath $outcomeMdPath -Destination $latestOutcomePath -Force
     Copy-Item -LiteralPath $outcomeHtmlPath -Destination $latestOutcomeHtmlPath -Force
+    Copy-Item -LiteralPath $outcomeJsonPath -Destination $latestOutcomeJsonPath -Force
     Copy-Item -LiteralPath $effectivenessMdPath -Destination $latestEffectivenessPath -Force
     Copy-Item -LiteralPath $effectivenessJsonPath -Destination $latestEffectivenessJsonPath -Force
     if (-not (Test-Path -LiteralPath $latestEffectivenessPath)) {
@@ -1208,6 +1266,26 @@ try {
         throw "latest outcome missing Top Plugin Blockers"
     }
     Require-LatestIndexLink -Label "latest outcome" -RelativePath "latest_outcome.md"
+    if (-not (Test-Path -LiteralPath $latestOutcomeJsonPath)) {
+        throw "latest outcome json missing: $latestOutcomeJsonPath"
+    }
+    Require-LatestIndexLink -Label "latest outcome json" -RelativePath "latest_outcome.json"
+    $latestOutcomeJson = Get-Content -Raw -LiteralPath $latestOutcomeJsonPath | ConvertFrom-Json
+    if ($null -eq $latestOutcomeJson.outcome_summary) {
+        throw "latest outcome json missing outcome_summary"
+    }
+    if ($null -eq $latestOutcomeJson.outcome_summary.headline) {
+        throw "latest outcome json missing outcome_summary.headline"
+    }
+    if ($null -eq $latestOutcomeJson.action_plan) {
+        throw "latest outcome json missing action_plan"
+    }
+    if ($null -eq $latestOutcomeJson.action_plan.next_actions) {
+        throw "latest outcome json missing action_plan.next_actions"
+    }
+    if ($null -eq $latestOutcomeJson.stable_outputs.open_target) {
+        throw "latest outcome json missing stable_outputs.open_target"
+    }
     if (-not (Test-Path -LiteralPath $latestOutcomeHtmlPath)) {
         throw "latest outcome html missing: $latestOutcomeHtmlPath"
     }
@@ -1348,6 +1426,7 @@ try {
     Write-Host "latest summary:  $latestAcceptancePath"
     Write-Host "latest outcome:  $latestOutcomePath"
     Write-Host "latest outcome h: $latestOutcomeHtmlPath"
+    Write-Host "latest outcome j: $latestOutcomeJsonPath"
     Write-Host "open target:     $latestOutcomeHtmlPath"
     Write-Host "latest effect:   $latestEffectivenessPath"
     Write-Host "latest effect j: $latestEffectivenessJsonPath"
