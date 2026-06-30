@@ -18,6 +18,10 @@ This slice supports:
 - target is `AE2020`, `AE2022`, or `AE2025`;
 - every composition has zero layers;
 - each composition is recreated with name, width, height, frame rate, and duration;
+- stable profile-visible composition settings are recreated through target-version
+  writers: background color, resolution factor, pixel aspect, display start
+  time, work area, frame blending, draft 3D, hide-shy, preserve-nested flags,
+  and motion-blur settings;
 - output project skeleton uses the requested target version.
 
 This slice refuses:
@@ -50,20 +54,20 @@ file in this first slice because that would silently drop content.
 
 ## Task 1: Library Convert
 
-- [ ] Write a failing test `TestConvertWritesTargetVersionNoLayerProject`.
+- [x] Write a failing test `TestConvertWritesTargetVersionNoLayerProject`.
   - Build an AE2020 source with one no-layer comp.
   - Convert to `AE2025`.
   - Open the output.
   - Assert output AE version normalizes to `AE2025`.
   - Assert output profile has one comp with same name, width, height, frame rate, and duration.
 
-- [ ] Write a failing test `TestConvertRefusesLayerProjects`.
+- [x] Write a failing test `TestConvertRefusesLayerProjects`.
   - Build a source with one solid layer.
   - Convert to `AE2025`.
   - Assert error is non-nil or report status is `blocked`.
   - Assert no output `.aep` exists.
 
-- [ ] Implement `ConvertOptions`.
+- [x] Implement `ConvertOptions`.
 
 ```go
 type ConvertOptions struct {
@@ -73,7 +77,7 @@ type ConvertOptions struct {
 }
 ```
 
-- [ ] Implement `Convert`.
+- [x] Implement `Convert`.
   - Open source and build profile.
   - Run source version normalization and `classifyProfile`.
   - Add `ClassBlocked` entries for every layer path in this first convert slice.
@@ -89,25 +93,32 @@ type ConvertOptions struct {
 go test ./internal/aepmigrate -run TestConvert -count=1
 ```
 
+- [x] Add `TestConvertPreservesNoLayerCompSettings`.
+  - Build an AE2020 no-layer source with non-default stable comp settings.
+  - Convert to `AE2025`.
+  - Reopen and profile the output.
+  - Assert background color, resolution factor, pixel aspect, display start
+    time, work area, comp flags, and motion-blur settings match.
+
 ## Task 2: CLI Convert
 
-- [ ] Write a failing CLI success test:
+- [x] Write a failing CLI success test:
   - `run(["convert", "-in", input, "-target", "AE2025", "-out", output, "-report", report])`.
   - Assert exit code `0`, output file exists, report status is `pass`.
 
-- [ ] Write a failing CLI blocked test:
+- [x] Write a failing CLI blocked test:
   - source has a layer;
   - command returns `1`;
   - report file exists;
   - output file does not exist.
 
-- [ ] Add `convert` subcommand:
+- [x] Add `convert` subcommand:
 
 ```powershell
 aepmigrate convert -in source.aep -target AE2025 -out migrated.aep -report report.json
 ```
 
-- [ ] Run:
+- [x] Run:
 
 ```powershell
 go test ./cmd/aepmigrate -count=1
@@ -115,7 +126,7 @@ go test ./cmd/aepmigrate -count=1
 
 ## Task 3: Verification And Docs
 
-- [ ] Run:
+- [x] Run final verification:
 
 ```powershell
 go test ./internal/aepmigrate ./cmd/aepmigrate -count=1
@@ -124,11 +135,12 @@ go vet ./...
 git diff --check
 ```
 
-- [ ] Run a real command on a generated fixture through tests or temp output.
+- [x] Run a real command on a generated fixture through tests or temp output.
 
-- [ ] Update `flightdeck/work/aep-understanding-generation/index.md` and `flightdeck/cockpit.md` to state:
+- [x] Update `flightdeck/work/aep-understanding-generation/index.md` and `flightdeck/cockpit.md` to state:
   - `assess` is available;
   - `convert` first slice is available only for no-layer comp skeleton projects;
+  - stable no-layer comp settings are preserved through target-version writers;
   - layer-bearing projects are intentionally blocked until layer reconstruction enters the migration surface.
 
 ## Self-Review
