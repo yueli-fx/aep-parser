@@ -307,12 +307,54 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 			})
 			add(path, expectedStyle.FillColor, actual, ok && profileValueEqual(expectedStyle.FillColor, actual))
 		}
+		if expectedStyle.AutoLeading != nil {
+			path := stylePath + ".auto_leading"
+			actual, ok := profileRunBool(layer.Text.Runs, expectedStyle.RunIndex, func(run profile.TextStyleRun) bool {
+				return run.AutoLeading
+			})
+			add(path, *expectedStyle.AutoLeading, actual, ok && actual == *expectedStyle.AutoLeading)
+		}
+		if expectedStyle.Leading != nil {
+			path := stylePath + ".leading"
+			actual, ok := profileRunFloat(layer.Text.Runs, expectedStyle.RunIndex, func(run profile.TextStyleRun) float64 {
+				return run.Leading
+			})
+			add(path, *expectedStyle.Leading, actual, ok && math.Abs(actual-*expectedStyle.Leading) < 1e-9)
+		}
 		if expectedStyle.Tracking != nil {
 			path := stylePath + ".tracking"
 			actual, ok := profileRunFloat(layer.Text.Runs, expectedStyle.RunIndex, func(run profile.TextStyleRun) float64 {
 				return run.Tracking
 			})
 			add(path, *expectedStyle.Tracking, actual, ok && math.Abs(actual-*expectedStyle.Tracking) < 1e-9)
+		}
+		if expectedStyle.BaselineShift != nil {
+			path := stylePath + ".baseline_shift"
+			actual, ok := profileRunFloat(layer.Text.Runs, expectedStyle.RunIndex, func(run profile.TextStyleRun) float64 {
+				return run.BaselineShift
+			})
+			add(path, *expectedStyle.BaselineShift, actual, ok && math.Abs(actual-*expectedStyle.BaselineShift) < 1e-9)
+		}
+		if expectedStyle.HorizontalScale != nil {
+			path := stylePath + ".horizontal_scale"
+			actual, ok := profileRunFloat(layer.Text.Runs, expectedStyle.RunIndex, func(run profile.TextStyleRun) float64 {
+				return run.HorizontalScale
+			})
+			add(path, *expectedStyle.HorizontalScale, actual, ok && math.Abs(actual-*expectedStyle.HorizontalScale) < 1e-9)
+		}
+		if expectedStyle.VerticalScale != nil {
+			path := stylePath + ".vertical_scale"
+			actual, ok := profileRunFloat(layer.Text.Runs, expectedStyle.RunIndex, func(run profile.TextStyleRun) float64 {
+				return run.VerticalScale
+			})
+			add(path, *expectedStyle.VerticalScale, actual, ok && math.Abs(actual-*expectedStyle.VerticalScale) < 1e-9)
+		}
+		if expectedStyle.Tsume != nil {
+			path := stylePath + ".tsume"
+			actual, ok := profileRunFloat(layer.Text.Runs, expectedStyle.RunIndex, func(run profile.TextStyleRun) float64 {
+				return run.Tsume
+			})
+			add(path, *expectedStyle.Tsume, actual, ok && math.Abs(actual-*expectedStyle.Tsume) < 1e-9)
 		}
 		if expectedStyle.FauxBold != nil {
 			path := stylePath + ".faux_bold"

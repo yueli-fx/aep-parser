@@ -432,8 +432,38 @@ func applyTextStyle(layer *aep.Layer, spec TextStyleSpec) error {
 			return err
 		}
 	}
+	if spec.AutoLeading != nil {
+		if err := layer.SetRunAutoLeading(spec.RunIndex, *spec.AutoLeading); err != nil {
+			return err
+		}
+	}
+	if spec.Leading != nil {
+		if err := layer.SetRunLeading(spec.RunIndex, *spec.Leading); err != nil {
+			return err
+		}
+	}
 	if spec.Tracking != nil {
 		if err := layer.SetRunTracking(spec.RunIndex, *spec.Tracking); err != nil {
+			return err
+		}
+	}
+	if spec.BaselineShift != nil {
+		if err := layer.SetRunBaselineShift(spec.RunIndex, *spec.BaselineShift); err != nil {
+			return err
+		}
+	}
+	if spec.HorizontalScale != nil {
+		if err := layer.SetRunHorizontalScale(spec.RunIndex, *spec.HorizontalScale); err != nil {
+			return err
+		}
+	}
+	if spec.VerticalScale != nil {
+		if err := layer.SetRunVerticalScale(spec.RunIndex, *spec.VerticalScale); err != nil {
+			return err
+		}
+	}
+	if spec.Tsume != nil {
+		if err := layer.SetRunTsume(spec.RunIndex, *spec.Tsume); err != nil {
 			return err
 		}
 	}

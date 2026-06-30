@@ -46,6 +46,25 @@ var fieldValidation = map[string]FieldMeta{
 	"comps[].layers[].text_animators[].value_keyframes[]": {
 		Validation: "When present, requires at least 2 keyframes sorted by non-negative time. Value is a number for opacity, rotation, tracking, and character_offset; a 3-number array for position and scale; a 3- or 4-number color array for color.",
 	},
+	"comps[].layers[].text_style.font_size": {
+		Validation: "Text font size must be positive.",
+	},
+	"comps[].layers[].text_style.fill_color": {
+		Validation: "Text fill color must contain RGB or RGBA channels in the 0..255 range.",
+	},
+	"comps[].layers[].text_style.tsume": {
+		Validation: "Text tsume must be between 0 and 100.",
+	},
+	"comps[].layers[].text_style.stroke_color": {
+		Validation: "Text stroke color must contain RGB or RGBA channels in the 0..255 range.",
+	},
+	"comps[].layers[].text_style.stroke_width": {
+		Validation: "Text stroke width must be non-negative.",
+	},
+	"comps[].layers[].text_style.justification": {
+		Validation: "Text justification must use a supported value.",
+		Enum:       []string{"left", "right", "center"},
+	},
 	"comps[].layers[].matte": {
 		Validation: "Requires project.target_version AE2025, a non-none track_matte mode, and a same-comp source layer name.",
 	},
@@ -181,6 +200,9 @@ var fieldValidation = map[string]FieldMeta{
 	},
 	"expected_profile.text_styles[].fill_color": {
 		Validation: "Expected fill color must contain RGB or RGBA channels in the 0..1 range.",
+	},
+	"expected_profile.text_styles[].tsume": {
+		Validation: "Expected tsume must be between 0 and 100.",
 	},
 	"expected_profile.text_styles[].stroke_color": {
 		Validation: "Expected stroke color must contain RGB or RGBA channels in the 0..1 range.",

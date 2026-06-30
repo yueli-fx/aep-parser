@@ -137,6 +137,11 @@ Done:
   `expected_profile.text_styles[]` checks. The updated shape/text example
   passed `go test ./...`, `go vet ./...`, profile checks, and an AE 2025
   render oracle gate.
+- Text-style recipe/profile coverage now also includes run auto-leading,
+  leading, baseline shift, horizontal scale, vertical scale, and tsume. Profile
+  `TextStyleRun` preserves these parsed run fields, `minimal-text-style.json`
+  asserts them through `expected_profile.text_styles[]`, and whole-recipe
+  profile verification passes with 127 recipes and 161 covered profile paths.
 - Recipe embedded profile contracts now support `expected_profile.keyframes[]`
   for property keyframe count/time/value checks. The updated shape/text example
   animates the title Position across three keyframes, passed `go test ./...`,

@@ -4669,30 +4669,42 @@ func TestCompileToFileChecksExpectedLayerPropertyProfile(t *testing.T) {
 func TestCompileToFileChecksExpectedTextStyleProfile(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].TextStyle = &recipe.TextStyleSpec{
-		FontSize:      ptr(96),
-		FillColor:     []float64{64, 128, 255, 255},
-		Tracking:      ptr(120),
-		FauxBold:      boolPtr(true),
-		FauxItalic:    boolPtr(true),
-		ApplyStroke:   boolPtr(true),
-		StrokeColor:   []float64{255, 32, 64, 255},
-		StrokeWidth:   ptr(8),
-		Justification: "center",
+		FontSize:        ptr(96),
+		FillColor:       []float64{64, 128, 255, 255},
+		AutoLeading:     boolPtr(false),
+		Leading:         ptr(110),
+		Tracking:        ptr(120),
+		BaselineShift:   ptr(12),
+		HorizontalScale: ptr(80),
+		VerticalScale:   ptr(120),
+		Tsume:           ptr(50),
+		FauxBold:        boolPtr(true),
+		FauxItalic:      boolPtr(true),
+		ApplyStroke:     boolPtr(true),
+		StrokeColor:     []float64{255, 32, 64, 255},
+		StrokeWidth:     ptr(8),
+		Justification:   "center",
 	}
 	rec.ExpectedProfile = recipe.ExpectedProfile{
 		TextStyles: []recipe.ExpectedTextStyle{{
-			LayerName:      "Title",
-			RunIndex:       0,
-			ParagraphIndex: 0,
-			FontSize:       ptr(96),
-			FillColor:      []float64{64.0 / 255.0, 128.0 / 255.0, 1, 1},
-			Tracking:       ptr(120),
-			FauxBold:       boolPtr(true),
-			FauxItalic:     boolPtr(true),
-			ApplyStroke:    boolPtr(true),
-			StrokeColor:    []float64{1, 32.0 / 255.0, 64.0 / 255.0, 1},
-			StrokeWidth:    ptr(8),
-			Justification:  "center",
+			LayerName:       "Title",
+			RunIndex:        0,
+			ParagraphIndex:  0,
+			FontSize:        ptr(96),
+			FillColor:       []float64{64.0 / 255.0, 128.0 / 255.0, 1, 1},
+			AutoLeading:     boolPtr(false),
+			Leading:         ptr(110),
+			Tracking:        ptr(120),
+			BaselineShift:   ptr(12),
+			HorizontalScale: ptr(80),
+			VerticalScale:   ptr(120),
+			Tsume:           ptr(50),
+			FauxBold:        boolPtr(true),
+			FauxItalic:      boolPtr(true),
+			ApplyStroke:     boolPtr(true),
+			StrokeColor:     []float64{1, 32.0 / 255.0, 64.0 / 255.0, 1},
+			StrokeWidth:     ptr(8),
+			Justification:   "center",
 		}},
 	}
 	outPath := filepath.Join(t.TempDir(), "recipe.aep")
@@ -4706,7 +4718,13 @@ func TestCompileToFileChecksExpectedTextStyleProfile(t *testing.T) {
 	}
 	assertProfileCheck(t, report, "expected_profile.text_styles[0].font_size", true)
 	assertProfileCheck(t, report, "expected_profile.text_styles[0].fill_color", true)
+	assertProfileCheck(t, report, "expected_profile.text_styles[0].auto_leading", true)
+	assertProfileCheck(t, report, "expected_profile.text_styles[0].leading", true)
 	assertProfileCheck(t, report, "expected_profile.text_styles[0].tracking", true)
+	assertProfileCheck(t, report, "expected_profile.text_styles[0].baseline_shift", true)
+	assertProfileCheck(t, report, "expected_profile.text_styles[0].horizontal_scale", true)
+	assertProfileCheck(t, report, "expected_profile.text_styles[0].vertical_scale", true)
+	assertProfileCheck(t, report, "expected_profile.text_styles[0].tsume", true)
 	assertProfileCheck(t, report, "expected_profile.text_styles[0].faux_bold", true)
 	assertProfileCheck(t, report, "expected_profile.text_styles[0].faux_italic", true)
 	assertProfileCheck(t, report, "expected_profile.text_styles[0].apply_stroke", true)

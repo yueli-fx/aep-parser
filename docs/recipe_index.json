@@ -70,7 +70,13 @@
     "comps[].layers[].text_style.paragraph_index",
     "comps[].layers[].text_style.font_size",
     "comps[].layers[].text_style.fill_color",
+    "comps[].layers[].text_style.auto_leading",
+    "comps[].layers[].text_style.leading",
     "comps[].layers[].text_style.tracking",
+    "comps[].layers[].text_style.baseline_shift",
+    "comps[].layers[].text_style.horizontal_scale",
+    "comps[].layers[].text_style.vertical_scale",
+    "comps[].layers[].text_style.tsume",
     "comps[].layers[].text_style.faux_bold",
     "comps[].layers[].text_style.faux_italic",
     "comps[].layers[].text_style.apply_stroke",
@@ -448,7 +454,13 @@
     "expected_profile.text_styles[].paragraph_index",
     "expected_profile.text_styles[].font_size",
     "expected_profile.text_styles[].fill_color",
+    "expected_profile.text_styles[].auto_leading",
+    "expected_profile.text_styles[].leading",
     "expected_profile.text_styles[].tracking",
+    "expected_profile.text_styles[].baseline_shift",
+    "expected_profile.text_styles[].horizontal_scale",
+    "expected_profile.text_styles[].vertical_scale",
+    "expected_profile.text_styles[].tsume",
     "expected_profile.text_styles[].faux_bold",
     "expected_profile.text_styles[].faux_italic",
     "expected_profile.text_styles[].apply_stroke",
@@ -3702,6 +3714,32 @@
       ],
       "example": "examples/recipes/minimal-text-shape.json"
     },
+    "comps[].layers[].text_style.auto_leading": {
+      "path": "comps[].layers[].text_style.auto_leading",
+      "json_name": "auto_leading",
+      "source_type": "TextStyleSpec",
+      "source_field": "AutoLeading",
+      "type": "boolean",
+      "go_type": "*bool",
+      "summary": "Layer text style auto-leading switch.",
+      "capability_keys": [
+        "text.set_run_auto_leading"
+      ],
+      "example": "examples/recipes/minimal-text-style.json"
+    },
+    "comps[].layers[].text_style.baseline_shift": {
+      "path": "comps[].layers[].text_style.baseline_shift",
+      "json_name": "baseline_shift",
+      "source_type": "TextStyleSpec",
+      "source_field": "BaselineShift",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Layer text style baseline shift amount.",
+      "capability_keys": [
+        "text.set_run_baseline_shift"
+      ],
+      "example": "examples/recipes/minimal-text-style.json"
+    },
     "comps[].layers[].text_style.faux_bold": {
       "path": "comps[].layers[].text_style.faux_bold",
       "json_name": "faux_bold",
@@ -3736,6 +3774,7 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Layer text style fill color as RGB channels.",
+      "validation": "Text fill color must contain RGB or RGBA channels in the 0..255 range.",
       "capability_keys": [
         "text.set_run_fill_color"
       ],
@@ -3749,8 +3788,22 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Layer text style font size.",
+      "validation": "Text font size must be positive.",
       "capability_keys": [
         "text.set_run_font_size"
+      ],
+      "example": "examples/recipes/minimal-text-style.json"
+    },
+    "comps[].layers[].text_style.horizontal_scale": {
+      "path": "comps[].layers[].text_style.horizontal_scale",
+      "json_name": "horizontal_scale",
+      "source_type": "TextStyleSpec",
+      "source_field": "HorizontalScale",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Layer text style horizontal text scale.",
+      "capability_keys": [
+        "text.set_run_horizontal_scale"
       ],
       "example": "examples/recipes/minimal-text-style.json"
     },
@@ -3762,10 +3815,29 @@
       "type": "string",
       "go_type": "string",
       "summary": "Layer text style paragraph justification mode.",
+      "validation": "Text justification must use a supported value.",
+      "enum": [
+        "left",
+        "right",
+        "center"
+      ],
       "capability_keys": [
         "text.set_paragraph_justification"
       ],
       "example": "examples/recipes/minimal-text-shape.json"
+    },
+    "comps[].layers[].text_style.leading": {
+      "path": "comps[].layers[].text_style.leading",
+      "json_name": "leading",
+      "source_type": "TextStyleSpec",
+      "source_field": "Leading",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Layer text style explicit leading value.",
+      "capability_keys": [
+        "text.set_run_leading"
+      ],
+      "example": "examples/recipes/minimal-text-style.json"
     },
     "comps[].layers[].text_style.paragraph_index": {
       "path": "comps[].layers[].text_style.paragraph_index",
@@ -3793,6 +3865,7 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Layer text style stroke color as RGB channels.",
+      "validation": "Text stroke color must contain RGB or RGBA channels in the 0..255 range.",
       "capability_keys": [
         "text.set_run_stroke_color"
       ],
@@ -3806,6 +3879,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Layer text style stroke width.",
+      "validation": "Text stroke width must be non-negative.",
       "capability_keys": [
         "text.set_run_stroke_width"
       ],
@@ -3823,6 +3897,33 @@
         "text.set_run_tracking"
       ],
       "example": "examples/recipes/minimal-text-shape.json"
+    },
+    "comps[].layers[].text_style.tsume": {
+      "path": "comps[].layers[].text_style.tsume",
+      "json_name": "tsume",
+      "source_type": "TextStyleSpec",
+      "source_field": "Tsume",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Layer text style CJK tsume spacing adjustment.",
+      "validation": "Text tsume must be between 0 and 100.",
+      "capability_keys": [
+        "text.set_run_tsume"
+      ],
+      "example": "examples/recipes/minimal-text-style.json"
+    },
+    "comps[].layers[].text_style.vertical_scale": {
+      "path": "comps[].layers[].text_style.vertical_scale",
+      "json_name": "vertical_scale",
+      "source_type": "TextStyleSpec",
+      "source_field": "VerticalScale",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Layer text style vertical text scale.",
+      "capability_keys": [
+        "text.set_run_vertical_scale"
+      ],
+      "example": "examples/recipes/minimal-text-style.json"
     },
     "comps[].layers[].track_matte": {
       "path": "comps[].layers[].track_matte",
@@ -6080,6 +6181,26 @@
       "summary": "Expected text style stroke enable switch.",
       "example": "examples/recipes/minimal-text-shape.json"
     },
+    "expected_profile.text_styles[].auto_leading": {
+      "path": "expected_profile.text_styles[].auto_leading",
+      "json_name": "auto_leading",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "AutoLeading",
+      "type": "boolean",
+      "go_type": "*bool",
+      "summary": "Expected text style auto-leading switch.",
+      "example": "examples/recipes/minimal-text-style.json"
+    },
+    "expected_profile.text_styles[].baseline_shift": {
+      "path": "expected_profile.text_styles[].baseline_shift",
+      "json_name": "baseline_shift",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "BaselineShift",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Expected text style baseline shift amount.",
+      "example": "examples/recipes/minimal-text-style.json"
+    },
     "expected_profile.text_styles[].faux_bold": {
       "path": "expected_profile.text_styles[].faux_bold",
       "json_name": "faux_bold",
@@ -6122,6 +6243,16 @@
       "validation": "Expected font size must be positive.",
       "example": "examples/recipes/minimal-text-shape.json"
     },
+    "expected_profile.text_styles[].horizontal_scale": {
+      "path": "expected_profile.text_styles[].horizontal_scale",
+      "json_name": "horizontal_scale",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "HorizontalScale",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Expected text style horizontal text scale.",
+      "example": "examples/recipes/minimal-text-style.json"
+    },
     "expected_profile.text_styles[].justification": {
       "path": "expected_profile.text_styles[].justification",
       "json_name": "justification",
@@ -6151,6 +6282,16 @@
       "summary": "Layer name to inspect for the expected text style.",
       "validation": "Text style profile checks require a target layer name.",
       "example": "examples/recipes/minimal-text-shape.json"
+    },
+    "expected_profile.text_styles[].leading": {
+      "path": "expected_profile.text_styles[].leading",
+      "json_name": "leading",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "Leading",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Expected text style explicit leading value.",
+      "example": "examples/recipes/minimal-text-style.json"
     },
     "expected_profile.text_styles[].paragraph_index": {
       "path": "expected_profile.text_styles[].paragraph_index",
@@ -6203,6 +6344,27 @@
       "go_type": "*float64",
       "summary": "Expected text style character tracking amount.",
       "example": "examples/recipes/minimal-text-shape.json"
+    },
+    "expected_profile.text_styles[].tsume": {
+      "path": "expected_profile.text_styles[].tsume",
+      "json_name": "tsume",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "Tsume",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Expected text style CJK tsume spacing adjustment.",
+      "validation": "Expected tsume must be between 0 and 100.",
+      "example": "examples/recipes/minimal-text-style.json"
+    },
+    "expected_profile.text_styles[].vertical_scale": {
+      "path": "expected_profile.text_styles[].vertical_scale",
+      "json_name": "vertical_scale",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "VerticalScale",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Expected text style vertical text scale.",
+      "example": "examples/recipes/minimal-text-style.json"
     },
     "expected_profile.width": {
       "path": "expected_profile.width",
@@ -6509,7 +6671,13 @@
       "expected_profile.text_styles[].paragraph_index",
       "expected_profile.text_styles[].font_size",
       "expected_profile.text_styles[].fill_color",
+      "expected_profile.text_styles[].auto_leading",
+      "expected_profile.text_styles[].leading",
       "expected_profile.text_styles[].tracking",
+      "expected_profile.text_styles[].baseline_shift",
+      "expected_profile.text_styles[].horizontal_scale",
+      "expected_profile.text_styles[].vertical_scale",
+      "expected_profile.text_styles[].tsume",
       "expected_profile.text_styles[].faux_bold",
       "expected_profile.text_styles[].faux_italic",
       "expected_profile.text_styles[].apply_stroke",
@@ -6805,7 +6973,13 @@
       "comps[].layers[].text_style.paragraph_index",
       "comps[].layers[].text_style.font_size",
       "comps[].layers[].text_style.fill_color",
+      "comps[].layers[].text_style.auto_leading",
+      "comps[].layers[].text_style.leading",
       "comps[].layers[].text_style.tracking",
+      "comps[].layers[].text_style.baseline_shift",
+      "comps[].layers[].text_style.horizontal_scale",
+      "comps[].layers[].text_style.vertical_scale",
+      "comps[].layers[].text_style.tsume",
       "comps[].layers[].text_style.faux_bold",
       "comps[].layers[].text_style.faux_italic",
       "comps[].layers[].text_style.apply_stroke",

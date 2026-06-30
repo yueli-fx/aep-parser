@@ -146,17 +146,23 @@ type CameraSpec struct {
 }
 
 type TextStyleSpec struct {
-	RunIndex       int       `json:"run_index,omitempty"`
-	ParagraphIndex int       `json:"paragraph_index,omitempty"`
-	FontSize       *float64  `json:"font_size,omitempty"`
-	FillColor      []float64 `json:"fill_color,omitempty"`
-	Tracking       *float64  `json:"tracking,omitempty"`
-	FauxBold       *bool     `json:"faux_bold,omitempty"`
-	FauxItalic     *bool     `json:"faux_italic,omitempty"`
-	ApplyStroke    *bool     `json:"apply_stroke,omitempty"`
-	StrokeColor    []float64 `json:"stroke_color,omitempty"`
-	StrokeWidth    *float64  `json:"stroke_width,omitempty"`
-	Justification  string    `json:"justification,omitempty"`
+	RunIndex        int       `json:"run_index,omitempty"`
+	ParagraphIndex  int       `json:"paragraph_index,omitempty"`
+	FontSize        *float64  `json:"font_size,omitempty"`
+	FillColor       []float64 `json:"fill_color,omitempty"`
+	AutoLeading     *bool     `json:"auto_leading,omitempty"`
+	Leading         *float64  `json:"leading,omitempty"`
+	Tracking        *float64  `json:"tracking,omitempty"`
+	BaselineShift   *float64  `json:"baseline_shift,omitempty"`
+	HorizontalScale *float64  `json:"horizontal_scale,omitempty"`
+	VerticalScale   *float64  `json:"vertical_scale,omitempty"`
+	Tsume           *float64  `json:"tsume,omitempty"`
+	FauxBold        *bool     `json:"faux_bold,omitempty"`
+	FauxItalic      *bool     `json:"faux_italic,omitempty"`
+	ApplyStroke     *bool     `json:"apply_stroke,omitempty"`
+	StrokeColor     []float64 `json:"stroke_color,omitempty"`
+	StrokeWidth     *float64  `json:"stroke_width,omitempty"`
+	Justification   string    `json:"justification,omitempty"`
 }
 
 type TextAnimatorSpec struct {
@@ -520,18 +526,24 @@ type ExpectedProperty struct {
 }
 
 type ExpectedTextStyle struct {
-	LayerName      string    `json:"layer_name"`
-	RunIndex       int       `json:"run_index,omitempty"`
-	ParagraphIndex int       `json:"paragraph_index,omitempty"`
-	FontSize       *float64  `json:"font_size,omitempty"`
-	FillColor      []float64 `json:"fill_color,omitempty"`
-	Tracking       *float64  `json:"tracking,omitempty"`
-	FauxBold       *bool     `json:"faux_bold,omitempty"`
-	FauxItalic     *bool     `json:"faux_italic,omitempty"`
-	ApplyStroke    *bool     `json:"apply_stroke,omitempty"`
-	StrokeColor    []float64 `json:"stroke_color,omitempty"`
-	StrokeWidth    *float64  `json:"stroke_width,omitempty"`
-	Justification  string    `json:"justification,omitempty"`
+	LayerName       string    `json:"layer_name"`
+	RunIndex        int       `json:"run_index,omitempty"`
+	ParagraphIndex  int       `json:"paragraph_index,omitempty"`
+	FontSize        *float64  `json:"font_size,omitempty"`
+	FillColor       []float64 `json:"fill_color,omitempty"`
+	AutoLeading     *bool     `json:"auto_leading,omitempty"`
+	Leading         *float64  `json:"leading,omitempty"`
+	Tracking        *float64  `json:"tracking,omitempty"`
+	BaselineShift   *float64  `json:"baseline_shift,omitempty"`
+	HorizontalScale *float64  `json:"horizontal_scale,omitempty"`
+	VerticalScale   *float64  `json:"vertical_scale,omitempty"`
+	Tsume           *float64  `json:"tsume,omitempty"`
+	FauxBold        *bool     `json:"faux_bold,omitempty"`
+	FauxItalic      *bool     `json:"faux_italic,omitempty"`
+	ApplyStroke     *bool     `json:"apply_stroke,omitempty"`
+	StrokeColor     []float64 `json:"stroke_color,omitempty"`
+	StrokeWidth     *float64  `json:"stroke_width,omitempty"`
+	Justification   string    `json:"justification,omitempty"`
 }
 
 type ExpectedKeyframedProperty struct {

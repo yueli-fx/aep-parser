@@ -338,16 +338,22 @@ type TextSource struct {
 }
 
 type TextStyleRun struct {
-	FontIndex   int        `json:"font_index"`
-	FontName    string     `json:"font_name,omitempty"`
-	FontSize    float64    `json:"font_size,omitempty"`
-	FillColor   [4]float64 `json:"fill_color"`
-	FauxBold    bool       `json:"faux_bold,omitempty"`
-	FauxItalic  bool       `json:"faux_italic,omitempty"`
-	Tracking    float64    `json:"tracking,omitempty"`
-	ApplyStroke bool       `json:"apply_stroke,omitempty"`
-	StrokeColor [4]float64 `json:"stroke_color,omitempty"`
-	StrokeWidth float64    `json:"stroke_width,omitempty"`
+	FontIndex       int        `json:"font_index"`
+	FontName        string     `json:"font_name,omitempty"`
+	FontSize        float64    `json:"font_size,omitempty"`
+	FillColor       [4]float64 `json:"fill_color"`
+	FauxBold        bool       `json:"faux_bold,omitempty"`
+	FauxItalic      bool       `json:"faux_italic,omitempty"`
+	AutoLeading     bool       `json:"auto_leading,omitempty"`
+	Leading         float64    `json:"leading,omitempty"`
+	Tracking        float64    `json:"tracking,omitempty"`
+	BaselineShift   float64    `json:"baseline_shift,omitempty"`
+	HorizontalScale float64    `json:"horizontal_scale,omitempty"`
+	VerticalScale   float64    `json:"vertical_scale,omitempty"`
+	Tsume           float64    `json:"tsume,omitempty"`
+	ApplyStroke     bool       `json:"apply_stroke,omitempty"`
+	StrokeColor     [4]float64 `json:"stroke_color,omitempty"`
+	StrokeWidth     float64    `json:"stroke_width,omitempty"`
 }
 
 type TextParagraph struct {
@@ -855,8 +861,10 @@ func buildText(c *aep.JSONComposition, l *aep.JSONLayer, ts *aep.JSONTextSource)
 		out.Runs = append(out.Runs, TextStyleRun{
 			FontIndex: r.FontIndex, FontName: r.FontName, FontSize: r.FontSize,
 			FillColor: r.FillColor, FauxBold: r.FauxBold, FauxItalic: r.FauxItalic,
-			Tracking: r.Tracking, ApplyStroke: r.ApplyStroke, StrokeColor: r.StrokeColor,
-			StrokeWidth: r.StrokeWidth,
+			AutoLeading: r.AutoLeading, Leading: r.Leading, Tracking: r.Tracking,
+			BaselineShift: r.BaselineShift, HorizontalScale: r.HorizontalScale,
+			VerticalScale: r.VerticalScale, Tsume: r.Tsume, ApplyStroke: r.ApplyStroke,
+			StrokeColor: r.StrokeColor, StrokeWidth: r.StrokeWidth,
 		})
 	}
 	for _, p := range ts.Paragraphs {

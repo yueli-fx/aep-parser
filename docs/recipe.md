@@ -113,15 +113,21 @@ This reference is generated from the canonical recipe field model.
 | --- | --- | --- | --- | --- | --- | --- |
 | `comps[].layers[].text_style.run_index` | `number` | - | Layer text style text run index. | - | - | - |
 | `comps[].layers[].text_style.paragraph_index` | `number` | - | Layer text style paragraph index. | - | - | - |
-| `comps[].layers[].text_style.font_size` | `number` | - | Layer text style font size. | - | `text.set_run_font_size` (`Layer.SetRunFontSize`) | examples/recipes/minimal-text-style.json |
-| `comps[].layers[].text_style.fill_color` | `array<float64>` | - | Layer text style fill color as RGB channels. | - | `text.set_run_fill_color` (`Layer.SetRunFillColor`) | examples/recipes/minimal-text-shape.json |
+| `comps[].layers[].text_style.font_size` | `number` | - | Layer text style font size. | Text font size must be positive. | `text.set_run_font_size` (`Layer.SetRunFontSize`) | examples/recipes/minimal-text-style.json |
+| `comps[].layers[].text_style.fill_color` | `array<float64>` | - | Layer text style fill color as RGB channels. | Text fill color must contain RGB or RGBA channels in the 0..255 range. | `text.set_run_fill_color` (`Layer.SetRunFillColor`) | examples/recipes/minimal-text-shape.json |
+| `comps[].layers[].text_style.auto_leading` | `boolean` | - | Layer text style auto-leading switch. | - | `text.set_run_auto_leading` (`Layer.SetRunAutoLeading`) | examples/recipes/minimal-text-style.json |
+| `comps[].layers[].text_style.leading` | `number` | - | Layer text style explicit leading value. | - | `text.set_run_leading` (`Layer.SetRunLeading`) | examples/recipes/minimal-text-style.json |
 | `comps[].layers[].text_style.tracking` | `number` | - | Layer text style character tracking amount. | - | `text.set_run_tracking` (`Layer.SetRunTracking`) | examples/recipes/minimal-text-shape.json |
+| `comps[].layers[].text_style.baseline_shift` | `number` | - | Layer text style baseline shift amount. | - | `text.set_run_baseline_shift` (`Layer.SetRunBaselineShift`) | examples/recipes/minimal-text-style.json |
+| `comps[].layers[].text_style.horizontal_scale` | `number` | - | Layer text style horizontal text scale. | - | `text.set_run_horizontal_scale` (`Layer.SetRunHorizontalScale`) | examples/recipes/minimal-text-style.json |
+| `comps[].layers[].text_style.vertical_scale` | `number` | - | Layer text style vertical text scale. | - | `text.set_run_vertical_scale` (`Layer.SetRunVerticalScale`) | examples/recipes/minimal-text-style.json |
+| `comps[].layers[].text_style.tsume` | `number` | - | Layer text style CJK tsume spacing adjustment. | Text tsume must be between 0 and 100. | `text.set_run_tsume` (`Layer.SetRunTsume`) | examples/recipes/minimal-text-style.json |
 | `comps[].layers[].text_style.faux_bold` | `boolean` | - | Layer text style faux bold switch. | - | `text.set_run_faux_bold` (`Layer.SetRunFauxBold`) | examples/recipes/minimal-text-shape.json |
 | `comps[].layers[].text_style.faux_italic` | `boolean` | - | Layer text style faux italic switch. | - | `text.set_run_faux_italic` (`Layer.SetRunFauxItalic`) | examples/recipes/minimal-text-shape.json |
 | `comps[].layers[].text_style.apply_stroke` | `boolean` | - | Layer text style stroke enable switch. | - | `text.set_run_apply_stroke` (`Layer.SetRunApplyStroke`) | examples/recipes/minimal-text-shape.json |
-| `comps[].layers[].text_style.stroke_color` | `array<float64>` | - | Layer text style stroke color as RGB channels. | - | `text.set_run_stroke_color` (`Layer.SetRunStrokeColor`) | examples/recipes/minimal-text-shape.json |
-| `comps[].layers[].text_style.stroke_width` | `number` | - | Layer text style stroke width. | - | `text.set_run_stroke_width` (`Layer.SetRunStrokeWidth`) | examples/recipes/minimal-text-shape.json |
-| `comps[].layers[].text_style.justification` | `string` | - | Layer text style paragraph justification mode. | - | `text.set_paragraph_justification` (`Layer.SetParagraphJustification`) | examples/recipes/minimal-text-shape.json |
+| `comps[].layers[].text_style.stroke_color` | `array<float64>` | - | Layer text style stroke color as RGB channels. | Text stroke color must contain RGB or RGBA channels in the 0..255 range. | `text.set_run_stroke_color` (`Layer.SetRunStrokeColor`) | examples/recipes/minimal-text-shape.json |
+| `comps[].layers[].text_style.stroke_width` | `number` | - | Layer text style stroke width. | Text stroke width must be non-negative. | `text.set_run_stroke_width` (`Layer.SetRunStrokeWidth`) | examples/recipes/minimal-text-shape.json |
+| `comps[].layers[].text_style.justification` | `string` | - | Layer text style paragraph justification mode. | Text justification must use a supported value. | `text.set_paragraph_justification` (`Layer.SetParagraphJustification`) | examples/recipes/minimal-text-shape.json |
 
 ## TextAnimatorSpec
 
@@ -712,7 +718,13 @@ This reference is generated from the canonical recipe field model.
 | `expected_profile.text_styles[].paragraph_index` | `number` | - | Expected text style paragraph index. | Expected text style paragraph index must be non-negative. | - | - |
 | `expected_profile.text_styles[].font_size` | `number` | - | Expected text style font size. | Expected font size must be positive. | - | examples/recipes/minimal-text-shape.json |
 | `expected_profile.text_styles[].fill_color` | `array<float64>` | - | Expected text style fill color as RGB channels. | Expected fill color must contain RGB or RGBA channels in the 0..1 range. | - | examples/recipes/minimal-text-shape.json |
+| `expected_profile.text_styles[].auto_leading` | `boolean` | - | Expected text style auto-leading switch. | - | - | examples/recipes/minimal-text-style.json |
+| `expected_profile.text_styles[].leading` | `number` | - | Expected text style explicit leading value. | - | - | examples/recipes/minimal-text-style.json |
 | `expected_profile.text_styles[].tracking` | `number` | - | Expected text style character tracking amount. | - | - | examples/recipes/minimal-text-shape.json |
+| `expected_profile.text_styles[].baseline_shift` | `number` | - | Expected text style baseline shift amount. | - | - | examples/recipes/minimal-text-style.json |
+| `expected_profile.text_styles[].horizontal_scale` | `number` | - | Expected text style horizontal text scale. | - | - | examples/recipes/minimal-text-style.json |
+| `expected_profile.text_styles[].vertical_scale` | `number` | - | Expected text style vertical text scale. | - | - | examples/recipes/minimal-text-style.json |
+| `expected_profile.text_styles[].tsume` | `number` | - | Expected text style CJK tsume spacing adjustment. | Expected tsume must be between 0 and 100. | - | examples/recipes/minimal-text-style.json |
 | `expected_profile.text_styles[].faux_bold` | `boolean` | - | Expected text style faux bold switch. | - | - | examples/recipes/minimal-text-shape.json |
 | `expected_profile.text_styles[].faux_italic` | `boolean` | - | Expected text style faux italic switch. | - | - | examples/recipes/minimal-text-shape.json |
 | `expected_profile.text_styles[].apply_stroke` | `boolean` | - | Expected text style stroke enable switch. | - | - | examples/recipes/minimal-text-shape.json |

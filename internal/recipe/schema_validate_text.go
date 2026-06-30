@@ -23,8 +23,29 @@ func validateTextStyle(style TextStyleSpec, stylePath string, recordCapability f
 		recordCapability("Layer.SetRunFillColor", stylePath+".fill_color")
 		validateColor(style.FillColor, stylePath+".fill_color", "invalid_text_fill_color", addRefusal)
 	}
+	if style.AutoLeading != nil {
+		recordCapability("Layer.SetRunAutoLeading", stylePath+".auto_leading")
+	}
+	if style.Leading != nil {
+		recordCapability("Layer.SetRunLeading", stylePath+".leading")
+	}
 	if style.Tracking != nil {
 		recordCapability("Layer.SetRunTracking", stylePath+".tracking")
+	}
+	if style.BaselineShift != nil {
+		recordCapability("Layer.SetRunBaselineShift", stylePath+".baseline_shift")
+	}
+	if style.HorizontalScale != nil {
+		recordCapability("Layer.SetRunHorizontalScale", stylePath+".horizontal_scale")
+	}
+	if style.VerticalScale != nil {
+		recordCapability("Layer.SetRunVerticalScale", stylePath+".vertical_scale")
+	}
+	if style.Tsume != nil {
+		recordCapability("Layer.SetRunTsume", stylePath+".tsume")
+		if *style.Tsume < 0 || *style.Tsume > 100 {
+			addRefusal("invalid_text_tsume", stylePath+".tsume", "tsume must be between 0 and 100")
+		}
 	}
 	if style.FauxBold != nil {
 		recordCapability("Layer.SetRunFauxBold", stylePath+".faux_bold")

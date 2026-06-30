@@ -302,6 +302,9 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 		if len(style.FillColor) > 0 {
 			validateColor(style.FillColor, stylePath+".fill_color", "invalid_expected_profile", addRefusal)
 		}
+		if style.Tsume != nil && (*style.Tsume < 0 || *style.Tsume > 100) {
+			addRefusal("invalid_expected_profile", stylePath+".tsume", "tsume must be between 0 and 100")
+		}
 		if len(style.StrokeColor) > 0 {
 			validateColor(style.StrokeColor, stylePath+".stroke_color", "invalid_expected_profile", addRefusal)
 		}

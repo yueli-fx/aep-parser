@@ -1660,6 +1660,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Layer text style font size.",
+      "x-aep-validation": "Text font size must be positive.",
       "x-aep-capabilities": [
         {
           "key": "text.set_run_font_size",
@@ -1687,6 +1688,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Layer text style fill color as RGB channels.",
+      "x-aep-validation": "Text fill color must contain RGB or RGBA channels in the 0..255 range.",
       "x-aep-capabilities": [
         {
           "key": "text.set_run_fill_color",
@@ -1704,6 +1706,58 @@
         }
       ],
       "x-aep-example": "examples/recipes/minimal-text-shape.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_style.auto_leading",
+      "json_name": "auto_leading",
+      "source_type": "TextStyleSpec",
+      "source_field": "AutoLeading",
+      "type": "boolean",
+      "go_type": "*bool",
+      "description": "Layer text style auto-leading switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "text.set_run_auto_leading",
+          "query": "Layer.SetRunAutoLeading",
+          "status": "supported",
+          "symbol": "Layer.SetRunAutoLeading",
+          "domain": "text",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-variable btdk PostScript body splice; verified against\na single-run DOM fixture on both AE versions",
+          "gate": [
+            "TestTextRun_AEShipGate_AE2020",
+            "TestTextRun_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_style.leading",
+      "json_name": "leading",
+      "source_type": "TextStyleSpec",
+      "source_field": "Leading",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Layer text style explicit leading value.",
+      "x-aep-capabilities": [
+        {
+          "key": "text.set_run_leading",
+          "query": "Layer.SetRunLeading",
+          "status": "supported",
+          "symbol": "Layer.SetRunLeading",
+          "domain": "text",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-variable btdk PostScript body splice; the point key\nmust be written as REAL (FormatPSReal); pair with SetRunAutoLeading(false);\nverified against the DOM value (leading=80) on both AE versions; render\nstill falls back to default leading because the rendered-pixel boundary\nfor from-scratch text is not yet verified",
+          "gate": [
+            "TestTextRun_AEShipGate_AE2020",
+            "TestTextRun_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_style.tracking",
@@ -1730,6 +1784,111 @@
         }
       ],
       "x-aep-example": "examples/recipes/minimal-text-shape.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_style.baseline_shift",
+      "json_name": "baseline_shift",
+      "source_type": "TextStyleSpec",
+      "source_field": "BaselineShift",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Layer text style baseline shift amount.",
+      "x-aep-capabilities": [
+        {
+          "key": "text.set_run_baseline_shift",
+          "query": "Layer.SetRunBaselineShift",
+          "status": "supported",
+          "symbol": "Layer.SetRunBaselineShift",
+          "domain": "text",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-variable btdk PostScript body splice; the point key\nmust be written as REAL (FormatPSReal) or AE reads it as a 16.16\nfixed-point value; verified against a single-run DOM fixture on both AE\nversions",
+          "gate": [
+            "TestTextRun_AEShipGate_AE2020",
+            "TestTextRun_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_style.horizontal_scale",
+      "json_name": "horizontal_scale",
+      "source_type": "TextStyleSpec",
+      "source_field": "HorizontalScale",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Layer text style horizontal text scale.",
+      "x-aep-capabilities": [
+        {
+          "key": "text.set_run_horizontal_scale",
+          "query": "Layer.SetRunHorizontalScale",
+          "status": "supported",
+          "symbol": "Layer.SetRunHorizontalScale",
+          "domain": "text",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-variable btdk PostScript body splice; the point key\nmust be written as REAL (FormatPSReal) or AE reads it as a 16.16\nfixed-point value; verified by reading back DOM scale=50 on both AE\nversions",
+          "gate": [
+            "TestTextRun_AEShipGate_AE2020",
+            "TestTextRun_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_style.vertical_scale",
+      "json_name": "vertical_scale",
+      "source_type": "TextStyleSpec",
+      "source_field": "VerticalScale",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Layer text style vertical text scale.",
+      "x-aep-capabilities": [
+        {
+          "key": "text.set_run_vertical_scale",
+          "query": "Layer.SetRunVerticalScale",
+          "status": "supported",
+          "symbol": "Layer.SetRunVerticalScale",
+          "domain": "text",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-variable btdk PostScript body splice; the point key\nmust be written as REAL (FormatPSReal) or AE reads it as a 16.16\nfixed-point value; verified by reading back DOM scale=150 on both AE\nversions",
+          "gate": [
+            "TestTextRun_AEShipGate_AE2020",
+            "TestTextRun_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_style.tsume",
+      "json_name": "tsume",
+      "source_type": "TextStyleSpec",
+      "source_field": "Tsume",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Layer text style CJK tsume spacing adjustment.",
+      "x-aep-validation": "Text tsume must be between 0 and 100.",
+      "x-aep-capabilities": [
+        {
+          "key": "text.set_run_tsume",
+          "query": "Layer.SetRunTsume",
+          "status": "supported",
+          "symbol": "Layer.SetRunTsume",
+          "domain": "text",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-variable btdk PostScript body splice; CJK-only\nattribute; the key must be written as REAL (FormatPSReal) — writing it\nas a plain number makes AE divide the value by 65536; verified against\nDOM tsume=0.5 on both AE versions",
+          "gate": [
+            "TestTextRun_AEShipGate_AE2020",
+            "TestTextRun_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_style.faux_bold",
@@ -1818,6 +1977,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Layer text style stroke color as RGB channels.",
+      "x-aep-validation": "Text stroke color must contain RGB or RGBA channels in the 0..255 range.",
       "x-aep-capabilities": [
         {
           "key": "text.set_run_stroke_color",
@@ -1844,6 +2004,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Layer text style stroke width.",
+      "x-aep-validation": "Text stroke width must be non-negative.",
       "x-aep-capabilities": [
         {
           "key": "text.set_run_stroke_width",
@@ -1870,6 +2031,12 @@
       "type": "string",
       "go_type": "string",
       "description": "Layer text style paragraph justification mode.",
+      "x-aep-validation": "Text justification must use a supported value.",
+      "enum": [
+        "left",
+        "right",
+        "center"
+      ],
       "x-aep-capabilities": [
         {
           "key": "text.set_paragraph_justification",
@@ -8716,6 +8883,26 @@
       "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
+      "x-aep-path": "expected_profile.text_styles[].auto_leading",
+      "json_name": "auto_leading",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "AutoLeading",
+      "type": "boolean",
+      "go_type": "*bool",
+      "description": "Expected text style auto-leading switch.",
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
+      "x-aep-path": "expected_profile.text_styles[].leading",
+      "json_name": "leading",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "Leading",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Expected text style explicit leading value.",
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
       "x-aep-path": "expected_profile.text_styles[].tracking",
       "json_name": "tracking",
       "source_type": "ExpectedTextStyle",
@@ -8724,6 +8911,47 @@
       "go_type": "*float64",
       "description": "Expected text style character tracking amount.",
       "x-aep-example": "examples/recipes/minimal-text-shape.json"
+    },
+    {
+      "x-aep-path": "expected_profile.text_styles[].baseline_shift",
+      "json_name": "baseline_shift",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "BaselineShift",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Expected text style baseline shift amount.",
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
+      "x-aep-path": "expected_profile.text_styles[].horizontal_scale",
+      "json_name": "horizontal_scale",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "HorizontalScale",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Expected text style horizontal text scale.",
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
+      "x-aep-path": "expected_profile.text_styles[].vertical_scale",
+      "json_name": "vertical_scale",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "VerticalScale",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Expected text style vertical text scale.",
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
+      "x-aep-path": "expected_profile.text_styles[].tsume",
+      "json_name": "tsume",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "Tsume",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Expected text style CJK tsume spacing adjustment.",
+      "x-aep-validation": "Expected tsume must be between 0 and 100.",
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
     },
     {
       "x-aep-path": "expected_profile.text_styles[].faux_bold",

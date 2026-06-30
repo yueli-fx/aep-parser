@@ -131,17 +131,23 @@ func addLayerSummaries(out map[string]string, prefix string) {
 
 func addTextStyleSummaries(out map[string]string, prefix, label string) {
 	addSummaries(out, prefix, map[string]string{
-		"run_index":       label + " text run index.",
-		"paragraph_index": label + " paragraph index.",
-		"font_size":       label + " font size.",
-		"fill_color":      label + " fill color as RGB channels.",
-		"tracking":        label + " character tracking amount.",
-		"faux_bold":       label + " faux bold switch.",
-		"faux_italic":     label + " faux italic switch.",
-		"apply_stroke":    label + " stroke enable switch.",
-		"stroke_color":    label + " stroke color as RGB channels.",
-		"stroke_width":    label + " stroke width.",
-		"justification":   label + " paragraph justification mode.",
+		"run_index":        label + " text run index.",
+		"paragraph_index":  label + " paragraph index.",
+		"font_size":        label + " font size.",
+		"fill_color":       label + " fill color as RGB channels.",
+		"auto_leading":     label + " auto-leading switch.",
+		"leading":          label + " explicit leading value.",
+		"tracking":         label + " character tracking amount.",
+		"baseline_shift":   label + " baseline shift amount.",
+		"horizontal_scale": label + " horizontal text scale.",
+		"vertical_scale":   label + " vertical text scale.",
+		"tsume":            label + " CJK tsume spacing adjustment.",
+		"faux_bold":        label + " faux bold switch.",
+		"faux_italic":      label + " faux italic switch.",
+		"apply_stroke":     label + " stroke enable switch.",
+		"stroke_color":     label + " stroke color as RGB channels.",
+		"stroke_width":     label + " stroke width.",
+		"justification":    label + " paragraph justification mode.",
 	})
 }
 
