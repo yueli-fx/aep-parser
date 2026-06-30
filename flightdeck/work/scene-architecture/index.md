@@ -45,9 +45,9 @@ ongoing state inconsistency, but also do not break callers for cosmetic moves.
       mutable slices.
 - [x] Added local source indexes for composition source views.
 - [x] Group Layer private state.
-- [ ] Split shape graph / shape lowering files.
+- [x] Split shape graph / shape lowering files.
   - [x] Split scene shape graph by node family.
-  - [ ] Split serializer shape lowering by node family.
+  - [x] Split serializer shape lowering by node family.
 - [ ] Design structured warning migration.
 
 ## Verification
