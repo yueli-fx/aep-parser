@@ -907,6 +907,26 @@ func TestCompileToFileChecksTextAnimatorFillOpacityProfileExample(t *testing.T) 
 	assertProfileCheck(t, report, "expected_profile.properties[0]", true)
 }
 
+func TestCompileToFileChecksTextAnimatorStrokeOpacityProfileExample(t *testing.T) {
+	raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "recipes", "minimal-text-animator-stroke-opacity.json"))
+	if err != nil {
+		t.Fatalf("ReadFile: %v", err)
+	}
+	rec := mustUnmarshalRecipe(t, string(raw))
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	assertProfileCheck(t, report, "expected_profile.layers[0].name", true)
+	assertProfileCheck(t, report, "expected_profile.layers[0].type", true)
+	assertProfileCheck(t, report, "expected_profile.properties[0]", true)
+}
+
 func TestCompileToFileChecksTextAnimatorRangeOffsetKeyframesExample(t *testing.T) {
 	raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "recipes", "minimal-text-animator-range-offset.json"))
 	if err != nil {

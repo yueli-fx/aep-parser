@@ -1983,6 +1983,20 @@
             "TestTextNeighborAnimators_AEShipGate_AE2020",
             "TestTextNeighborAnimators_AEShipGate_AE2025"
           ]
+        },
+        {
+          "key": "text_animator.add_stroke_opacity",
+          "query": "AddTextStrokeOpacityAnimator",
+          "status": "supported",
+          "symbol": "AddTextStrokeOpacityAnimator",
+          "domain": "text",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "boundary": "the text must carry a stroke to be visible; typed parameter accessors are not yet wired (tune via Reopen)",
+          "gate": [
+            "TestTextNeighborAnimators_AEShipGate_AE2020",
+            "TestTextNeighborAnimators_AEShipGate_AE2025"
+          ]
         }
       ],
       "x-aep-example": "examples/recipes/minimal-text-animator-character-offset.json"
@@ -2005,7 +2019,8 @@
         "color",
         "tracking",
         "character_offset",
-        "fill_opacity"
+        "fill_opacity",
+        "stroke_opacity"
       ],
       "x-aep-example": "examples/recipes/minimal-text-animator-character-offset.json"
     },
@@ -2017,7 +2032,7 @@
       "type": "object",
       "go_type": "interface {}",
       "description": "Text animator property value.",
-      "x-aep-validation": "Opacity, rotation, tracking, character_offset, and fill_opacity values must be numbers; position and scale values must be 3-number arrays; color values must be 3- or 4-number arrays.",
+      "x-aep-validation": "Opacity, rotation, tracking, character_offset, fill_opacity, and stroke_opacity values must be numbers; position and scale values must be 3-number arrays; color values must be 3- or 4-number arrays.",
       "x-aep-example": "examples/recipes/minimal-text-animator-character-offset.json"
     },
     {
