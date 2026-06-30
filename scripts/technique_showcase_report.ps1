@@ -35,16 +35,21 @@ try {
 
     $scanTimer = [System.Diagnostics.Stopwatch]::StartNew()
     & go @baseArgs "-out" $corpusPath "-summary-out" $summaryPath
+    $goExitCode = $LASTEXITCODE
     $scanTimer.Stop()
-    if ($LASTEXITCODE -ne 0) {
-        throw "aeptechnique corpus failed with exit code $LASTEXITCODE"
-    }
     $scanSeconds = [Math]::Round($scanTimer.Elapsed.TotalSeconds, 2)
 
     $summary = Get-Content -Raw -Path $summaryPath | ConvertFrom-Json
     $errorCount = 0
     if ($null -ne $summary.error_count) {
         $errorCount = $summary.error_count
+    }
+    if ($goExitCode -ne 0) {
+        if ($goExitCode -eq 1 -and $errorCount -gt 0) {
+            Write-Warning "aeptechnique reported $errorCount per-file error(s); continuing with partial corpus report."
+        } else {
+            throw "aeptechnique corpus failed with exit code $goExitCode"
+        }
     }
 
     function Write-CountTable {

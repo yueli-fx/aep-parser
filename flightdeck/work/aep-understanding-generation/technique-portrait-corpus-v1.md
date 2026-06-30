@@ -86,7 +86,13 @@ Passing `-Open` opens the generated HTML report after writing all files.
 Passing `-Verify` runs the artifact verifier after report generation.
 `scripts/verify_technique_report.ps1` validates that all generated artifacts
 exist, that `summary.json`, `corpus.jsonl`, and `digest.json` agree on project
-counts, and that the human reports contain the expected learning sections.
+counts plus per-file errors, and that the human reports contain the expected
+learning sections.
+
+The report script continues when `aeptechnique` reports per-file corpus errors.
+Those failed projects stay in `corpus.jsonl` and `report.html` as error records,
+while successful projects still feed the summary, digest, CSV exports, and study
+queue. Usage errors or missing output artifacts still fail the script.
 
 The report script now uses `-mode explain`, so per-project cards include
 deterministic recreation readiness, recreation steps, archetype labels, and

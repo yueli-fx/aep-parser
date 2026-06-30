@@ -47,8 +47,12 @@ $studyQueueRows = @(Import-Csv -LiteralPath $studyQueueCsvPath)
 if ([int]$summary.project_count -lt $MinProjects) {
     throw "project_count $($summary.project_count) is lower than MinProjects $MinProjects"
 }
-if ($corpusLines.Count -ne [int]$summary.project_count) {
-    throw "corpus line count $($corpusLines.Count) does not match summary project_count $($summary.project_count)"
+$expectedCorpusLines = [int]$summary.project_count
+if ($null -ne $summary.error_count) {
+    $expectedCorpusLines += [int]$summary.error_count
+}
+if ($corpusLines.Count -ne $expectedCorpusLines) {
+    throw "corpus line count $($corpusLines.Count) does not match project_count + error_count $expectedCorpusLines"
 }
 if ([int]$digest.project_count -ne [int]$summary.project_count) {
     throw "digest project_count $($digest.project_count) does not match summary project_count $($summary.project_count)"

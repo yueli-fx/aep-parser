@@ -644,6 +644,8 @@ Current:
   `summary.json`, `corpus.jsonl`, `digest.json`, `learning.md`, `projects.csv`,
   `patterns.csv`, `study_queue.csv`, `report.md`, and self-contained
   `report.html` under the selected output directory.
+  Per-file parse/profile errors no longer abort the report; they remain visible
+  as error records while successful projects still feed the learning artifacts.
 - `tmp\technique_samples_report` currently demonstrates the 90-project
   `data\samples` corpus: 90 parsed projects, 0 errors, 4 repeated pattern
   families, and a compact `learning.md` for selecting high-signal reference
