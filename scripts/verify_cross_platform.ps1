@@ -11,6 +11,7 @@ $targets = @(
 )
 
 $packages = @(
+    "./cmd/aepserver",
     "./cmd/aepdiff",
     "./cmd/aeprecipe",
     "./cmd/aepsearch",
@@ -23,6 +24,7 @@ $packages = @(
     "./internal/profilediff",
     "./internal/projectindex",
     "./internal/recipe",
+    "./internal/server",
     "./internal/technique"
 )
 

@@ -714,6 +714,22 @@ Capability response should include:
 `pixel_diff` can be available without AE because PNG comparison is pure Go.
 `render` is unavailable unless an AE worker is configured.
 
+Implemented first slice:
+
+- `cmd/aepserver`
+- `internal/server`
+- `GET /health` returns `{"status":"ok"}`.
+- `GET /capabilities` returns pure-Go capabilities and AE worker
+  unavailable statuses.
+- `POST /parse` accepts uploaded `.aep` bytes by default. JSON
+  `{"path":"..."}` input is available only when `-allow-path-input` /
+  `Options.AllowPathInput` is explicitly enabled.
+- `POST /parse` returns source, summary, and project JSON.
+- `POST /profile` accepts the same inputs and returns source, summary, and
+  normalized profile JSON.
+- The service uses only `internal/aep` and `internal/profile`; it does not
+  start AE or PowerShell.
+
 ## Acceptance Criteria
 
 - `go test ./...` continues to pass on Windows.
@@ -750,4 +766,4 @@ Capability response should include:
 - [x] Move technique report rendering into Go and reduce report PS script to a wrapper.
 - [x] Define AE host adapter.
 - [x] Add cross-platform build gate.
-- [ ] Start pure parser service.
+- [x] Start pure parser service.

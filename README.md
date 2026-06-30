@@ -20,6 +20,23 @@
 pwsh -NoProfile -File scripts\verify_cross_platform.ps1
 ```
 
+## 纯解析服务
+
+`cmd/aepserver` 提供不依赖 AE 的 HTTP 服务入口，适合放在 Windows、macOS 或 Linux 节点上做解析、profile 和能力探测：
+
+```powershell
+go run ./cmd/aepserver -addr 127.0.0.1:8080
+```
+
+当前 endpoint：
+
+- `GET /health`
+- `GET /capabilities`
+- `POST /parse`
+- `POST /profile`
+
+`/parse` 和 `/profile` 默认支持 `application/octet-stream` 直接上传 `.aep` 字节；上传时可用 `X-AEP-Path` 标记来源路径。本地批处理需要直接读取服务端路径时，可启动时加 `-allow-path-input`，再发送 `application/json` 的 `{"path":"data/samples/.../file.aep"}`。服务不会启动 AE，`render` / `ae_readback` 在 capabilities 中会报告为 unavailable。
+
 ## 自托管技法报告
 
 对本地 `.aep` 语料生成可浏览的 technique learning report：
