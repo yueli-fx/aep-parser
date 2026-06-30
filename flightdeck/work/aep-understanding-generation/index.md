@@ -660,6 +660,10 @@ Current:
   directories and writes `compare.json` / `compare.md` for scalar totals and
   count-map deltas across readiness, patterns, effects, plugin effects, shapes,
   text animators, layer roles, and graph edges.
+- `scripts\verify_technique_selfhost.ps1` is the one-command self-hosted
+  acceptance gate. It runs the technique Go tests, full sample report, partial
+  error report, self-compare, partial-to-full compare, and writes
+  `acceptance.json` / `acceptance.md`.
 - Recipe IR coverage for the current comp and layer strategy matrices is
   complete: comp settings have object-level and field-level profile checks,
   authored-layer examples carry `expected_profile.layers[]`, camera/light

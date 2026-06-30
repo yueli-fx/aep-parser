@@ -28,6 +28,12 @@ pwsh -NoProfile -File scripts\technique_showcase_report.ps1 -InputPath data\samp
 pwsh -NoProfile -File scripts\compare_technique_reports.ps1 -BaseDir tmp\old_report -NewDir tmp\technique_samples_report
 ```
 
+一键跑完整自托管验收：
+
+```powershell
+pwsh -NoProfile -File scripts\verify_technique_selfhost.ps1 -OutRoot tmp\technique_selfhost_gate
+```
+
 ## 原理与分层
 
 `.aep` 是 **RIFX**（Big-Endian RIFF）格式（魔数 `RIFX` + `Egg!`），内部为嵌套 Chunk 树；本库通过逆向工程已知偏移量提取数据。代码按单向 DAG 分层（M8 物理分包）：

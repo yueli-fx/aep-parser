@@ -19,6 +19,7 @@ pwsh -NoProfile -File scripts\technique_showcase_report.ps1 -Limit 3 -Verify
 pwsh -NoProfile -File scripts\technique_showcase_report.ps1 -Open
 pwsh -NoProfile -File scripts\verify_technique_report.ps1 -OutDir tmp\technique_showcase_report
 pwsh -NoProfile -File scripts\compare_technique_reports.ps1 -BaseDir tmp\old_report -NewDir tmp\technique_showcase_report
+pwsh -NoProfile -File scripts\verify_technique_selfhost.ps1 -OutRoot tmp\technique_selfhost_gate
 ```
 
 For every discovered `.aep`, emit one JSON object per line:
@@ -120,6 +121,12 @@ directories and writes `compare.json` plus `compare.md`. It reports scalar
 changes such as project/error totals and count-map changes for readiness,
 patterns, archetypes, hints, plugin effects, effects, shapes, text animators,
 layer roles, and graph edges.
+
+`scripts/verify_technique_selfhost.ps1` is the one-command self-hosted
+acceptance gate. It runs the technique Go tests, generates and verifies the full
+sample report, generates and verifies an intentional partial-error report,
+compares a report to itself, compares the partial report to the full report, and
+writes `acceptance.json` plus `acceptance.md`.
 
 ## Non-Goals
 
