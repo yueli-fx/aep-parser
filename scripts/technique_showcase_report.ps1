@@ -438,17 +438,6 @@ try {
         [void]$h.AppendLine("<section class=""representative"">")
         [void]$h.AppendLine("<h3>$(Escape-Html $group.id)</h3>")
         [void]$h.AppendLine("<p class=""muted"">$($group.count) projects</p>")
-        foreach ($line in @(
-            @{ Label = "readiness"; Value = Format-CountList -Rows $group.readiness },
-            @{ Label = "effects"; Value = Format-CountList -Rows $group.effects },
-            @{ Label = "plugin effects"; Value = Format-CountList -Rows $group.plugin_effects },
-            @{ Label = "shape families"; Value = Format-CountList -Rows $group.shape_families },
-            @{ Label = "text animators"; Value = Format-CountList -Rows $group.text_animators }
-        )) {
-            if ($line.Value) {
-                [void]$h.AppendLine("<div class=""small""><strong>$(Escape-Html $line.Label)</strong>: $(Escape-Html $line.Value)</div>")
-            }
-        }
         [void]$h.AppendLine("<ul class=""compact"">")
         foreach ($project in @($group.representatives | Select-Object -First 5)) {
             [void]$h.AppendLine("<li><code>$(Escape-Html $project.path)</code><div class=""small"">score=$($project.score) · readiness=$(Escape-Html $project.readiness)</div></li>")
@@ -463,6 +452,17 @@ try {
         [void]$h.AppendLine("<section class=""representative"">")
         [void]$h.AppendLine("<h3>$(Escape-Html $group.id)</h3>")
         [void]$h.AppendLine("<p class=""muted"">$($group.count) projects</p>")
+        foreach ($line in @(
+            @{ Label = "readiness"; Value = Format-CountList -Rows $group.readiness },
+            @{ Label = "effects"; Value = Format-CountList -Rows $group.effects },
+            @{ Label = "plugin effects"; Value = Format-CountList -Rows $group.plugin_effects },
+            @{ Label = "shape families"; Value = Format-CountList -Rows $group.shape_families },
+            @{ Label = "text animators"; Value = Format-CountList -Rows $group.text_animators }
+        )) {
+            if ($line.Value) {
+                [void]$h.AppendLine("<div class=""small""><strong>$(Escape-Html $line.Label)</strong>: $(Escape-Html $line.Value)</div>")
+            }
+        }
         [void]$h.AppendLine("<ul class=""compact"">")
         foreach ($project in @($group.representatives | Select-Object -First 5)) {
             [void]$h.AppendLine("<li><code>$(Escape-Html $project.path)</code><div class=""small"">score=$($project.score) · readiness=$(Escape-Html $project.readiness)</div></li>")
