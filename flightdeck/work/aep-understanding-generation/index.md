@@ -55,6 +55,10 @@ Phase 0 export-surface audit and contract lock before extracting
   over stable profile data.
 - `technique-facts-v1-plan.md` — implementation plan and verification record
   for `internal/technique` and `cmd/aeptechnique`.
+- `technique-portrait-v1.md` — first corpus-friendly project portrait layer
+  over Technique Facts.
+- `technique-portrait-v1-plan.md` — implementation plan and verification
+  record for portrait generation and CLI mode support.
 - `flightdeck/knowledge/techniques/understand-a-project.md` — existing
   reference-project internalization workflow.
 - `flightdeck/knowledge/techniques/fx-techniques.md` — current technique
@@ -607,6 +611,10 @@ Done:
   `cmd/aeptechnique`. It derives comp/layer/effect/text-animator/shape-operator,
   dependency, and unknown facts from `profile.Profile` only, and the CLI emits
   stable JSON for an input `.aep`.
+- Technique Portrait v1 is implemented over facts. `technique.BuildPortrait`
+  produces fingerprint, signal-layer, mechanism, graph, unknown, and conservative
+  technique-hint summaries; `cmd/aeptechnique -mode portrait` and `-portrait`
+  emit the portrait JSON.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven
@@ -615,6 +623,9 @@ Current:
   AE-understanding layer for downstream project explanation, corpus search, and
   later technique extraction. It is descriptive only; recipe generation and
   natural-language interpretation remain later layers.
+- `cmd/aeptechnique -mode portrait -in <file.aep>` now provides a compact
+  corpus-facing project image suitable for comparing many projects without
+  retaining the full fact dump.
 - Recipe IR coverage for the current comp and layer strategy matrices is
   complete: comp settings have object-level and field-level profile checks,
   authored-layer examples carry `expected_profile.layers[]`, camera/light

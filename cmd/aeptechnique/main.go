@@ -21,12 +21,17 @@ func run(args []string, stdout, stderr io.Writer) int {
 	fs.SetOutput(stderr)
 	input := fs.String("in", "", "input .aep file")
 	_ = fs.Bool("json", true, "emit technique facts as JSON")
+	mode := fs.String("mode", "facts", "output mode: facts or portrait")
+	portraitMode := fs.Bool("portrait", false, "emit project portrait JSON")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
 	if *input == "" {
 		fmt.Fprintln(stderr, "usage: aeptechnique -in file.aep")
 		return 2
+	}
+	if *portraitMode {
+		*mode = "portrait"
 	}
 
 	project, err := aep.Open(*input)
@@ -45,9 +50,25 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return 1
 	}
 
+	var output any
+	switch *mode {
+	case "facts":
+		output = facts
+	case "portrait":
+		portrait, err := technique.BuildPortrait(facts)
+		if err != nil {
+			fmt.Fprintf(stderr, "portrait %q: %v\n", *input, err)
+			return 1
+		}
+		output = portrait
+	default:
+		fmt.Fprintf(stderr, "invalid -mode %q; want facts or portrait\n", *mode)
+		return 2
+	}
+
 	enc := json.NewEncoder(stdout)
 	enc.SetIndent("", "  ")
-	if err := enc.Encode(facts); err != nil {
+	if err := enc.Encode(output); err != nil {
 		fmt.Fprintf(stderr, "json: %v\n", err)
 		return 1
 	}

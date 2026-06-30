@@ -116,3 +116,58 @@ type UnknownFact struct {
 	Reason     string           `json:"reason"`
 	Evidence   profile.Evidence `json:"evidence"`
 }
+
+type Portrait struct {
+	SchemaVersion  int                `json:"schema_version"`
+	SourcePath     string             `json:"source_path,omitempty"`
+	Fingerprint    FingerprintSummary `json:"fingerprint"`
+	SignalLayers   []SignalLayer      `json:"signal_layers,omitempty"`
+	Mechanisms     MechanismSummary   `json:"mechanisms"`
+	Graph          GraphSummary       `json:"graph"`
+	TechniqueHints []TechniqueHint    `json:"technique_hints,omitempty"`
+	Unknowns       UnknownSummary     `json:"unknowns"`
+}
+
+type FingerprintSummary struct {
+	CompCount          int            `json:"comp_count"`
+	LayerCount         int            `json:"layer_count"`
+	EffectCount        int            `json:"effect_count"`
+	TextLayerCount     int            `json:"text_layer_count,omitempty"`
+	ShapeLayerCount    int            `json:"shape_layer_count,omitempty"`
+	TextAnimatorCount  int            `json:"text_animator_count,omitempty"`
+	ShapeOperatorCount int            `json:"shape_operator_count,omitempty"`
+	DependencyCount    int            `json:"dependency_count,omitempty"`
+	UnknownCount       int            `json:"unknown_count,omitempty"`
+	LayerRoleCounts    map[string]int `json:"layer_role_counts"`
+}
+
+type SignalLayer struct {
+	CompName  string   `json:"comp_name,omitempty"`
+	LayerName string   `json:"layer_name"`
+	Role      string   `json:"role,omitempty"`
+	Score     int      `json:"score"`
+	Signals   []string `json:"signals"`
+}
+
+type MechanismSummary struct {
+	EffectClassCounts      map[string]int `json:"effect_class_counts"`
+	EffectMatchCounts      map[string]int `json:"effect_match_counts"`
+	TextAnimatorKindCounts map[string]int `json:"text_animator_kind_counts"`
+	ShapeFamilyCounts      map[string]int `json:"shape_family_counts"`
+	ReproducibilityCounts  map[string]int `json:"reproducibility_counts"`
+}
+
+type GraphSummary struct {
+	EdgeCount      int            `json:"edge_count"`
+	RelationCounts map[string]int `json:"relation_counts"`
+}
+
+type TechniqueHint struct {
+	ID         string   `json:"id"`
+	Confidence string   `json:"confidence"`
+	Signals    []string `json:"signals,omitempty"`
+}
+
+type UnknownSummary struct {
+	Count int `json:"count"`
+}

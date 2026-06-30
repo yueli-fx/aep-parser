@@ -45,3 +45,45 @@ func TestRunAcceptsJSONFlag(t *testing.T) {
 		t.Fatalf("stdout is not valid json: %s", stdout.String())
 	}
 }
+
+func TestRunEmitsPortraitJSONWithMode(t *testing.T) {
+	input := filepath.Join("..", "..", "flightdeck", "showcase", "text", "text.aep")
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"-in", input, "-mode", "portrait"}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("run exit = %d, stderr=%s", code, stderr.String())
+	}
+
+	var portrait technique.Portrait
+	if err := json.Unmarshal(stdout.Bytes(), &portrait); err != nil {
+		t.Fatalf("json.Unmarshal: %v\nstdout=%s", err, stdout.String())
+	}
+	if portrait.SchemaVersion != technique.SchemaVersion || portrait.SourcePath != input {
+		t.Fatalf("portrait identity = %+v", portrait)
+	}
+	if portrait.Fingerprint.CompCount == 0 || portrait.Fingerprint.LayerCount == 0 {
+		t.Fatalf("portrait fingerprint = %+v", portrait.Fingerprint)
+	}
+	if portrait.Mechanisms.ShapeFamilyCounts == nil || portrait.Graph.RelationCounts == nil {
+		t.Fatalf("portrait maps not initialized: %+v", portrait)
+	}
+}
+
+func TestRunAcceptsPortraitFlag(t *testing.T) {
+	input := filepath.Join("..", "..", "flightdeck", "showcase", "text", "text.aep")
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"-in", input, "-portrait"}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("run exit = %d, stderr=%s", code, stderr.String())
+	}
+
+	var portrait technique.Portrait
+	if err := json.Unmarshal(stdout.Bytes(), &portrait); err != nil {
+		t.Fatalf("json.Unmarshal: %v\nstdout=%s", err, stdout.String())
+	}
+	if portrait.Fingerprint.LayerCount == 0 {
+		t.Fatalf("portrait fingerprint = %+v", portrait.Fingerprint)
+	}
+}
