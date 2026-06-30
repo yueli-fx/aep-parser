@@ -36,6 +36,7 @@ try {
     $mechanismExamplesCsvPath = Join-Path $OutDir "mechanism_examples.csv"
     $coverageScorecardCsvPath = Join-Path $OutDir "coverage_scorecard.csv"
     $reconstructionBlueprintsPath = Join-Path $OutDir "reconstruction_blueprints.jsonl"
+    $recipeDraftsPath = Join-Path $OutDir "recipe_drafts.jsonl"
     $errorsCsvPath = Join-Path $OutDir "errors.csv"
     $manifestPath = Join-Path $OutDir "manifest.json"
     $reportPath = Join-Path $OutDir "report.md"
@@ -120,6 +121,24 @@ try {
             status         = $status
             notes          = $Notes
         }
+    }
+
+    function Get-UniqueRecipeName {
+        param(
+            [AllowNull()][string]$Name,
+            [hashtable]$Seen,
+            [string]$Fallback
+        )
+        $baseName = $Name
+        if ([string]::IsNullOrWhiteSpace($baseName)) {
+            $baseName = $Fallback
+        }
+        if (-not $Seen.ContainsKey($baseName)) {
+            $Seen[$baseName] = 1
+            return $baseName
+        }
+        $Seen[$baseName] = [int]$Seen[$baseName] + 1
+        return "$baseName #$($Seen[$baseName])"
     }
 
     function Get-CountRows {
@@ -1087,6 +1106,88 @@ try {
         ForEach-Object { $_ | ConvertTo-Json -Depth 10 -Compress } |
         Set-Content -LiteralPath $reconstructionBlueprintsPath -Encoding UTF8
 
+    $recipeDraftRows = @()
+    foreach ($record in $records) {
+        $explanation = $record.explanation
+        if ($null -eq $explanation) {
+            continue
+        }
+        $portrait = $explanation.portrait
+        $readiness = ""
+        if ($null -ne $explanation.recreation_readiness) {
+            $readiness = [string]$explanation.recreation_readiness.status
+        }
+        $nameMap = @{}
+        $recipeComps = @()
+        $expectedComps = @()
+        foreach ($comp in @($record.facts.comps)) {
+            $recipeName = Get-UniqueRecipeName -Name ([string]$comp.name) -Seen $nameMap -Fallback ("Comp $($recipeComps.Count + 1)")
+            $width = [int]$comp.width
+            $height = [int]$comp.height
+            $frameRate = [double]$comp.frame_rate
+            $duration = [double]$comp.duration_seconds
+            $recipeComps += [ordered]@{
+                name       = $recipeName
+                width      = $width
+                height     = $height
+                frame_rate = $frameRate
+                duration   = $duration
+                layers     = @()
+            }
+            $expectedComps += [ordered]@{
+                name       = $recipeName
+                width      = [double]$width
+                height     = [double]$height
+                frame_rate = $frameRate
+                duration   = $duration
+            }
+        }
+        $gaps = @()
+        if ([int]$portrait.fingerprint.layer_count -gt 0) {
+            $gaps += [ordered]@{ id = "layers_not_materialized"; count = [int]$portrait.fingerprint.layer_count; artifact = "layers.csv"; action = "Map parsed layer rows into recipe layer constructors after source, timing, and type support are selected." }
+        }
+        $mechanismCount = [int]$portrait.fingerprint.effect_count + [int]$portrait.fingerprint.shape_operator_count + [int]$portrait.fingerprint.text_animator_count
+        if ($mechanismCount -gt 0) {
+            $gaps += [ordered]@{ id = "mechanisms_not_materialized"; count = $mechanismCount; artifact = "effect_stacks.csv, shape_operators.csv, text_animators.csv"; action = "Translate parsed mechanisms into supported recipe effect, shape, and text animator specs." }
+        }
+        if ([int]$portrait.fingerprint.dependency_count -gt 0) {
+            $gaps += [ordered]@{ id = "dependencies_not_materialized"; count = [int]$portrait.fingerprint.dependency_count; artifact = "dependency_edges.csv"; action = "Resolve parent, matte, source, and effect-parameter references after layer IDs are materialized." }
+        }
+        if ($null -ne $explanation.recreation_readiness -and @($explanation.recreation_readiness.blockers).Count -gt 0) {
+            $gaps += [ordered]@{
+                id       = "readiness_blockers"
+                count    = @($explanation.recreation_readiness.blockers).Count
+                artifact = "recreation_blockers.csv"
+                action   = ((@($explanation.recreation_readiness.blockers) | ForEach-Object { [string]$_ } | Where-Object { $_.Trim() -ne "" }) -join "; ")
+            }
+        }
+        $gaps += [ordered]@{ id = "verification_required"; count = @($explanation.recreation_steps).Count; artifact = "recreation_steps.csv"; action = "Run project-specific recreation checks before treating the draft as exact." }
+        $recipeDraftRows += [ordered]@{
+            schema_version = 1
+            project_path   = [string]$record.path
+            readiness      = $readiness
+            recipe         = [ordered]@{
+                schema_version   = 1
+                project          = [ordered]@{
+                    name           = [System.IO.Path]::GetFileNameWithoutExtension([string]$record.path)
+                    target_version = "AE2020"
+                }
+                comps            = $recipeComps
+                expected_profile = [ordered]@{
+                    comp_count       = [int]$portrait.fingerprint.comp_count
+                    layer_count      = [int]$portrait.fingerprint.layer_count
+                    text_layer_count = [int]$portrait.fingerprint.text_layer_count
+                    shape_layer_count = [int]$portrait.fingerprint.shape_layer_count
+                    comps            = $expectedComps
+                }
+            }
+            gaps           = $gaps
+        }
+    }
+    $recipeDraftRows |
+        ForEach-Object { $_ | ConvertTo-Json -Depth 10 -Compress } |
+        Set-Content -LiteralPath $recipeDraftsPath -Encoding UTF8
+
     $coverageScorecardRows = @(
         New-CoverageRow -Artifact "projects.csv" -Metric "project rows" -Expected ([int]$summary.project_count) -Actual $projectRowsForCsv.Count -Notes "one explainable project row per parsed project"
         New-CoverageRow -Artifact "project_playbooks.csv" -Metric "project playbooks" -Expected ([int]$summary.project_count) -Actual $projectPlaybookRows.Count -Notes "one recreation playbook per parsed project"
@@ -1106,6 +1207,7 @@ try {
         New-CoverageRow -Artifact "mechanisms.csv" -Metric "mechanism rows" -Expected $mechanismRows.Count -Actual $mechanismRows.Count -Notes "mechanism count depends on corpus signals"
         New-CoverageRow -Artifact "mechanism_examples.csv" -Metric "mechanism examples" -Expected $mechanismExampleRows.Count -Actual $mechanismExampleRows.Count -Notes "example count depends on mechanism/project intersections"
         New-CoverageRow -Artifact "reconstruction_blueprints.jsonl" -Metric "project blueprints" -Expected ([int]$summary.project_count) -Actual $reconstructionBlueprintRows.Count -Notes "one deterministic reconstruction blueprint per parsed project"
+        New-CoverageRow -Artifact "recipe_drafts.jsonl" -Metric "recipe drafts" -Expected ([int]$summary.project_count) -Actual $recipeDraftRows.Count -Notes "one safe recipe skeleton per parsed project"
         New-CoverageRow -Artifact "errors.csv" -Metric "parse errors" -Expected ([int]$errorCount) -Actual $errorRowsForCsv.Count -Notes "one row per per-file parse error"
     )
     $coverageScorecardRows | Export-Csv -LiteralPath $coverageScorecardCsvPath -NoTypeInformation -Encoding UTF8
@@ -1302,7 +1404,7 @@ try {
     [void]$h.AppendLine("</head><body><main>")
     [void]$h.AppendLine("<h1>Technique Corpus Report</h1>")
     [void]$h.AppendLine("<p class=""muted"">input <code>$(Escape-Html $InputPath)</code></p>")
-    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""manifest.json"">manifest.json</a> · <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""project_playbooks.csv"">project_playbooks.csv</a> · <a href=""compositions.csv"">compositions.csv</a> · <a href=""layers.csv"">layers.csv</a> · <a href=""recreation_steps.csv"">recreation_steps.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""study_queue.csv"">study_queue.csv</a> · <a href=""study_tasks.csv"">study_tasks.csv</a> · <a href=""recreation_blockers.csv"">recreation_blockers.csv</a> · <a href=""signal_layers.csv"">signal_layers.csv</a> · <a href=""effect_stacks.csv"">effect_stacks.csv</a> · <a href=""shape_operators.csv"">shape_operators.csv</a> · <a href=""text_animators.csv"">text_animators.csv</a> · <a href=""dependency_edges.csv"">dependency_edges.csv</a> · <a href=""learning_actions.csv"">learning_actions.csv</a> · <a href=""mechanisms.csv"">mechanisms.csv</a> · <a href=""mechanism_examples.csv"">mechanism_examples.csv</a> · <a href=""coverage_scorecard.csv"">coverage_scorecard.csv</a> · <a href=""reconstruction_blueprints.jsonl"">reconstruction_blueprints.jsonl</a> · <a href=""errors.csv"">errors.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
+    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""manifest.json"">manifest.json</a> · <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""project_playbooks.csv"">project_playbooks.csv</a> · <a href=""compositions.csv"">compositions.csv</a> · <a href=""layers.csv"">layers.csv</a> · <a href=""recreation_steps.csv"">recreation_steps.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""study_queue.csv"">study_queue.csv</a> · <a href=""study_tasks.csv"">study_tasks.csv</a> · <a href=""recreation_blockers.csv"">recreation_blockers.csv</a> · <a href=""signal_layers.csv"">signal_layers.csv</a> · <a href=""effect_stacks.csv"">effect_stacks.csv</a> · <a href=""shape_operators.csv"">shape_operators.csv</a> · <a href=""text_animators.csv"">text_animators.csv</a> · <a href=""dependency_edges.csv"">dependency_edges.csv</a> · <a href=""learning_actions.csv"">learning_actions.csv</a> · <a href=""mechanisms.csv"">mechanisms.csv</a> · <a href=""mechanism_examples.csv"">mechanism_examples.csv</a> · <a href=""coverage_scorecard.csv"">coverage_scorecard.csv</a> · <a href=""reconstruction_blueprints.jsonl"">reconstruction_blueprints.jsonl</a> · <a href=""recipe_drafts.jsonl"">recipe_drafts.jsonl</a> · <a href=""errors.csv"">errors.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
     [void]$h.AppendLine("<div class=""grid"">")
     foreach ($metric in @(
         @{ Label = "Projects"; Value = $summary.project_count },
@@ -1342,6 +1444,13 @@ try {
         $countText = "comps=$($blueprint.counts.compositions), layers=$($blueprint.counts.layers), mechanisms=$([int]$blueprint.counts.effects + [int]$blueprint.counts.shape_operators + [int]$blueprint.counts.text_animators), deps=$($blueprint.counts.dependency_edges)"
         $phaseText = ((@($blueprint.phases) | ForEach-Object { "$($_.order).$($_.id)=$($_.expected_count)" }) -join "; ")
         [void]$h.AppendLine("<tr><td>$(Escape-Html $blueprint.project_path)</td><td>$(Escape-Html $blueprint.readiness)</td><td>$(Escape-Html $countText)</td><td>$(Escape-Html $phaseText)</td></tr>")
+    }
+    [void]$h.AppendLine("</tbody></table></section>")
+    [void]$h.AppendLine("<h2 style=""margin-top:28px"">Recipe Drafts</h2>")
+    [void]$h.AppendLine("<section class=""panel"" style=""margin-top:14px""><table><thead><tr><th>Project</th><th>Comps</th><th>Layers</th><th>Gaps</th></tr></thead><tbody>")
+    foreach ($draft in @($recipeDraftRows | Select-Object -First 80)) {
+        $gapText = ((@($draft.gaps) | ForEach-Object { "$($_.id)=$($_.count)" }) -join "; ")
+        [void]$h.AppendLine("<tr><td>$(Escape-Html $draft.project_path)</td><td>$(@($draft.recipe.comps).Count)</td><td>$($draft.recipe.expected_profile.layer_count)</td><td>$(Escape-Html $gapText)</td></tr>")
     }
     [void]$h.AppendLine("</tbody></table></section>")
     [void]$h.AppendLine("<h2 style=""margin-top:28px"">Mechanism Explorer</h2>")
@@ -1659,6 +1768,7 @@ try {
         $mechanismExamplesCsvPath,
         $coverageScorecardCsvPath,
         $reconstructionBlueprintsPath,
+        $recipeDraftsPath,
         $errorsCsvPath,
         $reportPath,
         $htmlPath
@@ -1730,6 +1840,7 @@ try {
     Write-Host "mechanism examples csv: $mechanismExamplesCsvPath"
     Write-Host "coverage scorecard csv: $coverageScorecardCsvPath"
     Write-Host "reconstruction blueprints: $reconstructionBlueprintsPath"
+    Write-Host "recipe drafts: $recipeDraftsPath"
     Write-Host "errors csv: $errorsCsvPath"
     Write-Host "manifest: $manifestPath"
     Write-Host "report:  $reportPath"

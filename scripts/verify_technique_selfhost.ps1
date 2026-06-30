@@ -106,6 +106,7 @@ try {
     $mechanismRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "mechanisms.csv") | Select-Object -First 8)
     $coverageScorecardRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "coverage_scorecard.csv") | Select-Object -First 12)
     $reconstructionBlueprintRows = @(Get-Content -LiteralPath (Join-Path $fullReportDir "reconstruction_blueprints.jsonl") | Where-Object { $_.Trim() -ne "" } | Select-Object -First 5 | ForEach-Object { $_ | ConvertFrom-Json })
+    $recipeDraftRows = @(Get-Content -LiteralPath (Join-Path $fullReportDir "recipe_drafts.jsonl") | Where-Object { $_.Trim() -ne "" } | Select-Object -First 5 | ForEach-Object { $_ | ConvertFrom-Json })
 
     $selfCountDiffs = @($compareSelf.count_diffs).Count
     $partialCountDiffs = @($comparePartial.count_diffs).Count
@@ -284,6 +285,12 @@ try {
         [void]$index.AppendLine("<tr><td>$(Escape-Html $row.project_path)</td><td>$(Escape-Html $row.readiness)</td><td>$(Escape-Html $phaseText)</td></tr>")
     }
     [void]$index.AppendLine("</tbody></table></section>")
+    [void]$index.AppendLine("<section class=""panel"" style=""margin-top:16px""><h2>Recipe Drafts Preview</h2><table><thead><tr><th>Project</th><th>Comps</th><th>Gaps</th></tr></thead><tbody>")
+    foreach ($row in $recipeDraftRows) {
+        $gapText = ((@($row.gaps) | ForEach-Object { "$($_.id)=$($_.count)" }) -join "; ")
+        [void]$index.AppendLine("<tr><td>$(Escape-Html $row.project_path)</td><td>$(@($row.recipe.comps).Count)</td><td>$(Escape-Html $gapText)</td></tr>")
+    }
+    [void]$index.AppendLine("</tbody></table></section>")
     [void]$index.AppendLine("<section class=""panel""><h2>Artifacts</h2><div class=""links"">")
     [void]$index.AppendLine("<a href=""$runRel/full_report/report.html"">Full report HTML</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/learning.md"">Learning index</a>")
@@ -304,6 +311,7 @@ try {
     [void]$index.AppendLine("<a href=""$runRel/full_report/mechanism_examples.csv"">Mechanism examples CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/coverage_scorecard.csv"">Coverage scorecard CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/reconstruction_blueprints.jsonl"">Reconstruction blueprints JSONL</a>")
+    [void]$index.AppendLine("<a href=""$runRel/full_report/recipe_drafts.jsonl"">Recipe drafts JSONL</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/projects.csv"">Projects CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/patterns.csv"">Patterns CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/errors.csv"">Errors CSV</a>")
@@ -368,6 +376,9 @@ try {
     if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Reconstruction Blueprints Preview" -Quiet)) {
         throw "latest index missing Reconstruction Blueprints Preview"
     }
+    if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Recipe Drafts Preview" -Quiet)) {
+        throw "latest index missing Recipe Drafts Preview"
+    }
     Require-LatestIndexLink -Label "full report" -RelativePath "$runRel/full_report/report.html"
     Require-LatestIndexLink -Label "learning index" -RelativePath "$runRel/full_report/learning.md"
     Require-LatestIndexLink -Label "project playbooks" -RelativePath "$runRel/full_report/project_playbooks.csv"
@@ -387,6 +398,7 @@ try {
     Require-LatestIndexLink -Label "mechanism examples" -RelativePath "$runRel/full_report/mechanism_examples.csv"
     Require-LatestIndexLink -Label "coverage scorecard" -RelativePath "$runRel/full_report/coverage_scorecard.csv"
     Require-LatestIndexLink -Label "reconstruction blueprints" -RelativePath "$runRel/full_report/reconstruction_blueprints.jsonl"
+    Require-LatestIndexLink -Label "recipe drafts" -RelativePath "$runRel/full_report/recipe_drafts.jsonl"
     Require-LatestIndexLink -Label "partial report" -RelativePath "$runRel/partial_report/report.html"
     Require-LatestIndexLink -Label "partial compare" -RelativePath "$runRel/compare_partial_to_full/compare.md"
 

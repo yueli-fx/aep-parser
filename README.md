@@ -20,7 +20,7 @@
 pwsh -NoProfile -File scripts\technique_showcase_report.ps1 -InputPath data\samples -OutDir tmp\technique_samples_report -Verify
 ```
 
-输出包括 `manifest.json`、`learning.md`、`report.html`、`projects.csv`、`project_playbooks.csv`、`compositions.csv`、`layers.csv`、`recreation_steps.csv`、`patterns.csv`、`study_queue.csv`、`study_tasks.csv`、`recreation_blockers.csv`、`signal_layers.csv`、`effect_stacks.csv`、`shape_operators.csv`、`text_animators.csv`、`dependency_edges.csv`、`learning_actions.csv`、`mechanisms.csv`、`mechanism_examples.csv`、`coverage_scorecard.csv`、`reconstruction_blueprints.jsonl`、`errors.csv`、`digest.json`、`summary.json`、`corpus.jsonl` 和 `report.md`。`report.html` 是自包含入口，支持按路径、readiness、pattern、effect、plugin、mechanism、study task 搜索，并展示每个项目的确定性复刻步骤、artifact 覆盖状态和复刻蓝图；`manifest.json` 记录输入、git 版本、耗时和 artifact 清单；`learning.md` 是更短的人工学习索引；CSV/JSONL 文件适合直接用表格或流式脚本筛项目、项目级复刻 playbook、逐项复刻步骤、合成/图层结构、逐层 effect stack、shape/text 操作项、依赖边、技法模式、学习顺序、学习任务、复刻阻塞项、关键层、学习动作、机制目录、机制代表项目、覆盖计分卡、代码生成蓝图、错误项目和 pattern 级复刻步骤分布。
+输出包括 `manifest.json`、`learning.md`、`report.html`、`projects.csv`、`project_playbooks.csv`、`compositions.csv`、`layers.csv`、`recreation_steps.csv`、`patterns.csv`、`study_queue.csv`、`study_tasks.csv`、`recreation_blockers.csv`、`signal_layers.csv`、`effect_stacks.csv`、`shape_operators.csv`、`text_animators.csv`、`dependency_edges.csv`、`learning_actions.csv`、`mechanisms.csv`、`mechanism_examples.csv`、`coverage_scorecard.csv`、`reconstruction_blueprints.jsonl`、`recipe_drafts.jsonl`、`errors.csv`、`digest.json`、`summary.json`、`corpus.jsonl` 和 `report.md`。`report.html` 是自包含入口，支持按路径、readiness、pattern、effect、plugin、mechanism、study task 搜索，并展示每个项目的确定性复刻步骤、artifact 覆盖状态、复刻蓝图和安全 recipe 草稿；`manifest.json` 记录输入、git 版本、耗时和 artifact 清单；`learning.md` 是更短的人工学习索引；CSV/JSONL 文件适合直接用表格或流式脚本筛项目、项目级复刻 playbook、逐项复刻步骤、合成/图层结构、逐层 effect stack、shape/text 操作项、依赖边、技法模式、学习顺序、学习任务、复刻阻塞项、关键层、学习动作、机制目录、机制代表项目、覆盖计分卡、代码生成蓝图、recipe 骨架草稿、错误项目和 pattern 级复刻步骤分布。
 
 对比两次报告：
 
@@ -34,7 +34,7 @@ pwsh -NoProfile -File scripts\compare_technique_reports.ps1 -BaseDir tmp\old_rep
 pwsh -NoProfile -File scripts\verify_technique_selfhost.ps1 -OutRoot tmp\technique_selfhost_gate
 ```
 
-想跑完后立刻查看浏览器入口，可以加 `-Open`。验收完成后也可直接打开 `tmp\technique_selfhost_gate\latest_index.html` 或 `tmp\technique_selfhost_gate\latest_acceptance.md` 查看最近一次结果；HTML 入口会直接显示 Study Queue、Pattern Playbook、Coverage Scorecard 和 Reconstruction Blueprint 预览。
+想跑完后立刻查看浏览器入口，可以加 `-Open`。验收完成后也可直接打开 `tmp\technique_selfhost_gate\latest_index.html` 或 `tmp\technique_selfhost_gate\latest_acceptance.md` 查看最近一次结果；HTML 入口会直接显示 Study Queue、Pattern Playbook、Coverage Scorecard、Reconstruction Blueprint 和 Recipe Draft 预览。
 
 ## 原理与分层
 

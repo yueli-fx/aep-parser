@@ -98,6 +98,7 @@ It defaults to `flightdeck\showcase` and writes generated output under
 - `mechanism_examples.csv`
 - `coverage_scorecard.csv`
 - `reconstruction_blueprints.jsonl`
+- `recipe_drafts.jsonl`
 - `errors.csv`
 - `manifest.json`
 - `report.md`
@@ -167,6 +168,10 @@ spreadsheet.
 per parsed project. Each line gives readiness, counts, ordered phases, blockers,
 key layers, mechanisms, and recreation steps so downstream recipe or codegen
 work can consume the corpus without scraping the HTML.
+`recipe_drafts.jsonl` writes one safe recipe skeleton per parsed project. The
+draft materializes comp dimensions/duration into the current recipe schema and
+keeps layer, mechanism, dependency, and readiness gaps explicit for later
+codegen work.
 `errors.csv` lists failed corpus records for retry or manual inspection.
 `manifest.json` records the input path, git revision, scan timing, project/error
 counts, and generated artifact inventory for repeatable self-hosted runs.

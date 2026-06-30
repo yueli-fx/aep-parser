@@ -45,12 +45,13 @@ $mechanismsCsvPath = Join-Path $OutDir "mechanisms.csv"
 $mechanismExamplesCsvPath = Join-Path $OutDir "mechanism_examples.csv"
 $coverageScorecardCsvPath = Join-Path $OutDir "coverage_scorecard.csv"
 $reconstructionBlueprintsPath = Join-Path $OutDir "reconstruction_blueprints.jsonl"
+$recipeDraftsPath = Join-Path $OutDir "recipe_drafts.jsonl"
 $errorsCsvPath = Join-Path $OutDir "errors.csv"
 $manifestPath = Join-Path $OutDir "manifest.json"
 $reportPath = Join-Path $OutDir "report.md"
 $htmlPath = Join-Path $OutDir "report.html"
 
-foreach ($path in @($summaryPath, $corpusPath, $digestPath, $learningPath, $projectsCsvPath, $projectPlaybooksCsvPath, $compositionsCsvPath, $layersCsvPath, $recreationStepsCsvPath, $patternsCsvPath, $studyQueueCsvPath, $studyTasksCsvPath, $recreationBlockersCsvPath, $signalLayersCsvPath, $effectStacksCsvPath, $shapeOperatorsCsvPath, $textAnimatorsCsvPath, $dependencyEdgesCsvPath, $learningActionsCsvPath, $mechanismsCsvPath, $mechanismExamplesCsvPath, $coverageScorecardCsvPath, $reconstructionBlueprintsPath, $errorsCsvPath, $manifestPath, $reportPath, $htmlPath)) {
+foreach ($path in @($summaryPath, $corpusPath, $digestPath, $learningPath, $projectsCsvPath, $projectPlaybooksCsvPath, $compositionsCsvPath, $layersCsvPath, $recreationStepsCsvPath, $patternsCsvPath, $studyQueueCsvPath, $studyTasksCsvPath, $recreationBlockersCsvPath, $signalLayersCsvPath, $effectStacksCsvPath, $shapeOperatorsCsvPath, $textAnimatorsCsvPath, $dependencyEdgesCsvPath, $learningActionsCsvPath, $mechanismsCsvPath, $mechanismExamplesCsvPath, $coverageScorecardCsvPath, $reconstructionBlueprintsPath, $recipeDraftsPath, $errorsCsvPath, $manifestPath, $reportPath, $htmlPath)) {
     Require-File -Path $path
 }
 
@@ -79,6 +80,8 @@ $mechanismExampleRows = @(Import-Csv -LiteralPath $mechanismExamplesCsvPath)
 $coverageScorecardRows = @(Import-Csv -LiteralPath $coverageScorecardCsvPath)
 $reconstructionBlueprintLines = @(Get-Content -LiteralPath $reconstructionBlueprintsPath | Where-Object { $_.Trim() -ne "" })
 $reconstructionBlueprintRows = @($reconstructionBlueprintLines | ForEach-Object { $_ | ConvertFrom-Json })
+$recipeDraftLines = @(Get-Content -LiteralPath $recipeDraftsPath | Where-Object { $_.Trim() -ne "" })
+$recipeDraftRows = @($recipeDraftLines | ForEach-Object { $_ | ConvertFrom-Json })
 $errorRows = @(Import-Csv -LiteralPath $errorsCsvPath)
 
 if ([int]$summary.project_count -lt $MinProjects) {
@@ -255,7 +258,7 @@ foreach ($row in $coverageScorecardRows) {
     }
 }
 $coverageArtifacts = @($coverageScorecardRows | ForEach-Object { [string]$_.artifact })
-foreach ($artifact in @("projects.csv", "project_playbooks.csv", "compositions.csv", "layers.csv", "recreation_steps.csv", "effect_stacks.csv", "shape_operators.csv", "text_animators.csv", "dependency_edges.csv")) {
+foreach ($artifact in @("projects.csv", "project_playbooks.csv", "compositions.csv", "layers.csv", "recreation_steps.csv", "effect_stacks.csv", "shape_operators.csv", "text_animators.csv", "dependency_edges.csv", "reconstruction_blueprints.jsonl", "recipe_drafts.jsonl")) {
     if ($coverageArtifacts -notcontains $artifact) {
         throw "coverage_scorecard.csv missing artifact row: $artifact"
     }
@@ -275,6 +278,26 @@ foreach ($row in $reconstructionBlueprintRows) {
         if ($phaseIDs -notcontains $phase) {
             throw "reconstruction_blueprints.jsonl row missing phase ${phase}: $($row.project_path)"
         }
+    }
+}
+if ($recipeDraftRows.Count -ne [int]$summary.project_count) {
+    throw "recipe_drafts.jsonl line count $($recipeDraftRows.Count) does not match summary project_count $($summary.project_count)"
+}
+foreach ($row in $recipeDraftRows) {
+    if ([string]$row.project_path -eq "" -or [string]$row.readiness -eq "" -or $null -eq $row.recipe -or $null -eq $row.gaps) {
+        throw "recipe_drafts.jsonl contains incomplete row: $($row | ConvertTo-Json -Compress -Depth 8)"
+    }
+    if ([int]$row.recipe.schema_version -ne 1 -or $null -eq $row.recipe.project -or $null -eq $row.recipe.comps -or $null -eq $row.recipe.expected_profile) {
+        throw "recipe_drafts.jsonl row has incomplete recipe draft: $($row | ConvertTo-Json -Compress -Depth 8)"
+    }
+    if (@($row.recipe.comps).Count -le 0) {
+        throw "recipe_drafts.jsonl row has no comps: $($row.project_path)"
+    }
+    if ([int]$row.recipe.expected_profile.comp_count -ne @($row.recipe.comps).Count) {
+        throw "recipe_drafts.jsonl expected_profile comp_count mismatch: $($row.project_path)"
+    }
+    if (@($row.gaps).Count -le 0) {
+        throw "recipe_drafts.jsonl row has no explicit gaps: $($row.project_path)"
     }
 }
 $recordsWithSteps = @($corpusRecords | Where-Object {
@@ -323,9 +346,11 @@ Require-Text -Path $htmlPath -Pattern "mechanisms\.csv"
 Require-Text -Path $htmlPath -Pattern "mechanism_examples\.csv"
 Require-Text -Path $htmlPath -Pattern "coverage_scorecard\.csv"
 Require-Text -Path $htmlPath -Pattern "reconstruction_blueprints\.jsonl"
+Require-Text -Path $htmlPath -Pattern "recipe_drafts\.jsonl"
 Require-Text -Path $htmlPath -Pattern "errors\.csv"
 Require-Text -Path $htmlPath -Pattern "Coverage Scorecard"
 Require-Text -Path $htmlPath -Pattern "Reconstruction Blueprints"
+Require-Text -Path $htmlPath -Pattern "Recipe Drafts"
 Require-Text -Path $htmlPath -Pattern "Mechanism Explorer"
 Require-Text -Path $htmlPath -Pattern "mechanismFilter"
 Require-Text -Path $htmlPath -Pattern "Study Task Queue"
