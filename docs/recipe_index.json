@@ -4378,6 +4378,7 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Static anchor point value.",
+      "validation": "When present, anchor_point must contain exactly two numeric values.",
       "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.anchor_point_keyframes[]": {
@@ -4388,6 +4389,7 @@
       "type": "array\u003crecipe.VectorKeyframe\u003e",
       "go_type": "[]recipe.VectorKeyframe",
       "summary": "Anchor point keyframe list.",
+      "validation": "When present, keyframes must be sorted by time and each keyframe time must be within comp duration.",
       "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].transform.anchor_point_keyframes[].in_ease": {
@@ -4411,6 +4413,7 @@
         "structural"
       ],
       "summary": "Anchor point keyframe incoming ease influence.",
+      "validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.anchor_point_keyframes[].in_ease.speed": {
@@ -4444,6 +4447,7 @@
         "structural"
       ],
       "summary": "Anchor point keyframe outgoing ease influence.",
+      "validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.anchor_point_keyframes[].out_ease.speed": {
@@ -4467,6 +4471,7 @@
         "structural"
       ],
       "summary": "Anchor point keyframe time in seconds.",
+      "validation": "Keyframe time must be non-negative, within comp duration, and sorted in ascending order.",
       "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].transform.anchor_point_keyframes[].value": {
@@ -4480,6 +4485,7 @@
         "structural"
       ],
       "summary": "Anchor point keyframe vector value.",
+      "validation": "Anchor point keyframe value must contain exactly two numeric values.",
       "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].transform.expressions": {
@@ -4526,6 +4532,7 @@
         "structural"
       ],
       "summary": "anchor_point transform expression source code.",
+      "validation": "Transform expression source is required when an anchor_point expression block is present.",
       "capability_keys": [
         "property.set_expression"
       ],
@@ -4565,6 +4572,7 @@
         "structural"
       ],
       "summary": "opacity transform expression source code.",
+      "validation": "Transform expression source is required when an opacity expression block is present.",
       "capability_keys": [
         "property.set_expression"
       ],
@@ -4604,6 +4612,7 @@
         "structural"
       ],
       "summary": "position transform expression source code.",
+      "validation": "Transform expression source is required when a position expression block is present.",
       "capability_keys": [
         "property.set_expression"
       ],
@@ -4643,6 +4652,7 @@
         "structural"
       ],
       "summary": "rotation transform expression source code.",
+      "validation": "Transform expression source is required when a rotation expression block is present.",
       "capability_keys": [
         "property.set_expression"
       ],
@@ -4682,6 +4692,7 @@
         "structural"
       ],
       "summary": "scale transform expression source code.",
+      "validation": "Transform expression source is required when a scale expression block is present.",
       "capability_keys": [
         "property.set_expression"
       ],
@@ -4705,6 +4716,7 @@
       "type": "array\u003crecipe.ScalarKeyframe\u003e",
       "go_type": "[]recipe.ScalarKeyframe",
       "summary": "Opacity keyframe list.",
+      "validation": "When present, keyframes must be sorted by time and each keyframe time must be within comp duration. Values must be between 0 and 100.",
       "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].transform.opacity_keyframes[].in_ease": {
@@ -4728,6 +4740,7 @@
         "structural"
       ],
       "summary": "Opacity keyframe incoming ease influence.",
+      "validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.opacity_keyframes[].in_ease.speed": {
@@ -4761,6 +4774,7 @@
         "structural"
       ],
       "summary": "Opacity keyframe outgoing ease influence.",
+      "validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.opacity_keyframes[].out_ease.speed": {
@@ -4784,6 +4798,7 @@
         "structural"
       ],
       "summary": "Opacity keyframe time in seconds.",
+      "validation": "Keyframe time must be non-negative, within comp duration, and sorted in ascending order.",
       "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].transform.opacity_keyframes[].value": {
@@ -4797,6 +4812,7 @@
         "structural"
       ],
       "summary": "Opacity keyframe value.",
+      "validation": "Opacity keyframe value must be between 0 and 100.",
       "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].transform.position": {
@@ -4807,6 +4823,7 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Static position value.",
+      "validation": "When present, position must contain exactly two numeric values.",
       "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "comps[].layers[].transform.position_keyframes[]": {
@@ -4817,6 +4834,7 @@
       "type": "array\u003crecipe.VectorKeyframe\u003e",
       "go_type": "[]recipe.VectorKeyframe",
       "summary": "Position keyframe list.",
+      "validation": "When present, keyframes must be sorted by time and each keyframe time must be within comp duration.",
       "example": "examples/recipes/minimal-transform-keyframes.json"
     },
     "comps[].layers[].transform.position_keyframes[].in_ease": {
@@ -4840,6 +4858,7 @@
         "structural"
       ],
       "summary": "Position keyframe incoming ease influence.",
+      "validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.position_keyframes[].in_ease.speed": {
@@ -4873,6 +4892,7 @@
         "structural"
       ],
       "summary": "Position keyframe outgoing ease influence.",
+      "validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.position_keyframes[].out_ease.speed": {
@@ -4896,6 +4916,7 @@
         "structural"
       ],
       "summary": "Position keyframe time in seconds.",
+      "validation": "Keyframe time must be non-negative, within comp duration, and sorted in ascending order.",
       "example": "examples/recipes/minimal-layer-auto-orient.json"
     },
     "comps[].layers[].transform.position_keyframes[].value": {
@@ -4909,6 +4930,7 @@
         "structural"
       ],
       "summary": "Position keyframe vector value.",
+      "validation": "Position keyframe value must contain exactly two numeric values.",
       "example": "examples/recipes/minimal-layer-auto-orient.json"
     },
     "comps[].layers[].transform.rotation": {
@@ -4929,6 +4951,7 @@
       "type": "array\u003crecipe.ScalarKeyframe\u003e",
       "go_type": "[]recipe.ScalarKeyframe",
       "summary": "Rotation keyframe list.",
+      "validation": "When present, keyframes must be sorted by time and each keyframe time must be within comp duration.",
       "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].transform.rotation_keyframes[].in_ease": {
@@ -4952,6 +4975,7 @@
         "structural"
       ],
       "summary": "Rotation keyframe incoming ease influence.",
+      "validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.rotation_keyframes[].in_ease.speed": {
@@ -4985,6 +5009,7 @@
         "structural"
       ],
       "summary": "Rotation keyframe outgoing ease influence.",
+      "validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.rotation_keyframes[].out_ease.speed": {
@@ -5008,6 +5033,7 @@
         "structural"
       ],
       "summary": "Rotation keyframe time in seconds.",
+      "validation": "Keyframe time must be non-negative, within comp duration, and sorted in ascending order.",
       "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].transform.rotation_keyframes[].value": {
@@ -5031,6 +5057,7 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Static scale value.",
+      "validation": "When present, scale must contain exactly two numeric values.",
       "example": "examples/recipes/minimal-text-effect.json"
     },
     "comps[].layers[].transform.scale_keyframes[]": {
@@ -5041,6 +5068,7 @@
       "type": "array\u003crecipe.VectorKeyframe\u003e",
       "go_type": "[]recipe.VectorKeyframe",
       "summary": "Scale keyframe list.",
+      "validation": "When present, keyframes must be sorted by time and each keyframe time must be within comp duration.",
       "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].transform.scale_keyframes[].in_ease": {
@@ -5064,6 +5092,7 @@
         "structural"
       ],
       "summary": "Scale keyframe incoming ease influence.",
+      "validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.scale_keyframes[].in_ease.speed": {
@@ -5097,6 +5126,7 @@
         "structural"
       ],
       "summary": "Scale keyframe outgoing ease influence.",
+      "validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.scale_keyframes[].out_ease.speed": {
@@ -5120,6 +5150,7 @@
         "structural"
       ],
       "summary": "Scale keyframe time in seconds.",
+      "validation": "Keyframe time must be non-negative, within comp duration, and sorted in ascending order.",
       "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].transform.scale_keyframes[].value": {
@@ -5133,6 +5164,7 @@
         "structural"
       ],
       "summary": "Scale keyframe vector value.",
+      "validation": "Scale keyframe value must contain exactly two numeric values.",
       "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].type": {

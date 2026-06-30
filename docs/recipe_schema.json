@@ -7597,6 +7597,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Static position value.",
+      "x-aep-validation": "When present, position must contain exactly two numeric values.",
       "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
@@ -7608,6 +7609,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Static scale value.",
+      "x-aep-validation": "When present, scale must contain exactly two numeric values.",
       "x-aep-example": "examples/recipes/minimal-text-effect.json"
     },
     {
@@ -7619,6 +7621,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Static anchor point value.",
+      "x-aep-validation": "When present, anchor_point must contain exactly two numeric values.",
       "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
@@ -7651,6 +7654,7 @@
       "element": "recipe.VectorKeyframe",
       "object_type": "VectorKeyframe",
       "description": "Position keyframe list.",
+      "x-aep-validation": "When present, keyframes must be sorted by time and each keyframe time must be within comp duration.",
       "x-aep-example": "examples/recipes/minimal-transform-keyframes.json"
     },
     {
@@ -7662,6 +7666,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Position keyframe time in seconds.",
+      "x-aep-validation": "Keyframe time must be non-negative, within comp duration, and sorted in ascending order.",
       "x-aep-example": "examples/recipes/minimal-layer-auto-orient.json"
     },
     {
@@ -7674,6 +7679,7 @@
       "element": "float64",
       "x-aep-structural-required": true,
       "description": "Position keyframe vector value.",
+      "x-aep-validation": "Position keyframe value must contain exactly two numeric values.",
       "x-aep-example": "examples/recipes/minimal-layer-auto-orient.json"
     },
     {
@@ -7706,6 +7712,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Position keyframe incoming ease influence.",
+      "x-aep-validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
@@ -7738,6 +7745,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Position keyframe outgoing ease influence.",
+      "x-aep-validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
@@ -7750,6 +7758,7 @@
       "element": "recipe.VectorKeyframe",
       "object_type": "VectorKeyframe",
       "description": "Anchor point keyframe list.",
+      "x-aep-validation": "When present, keyframes must be sorted by time and each keyframe time must be within comp duration.",
       "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
@@ -7761,6 +7770,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Anchor point keyframe time in seconds.",
+      "x-aep-validation": "Keyframe time must be non-negative, within comp duration, and sorted in ascending order.",
       "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
@@ -7773,6 +7783,7 @@
       "element": "float64",
       "x-aep-structural-required": true,
       "description": "Anchor point keyframe vector value.",
+      "x-aep-validation": "Anchor point keyframe value must contain exactly two numeric values.",
       "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
@@ -7805,6 +7816,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Anchor point keyframe incoming ease influence.",
+      "x-aep-validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
@@ -7837,6 +7849,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Anchor point keyframe outgoing ease influence.",
+      "x-aep-validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
@@ -7849,6 +7862,7 @@
       "element": "recipe.VectorKeyframe",
       "object_type": "VectorKeyframe",
       "description": "Scale keyframe list.",
+      "x-aep-validation": "When present, keyframes must be sorted by time and each keyframe time must be within comp duration.",
       "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
@@ -7860,6 +7874,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Scale keyframe time in seconds.",
+      "x-aep-validation": "Keyframe time must be non-negative, within comp duration, and sorted in ascending order.",
       "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
@@ -7872,6 +7887,7 @@
       "element": "float64",
       "x-aep-structural-required": true,
       "description": "Scale keyframe vector value.",
+      "x-aep-validation": "Scale keyframe value must contain exactly two numeric values.",
       "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
@@ -7904,6 +7920,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Scale keyframe incoming ease influence.",
+      "x-aep-validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
@@ -7936,6 +7953,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Scale keyframe outgoing ease influence.",
+      "x-aep-validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
@@ -7948,6 +7966,7 @@
       "element": "recipe.ScalarKeyframe",
       "object_type": "ScalarKeyframe",
       "description": "Rotation keyframe list.",
+      "x-aep-validation": "When present, keyframes must be sorted by time and each keyframe time must be within comp duration.",
       "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
@@ -7959,6 +7978,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Rotation keyframe time in seconds.",
+      "x-aep-validation": "Keyframe time must be non-negative, within comp duration, and sorted in ascending order.",
       "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
@@ -8002,6 +8022,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Rotation keyframe incoming ease influence.",
+      "x-aep-validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
@@ -8034,6 +8055,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Rotation keyframe outgoing ease influence.",
+      "x-aep-validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
@@ -8046,6 +8068,7 @@
       "element": "recipe.ScalarKeyframe",
       "object_type": "ScalarKeyframe",
       "description": "Opacity keyframe list.",
+      "x-aep-validation": "When present, keyframes must be sorted by time and each keyframe time must be within comp duration. Values must be between 0 and 100.",
       "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
@@ -8057,6 +8080,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Opacity keyframe time in seconds.",
+      "x-aep-validation": "Keyframe time must be non-negative, within comp duration, and sorted in ascending order.",
       "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
@@ -8068,6 +8092,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Opacity keyframe value.",
+      "x-aep-validation": "Opacity keyframe value must be between 0 and 100.",
       "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
@@ -8100,6 +8125,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Opacity keyframe incoming ease influence.",
+      "x-aep-validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
@@ -8132,6 +8158,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Opacity keyframe outgoing ease influence.",
+      "x-aep-validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
@@ -8165,6 +8192,7 @@
       "go_type": "string",
       "x-aep-structural-required": true,
       "description": "position transform expression source code.",
+      "x-aep-validation": "Transform expression source is required when a position expression block is present.",
       "x-aep-capabilities": [
         {
           "key": "property.set_expression",
@@ -8227,6 +8255,7 @@
       "go_type": "string",
       "x-aep-structural-required": true,
       "description": "anchor_point transform expression source code.",
+      "x-aep-validation": "Transform expression source is required when an anchor_point expression block is present.",
       "x-aep-capabilities": [
         {
           "key": "property.set_expression",
@@ -8289,6 +8318,7 @@
       "go_type": "string",
       "x-aep-structural-required": true,
       "description": "scale transform expression source code.",
+      "x-aep-validation": "Transform expression source is required when a scale expression block is present.",
       "x-aep-capabilities": [
         {
           "key": "property.set_expression",
@@ -8351,6 +8381,7 @@
       "go_type": "string",
       "x-aep-structural-required": true,
       "description": "rotation transform expression source code.",
+      "x-aep-validation": "Transform expression source is required when a rotation expression block is present.",
       "x-aep-capabilities": [
         {
           "key": "property.set_expression",
@@ -8413,6 +8444,7 @@
       "go_type": "string",
       "x-aep-structural-required": true,
       "description": "opacity transform expression source code.",
+      "x-aep-validation": "Transform expression source is required when an opacity expression block is present.",
       "x-aep-capabilities": [
         {
           "key": "property.set_expression",

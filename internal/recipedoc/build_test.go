@@ -190,6 +190,46 @@ func TestBuildDocumentIncludesLayerValidationMetadata(t *testing.T) {
 	}
 }
 
+func TestBuildDocumentIncludesTransformValidationMetadata(t *testing.T) {
+	doc, err := BuildDocument()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []string{
+		"comps[].layers[].transform.position",
+		"comps[].layers[].transform.scale",
+		"comps[].layers[].transform.anchor_point",
+		"comps[].layers[].transform.position_keyframes[]",
+		"comps[].layers[].transform.position_keyframes[].time",
+		"comps[].layers[].transform.position_keyframes[].value",
+		"comps[].layers[].transform.position_keyframes[].in_ease.influence",
+		"comps[].layers[].transform.position_keyframes[].out_ease.influence",
+		"comps[].layers[].transform.anchor_point_keyframes[]",
+		"comps[].layers[].transform.anchor_point_keyframes[].time",
+		"comps[].layers[].transform.anchor_point_keyframes[].value",
+		"comps[].layers[].transform.scale_keyframes[]",
+		"comps[].layers[].transform.scale_keyframes[].time",
+		"comps[].layers[].transform.scale_keyframes[].value",
+		"comps[].layers[].transform.rotation_keyframes[]",
+		"comps[].layers[].transform.rotation_keyframes[].time",
+		"comps[].layers[].transform.opacity_keyframes[]",
+		"comps[].layers[].transform.opacity_keyframes[].time",
+		"comps[].layers[].transform.opacity_keyframes[].value",
+		"comps[].layers[].transform.expressions.position.source",
+		"comps[].layers[].transform.expressions.anchor_point.source",
+		"comps[].layers[].transform.expressions.scale.source",
+		"comps[].layers[].transform.expressions.rotation.source",
+		"comps[].layers[].transform.expressions.opacity.source",
+	}
+	for _, path := range tests {
+		field := requireField(t, doc, path)
+		if field.Validation == "" && len(field.Enum) == 0 {
+			t.Fatalf("%s has no validation metadata: %+v", path, field)
+		}
+	}
+}
+
 func TestBuildDocumentIncludesExpectedProfileValidationMetadata(t *testing.T) {
 	doc, err := BuildDocument()
 	if err != nil {

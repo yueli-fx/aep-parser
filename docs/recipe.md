@@ -181,12 +181,12 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].text_animators[].range_offset_keyframes[].value` | `number` | structural | Range selector offset keyframe value. | - | - | examples/recipes/minimal-text-animator-range-offset.json |
 | `comps[].layers[].text_animators[].range_offset_keyframes[].in_ease` | `object<TemporalEase>` | - | Incoming temporal ease for the keyframe. | - | - | examples/recipes/minimal-text-animator-range-offset.json |
 | `comps[].layers[].text_animators[].range_offset_keyframes[].out_ease` | `object<TemporalEase>` | - | Outgoing temporal ease for the keyframe. | - | - | examples/recipes/minimal-text-animator-range-offset.json |
-| `comps[].layers[].transform.rotation_keyframes[].time` | `number` | structural | Rotation keyframe time in seconds. | - | - | examples/recipes/minimal-text-shape.json |
+| `comps[].layers[].transform.rotation_keyframes[].time` | `number` | structural | Rotation keyframe time in seconds. | Keyframe time must be non-negative, within comp duration, and sorted in ascending order. | - | examples/recipes/minimal-text-shape.json |
 | `comps[].layers[].transform.rotation_keyframes[].value` | `number` | structural | Rotation keyframe value. | - | - | examples/recipes/minimal-text-shape.json |
 | `comps[].layers[].transform.rotation_keyframes[].in_ease` | `object<TemporalEase>` | - | Rotation keyframe incoming temporal ease. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].transform.rotation_keyframes[].out_ease` | `object<TemporalEase>` | - | Rotation keyframe outgoing temporal ease. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
-| `comps[].layers[].transform.opacity_keyframes[].time` | `number` | structural | Opacity keyframe time in seconds. | - | - | examples/recipes/minimal-text-shape.json |
-| `comps[].layers[].transform.opacity_keyframes[].value` | `number` | structural | Opacity keyframe value. | - | - | examples/recipes/minimal-text-shape.json |
+| `comps[].layers[].transform.opacity_keyframes[].time` | `number` | structural | Opacity keyframe time in seconds. | Keyframe time must be non-negative, within comp duration, and sorted in ascending order. | - | examples/recipes/minimal-text-shape.json |
+| `comps[].layers[].transform.opacity_keyframes[].value` | `number` | structural | Opacity keyframe value. | Opacity keyframe value must be between 0 and 100. | - | examples/recipes/minimal-text-shape.json |
 | `comps[].layers[].transform.opacity_keyframes[].in_ease` | `object<TemporalEase>` | - | Opacity keyframe incoming temporal ease. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].transform.opacity_keyframes[].out_ease` | `object<TemporalEase>` | - | Opacity keyframe outgoing temporal ease. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
 
@@ -203,25 +203,25 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].text_animators[].value_keyframes[].out_ease.speed` | `number` | - | Outgoing temporal ease speed. | - | - | examples/recipes/minimal-text-animator-position-value-keyframes.json |
 | `comps[].layers[].text_animators[].value_keyframes[].out_ease.influence` | `number` | structural | Outgoing temporal ease influence percentage. | - | - | examples/recipes/minimal-text-animator-position-value-keyframes.json |
 | `comps[].layers[].transform.position_keyframes[].in_ease.speed` | `number` | - | Position keyframe incoming ease speed. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
-| `comps[].layers[].transform.position_keyframes[].in_ease.influence` | `number` | structural | Position keyframe incoming ease influence. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
+| `comps[].layers[].transform.position_keyframes[].in_ease.influence` | `number` | structural | Position keyframe incoming ease influence. | Keyframe ease influence must be greater than 0 and at most 1. | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].transform.position_keyframes[].out_ease.speed` | `number` | - | Position keyframe outgoing ease speed. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
-| `comps[].layers[].transform.position_keyframes[].out_ease.influence` | `number` | structural | Position keyframe outgoing ease influence. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
+| `comps[].layers[].transform.position_keyframes[].out_ease.influence` | `number` | structural | Position keyframe outgoing ease influence. | Keyframe ease influence must be greater than 0 and at most 1. | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].transform.anchor_point_keyframes[].in_ease.speed` | `number` | - | Anchor point keyframe incoming ease speed. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
-| `comps[].layers[].transform.anchor_point_keyframes[].in_ease.influence` | `number` | structural | Anchor point keyframe incoming ease influence. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
+| `comps[].layers[].transform.anchor_point_keyframes[].in_ease.influence` | `number` | structural | Anchor point keyframe incoming ease influence. | Keyframe ease influence must be greater than 0 and at most 1. | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].transform.anchor_point_keyframes[].out_ease.speed` | `number` | - | Anchor point keyframe outgoing ease speed. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
-| `comps[].layers[].transform.anchor_point_keyframes[].out_ease.influence` | `number` | structural | Anchor point keyframe outgoing ease influence. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
+| `comps[].layers[].transform.anchor_point_keyframes[].out_ease.influence` | `number` | structural | Anchor point keyframe outgoing ease influence. | Keyframe ease influence must be greater than 0 and at most 1. | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].transform.scale_keyframes[].in_ease.speed` | `number` | - | Scale keyframe incoming ease speed. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
-| `comps[].layers[].transform.scale_keyframes[].in_ease.influence` | `number` | structural | Scale keyframe incoming ease influence. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
+| `comps[].layers[].transform.scale_keyframes[].in_ease.influence` | `number` | structural | Scale keyframe incoming ease influence. | Keyframe ease influence must be greater than 0 and at most 1. | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].transform.scale_keyframes[].out_ease.speed` | `number` | - | Scale keyframe outgoing ease speed. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
-| `comps[].layers[].transform.scale_keyframes[].out_ease.influence` | `number` | structural | Scale keyframe outgoing ease influence. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
+| `comps[].layers[].transform.scale_keyframes[].out_ease.influence` | `number` | structural | Scale keyframe outgoing ease influence. | Keyframe ease influence must be greater than 0 and at most 1. | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].transform.rotation_keyframes[].in_ease.speed` | `number` | - | Rotation keyframe incoming ease speed. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
-| `comps[].layers[].transform.rotation_keyframes[].in_ease.influence` | `number` | structural | Rotation keyframe incoming ease influence. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
+| `comps[].layers[].transform.rotation_keyframes[].in_ease.influence` | `number` | structural | Rotation keyframe incoming ease influence. | Keyframe ease influence must be greater than 0 and at most 1. | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].transform.rotation_keyframes[].out_ease.speed` | `number` | - | Rotation keyframe outgoing ease speed. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
-| `comps[].layers[].transform.rotation_keyframes[].out_ease.influence` | `number` | structural | Rotation keyframe outgoing ease influence. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
+| `comps[].layers[].transform.rotation_keyframes[].out_ease.influence` | `number` | structural | Rotation keyframe outgoing ease influence. | Keyframe ease influence must be greater than 0 and at most 1. | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].transform.opacity_keyframes[].in_ease.speed` | `number` | - | Opacity keyframe incoming ease speed. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
-| `comps[].layers[].transform.opacity_keyframes[].in_ease.influence` | `number` | structural | Opacity keyframe incoming ease influence. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
+| `comps[].layers[].transform.opacity_keyframes[].in_ease.influence` | `number` | structural | Opacity keyframe incoming ease influence. | Keyframe ease influence must be greater than 0 and at most 1. | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].transform.opacity_keyframes[].out_ease.speed` | `number` | - | Opacity keyframe outgoing ease speed. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
-| `comps[].layers[].transform.opacity_keyframes[].out_ease.influence` | `number` | structural | Opacity keyframe outgoing ease influence. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
+| `comps[].layers[].transform.opacity_keyframes[].out_ease.influence` | `number` | structural | Opacity keyframe outgoing ease influence. | Keyframe ease influence must be greater than 0 and at most 1. | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].effects[].params[].keyframes[].in_ease.speed` | `number` | - | Effect parameter keyframe incoming ease speed. | - | - | examples/recipes/minimal-effect-param-vector-keyframes.json |
 | `comps[].layers[].effects[].params[].keyframes[].in_ease.influence` | `number` | structural | Effect parameter keyframe incoming ease influence. | - | - | examples/recipes/minimal-effect-param-vector-keyframes.json |
 | `comps[].layers[].effects[].params[].keyframes[].out_ease.speed` | `number` | - | Effect parameter keyframe outgoing ease speed. | - | - | examples/recipes/minimal-effect-param-vector-keyframes.json |
@@ -520,32 +520,32 @@ This reference is generated from the canonical recipe field model.
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].transform.position` | `array<float64>` | - | Static position value. | - | - | examples/recipes/minimal-adjustment-layer.json |
-| `comps[].layers[].transform.scale` | `array<float64>` | - | Static scale value. | - | - | examples/recipes/minimal-text-effect.json |
-| `comps[].layers[].transform.anchor_point` | `array<float64>` | - | Static anchor point value. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
+| `comps[].layers[].transform.position` | `array<float64>` | - | Static position value. | When present, position must contain exactly two numeric values. | - | examples/recipes/minimal-adjustment-layer.json |
+| `comps[].layers[].transform.scale` | `array<float64>` | - | Static scale value. | When present, scale must contain exactly two numeric values. | - | examples/recipes/minimal-text-effect.json |
+| `comps[].layers[].transform.anchor_point` | `array<float64>` | - | Static anchor point value. | When present, anchor_point must contain exactly two numeric values. | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].transform.rotation` | `number` | - | Static rotation value. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].transform.opacity` | `number` | - | Static opacity value. | - | - | examples/recipes/minimal-text-effect.json |
-| `comps[].layers[].transform.position_keyframes[]` | `array<recipe.VectorKeyframe>` | - | Position keyframe list. | - | - | examples/recipes/minimal-transform-keyframes.json |
-| `comps[].layers[].transform.anchor_point_keyframes[]` | `array<recipe.VectorKeyframe>` | - | Anchor point keyframe list. | - | - | examples/recipes/minimal-text-shape.json |
-| `comps[].layers[].transform.scale_keyframes[]` | `array<recipe.VectorKeyframe>` | - | Scale keyframe list. | - | - | examples/recipes/minimal-text-shape.json |
-| `comps[].layers[].transform.rotation_keyframes[]` | `array<recipe.ScalarKeyframe>` | - | Rotation keyframe list. | - | - | examples/recipes/minimal-text-shape.json |
-| `comps[].layers[].transform.opacity_keyframes[]` | `array<recipe.ScalarKeyframe>` | - | Opacity keyframe list. | - | - | examples/recipes/minimal-text-shape.json |
+| `comps[].layers[].transform.position_keyframes[]` | `array<recipe.VectorKeyframe>` | - | Position keyframe list. | When present, keyframes must be sorted by time and each keyframe time must be within comp duration. | - | examples/recipes/minimal-transform-keyframes.json |
+| `comps[].layers[].transform.anchor_point_keyframes[]` | `array<recipe.VectorKeyframe>` | - | Anchor point keyframe list. | When present, keyframes must be sorted by time and each keyframe time must be within comp duration. | - | examples/recipes/minimal-text-shape.json |
+| `comps[].layers[].transform.scale_keyframes[]` | `array<recipe.VectorKeyframe>` | - | Scale keyframe list. | When present, keyframes must be sorted by time and each keyframe time must be within comp duration. | - | examples/recipes/minimal-text-shape.json |
+| `comps[].layers[].transform.rotation_keyframes[]` | `array<recipe.ScalarKeyframe>` | - | Rotation keyframe list. | When present, keyframes must be sorted by time and each keyframe time must be within comp duration. | - | examples/recipes/minimal-text-shape.json |
+| `comps[].layers[].transform.opacity_keyframes[]` | `array<recipe.ScalarKeyframe>` | - | Opacity keyframe list. | When present, keyframes must be sorted by time and each keyframe time must be within comp duration. Values must be between 0 and 100. | - | examples/recipes/minimal-text-shape.json |
 | `comps[].layers[].transform.expressions` | `object<TransformExpressions>` | - | Transform property expressions. | - | - | examples/recipes/minimal-transform-expression.json |
 
 ## VectorKeyframe
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].transform.position_keyframes[].time` | `number` | structural | Position keyframe time in seconds. | - | - | examples/recipes/minimal-layer-auto-orient.json |
-| `comps[].layers[].transform.position_keyframes[].value` | `array<float64>` | structural | Position keyframe vector value. | - | - | examples/recipes/minimal-layer-auto-orient.json |
+| `comps[].layers[].transform.position_keyframes[].time` | `number` | structural | Position keyframe time in seconds. | Keyframe time must be non-negative, within comp duration, and sorted in ascending order. | - | examples/recipes/minimal-layer-auto-orient.json |
+| `comps[].layers[].transform.position_keyframes[].value` | `array<float64>` | structural | Position keyframe vector value. | Position keyframe value must contain exactly two numeric values. | - | examples/recipes/minimal-layer-auto-orient.json |
 | `comps[].layers[].transform.position_keyframes[].in_ease` | `object<TemporalEase>` | - | Position keyframe incoming temporal ease. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].transform.position_keyframes[].out_ease` | `object<TemporalEase>` | - | Position keyframe outgoing temporal ease. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
-| `comps[].layers[].transform.anchor_point_keyframes[].time` | `number` | structural | Anchor point keyframe time in seconds. | - | - | examples/recipes/minimal-text-shape.json |
-| `comps[].layers[].transform.anchor_point_keyframes[].value` | `array<float64>` | structural | Anchor point keyframe vector value. | - | - | examples/recipes/minimal-text-shape.json |
+| `comps[].layers[].transform.anchor_point_keyframes[].time` | `number` | structural | Anchor point keyframe time in seconds. | Keyframe time must be non-negative, within comp duration, and sorted in ascending order. | - | examples/recipes/minimal-text-shape.json |
+| `comps[].layers[].transform.anchor_point_keyframes[].value` | `array<float64>` | structural | Anchor point keyframe vector value. | Anchor point keyframe value must contain exactly two numeric values. | - | examples/recipes/minimal-text-shape.json |
 | `comps[].layers[].transform.anchor_point_keyframes[].in_ease` | `object<TemporalEase>` | - | Anchor point keyframe incoming temporal ease. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].transform.anchor_point_keyframes[].out_ease` | `object<TemporalEase>` | - | Anchor point keyframe outgoing temporal ease. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
-| `comps[].layers[].transform.scale_keyframes[].time` | `number` | structural | Scale keyframe time in seconds. | - | - | examples/recipes/minimal-text-shape.json |
-| `comps[].layers[].transform.scale_keyframes[].value` | `array<float64>` | structural | Scale keyframe vector value. | - | - | examples/recipes/minimal-text-shape.json |
+| `comps[].layers[].transform.scale_keyframes[].time` | `number` | structural | Scale keyframe time in seconds. | Keyframe time must be non-negative, within comp duration, and sorted in ascending order. | - | examples/recipes/minimal-text-shape.json |
+| `comps[].layers[].transform.scale_keyframes[].value` | `array<float64>` | structural | Scale keyframe vector value. | Scale keyframe value must contain exactly two numeric values. | - | examples/recipes/minimal-text-shape.json |
 | `comps[].layers[].transform.scale_keyframes[].in_ease` | `object<TemporalEase>` | - | Scale keyframe incoming temporal ease. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].transform.scale_keyframes[].out_ease` | `object<TemporalEase>` | - | Scale keyframe outgoing temporal ease. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
 
@@ -563,15 +563,15 @@ This reference is generated from the canonical recipe field model.
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].transform.expressions.position.source` | `string` | structural | position transform expression source code. | - | `property.set_expression` (`Property.SetExpression`) | examples/recipes/minimal-transform-expression.json |
+| `comps[].layers[].transform.expressions.position.source` | `string` | structural | position transform expression source code. | Transform expression source is required when a position expression block is present. | `property.set_expression` (`Property.SetExpression`) | examples/recipes/minimal-transform-expression.json |
 | `comps[].layers[].transform.expressions.position.enabled` | `boolean` | - | position transform expression enable switch. | - | `property.set_expression_enabled` (`Property.SetExpressionEnabled`) | examples/recipes/minimal-transform-expression.json |
-| `comps[].layers[].transform.expressions.anchor_point.source` | `string` | structural | anchor_point transform expression source code. | - | `property.set_expression` (`Property.SetExpression`) | examples/recipes/minimal-transform-expression.json |
+| `comps[].layers[].transform.expressions.anchor_point.source` | `string` | structural | anchor_point transform expression source code. | Transform expression source is required when an anchor_point expression block is present. | `property.set_expression` (`Property.SetExpression`) | examples/recipes/minimal-transform-expression.json |
 | `comps[].layers[].transform.expressions.anchor_point.enabled` | `boolean` | - | anchor_point transform expression enable switch. | - | `property.set_expression_enabled` (`Property.SetExpressionEnabled`) | examples/recipes/minimal-transform-expression.json |
-| `comps[].layers[].transform.expressions.scale.source` | `string` | structural | scale transform expression source code. | - | `property.set_expression` (`Property.SetExpression`) | examples/recipes/minimal-transform-expression.json |
+| `comps[].layers[].transform.expressions.scale.source` | `string` | structural | scale transform expression source code. | Transform expression source is required when a scale expression block is present. | `property.set_expression` (`Property.SetExpression`) | examples/recipes/minimal-transform-expression.json |
 | `comps[].layers[].transform.expressions.scale.enabled` | `boolean` | - | scale transform expression enable switch. | - | `property.set_expression_enabled` (`Property.SetExpressionEnabled`) | examples/recipes/minimal-transform-expression.json |
-| `comps[].layers[].transform.expressions.rotation.source` | `string` | structural | rotation transform expression source code. | - | `property.set_expression` (`Property.SetExpression`) | examples/recipes/minimal-transform-expression.json |
+| `comps[].layers[].transform.expressions.rotation.source` | `string` | structural | rotation transform expression source code. | Transform expression source is required when a rotation expression block is present. | `property.set_expression` (`Property.SetExpression`) | examples/recipes/minimal-transform-expression.json |
 | `comps[].layers[].transform.expressions.rotation.enabled` | `boolean` | - | rotation transform expression enable switch. | - | `property.set_expression_enabled` (`Property.SetExpressionEnabled`) | examples/recipes/minimal-transform-expression.json |
-| `comps[].layers[].transform.expressions.opacity.source` | `string` | structural | opacity transform expression source code. | - | `property.set_expression` (`Property.SetExpression`) | examples/recipes/minimal-transform-expression.json |
+| `comps[].layers[].transform.expressions.opacity.source` | `string` | structural | opacity transform expression source code. | Transform expression source is required when an opacity expression block is present. | `property.set_expression` (`Property.SetExpression`) | examples/recipes/minimal-transform-expression.json |
 | `comps[].layers[].transform.expressions.opacity.enabled` | `boolean` | - | opacity transform expression enable switch. | - | `property.set_expression_enabled` (`Property.SetExpressionEnabled`) | examples/recipes/minimal-transform-expression.json |
 | `comps[].layers[].effects[].params[].expression.source` | `string` | structural | effect parameter expression source code. | Expression source is applied only when non-empty. | `property.set_expression` (`Property.SetExpression`) | examples/recipes/minimal-effect-param-expression.json |
 | `comps[].layers[].effects[].params[].expression.enabled` | `boolean` | - | effect parameter expression enable switch. | - | `property.set_expression_enabled` (`Property.SetExpressionEnabled`) | examples/recipes/minimal-effect-param-expression.json |

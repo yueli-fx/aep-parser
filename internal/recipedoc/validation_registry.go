@@ -134,6 +134,102 @@ var fieldValidation = map[string]FieldMeta{
 	"comps[].layers[].stretch": {
 		Validation: "Layer stretch must be greater than 0.",
 	},
+	"comps[].layers[].transform.position": {
+		Validation: "When present, position must contain exactly two numeric values.",
+	},
+	"comps[].layers[].transform.scale": {
+		Validation: "When present, scale must contain exactly two numeric values.",
+	},
+	"comps[].layers[].transform.anchor_point": {
+		Validation: "When present, anchor_point must contain exactly two numeric values.",
+	},
+	"comps[].layers[].transform.position_keyframes[]": {
+		Validation: "When present, keyframes must be sorted by time and each keyframe time must be within comp duration.",
+	},
+	"comps[].layers[].transform.position_keyframes[].time": {
+		Validation: "Keyframe time must be non-negative, within comp duration, and sorted in ascending order.",
+	},
+	"comps[].layers[].transform.position_keyframes[].value": {
+		Validation: "Position keyframe value must contain exactly two numeric values.",
+	},
+	"comps[].layers[].transform.position_keyframes[].in_ease.influence": {
+		Validation: "Keyframe ease influence must be greater than 0 and at most 1.",
+	},
+	"comps[].layers[].transform.position_keyframes[].out_ease.influence": {
+		Validation: "Keyframe ease influence must be greater than 0 and at most 1.",
+	},
+	"comps[].layers[].transform.anchor_point_keyframes[]": {
+		Validation: "When present, keyframes must be sorted by time and each keyframe time must be within comp duration.",
+	},
+	"comps[].layers[].transform.anchor_point_keyframes[].time": {
+		Validation: "Keyframe time must be non-negative, within comp duration, and sorted in ascending order.",
+	},
+	"comps[].layers[].transform.anchor_point_keyframes[].value": {
+		Validation: "Anchor point keyframe value must contain exactly two numeric values.",
+	},
+	"comps[].layers[].transform.anchor_point_keyframes[].in_ease.influence": {
+		Validation: "Keyframe ease influence must be greater than 0 and at most 1.",
+	},
+	"comps[].layers[].transform.anchor_point_keyframes[].out_ease.influence": {
+		Validation: "Keyframe ease influence must be greater than 0 and at most 1.",
+	},
+	"comps[].layers[].transform.scale_keyframes[]": {
+		Validation: "When present, keyframes must be sorted by time and each keyframe time must be within comp duration.",
+	},
+	"comps[].layers[].transform.scale_keyframes[].time": {
+		Validation: "Keyframe time must be non-negative, within comp duration, and sorted in ascending order.",
+	},
+	"comps[].layers[].transform.scale_keyframes[].value": {
+		Validation: "Scale keyframe value must contain exactly two numeric values.",
+	},
+	"comps[].layers[].transform.scale_keyframes[].in_ease.influence": {
+		Validation: "Keyframe ease influence must be greater than 0 and at most 1.",
+	},
+	"comps[].layers[].transform.scale_keyframes[].out_ease.influence": {
+		Validation: "Keyframe ease influence must be greater than 0 and at most 1.",
+	},
+	"comps[].layers[].transform.rotation_keyframes[]": {
+		Validation: "When present, keyframes must be sorted by time and each keyframe time must be within comp duration.",
+	},
+	"comps[].layers[].transform.rotation_keyframes[].time": {
+		Validation: "Keyframe time must be non-negative, within comp duration, and sorted in ascending order.",
+	},
+	"comps[].layers[].transform.rotation_keyframes[].in_ease.influence": {
+		Validation: "Keyframe ease influence must be greater than 0 and at most 1.",
+	},
+	"comps[].layers[].transform.rotation_keyframes[].out_ease.influence": {
+		Validation: "Keyframe ease influence must be greater than 0 and at most 1.",
+	},
+	"comps[].layers[].transform.opacity_keyframes[]": {
+		Validation: "When present, keyframes must be sorted by time and each keyframe time must be within comp duration. Values must be between 0 and 100.",
+	},
+	"comps[].layers[].transform.opacity_keyframes[].time": {
+		Validation: "Keyframe time must be non-negative, within comp duration, and sorted in ascending order.",
+	},
+	"comps[].layers[].transform.opacity_keyframes[].value": {
+		Validation: "Opacity keyframe value must be between 0 and 100.",
+	},
+	"comps[].layers[].transform.opacity_keyframes[].in_ease.influence": {
+		Validation: "Keyframe ease influence must be greater than 0 and at most 1.",
+	},
+	"comps[].layers[].transform.opacity_keyframes[].out_ease.influence": {
+		Validation: "Keyframe ease influence must be greater than 0 and at most 1.",
+	},
+	"comps[].layers[].transform.expressions.position.source": {
+		Validation: "Transform expression source is required when a position expression block is present.",
+	},
+	"comps[].layers[].transform.expressions.anchor_point.source": {
+		Validation: "Transform expression source is required when an anchor_point expression block is present.",
+	},
+	"comps[].layers[].transform.expressions.scale.source": {
+		Validation: "Transform expression source is required when a scale expression block is present.",
+	},
+	"comps[].layers[].transform.expressions.rotation.source": {
+		Validation: "Transform expression source is required when a rotation expression block is present.",
+	},
+	"comps[].layers[].transform.expressions.opacity.source": {
+		Validation: "Transform expression source is required when an opacity expression block is present.",
+	},
 	"comps[].layers[].text_animators[].property": {
 		Validation: "Supported values create the corresponding text animator property.",
 		Enum:       []string{"opacity", "position", "scale", "rotation", "color", "tracking", "character_offset", "fill_opacity", "stroke_opacity", "stroke_width", "skew", "rotation_x", "rotation_y", "stroke_color"},
