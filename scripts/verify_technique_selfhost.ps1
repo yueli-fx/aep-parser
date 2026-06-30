@@ -25,10 +25,12 @@ try {
     $recipeDraftBatchDir = Join-Path $runRoot "recipe_draft_batch"
     $acceptanceJsonPath = Join-Path $runRoot "acceptance.json"
     $acceptanceMdPath = Join-Path $runRoot "acceptance.md"
+    $outcomeMdPath = Join-Path $runRoot "outcome.md"
     $effectivenessMdPath = Join-Path $runRoot "effectiveness.md"
     $effectivenessJsonPath = Join-Path $runRoot "effectiveness.json"
     $latestRunPath = Join-Path $OutRoot "latest_run.txt"
     $latestAcceptancePath = Join-Path $OutRoot "latest_acceptance.md"
+    $latestOutcomePath = Join-Path $OutRoot "latest_outcome.md"
     $latestEffectivenessPath = Join-Path $OutRoot "latest_effectiveness.md"
     $latestEffectivenessJsonPath = Join-Path $OutRoot "latest_effectiveness.json"
     $historyJsonlPath = Join-Path $OutRoot "history.jsonl"
@@ -448,6 +450,7 @@ try {
         stable_outputs = [ordered]@{
             latest_run = $latestRunPath
             latest_acceptance = $latestAcceptancePath
+            latest_outcome = $latestOutcomePath
             latest_effectiveness = $latestEffectivenessPath
             latest_effectiveness_json = $latestEffectivenessJsonPath
             history_jsonl = $historyJsonlPath
@@ -553,6 +556,32 @@ try {
     [void]$b.AppendLine("| $($step.name) | $($step.exit) | $($step.seconds) |")
     }
     $b.ToString() | Set-Content -LiteralPath $acceptanceMdPath -Encoding UTF8
+
+    $o = [System.Text.StringBuilder]::new()
+    [void]$o.AppendLine("# Self-Hosted Outcome")
+    [void]$o.AppendLine("")
+    [void]$o.AppendLine("## Outcome Status")
+    [void]$o.AppendLine("")
+    [void]$o.AppendLine("- status: $($outcomeStatusInfo.status)")
+    [void]$o.AppendLine("- regression: $($outcomeStatusInfo.has_regression)")
+    foreach ($reason in $outcomeStatusInfo.reasons) {
+        [void]$o.AppendLine("- reason: $reason")
+    }
+    [void]$o.AppendLine("")
+    [void]$o.AppendLine("## Numbers")
+    [void]$o.AppendLine("")
+    [void]$o.AppendLine("- projects: $($fullManifest.project_count)")
+    [void]$o.AppendLine("- patterns: $($fullManifest.pattern_count)")
+    [void]$o.AppendLine("- full parse errors: $($fullManifest.error_count)")
+    [void]$o.AppendLine("- recipe batch smoke: $($recipeDraftBatchSummary.passed)/$($recipeDraftBatchSummary.attempted)")
+    [void]$o.AppendLine("- history delta: projects $($historyDelta.parsed_projects_delta), patterns $($historyDelta.technique_patterns_delta), batch passed $($historyDelta.batch_passed_delta)")
+    [void]$o.AppendLine("")
+    [void]$o.AppendLine("## Links")
+    [void]$o.AppendLine("")
+    [void]$o.AppendLine("- latest index: ``$latestIndexPath``")
+    [void]$o.AppendLine("- effectiveness json: ``$latestEffectivenessJsonPath``")
+    [void]$o.AppendLine("- run root: ``$runRoot``")
+    $o.ToString() | Set-Content -LiteralPath $outcomeMdPath -Encoding UTF8
 
     $e = [System.Text.StringBuilder]::new()
     [void]$e.AppendLine("# Technique Effectiveness Snapshot")
@@ -801,6 +830,7 @@ try {
     [void]$index.AppendLine("<a href=""$runRel/recipe_draft_reparse/reparse_summary.json"">Compiled draft reparse summary</a>")
     [void]$index.AppendLine("<a href=""$runRel/effectiveness.json"">Effectiveness JSON</a>")
     [void]$index.AppendLine("<a href=""latest_effectiveness.md"">Latest effectiveness snapshot</a>")
+    [void]$index.AppendLine("<a href=""latest_outcome.md"">Latest outcome</a>")
     [void]$index.AppendLine("<a href=""latest_effectiveness.json"">Latest effectiveness JSON</a>")
     [void]$index.AppendLine("<a href=""history.jsonl"">Effectiveness history JSONL</a>")
     [void]$index.AppendLine("<a href=""history.csv"">Effectiveness history CSV</a>")
@@ -811,6 +841,7 @@ try {
     [void]$index.AppendLine("<a href=""$runRel/compare_self/compare.md"">Self compare</a>")
     [void]$index.AppendLine("<a href=""$runRel/compare_partial_to_full/compare.md"">Partial-to-full compare</a>")
     [void]$index.AppendLine("<a href=""$runRel/acceptance.md"">Acceptance markdown</a>")
+    [void]$index.AppendLine("<a href=""$runRel/outcome.md"">Outcome markdown</a>")
     [void]$index.AppendLine("<a href=""$runRel/acceptance.json"">Acceptance JSON</a>")
     [void]$index.AppendLine("</div></section>")
     [void]$index.AppendLine("<section class=""panel"" style=""margin-top:16px""><h2>Steps</h2><table><thead><tr><th>Step</th><th>Seconds</th></tr></thead><tbody>")
@@ -922,15 +953,24 @@ try {
     Require-LatestIndexLink -Label "effectiveness json" -RelativePath "$runRel/effectiveness.json"
     Require-LatestIndexLink -Label "partial report" -RelativePath "$runRel/partial_report/report.html"
     Require-LatestIndexLink -Label "partial compare" -RelativePath "$runRel/compare_partial_to_full/compare.md"
+    Require-LatestIndexLink -Label "outcome markdown" -RelativePath "$runRel/outcome.md"
 
     $runRoot | Set-Content -LiteralPath $latestRunPath -Encoding UTF8
     Copy-Item -LiteralPath $acceptanceMdPath -Destination $latestAcceptancePath -Force
+    Copy-Item -LiteralPath $outcomeMdPath -Destination $latestOutcomePath -Force
     Copy-Item -LiteralPath $effectivenessMdPath -Destination $latestEffectivenessPath -Force
     Copy-Item -LiteralPath $effectivenessJsonPath -Destination $latestEffectivenessJsonPath -Force
     if (-not (Test-Path -LiteralPath $latestEffectivenessPath)) {
         throw "latest effectiveness snapshot missing: $latestEffectivenessPath"
     }
     Require-LatestIndexLink -Label "latest effectiveness" -RelativePath "latest_effectiveness.md"
+    if (-not (Test-Path -LiteralPath $latestOutcomePath)) {
+        throw "latest outcome missing: $latestOutcomePath"
+    }
+    if (-not (Select-String -LiteralPath $latestOutcomePath -Pattern "Outcome Status" -Quiet)) {
+        throw "latest outcome missing Outcome Status"
+    }
+    Require-LatestIndexLink -Label "latest outcome" -RelativePath "latest_outcome.md"
     if (-not (Test-Path -LiteralPath $latestEffectivenessJsonPath)) {
         throw "latest effectiveness json missing: $latestEffectivenessJsonPath"
     }
@@ -992,6 +1032,7 @@ try {
     Write-Host "effect json:     $effectivenessJsonPath"
     Write-Host "latest run:      $latestRunPath"
     Write-Host "latest summary:  $latestAcceptancePath"
+    Write-Host "latest outcome:  $latestOutcomePath"
     Write-Host "latest effect:   $latestEffectivenessPath"
     Write-Host "latest effect j: $latestEffectivenessJsonPath"
     Write-Host "latest index:    $latestIndexPath"
