@@ -338,6 +338,19 @@ func TestRunVerifyReportReturnsValidationError(t *testing.T) {
 	}
 }
 
+func TestRunFinalizeRunReturnsValidationError(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"finalize-run", "-out-root", t.TempDir(), "-run-root", t.TempDir()}, &stdout, &stderr, testPlatform())
+
+	if code != 1 {
+		t.Fatalf("run finalize-run = %d, want 1", code)
+	}
+	if !strings.Contains(stderr.String(), "manifest.json") {
+		t.Fatalf("stderr = %q, want missing manifest", stderr.String())
+	}
+}
+
 func writeFile(t *testing.T, path, text string) {
 	t.Helper()
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {

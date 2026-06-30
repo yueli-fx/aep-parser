@@ -34,6 +34,8 @@ func run(args []string, stdout, stderr io.Writer, platform host.Platform) int {
 		return runRecipeSmoke(args[1:], stdout, stderr, platform)
 	case "verify-report":
 		return runVerifyReport(args[1:], stdout, stderr)
+	case "finalize-run":
+		return runFinalizeRun(args[1:], stdout, stderr)
 	case "outcome":
 		return runOutcome(args[1:], stdout, stderr)
 	case "status":
@@ -79,6 +81,35 @@ func runCompareReports(args []string, stdout, stderr io.Writer) int {
 	_ = result
 	fmt.Fprintf(stdout, "compare json: %s\n", filepath.Join(reportOutDir, "compare.json"))
 	fmt.Fprintf(stdout, "compare md:   %s\n", filepath.Join(reportOutDir, "compare.md"))
+	return 0
+}
+
+func runFinalizeRun(args []string, stdout, stderr io.Writer) int {
+	fs := flag.NewFlagSet("aepselfhost finalize-run", flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	outRoot := fs.String("out-root", filepath.Join("tmp", "technique_selfhost_gate"), "selfhost output root")
+	runRoot := fs.String("run-root", "", "specific selfhost run root")
+	runID := fs.String("run-id", "", "run identifier; defaults to run root base name")
+	inputPath := fs.String("input", "", "source corpus input path")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	if *runRoot == "" {
+		fmt.Fprintln(stderr, "usage: aepselfhost finalize-run -out-root root -run-root root/run-id [-input path]")
+		return 2
+	}
+	result, err := selfhost.FinalizeSelfhostRun(context.Background(), selfhost.FinalizeOptions{
+		OutRoot:   *outRoot,
+		RunRoot:   *runRoot,
+		RunID:     *runID,
+		InputPath: *inputPath,
+	})
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	fmt.Fprintf(stdout, "latest index: %s\n", result.LatestIndex)
+	fmt.Fprintf(stdout, "outcome: %s\n", result.OutcomeStatus)
 	return 0
 }
 
@@ -746,5 +777,5 @@ func ptrIntValue(v *int) string {
 }
 
 func usage(stderr io.Writer) {
-	fmt.Fprintln(stderr, "usage: aepselfhost <verify|compare-reports|verify-report|recipe-smoke|outcome|status|watch|start-watch> -out-root tmp\\technique_selfhost_gate")
+	fmt.Fprintln(stderr, "usage: aepselfhost <verify|compare-reports|verify-report|recipe-smoke|finalize-run|outcome|status|watch|start-watch> -out-root tmp\\technique_selfhost_gate")
 }
