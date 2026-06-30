@@ -8,15 +8,20 @@ var allowedMissingSemanticSummary = map[string]string{}
 
 func buildFieldSummaries() map[string]string {
 	out := map[string]string{
-		"schema_version":                  "Recipe schema version.",
-		"project":                         "Project-level metadata used when materializing the recipe.",
-		"project.name":                    "Project display name.",
-		"project.target_version":          "AE target template used when compiling the recipe.",
-		"project.bits_per_channel":        "Project color bit depth.",
-		"project.linear_blending":         "Project linear blending switch.",
-		"project.linearize_working_space": "Project linearized working space switch.",
-		"comps[]":                         "Composition definitions to create or validate.",
-		"expected_profile":                "Optional assertions used to compare the generated project against expected structure.",
+		"schema_version":                              "Recipe schema version.",
+		"project":                                     "Project-level metadata used when materializing the recipe.",
+		"project.name":                                "Project display name.",
+		"project.target_version":                      "AE target template used when compiling the recipe.",
+		"project.bits_per_channel":                    "Project color bit depth.",
+		"project.linear_blending":                     "Project linear blending switch.",
+		"project.linearize_working_space":             "Project linearized working space switch.",
+		"project.time_display_type":                   "Project time display mode.",
+		"project.frames_count_type":                   "Project frame count mode.",
+		"project.frames_use_feet_frames":              "Project feet+frames display switch.",
+		"project.feet_frames_film_type":               "Project feet+frames film type.",
+		"project.footage_timecode_display_start_type": "Project footage timecode display start mode.",
+		"comps[]":          "Composition definitions to create or validate.",
+		"expected_profile": "Optional assertions used to compare the generated project against expected structure.",
 	}
 
 	addCompSummaries(out, "comps[]", "Composition")
@@ -518,21 +523,26 @@ func addEffectSummaries(out map[string]string, prefix, label string) {
 
 func addExpectedProfileSummaries(out map[string]string) {
 	addSummaries(out, "expected_profile", map[string]string{
-		"comp_count":                "Expected number of compositions.",
-		"layer_count":               "Expected total number of layers.",
-		"text_layer_count":          "Expected number of text layers.",
-		"shape_layer_count":         "Expected number of shape layers.",
-		"bits_per_channel":          "Expected project color bit depth.",
-		"linear_blending":           "Expected project linear blending switch.",
-		"linearize_working_space":   "Expected project linearized working space switch.",
-		"effects[]":                 "Expected effect checks.",
-		"properties[]":              "Expected property checks.",
-		"essential_graphics[]":      "Expected Essential Graphics controller checks.",
-		"essential_graphics[].name": "Expected Essential Graphics controller display name.",
-		"essential_graphics[].type": "Expected Essential Graphics controller type.",
-		"text_styles[]":             "Expected text style checks.",
-		"keyframes[]":               "Expected keyframes for a layer property.",
-		"masks[]":                   "Expected mask checks.",
+		"comp_count":                          "Expected number of compositions.",
+		"layer_count":                         "Expected total number of layers.",
+		"text_layer_count":                    "Expected number of text layers.",
+		"shape_layer_count":                   "Expected number of shape layers.",
+		"bits_per_channel":                    "Expected project color bit depth.",
+		"linear_blending":                     "Expected project linear blending switch.",
+		"linearize_working_space":             "Expected project linearized working space switch.",
+		"time_display_type":                   "Expected project time display mode.",
+		"frames_count_type":                   "Expected project frame count mode.",
+		"frames_use_feet_frames":              "Expected project feet+frames display switch.",
+		"feet_frames_film_type":               "Expected project feet+frames film type.",
+		"footage_timecode_display_start_type": "Expected project footage timecode display start mode.",
+		"effects[]":                           "Expected effect checks.",
+		"properties[]":                        "Expected property checks.",
+		"essential_graphics[]":                "Expected Essential Graphics controller checks.",
+		"essential_graphics[].name":           "Expected Essential Graphics controller display name.",
+		"essential_graphics[].type":           "Expected Essential Graphics controller type.",
+		"text_styles[]":                       "Expected text style checks.",
+		"keyframes[]":                         "Expected keyframes for a layer property.",
+		"masks[]":                             "Expected mask checks.",
 	})
 	addCompSummaries(out, "expected_profile", "Expected composition")
 	addExpectedLayerSummaries(out, "expected_profile.layers[]")

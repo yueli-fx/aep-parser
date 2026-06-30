@@ -240,6 +240,11 @@ Done:
   exposes `meta.linear_blending` and `meta.linearize_working_space`,
   `expected_profile` asserts both flags, and
   `examples/recipes/minimal-project-linear-color.json` covers the pair.
+- Recipe project display settings now support `time_display_type`,
+  `frames_count_type`, `frames_use_feet_frames`, `feet_frames_film_type`, and
+  `footage_timecode_display_start_type`. Profile metadata exposes stable
+  snake-case values for the same settings, `expected_profile` asserts them,
+  and `examples/recipes/minimal-project-display-settings.json` covers the group.
 - Comp-level recipe/profile work now has an object-level execution strategy:
   field order, evidence level, profile target, test shape, verification, and
   commit rules are captured in `comp-recipe-execution-strategy.md`.

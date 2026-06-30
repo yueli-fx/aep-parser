@@ -175,6 +175,157 @@
       "x-aep-example": "examples/recipes/minimal-project-linear-color.json"
     },
     {
+      "x-aep-path": "project.time_display_type",
+      "json_name": "time_display_type",
+      "source_type": "ProjectSpec",
+      "source_field": "TimeDisplayType",
+      "type": "string",
+      "go_type": "string",
+      "description": "Project time display mode.",
+      "x-aep-validation": "Must be timecode or frames.",
+      "enum": [
+        "timecode",
+        "frames"
+      ],
+      "x-aep-capabilities": [
+        {
+          "key": "project.set_time_display_type",
+          "query": "Project.SetTimeDisplayType",
+          "status": "supported",
+          "symbol": "Project.SetTimeDisplayType",
+          "domain": "project",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, low risk; writes nnhd byte 8 bits 6-0",
+          "gate": [
+            "TestProjectSettings_AEShipGate_AE2020",
+            "TestProjectSettings_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-project-display-settings.json"
+    },
+    {
+      "x-aep-path": "project.frames_count_type",
+      "json_name": "frames_count_type",
+      "source_type": "ProjectSpec",
+      "source_field": "FramesCountType",
+      "type": "string",
+      "go_type": "string",
+      "description": "Project frame count mode.",
+      "x-aep-validation": "Must be start_0, start_1, or timecode_conversion.",
+      "enum": [
+        "start_0",
+        "start_1",
+        "timecode_conversion"
+      ],
+      "x-aep-capabilities": [
+        {
+          "key": "project.set_frames_count_type",
+          "query": "Project.SetFramesCountType",
+          "status": "supported",
+          "symbol": "Project.SetFramesCountType",
+          "domain": "project",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, low risk; writes nnhd byte 20",
+          "gate": [
+            "TestProjectSettings_AEShipGate_AE2020",
+            "TestProjectSettings_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-project-display-settings.json"
+    },
+    {
+      "x-aep-path": "project.frames_use_feet_frames",
+      "json_name": "frames_use_feet_frames",
+      "source_type": "ProjectSpec",
+      "source_field": "FramesUseFeetFrames",
+      "type": "boolean",
+      "go_type": "*bool",
+      "description": "Project feet+frames display switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "project.set_frames_use_feet_frames",
+          "query": "Project.SetFramesUseFeetFrames",
+          "status": "supported",
+          "symbol": "Project.SetFramesUseFeetFrames",
+          "domain": "project",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, low risk; writes nnhd byte 11 bit 0",
+          "gate": [
+            "TestProjectSettings_AEShipGate_AE2020",
+            "TestProjectSettings_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-project-display-settings.json"
+    },
+    {
+      "x-aep-path": "project.feet_frames_film_type",
+      "json_name": "feet_frames_film_type",
+      "source_type": "ProjectSpec",
+      "source_field": "FeetFramesFilmType",
+      "type": "string",
+      "go_type": "string",
+      "description": "Project feet+frames film type.",
+      "x-aep-validation": "Must be 35mm or 16mm.",
+      "enum": [
+        "35mm",
+        "16mm"
+      ],
+      "x-aep-capabilities": [
+        {
+          "key": "project.set_feet_frames_film_type",
+          "query": "Project.SetFeetFramesFilmType",
+          "status": "supported",
+          "symbol": "Project.SetFeetFramesFilmType",
+          "domain": "project",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, low risk (nnhd is a fixed 40-byte chunk);\nwrites nnhd byte 8 bit 7",
+          "gate": [
+            "TestProjectSettings_AEShipGate_AE2020",
+            "TestProjectSettings_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-project-display-settings.json"
+    },
+    {
+      "x-aep-path": "project.footage_timecode_display_start_type",
+      "json_name": "footage_timecode_display_start_type",
+      "source_type": "ProjectSpec",
+      "source_field": "FootageTimecodeDisplayStartType",
+      "type": "string",
+      "go_type": "string",
+      "description": "Project footage timecode display start mode.",
+      "x-aep-validation": "Must be start_0 or source_media.",
+      "enum": [
+        "start_0",
+        "source_media"
+      ],
+      "x-aep-capabilities": [
+        {
+          "key": "project.set_footage_timecode_display_start_type",
+          "query": "Project.SetFootageTimecodeDisplayStartType",
+          "status": "supported",
+          "symbol": "Project.SetFootageTimecodeDisplayStartType",
+          "domain": "project",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, low risk; writes nnhd byte 9",
+          "gate": [
+            "TestProjectSettings_AEShipGate_AE2020",
+            "TestProjectSettings_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-project-display-settings.json"
+    },
+    {
       "x-aep-path": "comps[]",
       "json_name": "comps",
       "source_type": "Recipe",
@@ -8476,6 +8627,77 @@
       "go_type": "*bool",
       "description": "Expected project linearized working space switch.",
       "x-aep-example": "examples/recipes/minimal-project-linear-color.json"
+    },
+    {
+      "x-aep-path": "expected_profile.time_display_type",
+      "json_name": "time_display_type",
+      "source_type": "ExpectedProfile",
+      "source_field": "TimeDisplayType",
+      "type": "string",
+      "go_type": "string",
+      "description": "Expected project time display mode.",
+      "x-aep-validation": "Expected project time display mode must be supported.",
+      "enum": [
+        "timecode",
+        "frames"
+      ],
+      "x-aep-example": "examples/recipes/minimal-project-display-settings.json"
+    },
+    {
+      "x-aep-path": "expected_profile.frames_count_type",
+      "json_name": "frames_count_type",
+      "source_type": "ExpectedProfile",
+      "source_field": "FramesCountType",
+      "type": "string",
+      "go_type": "string",
+      "description": "Expected project frame count mode.",
+      "x-aep-validation": "Expected project frame count mode must be supported.",
+      "enum": [
+        "start_0",
+        "start_1",
+        "timecode_conversion"
+      ],
+      "x-aep-example": "examples/recipes/minimal-project-display-settings.json"
+    },
+    {
+      "x-aep-path": "expected_profile.frames_use_feet_frames",
+      "json_name": "frames_use_feet_frames",
+      "source_type": "ExpectedProfile",
+      "source_field": "FramesUseFeetFrames",
+      "type": "boolean",
+      "go_type": "*bool",
+      "description": "Expected project feet+frames display switch.",
+      "x-aep-example": "examples/recipes/minimal-project-display-settings.json"
+    },
+    {
+      "x-aep-path": "expected_profile.feet_frames_film_type",
+      "json_name": "feet_frames_film_type",
+      "source_type": "ExpectedProfile",
+      "source_field": "FeetFramesFilmType",
+      "type": "string",
+      "go_type": "string",
+      "description": "Expected project feet+frames film type.",
+      "x-aep-validation": "Expected project feet+frames film type must be supported.",
+      "enum": [
+        "35mm",
+        "16mm"
+      ],
+      "x-aep-example": "examples/recipes/minimal-project-display-settings.json"
+    },
+    {
+      "x-aep-path": "expected_profile.footage_timecode_display_start_type",
+      "json_name": "footage_timecode_display_start_type",
+      "source_type": "ExpectedProfile",
+      "source_field": "FootageTimecodeDisplayStartType",
+      "type": "string",
+      "go_type": "string",
+      "description": "Expected project footage timecode display start mode.",
+      "x-aep-validation": "Expected project footage timecode display start mode must be supported.",
+      "enum": [
+        "start_0",
+        "source_media"
+      ],
+      "x-aep-example": "examples/recipes/minimal-project-display-settings.json"
     },
     {
       "x-aep-path": "expected_profile.name",

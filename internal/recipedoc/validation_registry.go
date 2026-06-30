@@ -12,6 +12,22 @@ var fieldValidation = map[string]FieldMeta{
 		Validation: "Must be 8, 16, or 32 bits per channel.",
 		Enum:       []string{"8", "16", "32", "8bpc", "16bpc", "32bpc"},
 	},
+	"project.time_display_type": {
+		Validation: "Must be timecode or frames.",
+		Enum:       []string{"timecode", "frames"},
+	},
+	"project.frames_count_type": {
+		Validation: "Must be start_0, start_1, or timecode_conversion.",
+		Enum:       []string{"start_0", "start_1", "timecode_conversion"},
+	},
+	"project.feet_frames_film_type": {
+		Validation: "Must be 35mm or 16mm.",
+		Enum:       []string{"35mm", "16mm"},
+	},
+	"project.footage_timecode_display_start_type": {
+		Validation: "Must be start_0 or source_media.",
+		Enum:       []string{"start_0", "source_media"},
+	},
 	"comps[].width": {
 		Validation: "Pixel width must fit the composition writer's uint16 range.",
 	},
@@ -277,6 +293,22 @@ var fieldValidation = map[string]FieldMeta{
 	"expected_profile.bits_per_channel": {
 		Validation: "Expected project color bit depth must be 8, 16, or 32 bits per channel.",
 		Enum:       []string{"8", "16", "32", "8bpc", "16bpc", "32bpc"},
+	},
+	"expected_profile.time_display_type": {
+		Validation: "Expected project time display mode must be supported.",
+		Enum:       []string{"timecode", "frames"},
+	},
+	"expected_profile.frames_count_type": {
+		Validation: "Expected project frame count mode must be supported.",
+		Enum:       []string{"start_0", "start_1", "timecode_conversion"},
+	},
+	"expected_profile.feet_frames_film_type": {
+		Validation: "Expected project feet+frames film type must be supported.",
+		Enum:       []string{"35mm", "16mm"},
+	},
+	"expected_profile.footage_timecode_display_start_type": {
+		Validation: "Expected project footage timecode display start mode must be supported.",
+		Enum:       []string{"start_0", "source_media"},
 	},
 	"expected_profile.keyframes[].layer_name": {
 		Validation: "Keyframe profile checks require a target layer name.",

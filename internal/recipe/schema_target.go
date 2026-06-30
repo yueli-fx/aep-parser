@@ -49,6 +49,106 @@ func projectBitsPerChannelProfileValue(value string) (string, error) {
 	return bpc.String(), nil
 }
 
+func projectTimeDisplayType(value string) (aep.TimeDisplayType, error) {
+	switch normalizeEnum(value) {
+	case "timecode":
+		return aep.TimeDisplayTypeTimecode, nil
+	case "frames":
+		return aep.TimeDisplayTypeFrames, nil
+	default:
+		return 0, fmt.Errorf("time_display_type must be timecode or frames")
+	}
+}
+
+func projectTimeDisplayTypeProfileValue(value string) (string, error) {
+	v, err := projectTimeDisplayType(value)
+	if err != nil {
+		return "", err
+	}
+	switch v {
+	case aep.TimeDisplayTypeFrames:
+		return "frames", nil
+	default:
+		return "timecode", nil
+	}
+}
+
+func projectFramesCountType(value string) (aep.FramesCountType, error) {
+	switch normalizeEnum(value) {
+	case "start_0", "start0":
+		return aep.FramesCountTypeStart0, nil
+	case "start_1", "start1":
+		return aep.FramesCountTypeStart1, nil
+	case "timecode_conversion":
+		return aep.FramesCountTypeTimecodeConversion, nil
+	default:
+		return 0, fmt.Errorf("frames_count_type must be start_0, start_1, or timecode_conversion")
+	}
+}
+
+func projectFramesCountTypeProfileValue(value string) (string, error) {
+	v, err := projectFramesCountType(value)
+	if err != nil {
+		return "", err
+	}
+	switch v {
+	case aep.FramesCountTypeStart1:
+		return "start_1", nil
+	case aep.FramesCountTypeTimecodeConversion:
+		return "timecode_conversion", nil
+	default:
+		return "start_0", nil
+	}
+}
+
+func projectFeetFramesFilmType(value string) (aep.FeetFramesFilmType, error) {
+	switch normalizeEnum(value) {
+	case "35mm", "mm35":
+		return aep.FeetFramesFilmTypeMM35, nil
+	case "16mm", "mm16":
+		return aep.FeetFramesFilmTypeMM16, nil
+	default:
+		return 0, fmt.Errorf("feet_frames_film_type must be 35mm or 16mm")
+	}
+}
+
+func projectFeetFramesFilmTypeProfileValue(value string) (string, error) {
+	v, err := projectFeetFramesFilmType(value)
+	if err != nil {
+		return "", err
+	}
+	switch v {
+	case aep.FeetFramesFilmTypeMM16:
+		return "16mm", nil
+	default:
+		return "35mm", nil
+	}
+}
+
+func projectFootageTimecodeDisplayStartType(value string) (aep.FootageTimecodeDisplayStartType, error) {
+	switch normalizeEnum(value) {
+	case "start_0", "start0":
+		return aep.FootageTimecodeDisplayStartTypeStart0, nil
+	case "source_media", "use_source_media":
+		return aep.FootageTimecodeDisplayStartTypeUseSourceMedia, nil
+	default:
+		return 0, fmt.Errorf("footage_timecode_display_start_type must be start_0 or source_media")
+	}
+}
+
+func projectFootageTimecodeDisplayStartTypeProfileValue(value string) (string, error) {
+	v, err := projectFootageTimecodeDisplayStartType(value)
+	if err != nil {
+		return "", err
+	}
+	switch v {
+	case aep.FootageTimecodeDisplayStartTypeUseSourceMedia:
+		return "source_media", nil
+	default:
+		return "start_0", nil
+	}
+}
+
 func (target recipeProjectTarget) aepTarget() aep.AETarget {
 	switch target {
 	case aepTargetAE2022:

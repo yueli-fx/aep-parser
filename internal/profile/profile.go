@@ -46,6 +46,11 @@ type Meta struct {
 	BitsPerChannel          string             `json:"bits_per_channel,omitempty"`
 	LinearBlending          bool               `json:"linear_blending"`
 	LinearizeWorkingSpace   bool               `json:"linearize_working_space"`
+	TimeDisplayType         string             `json:"time_display_type"`
+	FramesCountType         string             `json:"frames_count_type"`
+	FramesUseFeetFrames     bool               `json:"frames_use_feet_frames"`
+	FeetFramesFilmType      string             `json:"feet_frames_film_type"`
+	FootageTimecodeStart    string             `json:"footage_timecode_display_start_type"`
 }
 
 type Fingerprint struct {
@@ -412,6 +417,11 @@ func Build(project *aep.Project, opts Options) (*Profile, error) {
 			BitsPerChannel:          project.BitsPerChannel.String(),
 			LinearBlending:          project.LinearBlending(),
 			LinearizeWorkingSpace:   project.LinearizeWorkingSpace(),
+			TimeDisplayType:         projectTimeDisplayTypeProfileValue(project.TimeDisplayType()),
+			FramesCountType:         projectFramesCountTypeProfileValue(project.FramesCountType()),
+			FramesUseFeetFrames:     project.FramesUseFeetFrames(),
+			FeetFramesFilmType:      projectFeetFramesFilmTypeProfileValue(project.FeetFramesFilmType()),
+			FootageTimecodeStart:    projectFootageTimecodeStartProfileValue(project.FootageTimecodeDisplayStartType()),
 		},
 		Fingerprint: Fingerprint{
 			CompCount:    len(project.Compositions),
@@ -1050,6 +1060,44 @@ func renderQueuePath() PathRef {
 	return PathRef{
 		Path:        "render_queue",
 		DisplayPath: "render_queue",
+	}
+}
+
+func projectTimeDisplayTypeProfileValue(v aep.TimeDisplayType) string {
+	switch v {
+	case aep.TimeDisplayTypeFrames:
+		return "frames"
+	default:
+		return "timecode"
+	}
+}
+
+func projectFramesCountTypeProfileValue(v aep.FramesCountType) string {
+	switch v {
+	case aep.FramesCountTypeStart1:
+		return "start_1"
+	case aep.FramesCountTypeTimecodeConversion:
+		return "timecode_conversion"
+	default:
+		return "start_0"
+	}
+}
+
+func projectFeetFramesFilmTypeProfileValue(v aep.FeetFramesFilmType) string {
+	switch v {
+	case aep.FeetFramesFilmTypeMM16:
+		return "16mm"
+	default:
+		return "35mm"
+	}
+}
+
+func projectFootageTimecodeStartProfileValue(v aep.FootageTimecodeDisplayStartType) string {
+	switch v {
+	case aep.FootageTimecodeDisplayStartTypeUseSourceMedia:
+		return "source_media"
+	default:
+		return "start_0"
 	}
 }
 

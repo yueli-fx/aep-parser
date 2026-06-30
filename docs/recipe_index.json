@@ -8,6 +8,11 @@
     "project.bits_per_channel",
     "project.linear_blending",
     "project.linearize_working_space",
+    "project.time_display_type",
+    "project.frames_count_type",
+    "project.frames_use_feet_frames",
+    "project.feet_frames_film_type",
+    "project.footage_timecode_display_start_type",
     "comps[]",
     "comps[].name",
     "comps[].width",
@@ -386,6 +391,11 @@
     "expected_profile.bits_per_channel",
     "expected_profile.linear_blending",
     "expected_profile.linearize_working_space",
+    "expected_profile.time_display_type",
+    "expected_profile.frames_count_type",
+    "expected_profile.frames_use_feet_frames",
+    "expected_profile.feet_frames_film_type",
+    "expected_profile.footage_timecode_display_start_type",
     "expected_profile.name",
     "expected_profile.width",
     "expected_profile.height",
@@ -5484,6 +5494,36 @@
       ],
       "example": "examples/recipes/minimal-essential-graphics-checkbox-controller.json"
     },
+    "expected_profile.feet_frames_film_type": {
+      "path": "expected_profile.feet_frames_film_type",
+      "json_name": "feet_frames_film_type",
+      "source_type": "ExpectedProfile",
+      "source_field": "FeetFramesFilmType",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Expected project feet+frames film type.",
+      "validation": "Expected project feet+frames film type must be supported.",
+      "enum": [
+        "35mm",
+        "16mm"
+      ],
+      "example": "examples/recipes/minimal-project-display-settings.json"
+    },
+    "expected_profile.footage_timecode_display_start_type": {
+      "path": "expected_profile.footage_timecode_display_start_type",
+      "json_name": "footage_timecode_display_start_type",
+      "source_type": "ExpectedProfile",
+      "source_field": "FootageTimecodeDisplayStartType",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Expected project footage timecode display start mode.",
+      "validation": "Expected project footage timecode display start mode must be supported.",
+      "enum": [
+        "start_0",
+        "source_media"
+      ],
+      "example": "examples/recipes/minimal-project-display-settings.json"
+    },
     "expected_profile.frame_blending": {
       "path": "expected_profile.frame_blending",
       "json_name": "frame_blending",
@@ -5504,6 +5544,32 @@
       "summary": "Expected composition frame rate in frames per second.",
       "validation": "Expected frame rate must be positive.",
       "example": "examples/recipes/minimal-comp-object-profile.json"
+    },
+    "expected_profile.frames_count_type": {
+      "path": "expected_profile.frames_count_type",
+      "json_name": "frames_count_type",
+      "source_type": "ExpectedProfile",
+      "source_field": "FramesCountType",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Expected project frame count mode.",
+      "validation": "Expected project frame count mode must be supported.",
+      "enum": [
+        "start_0",
+        "start_1",
+        "timecode_conversion"
+      ],
+      "example": "examples/recipes/minimal-project-display-settings.json"
+    },
+    "expected_profile.frames_use_feet_frames": {
+      "path": "expected_profile.frames_use_feet_frames",
+      "json_name": "frames_use_feet_frames",
+      "source_type": "ExpectedProfile",
+      "source_field": "FramesUseFeetFrames",
+      "type": "boolean",
+      "go_type": "*bool",
+      "summary": "Expected project feet+frames display switch.",
+      "example": "examples/recipes/minimal-project-display-settings.json"
     },
     "expected_profile.height": {
       "path": "expected_profile.height",
@@ -6897,6 +6963,21 @@
       "summary": "Expected text style vertical text scale.",
       "example": "examples/recipes/minimal-text-style.json"
     },
+    "expected_profile.time_display_type": {
+      "path": "expected_profile.time_display_type",
+      "json_name": "time_display_type",
+      "source_type": "ExpectedProfile",
+      "source_field": "TimeDisplayType",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Expected project time display mode.",
+      "validation": "Expected project time display mode must be supported.",
+      "enum": [
+        "timecode",
+        "frames"
+      ],
+      "example": "examples/recipes/minimal-project-display-settings.json"
+    },
     "expected_profile.width": {
       "path": "expected_profile.width",
       "json_name": "width",
@@ -6973,6 +7054,74 @@
       ],
       "example": "examples/recipes/minimal-project-bits-per-channel.json"
     },
+    "project.feet_frames_film_type": {
+      "path": "project.feet_frames_film_type",
+      "json_name": "feet_frames_film_type",
+      "source_type": "ProjectSpec",
+      "source_field": "FeetFramesFilmType",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Project feet+frames film type.",
+      "validation": "Must be 35mm or 16mm.",
+      "enum": [
+        "35mm",
+        "16mm"
+      ],
+      "capability_keys": [
+        "project.set_feet_frames_film_type"
+      ],
+      "example": "examples/recipes/minimal-project-display-settings.json"
+    },
+    "project.footage_timecode_display_start_type": {
+      "path": "project.footage_timecode_display_start_type",
+      "json_name": "footage_timecode_display_start_type",
+      "source_type": "ProjectSpec",
+      "source_field": "FootageTimecodeDisplayStartType",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Project footage timecode display start mode.",
+      "validation": "Must be start_0 or source_media.",
+      "enum": [
+        "start_0",
+        "source_media"
+      ],
+      "capability_keys": [
+        "project.set_footage_timecode_display_start_type"
+      ],
+      "example": "examples/recipes/minimal-project-display-settings.json"
+    },
+    "project.frames_count_type": {
+      "path": "project.frames_count_type",
+      "json_name": "frames_count_type",
+      "source_type": "ProjectSpec",
+      "source_field": "FramesCountType",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Project frame count mode.",
+      "validation": "Must be start_0, start_1, or timecode_conversion.",
+      "enum": [
+        "start_0",
+        "start_1",
+        "timecode_conversion"
+      ],
+      "capability_keys": [
+        "project.set_frames_count_type"
+      ],
+      "example": "examples/recipes/minimal-project-display-settings.json"
+    },
+    "project.frames_use_feet_frames": {
+      "path": "project.frames_use_feet_frames",
+      "json_name": "frames_use_feet_frames",
+      "source_type": "ProjectSpec",
+      "source_field": "FramesUseFeetFrames",
+      "type": "boolean",
+      "go_type": "*bool",
+      "summary": "Project feet+frames display switch.",
+      "capability_keys": [
+        "project.set_frames_use_feet_frames"
+      ],
+      "example": "examples/recipes/minimal-project-display-settings.json"
+    },
     "project.linear_blending": {
       "path": "project.linear_blending",
       "json_name": "linear_blending",
@@ -7027,6 +7176,24 @@
         "project.create_target"
       ],
       "example": "examples/recipes/minimal-layer-explicit-matte.json"
+    },
+    "project.time_display_type": {
+      "path": "project.time_display_type",
+      "json_name": "time_display_type",
+      "source_type": "ProjectSpec",
+      "source_field": "TimeDisplayType",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Project time display mode.",
+      "validation": "Must be timecode or frames.",
+      "enum": [
+        "timecode",
+        "frames"
+      ],
+      "capability_keys": [
+        "project.set_time_display_type"
+      ],
+      "example": "examples/recipes/minimal-project-display-settings.json"
     },
     "schema_version": {
       "path": "schema_version",
@@ -7212,6 +7379,11 @@
       "expected_profile.bits_per_channel",
       "expected_profile.linear_blending",
       "expected_profile.linearize_working_space",
+      "expected_profile.time_display_type",
+      "expected_profile.frames_count_type",
+      "expected_profile.frames_use_feet_frames",
+      "expected_profile.feet_frames_film_type",
+      "expected_profile.footage_timecode_display_start_type",
       "expected_profile.name",
       "expected_profile.width",
       "expected_profile.height",
@@ -7428,7 +7600,12 @@
       "project.target_version",
       "project.bits_per_channel",
       "project.linear_blending",
-      "project.linearize_working_space"
+      "project.linearize_working_space",
+      "project.time_display_type",
+      "project.frames_count_type",
+      "project.frames_use_feet_frames",
+      "project.feet_frames_film_type",
+      "project.footage_timecode_display_start_type"
     ],
     "PuckerBloatSpec": [
       "comps[].layers[].shape.pucker_bloat.amount"

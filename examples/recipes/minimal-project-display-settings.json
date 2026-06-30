@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal project display settings",
+    "time_display_type": "frames",
+    "frames_count_type": "start_1",
+    "frames_use_feet_frames": true,
+    "feet_frames_film_type": "16mm",
+    "footage_timecode_display_start_type": "source_media"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 2
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 0,
+    "time_display_type": "frames",
+    "frames_count_type": "start_1",
+    "frames_use_feet_frames": true,
+    "feet_frames_film_type": "16mm",
+    "footage_timecode_display_start_type": "source_media"
+  }
+}

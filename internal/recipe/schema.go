@@ -68,6 +68,33 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 	if rec.Project.LinearizeWorkingSpace != nil {
 		recordCapability("Project.SetLinearizeWorkingSpace", "project.linearize_working_space")
 	}
+	if rec.Project.TimeDisplayType != "" {
+		recordCapability("Project.SetTimeDisplayType", "project.time_display_type")
+		if _, err := projectTimeDisplayType(rec.Project.TimeDisplayType); err != nil {
+			addRefusal("invalid_project_time_display_type", "project.time_display_type", err.Error())
+		}
+	}
+	if rec.Project.FramesCountType != "" {
+		recordCapability("Project.SetFramesCountType", "project.frames_count_type")
+		if _, err := projectFramesCountType(rec.Project.FramesCountType); err != nil {
+			addRefusal("invalid_project_frames_count_type", "project.frames_count_type", err.Error())
+		}
+	}
+	if rec.Project.FramesUseFeetFrames != nil {
+		recordCapability("Project.SetFramesUseFeetFrames", "project.frames_use_feet_frames")
+	}
+	if rec.Project.FeetFramesFilmType != "" {
+		recordCapability("Project.SetFeetFramesFilmType", "project.feet_frames_film_type")
+		if _, err := projectFeetFramesFilmType(rec.Project.FeetFramesFilmType); err != nil {
+			addRefusal("invalid_project_feet_frames_film_type", "project.feet_frames_film_type", err.Error())
+		}
+	}
+	if rec.Project.FootageTimecodeDisplayStartType != "" {
+		recordCapability("Project.SetFootageTimecodeDisplayStartType", "project.footage_timecode_display_start_type")
+		if _, err := projectFootageTimecodeDisplayStartType(rec.Project.FootageTimecodeDisplayStartType); err != nil {
+			addRefusal("invalid_project_footage_timecode_display_start_type", "project.footage_timecode_display_start_type", err.Error())
+		}
+	}
 	if len(rec.Comps) > 1 {
 		addRefusal("too_many_comps", "comps", "first recipe slice supports exactly one comp")
 	}
@@ -192,6 +219,26 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 	if expected.BitsPerChannel != "" {
 		if _, err := projectBitsPerChannel(expected.BitsPerChannel); err != nil {
 			addRefusal("invalid_expected_profile", "expected_profile.bits_per_channel", err.Error())
+		}
+	}
+	if expected.TimeDisplayType != "" {
+		if _, err := projectTimeDisplayType(expected.TimeDisplayType); err != nil {
+			addRefusal("invalid_expected_profile", "expected_profile.time_display_type", err.Error())
+		}
+	}
+	if expected.FramesCountType != "" {
+		if _, err := projectFramesCountType(expected.FramesCountType); err != nil {
+			addRefusal("invalid_expected_profile", "expected_profile.frames_count_type", err.Error())
+		}
+	}
+	if expected.FeetFramesFilmType != "" {
+		if _, err := projectFeetFramesFilmType(expected.FeetFramesFilmType); err != nil {
+			addRefusal("invalid_expected_profile", "expected_profile.feet_frames_film_type", err.Error())
+		}
+	}
+	if expected.FootageTimecodeDisplayStartType != "" {
+		if _, err := projectFootageTimecodeDisplayStartType(expected.FootageTimecodeDisplayStartType); err != nil {
+			addRefusal("invalid_expected_profile", "expected_profile.footage_timecode_display_start_type", err.Error())
 		}
 	}
 	if expected.Label != nil {

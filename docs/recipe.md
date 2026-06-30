@@ -22,6 +22,11 @@ This reference is generated from the canonical recipe field model.
 | `project.bits_per_channel` | `string` | - | Project color bit depth. | Must be 8, 16, or 32 bits per channel. | `project.set_bits_per_channel` (`Project.SetBitsPerChannel`) | examples/recipes/minimal-project-bits-per-channel.json |
 | `project.linear_blending` | `boolean` | - | Project linear blending switch. | - | `project.set_linear_blending` (`Project.SetLinearBlending`) | examples/recipes/minimal-project-linear-color.json |
 | `project.linearize_working_space` | `boolean` | - | Project linearized working space switch. | - | `project.set_linearize_working_space` (`Project.SetLinearizeWorkingSpace`) | examples/recipes/minimal-project-linear-color.json |
+| `project.time_display_type` | `string` | - | Project time display mode. | Must be timecode or frames. | `project.set_time_display_type` (`Project.SetTimeDisplayType`) | examples/recipes/minimal-project-display-settings.json |
+| `project.frames_count_type` | `string` | - | Project frame count mode. | Must be start_0, start_1, or timecode_conversion. | `project.set_frames_count_type` (`Project.SetFramesCountType`) | examples/recipes/minimal-project-display-settings.json |
+| `project.frames_use_feet_frames` | `boolean` | - | Project feet+frames display switch. | - | `project.set_frames_use_feet_frames` (`Project.SetFramesUseFeetFrames`) | examples/recipes/minimal-project-display-settings.json |
+| `project.feet_frames_film_type` | `string` | - | Project feet+frames film type. | Must be 35mm or 16mm. | `project.set_feet_frames_film_type` (`Project.SetFeetFramesFilmType`) | examples/recipes/minimal-project-display-settings.json |
+| `project.footage_timecode_display_start_type` | `string` | - | Project footage timecode display start mode. | Must be start_0 or source_media. | `project.set_footage_timecode_display_start_type` (`Project.SetFootageTimecodeDisplayStartType`) | examples/recipes/minimal-project-display-settings.json |
 
 ## CompSpec
 
@@ -598,6 +603,11 @@ This reference is generated from the canonical recipe field model.
 | `expected_profile.bits_per_channel` | `string` | - | Expected project color bit depth. | Expected project color bit depth must be 8, 16, or 32 bits per channel. | - | examples/recipes/minimal-project-bits-per-channel.json |
 | `expected_profile.linear_blending` | `boolean` | - | Expected project linear blending switch. | - | - | examples/recipes/minimal-project-linear-color.json |
 | `expected_profile.linearize_working_space` | `boolean` | - | Expected project linearized working space switch. | - | - | examples/recipes/minimal-project-linear-color.json |
+| `expected_profile.time_display_type` | `string` | - | Expected project time display mode. | Expected project time display mode must be supported. | - | examples/recipes/minimal-project-display-settings.json |
+| `expected_profile.frames_count_type` | `string` | - | Expected project frame count mode. | Expected project frame count mode must be supported. | - | examples/recipes/minimal-project-display-settings.json |
+| `expected_profile.frames_use_feet_frames` | `boolean` | - | Expected project feet+frames display switch. | - | - | examples/recipes/minimal-project-display-settings.json |
+| `expected_profile.feet_frames_film_type` | `string` | - | Expected project feet+frames film type. | Expected project feet+frames film type must be supported. | - | examples/recipes/minimal-project-display-settings.json |
+| `expected_profile.footage_timecode_display_start_type` | `string` | - | Expected project footage timecode display start mode. | Expected project footage timecode display start mode must be supported. | - | examples/recipes/minimal-project-display-settings.json |
 | `expected_profile.name` | `string` | - | Expected composition display name. | - | - | examples/recipes/minimal-comp-object-profile.json |
 | `expected_profile.width` | `number` | - | Expected composition width in pixels. | Expected width must be a positive integer. | - | examples/recipes/minimal-comp-object-profile.json |
 | `expected_profile.height` | `number` | - | Expected composition height in pixels. | Expected height must be a positive integer. | - | examples/recipes/minimal-comp-object-profile.json |

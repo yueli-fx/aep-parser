@@ -1,10 +1,15 @@
 package recipedoc
 
 var capabilitiesByPath = map[string][]string{
-	"project.target_version":                                      {"project.create_target"},
-	"project.bits_per_channel":                                    {"project.set_bits_per_channel"},
-	"project.linear_blending":                                     {"project.set_linear_blending"},
-	"project.linearize_working_space":                             {"project.set_linearize_working_space"},
+	"project.target_version":                      {"project.create_target"},
+	"project.bits_per_channel":                    {"project.set_bits_per_channel"},
+	"project.linear_blending":                     {"project.set_linear_blending"},
+	"project.linearize_working_space":             {"project.set_linearize_working_space"},
+	"project.time_display_type":                   {"project.set_time_display_type"},
+	"project.frames_count_type":                   {"project.set_frames_count_type"},
+	"project.frames_use_feet_frames":              {"project.set_frames_use_feet_frames"},
+	"project.feet_frames_film_type":               {"project.set_feet_frames_film_type"},
+	"project.footage_timecode_display_start_type": {"project.set_footage_timecode_display_start_type"},
 	"comps[]":                                                     {"comp.create"},
 	"comps[].background_color":                                    {"comp.set_background_color"},
 	"comps[].label":                                               {"comp.set_label"},
@@ -269,6 +274,26 @@ var capabilityRegistry = map[string]CapabilityMeta{
 	"project.set_linearize_working_space": {
 		Query:   "Project.SetLinearizeWorkingSpace",
 		Summary: "Toggle project linearized working space.",
+	},
+	"project.set_time_display_type": {
+		Query:   "Project.SetTimeDisplayType",
+		Summary: "Set project time display mode.",
+	},
+	"project.set_frames_count_type": {
+		Query:   "Project.SetFramesCountType",
+		Summary: "Set project frame count mode.",
+	},
+	"project.set_frames_use_feet_frames": {
+		Query:   "Project.SetFramesUseFeetFrames",
+		Summary: "Toggle project feet+frames display.",
+	},
+	"project.set_feet_frames_film_type": {
+		Query:   "Project.SetFeetFramesFilmType",
+		Summary: "Set project feet+frames film type.",
+	},
+	"project.set_footage_timecode_display_start_type": {
+		Query:   "Project.SetFootageTimecodeDisplayStartType",
+		Summary: "Set footage timecode display start mode.",
 	},
 	"comp.create":               {Query: "NewComposition", Summary: "Create a composition."},
 	"comp.set_background_color": {Query: "Composition.SetBGColor", Summary: "Set composition background color."},

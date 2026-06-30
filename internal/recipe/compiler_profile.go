@@ -16,6 +16,11 @@ func hasExpectedProfile(expected ExpectedProfile) bool {
 		expected.BitsPerChannel != "" ||
 		expected.LinearBlending != nil ||
 		expected.LinearizeWorkingSpace != nil ||
+		expected.TimeDisplayType != "" ||
+		expected.FramesCountType != "" ||
+		expected.FramesUseFeetFrames != nil ||
+		expected.FeetFramesFilmType != "" ||
+		expected.FootageTimecodeDisplayStartType != "" ||
 		expected.Name != "" ||
 		expected.Width != nil ||
 		expected.Height != nil ||
@@ -89,6 +94,41 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 	}
 	if expected.LinearizeWorkingSpace != nil {
 		add("expected_profile.linearize_working_space", *expected.LinearizeWorkingSpace, prof.Meta.LinearizeWorkingSpace, prof.Meta.LinearizeWorkingSpace == *expected.LinearizeWorkingSpace)
+	}
+	if expected.TimeDisplayType != "" {
+		expectedValue, err := projectTimeDisplayTypeProfileValue(expected.TimeDisplayType)
+		if err != nil {
+			add("expected_profile.time_display_type", expected.TimeDisplayType, prof.Meta.TimeDisplayType, false)
+		} else {
+			add("expected_profile.time_display_type", expectedValue, prof.Meta.TimeDisplayType, prof.Meta.TimeDisplayType == expectedValue)
+		}
+	}
+	if expected.FramesCountType != "" {
+		expectedValue, err := projectFramesCountTypeProfileValue(expected.FramesCountType)
+		if err != nil {
+			add("expected_profile.frames_count_type", expected.FramesCountType, prof.Meta.FramesCountType, false)
+		} else {
+			add("expected_profile.frames_count_type", expectedValue, prof.Meta.FramesCountType, prof.Meta.FramesCountType == expectedValue)
+		}
+	}
+	if expected.FramesUseFeetFrames != nil {
+		add("expected_profile.frames_use_feet_frames", *expected.FramesUseFeetFrames, prof.Meta.FramesUseFeetFrames, prof.Meta.FramesUseFeetFrames == *expected.FramesUseFeetFrames)
+	}
+	if expected.FeetFramesFilmType != "" {
+		expectedValue, err := projectFeetFramesFilmTypeProfileValue(expected.FeetFramesFilmType)
+		if err != nil {
+			add("expected_profile.feet_frames_film_type", expected.FeetFramesFilmType, prof.Meta.FeetFramesFilmType, false)
+		} else {
+			add("expected_profile.feet_frames_film_type", expectedValue, prof.Meta.FeetFramesFilmType, prof.Meta.FeetFramesFilmType == expectedValue)
+		}
+	}
+	if expected.FootageTimecodeDisplayStartType != "" {
+		expectedValue, err := projectFootageTimecodeDisplayStartTypeProfileValue(expected.FootageTimecodeDisplayStartType)
+		if err != nil {
+			add("expected_profile.footage_timecode_display_start_type", expected.FootageTimecodeDisplayStartType, prof.Meta.FootageTimecodeStart, false)
+		} else {
+			add("expected_profile.footage_timecode_display_start_type", expectedValue, prof.Meta.FootageTimecodeStart, prof.Meta.FootageTimecodeStart == expectedValue)
+		}
 	}
 	if expected.Name != "" {
 		actual := ""

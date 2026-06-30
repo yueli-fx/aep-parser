@@ -47,6 +47,47 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 			return report, fmt.Errorf("recipe: project linearize_working_space: %w", err)
 		}
 	}
+	if rec.Project.TimeDisplayType != "" {
+		v, err := projectTimeDisplayType(rec.Project.TimeDisplayType)
+		if err != nil {
+			return report, nil
+		}
+		if err := project.SetTimeDisplayType(v); err != nil {
+			return report, fmt.Errorf("recipe: project time_display_type: %w", err)
+		}
+	}
+	if rec.Project.FramesCountType != "" {
+		v, err := projectFramesCountType(rec.Project.FramesCountType)
+		if err != nil {
+			return report, nil
+		}
+		if err := project.SetFramesCountType(v); err != nil {
+			return report, fmt.Errorf("recipe: project frames_count_type: %w", err)
+		}
+	}
+	if rec.Project.FramesUseFeetFrames != nil {
+		if err := project.SetFramesUseFeetFrames(*rec.Project.FramesUseFeetFrames); err != nil {
+			return report, fmt.Errorf("recipe: project frames_use_feet_frames: %w", err)
+		}
+	}
+	if rec.Project.FeetFramesFilmType != "" {
+		v, err := projectFeetFramesFilmType(rec.Project.FeetFramesFilmType)
+		if err != nil {
+			return report, nil
+		}
+		if err := project.SetFeetFramesFilmType(v); err != nil {
+			return report, fmt.Errorf("recipe: project feet_frames_film_type: %w", err)
+		}
+	}
+	if rec.Project.FootageTimecodeDisplayStartType != "" {
+		v, err := projectFootageTimecodeDisplayStartType(rec.Project.FootageTimecodeDisplayStartType)
+		if err != nil {
+			return report, nil
+		}
+		if err := project.SetFootageTimecodeDisplayStartType(v); err != nil {
+			return report, fmt.Errorf("recipe: project footage_timecode_display_start_type: %w", err)
+		}
+	}
 	compSpec := rec.Comps[0]
 	comp, err := aep.NewComposition(project, compSpec.Name, uint16(compSpec.Width), uint16(compSpec.Height), compSpec.FrameRate, compSpec.Duration)
 	if err != nil {

@@ -48,6 +48,27 @@ func TestValidateReportsProjectLinearColorCapabilities(t *testing.T) {
 	assertCapability(t, report, "Project.SetLinearizeWorkingSpace")
 }
 
+func TestValidateReportsProjectDisplayCapabilities(t *testing.T) {
+	rec := minimalRecipe()
+	enabled := true
+	rec.Project.TimeDisplayType = "frames"
+	rec.Project.FramesCountType = "start_1"
+	rec.Project.FramesUseFeetFrames = &enabled
+	rec.Project.FeetFramesFilmType = "16mm"
+	rec.Project.FootageTimecodeDisplayStartType = "source_media"
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "Project.SetTimeDisplayType")
+	assertCapability(t, report, "Project.SetFramesCountType")
+	assertCapability(t, report, "Project.SetFramesUseFeetFrames")
+	assertCapability(t, report, "Project.SetFeetFramesFilmType")
+	assertCapability(t, report, "Project.SetFootageTimecodeDisplayStartType")
+}
+
 func TestValidateRejectsInvalidProjectBitsPerChannel(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Project.BitsPerChannel = "12"
@@ -58,6 +79,24 @@ func TestValidateRejectsInvalidProjectBitsPerChannel(t *testing.T) {
 		t.Fatal("Valid = true, want false")
 	}
 	assertRefusal(t, report, "invalid_project_bits_per_channel")
+}
+
+func TestValidateRejectsInvalidProjectDisplaySettings(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Project.TimeDisplayType = "seconds"
+	rec.Project.FramesCountType = "zero"
+	rec.Project.FeetFramesFilmType = "70mm"
+	rec.Project.FootageTimecodeDisplayStartType = "clip"
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_project_time_display_type")
+	assertRefusal(t, report, "invalid_project_frames_count_type")
+	assertRefusal(t, report, "invalid_project_feet_frames_film_type")
+	assertRefusal(t, report, "invalid_project_footage_timecode_display_start_type")
 }
 
 func TestValidateRejectsUnsupportedLayerType(t *testing.T) {

@@ -4580,6 +4580,38 @@ func TestCompileToFileChecksProjectLinearColorProfile(t *testing.T) {
 	assertProfileCheck(t, report, "expected_profile.linearize_working_space", true)
 }
 
+func TestCompileToFileChecksProjectDisplayProfile(t *testing.T) {
+	rec := minimalRecipe()
+	enabled := true
+	rec.Project.TimeDisplayType = "frames"
+	rec.Project.FramesCountType = "start_1"
+	rec.Project.FramesUseFeetFrames = &enabled
+	rec.Project.FeetFramesFilmType = "16mm"
+	rec.Project.FootageTimecodeDisplayStartType = "source_media"
+	rec.ExpectedProfile = recipe.ExpectedProfile{
+		CompCount:                       intPtr(1),
+		TimeDisplayType:                 "frames",
+		FramesCountType:                 "start_1",
+		FramesUseFeetFrames:             &enabled,
+		FeetFramesFilmType:              "16mm",
+		FootageTimecodeDisplayStartType: "source_media",
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	assertProfileCheck(t, report, "expected_profile.time_display_type", true)
+	assertProfileCheck(t, report, "expected_profile.frames_count_type", true)
+	assertProfileCheck(t, report, "expected_profile.frames_use_feet_frames", true)
+	assertProfileCheck(t, report, "expected_profile.feet_frames_film_type", true)
+	assertProfileCheck(t, report, "expected_profile.footage_timecode_display_start_type", true)
+}
+
 func TestCompileToFileRefusesExpectedProfileMismatch(t *testing.T) {
 	rec := minimalRecipe()
 	rec.ExpectedProfile = recipe.ExpectedProfile{
