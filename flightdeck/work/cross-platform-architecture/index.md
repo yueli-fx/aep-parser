@@ -739,6 +739,8 @@ Capability response should include:
 - [x] Add host primitives.
 - [x] Route `aepselfhost` through host primitives.
 - [x] Move report compare and recipe draft smoke orchestration into Go.
+- [x] Move technique report validation into Go.
+- [x] Add Go selfhost run finalizer entrypoint.
 - [ ] Move selfhost verification gate from PowerShell to Go.
 - [ ] Define AE host adapter.
 - [ ] Add cross-platform build gate.
