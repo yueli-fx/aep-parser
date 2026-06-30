@@ -340,6 +340,24 @@ try {
                 count = [int]$_.Value
             }
         })
+    $nextActionRows = [System.Collections.ArrayList]::new()
+    if ($pluginBlockerTopRows.Count -gt 0) {
+        $topPlugin = $pluginBlockerTopRows[0]
+        [void]$nextActionRows.Add([ordered]@{
+            priority = 100
+            category = "plugin_blocker"
+            title = "Resolve top plugin blocker: $($topPlugin.effect)"
+            detail = "Affects $($topPlugin.count) observed effect instance(s) across plugin-blocked projects."
+        })
+    }
+    foreach ($row in @($learningActionRows | Select-Object -First 2)) {
+        [void]$nextActionRows.Add([ordered]@{
+            priority = [int]$row.priority
+            category = "learning_pattern"
+            title = $row.pattern
+            detail = $row.action
+        })
+    }
 
     $selfCountDiffs = @($compareSelf.count_diffs).Count
     $partialCountDiffs = @($comparePartial.count_diffs).Count
@@ -582,6 +600,9 @@ try {
                 }
             })
         }
+        action_plan = [ordered]@{
+            next_actions = @($nextActionRows)
+        }
         history_delta = $historyDelta
         history_recent = @($historyPreviewRows | ForEach-Object {
             [ordered]@{
@@ -674,6 +695,11 @@ try {
     [void]$outcomeHtml.AppendLine("<tr><td>Patterns</td><td>$($fullManifest.pattern_count)</td></tr>")
     [void]$outcomeHtml.AppendLine("<tr><td>Full parse errors</td><td>$($fullManifest.error_count)</td></tr>")
     [void]$outcomeHtml.AppendLine("<tr><td>Recipe batch smoke</td><td>$($recipeDraftBatchSummary.passed) / $($recipeDraftBatchSummary.attempted)</td></tr>")
+    [void]$outcomeHtml.AppendLine("</tbody></table></section>")
+    [void]$outcomeHtml.AppendLine("<section class=""panel""><h2>Next Actions</h2><table><thead><tr><th>Priority</th><th>Action</th><th>Detail</th></tr></thead><tbody>")
+    foreach ($row in @($nextActionRows | Select-Object -First 3)) {
+        [void]$outcomeHtml.AppendLine("<tr><td>$(Escape-Html $row.priority)</td><td>$(Escape-Html $row.title)</td><td>$(Escape-Html $row.detail)</td></tr>")
+    }
     [void]$outcomeHtml.AppendLine("</tbody></table></section>")
     [void]$outcomeHtml.AppendLine("<section class=""panel""><h2>Reconstruction Readiness</h2><table><thead><tr><th>Readiness</th><th>Projects</th></tr></thead><tbody>")
     foreach ($row in $readinessSummaryRows) {
@@ -1134,6 +1160,9 @@ try {
     if (-not (Select-String -LiteralPath $latestOutcomeHtmlPath -Pattern "Learning Actions" -Quiet)) {
         throw "latest outcome html missing Learning Actions"
     }
+    if (-not (Select-String -LiteralPath $latestOutcomeHtmlPath -Pattern "Next Actions" -Quiet)) {
+        throw "latest outcome html missing Next Actions"
+    }
     if (-not (Select-String -LiteralPath $latestOutcomeHtmlPath -Pattern "Reconstruction Readiness" -Quiet)) {
         throw "latest outcome html missing Reconstruction Readiness"
     }
@@ -1182,6 +1211,12 @@ try {
     }
     if ($null -eq $latestEffectivenessJson.reconstruction_status.plugin_blockers_top) {
         throw "latest effectiveness json missing reconstruction_status.plugin_blockers_top"
+    }
+    if ($null -eq $latestEffectivenessJson.action_plan) {
+        throw "latest effectiveness json missing action_plan"
+    }
+    if ($null -eq $latestEffectivenessJson.action_plan.next_actions) {
+        throw "latest effectiveness json missing action_plan.next_actions"
     }
     if ($null -eq $latestEffectivenessJson.history_delta) {
         throw "latest effectiveness json missing history_delta"
