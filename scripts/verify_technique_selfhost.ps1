@@ -88,6 +88,8 @@ try {
     $partialManifest = Get-Content -Raw -LiteralPath (Join-Path $partialReportDir "manifest.json") | ConvertFrom-Json
     $compareSelf = Get-Content -Raw -LiteralPath (Join-Path $compareSelfDir "compare.json") | ConvertFrom-Json
     $comparePartial = Get-Content -Raw -LiteralPath (Join-Path $comparePartialDir "compare.json") | ConvertFrom-Json
+    $studyRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "study_queue.csv") | Select-Object -First 5)
+    $patternRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "patterns.csv") | Select-Object -First 5)
 
     $selfCountDiffs = @($compareSelf.count_diffs).Count
     $partialCountDiffs = @($comparePartial.count_diffs).Count
@@ -148,6 +150,14 @@ try {
     }
     $b.ToString() | Set-Content -LiteralPath $acceptanceMdPath -Encoding UTF8
 
+    function Escape-Html {
+        param([AllowNull()][object]$Value)
+        if ($null -eq $Value) {
+            return ""
+        }
+        return [System.Net.WebUtility]::HtmlEncode([string]$Value)
+    }
+
     $runRel = $runID
     $index = [System.Text.StringBuilder]::new()
     [void]$index.AppendLine("<!doctype html>")
@@ -163,6 +173,16 @@ try {
     [void]$index.AppendLine("<div class=""metric""><span>Patterns</span><strong>$($fullManifest.pattern_count)</strong></div>")
     [void]$index.AppendLine("<div class=""metric""><span>Partial Errors</span><strong>$($partialManifest.error_count)</strong></div>")
     [void]$index.AppendLine("</div>")
+    [void]$index.AppendLine("<section class=""panel""><h2>Study Queue Preview</h2><table><thead><tr><th>Rank</th><th>Project</th><th>Score</th></tr></thead><tbody>")
+    foreach ($row in $studyRows) {
+        [void]$index.AppendLine("<tr><td>$(Escape-Html $row.rank)</td><td>$(Escape-Html $row.path)</td><td>$(Escape-Html $row.study_score)</td></tr>")
+    }
+    [void]$index.AppendLine("</tbody></table></section>")
+    [void]$index.AppendLine("<section class=""panel"" style=""margin-top:16px""><h2>Pattern Playbook Preview</h2><table><thead><tr><th>Pattern</th><th>Count</th><th>Steps</th></tr></thead><tbody>")
+    foreach ($row in $patternRows) {
+        [void]$index.AppendLine("<tr><td>$(Escape-Html $row.id)</td><td>$(Escape-Html $row.count)</td><td>$(Escape-Html $row.recreation_steps)</td></tr>")
+    }
+    [void]$index.AppendLine("</tbody></table></section>")
     [void]$index.AppendLine("<section class=""panel""><h2>Artifacts</h2><div class=""links"">")
     [void]$index.AppendLine("<a href=""$runRel/full_report/report.html"">Full report HTML</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/learning.md"">Learning index</a>")
