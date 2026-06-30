@@ -13,6 +13,7 @@ Extend `cmd/aeptechnique` with corpus JSONL mode:
 go run ./cmd/aeptechnique -in <dir-or-file> -mode portrait -corpus -recursive
 go run ./cmd/aeptechnique -in <dir-or-file> -mode portrait -corpus -recursive -summary
 pwsh -NoProfile -File scripts\technique_showcase_report.ps1 -Limit 3
+pwsh -NoProfile -File scripts\technique_showcase_report.ps1 -Open
 ```
 
 For every discovered `.aep`, emit one JSON object per line:
@@ -57,6 +58,9 @@ It defaults to `flightdeck\showcase` and writes generated output under
 - `summary.json`
 - `corpus.jsonl`
 - `report.md`
+- `report.html`
+
+Passing `-Open` opens the generated HTML report after writing all files.
 
 ## Non-Goals
 

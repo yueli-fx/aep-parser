@@ -1,7 +1,8 @@
 param(
     [string]$InputPath = "flightdeck\showcase",
     [string]$OutDir = "tmp\technique_showcase_report",
-    [int]$Limit = 0
+    [int]$Limit = 0,
+    [switch]$Open
 )
 
 $ErrorActionPreference = "Stop"
@@ -204,6 +205,9 @@ try {
     Write-Host "corpus:  $corpusPath"
     Write-Host "report:  $reportPath"
     Write-Host "html:    $htmlPath"
+    if ($Open) {
+        Invoke-Item $htmlPath
+    }
 }
 finally {
     Pop-Location
