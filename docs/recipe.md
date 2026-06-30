@@ -99,7 +99,7 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].camera` | `object<CameraSpec>` | - | Camera layer options. | - | - |
 | `comps[].layers[].light` | `object<LightSpec>` | - | Light layer options. | - | - |
 | `comps[].layers[].shape` | `object<ShapeSpec>` | - | Shape layer primitive and operators. | - | - |
-| `comps[].layers[].masks[]` | `array<recipe.MaskSpec>` | - | Layer masks. | - | - |
+| `comps[].layers[].masks[]` | `array<recipe.MaskSpec>` | - | Layer masks. | - | `mask.add` (`AddMask`) |
 | `comps[].layers[].transform` | `object<Transform>` | - | Layer transform block. | - | `layer.set_transform` (`SetLayerTransform`) |
 | `comps[].layers[].effects[]` | `array<recipe.Effect>` | - | Built-in effect instance to add to the layer. | - | `effect.add_builtin` (`AddEffect`) |
 
@@ -374,26 +374,26 @@ This reference is generated from the canonical recipe field model.
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].masks[].name` | `string` | - | Layer mask name. | - | - |
-| `comps[].layers[].masks[].mode` | `string` | - | Layer mask mode. | - | - |
-| `comps[].layers[].masks[].inverted` | `boolean` | - | Layer mask inverted switch. | - | - |
-| `comps[].layers[].masks[].locked` | `boolean` | - | Layer mask lock switch. | - | - |
-| `comps[].layers[].masks[].color` | `array<float64>` | - | Layer mask UI color as RGB channels. | - | - |
-| `comps[].layers[].masks[].motion_blur` | `string` | - | Layer mask motion blur mode. | - | - |
-| `comps[].layers[].masks[].feather_falloff` | `string` | - | Layer mask feather falloff mode. | - | - |
-| `comps[].layers[].masks[].opacity` | `number` | - | Layer mask opacity. | - | - |
-| `comps[].layers[].masks[].feather` | `array<float64>` | - | Layer mask feather vector. | - | - |
-| `comps[].layers[].masks[].expansion` | `number` | - | Layer mask expansion. | - | - |
-| `comps[].layers[].masks[].closed` | `boolean` | - | Layer mask closed path switch. | - | - |
-| `comps[].layers[].masks[].vertices` | `array<[]float64>` | structural | Layer mask path vertices. | - | - |
-| `comps[].layers[].masks[].path_keyframes[]` | `array<recipe.MaskPathKeyframeSpec>` | - | Layer mask path keyframes. | - | - |
+| `comps[].layers[].masks[].name` | `string` | - | Layer mask name. | - | `mask.add` (`AddMask`) |
+| `comps[].layers[].masks[].mode` | `string` | - | Layer mask mode. | - | `mask.set_mode` (`Mask.SetMode`) |
+| `comps[].layers[].masks[].inverted` | `boolean` | - | Layer mask inverted switch. | - | `mask.set_inverted` (`Mask.SetInverted`) |
+| `comps[].layers[].masks[].locked` | `boolean` | - | Layer mask lock switch. | - | `mask.set_locked` (`Mask.SetLocked`) |
+| `comps[].layers[].masks[].color` | `array<float64>` | - | Layer mask UI color as RGB channels. | - | `mask.set_color` (`Mask.SetColor`) |
+| `comps[].layers[].masks[].motion_blur` | `string` | - | Layer mask motion blur mode. | - | `mask.set_motion_blur` (`Mask.SetMaskMotionBlur`) |
+| `comps[].layers[].masks[].feather_falloff` | `string` | - | Layer mask feather falloff mode. | - | `mask.set_feather_falloff` (`Mask.SetFeatherFalloff`) |
+| `comps[].layers[].masks[].opacity` | `number` | - | Layer mask opacity. | - | `mask.set_opacity` (`Mask.SetOpacity`) |
+| `comps[].layers[].masks[].feather` | `array<float64>` | - | Layer mask feather vector. | - | `mask.set_feather` (`Mask.SetFeather`) |
+| `comps[].layers[].masks[].expansion` | `number` | - | Layer mask expansion. | - | `mask.set_expansion` (`Mask.SetExpansion`) |
+| `comps[].layers[].masks[].closed` | `boolean` | - | Layer mask closed path switch. | - | `mask.add` (`AddMask`) |
+| `comps[].layers[].masks[].vertices` | `array<[]float64>` | structural | Layer mask path vertices. | - | `mask.add` (`AddMask`) |
+| `comps[].layers[].masks[].path_keyframes[]` | `array<recipe.MaskPathKeyframeSpec>` | - | Layer mask path keyframes. | - | `mask.set_path_keyframes` (`SetMaskPathKeyframes`) |
 
 ## MaskPathKeyframeSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].masks[].path_keyframes[].time` | `number` | structural | Layer mask path keyframe time in seconds. | - | - |
-| `comps[].layers[].masks[].path_keyframes[].vertices` | `array<[]float64>` | structural | Layer mask path keyframe vertices. | - | - |
+| `comps[].layers[].masks[].path_keyframes[].time` | `number` | structural | Layer mask path keyframe time in seconds. | - | `mask.set_path_keyframes` (`SetMaskPathKeyframes`) |
+| `comps[].layers[].masks[].path_keyframes[].vertices` | `array<[]float64>` | structural | Layer mask path keyframe vertices. | - | `mask.set_path_keyframes` (`SetMaskPathKeyframes`) |
 
 ## Transform
 

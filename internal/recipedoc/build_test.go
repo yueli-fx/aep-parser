@@ -96,6 +96,38 @@ func TestBuildDocumentIncludesShapeCapabilityMetadata(t *testing.T) {
 	}
 }
 
+func TestBuildDocumentIncludesMaskCapabilityMetadata(t *testing.T) {
+	doc, err := BuildDocument()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tests := map[string]string{
+		"comps[].layers[].masks[]":                           "mask.add",
+		"comps[].layers[].masks[].name":                      "mask.add",
+		"comps[].layers[].masks[].mode":                      "mask.set_mode",
+		"comps[].layers[].masks[].inverted":                  "mask.set_inverted",
+		"comps[].layers[].masks[].locked":                    "mask.set_locked",
+		"comps[].layers[].masks[].color":                     "mask.set_color",
+		"comps[].layers[].masks[].motion_blur":               "mask.set_motion_blur",
+		"comps[].layers[].masks[].feather_falloff":           "mask.set_feather_falloff",
+		"comps[].layers[].masks[].opacity":                   "mask.set_opacity",
+		"comps[].layers[].masks[].feather":                   "mask.set_feather",
+		"comps[].layers[].masks[].expansion":                 "mask.set_expansion",
+		"comps[].layers[].masks[].closed":                    "mask.add",
+		"comps[].layers[].masks[].vertices":                  "mask.add",
+		"comps[].layers[].masks[].path_keyframes[]":          "mask.set_path_keyframes",
+		"comps[].layers[].masks[].path_keyframes[].time":     "mask.set_path_keyframes",
+		"comps[].layers[].masks[].path_keyframes[].vertices": "mask.set_path_keyframes",
+	}
+	for path, key := range tests {
+		field := requireField(t, doc, path)
+		if !hasCapability(field, key) {
+			t.Fatalf("%s capabilities = %+v, want key %q", path, field.Capabilities, key)
+		}
+	}
+}
+
 func TestBuildDocumentIncludesExpectedProfileValidationMetadata(t *testing.T) {
 	doc, err := BuildDocument()
 	if err != nil {

@@ -5142,7 +5142,23 @@
       "go_type": "[]recipe.MaskSpec",
       "element": "recipe.MaskSpec",
       "object_type": "MaskSpec",
-      "description": "Layer masks."
+      "description": "Layer masks.",
+      "x-aep-capabilities": [
+        {
+          "key": "mask.add",
+          "query": "AddMask",
+          "status": "supported",
+          "symbol": "AddMask",
+          "domain": "mask",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "camera/light layers and freshly-built layers not yet reopened are refused; Feather/Opacity/Expansion are default-elided",
+          "gate": [
+            "TestAddMask_AEShipGate_AE2020",
+            "TestAddMask_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].masks[].name",
@@ -5151,7 +5167,23 @@
       "source_field": "Name",
       "type": "string",
       "go_type": "string",
-      "description": "Layer mask name."
+      "description": "Layer mask name.",
+      "x-aep-capabilities": [
+        {
+          "key": "mask.add",
+          "query": "AddMask",
+          "status": "supported",
+          "symbol": "AddMask",
+          "domain": "mask",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "camera/light layers and freshly-built layers not yet reopened are refused; Feather/Opacity/Expansion are default-elided",
+          "gate": [
+            "TestAddMask_AEShipGate_AE2020",
+            "TestAddMask_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].masks[].mode",
@@ -5160,7 +5192,23 @@
       "source_field": "Mode",
       "type": "string",
       "go_type": "string",
-      "description": "Layer mask mode."
+      "description": "Layer mask mode.",
+      "x-aep-capabilities": [
+        {
+          "key": "mask.set_mode",
+          "query": "Mask.SetMode",
+          "status": "supported",
+          "symbol": "Mask.SetMode",
+          "domain": "mask",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving 4-byte write to mkif offset 0x04",
+          "gate": [
+            "TestMaskOpts_AEShipGate_AE2020",
+            "TestMaskOpts_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].masks[].inverted",
@@ -5169,7 +5217,23 @@
       "source_field": "Inverted",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Layer mask inverted switch."
+      "description": "Layer mask inverted switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "mask.set_inverted",
+          "query": "Mask.SetInverted",
+          "status": "supported",
+          "symbol": "Mask.SetInverted",
+          "domain": "mask",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving 1-byte write to mkif offset 0x00",
+          "gate": [
+            "TestMaskOpts_AEShipGate_AE2020",
+            "TestMaskOpts_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].masks[].locked",
@@ -5178,7 +5242,23 @@
       "source_field": "Locked",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Layer mask lock switch."
+      "description": "Layer mask lock switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "mask.set_locked",
+          "query": "Mask.SetLocked",
+          "status": "supported",
+          "symbol": "Mask.SetLocked",
+          "domain": "mask",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving 1-byte write to mkif offset 0x01",
+          "gate": [
+            "TestMaskOpts_AEShipGate_AE2020",
+            "TestMaskOpts_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].masks[].color",
@@ -5188,7 +5268,23 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "description": "Layer mask UI color as RGB channels."
+      "description": "Layer mask UI color as RGB channels.",
+      "x-aep-capabilities": [
+        {
+          "key": "mask.set_color",
+          "query": "Mask.SetColor",
+          "status": "supported",
+          "symbol": "Mask.SetColor",
+          "domain": "mask",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving 3-byte write to mkif offsets 0x2D-0x2F",
+          "gate": [
+            "TestMaskOpts_AEShipGate_AE2020",
+            "TestMaskOpts_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].masks[].motion_blur",
@@ -5197,7 +5293,23 @@
       "source_field": "MotionBlur",
       "type": "string",
       "go_type": "string",
-      "description": "Layer mask motion blur mode."
+      "description": "Layer mask motion blur mode.",
+      "x-aep-capabilities": [
+        {
+          "key": "mask.set_motion_blur",
+          "query": "Mask.SetMaskMotionBlur",
+          "status": "supported",
+          "symbol": "Mask.SetMaskMotionBlur",
+          "domain": "mask",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving 1-byte write to mkif offset 0x02",
+          "gate": [
+            "TestMaskOpts_AEShipGate_AE2020",
+            "TestMaskOpts_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].masks[].feather_falloff",
@@ -5206,7 +5318,23 @@
       "source_field": "FeatherFalloff",
       "type": "string",
       "go_type": "string",
-      "description": "Layer mask feather falloff mode."
+      "description": "Layer mask feather falloff mode.",
+      "x-aep-capabilities": [
+        {
+          "key": "mask.set_feather_falloff",
+          "query": "Mask.SetFeatherFalloff",
+          "status": "supported",
+          "symbol": "Mask.SetFeatherFalloff",
+          "domain": "mask",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving 1-byte write to mkif offset 0x03; verified\nvia AE DOM readback of the maskFeatherFalloff enum (not a render check)",
+          "gate": [
+            "TestMaskFeatherFalloff_AEShipGate_AE2020",
+            "TestMaskFeatherFalloff_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].masks[].opacity",
@@ -5215,7 +5343,23 @@
       "source_field": "Opacity",
       "type": "number",
       "go_type": "*float64",
-      "description": "Layer mask opacity."
+      "description": "Layer mask opacity.",
+      "x-aep-capabilities": [
+        {
+          "key": "mask.set_opacity",
+          "query": "Mask.SetOpacity",
+          "status": "supported",
+          "symbol": "Mask.SetOpacity",
+          "domain": "mask",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "boundary": "synthesis-insert; requires a mask that has been round-tripped\nthrough Reopen so the atom chunk exists; rejects values outside 0..1",
+          "gate": [
+            "TestMGMaskOpacity_AEShipGate_AE2020",
+            "TestMGMaskOpacity_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].masks[].feather",
@@ -5225,7 +5369,23 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "description": "Layer mask feather vector."
+      "description": "Layer mask feather vector.",
+      "x-aep-capabilities": [
+        {
+          "key": "mask.set_feather",
+          "query": "Mask.SetFeather",
+          "status": "supported",
+          "symbol": "Mask.SetFeather",
+          "domain": "mask",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "synthesis-insert; requires a mask that has been round-tripped\nthrough Reopen so the atom chunk exists; rejects negative components",
+          "gate": [
+            "TestMaskOpts_AEShipGate_AE2020",
+            "TestMaskOpts_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].masks[].expansion",
@@ -5234,7 +5394,23 @@
       "source_field": "Expansion",
       "type": "number",
       "go_type": "*float64",
-      "description": "Layer mask expansion."
+      "description": "Layer mask expansion.",
+      "x-aep-capabilities": [
+        {
+          "key": "mask.set_expansion",
+          "query": "Mask.SetExpansion",
+          "status": "supported",
+          "symbol": "Mask.SetExpansion",
+          "domain": "mask",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "synthesis-insert; requires a mask that has been round-tripped\nthrough Reopen so the atom chunk exists",
+          "gate": [
+            "TestMaskOpts_AEShipGate_AE2020",
+            "TestMaskOpts_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].masks[].closed",
@@ -5243,7 +5419,23 @@
       "source_field": "Closed",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Layer mask closed path switch."
+      "description": "Layer mask closed path switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "mask.add",
+          "query": "AddMask",
+          "status": "supported",
+          "symbol": "AddMask",
+          "domain": "mask",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "camera/light layers and freshly-built layers not yet reopened are refused; Feather/Opacity/Expansion are default-elided",
+          "gate": [
+            "TestAddMask_AEShipGate_AE2020",
+            "TestAddMask_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].masks[].vertices",
@@ -5254,7 +5446,23 @@
       "go_type": "[][]float64",
       "element": "[]float64",
       "x-aep-structural-required": true,
-      "description": "Layer mask path vertices."
+      "description": "Layer mask path vertices.",
+      "x-aep-capabilities": [
+        {
+          "key": "mask.add",
+          "query": "AddMask",
+          "status": "supported",
+          "symbol": "AddMask",
+          "domain": "mask",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "camera/light layers and freshly-built layers not yet reopened are refused; Feather/Opacity/Expansion are default-elided",
+          "gate": [
+            "TestAddMask_AEShipGate_AE2020",
+            "TestAddMask_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].masks[].path_keyframes[]",
@@ -5265,7 +5473,23 @@
       "go_type": "[]recipe.MaskPathKeyframeSpec",
       "element": "recipe.MaskPathKeyframeSpec",
       "object_type": "MaskPathKeyframeSpec",
-      "description": "Layer mask path keyframes."
+      "description": "Layer mask path keyframes.",
+      "x-aep-capabilities": [
+        {
+          "key": "mask.set_path_keyframes",
+          "query": "SetMaskPathKeyframes",
+          "status": "supported",
+          "symbol": "SetMaskPathKeyframes",
+          "domain": "mask",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "boundary": "\u003e= 2 keyframes, gate tested to 6 (two capacity pages, verifying pagination under mask strictness, not a single page); per-keyframe vertex counts may differ; mask must come from a parsed project (Reopen)",
+          "gate": [
+            "TestMGMaskPathKf_AEShipGate_AE2020",
+            "TestMGMaskPathKf_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].masks[].path_keyframes[].time",
@@ -5275,7 +5499,23 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Layer mask path keyframe time in seconds."
+      "description": "Layer mask path keyframe time in seconds.",
+      "x-aep-capabilities": [
+        {
+          "key": "mask.set_path_keyframes",
+          "query": "SetMaskPathKeyframes",
+          "status": "supported",
+          "symbol": "SetMaskPathKeyframes",
+          "domain": "mask",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "boundary": "\u003e= 2 keyframes, gate tested to 6 (two capacity pages, verifying pagination under mask strictness, not a single page); per-keyframe vertex counts may differ; mask must come from a parsed project (Reopen)",
+          "gate": [
+            "TestMGMaskPathKf_AEShipGate_AE2020",
+            "TestMGMaskPathKf_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].masks[].path_keyframes[].vertices",
@@ -5286,7 +5526,23 @@
       "go_type": "[][]float64",
       "element": "[]float64",
       "x-aep-structural-required": true,
-      "description": "Layer mask path keyframe vertices."
+      "description": "Layer mask path keyframe vertices.",
+      "x-aep-capabilities": [
+        {
+          "key": "mask.set_path_keyframes",
+          "query": "SetMaskPathKeyframes",
+          "status": "supported",
+          "symbol": "SetMaskPathKeyframes",
+          "domain": "mask",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "boundary": "\u003e= 2 keyframes, gate tested to 6 (two capacity pages, verifying pagination under mask strictness, not a single page); per-keyframe vertex counts may differ; mask must come from a parsed project (Reopen)",
+          "gate": [
+            "TestMGMaskPathKf_AEShipGate_AE2020",
+            "TestMGMaskPathKf_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].transform",

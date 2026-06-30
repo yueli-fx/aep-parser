@@ -405,10 +405,13 @@ Done:
   details for 202 recipe fields.
 - Effect and expected-profile validation metadata expanded; generated docs now
   include validation notes/enums for 57 recipe fields.
+- Mask capability metadata expanded for mask creation, options, static path, and
+  path keyframes; generated docs now join capability details for 218 recipe
+  fields.
 
 Current:
 
-- Ready for mask capability metadata expansion or editor integration.
+- Ready for editor integration or example-reference metadata.
 
 ## Open questions
 
