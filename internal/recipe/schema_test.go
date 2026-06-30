@@ -937,6 +937,53 @@ func TestValidateRejectsMissingLayerParent(t *testing.T) {
 	assertRefusal(t, report, "unknown_layer_parent")
 }
 
+func TestValidateReportsExplicitMatteCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Project.TargetVersion = "AE2025"
+	rec.Comps[0].Layers = []recipe.Layer{
+		{
+			Type:       "solid",
+			Name:       "Fill",
+			TrackMatte: "luma",
+			Matte:      "Matte Source",
+		},
+		{
+			Type: "solid",
+			Name: "Matte Source",
+		},
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, refusals = %+v", report.Refusals)
+	}
+	assertCapability(t, report, "Layer.SetTrackMatteSource")
+}
+
+func TestValidateRejectsExplicitMatteWithoutAE2025Target(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers = []recipe.Layer{
+		{
+			Type:       "solid",
+			Name:       "Fill",
+			TrackMatte: "luma",
+			Matte:      "Matte Source",
+		},
+		{
+			Type: "solid",
+			Name: "Matte Source",
+		},
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "explicit_matte_requires_ae2025")
+}
+
 func TestValidateReportsNullLayerCapability(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0] = recipe.Layer{

@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "explicit-matte",
+    "target_version": "AE2025"
+  },
+  "comps": [
+    {
+      "name": "Explicit Matte",
+      "width": 640,
+      "height": 360,
+      "frame_rate": 30,
+      "duration": 2,
+      "layers": [
+        {
+          "type": "solid",
+          "name": "Fill",
+          "track_matte": "luma",
+          "matte": "Matte Source",
+          "shape": {
+            "fill_color": [0.2, 0.6, 1.0]
+          }
+        },
+        {
+          "type": "solid",
+          "name": "Matte Source",
+          "shape": {
+            "fill_color": [1.0, 1.0, 1.0]
+          }
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 2,
+    "layers": [
+      {
+        "name": "Fill",
+        "type": "av",
+        "track_matte": "luma",
+        "matte": "Matte Source"
+      },
+      {
+        "name": "Matte Source",
+        "type": "av"
+      }
+    ]
+  }
+}

@@ -814,6 +814,25 @@ func TestCompileToFileChecksShapeFilterProfileExamples(t *testing.T) {
 	}
 }
 
+func TestCompileToFileChecksExplicitMatteProfileExample(t *testing.T) {
+	raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "recipes", "minimal-layer-explicit-matte.json"))
+	if err != nil {
+		t.Fatalf("ReadFile: %v", err)
+	}
+	rec := mustUnmarshalRecipe(t, string(raw))
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	assertProfileCheck(t, report, "expected_profile.layers[0].track_matte", true)
+	assertProfileCheck(t, report, "expected_profile.layers[0].matte", true)
+}
+
 func TestCompileToFileChecksLayerObjectProfileExample(t *testing.T) {
 	raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "recipes", "minimal-layer-object-profile.json"))
 	if err != nil {

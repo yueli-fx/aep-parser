@@ -454,6 +454,11 @@ Done:
   `examples/recipes/minimal-comp-motion-blur-enabled.json` example compiles the
   comp motion-blur master switch, passes compiled AEP `cdta` flag readback, and
   passes an AE 2025 render oracle gate.
+- Explicit AE2025 source matte recipe support is implemented. Recipes can set
+  `project.target_version: "AE2025"` and `layers[].matte` with a non-none
+  `layers[].track_matte`; `minimal-layer-explicit-matte.json` asserts both
+  the matte mode and profile `matte_ref`, and the verifier passes for that
+  example.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven
@@ -470,12 +475,11 @@ Current:
   spot-checking. For comp work, follow `comp-recipe-execution-strategy.md`
   instead of asking for per-field direction; standalone comp examples now carry
   field-level profile checks. For layer work, follow
-  `layer-recipe-execution-strategy.md`; explicit AE2025 source mattes remain
-  blocked until recipe target-version handling is explicit, so continue with
-  the next recipe-owned family; the consolidated layer object baseline now
-  includes render/sampling flags, base null/adjustment and standalone layer
-  recipes assert object-level layer contracts, every authored-layer recipe now
-  has `expected_profile.layers[]`, and camera/light options now have
+  `layer-recipe-execution-strategy.md`; explicit AE2025 source mattes now have
+  a target-version-gated recipe slice, while the consolidated layer object
+  baseline includes render/sampling flags, base null/adjustment and standalone
+  layer recipes assert object-level layer contracts, every authored-layer
+  recipe now has `expected_profile.layers[]`, and camera/light options now have
   consolidated baselines for profile-visible properties. Do not start automated
   correction loops.
 

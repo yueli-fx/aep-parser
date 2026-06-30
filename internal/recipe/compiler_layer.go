@@ -370,6 +370,27 @@ func applyLayerParents(compSpec CompSpec, idx *projectindex.Index) error {
 	return nil
 }
 
+func applyExplicitMattes(compSpec CompSpec, idx *projectindex.Index) error {
+	for _, layerSpec := range compSpec.Layers {
+		if layerSpec.Matte == "" {
+			continue
+		}
+		layer := recipeLayerByName(idx, layerSpec.Name)
+		matte := recipeLayerByName(idx, layerSpec.Matte)
+		if layer == nil || matte == nil {
+			return fmt.Errorf("recipe: layer %q matte %q not found", layerSpec.Name, layerSpec.Matte)
+		}
+		mode, err := layerTrackMatte(layerSpec.TrackMatte)
+		if err != nil {
+			return fmt.Errorf("recipe: layer %q matte track_matte: %w", layerSpec.Name, err)
+		}
+		if err := layer.SetTrackMatteSource(matte, mode); err != nil {
+			return fmt.Errorf("recipe: layer %q matte: %w", layerSpec.Name, err)
+		}
+	}
+	return nil
+}
+
 func applyLightSources(compSpec CompSpec, idx *projectindex.Index) error {
 	for _, layerSpec := range compSpec.Layers {
 		if layerSpec.Light == nil || layerSpec.Light.SourceLayer == "" {

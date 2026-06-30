@@ -1,6 +1,7 @@
 package recipedoc
 
 var capabilitiesByPath = map[string][]string{
+	"project.target_version":                                      {"project.create_target"},
 	"comps[]":                                                     {"comp.create"},
 	"comps[].background_color":                                    {"comp.set_background_color"},
 	"comps[].label":                                               {"comp.set_label"},
@@ -45,6 +46,7 @@ var capabilitiesByPath = map[string][]string{
 	"comps[].layers[].quality":                                    {"layer.set_quality"},
 	"comps[].layers[].blending_mode":                              {"layer.set_blending_mode"},
 	"comps[].layers[].track_matte":                                {"layer.set_track_matte"},
+	"comps[].layers[].matte":                                      {"layer.set_track_matte_source"},
 	"comps[].layers[].auto_orient":                                {"layer.set_auto_orient"},
 	"comps[].layers[].start_time":                                 {"layer.set_start_time"},
 	"comps[].layers[].in_point":                                   {"layer.set_in_point"},
@@ -222,6 +224,7 @@ var capabilitiesByPath = map[string][]string{
 }
 
 var capabilityRegistry = map[string]CapabilityMeta{
+	"project.create_target":       {Query: "NewProject", Summary: "Create a project from a target AE template."},
 	"comp.create":                 {Query: "NewComposition", Summary: "Create a composition."},
 	"comp.set_background_color":   {Query: "Composition.SetBGColor", Summary: "Set composition background color."},
 	"comp.set_label":              {Query: "Composition.SetLabel", Summary: "Set composition label color."},
@@ -279,6 +282,7 @@ var capabilityRegistry = map[string]CapabilityMeta{
 	"layer.set_quality":               {Query: "Layer.SetQuality", Summary: "Set layer quality mode."},
 	"layer.set_blending_mode":         {Query: "Layer.SetBlendingMode", Summary: "Set layer blending mode."},
 	"layer.set_track_matte":           {Query: "Layer.SetTrackMatte", Summary: "Set layer track matte."},
+	"layer.set_track_matte_source":    {Query: "Layer.SetTrackMatteSource", Summary: "Set explicit track matte source."},
 	"layer.set_auto_orient":           {Query: "Layer.SetAutoOrient", Summary: "Set layer auto orientation."},
 	"layer.set_start_time":            {Query: "Layer.SetStartTime", Summary: "Set layer start time."},
 	"layer.set_in_point":              {Query: "Layer.SetInPoint", Summary: "Set layer in point."},

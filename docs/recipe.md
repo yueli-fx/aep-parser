@@ -18,6 +18,7 @@ This reference is generated from the canonical recipe field model.
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
 | `project.name` | `string` | - | Project display name. | - | - | examples/recipes/minimal-adjustment-layer.json |
+| `project.target_version` | `string` | - | AE target template used when compiling the recipe. | Must be AE2020, AE2022, or AE2025. Omitted target_version defaults to AE2020. | `project.create_target` (`NewProject`) | examples/recipes/minimal-layer-explicit-matte.json |
 
 ## CompSpec
 
@@ -88,7 +89,8 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].preserve_transparency` | `boolean` | - | Preserve transparency switch. | - | `layer.set_preserve_transparency` (`Layer.SetPreserveTransparency`) | examples/recipes/minimal-layer-advanced-switches.json |
 | `comps[].layers[].quality` | `string` | - | Layer quality mode. | - | `layer.set_quality` (`Layer.SetQuality`) | examples/recipes/minimal-layer-object-profile.json |
 | `comps[].layers[].blending_mode` | `string` | - | Layer blending mode. | - | `layer.set_blending_mode` (`Layer.SetBlendingMode`) | examples/recipes/minimal-layer-object-profile.json |
-| `comps[].layers[].track_matte` | `string` | - | Layer track matte mode. | - | `layer.set_track_matte` (`Layer.SetTrackMatte`) | examples/recipes/minimal-layer-track-matte.json |
+| `comps[].layers[].track_matte` | `string` | - | Layer track matte mode. | - | `layer.set_track_matte` (`Layer.SetTrackMatte`) | examples/recipes/minimal-layer-explicit-matte.json |
+| `comps[].layers[].matte` | `string` | - | Explicit track matte source layer name. | Requires project.target_version AE2025, a non-none track_matte mode, and a same-comp source layer name. | `layer.set_track_matte_source` (`Layer.SetTrackMatteSource`) | examples/recipes/minimal-layer-explicit-matte.json |
 | `comps[].layers[].auto_orient` | `string` | - | Layer auto-orientation mode. | - | `layer.set_auto_orient` (`Layer.SetAutoOrient`) | examples/recipes/minimal-layer-auto-orient.json |
 | `comps[].layers[].start_time` | `number` | - | Layer start time in seconds. | - | `layer.set_start_time` (`Layer.SetStartTime`) | examples/recipes/minimal-layer-object-profile.json |
 | `comps[].layers[].in_point` | `number` | - | Layer in point in seconds. | - | `layer.set_in_point` (`Layer.SetInPoint`) | examples/recipes/minimal-layer-object-profile.json |
@@ -98,7 +100,7 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].text_style` | `object<TextStyleSpec>` | - | Text layer style overrides. | - | - | examples/recipes/minimal-text-shape.json |
 | `comps[].layers[].camera` | `object<CameraSpec>` | - | Camera layer options. | - | - | examples/recipes/minimal-camera-aperture.json |
 | `comps[].layers[].light` | `object<LightSpec>` | - | Light layer options. | - | - | examples/recipes/minimal-light-casts-shadows.json |
-| `comps[].layers[].shape` | `object<ShapeSpec>` | - | Shape layer primitive and operators. | - | - | examples/recipes/minimal-layer-mask.json |
+| `comps[].layers[].shape` | `object<ShapeSpec>` | - | Shape layer primitive and operators. | - | - | examples/recipes/minimal-layer-explicit-matte.json |
 | `comps[].layers[].masks[]` | `array<recipe.MaskSpec>` | - | Layer masks. | - | `mask.add` (`AddMask`) | examples/recipes/minimal-layer-mask.json |
 | `comps[].layers[].transform` | `object<Transform>` | - | Layer transform block. | - | `layer.set_transform` (`SetLayerTransform`) | examples/recipes/minimal-adjustment-layer.json |
 | `comps[].layers[].effects[]` | `array<recipe.Effect>` | - | Built-in effect instance to add to the layer. | - | `effect.add_builtin` (`AddEffect`) | examples/recipes/minimal-text-effect.json |
@@ -168,7 +170,7 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].shape.outer_radius` | `number` | - | Star or polygon outer radius. | - | `shape.star.set_outer_radius` (`StarNode.SetOuterRadius`) | examples/recipes/minimal-shape-polystar.json |
 | `comps[].layers[].shape.inner_roundness` | `number` | - | Star inner roundness. | - | `shape.star.set_inner_roundness` (`StarNode.SetInnerRoundness`) | examples/recipes/minimal-shape-polystar.json |
 | `comps[].layers[].shape.outer_roundness` | `number` | - | Star or polygon outer roundness. | - | `shape.star.set_outer_roundness` (`StarNode.SetOuterRoundness`) | examples/recipes/minimal-shape-polystar.json |
-| `comps[].layers[].shape.fill_color` | `array<float64>` | - | Solid fill color as RGB channels. | - | `shape.fill.set_color` (`FillNode.SetColor`) | examples/recipes/minimal-layer-mask.json |
+| `comps[].layers[].shape.fill_color` | `array<float64>` | - | Solid fill color as RGB channels. | - | `shape.fill.set_color` (`FillNode.SetColor`) | examples/recipes/minimal-layer-explicit-matte.json |
 | `comps[].layers[].shape.fill_opacity` | `number` | - | Solid fill opacity. | - | `shape.fill.set_opacity` (`FillNode.SetOpacity`) | examples/recipes/minimal-text-shape.json |
 | `comps[].layers[].shape.fill_blend_mode` | `number` | - | Solid fill blend mode. | - | `shape.fill.set_blend_mode` (`FillNode.SetBlendMode`) | examples/recipes/minimal-shape-fill-blend-mode.json |
 | `comps[].layers[].shape.fill_composite_order` | `string` | - | Solid fill composite order. | - | `shape.fill.set_composite_order` (`FillNode.SetCompositeOrder`) | examples/recipes/minimal-shape-fill-composite-order.json |
@@ -573,8 +575,8 @@ This reference is generated from the canonical recipe field model.
 | `expected_profile.layers[].source_kind` | `string` | - | Expected source item type. | - | - | examples/recipes/minimal-layer-mask.json |
 | `expected_profile.layers[].light_source` | `string` | - | Expected source layer for light data. | - | - | examples/recipes/minimal-light-source.json |
 | `expected_profile.layers[].parent` | `string` | - | Expected parent layer name. | - | - | examples/recipes/minimal-layer-null-flag.json |
-| `expected_profile.layers[].track_matte` | `string` | - | Expected track matte mode. | Expected track matte must use a supported recipe track matte value. | - | examples/recipes/minimal-layer-track-matte.json |
-| `expected_profile.layers[].matte` | `string` | - | Expected matte layer name. | - | - | examples/recipes/minimal-layer-track-matte.json |
+| `expected_profile.layers[].track_matte` | `string` | - | Expected track matte mode. | Expected track matte must use a supported recipe track matte value. | - | examples/recipes/minimal-layer-explicit-matte.json |
+| `expected_profile.layers[].matte` | `string` | - | Expected matte layer name. | - | - | examples/recipes/minimal-layer-explicit-matte.json |
 | `expected_profile.layers[].label` | `number` | - | Expected layer label color index. | Expected layer label must be a valid AE label index. | - | examples/recipes/minimal-layer-label.json |
 | `expected_profile.layers[].comment` | `string` | - | Expected layer comment text. | - | - | examples/recipes/minimal-layer-comment.json |
 | `expected_profile.layers[].timing` | `object<ExpectedLayerTiming>` | - | Expected layer timing checks. | - | - | examples/recipes/minimal-layer-object-profile.json |

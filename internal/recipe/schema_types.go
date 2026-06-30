@@ -10,7 +10,8 @@ type Recipe struct {
 }
 
 type ProjectSpec struct {
-	Name string `json:"name,omitempty"`
+	Name          string `json:"name,omitempty"`
+	TargetVersion string `json:"target_version,omitempty"`
 }
 
 type CompSpec struct {
@@ -74,6 +75,7 @@ type Layer struct {
 	Quality               string         `json:"quality,omitempty"`
 	BlendingMode          string         `json:"blending_mode,omitempty"`
 	TrackMatte            string         `json:"track_matte,omitempty"`
+	Matte                 string         `json:"matte,omitempty"`
 	AutoOrient            string         `json:"auto_orient,omitempty"`
 	StartTime             *float64       `json:"start_time,omitempty"`
 	InPoint               *float64       `json:"in_point,omitempty"`

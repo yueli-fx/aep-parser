@@ -23,7 +23,11 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 		return report, nil
 	}
 
-	project := aep.NewProject(aep.TargetAE2020)
+	projectTarget, err := parseRecipeProjectTarget(rec.Project.TargetVersion)
+	if err != nil {
+		return report, nil
+	}
+	project := aep.NewProject(projectTarget.aepTarget())
 	compSpec := rec.Comps[0]
 	comp, err := aep.NewComposition(project, compSpec.Name, uint16(compSpec.Width), uint16(compSpec.Height), compSpec.FrameRate, compSpec.Duration)
 	if err != nil {
@@ -96,6 +100,9 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 	}
 	idx := projectindex.Build(project)
 	if err := applyLayerParents(compSpec, idx); err != nil {
+		return report, err
+	}
+	if err := applyExplicitMattes(compSpec, idx); err != nil {
 		return report, err
 	}
 	if err := applyLightSources(compSpec, idx); err != nil {

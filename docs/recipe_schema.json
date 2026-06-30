@@ -60,6 +60,38 @@
       "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
+      "x-aep-path": "project.target_version",
+      "json_name": "target_version",
+      "source_type": "ProjectSpec",
+      "source_field": "TargetVersion",
+      "type": "string",
+      "go_type": "string",
+      "description": "AE target template used when compiling the recipe.",
+      "x-aep-validation": "Must be AE2020, AE2022, or AE2025. Omitted target_version defaults to AE2020.",
+      "enum": [
+        "AE2020",
+        "AE2022",
+        "AE2025"
+      ],
+      "x-aep-capabilities": [
+        {
+          "key": "project.create_target",
+          "query": "NewProject",
+          "status": "supported",
+          "symbol": "NewProject",
+          "domain": "project",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "zero args defaults to TargetAE2020; targets 2020 / 2022 / 2025 supported",
+          "gate": [
+            "TestV2_1_AEShipGate_AE2020",
+            "TestV2_1_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-explicit-matte.json"
+    },
+    {
       "x-aep-path": "comps[]",
       "json_name": "comps",
       "source_type": "Recipe",
@@ -1380,7 +1412,33 @@
           ]
         }
       ],
-      "x-aep-example": "examples/recipes/minimal-layer-track-matte.json"
+      "x-aep-example": "examples/recipes/minimal-layer-explicit-matte.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].matte",
+      "json_name": "matte",
+      "source_type": "Layer",
+      "source_field": "Matte",
+      "type": "string",
+      "go_type": "string",
+      "description": "Explicit track matte source layer name.",
+      "x-aep-validation": "Requires project.target_version AE2025, a non-none track_matte mode, and a same-comp source layer name.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_track_matte_source",
+          "query": "Layer.SetTrackMatteSource",
+          "status": "supported",
+          "symbol": "Layer.SetTrackMatteSource",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2025",
+          "boundary": "mirrors AE ScriptingAPI 23+'s layer.setTrackMatte(srcLayer,\ntype) and requires the AE 23+ ldta layout (the @0xA0 slot) — files saved\nby AE 22 / 2020 need a resave through AE 23+ first. length-preserving:\nwrites ldta @0xA0..0xA3 = src.ID (4 bytes BE) and @0x6B = mode (1 byte),\ndelegating to SetTrackMatteLayer. Refuses a nil src, either layer\nlacking a comp back-pointer, a cross-comp matte (AE 23+ requires the\nsame comp), and a self-matte (src.ID == the layer's own ID). Passing\nmode=TrackMatteNone with a non-nil src preserves the source pointer\nwhile disabling the matte channel; use ClearTrackMatteLayer to fully\nclear it. The ship gate is single-version because no intermediate AE\ntarget both produces this layout and survives the next version's\nforward compatibility check, so a two-version gate is not reachable.",
+          "gate": [
+            "TestTrackMatteExplicit_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-layer-explicit-matte.json"
     },
     {
       "x-aep-path": "comps[].layers[].auto_orient",
@@ -2475,7 +2533,7 @@
       "go_type": "*recipe.ShapeSpec",
       "object_type": "ShapeSpec",
       "description": "Shape layer primitive and operators.",
-      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
+      "x-aep-example": "examples/recipes/minimal-layer-explicit-matte.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.kind",
@@ -2811,7 +2869,7 @@
           ]
         }
       ],
-      "x-aep-example": "examples/recipes/minimal-layer-mask.json"
+      "x-aep-example": "examples/recipes/minimal-layer-explicit-matte.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.fill_opacity",
@@ -7283,7 +7341,7 @@
         "luma",
         "luma_inverse"
       ],
-      "x-aep-example": "examples/recipes/minimal-layer-track-matte.json"
+      "x-aep-example": "examples/recipes/minimal-layer-explicit-matte.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].matte",
@@ -7293,7 +7351,7 @@
       "type": "string",
       "go_type": "string",
       "description": "Expected matte layer name.",
-      "x-aep-example": "examples/recipes/minimal-layer-track-matte.json"
+      "x-aep-example": "examples/recipes/minimal-layer-explicit-matte.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].label",

@@ -4,6 +4,10 @@ var fieldValidation = map[string]FieldMeta{
 	"schema_version": {
 		Validation: "Must equal the supported recipe schema version.",
 	},
+	"project.target_version": {
+		Validation: "Must be AE2020, AE2022, or AE2025. Omitted target_version defaults to AE2020.",
+		Enum:       []string{"AE2020", "AE2022", "AE2025"},
+	},
 	"comps[].width": {
 		Validation: "Pixel width must fit the composition writer's uint16 range.",
 	},
@@ -16,6 +20,9 @@ var fieldValidation = map[string]FieldMeta{
 	"comps[].layers[].type": {
 		Validation: "Supported values create the corresponding layer type.",
 		Enum:       []string{"solid", "text", "shape", "camera", "light", "null", "adjustment"},
+	},
+	"comps[].layers[].matte": {
+		Validation: "Requires project.target_version AE2025, a non-none track_matte mode, and a same-comp source layer name.",
 	},
 	"comps[].layers[].effects[].match_name": {
 		Validation: "Must be a supported effect match name for recipe compilation.",

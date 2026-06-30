@@ -4,6 +4,7 @@
     "schema_version",
     "project",
     "project.name",
+    "project.target_version",
     "comps[]",
     "comps[].name",
     "comps[].width",
@@ -56,6 +57,7 @@
     "comps[].layers[].quality",
     "comps[].layers[].blending_mode",
     "comps[].layers[].track_matte",
+    "comps[].layers[].matte",
     "comps[].layers[].auto_orient",
     "comps[].layers[].start_time",
     "comps[].layers[].in_point",
@@ -1469,6 +1471,20 @@
       ],
       "example": "examples/recipes/minimal-layer-mask.json"
     },
+    "comps[].layers[].matte": {
+      "path": "comps[].layers[].matte",
+      "json_name": "matte",
+      "source_type": "Layer",
+      "source_field": "Matte",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Explicit track matte source layer name.",
+      "validation": "Requires project.target_version AE2025, a non-none track_matte mode, and a same-comp source layer name.",
+      "capability_keys": [
+        "layer.set_track_matte_source"
+      ],
+      "example": "examples/recipes/minimal-layer-explicit-matte.json"
+    },
     "comps[].layers[].motion_blur": {
       "path": "comps[].layers[].motion_blur",
       "json_name": "motion_blur",
@@ -1568,7 +1584,7 @@
       "type": "object\u003cShapeSpec\u003e",
       "go_type": "*recipe.ShapeSpec",
       "summary": "Shape layer primitive and operators.",
-      "example": "examples/recipes/minimal-layer-mask.json"
+      "example": "examples/recipes/minimal-layer-explicit-matte.json"
     },
     "comps[].layers[].shape.fill_blend_mode": {
       "path": "comps[].layers[].shape.fill_blend_mode",
@@ -1594,7 +1610,7 @@
       "capability_keys": [
         "shape.fill.set_color"
       ],
-      "example": "examples/recipes/minimal-layer-mask.json"
+      "example": "examples/recipes/minimal-layer-explicit-matte.json"
     },
     "comps[].layers[].shape.fill_composite_order": {
       "path": "comps[].layers[].shape.fill_composite_order",
@@ -3328,7 +3344,7 @@
       "capability_keys": [
         "layer.set_track_matte"
       ],
-      "example": "examples/recipes/minimal-layer-track-matte.json"
+      "example": "examples/recipes/minimal-layer-explicit-matte.json"
     },
     "comps[].layers[].transform": {
       "path": "comps[].layers[].transform",
@@ -4904,7 +4920,7 @@
       "type": "string",
       "go_type": "string",
       "summary": "Expected matte layer name.",
-      "example": "examples/recipes/minimal-layer-track-matte.json"
+      "example": "examples/recipes/minimal-layer-explicit-matte.json"
     },
     "expected_profile.layers[].name": {
       "path": "expected_profile.layers[].name",
@@ -5042,7 +5058,7 @@
         "luma",
         "luma_inverse"
       ],
-      "example": "examples/recipes/minimal-layer-track-matte.json"
+      "example": "examples/recipes/minimal-layer-explicit-matte.json"
     },
     "expected_profile.layers[].type": {
       "path": "expected_profile.layers[].type",
@@ -5678,6 +5694,25 @@
       "summary": "Project display name.",
       "example": "examples/recipes/minimal-adjustment-layer.json"
     },
+    "project.target_version": {
+      "path": "project.target_version",
+      "json_name": "target_version",
+      "source_type": "ProjectSpec",
+      "source_field": "TargetVersion",
+      "type": "string",
+      "go_type": "string",
+      "summary": "AE target template used when compiling the recipe.",
+      "validation": "Must be AE2020, AE2022, or AE2025. Omitted target_version defaults to AE2020.",
+      "enum": [
+        "AE2020",
+        "AE2022",
+        "AE2025"
+      ],
+      "capability_keys": [
+        "project.create_target"
+      ],
+      "example": "examples/recipes/minimal-layer-explicit-matte.json"
+    },
     "schema_version": {
       "path": "schema_version",
       "json_name": "schema_version",
@@ -5975,6 +6010,7 @@
       "comps[].layers[].quality",
       "comps[].layers[].blending_mode",
       "comps[].layers[].track_matte",
+      "comps[].layers[].matte",
       "comps[].layers[].auto_orient",
       "comps[].layers[].start_time",
       "comps[].layers[].in_point",
@@ -6033,7 +6069,8 @@
       "comps[].layers[].shape.offset_paths.copy_offset"
     ],
     "ProjectSpec": [
-      "project.name"
+      "project.name",
+      "project.target_version"
     ],
     "PuckerBloatSpec": [
       "comps[].layers[].shape.pucker_bloat.amount"

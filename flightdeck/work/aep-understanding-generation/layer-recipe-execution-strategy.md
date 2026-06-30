@@ -61,7 +61,7 @@ flags, and refs.
 | Masks | `layers[].masks[]` static path/name/mode/inverted/options/path keyframes | `AddMask` after Reopen plus `Mask.Set*` option setters and `SetMaskPathKeyframes` | `layers[].masks[]` | `expected_profile.masks[]` | L3 | static + options + path keyframes done |
 | Parent refs | `parent` | `Layer.SetParent` | `layers[].parent_ref` | `expected_profile.layers[].parent` | L3 | done |
 | Classic matte refs | `track_matte` | `Layer.SetTrackMatte` | `layers[].flags.track_matte_name` / `matte_ref` | `expected_profile.layers[].track_matte` / `matte` | L3 | done |
-| Explicit matte refs | not recipe-owned yet | `Layer.SetTrackMatteSource` / `SetTrackMatteLayer` | `layers[].matte_ref` | planned when writer enters recipe scope | L3 AE2025-only | blocked |
+| Explicit matte refs | `matte` + non-none `track_matte` with `project.target_version: "AE2025"` | `Layer.SetTrackMatteSource` | `layers[].matte_ref` | `expected_profile.layers[].matte` | L3 AE2025-only | done |
 | Transform statics | `transform.position` / `scale` / `anchor_point` / `rotation` / `opacity` | `SetLayerTransform` | `properties[]` | `expected_profile.properties[]` | L3 | keep separate |
 | Transform keyframes/ease | `transform.*_keyframes` | `SetLayerTransform` | `properties[].keyframes[]` | `expected_profile.keyframes[]` | L3 | keep separate |
 | Transform expressions | `transform.expressions.*` | `Property.SetExpression` / `Property.SetExpressionEnabled` | `properties[].expression` / `expression_enabled` | `expected_profile.properties[].expression` / `expression_enabled` | L3 | keep separate |
@@ -271,10 +271,13 @@ same baseline through `path_keyframes[]` authoring and
 Per-keyframe interpolation/ease and tangent detail remain future work only when
 the parser/profile can expose a defensible contract.
 
-Next, leave explicit AE2025 `SetTrackMatteSource` / `SetTrackMatteLayer`
-blocked until recipe target-version handling is explicit. Continue with the
-next recipe-owned family instead of mixing AE2025-only layout requirements into
-the AE2020-targeted recipe compiler.
+Explicit AE2025 source mattes now have a target-version-gated recipe slice:
+`minimal-layer-explicit-matte.json` sets `project.target_version: "AE2025"`,
+uses `layers[].matte` to name the source layer, and keeps the channel mode in
+`layers[].track_matte`. The recipe asserts both
+`expected_profile.layers[].track_matte` and `expected_profile.layers[].matte`.
+Continue with the next recipe-owned family; do not add more AE2025-only fields
+without the same explicit target-version boundary.
 
 ## Self-Review
 

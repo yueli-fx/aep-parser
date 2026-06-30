@@ -49,6 +49,13 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 		addRefusal("missing_comp", "comps", "at least one comp is required")
 		return report
 	}
+	projectTarget, err := parseRecipeProjectTarget(rec.Project.TargetVersion)
+	if err != nil {
+		addRefusal("invalid_project_target_version", "project.target_version", err.Error())
+	}
+	if rec.Project.TargetVersion != "" {
+		recordCapability("NewProject", "project.target_version")
+	}
 	if len(rec.Comps) > 1 {
 		addRefusal("too_many_comps", "comps", "first recipe slice supports exactly one comp")
 	}
@@ -122,6 +129,21 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 				recordCapability("Layer.SetParent", layerPath+".parent")
 				if !layerNames[layer.Parent] {
 					addRefusal("unknown_layer_parent", layerPath+".parent", fmt.Sprintf("parent layer %q was not found in the comp", layer.Parent))
+				}
+			}
+			if layer.Matte != "" {
+				recordCapability("Layer.SetTrackMatteSource", layerPath+".matte")
+				if projectTarget != aepTargetAE2025 {
+					addRefusal("explicit_matte_requires_ae2025", layerPath+".matte", "explicit matte source requires project.target_version AE2025")
+				}
+				if layer.TrackMatte == "" || layer.TrackMatte == "none" {
+					addRefusal("missing_explicit_matte_mode", layerPath+".track_matte", "explicit matte source requires a non-none track_matte mode")
+				}
+				if layer.Matte == layer.Name {
+					addRefusal("self_explicit_matte", layerPath+".matte", "layer cannot use itself as an explicit matte source")
+				}
+				if !layerNames[layer.Matte] {
+					addRefusal("unknown_explicit_matte", layerPath+".matte", fmt.Sprintf("matte layer %q was not found in the comp", layer.Matte))
 				}
 			}
 			if layer.Light != nil && layer.Light.SourceLayer != "" && !layerNames[layer.Light.SourceLayer] {
