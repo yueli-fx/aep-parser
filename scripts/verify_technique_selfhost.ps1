@@ -22,6 +22,7 @@ try {
     $acceptanceMdPath = Join-Path $runRoot "acceptance.md"
     $latestRunPath = Join-Path $OutRoot "latest_run.txt"
     $latestAcceptancePath = Join-Path $OutRoot "latest_acceptance.md"
+    $latestIndexPath = Join-Path $OutRoot "latest_index.html"
     New-Item -ItemType Directory -Force -Path $runRoot | Out-Null
 
     $steps = [System.Collections.ArrayList]::new()
@@ -146,6 +147,43 @@ try {
         [void]$b.AppendLine("| $($step.name) | $($step.exit) | $($step.seconds) |")
     }
     $b.ToString() | Set-Content -LiteralPath $acceptanceMdPath -Encoding UTF8
+
+    $runRel = $runID
+    $index = [System.Text.StringBuilder]::new()
+    [void]$index.AppendLine("<!doctype html>")
+    [void]$index.AppendLine("<html lang=""en""><head><meta charset=""utf-8""><meta name=""viewport"" content=""width=device-width, initial-scale=1"">")
+    [void]$index.AppendLine("<title>Technique Self-Hosted Acceptance</title>")
+    [void]$index.AppendLine("<style>body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#f6f8fb;color:#1f2937}main{max-width:960px;margin:0 auto;padding:32px}h1{font-size:28px;margin:0 0 8px}.muted{color:#667085}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:22px 0}.metric,.panel{background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:16px}.metric strong{display:block;font-size:26px;margin-top:6px}.links{display:grid;gap:10px;margin-top:16px}.links a{display:block;background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:12px 14px;color:#1d4ed8;text-decoration:none}.links a:hover{text-decoration:underline}table{width:100%;border-collapse:collapse;font-size:14px}td,th{border-bottom:1px solid #e5e7eb;padding:8px;text-align:left}td:last-child,th:last-child{text-align:right}code{background:#eef2f7;padding:2px 5px;border-radius:4px}</style>")
+    [void]$index.AppendLine("</head><body><main>")
+    [void]$index.AppendLine("<h1>Technique Self-Hosted Acceptance</h1>")
+    [void]$index.AppendLine("<p class=""muted"">run <code>$runRel</code> · input <code>$InputPath</code></p>")
+    [void]$index.AppendLine("<div class=""grid"">")
+    [void]$index.AppendLine("<div class=""metric""><span>Projects</span><strong>$($fullManifest.project_count)</strong></div>")
+    [void]$index.AppendLine("<div class=""metric""><span>Errors</span><strong>$($fullManifest.error_count)</strong></div>")
+    [void]$index.AppendLine("<div class=""metric""><span>Patterns</span><strong>$($fullManifest.pattern_count)</strong></div>")
+    [void]$index.AppendLine("<div class=""metric""><span>Partial Errors</span><strong>$($partialManifest.error_count)</strong></div>")
+    [void]$index.AppendLine("</div>")
+    [void]$index.AppendLine("<section class=""panel""><h2>Artifacts</h2><div class=""links"">")
+    [void]$index.AppendLine("<a href=""$runRel/full_report/report.html"">Full report HTML</a>")
+    [void]$index.AppendLine("<a href=""$runRel/full_report/learning.md"">Learning index</a>")
+    [void]$index.AppendLine("<a href=""$runRel/full_report/study_queue.csv"">Study queue CSV</a>")
+    [void]$index.AppendLine("<a href=""$runRel/full_report/projects.csv"">Projects CSV</a>")
+    [void]$index.AppendLine("<a href=""$runRel/full_report/patterns.csv"">Patterns CSV</a>")
+    [void]$index.AppendLine("<a href=""$runRel/full_report/errors.csv"">Errors CSV</a>")
+    [void]$index.AppendLine("<a href=""$runRel/partial_report/report.html"">Partial-error report HTML</a>")
+    [void]$index.AppendLine("<a href=""$runRel/compare_self/compare.md"">Self compare</a>")
+    [void]$index.AppendLine("<a href=""$runRel/compare_partial_to_full/compare.md"">Partial-to-full compare</a>")
+    [void]$index.AppendLine("<a href=""$runRel/acceptance.md"">Acceptance markdown</a>")
+    [void]$index.AppendLine("<a href=""$runRel/acceptance.json"">Acceptance JSON</a>")
+    [void]$index.AppendLine("</div></section>")
+    [void]$index.AppendLine("<section class=""panel"" style=""margin-top:16px""><h2>Steps</h2><table><thead><tr><th>Step</th><th>Seconds</th></tr></thead><tbody>")
+    foreach ($step in $steps) {
+        [void]$index.AppendLine("<tr><td>$($step.name)</td><td>$($step.seconds)</td></tr>")
+    }
+    [void]$index.AppendLine("</tbody></table></section>")
+    [void]$index.AppendLine("</main></body></html>")
+    $index.ToString() | Set-Content -LiteralPath $latestIndexPath -Encoding UTF8
+
     $runRoot | Set-Content -LiteralPath $latestRunPath -Encoding UTF8
     Copy-Item -LiteralPath $acceptanceMdPath -Destination $latestAcceptancePath -Force
 
@@ -153,6 +191,7 @@ try {
     Write-Host "acceptance md:   $acceptanceMdPath"
     Write-Host "latest run:      $latestRunPath"
     Write-Host "latest summary:  $latestAcceptancePath"
+    Write-Host "latest index:    $latestIndexPath"
     Write-Host "full report:     $fullReportDir"
     Write-Host "partial report:  $partialReportDir"
 }

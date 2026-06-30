@@ -34,7 +34,7 @@ pwsh -NoProfile -File scripts\compare_technique_reports.ps1 -BaseDir tmp\old_rep
 pwsh -NoProfile -File scripts\verify_technique_selfhost.ps1 -OutRoot tmp\technique_selfhost_gate
 ```
 
-验收完成后可直接打开 `tmp\technique_selfhost_gate\latest_acceptance.md` 查看最近一次结果。
+验收完成后可直接打开 `tmp\technique_selfhost_gate\latest_index.html` 或 `tmp\technique_selfhost_gate\latest_acceptance.md` 查看最近一次结果。
 
 ## 原理与分层
 
