@@ -3,7 +3,7 @@
 // Renders the comp named in render_target.txt (UTF-8 sidecar, avoids embedding
 // Japanese names in this source); falls back to the FIRST comp if the sidecar is
 // absent/unmatched. 8bpc + purge + sleep so the async write flushes. Run via
-// scripts/ae_run.ps1 after the generator; -Done = render.done.
+// scripts/ae-worker/ae_run.ps1 after the generator; -Done = render.done.
 (function () {
     var dir = "e:/projects/tools/aep-parser/flightdeck/showcase/booyah-clone/";
     var T = 1.0; // time (seconds)

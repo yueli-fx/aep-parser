@@ -1,11 +1,11 @@
 # ⚠ aeoracle render must validate PNG files after saveFrameToPng
 
 SUMMARY: AE `comp.saveFrameToPng` can return without the requested PNG being present yet; `aeoracle render` must wait for each file and the CLI must validate all requested frame PNGs after AE reports `ok`.
-READ WHEN: changing `scripts/aeoracle_render.jsx`; debugging aeoracle metadata that says frames are `rendered` but PNG files are missing; adding render gates for heavier shape/effect outputs
+READ WHEN: changing `scripts/ae-worker/aeoracle_render.jsx`; debugging aeoracle metadata that says frames are `rendered` but PNG files are missing; adding render gates for heavier shape/effect outputs
 
 ---
 
-During recipe Twist validation, `scripts/aeoracle_render.jsx` produced:
+During recipe Twist validation, `scripts/ae-worker/aeoracle_render.jsx` produced:
 
 - `aeoracle_render.done` = `ok`
 - `metadata.json` with five frames marked `rendered`

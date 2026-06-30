@@ -20,10 +20,10 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$repo = Split-Path $PSScriptRoot -Parent
+$repo = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 $jsx  = Join-Path $PSScriptRoot 'dump_effects_dict.jsx'
 $done = Join-Path $repo 'data\effects-dict\effects_dict.done'
-$aeRun = Join-Path $PSScriptRoot 'ae_run.ps1'
+$aeRun = Join-Path (Split-Path $PSScriptRoot -Parent) 'ae-worker\ae_run.ps1'
 
 foreach ($ae in $AeExes) {
     if (-not (Test-Path $ae)) { Write-Host "SKIP (not found): $ae"; continue }

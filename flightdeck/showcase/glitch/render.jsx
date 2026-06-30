@@ -1,7 +1,7 @@
 // flightdeck/showcase/glitch/render.jsx — open glitch.aep and save a frame at the
 // peak-tear moment (t=1.5s, Max H Displacement keyframe = 60) as glitch.png for
 // eyeballing. Force 8bpc + $.sleep so the async write flushes.
-// Run via scripts/ae_run.ps1 after `go run ./flightdeck/showcase/glitch`.
+// Run via scripts/ae-worker/ae_run.ps1 after `go run ./flightdeck/showcase/glitch`.
 (function () {
     var dir = "e:/projects/tools/aep-parser/flightdeck/showcase/glitch/";
     var log = [];

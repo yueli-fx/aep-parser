@@ -377,7 +377,7 @@ Describe 'Write-ForensicsDump' {
     }
 }
 
-Describe 'Shipped dialog rules (scripts/ae_dialog_rules.json)' {
+Describe 'Shipped dialog rules (scripts/ae-worker/ae_dialog_rules.json)' {
     BeforeAll {
         $script:shipped = Parse-Rules -Path (Join-Path $PSScriptRoot 'ae_dialog_rules.json')
     }

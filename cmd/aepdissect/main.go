@@ -17,7 +17,7 @@
 //
 // Dictionary defaults to data/effects-dict/effects_en_US_25.1x68.json (run from
 // repo root). Missing dict -> falls back to raw matchName output. Build the dict
-// with scripts/dump_effects_dict.ps1 (see checklists/effects-dict.md).
+// with scripts/effects-dict/dump_effects_dict.ps1 (see checklists/effects-dict.md).
 //
 // This is the mechanical step; turning the dump into role/technique knowledge is
 // human/AI judgment (see docs/fx-techniques.md + the technique-ontology schema).

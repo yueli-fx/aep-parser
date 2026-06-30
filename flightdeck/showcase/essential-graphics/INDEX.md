@@ -5,7 +5,7 @@ capabilities: [add-essential-property, set-motion-graphics-template-name, eg-con
 gates: [TestEssentialGraphics_AEShipGate_AE2020, TestEssentialGraphics_AEShipGate_AE2025, essential-graphics-write-re]
 status: blocked
 last_updated: 2026-06-14
-regenerate: "go run ./flightdeck/showcase/essential-graphics  +  scripts/ae_run.ps1 verify.jsx"
+regenerate: "go run ./flightdeck/showcase/essential-graphics  +  scripts/ae-worker/ae_run.ps1 verify.jsx"
 ---
 # essential-graphics — Essential Graphics 控件 showcase（📋 读值档）
 

@@ -5,7 +5,7 @@ capabilities: [rgb-channel-split, displacement-glitch, emissive-glow, add-blend,
 gates: []
 status: 待review
 last_updated: 2026-06-19
-regenerate: "go run ./flightdeck/showcase/glitch  +  scripts/ae_run.ps1 render.jsx"
+regenerate: "go run ./flightdeck/showcase/glitch  +  scripts/ae-worker/ae_run.ps1 render.jsx"
 ---
 
 # glitch — 纯 native glitch showcase（VALIDATE：glitch 技法实渲）
@@ -40,7 +40,7 @@ regenerate: "go run ./flightdeck/showcase/glitch  +  scripts/ae_run.ps1 render.j
 
 ## 验证状态（2026-06-18）
 
-- **agent 实渲 + 眼验：✅**（AE 2025，`scripts/ae_run.ps1`，exit 0）。4 个技法肉眼全部可见、零第三方依赖（aepdissect: RENDER DEPENDENCIES = none）。
+- **agent 实渲 + 眼验：✅**（AE 2025，`scripts/ae-worker/ae_run.ps1`，exit 0）。4 个技法肉眼全部可见、零第三方依赖（aepdissect: RENDER DEPENDENCIES = none）。
 - **⚠ 待用户真机验收**：agent 眼验 ≠ 用户真机验收（showcase review-gate）。未建独立 `TestGlitch_AEShipGate`（底层 caps 已各自 gated；组合走 showcase 眼验）。
 - 升级路：若要把 T16 confidence 升 `validated`，补一个 `TestGlitch_AEShipGate_AE2020/AE2025`（双版本 + 像素采样）。
 

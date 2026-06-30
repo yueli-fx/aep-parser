@@ -8,7 +8,7 @@ READ WHEN: 要给新 AE 版本(2027/2028…)生成效果参数字典;想知道�
 > **这份字典是什么 / 为什么要它**:.aep 里效果参数只存 matchName(`ADBE Glo2-0002`)+ 无名数值,**parser 读得到存在、读不懂语义**。这份字典把 `matchName → 人类可读名 + 类型 + 默认值` 嚼好,让工具能把"一串无名数字"翻译成"用户在这个效果上调了哪几个旋钮"。是"读懂工程效果意图"的基础设施。
 >
 > **产物**:`data/effects-dict/effects_<lang>_<ver>.json`(分语言 + 分版本,各 ~470KB)。当前已有 5 版本英文(2020/2022/2023/2024/2025)+ 4 版本中文残档(2020/2023/2024/2025;统一英文后中文留作三语 join 用)。
-> **工具**(tracked,可重生成):`scripts/dump_effects_dict.jsx` + `scripts/dump_effects_dict.ps1`(跑全版本 wrapper)+ `scripts/effect_matchnames_seed.txt`(种子 matchName 列表)。
+> **工具**(tracked,可重生成):`scripts/effects-dict/dump_effects_dict.jsx` + `scripts/effects-dict/dump_effects_dict.ps1`(跑全版本 wrapper)+ `scripts/effects-dict/effect_matchnames_seed.txt`(种子 matchName 列表)。
 
 ---
 
@@ -16,14 +16,14 @@ READ WHEN: 要给新 AE 版本(2027/2028…)生成效果参数字典;想知道�
 
 ### 原理(为什么是 seed + addProperty,而不是"列出所有效果")
 
-AE ExtendScript **没有"列出所有已装效果"的 API**。本方案用一份 **matchName 种子列表**(`scripts/effect_matchnames_seed.txt`,439 个,源自 yozya 三语 JSON + 本 reel 出现的第三方),对每个种子在临时 solid 上 `addProperty(matchName)`:成功 → 递归走它的参数树,记 `matchName + 当前语言显示名 + 类型 + 默认值`;失败(该版本没有 / 第三方没装)→ 跳过。**默认值取自刚 add、未改动的效果实例,所以就是 AE 默认值**。
+AE ExtendScript **没有"列出所有已装效果"的 API**。本方案用一份 **matchName 种子列表**(`scripts/effects-dict/effect_matchnames_seed.txt`,439 个,源自 yozya 三语 JSON + 本 reel 出现的第三方),对每个种子在临时 solid 上 `addProperty(matchName)`:成功 → 递归走它的参数树,记 `matchName + 当前语言显示名 + 类型 + 默认值`;失败(该版本没有 / 第三方没装)→ 跳过。**默认值取自刚 add、未改动的效果实例,所以就是 AE 默认值**。
 
 ### 标准流程(每个版本)
 
 1. **(只 dump 英文时)把 AE 切英文** —— 改 `E:\adobe\Adobe After Effects <YEAR>\Support Files\AMT\application.xml` 里
    `<Data key="installedLanguages">zh_CN</Data>` → `en_US`(先 `.bak` 备份)。重启 AE 即英文 UI。`zh_CN`=中文,`en_US`=英文。
 2. **人工开脚本写权限**(⚠ 见下方注意事项,这步**必须人工**) —— AE 里 `Edit > Preferences > Scripting & Expressions` → 勾 **"Allow Scripts to Write Files and Access Network"** → OK。**每个语言档第一次都要开一次**(切语言=新首选项档,默认关)。
-3. **跑 dumper** —— `pwsh -File scripts/dump_effects_dict.ps1`(默认跑 E:\adobe 下 5 个版本;新版本在 `-AeExes` 数组里加 exe 路径)。每版本:kill 残留 → `ae_run.ps1` 跑 jsx → cold-start exit-2 warm-retry ×3。
+3. **跑 dumper** —— `pwsh -File scripts/effects-dict/dump_effects_dict.ps1`(默认跑 E:\adobe 下 5 个版本;新版本在 `-AeExes` 数组里加 exe 路径)。每版本:kill 残留 → `ae_run.ps1` 跑 jsx → cold-start exit-2 warm-retry ×3。
 4. **验证** —— done 日志 `ok=N fail=M skip=2`,产物 `data/effects-dict/effects_<lang>_<ver>.json` 非 0KB(~470KB)。再抽查 name 语言对、跨语言 matchName 集合一致(只差 skip 的 2 个 LUT)、同 key 默认值跨语言相同。
 
 ### ⚠ 注意事项(都是踩过的坑,2026-06-18)

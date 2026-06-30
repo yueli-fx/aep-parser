@@ -37,7 +37,7 @@ READ WHEN: 判断某 chunk/字段属于哪个 AE 版本的版本门禁；想用 
 
 - 静态：node `vm` stub `require`+补 `Buffer`，只跑纯查表解码器反混淆（不调 convertFile），逐函数读出偏移/阈值/护栏。
 - live：同 vm 真 fs/path 调真 `convertFile` 对 fixture 副本转换，自写字节 walker diff —— 朴素偏移 `head.dataStart+[1,3,4,5,6,7]`+write-if-different、trimmedLdta 164→160、comr/CIF3/OvdG 删增、bug#1/#2 全部活证。
-- ship-gate：`selection_both_layers`(AE2025, 2 图层)→2020 经 `scripts/ae_run.ps1` 开 AE 2020 → 4 items / Comp 1 / 2 层同名同序，无"损坏/跳过"，**工具主流路径(2025→2020)产出 AE 视为原生且内容无损**。AE 自动化 prefs 注意：脚本跑完让 AE 优雅 `app.quit()` 等几秒再 kill，否则首选项损坏（见 [ae-automation-occlusion-crashstate.md](ae-automation-occlusion-crashstate.md)）。
+- ship-gate：`selection_both_layers`(AE2025, 2 图层)→2020 经 `scripts/ae-worker/ae_run.ps1` 开 AE 2020 → 4 items / Comp 1 / 2 层同名同序，无"损坏/跳过"，**工具主流路径(2025→2020)产出 AE 视为原生且内容无损**。AE 自动化 prefs 注意：脚本跑完让 AE 优雅 `app.quit()` 等几秒再 kill，否则首选项损坏（见 [ae-automation-occlusion-crashstate.md](ae-automation-occlusion-crashstate.md)）。
 
 ## 实证：非相邻显式 track-matte 降级后静默丢绑（bug #6，2026-06-22）
 
@@ -54,7 +54,7 @@ READ WHEN: 判断某 chunk/字段属于哪个 AE 版本的版本门禁；想用 
 - BEFORE（AE2025，164-ldta）：`T.TrackMatteLayerID = 14 = M.ID` —— **本仓 `SetTrackMatteSource` 正确写 @0xA0，无 0xA0=0 写 bug**（顺手排除了「我们自己也假设 0xA0=0」的疑虑）。`T.TrackMatte(@0x6B)=3`（LUMA）。
 - AFTER（trim 后）：`T.TrackMatteLayerID = 0`（显式源**抹除**），`T.TrackMatte(@0x6B)=3` **存活**（孤儿：模式在、源没了）。
 
-**AE 2020 实测**（v17.7，`scripts/ae_run.ps1` 无人值守开全降级文件 dump DOM）：
+**AE 2020 实测**（v17.7，`scripts/ae-worker/ae_run.ps1` 无人值守开全降级文件 dump DOM）：
 ```
 OPENED silently (no corruption dialog)        ← 静默，无报错
 idx=1 M trackMatteType=NONE enabled=true       ← 原显式源 M 沦为普通可见层

@@ -5,7 +5,7 @@
 //   line2: comp name ("" = first comp)
 //   line3: comma-separated times in seconds (e.g. "0.3,0.5,0.8")
 //   line4: absolute output prefix (PNGs -> <prefix>_t300.png etc., ms)
-// Run via scripts/ae_run.ps1; writes render_frames.done on completion.
+// Run via scripts/ae-worker/ae_run.ps1; writes render_frames.done on completion.
 (function () {
     var dir = "e:/projects/tools/aep-parser/flightdeck/showcase/booyah-clone/";
     var log = [];

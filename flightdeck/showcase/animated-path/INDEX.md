@@ -5,7 +5,7 @@ capabilities: [path-keyframes, animated-shape-path, bezier-path-interpolation, m
 gates: [TestV2_2_PathKf_AEShipGate_AE2020, TestV2_2_PathKf_AEShipGate_AE2025]
 status: complete
 last_updated: 2026-06-14
-regenerate: "go run ./flightdeck/showcase/animated-path  +  scripts/ae_run.ps1 render.jsx (renders t=2s)"
+regenerate: "go run ./flightdeck/showcase/animated-path  +  scripts/ae-worker/ae_run.ps1 render.jsx (renders t=2s)"
 ---
 
 # animated-path — 动画形状路径 showcase

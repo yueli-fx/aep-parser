@@ -40,14 +40,14 @@ bespoke project code:
   - 31 `missing_object`
   - 24 `extra_object`
 - Render oracle planning selected 3 sentinel frames: 0, 24, 48.
-- Render dry-run validated the request and emitted the `scripts/ae_run.ps1`
+- Render dry-run validated the request and emitted the `scripts/ae-worker/ae_run.ps1`
   invocation with absolute runner, JSX, and `.done` paths.
 - Hard AE render gate passed on After Effects `25.1x68`:
   - `.done`: `tmp_debug/aeoracle/circle_animation/aeoracle_render.done` = `ok`
   - metadata: `tmp_debug/aeoracle/circle_animation/metadata.json`, status `ok`
   - PNG outputs: `f000000.png`, `f000024.png`, `f000048.png`
 - Render gate fix recorded in code:
-  - `scripts/aeoracle_render.jsx` injects a small JSON parser/stringifier because
+  - `scripts/ae-worker/aeoracle_render.jsx` injects a small JSON parser/stringifier because
     this AE ExtendScript runtime does not provide global `JSON`.
   - `cmd/aeoracle render` resolves request/runner/JSX/done paths against the
     invocation cwd and treats non-`ok` `.done` content as failure.

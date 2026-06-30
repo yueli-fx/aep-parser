@@ -5,7 +5,7 @@ capabilities: [rect, ellipse, star, rounded-rect, fill, stroke, stroke-width, st
 gates: [TestNewShapeLayer_AEShipGate, "shape rect/ellipse/star gates", TestMGGradientDir_AEShipGate, "stroke line-cap/join gate"]
 status: complete
 last_updated: 2026-06-13
-regenerate: "go run ./flightdeck/showcase/shape-primitives  +  scripts/ae_run.ps1 render.jsx"
+regenerate: "go run ./flightdeck/showcase/shape-primitives  +  scripts/ae-worker/ae_run.ps1 render.jsx"
 ---
 
 # shape-primitives — 形状图元 + 描绘算子 showcase

@@ -5,7 +5,7 @@ capabilities: [new-camera-layer, new-light-layer, source-less-layer]
 gates: [TestNewCameraLayer_AEShipGate, TestNewLightLayer_AEShipGate, camera-light-layer-create-re]
 status: complete
 last_updated: 2026-06-14
-regenerate: "go run ./flightdeck/showcase/camera-light  +  scripts/ae_run.ps1 verify.jsx"
+regenerate: "go run ./flightdeck/showcase/camera-light  +  scripts/ae-worker/ae_run.ps1 verify.jsx"
 ---
 
 # camera-light — 相机/灯光层创建 showcase（📋 读值档）

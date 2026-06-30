@@ -1,5 +1,5 @@
 {
-  "_doc": "Fixture regeneration manifest. Each entry: jsx (generator), ae (AE version key, or {default+per-first-env-value overrides}), env (var -> value list; multiple vars = cartesian product), done/outputs ({VAR} placeholders expand per combination, paths repo-relative). manual=true entries can't be driven unattended (no .done marker). Drive with scripts/regen_fixtures.ps1.",
+  "_doc": "Fixture regeneration manifest. Each entry: jsx (generator), ae (AE version key, or {default+per-first-env-value overrides}), env (var -> value list; multiple vars = cartesian product), done/outputs ({VAR} placeholders expand per combination, paths repo-relative). manual=true entries can't be driven unattended (no .done marker). Drive with scripts/fixtures/regen_fixtures.ps1.",
   "ae_exes": {
     "2020": "E:\\adobe\\Adobe After Effects 2020\\Support Files\\AfterFX.exe",
     "2022": "E:\\adobe\\Adobe After Effects 2022\\Support Files\\AfterFX.exe",

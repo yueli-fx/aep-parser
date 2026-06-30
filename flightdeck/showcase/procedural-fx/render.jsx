@@ -1,7 +1,7 @@
 // flightdeck/showcase/procedural-fx/render.jsx — open flame.aep and save a
 // mid-boil frame (t=2s) as flame.png for eyeballing. Force 8bpc (32bpc float
 // saveFrameToPng emits dark linear pixels) + $.sleep so the async write flushes.
-// Run via scripts/ae_run.ps1 after `go run ./flightdeck/showcase/procedural-fx`.
+// Run via scripts/ae-worker/ae_run.ps1 after `go run ./flightdeck/showcase/procedural-fx`.
 (function () {
     var dir = "e:/projects/tools/aep-parser/flightdeck/showcase/procedural-fx/";
     var log = [];

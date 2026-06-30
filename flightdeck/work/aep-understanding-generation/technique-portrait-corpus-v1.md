@@ -14,13 +14,13 @@ go run ./cmd/aeptechnique -in <dir-or-file> -mode portrait -corpus -recursive
 go run ./cmd/aeptechnique -in <dir-or-file> -mode portrait -corpus -recursive -summary
 go run ./cmd/aeptechnique -in <dir-or-file> -mode explain -corpus -recursive -out corpus.jsonl -summary-out summary.json
 go run ./cmd/aeptechnique -in <dir-or-file> -mode explain -corpus -recursive
-pwsh -NoProfile -File scripts\technique_showcase_report.ps1 -Limit 3
-pwsh -NoProfile -File scripts\technique_showcase_report.ps1 -Limit 3 -Verify
-pwsh -NoProfile -File scripts\technique_showcase_report.ps1 -Open
-pwsh -NoProfile -File scripts\verify_technique_report.ps1 -OutDir tmp\technique_showcase_report
-pwsh -NoProfile -File scripts\compare_technique_reports.ps1 -BaseDir tmp\old_report -NewDir tmp\technique_showcase_report
-pwsh -NoProfile -File scripts\verify_technique_selfhost.ps1 -OutRoot tmp\technique_selfhost_gate
-pwsh -NoProfile -File scripts\verify_technique_selfhost.ps1 -OutRoot tmp\technique_selfhost_gate -Open
+go run ./cmd/aepselfhost technique-report -limit 3
+go run ./cmd/aepselfhost technique-report -limit 3 -verify
+pwsh -NoProfile -File go run ./cmd/aepselfhost technique-report -open
+go run ./cmd/aepselfhost verify-report -out-dir tmp\technique_showcase_report
+go run ./cmd/aepselfhost compare-reports -base tmp\old_report -new tmp\technique_showcase_report
+go run ./cmd/aepselfhost verify -out-root tmp\technique_selfhost_gate
+go run ./cmd/aepselfhost verify -out-root tmp\technique_selfhost_gate -open
 ```
 
 For every discovered `.aep`, emit one JSON object per line:
@@ -71,7 +71,7 @@ script uses this path so large corpora are not parsed twice.
 
 ## Showcase Report Script
 
-`scripts/technique_showcase_report.ps1` is the self-hosted demonstration entry.
+`go run ./cmd/aepselfhost technique-report` is the self-hosted demonstration entry.
 It defaults to `flightdeck\showcase` and writes generated output under
 `tmp\technique_showcase_report`:
 
@@ -104,9 +104,9 @@ It defaults to `flightdeck\showcase` and writes generated output under
 - `report.md`
 - `report.html`
 
-Passing `-Open` opens the generated HTML report after writing all files.
+Passing `-open` opens the generated HTML report after writing all files.
 Passing `-Verify` runs the artifact verifier after report generation.
-`scripts/verify_technique_report.ps1` validates that all generated artifacts
+`go run ./cmd/aepselfhost verify-report` validates that all generated artifacts
 exist, that `summary.json`, `corpus.jsonl`, and `digest.json` agree on project
 counts plus per-file errors, and that the human reports contain the expected
 learning sections.
@@ -176,13 +176,13 @@ codegen work.
 `manifest.json` records the input path, git revision, scan timing, project/error
 counts, and generated artifact inventory for repeatable self-hosted runs.
 
-`scripts/compare_technique_reports.ps1` compares two generated report
+`go run ./cmd/aepselfhost compare-reports` compares two generated report
 directories and writes `compare.json` plus `compare.md`. It reports scalar
 changes such as project/error totals and count-map changes for readiness,
 patterns, archetypes, hints, plugin effects, effects, shapes, text animators,
 layer roles, and graph edges.
 
-`scripts/verify_technique_selfhost.ps1` is the one-command self-hosted
+`go run ./cmd/aepselfhost verify` is the one-command self-hosted
 acceptance gate. It runs the technique Go tests, generates and verifies the full
 sample report, generates and verifies an intentional partial-error report,
 compares a report to itself, compares the partial report to the full report,
@@ -206,7 +206,7 @@ queue, learning actions, and coverage scorecard. The history files append one co
 gate run for trend checks across repeated self-hosted validation, and the latest
 HTML index renders the outcome, current run delta, and recent rows in Outcome
 Status, History Delta, and Effectiveness History Preview panels.
-Passing `-Open` opens `latest_outcome.html`, the shortest effectiveness page,
+Passing `-open` opens `latest_outcome.html`, the shortest effectiveness page,
 after the gate finishes. Use `latest_index.html` when the full artifact browser
 is needed.
 

@@ -11,14 +11,14 @@ READ WHEN: writing a new RE JSX fixture; debugging field locations via byte-diff
 
 ## Agent 自己调 AE — 不要 ask user
 
-`scripts/ae_run.ps1` 是 **unattended wrapper**（OCR + multi-signal modal 自动消化，exit code 0/1/2/3/4/5）。Agent 应直接通过 Bash/PowerShell tool 调它，**不要**把 "请 user 跑 AE" 当默认。
+`scripts/ae-worker/ae_run.ps1` 是 **unattended wrapper**（OCR + multi-signal modal 自动消化，exit code 0/1/2/3/4/5）。Agent 应直接通过 Bash/PowerShell tool 调它，**不要**把 "请 user 跑 AE" 当默认。
 
 调用模板（用 `$env:` 传 JSX 内 `$.getenv()` 读到的 mode/参数）：
 
 ```powershell
 $env:MY_VAR = "value"   # 如果 JSX 用 $.getenv() 读 mode
 Remove-Item -ErrorAction SilentlyContinue test_data/re_X.done
-pwsh -NoProfile -File scripts/ae_run.ps1 `
+pwsh -NoProfile -File scripts/ae-worker/ae_run.ps1 `
     -AeExe "E:\adobe\Adobe After Effects 2020\Support Files\AfterFX.exe" `
     -Jsx   "E:\projects\tools\aep-parser\test_data\generators\re_X.jsx" `
     -Done  "E:\projects\tools\aep-parser\test_data\re_X.done" `
@@ -98,7 +98,7 @@ length-preserving 单字段（cdta 单 offset 改 / ldta flag bit 改）roundtri
 - 用 **fixture 源版本** 的 AE 打开 (检查方式: `Application.Version()` 读 head 解出 e.g. `17.7x45` = AE 17.7 = AE 2020)
 - 例：`re_cameralight.aep` 是 AE 2020 写的 → 优先用 AE 2020 跑（避无意义 convert 流程）
 - 反向（高版本 fixture → 低版本 AE）经常崩，仍**避免**
-- 跨版本测：`scripts/ae_run.ps1` wrapper 自动消化 convert 对话框，不再被 GUI 阻塞 unattended run（详 § GDI 自动化）
+- 跨版本测：`scripts/ae-worker/ae_run.ps1` wrapper 自动消化 convert 对话框，不再被 GUI 阻塞 unattended run（详 § GDI 自动化）
 
 ## AE 打开 .aep 的 3 种失败模式
 
@@ -107,7 +107,7 @@ length-preserving 单字段（cdta 单 offset 改 / ldta flag bit 改）roundtri
 | 模式 | 信号 | 处理 |
 |---|---|---|
 | **1. 完全崩溃** | `tasklist`/Get-Process 看不到 AfterFX.exe；没有 `.done`；exit code 非 0 | builder 写的字段触发 AE 内部 sanity-check fail (e.g. cdta timing 空)。先最小化生成工程，再逐字段二分定位触发字节。 |
-| **2. 打开但需转换** | GUI 弹 "Convert?" 对话框 → JSX 跑不到 `app.open` 返回，要么 catch 到 error，要么 hang。`.done` 含 ERR 信息（或根本写不出） | 用 `scripts/ae_run.ps1` wrapper 自动消化 convert 对话框；裸 `AfterFX -r` 仍需版本匹配 |
+| **2. 打开但需转换** | GUI 弹 "Convert?" 对话框 → JSX 跑不到 `app.open` 返回，要么 catch 到 error，要么 hang。`.done` 含 ERR 信息（或根本写不出） | 用 `scripts/ae-worker/ae_run.ps1` wrapper 自动消化 convert 对话框；裸 `AfterFX -r` 仍需版本匹配 |
 | **3. 打开但报数据损坏** | JSX 跑通；`app.open(...)` 在 try/catch 里 throw "After Effects 错误: 文件数据丢失" 类错误字符串 | builder chunk 写法 / 位置 / 大小破坏 AE 检查。这是最常见且最有 RE 价值的 — bisect 隔离哪个 setter 触发 |
 
 诊断流程（按这个 order）：
@@ -118,14 +118,14 @@ length-preserving 单字段（cdta 单 offset 改 / ldta flag bit 改）roundtri
 
 **不要直接归 mode 3** 去 RE 字节，先排除 mode 1 / 2。
 
-## GDI 自动化 — `scripts/ae_run.ps1`
+## GDI 自动化 — `scripts/ae-worker/ae_run.ps1`
 
-Ship-gate 用 `scripts/ae_run.ps1` 替代裸 `AfterFX -r`：OCR + multi-signal dispatch 自动消化 convert / save / data-loss modal。任意 AE 版本 × 任意 fixture 都能 unattended 跑。**Cross-version smoke PASS**：AE 2020 fixture 用 AE 2025 跑，convert 对话框被自动消化（2026-05-27 验证）。
+Ship-gate 用 `scripts/ae-worker/ae_run.ps1` 替代裸 `AfterFX -r`：OCR + multi-signal dispatch 自动消化 convert / save / data-loss modal。任意 AE 版本 × 任意 fixture 都能 unattended 跑。**Cross-version smoke PASS**：AE 2020 fixture 用 AE 2025 跑，convert 对话框被自动消化（2026-05-27 验证）。
 
 **调用契约**：
 
 ```powershell
-pwsh -NoProfile -File scripts/ae_run.ps1 `
+pwsh -NoProfile -File scripts/ae-worker/ae_run.ps1 `
     -AeExe   $aeExe `
     -Jsx     $jsxPath `
     -Done    $doneFile `
@@ -153,8 +153,8 @@ pwsh -NoProfile -File scripts/ae_run.ps1 `
 
 ## 全量 gate sweep + fixture 再生（批处理入口）
 
-- **`scripts/run_ship_gates.ps1`** — 全量 ship-gate 回归 sweep：预清理残留 AfterFX → `AE_SHIP_GATE=1 go test -run ShipGate -count=1 -v` → 写 PASS/FAIL/SKIP 台账（`test_data/gate_ledger.json` + `gate_sweep.log`）。跨切面改动（ID 分配 / write 路径 / wrapper）后跑一次；`-Run <pattern>` 可只跑子集；`-ClearCrashState` 在 force-kill 弄脏 crash flag 后用。
-- **`scripts/regen_fixtures.ps1`** — 按 `scripts/fixtures_manifest.json`（44 个生成 JSX 的 AE 版本 / env-mode 矩阵 / 期望产物）无人值守重建 fixture。**默认 only-missing 不碰已有文件**（AE 保存非确定性，乱重生会 churn byte-diff 基线）；`-CheckOnly` 盘点缺失 + 无主 fixture；`-Force` 全重建；`-Only <substring>` 过滤。新增生成 JSX 时**必须**同步 manifest 加条目。
+- **`scripts/fixtures/run_ship_gates.ps1`** — 全量 ship-gate 回归 sweep：预清理残留 AfterFX → `AE_SHIP_GATE=1 go test -run ShipGate -count=1 -v` → 写 PASS/FAIL/SKIP 台账（`test_data/gate_ledger.json` + `gate_sweep.log`）。跨切面改动（ID 分配 / write 路径 / wrapper）后跑一次；`-Run <pattern>` 可只跑子集；`-ClearCrashState` 在 force-kill 弄脏 crash flag 后用。
+- **`scripts/fixtures/regen_fixtures.ps1`** — 按 `scripts/fixtures/fixtures_manifest.json`（44 个生成 JSX 的 AE 版本 / env-mode 矩阵 / 期望产物）无人值守重建 fixture。**默认 only-missing 不碰已有文件**（AE 保存非确定性，乱重生会 churn byte-diff 基线）；`-CheckOnly` 盘点缺失 + 无主 fixture；`-Force` 全重建；`-Only <substring>` 过滤。新增生成 JSX 时**必须**同步 manifest 加条目。
 
 **⚠️ verify JSX `.done` 文件名必须 per-version 唯一**：ship-gate 同一 mode 跨 AE 2020/2025 跑两遍时，verify JSX 若把 `.done` 文件名只按 mode 命名，会(a)第二版覆盖第一版结果、(b)`ae_run.ps1 -Done` 等的是带 version-tag 的名 → 永远等不到 → 每次空等满 `TimeoutSec` 报 exit 1（实际验证早已跑通，假阴性）。修法：JSX 读一个 `$.getenv("..._TAG")`（如 `ae2020_basic`）拼进 `.done` 名，调用方 `-Done` 传同名。见 `verify_ge_insert_layer.jsx` + 2026-05-29 logbook。
 
@@ -162,14 +162,14 @@ pwsh -NoProfile -File scripts/ae_run.ps1 `
 
 1. ship-gate FAIL, exit code 2
 2. 看 `<doneFile>.fail/screenshot.png` + `ocr.txt`
-3. 加规则到 `scripts/ae_dialog_rules.json`（substring 进 `ocrMatch`，或抄稳定 `windowTitle` / `windowClass`）
+3. 加规则到 `scripts/ae-worker/ae_dialog_rules.json`（substring 进 `ocrMatch`，或抄稳定 `windowTitle` / `windowClass`）
 4. `Parse-Rules` 跑通 → re-run ship-gate
 
 ## 工作流
 
 ```
 1. 写 test_data/re_<feature>.jsx
-2. pwsh -File scripts/ae_run.ps1 -AeExe ... -Jsx ... -Done ...  (unattended)
+2. pwsh -File scripts/ae-worker/ae_run.ps1 -AeExe ... -Jsx ... -Done ...  (unattended)
 3. JSX 末尾写 .done marker 标记完成
 4. Go 端读 .aep → parse_btdk dump → 看新字段在哪
 5. 写 test_data/re_<feature>_*_test.go 用 fixture 测试

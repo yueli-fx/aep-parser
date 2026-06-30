@@ -1,5 +1,5 @@
 // flightdeck/showcase/gradient/render.jsx — open gradient.aep, render frame 0 →
-// gradient.png. Run via scripts/ae_run.ps1.
+// gradient.png. Run via scripts/ae-worker/ae_run.ps1.
 (function () {
     var dir = "e:/projects/tools/aep-parser/flightdeck/showcase/gradient/";
     var inAep = new File(dir + "gradient.aep");

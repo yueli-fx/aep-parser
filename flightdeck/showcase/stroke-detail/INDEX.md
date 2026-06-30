@@ -5,7 +5,7 @@ capabilities: [stroke-dashes, stroke-line-join, stroke-miter-limit, stroke-wave]
 gates: [TestV2_2_Stroke_AEShipGate, TestV2_2_StrokeTaperWave_AEShipGate, shape_dashes_shipgate_test]
 status: complete
 last_updated: 2026-06-14
-regenerate: "go run ./flightdeck/showcase/stroke-detail  +  scripts/ae_run.ps1 render.jsx"
+regenerate: "go run ./flightdeck/showcase/stroke-detail  +  scripts/ae-worker/ae_run.ps1 render.jsx"
 ---
 
 # stroke-detail — 描边细节 setter showcase

@@ -1,6 +1,6 @@
 // flightdeck/showcase/precomp-nesting/render.jsx — open precomp_nesting.aep,
 // render the parent comp frame 0 → precomp_nesting.png, showing the nested Badge
-// comp reused 3×. Run via scripts/ae_run.ps1.
+// comp reused 3×. Run via scripts/ae-worker/ae_run.ps1.
 (function () {
     var dir = "e:/projects/tools/aep-parser/flightdeck/showcase/precomp-nesting/";
     var inAep = new File(dir + "precomp_nesting.aep");

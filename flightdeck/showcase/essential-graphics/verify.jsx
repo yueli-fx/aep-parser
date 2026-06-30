@@ -1,7 +1,7 @@
 // flightdeck/showcase/essential-graphics/verify.jsx — open essential_graphics.aep
 // and dump the comp's Essential Graphics DOM (template name + controller count +
 // each controller name) to .done. 📋 READBACK showcase: no png, the user reads the
-// log. Run via scripts/ae_run.ps1.
+// log. Run via scripts/ae-worker/ae_run.ps1.
 (function () {
     var dir = "e:/projects/tools/aep-parser/flightdeck/showcase/essential-graphics/";
     var inAep = new File(dir + "essential_graphics.aep");

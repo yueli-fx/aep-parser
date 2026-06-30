@@ -5,7 +5,7 @@ capabilities: [fractal-noise, tritone, turbulent-displace, glo2-glow, mask-feath
 gates: [TestFlameDemo_AEShipGate_AE2020, TestFlameDemo_AEShipGate_AE2025]
 status: complete
 last_updated: 2026-06-18
-regenerate: "go run ./flightdeck/showcase/procedural-fx  +  scripts/ae_run.ps1 render.jsx"
+regenerate: "go run ./flightdeck/showcase/procedural-fx  +  scripts/ae-worker/ae_run.ps1 render.jsx"
 ---
 
 # procedural-fx — 程序化火焰 showcase（v3，多层合成，用户验收通过）

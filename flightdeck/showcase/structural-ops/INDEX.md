@@ -5,7 +5,7 @@ capabilities: [duplicate-layer, move-layer, delete-layer, set-dimensions-separat
 gates: [TestDeleteLayer_AEShipGate, TestDuplicateLayer_AEShipGate, TestMoveLayer_AEShipGate]
 status: complete
 last_updated: 2026-06-13
-regenerate: "go run ./flightdeck/showcase/structural-ops  +  scripts/ae_run.ps1 render.jsx"
+regenerate: "go run ./flightdeck/showcase/structural-ops  +  scripts/ae-worker/ae_run.ps1 render.jsx"
 ---
 
 # structural-ops — 图层结构性 op showcase

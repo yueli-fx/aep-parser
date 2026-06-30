@@ -9,5 +9,5 @@ import (
 )
 
 func DefaultHost() Host {
-	return NewPowerShellHost(host.ExecRunner{}, filepath.Join("scripts", "ae_run.ps1"))
+	return NewPowerShellHost(host.ExecRunner{}, filepath.Join("scripts", "ae-worker", "ae_run.ps1"))
 }

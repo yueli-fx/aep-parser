@@ -5,7 +5,7 @@
 // solid layer, then saves. A Go extractor (TestZZExtractEffectLibrary) pulls
 // each effect's (tdmn, LIST:sspc) pair into its own templates/effect_*.bin.
 //
-// Run via scripts/ae_run.ps1 against AE 2020 (read floor → maximally portable
+// Run via scripts/ae-worker/ae_run.ps1 against AE 2020 (read floor → maximally portable
 // templates; AE-2020 effect bytes are accepted by AE 2025, mirroring the
 // gradient version-portability finding).
 //

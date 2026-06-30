@@ -14,7 +14,7 @@ property-like surfaces; use `layers[]` for layer identity, metadata, timing,
 flags, and refs.
 
 **Tech Stack:** Go, `internal/aep`, `internal/scene`, `internal/profile`,
-`internal/recipe`, `cmd/aeprecipe`, `scripts/verify_recipe_profiles.ps1`, AE
+`internal/recipe`, `cmd/aeprecipe`, `go run ./cmd/aepverify recipe-profiles`, AE
 2025 render/profile gates when needed.
 
 ---
@@ -29,7 +29,7 @@ flags, and refs.
 - Keep dedicated recipes for layer families with distinct semantics: parent
   refs, matte refs, camera/light settings, shape/text/effect/property content,
   keyframes, and expressions.
-- Use `scripts/verify_recipe_profiles.ps1` after each slice to check all
+- Use `go run ./cmd/aepverify recipe-profiles` after each slice to check all
   recipe examples validate, compile, and pass `profile_checks`.
 - Add knowledge notes only when the field has non-obvious byte layout, AE DOM
   readback caveats, or false-green risk.
@@ -128,14 +128,14 @@ type-specific content.
 
 ```powershell
 go test ./internal/recipe -run TestCompileToFileChecksLayerObjectProfileExample -count=1
-pwsh -NoProfile -File scripts\verify_recipe_profiles.ps1 -Recipe examples\recipes\minimal-layer-object-profile.json
+go run ./cmd/aepverify recipe-profiles -recipe examples\recipes\minimal-layer-object-profile.json
 ```
 
 - **Step 6: Run branch verification**
 
 ```powershell
 go test ./internal/recipe ./internal/profile
-pwsh -NoProfile -File scripts\verify_recipe_profiles.ps1
+go run ./cmd/aepverify recipe-profiles
 git diff --check
 ```
 

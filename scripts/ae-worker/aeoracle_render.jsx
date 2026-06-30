@@ -2,7 +2,7 @@
 //
 // Reads a JSON RenderRequest from the AEORACLE_REQUEST environment variable.
 // If the variable is absent, falls back to aeoracle_request.json beside this JSX.
-// Intended to run through scripts/ae_run.ps1, which watches request.done_path.
+// Intended to run through scripts/ae-worker/ae_run.ps1, which watches request.done_path.
 (function () {
     function installJSON() {
         if (typeof JSON === "undefined") JSON = {};

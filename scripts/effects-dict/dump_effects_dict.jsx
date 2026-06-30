@@ -1,5 +1,5 @@
-// scripts/dump_effects_dict.jsx — enumerate this machine's AE effects from a
-// matchName SEED list (scripts/effect_matchnames_seed.txt), add each to a temp
+// scripts/effects-dict/dump_effects_dict.jsx — enumerate this machine's AE effects from a
+// matchName SEED list (scripts/effects-dict/effect_matchnames_seed.txt), add each to a temp
 // solid, walk its param tree (matchName + localized name + type + DEFAULT value),
 // recurse sub-groups, and dump a VERSION-TAGGED JSON to data/effects-dict/.
 //
@@ -7,11 +7,11 @@
 // So a param present in a parsed .aep is one the user actually changed — and the
 // default lets aepdissect flag exactly those "recipe signal" knobs.
 //
-// Run via scripts/dump_effects_dict.ps1 (drives all installed AE versions).
+// Run via scripts/effects-dict/dump_effects_dict.ps1 (drives all installed AE versions).
 // Output: data/effects-dict/effects_<isoLang>_<appVersion>.json  + effects_dict.done
 (function () {
     var repo = "e:/projects/tools/aep-parser/";
-    var seedPath = repo + "scripts/effect_matchnames_seed.txt";
+    var seedPath = repo + "scripts/effects-dict/effect_matchnames_seed.txt";
     var outDir = repo + "data/effects-dict/";
     var log = [];
 

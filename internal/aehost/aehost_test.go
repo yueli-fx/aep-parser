@@ -34,7 +34,7 @@ func TestUnavailableHostRunScriptFailsDeterministically(t *testing.T) {
 
 func TestPowerShellHostRunScriptBuildsAERunnerCommand(t *testing.T) {
 	runner := &recordingRunner{}
-	h := NewPowerShellHost(runner, "scripts/ae_run.ps1")
+	h := NewPowerShellHost(runner, "scripts/ae-worker/ae_run.ps1")
 
 	got, err := h.RunScript(context.Background(), ScriptRequest{
 		AEPath:     "AfterFX.exe",
@@ -53,7 +53,7 @@ func TestPowerShellHostRunScriptBuildsAERunnerCommand(t *testing.T) {
 	if runner.cmd.Name != "pwsh" {
 		t.Fatalf("command name = %q", runner.cmd.Name)
 	}
-	wantArgs := []string{"-NoProfile", "-File", "scripts/ae_run.ps1", "-AeExe", "AfterFX.exe", "-Jsx", "render.jsx", "-Done", "render.done", "-TimeoutSec", "42"}
+	wantArgs := []string{"-NoProfile", "-File", "scripts/ae-worker/ae_run.ps1", "-AeExe", "AfterFX.exe", "-Jsx", "render.jsx", "-Done", "render.done", "-TimeoutSec", "42"}
 	if !slices.Equal(runner.cmd.Args, wantArgs) {
 		t.Fatalf("command args = %#v", runner.cmd.Args)
 	}

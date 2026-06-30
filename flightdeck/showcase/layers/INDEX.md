@@ -5,7 +5,7 @@ capabilities: [new-solid-layer, solid-color, solid-dimensions, new-null-layer, n
 gates: [TestNewSolidNull_AEShipGate_AE2020, TestNewSolidNull_AEShipGate_AE2025]
 status: complete
 last_updated: 2026-06-13
-regenerate: "go run ./flightdeck/showcase/layers  +  scripts/ae_run.ps1 render.jsx"
+regenerate: "go run ./flightdeck/showcase/layers  +  scripts/ae-worker/ae_run.ps1 render.jsx"
 ---
 
 # layers — 图层创建 showcase

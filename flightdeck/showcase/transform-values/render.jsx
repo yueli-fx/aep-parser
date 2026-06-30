@@ -1,7 +1,7 @@
 // flightdeck/showcase/transform-values/render.jsx — open transform_values.aep,
 // dump each layer's Transform channel values (so the gen.go static values can be
 // cross-checked against what AE actually read), then render frame 0 to
-// transform_values.png for review. Run via scripts/ae_run.ps1.
+// transform_values.png for review. Run via scripts/ae-worker/ae_run.ps1.
 (function () {
     var dir = "e:/projects/tools/aep-parser/flightdeck/showcase/transform-values/";
     var inAep = new File(dir + "transform_values.aep");

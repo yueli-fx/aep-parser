@@ -5,7 +5,7 @@ capabilities: [new-text-layer, set-text, multiline-text, length-variable-string]
 gates: [TestNewTextLayer_AEShipGate_AE2020, TestNewTextLayer_AEShipGate_AE2025]
 status: complete
 last_updated: 2026-06-13
-regenerate: "go run ./flightdeck/showcase/text  +  scripts/ae_run.ps1 render.jsx"
+regenerate: "go run ./flightdeck/showcase/text  +  scripts/ae-worker/ae_run.ps1 render.jsx"
 ---
 
 # text — 文字层 from-scratch showcase

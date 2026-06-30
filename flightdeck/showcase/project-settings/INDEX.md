@@ -5,7 +5,7 @@ capabilities: [bits-per-channel, linear-blending, expression-engine, footage-tim
 gates: [project-flag-chunks-lnrb-lnrp, nnhd-display-settings-layout-re]
 status: complete
 last_updated: 2026-06-14
-regenerate: "go run ./flightdeck/showcase/project-settings  +  scripts/ae_run.ps1 verify.jsx"
+regenerate: "go run ./flightdeck/showcase/project-settings  +  scripts/ae-worker/ae_run.ps1 verify.jsx"
 ---
 
 # project-settings — 工程设置 setter showcase（📋 读值档）

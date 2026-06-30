@@ -11,7 +11,7 @@
 //                   tmp_debug/extract_effect_lib looks for the AddEffect
 //                   library template)
 //
-// Run via scripts/ae_run.ps1 against AE 2020.
+// Run via scripts/ae-worker/ae_run.ps1 against AE 2020.
 // Output: test_data/generated/fixtures/re_effect_param_types.aep + .done
 (function () {
     var outFile  = new File("e:/projects/tools/aep-parser/test_data/generated/fixtures/re_effect_param_types.aep");

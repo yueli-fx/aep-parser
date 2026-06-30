@@ -1,6 +1,6 @@
 // flightdeck/showcase/keyframes-ease/render.jsx — open keyframes_ease.aep, render
 // the MID time (t=2s) to keyframes_ease.png so the ease shows as a horizontal
-// position spread between the three dots. Run via scripts/ae_run.ps1.
+// position spread between the three dots. Run via scripts/ae-worker/ae_run.ps1.
 (function () {
     var dir = "e:/projects/tools/aep-parser/flightdeck/showcase/keyframes-ease/";
     var inAep = new File(dir + "keyframes_ease.aep");

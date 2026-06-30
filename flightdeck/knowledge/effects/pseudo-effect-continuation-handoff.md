@@ -95,7 +95,7 @@ READ WHEN: 维护 BuildPseudoEffect、新增伪控件类型、或复用 pard/val
 
 ## 5. ship-gate 技巧 / 坑(踩过的)
 
-- **跑 gate**:`$env:AE_SHIP_GATE=1; go test ./internal/aep/ -run 'TestBuildPseudoEffect_AEShipGate_AE2020' -v -count=1`。手动单跑 JSX 用 `pwsh -File scripts/ae_run.ps1 -AeExe "<exe>" -Jsx <jsx> -Done <done> -TimeoutSec 120`(**参数名 `-AeExe` 不是 `-Exe`**)。
+- **跑 gate**:`$env:AE_SHIP_GATE=1; go test ./internal/aep/ -run 'TestBuildPseudoEffect_AEShipGate_AE2020' -v -count=1`。手动单跑 JSX 用 `pwsh -File scripts/ae-worker/ae_run.ps1 -AeExe "<exe>" -Jsx <jsx> -Done <done> -TimeoutSec 120`(**参数名 `-AeExe` 不是 `-Exe`**)。
 - **每次跑前** `Get-Process AfterFX* | Stop-Process -Force`(straggler → exit 6)。
 - **AE exe**:2020=`E:\adobe\Adobe After Effects 2020\Support Files\AfterFX.exe`;2025 同构。
 - **ExtendScript minValue 坑**:刚 fetch 的伪 slider 属性,直接读 `p.minValue` 返回 stale(=maxValue);**必须先碰 `p.hasMin`** 再读(maxValue 先碰 hasMax)。verify JSX 已处理。

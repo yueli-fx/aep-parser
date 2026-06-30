@@ -10,7 +10,7 @@
 .PARAMETER Jsx     verify_*.jsx absolute path
 .PARAMETER Done    .done marker absolute path (JSX writes this on completion)
 .PARAMETER TimeoutSec   max wait for .done (default 180)
-.PARAMETER RulesPath    dispatch table JSON (default scripts/ae_dialog_rules.json)
+.PARAMETER RulesPath    dispatch table JSON (default scripts/ae-worker/ae_dialog_rules.json)
 
 .OUTPUTS exit codes
    0 — .done found, PASS contract met
@@ -287,7 +287,7 @@ try {
                 $txt = ($ocrTexts[$k] -replace "`r?`n", ' / ')
                 [Console]::Error.WriteLine("  $k : $txt")
             }
-            [Console]::Error.WriteLine("Add a rule to scripts/ae_dialog_rules.json (CJK patterns CONTIGUOUS — matcher strips OCR spaces):")
+            [Console]::Error.WriteLine("Add a rule to scripts/ae-worker/ae_dialog_rules.json (CJK patterns CONTIGUOUS — matcher strips OCR spaces):")
             [Console]::Error.WriteLine('  { "name": "<describe>", "windowTitle": [], "windowClass": [], "ocrMatch": ["<distinctive substring>"], "action": "SendKeys", "keys": "{ENTER}", "cooldownMs": 2000, "comment": "<why + which button this presses>" }')
             [Console]::Error.WriteLine("Full dump: $dumpDir")
         }

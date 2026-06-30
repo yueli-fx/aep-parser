@@ -187,8 +187,8 @@ Run:
 go test ./internal/technique ./cmd/aeptechnique -count=1
 go test ./...
 go vet ./...
-pwsh -NoProfile -File scripts\verify_recipe_profiles.ps1
-pwsh -NoProfile -File scripts\regen_fixtures.ps1 -CheckOnly
+go run ./cmd/aepverify recipe-profiles
+pwsh -NoProfile -File scripts\fixtures\regen_fixtures.ps1 -CheckOnly
 git diff --check
 ```
 

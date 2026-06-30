@@ -1,6 +1,6 @@
 // flightdeck/showcase/expressions/render.jsx — open expressions.aep, render t=1s
 // to expressions.png so each time*N rotation expression has spun its dot to a
-// distinct angle (90°/180°/270°). Run via scripts/ae_run.ps1.
+// distinct angle (90°/180°/270°). Run via scripts/ae-worker/ae_run.ps1.
 (function () {
     var dir = "e:/projects/tools/aep-parser/flightdeck/showcase/expressions/";
     var inAep = new File(dir + "expressions.aep");

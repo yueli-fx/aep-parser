@@ -5,7 +5,7 @@ capabilities: [position-keyframes, linear-interpolation, temporal-ease, ease-out
 gates: [TestMGEase_AEShipGate_AE2020, TestMGEase_AEShipGate_AE2025]
 status: complete
 last_updated: 2026-06-13
-regenerate: "go run ./flightdeck/showcase/keyframes-ease  +  scripts/ae_run.ps1 render.jsx (renders t=2s)"
+regenerate: "go run ./flightdeck/showcase/keyframes-ease  +  scripts/ae-worker/ae_run.ps1 render.jsx (renders t=2s)"
 ---
 
 # keyframes-ease — 时间缓动关键帧 showcase

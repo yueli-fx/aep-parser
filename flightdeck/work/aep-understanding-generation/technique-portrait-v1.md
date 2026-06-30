@@ -159,8 +159,8 @@ Minimum tests:
 - `go test ./internal/technique ./cmd/aeptechnique -count=1` passes
 - `go test ./...` passes
 - `go vet ./...` passes
-- `scripts/verify_recipe_profiles.ps1` passes
-- `scripts/regen_fixtures.ps1 -CheckOnly` reports no new unmanaged AEPs
+- `go run ./cmd/aepverify recipe-profiles` passes
+- `scripts/fixtures/regen_fixtures.ps1 -CheckOnly` reports no new unmanaged AEPs
 - `git diff --check` passes
 
 ## Progress

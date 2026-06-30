@@ -7,7 +7,7 @@ READ WHEN: `aeoracle render` reports `rendered frame missing or empty`; AE shows
 
 Root cause from the Wiggle Paths recipe slice:
 
-- `scripts/aeoracle_render.jsx` waited only 30 seconds for each
+- `scripts/ae-worker/aeoracle_render.jsx` waited only 30 seconds for each
   `saveFrameToPng` output even when `cmd/aeoracle render -timeout-sec` was much
   larger.
 - For slow frames, AE keeps a modal progress dialog titled like
@@ -22,9 +22,9 @@ Current behavior:
 
 - `internal/aeoracle.RenderRequest` includes `frame_timeout_ms`.
 - `aeoracle.NewRenderRequest` defaults `frame_timeout_ms` to `120000`.
-- `scripts/aeoracle_render.jsx` reads `req.frame_timeout_ms` and falls back to
+- `scripts/ae-worker/aeoracle_render.jsx` reads `req.frame_timeout_ms` and falls back to
   `120000` for older request files.
-- `scripts/ae_dialog_rules.json` ignores the long-running
+- `scripts/ae-worker/ae_dialog_rules.json` ignores the long-running
   `Executing Script ...` progress dialog.
 - The same rules file aborts on `Scripting plugin is not installed` with a
   clear operator-facing message.

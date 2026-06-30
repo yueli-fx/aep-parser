@@ -13,7 +13,7 @@
 // persistence keys off value≠default and templates would carry non-default
 // values needing a post-patch.
 //
-// Run via scripts/ae_run.ps1 against AE 2020.
+// Run via scripts/ae-worker/ae_run.ps1 against AE 2020.
 // Output: test_data/fixtures/re_effect_param_elision_2025.aep + .done
 (function () {
     var outFile  = new File("e:/projects/tools/aep-parser/test_data/fixtures/re_effect_param_elision_2025.aep");

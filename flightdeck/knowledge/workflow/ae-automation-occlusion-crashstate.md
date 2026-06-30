@@ -117,10 +117,10 @@ error via capture_dialog.ps1 before assuming the .aep is bad.
 
 ## OCR 后端两坑（原 `pwsh-7-no-winrt` + `windows-media-ocr-cjk-glyph-spacing`,2026-06-16 折入）
 
-Layer C 的 OCR 后端(`scripts/ocr_helper.ps1` + `AeRun.Lib.ps1`)有两个独立 scar:
+Layer C 的 OCR 后端(`scripts/ae-worker/ocr_helper.ps1` + `AeRun.Lib.ps1`)有两个独立 scar:
 
 ### Case OCR-1 — pwsh 7 丢了 WinRT 投影 → 用 powershell.exe 5.1 子壳
-`Add-Type ... ContentType=WindowsRuntime` / `[Windows.Media.Ocr.OcrEngine, Windows.Foundation, ContentType=WindowsRuntime]` 在 **pwsh 7+(.NET 6+)静默失败**(报 `Unable to find type` —— 是"类型不存在"不是"引擎创建失败";.NET 6 无 WinRT 投影层)。Windows PowerShell 5.1(`powershell.exe`)仍有。**修法**:`ae_run.ps1`(pwsh 7 主)shell out 到 `powershell.exe -NoProfile -File scripts/ocr_helper.ps1`(5.1,WinRT 可用)。成本 ~400ms/次冷启,便宜(OCR 仅 Layer B 命中 modal 时跑)。未来:`Microsoft.Windows.SDK.NET.Ref` 理论上让 pwsh 7 直接 WinRT(未用,子壳更稳);跨平台脚本**别 import 此模式**(Windows-only)。
+`Add-Type ... ContentType=WindowsRuntime` / `[Windows.Media.Ocr.OcrEngine, Windows.Foundation, ContentType=WindowsRuntime]` 在 **pwsh 7+(.NET 6+)静默失败**(报 `Unable to find type` —— 是"类型不存在"不是"引擎创建失败";.NET 6 无 WinRT 投影层)。Windows PowerShell 5.1(`powershell.exe`)仍有。**修法**:`ae_run.ps1`(pwsh 7 主)shell out 到 `powershell.exe -NoProfile -File scripts/ae-worker/ocr_helper.ps1`(5.1,WinRT 可用)。成本 ~400ms/次冷启,便宜(OCR 仅 Layer B 命中 modal 时跑)。未来:`Microsoft.Windows.SDK.NET.Ref` 理论上让 pwsh 7 直接 WinRT(未用,子壳更稳);跨平台脚本**别 import 此模式**(Windows-only)。
 
 ### Case OCR-2 — Windows.Media.Ocr 给 CJK 每字插空格
 OCR 把 `"修复选项"` 返回成 `"修 复 选 项"`(`OcrResult.Text` = 按 word 空格 join;CJK 每字一个 word)→ `IndexOf("修复选项")` 失败。**修法**:`ae_dialog_rules.json` 里 CJK pattern 写**连续**(`"修复选项"`);`AeRun.Lib.ps1::Match-Rule` 的 `_matchAnyOcr` 先直配(英文),再 fallback 比 `($text -replace '\s+','')` vs `($pattern -replace '\s+','')`(CJK)。规则作者按 UI 原样写,matcher 透明归一。**Pester 回归**:`ae_run.Tests.ps1` 有 CJK 空格用例(别删,否则 CJK fallback 静默退化)。**坑中坑**:OCR console 输出经 cp936 渲染 UTF-8 是 mojibake(字节对、终端骗你)——存疑时 dump 文件按 UTF-8 读 codepoint,别从 console 诊断;forensics dump 保留原始带空格版(stripping 仅 match-time)。

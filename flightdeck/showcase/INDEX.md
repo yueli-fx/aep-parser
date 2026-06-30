@@ -8,7 +8,7 @@
 
 ```
 go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
-# 再用 scripts/ae_run.ps1 跑 <方向>/render.jsx 出 <方向>.png
+# 再用 scripts/ae-worker/ae_run.ps1 跑 <方向>/render.jsx 出 <方向>.png
 ```
 
 ## 状态说明（review-gate）

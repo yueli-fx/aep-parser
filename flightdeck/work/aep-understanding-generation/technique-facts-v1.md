@@ -180,8 +180,8 @@ The first slice is accepted when:
 - `go test ./internal/technique ./cmd/aeptechnique -count=1` passes
 - `go test ./...` passes
 - `go vet ./...` passes
-- `scripts/verify_recipe_profiles.ps1` still passes
-- `scripts/regen_fixtures.ps1 -CheckOnly` has no new unmanaged fixture changes
+- `go run ./cmd/aepverify recipe-profiles` still passes
+- `scripts/fixtures/regen_fixtures.ps1 -CheckOnly` has no new unmanaged fixture changes
 
 ## Progress
 

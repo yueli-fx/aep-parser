@@ -1,6 +1,6 @@
 // flightdeck/showcase/3d-camera/render.jsx — open 3d_camera.aep, verify AE
 // accepts it (all layers present, the cards are 3D), and render frame 0 to
-// 3d_camera.png for user review. Run via scripts/ae_run.ps1 (writes .done).
+// 3d_camera.png for user review. Run via scripts/ae-worker/ae_run.ps1 (writes .done).
 (function () {
     var dir = "e:/projects/tools/aep-parser/flightdeck/showcase/3d-camera/";
     var inAep = new File(dir + "3d_camera.aep");

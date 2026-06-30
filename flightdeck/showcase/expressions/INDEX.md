@@ -5,7 +5,7 @@ capabilities: [set-expression, set-expression-enabled, rotation-expression, time
 gates: [TestExpression_AEShipGate_AE2020, TestExpression_AEShipGate_AE2025, TestExprVocab_AEShipGate_AE2020, TestExprVocab_AEShipGate_AE2025]
 status: complete
 last_updated: 2026-06-14
-regenerate: "go run ./flightdeck/showcase/expressions  +  scripts/ae_run.ps1 render.jsx (renders t=1s)"
+regenerate: "go run ./flightdeck/showcase/expressions  +  scripts/ae-worker/ae_run.ps1 render.jsx (renders t=1s)"
 ---
 
 # expressions — 表达式激活 + 语汇 showcase

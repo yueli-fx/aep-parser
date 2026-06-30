@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
-  Regenerate test_data fixtures from scripts/fixtures_manifest.json by driving
-  each generator JSX through ae_run.ps1 (unattended). Default mode regenerates
+  Regenerate test_data fixtures from scripts/fixtures/fixtures_manifest.json by
+  driving each generator JSX through ae_run.ps1 (unattended). Default mode regenerates
   ONLY entries with missing outputs — existing fixtures are never overwritten
   unless -Force (AE saves are nondeterministic: GUIDs/timestamps shift, which
   would churn byte-diff RE baselines for no reason).
@@ -30,7 +30,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$repoRoot = Split-Path $PSScriptRoot -Parent
+$repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 $manifest = Get-Content (Join-Path $PSScriptRoot 'fixtures_manifest.json') -Raw -Encoding UTF8 | ConvertFrom-Json
 
 # Expand an entry's env (var -> value list) into the cartesian product of
@@ -112,7 +112,7 @@ if ($CheckOnly) { exit ([int]($missingJobs.Count -gt 0)) }
 $toRun = if ($Force) { @($jobs | Where-Object { -not $_.Entry.manual }) } else { $missingJobs }
 if ($toRun.Count -eq 0) { Write-Host 'nothing to regenerate.'; exit 0 }
 
-$aeRun = Join-Path $PSScriptRoot 'ae_run.ps1'
+$aeRun = Join-Path (Split-Path $PSScriptRoot -Parent) 'ae-worker\ae_run.ps1'
 $failures = @()
 foreach ($j in $toRun) {
     $donePath = Join-Path $repoRoot (Expand-Placeholders $j.Entry.done $j.Combo)

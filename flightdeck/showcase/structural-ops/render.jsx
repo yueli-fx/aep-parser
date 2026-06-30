@@ -2,7 +2,7 @@
 // the comp's layer roster (proof of the Delete/Duplicate/Move structural result)
 // plus demo-D's Position "Separate Dimensions" state (proof of
 // SetDimensionsSeparated, which has no single-frame pixel signature), then render
-// frame 0 to structural_ops.png for review. Run via scripts/ae_run.ps1.
+// frame 0 to structural_ops.png for review. Run via scripts/ae-worker/ae_run.ps1.
 //
 // Layout is a CENTRED CONCENTRIC bullseye (solids can't be repositioned — see
 // gen.go). Verifiable results:

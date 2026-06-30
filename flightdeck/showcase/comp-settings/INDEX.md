@@ -5,7 +5,7 @@ capabilities: [comp-motion-blur, motion-blur-samples, work-area, bg-color, hide-
 gates: [shutter-side-effect-divisors, cdta-duration-two-representations]
 status: 待review
 last_updated: 2026-06-14
-regenerate: "go run ./flightdeck/showcase/comp-settings  +  scripts/ae_run.ps1 verify.jsx"
+regenerate: "go run ./flightdeck/showcase/comp-settings  +  scripts/ae-worker/ae_run.ps1 verify.jsx"
 ---
 
 # comp-settings — 合成设置 setter showcase（📋 读值档）

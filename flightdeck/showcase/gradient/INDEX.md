@@ -5,7 +5,7 @@ capabilities: [gradient-fill, gradient-stroke, color-stops, multi-stop, ramp-dir
 gates: [TestShapeGradient_AEShipGate, TestMGGradientDir_AEShipGate_AE2020, TestMGGradientDir_AEShipGate_AE2025, TestMGGradientRadial_AEShipGate_AE2020, TestMGGradientRadial_AEShipGate_AE2025, TestMGGradientHilite_AEShipGate_AE2020, TestMGGradientHilite_AEShipGate_AE2025, TestMGGradStrokeGeom_AEShipGate_AE2020, TestMGGradStrokeGeom_AEShipGate_AE2025, TestV2_2_GradientStroke_AEShipGate_AE2020, TestV2_2_GradientStroke_AEShipGate_AE2025]
 status: complete
 last_updated: 2026-06-14
-regenerate: "go run ./flightdeck/showcase/gradient  +  scripts/ae_run.ps1 render.jsx"
+regenerate: "go run ./flightdeck/showcase/gradient  +  scripts/ae-worker/ae_run.ps1 render.jsx"
 ---
 
 # gradient — 渐变填充 + 描边 + 方向/类型/高光 showcase

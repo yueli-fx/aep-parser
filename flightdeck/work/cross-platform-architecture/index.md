@@ -106,7 +106,7 @@ Capabilities:
 
 Platform behavior:
 
-- Windows: adapter may use existing `scripts/ae_run.ps1` during migration.
+- Windows: adapter may use existing `scripts/ae-worker/ae_run.ps1` during migration.
 - macOS: adapter should use macOS AE application paths and platform launch
   mechanics.
 - Linux: adapter returns `Unavailable` for AE execution and render validation.
@@ -124,13 +124,13 @@ Known platform-sensitive areas:
 - `cmd/aeoracle/main.go`
   - `render` routes through `internal/aehost`; Windows may use the PowerShell
     AE runner internally.
-- `scripts/ae_run.ps1` and `scripts/AeRun.Lib.ps1`
+- `scripts/ae-worker/ae_run.ps1` and `scripts/ae-worker/AeRun.Lib.ps1`
   - Windows AE launch, dialog handling, OCR, crash-state handling.
 - `internal/aep_test/*_shipgate_test.go`
   - many tests hard-code `E:/adobe/Adobe After Effects .../AfterFX.exe`.
-  - tests dispatch AE through `scripts/ae_run.ps1`.
-- `scripts/dump_effects_dict.ps1`, `scripts/run_ship_gates.ps1`,
-  `scripts/regen_fixtures.ps1`
+  - tests dispatch AE through `scripts/ae-worker/ae_run.ps1`.
+- `scripts/effects-dict/dump_effects_dict.ps1`, `scripts/fixtures/run_ship_gates.ps1`,
+  `scripts/fixtures/regen_fixtures.ps1`
   - Windows AE paths and PowerShell orchestration.
 
 This inventory is not a failure condition for Tier 1. Ship gates and AE workers
@@ -527,7 +527,7 @@ only exists as a PS script, call the eventual Go equivalent from the new
 package only after adding that equivalent. Do not call PS from the new
 `internal/selfhost` package.
 
-- [x] **Step 4: Remove `scripts/verify_technique_selfhost.ps1` wrapper**
+- [x] **Step 4: Remove `go run ./cmd/aepselfhost verify` wrapper**
 
 After the Go gate produced the same `latest_outcome.*`,
 `latest_effectiveness.*`, `latest_index.html`, `history.jsonl`, and

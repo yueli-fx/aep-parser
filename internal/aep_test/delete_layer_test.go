@@ -15,7 +15,7 @@ import (
 // All tests use re_delete_layer_*.aep produced by test_data/generators/re_delete_layer.jsx
 // (see scars/ae-deletelayer-re.md). Fixtures are gitignored; t.Skipf when missing.
 // To regenerate: set $env:RE_DELETE_MODE = "baseline"/"middle"/"parent"/"matte"
-// then run scripts/ae_run.ps1 against the JSX (baseline/middle/parent under
+// then run scripts/ae-worker/ae_run.ps1 against the JSX (baseline/middle/parent under
 // AE 2020; matte under AE 2025 — TrackMatteLayerID field is AE 23+).
 
 const deleteLayerFixtureDir = "../../test_data/generated/fixtures"

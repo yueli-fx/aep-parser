@@ -5,7 +5,7 @@ capabilities: [position-keyframes, scale-keyframes, rotation-keyframes, opacity-
 gates: [TestMGEase_AEShipGate_AE2020, TestMGEase_AEShipGate_AE2025]
 status: complete
 last_updated: 2026-06-14
-regenerate: "go run ./flightdeck/showcase/keyframe-channels  +  scripts/ae_run.ps1 render.jsx (renders t=2s)"
+regenerate: "go run ./flightdeck/showcase/keyframe-channels  +  scripts/ae-worker/ae_run.ps1 render.jsx (renders t=2s)"
 ---
 
 # keyframe-channels — 四通道 transform 关键帧 showcase

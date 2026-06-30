@@ -15,7 +15,7 @@ READ WHEN: 实现/调试 project 显示设置 setter（SetTimeDisplayType / SetF
 
 showcase project-settings 的 AE-DOM readback 查出：`SetTimeDisplayType(Frames)` / `SetFramesCountType(Start1)` / `SetFeetFramesFilmType(MM16)` 写完字节 Go round-trip 全绿，但 AE 打开后 `app.project.*` 读回**默认值**，我方写入完全被忽略（红线4a false green）。`SetFootageTimecodeDisplayStartType`（nnhd byte9）当时「看似通过」实为**巧合**（我方 from-scratch seed 的 nhed[9] 恰好 = 设的值）。
 
-复现：`go run ./tmp_debug/nnhd_verify_gen`（建 4 设置的工程）→ `scripts/ae_run.ps1` 跑 `test_data/generators/verify_nnhd.jsx` 读 DOM → `verify_nnhd.done` 显示 `NO ... got=<default>`。
+复现：`go run ./tmp_debug/nnhd_verify_gen`（建 4 设置的工程）→ `scripts/ae-worker/ae_run.ps1` 跑 `test_data/generators/verify_nnhd.jsx` 读 DOM → `verify_nnhd.done` 显示 `NO ... got=<default>`。
 
 ## 根因
 

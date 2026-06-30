@@ -1,6 +1,6 @@
 // flightdeck/showcase/shape-primitives/render.jsx — open shape_primitives.aep,
 // verify AE accepts it, render frame 0 to shape_primitives.png for review.
-// Run via scripts/ae_run.ps1 (writes the .done marker).
+// Run via scripts/ae-worker/ae_run.ps1 (writes the .done marker).
 (function () {
     var dir = "e:/projects/tools/aep-parser/flightdeck/showcase/shape-primitives/";
     var inAep = new File(dir + "shape_primitives.aep");

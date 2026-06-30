@@ -1,4 +1,4 @@
-# scripts/AeRun.Lib.ps1
+# scripts/ae-worker/AeRun.Lib.ps1
 # Pure-ish functions for ae_run.ps1; dot-sourced by main + tests.
 
 function Test-FileStable {
@@ -324,7 +324,7 @@ function Invoke-Ocr {
     param([Parameter(Mandatory)][System.Drawing.Bitmap]$Bitmap)
 
     if (-not (Initialize-Ocr)) {
-        throw "OCR helper unavailable (scripts/ocr_helper.ps1 + Windows PowerShell 5.1 required)"
+        throw "OCR helper unavailable (scripts/ae-worker/ocr_helper.ps1 + Windows PowerShell 5.1 required)"
     }
 
     $tmp = Join-Path $env:TEMP "ocr-$(New-Guid).png"

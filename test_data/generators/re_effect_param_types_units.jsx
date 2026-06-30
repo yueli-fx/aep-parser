@@ -7,7 +7,7 @@
 //   L2 shape (source-less) — same values
 //
 // Readback: go run ./tmp_debug/probe_effects test_data/generated/fixtures/re_effect_param_types_units.aep
-// Run via scripts/ae_run.ps1 against AE 2020.
+// Run via scripts/ae-worker/ae_run.ps1 against AE 2020.
 (function () {
     var outFile  = new File("e:/projects/tools/aep-parser/test_data/generated/fixtures/re_effect_param_types_units.aep");
     var doneFile = new File("e:/projects/tools/aep-parser/test_data/re_effect_param_types_units.done");

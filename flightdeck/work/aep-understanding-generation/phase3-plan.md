@@ -4,9 +4,9 @@
 
 **Goal:** Add a generic render-oracle harness that can select sentinel frames, render them through existing AE automation, and compare PNG outputs with deterministic metadata.
 
-**Architecture:** `internal/aeoracle` owns non-AE logic: sentinel frame selection from `profile.Profile`, sidecar request/metadata structs, and PNG comparison metrics. `cmd/aeoracle` is a thin CLI with `plan`, `render`, and `compare` subcommands. `scripts/aeoracle_render.jsx` is the generic AE-side renderer invoked through existing `scripts/ae_run.ps1`; it reads a JSON request and writes metadata/done files. Phase 3 does not generate gap ledgers or recipes.
+**Architecture:** `internal/aeoracle` owns non-AE logic: sentinel frame selection from `profile.Profile`, sidecar request/metadata structs, and PNG comparison metrics. `cmd/aeoracle` is a thin CLI with `plan`, `render`, and `compare` subcommands. `scripts/ae-worker/aeoracle_render.jsx` is the generic AE-side renderer invoked through existing `scripts/ae-worker/ae_run.ps1`; it reads a JSON request and writes metadata/done files. Phase 3 does not generate gap ledgers or recipes.
 
-**Tech Stack:** Go 1.25.1, standard `image/png`, `internal/aep`, `internal/profile`, existing `scripts/ae_run.ps1`, ExtendScript JSX.
+**Tech Stack:** Go 1.25.1, standard `image/png`, `internal/aep`, `internal/profile`, existing `scripts/ae-worker/ae_run.ps1`, ExtendScript JSX.
 
 ---
 
@@ -17,7 +17,7 @@
 - Create `internal/aeoracle/pngcompare.go`: PNG exact/threshold comparison.
 - Create `internal/aeoracle/pngcompare_test.go`: generated image comparison tests.
 - Create `cmd/aeoracle/main.go`: CLI subcommands.
-- Create `scripts/aeoracle_render.jsx`: AE renderer reading JSON sidecar.
+- Create `scripts/ae-worker/aeoracle_render.jsx`: AE renderer reading JSON sidecar.
 - Modify `flightdeck/work/aep-understanding-generation/index.md`: mark Phase 3 active/result.
 - Modify `flightdeck/cockpit.md`: route next step to Phase 3 closeout or Phase 4.
 
@@ -67,12 +67,12 @@
 - [x] Implement `render`:
   - flags: `-request`, `-ae`, `-jsx`, `-timeout-sec`, `-dry-run`
   - dry-run validates request and prints the `ae_run.ps1` command without launching AE
-  - non-dry-run invokes PowerShell `scripts/ae_run.ps1`
+  - non-dry-run invokes PowerShell `scripts/ae-worker/ae_run.ps1`
 - [x] Run command-level smoke tests without launching AE.
 
 ### Task 5: Generic JSX Renderer
 
-- [x] Create `scripts/aeoracle_render.jsx`.
+- [x] Create `scripts/ae-worker/aeoracle_render.jsx`.
 - [x] Read JSON request path from `AEORACLE_REQUEST` environment variable first; fall back to `aeoracle_request.json` beside the JSX.
 - [x] Open requested AEP, find requested comp by exact name or first comp when comp name is empty.
 - [x] Set 8bpc, purge caches, render each frame to deterministic PNG names under output dir.
@@ -95,7 +95,7 @@
 ## Verification Notes
 
 - `plan` generated `tmp_debug/aeoracle/text/request.json` with frames 0, 45, and 90 for `flightdeck/showcase/text/text.aep`.
-- `render -dry-run` validated the request and printed the `scripts/ae_run.ps1` invocation without launching AE.
+- `render -dry-run` validated the request and printed the `scripts/ae-worker/ae_run.ps1` invocation without launching AE.
 - `compare` against generated 2x2 PNGs returned exit code 1 and reported 1 different pixel.
 
 ## Stop Rule

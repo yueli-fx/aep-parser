@@ -1,6 +1,6 @@
 // flightdeck/showcase/masks/render.jsx — open masks.aep, dump each layer's mask
 // names / modes / inverted flags / vertex counts (so the gen.go paths can be
-// verified), then render frame 0 to masks.png for review. Run via scripts/ae_run.ps1.
+// verified), then render frame 0 to masks.png for review. Run via scripts/ae-worker/ae_run.ps1.
 (function () {
     var dir = "e:/projects/tools/aep-parser/flightdeck/showcase/masks/";
     var inAep = new File(dir + "masks.aep");

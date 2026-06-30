@@ -12,7 +12,7 @@ import (
 	"github.com/yueli-fx/aep-parser/internal/rifx"
 )
 
-// runAeRunShipGate dispatches AE via scripts/ae_run.ps1 (drop-in for AfterFX -r).
+// runAeRunShipGate dispatches AE via scripts/ae-worker/ae_run.ps1 (drop-in for AfterFX -r).
 // ps1 owns timeout + .done polling + dialog dismissal. On non-zero exit ps1
 // leaves a <doneFile>.fail/ dump dir with screenshot.png / ocr.txt / actions.log.
 //
@@ -30,7 +30,7 @@ func runAeRunShipGate(t *testing.T, aeExe, jsxPath, doneFile string, timeoutSec 
 		t.Fatal("runtime.Caller failed")
 	}
 	repoRoot := filepath.Join(filepath.Dir(thisFile), "..", "..")
-	script := filepath.Join(repoRoot, "scripts", "ae_run.ps1")
+	script := filepath.Join(repoRoot, "scripts", "ae-worker", "ae_run.ps1")
 
 	// Pull the gate's moving parts into the go test cache key. The cache
 	// tracks files a test reads — without these reads, editing the verify JSX
@@ -38,7 +38,7 @@ func runAeRunShipGate(t *testing.T, aeExe, jsxPath, doneFile string, timeoutSec 
 	// incidents/camera-light-layer-create-re.md gotcha). Reading them here
 	// makes such edits invalidate the cache structurally instead of relying
 	// on -count=1 discipline.
-	for _, p := range []string{jsxPath, script, filepath.Join(repoRoot, "scripts", "ae_dialog_rules.json")} {
+	for _, p := range []string{jsxPath, script, filepath.Join(repoRoot, "scripts", "ae-worker", "ae_dialog_rules.json")} {
 		if _, err := os.ReadFile(p); err != nil {
 			t.Fatalf("gate input missing: %v", err)
 		}
@@ -85,7 +85,7 @@ func runAeRunShipGate(t *testing.T, aeExe, jsxPath, doneFile string, timeoutSec 
 	os.MkdirAll(filepath.Dir(kept), 0755)
 	moveDirCrossVol(doneFile+".fail", kept+".fail")
 	moveDirCrossVol(doneFile+".fail.1", kept+".fail.1")
-	t.Fatalf("ae_run.ps1 failed: %v (forensics preserved at %s.fail/ — screenshot.png / ocr.txt / actions.log; first attempt in %s.fail.1/ if retried)", err, kept, kept)
+	t.Fatalf("scripts/ae-worker/ae_run.ps1 failed: %v (forensics preserved at %s.fail/ — screenshot.png / ocr.txt / actions.log; first attempt in %s.fail.1/ if retried)", err, kept, kept)
 }
 
 // moveDirCrossVol moves src→dst, falling back to a recursive copy when src and

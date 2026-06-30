@@ -21,13 +21,13 @@
 param(
     [string]$Run = 'ShipGate',
     [int]$GoTimeoutMin = 240,
-    [string]$Ledger = (Join-Path (Split-Path $PSScriptRoot -Parent) 'test_data/gate_ledger.json'),
+    [string]$Ledger = (Join-Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) 'test_data/gate_ledger.json'),
     [switch]$SkipPreClean,
     [switch]$ClearCrashState
 )
 
 $ErrorActionPreference = 'Stop'
-$repoRoot = Split-Path $PSScriptRoot -Parent
+$repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 $logPath = Join-Path (Split-Path $Ledger -Parent) 'gate_sweep.log'
 
 if (-not $SkipPreClean) {

@@ -567,7 +567,7 @@ Nineteenth follow-up completed:
   `Underline` layer and asserts both Twist profile properties.
 - During Twist AE validation, the generic render oracle exposed a harness bug:
   metadata could say five frames were rendered while only two PNG files existed.
-  Root cause: `scripts/aeoracle_render.jsx` did not wait for
+  Root cause: `scripts/ae-worker/aeoracle_render.jsx` did not wait for
   `saveFrameToPng` output files, and `cmd/aeoracle render` did not validate
   requested frame artifacts after `done_path = ok`. The harness now waits for
   each PNG and the CLI verifies all requested PNG files exist and are non-empty;
@@ -620,11 +620,11 @@ Twentieth follow-up completed:
   make AE 2025 fail to produce `saveFrameToPng` output for the first frame.
 - During Wiggle Paths AE validation, the generic render oracle exposed two
   harness gaps:
-  - `scripts/aeoracle_render.jsx` used a hard-coded 30-second per-frame PNG
+  - `scripts/ae-worker/aeoracle_render.jsx` used a hard-coded 30-second per-frame PNG
     wait despite the CLI having a much larger `-timeout-sec`; render requests
     now carry `frame_timeout_ms` with a 120-second default.
   - AE's long-running `Executing Script ...` progress dialog was treated as an
-    unknown modal; `scripts/ae_dialog_rules.json` now classifies it as a known
+    unknown modal; `scripts/ae-worker/ae_dialog_rules.json` now classifies it as a known
     `Ignore` dialog. The same rules file also classifies the
     `Scripting plugin is not installed` dialog as `Abort` instead of blindly
     pressing OK.
@@ -634,7 +634,7 @@ Twentieth follow-up completed:
     ./cmd/aeoracle` passed.
   - `go test ./...` passed.
   - `go vet ./...` passed.
-  - `Invoke-Pester scripts\ae_run.Tests.ps1` passed.
+  - `Invoke-Pester scripts\ae-worker\ae_run.Tests.ps1` passed.
   - `cmd/aeprecipe compile -recipe
     examples\recipes\minimal-shape-wiggle-paths.json -out
     tmp_debug\recipes\minimal-shape-wiggle-paths.aep -json` returned valid and
@@ -726,7 +726,7 @@ Twenty-second follow-up completed:
   authored as `below` / `above`, while profile readback is numeric `1` / `2`;
   see `knowledge/shape/recipe-repeater-profile-enums.md`.
 - The AE 2025 run did not reproduce the earlier `Scripting plugin is not
-  installed` modal. Current `scripts/ae_dialog_rules.json` already classifies
+  installed` modal. Current `scripts/ae-worker/ae_dialog_rules.json` already classifies
   that dialog as `Abort`, so a recurrence exits fast with forensics instead of
   dismissing the environment failure.
 - Verification:
@@ -2191,7 +2191,7 @@ Seventy-second follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
   - Full gate passed: `go test ./...`, `go vet ./...`,
-    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+    `Invoke-Pester -Path scripts\ae-worker\ae_run.Tests.ps1`, and `git diff --check`.
 
 Seventy-third follow-up completed:
 
@@ -2219,7 +2219,7 @@ Seventy-third follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
   - Full gate passed: `go test ./...`, `go vet ./...`,
-    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+    `Invoke-Pester -Path scripts\ae-worker\ae_run.Tests.ps1`, and `git diff --check`.
 
 Seventy-fourth follow-up completed:
 
@@ -2249,7 +2249,7 @@ Seventy-fourth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
   - Full gate passed: `go test ./...`, `go vet ./...`,
-    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+    `Invoke-Pester -Path scripts\ae-worker\ae_run.Tests.ps1`, and `git diff --check`.
 
 Seventy-fifth follow-up completed:
 
@@ -2279,7 +2279,7 @@ Seventy-fifth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
   - Full gate passed: `go test ./...`, `go vet ./...`,
-    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+    `Invoke-Pester -Path scripts\ae-worker\ae_run.Tests.ps1`, and `git diff --check`.
 
 Seventy-sixth follow-up completed:
 
@@ -2307,7 +2307,7 @@ Seventy-sixth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
   - Full gate passed: `go test ./...`, `go vet ./...`,
-    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+    `Invoke-Pester -Path scripts\ae-worker\ae_run.Tests.ps1`, and `git diff --check`.
 
 Seventy-seventh follow-up completed:
 
@@ -2338,7 +2338,7 @@ Seventy-seventh follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
   - Full gate passed: `go test ./...`, `go vet ./...`,
-    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+    `Invoke-Pester -Path scripts\ae-worker\ae_run.Tests.ps1`, and `git diff --check`.
 
 Seventy-eighth follow-up completed:
 
@@ -2369,7 +2369,7 @@ Seventy-eighth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
   - Full gate passed: `go test ./...`, `go vet ./...`,
-    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+    `Invoke-Pester -Path scripts\ae-worker\ae_run.Tests.ps1`, and `git diff --check`.
 
 Seventy-ninth follow-up completed:
 
@@ -2397,7 +2397,7 @@ Seventy-ninth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
   - Full gate passed: `go test ./...`, `go vet ./...`,
-    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+    `Invoke-Pester -Path scripts\ae-worker\ae_run.Tests.ps1`, and `git diff --check`.
 
 Eightieth follow-up completed:
 
@@ -2425,7 +2425,7 @@ Eightieth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
   - Full gate passed: `go test ./...`, `go vet ./...`,
-    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+    `Invoke-Pester -Path scripts\ae-worker\ae_run.Tests.ps1`, and `git diff --check`.
 
 Eighty-first follow-up completed:
 
@@ -2455,7 +2455,7 @@ Eighty-first follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
   - Full gate passed: `go test ./...`, `go vet ./...`,
-    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+    `Invoke-Pester -Path scripts\ae-worker\ae_run.Tests.ps1`, and `git diff --check`.
 
 Eighty-second follow-up completed:
 
@@ -2487,7 +2487,7 @@ Eighty-second follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
   - Full gate passed: `go test ./...`, `go vet ./...`,
-    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+    `Invoke-Pester -Path scripts\ae-worker\ae_run.Tests.ps1`, and `git diff --check`.
 
 Eighty-third follow-up completed:
 
@@ -2518,7 +2518,7 @@ Eighty-third follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
   - Full gate passed: `go test ./...`, `go vet ./...`,
-    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+    `Invoke-Pester -Path scripts\ae-worker\ae_run.Tests.ps1`, and `git diff --check`.
 
 Eighty-fourth follow-up completed:
 
@@ -2552,7 +2552,7 @@ Eighty-fourth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
   - Full gate passed: `go test ./...`, `go vet ./...`,
-    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+    `Invoke-Pester -Path scripts\ae-worker\ae_run.Tests.ps1`, and `git diff --check`.
 
 Eighty-fifth follow-up completed:
 
@@ -2581,7 +2581,7 @@ Eighty-fifth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
   - Full gate passed: `go test ./...`, `go vet ./...`,
-    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+    `Invoke-Pester -Path scripts\ae-worker\ae_run.Tests.ps1`, and `git diff --check`.
 
 Eighty-sixth follow-up completed:
 
@@ -2618,7 +2618,7 @@ Eighty-sixth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
   - Full gate passed: `go test ./...`, `go vet ./...`,
-    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+    `Invoke-Pester -Path scripts\ae-worker\ae_run.Tests.ps1`, and `git diff --check`.
 
 Eighty-seventh follow-up completed:
 
@@ -2655,7 +2655,7 @@ Eighty-seventh follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
   - Full gate passed: `go test ./...`, `go vet ./...`,
-    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+    `Invoke-Pester -Path scripts\ae-worker\ae_run.Tests.ps1`, and `git diff --check`.
 
 Eighty-eighth follow-up completed:
 
@@ -2695,7 +2695,7 @@ Eighty-eighth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
   - Full gate passed: `go test ./...`, `go vet ./...`,
-    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+    `Invoke-Pester -Path scripts\ae-worker\ae_run.Tests.ps1`, and `git diff --check`.
 
 Eighty-ninth follow-up completed:
 
@@ -2732,7 +2732,7 @@ Eighty-ninth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
   - Full gate passed: `go test ./...`, `go vet ./...`,
-    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+    `Invoke-Pester -Path scripts\ae-worker\ae_run.Tests.ps1`, and `git diff --check`.
 
 Ninetieth follow-up completed:
 
@@ -2768,7 +2768,7 @@ Ninetieth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
   - Full gate passed: `go test ./...`, `go vet ./...`,
-    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+    `Invoke-Pester -Path scripts\ae-worker\ae_run.Tests.ps1`, and `git diff --check`.
 
 Ninety-first follow-up completed:
 
@@ -2802,7 +2802,7 @@ Ninety-first follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
   - Full gate passed: `go test ./...`, `go vet ./...`,
-    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+    `Invoke-Pester -Path scripts\ae-worker\ae_run.Tests.ps1`, and `git diff --check`.
 
 Ninety-second follow-up completed:
 
@@ -2836,7 +2836,7 @@ Ninety-second follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
   - Full gate passed: `go test ./...`, `go vet ./...`,
-    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+    `Invoke-Pester -Path scripts\ae-worker\ae_run.Tests.ps1`, and `git diff --check`.
 
 Ninety-third follow-up completed:
 
@@ -2868,7 +2868,7 @@ Ninety-third follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
   - Full gate passed: `go test ./...`, `go vet ./...`,
-    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+    `Invoke-Pester -Path scripts\ae-worker\ae_run.Tests.ps1`, and `git diff --check`.
 
 Ninety-fourth follow-up completed:
 
@@ -2889,10 +2889,10 @@ Ninety-fourth follow-up completed:
   - Focused recipe tests passed after implementation.
   - `go test ./internal/scene ./internal/profile ./internal/recipe -count=1`
     passed.
-  - `pwsh -NoProfile -File scripts\verify_recipe_profiles.ps1` passed:
+  - `go run ./cmd/aepverify recipe-profiles` passed:
     89 recipes, 89 passed, 0 failed, 149 covered profile paths.
   - Full gate passed: `go test ./...`, `go vet ./...`,
-    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+    `Invoke-Pester -Path scripts\ae-worker\ae_run.Tests.ps1`, and `git diff --check`.
 
 Ninety-fifth follow-up completed:
 
@@ -2915,10 +2915,10 @@ Ninety-fifth follow-up completed:
     dedicated filter recipes.
   - Focused shape filter profile tests passed after adding the recipes.
   - `go test ./internal/recipe -count=1` passed.
-  - `pwsh -NoProfile -File scripts\verify_recipe_profiles.ps1` passed:
+  - `go run ./cmd/aepverify recipe-profiles` passed:
     95 recipes, 95 passed, 0 failed, 149 covered profile paths.
   - Full gate passed: `go test ./...`, `go vet ./...`,
-    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+    `Invoke-Pester -Path scripts\ae-worker\ae_run.Tests.ps1`, and `git diff --check`.
 
 Next generation work should broaden recipe coverage in small proven slices:
 remaining recipe-owned families with existing parser/profile contracts. Do not
@@ -2939,10 +2939,10 @@ Ninety-seventh follow-up completed:
     `minimal-text-style.json` was missing.
   - The focused text style profile test passed after adding the recipe.
   - `go test ./internal/recipe -count=1` passed.
-  - `pwsh -NoProfile -File scripts\verify_recipe_profiles.ps1` passed:
+  - `go run ./cmd/aepverify recipe-profiles` passed:
     97 recipes, 97 passed, 0 failed, 149 covered profile paths.
   - Full gate passed: `go test ./...`, `go vet ./...`,
-    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+    `Invoke-Pester -Path scripts\ae-worker\ae_run.Tests.ps1`, and `git diff --check`.
 
 Next generation work should broaden recipe coverage in small proven slices:
 remaining recipe-owned families with existing parser/profile contracts. Do not
@@ -2964,10 +2964,10 @@ Ninety-sixth follow-up completed:
   - The focused transform keyframe profile test passed after adding the
     recipe.
   - `go test ./internal/recipe -count=1` passed.
-  - `pwsh -NoProfile -File scripts\verify_recipe_profiles.ps1` passed:
+  - `go run ./cmd/aepverify recipe-profiles` passed:
     96 recipes, 96 passed, 0 failed, 149 covered profile paths.
   - Full gate passed: `go test ./...`, `go vet ./...`,
-    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+    `Invoke-Pester -Path scripts\ae-worker\ae_run.Tests.ps1`, and `git diff --check`.
 
 Next generation work should broaden recipe coverage in small proven slices:
 remaining recipe-owned families with existing parser/profile contracts. Do not

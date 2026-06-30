@@ -1,7 +1,7 @@
 // flightdeck/showcase/keyframe-channels/render.jsx — open keyframe_channels.aep,
 // render the MID time (t=2s) to keyframe_channels.png so every channel shows its
 // INTERPOLATED (non-endpoint) value, and dump each layer's t=2s channel value to
-// the .done log as a readback cross-check. Run via scripts/ae_run.ps1.
+// the .done log as a readback cross-check. Run via scripts/ae-worker/ae_run.ps1.
 (function () {
     var dir = "e:/projects/tools/aep-parser/flightdeck/showcase/keyframe-channels/";
     var inAep = new File(dir + "keyframe_channels.aep");

@@ -64,7 +64,7 @@ internal/aep         ── 薄 facade (公共 API：Open / FromReader / New* / 
 - **调试纪律**：外部校验器（AE）以**相同错误信号**连拒多个结构性修复 → 停止堆叠，转**最小失败 bisection**（已知 PASS baseline 逐特征加到首个 FAIL）。错误信号每次变化才继续 stack。
 - **渲染类 bug 先看图**：拿到渲染帧先 `Read` PNG 目视（浮雕/overlay/flat 等模式信息 > 像素数值占卜），再做数值断言；showcase 先自渲染 + Read png 自验再呈用户（不替代用户实机验收）。
 - **工具链才是真相源**：判断编译/测试只信 `go build`/`go vet`/`go test`，**不信** IDE/`<new-diagnostics>` 面板（subagent 多文件编辑期会 stale 报假 ✘）或 `gofmt -l`（本仓 core.autocrlf=true，每个 .go 都误报——比 LF/index 形或直接信 go vet）。
-- **AE ship-gate = agent 自跑** `scripts/ae_run.ps1`（无人值守，exit 0/1/2/8），别默认让用户手开 AE；cold-start exit-2 先 warm-retry（≤3 次）+ 跑已知-good fixture 作对照，别当真 FAIL（详 `knowledge/workflow/re-fixture.md`）。
+- **AE ship-gate = agent 自跑** `scripts/ae-worker/ae_run.ps1`（无人值守，exit 0/1/2/8），别默认让用户手开 AE；cold-start exit-2 先 warm-retry（≤3 次）+ 跑已知-good fixture 作对照，别当真 FAIL（详 `knowledge/workflow/re-fixture.md`）。
 - **真相源优先级**：代码 + ship-gate test > capindex tag（`go run ./cmd/capindex -q`）> docs > spec 正文/backlog（最易漂）。对齐看板前 grep 代码核实，别照搬文档。
 - **内部实现无注释**，除非 WHY 不明显；但**导出 API 的 doc comment = 文档源**（英文为源，`cmd/docgen` 从中生成 `docs/*.md`）。行内实现注释仍禁；导出符号上方的 doc comment 是文档载体，不算违反。
 

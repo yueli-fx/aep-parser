@@ -5,7 +5,7 @@ capabilities: [full-project-replication, precomp-nesting, fractal-noise-params, 
 gates: []
 status: 待review
 last_updated: 2026-06-22
-regenerate: "go run ./flightdeck/showcase/booyah-clone  +  scripts/ae_run.ps1 render.jsx / verify.jsx"
+regenerate: "go run ./flightdeck/showcase/booyah-clone  +  scripts/ae-worker/ae_run.ps1 render.jsx / verify.jsx"
 ---
 
 # booyah-clone — Booyah Glitch 全工程复刻(理解金标准)

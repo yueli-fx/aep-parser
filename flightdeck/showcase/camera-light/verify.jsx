@@ -1,7 +1,7 @@
 // flightdeck/showcase/camera-light/verify.jsx — open camera_light.aep and dump the
 // camera / light layer types + default option values to .done. 📋 READBACK
 // showcase: no png. Confirms NewCameraLayer / NewLightLayer produce AE-accepted,
-// correctly-typed layers. Run via scripts/ae_run.ps1.
+// correctly-typed layers. Run via scripts/ae-worker/ae_run.ps1.
 (function () {
     var dir = "e:/projects/tools/aep-parser/flightdeck/showcase/camera-light/";
     var inAep = new File(dir + "camera_light.aep");

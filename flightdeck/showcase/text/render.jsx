@@ -1,6 +1,6 @@
 // flightdeck/showcase/text/render.jsx — open text.aep, render frame 0 → text.png.
 // Also dumps each text layer's source string + font size to the .done log so the
-// default text style is visible. Run via scripts/ae_run.ps1.
+// default text style is visible. Run via scripts/ae-worker/ae_run.ps1.
 (function () {
     var dir = "e:/projects/tools/aep-parser/flightdeck/showcase/text/";
     var inAep = new File(dir + "text.aep");

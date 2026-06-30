@@ -1,6 +1,6 @@
 // flightdeck/showcase/shape-filters/render.jsx — open shape_filters.aep, verify
 // AE accepts it (all 13 layers present), and render frame 0 to shape_filters.png
-// for user review. Run via scripts/ae_run.ps1 (writes the .done marker).
+// for user review. Run via scripts/ae-worker/ae_run.ps1 (writes the .done marker).
 (function () {
     var dir = "e:/projects/tools/aep-parser/flightdeck/showcase/shape-filters/";
     var inAep = new File(dir + "shape_filters.aep");

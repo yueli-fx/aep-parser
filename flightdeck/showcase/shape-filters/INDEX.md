@@ -5,7 +5,7 @@ capabilities: [round-corners, offset-paths, trim-paths, zigzag, pucker-bloat, tw
 gates: [TestMGTrim_AEShipGate, TestMGRepeater_AEShipGate, TestMGRoundCorners_AEShipGate, TestMGOffset_AEShipGate, TestMGMerge_AEShipGate, TestMGZigZag_AEShipGate, TestMGPuckerBloat_AEShipGate, TestMGTwist_AEShipGate, TestMGWiggle_AEShipGate, TestMGWiggleTransform_AEShipGate, TestMGWiggleMod_AEShipGate, "+PolyStar star gate"]
 status: 待review
 last_updated: 2026-06-16
-regenerate: "go run ./flightdeck/showcase/shape-filters  +  scripts/ae_run.ps1 render.jsx"
+regenerate: "go run ./flightdeck/showcase/shape-filters  +  scripts/ae-worker/ae_run.ps1 render.jsx"
 ---
 
 # shape-filters — 形状矢量滤镜家族 showcase

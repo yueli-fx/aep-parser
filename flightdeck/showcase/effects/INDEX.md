@@ -5,7 +5,7 @@ capabilities: [add-effect, set-effect-param, gaussian-blur, drop-shadow, invert,
 gates: [TestAddEffect_AEShipGate_AE2020, TestAddEffect_AEShipGate_AE2025, "set_effect_param_shipgate_test.go (SetEffectParam 双版本)"]
 status: complete
 last_updated: 2026-06-13
-regenerate: "go run ./flightdeck/showcase/effects  +  scripts/ae_run.ps1 render.jsx"
+regenerate: "go run ./flightdeck/showcase/effects  +  scripts/ae-worker/ae_run.ps1 render.jsx"
 ---
 
 # effects — 加效果 + 改参数 showcase

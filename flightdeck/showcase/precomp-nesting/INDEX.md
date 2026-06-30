@@ -5,7 +5,7 @@ capabilities: [new-composition, new-precomp-layer, nested-composition, source-id
 gates: [TestMGPrecomp_AEShipGate_AE2020, TestMGPrecomp_AEShipGate_AE2025]
 status: complete
 last_updated: 2026-06-13
-regenerate: "go run ./flightdeck/showcase/precomp-nesting  +  scripts/ae_run.ps1 render.jsx"
+regenerate: "go run ./flightdeck/showcase/precomp-nesting  +  scripts/ae-worker/ae_run.ps1 render.jsx"
 ---
 
 # precomp-nesting — 预合成嵌套 showcase

@@ -177,7 +177,7 @@ Run:
 ```powershell
 go test ./...
 go vet ./...
-pwsh -NoProfile -File scripts\regen_fixtures.ps1 -CheckOnly
+pwsh -NoProfile -File scripts\fixtures\regen_fixtures.ps1 -CheckOnly
 git diff --check
 ```
 

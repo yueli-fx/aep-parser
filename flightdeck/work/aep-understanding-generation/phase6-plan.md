@@ -6,7 +6,7 @@
 
 **Architecture:** Keep render comparison in `internal/aeoracle` and `cmd/aeoracle`; keep slice/gap aggregation in `internal/sliceworkflow` and `cmd/aepslices`. Phase 6 starts with measured clone fidelity, not automatic correction. Recipe IR work starts only after a source-vs-clone render compare can be produced from generic commands.
 
-**Tech Stack:** Go 1.25.1, `internal/aeoracle`, `internal/gapledger`, `internal/sliceworkflow`, `cmd/aeoracle`, `cmd/aepslices`, `scripts/aeoracle_render.jsx`, existing AE runner `scripts/ae_run.ps1`.
+**Tech Stack:** Go 1.25.1, `internal/aeoracle`, `internal/gapledger`, `internal/sliceworkflow`, `cmd/aeoracle`, `cmd/aepslices`, `scripts/ae-worker/aeoracle_render.jsx`, existing AE runner `scripts/ae-worker/ae_run.ps1`.
 
 ---
 

@@ -1,4 +1,4 @@
-// Minimal smoke for scripts/ae_run.ps1 -- no .aep IO, just .done write + quit.
+// Minimal smoke for scripts/ae-worker/ae_run.ps1 -- no .aep IO, just .done write + quit.
 // Reads $TEMP/ae_run_smoke.done path from args.json (Go-side ship-gate pattern).
 (function () {
     var doneFile = new File("$DONE_PLACEHOLDER$");

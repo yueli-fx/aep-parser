@@ -74,7 +74,7 @@ regenerate: "go run ./flightdeck/showcase/<方向>  +  AE render.jsx"
 
 1. 新方向 → 建 `flightdeck/showcase/<方向>/`，写 `gen.go`（参考既有方向；纯 Go facade 调用，输出到本目录的 `<方向>.aep`）。
 2. `go run ./flightdeck/showcase/<方向>` 构建 .aep。
-3. 写 `render.jsx`（打开 .aep → `saveFrameToPng(0, …)`），用 `scripts/ae_run.ps1` 跑出 `<方向>.png`。
+3. 写 `render.jsx`（打开 .aep → `saveFrameToPng(0, …)`），用 `scripts/ae-worker/ae_run.ps1` 跑出 `<方向>.png`。
 4. **AE 实渲眼验**（红线4）：Read 渲染 png，确认每个能力的视觉对了——不靠值 round-trip 假绿。
 5. 写/更新 `<方向>/INDEX.md`（上面模板，`status: 待review`）+ 顶层 `showcase/INDEX.md` 加一行（`🔍 待review`）。
 6. commit tracked 三件（INDEX.md/gen.go/render.jsx）；**通知用户真机复核**。
@@ -88,7 +88,7 @@ showcase 里每个能力须已过双版本 ship-gate（`delivery-contract.md`）
 
 复刻一个真实 .aep 后，用户/你发现某帧「长得不一样」时——**别靠 keyTime/值 dump 占卜，直接渲帧看图**（红线4：值对≠渲染对；本工作流揪出了 comp ⑤ 的 tdb4 时基 bug + Scale/Rotation 漏复刻，详 [[layer-replication-drops-static-transform-channels]]）。三件 tracked 工具（`flightdeck/showcase/booyah-clone/`）：
 
-- **`render_shape_compare.jsx`** — 一趟 AE 里先开原版、再开 clone，把某 comp 的 frame `0..N-1` 各导一张 PNG。sidecar `render_shape_compare.txt`（UTF-8，每行一项）：`原版.aep` / `clone.aep` / `comp 名` / 帧数 / 输出目录 / 源前缀 / clone前缀。跑：`pwsh scripts/ae_run.ps1 -AeExe <AE> -Jsx <这个> -Done <.done>`。
+- **`render_shape_compare.jsx`** — 一趟 AE 里先开原版、再开 clone，把某 comp 的 frame `0..N-1` 各导一张 PNG。sidecar `render_shape_compare.txt`（UTF-8，每行一项）：`原版.aep` / `clone.aep` / `comp 名` / 帧数 / 输出目录 / 源前缀 / clone前缀。跑：`pwsh scripts/ae-worker/ae_run.ps1 -AeExe <AE> -Jsx <这个> -Done <.done>`。
 - **`render_solo_layers.jsx`** — 同一 comp 把每层逐个 `solo` 单独渲一帧（原版 + clone），**隔离是哪一层不对**。sidecar：原/clone/comp/帧号/输出目录。它还顺手把每层 start/opacity 写进 `.done`。
 - **`dump_layer_time.jsx`** — dump 每层 start/in/out/stretch/timeRemap/source（不渲染，快），排除时间属性差异。
 - **`tools/debug/dump_precomp_xform`**（Go）— dump 层的静态 Scale/Rotate Z/Anchor 值（parser 读 Scale 为分数）。

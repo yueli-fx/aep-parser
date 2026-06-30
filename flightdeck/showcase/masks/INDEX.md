@@ -5,7 +5,7 @@ capabilities: [add-mask, bezier-path, mask-inverted, mask-clipping]
 gates: [TestAddMask_AEShipGate_AE2020, TestAddMask_AEShipGate_AE2025]
 status: complete
 last_updated: 2026-06-13
-regenerate: "go run ./flightdeck/showcase/masks  +  scripts/ae_run.ps1 render.jsx"
+regenerate: "go run ./flightdeck/showcase/masks  +  scripts/ae-worker/ae_run.ps1 render.jsx"
 ---
 
 # masks — 遮罩裁切 showcase

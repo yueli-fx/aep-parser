@@ -538,7 +538,7 @@ Exit criteria:
 Goal: make render comparison targeted and repeatable.
 
 Work:
-- Wrap existing `scripts/ae_run.ps1` and Booyah JSX patterns into generic
+- Wrap existing `scripts/ae-worker/ae_run.ps1` and Booyah JSX patterns into generic
   `cmd/aeoracle` or tracked reusable scripts.
 - Implement capped sentinel frame selection from profile keyframes and active
   intervals.

@@ -1,7 +1,7 @@
 // flightdeck/showcase/animated-path/render.jsx — open animated_path.aep, render the
 // MID time (t=2s) to animated_path.png (the path is a SQUARE there = morph
 // midpoint), and dump the path's vertices at t=0 / t=2 / t=4 to the .done log so
-// the bar→square→bar morph is numerically proven. Run via scripts/ae_run.ps1.
+// the bar→square→bar morph is numerically proven. Run via scripts/ae-worker/ae_run.ps1.
 (function () {
     var dir = "e:/projects/tools/aep-parser/flightdeck/showcase/animated-path/";
     var inAep = new File(dir + "animated_path.aep");

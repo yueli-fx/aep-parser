@@ -1,7 +1,7 @@
 // flightdeck/showcase/project-settings/verify.jsx — open project_settings.aep and
 // dump app.project DOM settings to the .done log with an explicit OK/NO check vs
 // the expected value. 📋 READBACK showcase: no png, the user reads the log.
-// Run via scripts/ae_run.ps1.
+// Run via scripts/ae-worker/ae_run.ps1.
 (function () {
     var dir = "e:/projects/tools/aep-parser/flightdeck/showcase/project-settings/";
     var inAep = new File(dir + "project_settings.aep");

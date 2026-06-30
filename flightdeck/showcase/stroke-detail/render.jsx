@@ -1,7 +1,7 @@
 // flightdeck/showcase/stroke-detail/render.jsx — open stroke_detail.aep, dump a
 // terse per-layer summary (layer count + each shape layer's stroke detail
 // properties where they can be cheaply read), then render frame 0 to
-// stroke_detail.png for review. Run via scripts/ae_run.ps1.
+// stroke_detail.png for review. Run via scripts/ae-worker/ae_run.ps1.
 (function () {
     var dir = "e:/projects/tools/aep-parser/flightdeck/showcase/stroke-detail/";
     var inAep = new File(dir + "stroke_detail.aep");

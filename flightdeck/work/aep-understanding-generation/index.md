@@ -84,7 +84,7 @@ Done:
 - Phase 2 implemented `internal/profilediff` and `cmd/aepdiff` with JSON ignore
   rules and deterministic path-level reports.
 - Phase 3 implemented `internal/aeoracle`, `cmd/aeoracle`, and
-  `scripts/aeoracle_render.jsx` for sentinel frame planning, render sidecars,
+  `scripts/ae-worker/aeoracle_render.jsx` for sentinel frame planning, render sidecars,
   PNG comparison, and AE dry-run invocation.
 - Phase 4 implemented `internal/gapledger` and `cmd/aepgaps` for structured
   diff/render gap reports with stable IDs, evidence, severity, action type,
@@ -100,7 +100,7 @@ Done:
   selected representative slices, produced zero self-diff gaps, produced
   cross-project gap output against `seabox.aep`, generated a render-oracle
   sentinel plan, and passed a real AE 2025 hard render gate after hardening
-  `cmd/aeoracle render` and `scripts/aeoracle_render.jsx`.
+  `cmd/aeoracle render` and `scripts/ae-worker/aeoracle_render.jsx`.
 - Phase 6 render-compare plan written. The first implementation slice is
   source-vs-clone frame-set compare (`clone-request` + `compare-set`) before
   recipe IR or automated correction loops.
@@ -289,7 +289,7 @@ Done:
   preserve nested frame rate, preserve nested resolution, and motion blur
   enabled now assert their own profile-visible fields instead of count-only
   smoke checks.
-- Added `scripts/verify_recipe_profiles.ps1` as the one-command recipe profile
+- Added `go run ./cmd/aepverify recipe-profiles` as the one-command recipe profile
   verifier. It builds `cmd/aeprecipe` once, validates and compiles all selected
   recipes, summarizes `profile_checks` coverage/failures, and exits non-zero on
   validation, compile, invalid-report, or profile-check failures.
@@ -639,7 +639,7 @@ Current:
   with recreation readiness, archetypes, repeated pattern catalog entries,
   deterministic recreation steps, representative projects, mechanism profiles,
   pattern-level recreation-step profiles, and plugin-effect blockers.
-- `scripts\technique_showcase_report.ps1` is the self-hosted corpus dashboard.
+- `go run ./cmd/aepselfhost technique-report` is the self-hosted corpus dashboard.
   It runs explain-mode corpus analysis once with `-summary-out`, then writes
   `summary.json`, `corpus.jsonl`, `digest.json`, `learning.md`, `projects.csv`,
   `patterns.csv`, `study_queue.csv`, `errors.csv`, `manifest.json`, `report.md`,
@@ -656,11 +656,11 @@ Current:
   deterministic recreation steps. Pattern playbooks now include the common
   recreation-step distribution for each repeated technique pattern, and the
   study queue ranks projects by readiness and signal density.
-- `scripts\compare_technique_reports.ps1` compares two generated report
+- `go run ./cmd/aepselfhost compare-reports` compares two generated report
   directories and writes `compare.json` / `compare.md` for scalar totals and
   count-map deltas across readiness, patterns, effects, plugin effects, shapes,
   text animators, layer roles, and graph edges.
-- `scripts\verify_technique_selfhost.ps1` is the one-command self-hosted
+- `go run ./cmd/aepselfhost verify` is the one-command self-hosted
   acceptance gate. It runs the technique Go tests, full sample report, partial
   error report, self-compare, partial-to-full compare, and writes
   `acceptance.json` / `acceptance.md`.
@@ -671,7 +671,7 @@ Current:
   baseline plus the dedicated ease baseline, and text style has a dedicated
   `minimal-text-style.json` baseline instead of relying only on the larger
   text/shape recipe. Use
-  `scripts/verify_recipe_profiles.ps1` for whole-recipe
+  `go run ./cmd/aepverify recipe-profiles` for whole-recipe
 - validation/compile/profile-check coverage instead of manual per-field
   spot-checking. For any new comp or layer work, first update the relevant
   execution strategy with the new writer/profile evidence boundary. Do not

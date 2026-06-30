@@ -2,7 +2,7 @@
 // comp's DOM to verify.done (plain text), confirming AE actually ingested the
 // shapes/effects (spec §3 结构保真; catches silent-drop). Iterates ALL comps so no
 // Japanese-name matching is needed. String-only output (no JSON.stringify, which can
-// throw on DOM enum values). Run via scripts/ae_run.ps1, -Done = verify.done.
+// throw on DOM enum values). Run via scripts/ae-worker/ae_run.ps1, -Done = verify.done.
 (function () {
     var dir = "e:/projects/tools/aep-parser/flightdeck/showcase/booyah-clone/";
     var L = [];

@@ -5,7 +5,7 @@ capabilities: [set-position, set-scale, set-rotation, set-opacity, transform-set
 gates: [TestV2_2_XfKf_AEShipGate_AE2020, TestV2_2_XfKf_AEShipGate_AE2025]
 status: complete
 last_updated: 2026-06-13
-regenerate: "go run ./flightdeck/showcase/transform-values  +  scripts/ae_run.ps1 render.jsx"
+regenerate: "go run ./flightdeck/showcase/transform-values  +  scripts/ae-worker/ae_run.ps1 render.jsx"
 ---
 
 # transform-values — 改 transform 字段值 showcase

@@ -1,6 +1,6 @@
 // flightdeck/showcase/layers/render.jsx — open layers.aep, render frame 0 →
 // layers.png, and dump each layer's name + type flags so the non-rendering
-// layers (Null / Adjustment) are provably present. Run via scripts/ae_run.ps1.
+// layers (Null / Adjustment) are provably present. Run via scripts/ae-worker/ae_run.ps1.
 (function () {
     var dir = "e:/projects/tools/aep-parser/flightdeck/showcase/layers/";
     var inAep = new File(dir + "layers.aep");

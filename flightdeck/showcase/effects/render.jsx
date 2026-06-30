@@ -1,6 +1,6 @@
 // flightdeck/showcase/effects/render.jsx — open effects.aep, dump each layer's
 // effect + parameter match-names (so the gen.go param indices can be verified),
-// then render frame 0 to effects.png for review. Run via scripts/ae_run.ps1.
+// then render frame 0 to effects.png for review. Run via scripts/ae-worker/ae_run.ps1.
 (function () {
     var dir = "e:/projects/tools/aep-parser/flightdeck/showcase/effects/";
     var inAep = new File(dir + "effects.aep");

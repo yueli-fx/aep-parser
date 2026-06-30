@@ -210,14 +210,14 @@ func runRender(args []string, aeHost aehost.Host) int {
 	fs.SetOutput(os.Stderr)
 	requestPath := fs.String("request", "", "render request JSON path")
 	aePath := fs.String("ae", "", "After Effects executable path")
-	jsxPath := fs.String("jsx", "scripts/aeoracle_render.jsx", "renderer JSX path")
+	jsxPath := fs.String("jsx", filepath.Join("scripts", "ae-worker", "aeoracle_render.jsx"), "renderer JSX path")
 	timeout := fs.Int("timeout-sec", 180, "AE automation timeout seconds")
 	dryRun := fs.Bool("dry-run", false, "print command without launching AE")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
 	if *requestPath == "" {
-		fmt.Fprintln(os.Stderr, "usage: aeoracle render -request request.json [-ae path] [-jsx scripts/aeoracle_render.jsx] [-timeout-sec n] [-dry-run]")
+		fmt.Fprintln(os.Stderr, "usage: aeoracle render -request request.json [-ae path] [-jsx scripts/ae-worker/aeoracle_render.jsx] [-timeout-sec n] [-dry-run]")
 		return 2
 	}
 	cwd, err := os.Getwd()
@@ -254,7 +254,7 @@ func runRender(args []string, aeHost aehost.Host) int {
 		}
 	}
 	if *dryRun {
-		runScript, err := resolvePath(filepath.Join("scripts", "ae_run.ps1"), cwd)
+		runScript, err := resolvePath(filepath.Join("scripts", "ae-worker", "ae_run.ps1"), cwd)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "runner path:", err)
 			return 2

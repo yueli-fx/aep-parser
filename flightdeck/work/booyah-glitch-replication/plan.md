@@ -6,7 +6,7 @@
 
 **Architecture:** `flightdeck/showcase/booyah-clone/` 一个 `package main`:`oracle.go` 用 `aep.Open` 把原工程当只读取值源;`gen_<comp>.go` 每 comp 一个 build 函数,经 New*/AddEffect/Set*/AddMask/Animate* 重建;`main.go` 按 DAG 拓扑序拼装 → 写 `booyah-clone.aep`。原工程只读、绝不 copy 字节。
 
-**Tech Stack:** Go(internal/aep facade)· AE 2020+2025 ship-gate(`scripts/ae_run.ps1`)· `render.jsx`/`verify.jsx`(ExtendScript)。
+**Tech Stack:** Go(internal/aep facade)· AE 2020+2025 ship-gate(`scripts/ae-worker/ae_run.ps1`)· `render.jsx`/`verify.jsx`(ExtendScript)。
 
 **真相源:** 每 comp 结构/值取自 `data/reference/booyah-glitch/booyah_dissect.txt`(完整画像)+ 执行时 `aep.Open` 实读。本 plan 内联的是**已知标量参数 + API 调用骨架**;mask 路径 / 关键帧值这类批量数据由 `oracle.go` 程序化提取,不内联。
 
@@ -68,7 +68,7 @@ de-risk 原则:表达式/many-mask/curves 三个未知一旦 blocked,会改变�
 **Files:** Create `tmp_debug/` 或现有 ship-gate test 里加最小用例(NewSolidLayer + AddEffect Fractal Noise + SetExpression on Evolution = `"time*1200"`;另一例 Exposure + `"wiggle(34,0.29)"`)。
 
 - [ ] **Step 1:** 写最小 Go:一层 Fractal Noise,`SetExpression(Evolution, "time*1200")` + `SetExpressionEnabled(true)`,WriteAEP。
-- [ ] **Step 2:** AE ship-gate(`scripts/ae_run.ps1`,AE2025 先):打开 + verify.jsx 读 `expressionEnabled` 与逐帧 Evolution 值是否随 time 变化(render 两帧采样或 DOM valueAtTime)。Expected:**判定 PASS / FAIL**。
+- [ ] **Step 2:** AE ship-gate(`scripts/ae-worker/ae_run.ps1`,AE2025 先):打开 + verify.jsx 读 `expressionEnabled` 与逐帧 Evolution 值是否随 time 变化(render 两帧采样或 DOM valueAtTime)。Expected:**判定 PASS / FAIL**。
 - [ ] **Step 3(go/no-go):**
   - PASS → 表达式可复刻,账本 `expr-evolution`/`expr-wiggle` = 可做;后续 comp 直接 SetExpression。
   - FAIL(AE 不求值)→ **降级路**(用户已批准):Evolution 用线性 keyframe 近似(0→time*N*dur over 6s),wiggle 用其 9kf 实测值直接复刻;账本标 `blocked(expr)` + 实证理由;若 FAIL 写新 incident(或 append `expression-enable-byte-pair` 一个 Case)。
