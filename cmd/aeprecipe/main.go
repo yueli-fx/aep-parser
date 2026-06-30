@@ -99,12 +99,20 @@ func runExplain(args []string) int {
 	fs := flag.NewFlagSet("aeprecipe explain", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
 	recipePath := fs.String("recipe", "", "recipe JSON path")
+	fieldPath := fs.String("field", "", "recipe field path to explain")
 	jsonOut := fs.Bool("json", false, "print JSON report")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
+	if *recipePath != "" && *fieldPath != "" {
+		fmt.Fprintln(os.Stderr, "usage: aeprecipe explain [-recipe recipe.json | -field recipe.path] [-json]")
+		return 2
+	}
+	if *fieldPath != "" {
+		return runExplainField(*fieldPath, *jsonOut)
+	}
 	if *recipePath == "" {
-		fmt.Fprintln(os.Stderr, "usage: aeprecipe explain -recipe recipe.json [-json]")
+		fmt.Fprintln(os.Stderr, "usage: aeprecipe explain [-recipe recipe.json | -field recipe.path] [-json]")
 		return 2
 	}
 	rec, err := readRecipe(*recipePath)
@@ -121,6 +129,87 @@ func runExplain(args []string) int {
 		return 1
 	}
 	return 0
+}
+
+type recipeIndexFile struct {
+	Fields map[string]recipeIndexEntry `json:"fields"`
+}
+
+type recipeIndexEntry struct {
+	Path           string   `json:"path"`
+	JSONName       string   `json:"json_name"`
+	SourceType     string   `json:"source_type"`
+	SourceField    string   `json:"source_field"`
+	Type           string   `json:"type"`
+	GoType         string   `json:"go_type"`
+	Requiredness   []string `json:"requiredness,omitempty"`
+	Summary        string   `json:"summary,omitempty"`
+	Validation     string   `json:"validation,omitempty"`
+	Enum           []string `json:"enum,omitempty"`
+	CapabilityKeys []string `json:"capability_keys,omitempty"`
+	Example        string   `json:"example,omitempty"`
+}
+
+func runExplainField(fieldPath string, jsonOut bool) int {
+	index, err := readRecipeIndex()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "recipe index:", err)
+		return 2
+	}
+	entry, ok := index.Fields[fieldPath]
+	if !ok {
+		fmt.Fprintf(os.Stderr, "recipe field %q not found\n", fieldPath)
+		return 1
+	}
+	if jsonOut {
+		enc := json.NewEncoder(os.Stdout)
+		enc.SetIndent("", "  ")
+		if err := enc.Encode(entry); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return 2
+		}
+		return 0
+	}
+	fmt.Printf("field %s\n", entry.Path)
+	fmt.Printf("type %s\n", entry.Type)
+	if entry.SourceType != "" || entry.SourceField != "" {
+		fmt.Printf("source %s.%s\n", entry.SourceType, entry.SourceField)
+	}
+	if len(entry.Requiredness) > 0 {
+		fmt.Printf("requiredness %s\n", strings.Join(entry.Requiredness, ","))
+	}
+	if entry.Summary != "" {
+		fmt.Printf("summary %s\n", entry.Summary)
+	}
+	if entry.Validation != "" {
+		fmt.Printf("validation %s\n", entry.Validation)
+	}
+	for _, value := range entry.Enum {
+		fmt.Printf("enum %s\n", value)
+	}
+	for _, key := range entry.CapabilityKeys {
+		fmt.Printf("capability %s\n", key)
+	}
+	if entry.Example != "" {
+		fmt.Printf("example %s\n", entry.Example)
+	}
+	return 0
+}
+
+func readRecipeIndex() (recipeIndexFile, error) {
+	root, err := repoRoot()
+	if err != nil {
+		return recipeIndexFile{}, err
+	}
+	data, err := os.ReadFile(filepath.Join(root, "docs", "recipe_index.json"))
+	if err != nil {
+		return recipeIndexFile{}, err
+	}
+	var index recipeIndexFile
+	if err := json.Unmarshal(data, &index); err != nil {
+		return recipeIndexFile{}, err
+	}
+	return index, nil
 }
 
 func readRecipe(path string) (recipe.Recipe, error) {

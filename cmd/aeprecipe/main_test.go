@@ -2,8 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/yueli-fx/aep-parser/internal/recipe"
@@ -58,6 +60,30 @@ func TestRunCompileWritesAEP(t *testing.T) {
 	}
 }
 
+func TestRunExplainFieldPrintsRecipeIndexEntry(t *testing.T) {
+	output, code := captureStdout(t, func() int {
+		return run([]string{"explain", "-field", "comps[].background_color"})
+	})
+
+	if code != 0 {
+		t.Fatalf("run explain -field = %d, want 0", code)
+	}
+	if !strings.Contains(output, "comps[].background_color") {
+		t.Fatalf("output missing field path:\n%s", output)
+	}
+	if !strings.Contains(output, "comp.set_background_color") {
+		t.Fatalf("output missing capability key:\n%s", output)
+	}
+}
+
+func TestRunExplainFieldReturnsOneForUnknownField(t *testing.T) {
+	code := run([]string{"explain", "-field", "comps[].does_not_exist", "-json"})
+
+	if code != 1 {
+		t.Fatalf("run explain unknown field = %d, want 1", code)
+	}
+}
+
 func minimalCLIRecipe() recipe.Recipe {
 	return recipe.Recipe{
 		SchemaVersion: recipe.SchemaVersion,
@@ -105,4 +131,24 @@ func writeRecipe(t *testing.T, rec recipe.Recipe) string {
 		t.Fatal(err)
 	}
 	return path
+}
+
+func captureStdout(t *testing.T, fn func() int) (string, int) {
+	t.Helper()
+	old := os.Stdout
+	r, w, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	os.Stdout = w
+	code := fn()
+	if err := w.Close(); err != nil {
+		t.Fatal(err)
+	}
+	os.Stdout = old
+	data, err := io.ReadAll(r)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(data), code
 }

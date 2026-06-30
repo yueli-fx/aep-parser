@@ -415,10 +415,13 @@ Done:
   by the recipedocgen up-to-date drift gate.
 - Example-reference drift gate now verifies each referenced recipe JSON actually
   contains the documented field path, not just that the file exists.
+- `cmd/aeprecipe explain -field <recipe.path>` now reads
+  `docs/recipe_index.json` and prints field metadata/capability/example details,
+  giving the generated index a direct CLI integration point.
 
 Current:
 
-- Ready for editor integration or broader example coverage.
+- Ready for broader example coverage or deeper editor integration.
 
 ## Open questions
 
