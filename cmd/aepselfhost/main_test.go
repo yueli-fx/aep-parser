@@ -262,6 +262,41 @@ func TestRunWatchRejectsZeroWork(t *testing.T) {
 	}
 }
 
+func TestRunCompareReportsWritesArtifacts(t *testing.T) {
+	root := t.TempDir()
+	baseDir := filepath.Join(root, "base")
+	newDir := filepath.Join(root, "new")
+	outDir := filepath.Join(root, "out")
+	writeFile(t, filepath.Join(baseDir, "summary.json"), `{
+  "project_count": 1,
+  "totals": {"comp_count": 1, "layer_count": 2, "effect_count": 3},
+  "effect_counts": {"ADBE Fill": 2}
+}`)
+	writeFile(t, filepath.Join(newDir, "summary.json"), `{
+  "project_count": 2,
+  "totals": {"comp_count": 2, "layer_count": 4, "effect_count": 6},
+  "effect_counts": {"ADBE Fill": 1, "ADBE Slider Control": 3}
+}`)
+	writeFile(t, filepath.Join(baseDir, "digest.json"), `{"patterns":["kinetic_text"]}`)
+	writeFile(t, filepath.Join(newDir, "digest.json"), `{"patterns":["kinetic_text","precomp_effect_pipeline"]}`)
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"compare-reports", "-base", baseDir, "-new", newDir, "-out", outDir, "-top", "5"}, &stdout, &stderr, testPlatform())
+
+	if code != 0 {
+		t.Fatalf("run compare-reports = %d, stderr=%s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "compare json:") {
+		t.Fatalf("stdout missing compare json:\n%s", stdout.String())
+	}
+	if _, err := os.Stat(filepath.Join(outDir, "compare.json")); err != nil {
+		t.Fatalf("compare.json missing: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(outDir, "compare.md")); err != nil {
+		t.Fatalf("compare.md missing: %v", err)
+	}
+}
+
 func writeFile(t *testing.T, path, text string) {
 	t.Helper()
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {

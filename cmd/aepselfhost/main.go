@@ -28,6 +28,8 @@ func run(args []string, stdout, stderr io.Writer, platform host.Platform) int {
 	switch args[0] {
 	case "verify":
 		return runVerify(args[1:], stdout, stderr, platform)
+	case "compare-reports":
+		return runCompareReports(args[1:], stdout, stderr)
 	case "outcome":
 		return runOutcome(args[1:], stdout, stderr)
 	case "status":
@@ -40,6 +42,40 @@ func run(args []string, stdout, stderr io.Writer, platform host.Platform) int {
 		usage(stderr)
 		return 2
 	}
+}
+
+func runCompareReports(args []string, stdout, stderr io.Writer) int {
+	fs := flag.NewFlagSet("aepselfhost compare-reports", flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	baseDir := fs.String("base", "", "base technique report directory")
+	newDir := fs.String("new", "", "new technique report directory")
+	outDir := fs.String("out", "", "output directory; defaults to <new>/compare")
+	top := fs.Int("top", 20, "maximum count diffs per group")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	if *baseDir == "" || *newDir == "" {
+		fmt.Fprintln(stderr, "usage: aepselfhost compare-reports -base old_report -new new_report [-out dir] [-top n]")
+		return 2
+	}
+	result, err := selfhost.CompareReports(selfhost.CompareOptions{
+		BaseDir: *baseDir,
+		NewDir:  *newDir,
+		OutDir:  *outDir,
+		Top:     *top,
+	})
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	reportOutDir := *outDir
+	if reportOutDir == "" {
+		reportOutDir = filepath.Join(*newDir, "compare")
+	}
+	_ = result
+	fmt.Fprintf(stdout, "compare json: %s\n", filepath.Join(reportOutDir, "compare.json"))
+	fmt.Fprintf(stdout, "compare md:   %s\n", filepath.Join(reportOutDir, "compare.md"))
+	return 0
 }
 
 func runOutcome(args []string, stdout, stderr io.Writer) int {
@@ -648,5 +684,5 @@ func ptrIntValue(v *int) string {
 }
 
 func usage(stderr io.Writer) {
-	fmt.Fprintln(stderr, "usage: aepselfhost <verify|outcome|status|watch|start-watch> -out-root tmp\\technique_selfhost_gate")
+	fmt.Fprintln(stderr, "usage: aepselfhost <verify|compare-reports|outcome|status|watch|start-watch> -out-root tmp\\technique_selfhost_gate")
 }
