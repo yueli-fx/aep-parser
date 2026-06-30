@@ -887,7 +887,10 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 			if param.MatchName == "" {
 				addRefusal("missing_effect_param_match_name", paramPath+".match_name", "effect param match_name is required")
 			}
-			if !validEffectParamValue(param.Value) {
+			if len(param.Keyframes) > 0 {
+				recordCapability("AnimateEffectParam", paramPath+".keyframes")
+				validateScalarKeyframes(param.Keyframes, paramPath+".keyframes", "keyframes", addRefusal)
+			} else if !validEffectParamValue(param.Value) {
 				addRefusal("unsupported_effect_param_value", paramPath+".value", "effect param value must be a number, boolean, or numeric array")
 			}
 			if param.Expression != nil {

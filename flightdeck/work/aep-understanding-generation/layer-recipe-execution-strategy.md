@@ -68,7 +68,7 @@ flags, and refs.
 | Text style | `text_style.*` | text run/paragraph setters | `layers[].text.*` | `expected_profile.text_styles[]` | L3 | keep separate |
 | Text animators | `text_animators[].property: opacity/position/scale/rotation/color/tracking/character_offset/fill_opacity/stroke_opacity/stroke_width/skew/rotation_x/rotation_y/stroke_color` static Range Selector + `range_offset_keyframes` + `value_keyframes` | `AddTextOpacityAnimator` / `AddTextPositionAnimator` / `AddTextScaleAnimator` / `AddTextRotationAnimator` / `AddTextColorAnimator` / `AddTextTrackingAnimator` / `AddTextCharacterOffsetAnimator` / `AddTextFillOpacityAnimator` / `AddTextStrokeOpacityAnimator` / `AddTextStrokeWidthAnimator` / `AddTextSkewAnimator` / `AddTextRotationXAnimator` / `AddTextRotationYAnimator` / `AddTextStrokeColorAnimator` / `AnimateTextRangeOffset` / `AnimateTextOpacity` / `AnimateTextPosition` / `AnimateTextScale` / `AnimateTextRotation` / `AnimateTextColor` / `AnimateTextTracking` / `AnimateTextCharacterOffset` | `properties[]` / `properties[].keyframes[]` | `expected_profile.properties[]` / `expected_profile.keyframes[]` | L3/L4 | static animator properties + range offset + scalar/vector value keyframes done |
 | Shape contents | `shape.*` | vector group writers | `layers[].shapes[]` / `properties[]` | `expected_profile.properties[]` | L3/L4 | keep separate |
-| Effects | `effects[]` | `AddEffect` / `SetEffectParam` | `layers[].effects[]` | `expected_profile.effects[]` | L3/L4 | keep separate |
+| Effects | `effects[]` + static/expression/keyframed params | `AddEffect` / `SetEffectParam` / `AnimateEffectParam` / `Property.SetExpression` | `layers[].effects[]` / `properties[].keyframes[]` | `expected_profile.effects[]` / `expected_profile.keyframes[]` | L3/L4 | static params + expressions + scalar param keyframes done |
 | Camera/light layer identity | `type: camera` / `type: light` | layer constructors | `layers[].name` / `type` | `expected_profile.layers[].name` / `type` | L3 | done |
 | Camera options | `camera.*` | camera setters | `properties[]` | `expected_profile.properties[]` | L3/L4 | done in consolidated camera baseline |
 | Light options | `light.kind` / `light.source_layer` / `light.*` | light setters | `layers[].light_kind` / `layers[].light_source_ref` / `properties[]` | `expected_profile.layers[].light_kind` / `light_source` / `expected_profile.properties[]` | L3/L4 | done |
@@ -237,6 +237,9 @@ Expression examples now assert enabled state as part of the property contract.
 disabled Opacity expressions through `expected_profile.properties[]`, while
 `minimal-effect-param-expression.json` checks disabled Gaussian Blur parameter
 expression state through `expected_profile.effects[].params[]`.
+`minimal-effect-param-keyframes.json` checks Gaussian Blur scalar parameter
+keyframes through `expected_profile.keyframes[]` while still asserting the
+effect instance through `expected_profile.effects[]`.
 
 Text style now has a dedicated minimal recipe/profile baseline:
 `minimal-text-style.json` authors font size, fill color, tracking, faux bold,

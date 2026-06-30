@@ -53,7 +53,10 @@ var fieldValidation = map[string]FieldMeta{
 		Validation: "Must match a parameter exposed by the chosen effect.",
 	},
 	"comps[].layers[].effects[].params[].value": {
-		Validation: "Supported values are numbers, booleans, or numeric arrays.",
+		Validation: "Supported values are numbers, booleans, or numeric arrays. Optional when keyframes are present.",
+	},
+	"comps[].layers[].effects[].params[].keyframes[]": {
+		Validation: "When present, requires at least 2 scalar keyframes sorted by non-negative time.",
 	},
 	"comps[].layers[].effects[].params[].expression.source": {
 		Validation: "Expression source is applied only when non-empty.",

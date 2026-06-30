@@ -3016,6 +3016,29 @@ func TestValidateAcceptsSupportedEffectParams(t *testing.T) {
 	assertCapability(t, report, "SetEffectParam")
 }
 
+func TestValidateReportsEffectParamKeyframesCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Effects = []recipe.Effect{{
+		MatchName: "ADBE Gaussian Blur 2",
+		Params: []recipe.EffectParam{
+			{
+				MatchName: "ADBE Gaussian Blur 2-0001",
+				Keyframes: []recipe.ScalarKeyframe{
+					{Time: 0, Value: 0},
+					{Time: 2, Value: 50},
+				},
+			},
+		},
+	}}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "AnimateEffectParam")
+}
+
 func TestValidateRejectsUnsupportedEffectParamValue(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].Effects = []recipe.Effect{{

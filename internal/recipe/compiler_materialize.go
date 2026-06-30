@@ -188,11 +188,7 @@ func materializeEffects(project *aep.Project, compSpec CompSpec) (*aep.Project, 
 				return nil, fmt.Errorf("recipe: layer %q add effect %q: %w", layerSpec.Name, effect.MatchName, err)
 			}
 			for _, param := range effect.Params {
-				value, err := normalizeEffectParamValue(param.Value)
-				if err != nil {
-					return nil, fmt.Errorf("recipe: layer %q effect %q param %q: %w", layerSpec.Name, effect.MatchName, param.MatchName, err)
-				}
-				property, err := aep.SetEffectParam(layer, fx, param.MatchName, value)
+				property, err := applyEffectParam(layer, fx, param)
 				if err != nil {
 					return nil, fmt.Errorf("recipe: layer %q effect %q param %q: %w", layerSpec.Name, effect.MatchName, param.MatchName, err)
 				}
@@ -205,6 +201,26 @@ func materializeEffects(project *aep.Project, compSpec CompSpec) (*aep.Project, 
 		}
 	}
 	return reopened, nil
+}
+
+func applyEffectParam(layer *aep.Layer, fx *aep.Effect, param EffectParam) (*aep.Property, error) {
+	if len(param.Keyframes) > 0 {
+		keyframes := make([]aep.ScalarKeyframe, 0, len(param.Keyframes))
+		for _, kf := range param.Keyframes {
+			keyframes = append(keyframes, aep.ScalarKeyframe{
+				Time:    kf.Time,
+				Value:   kf.Value,
+				InEase:  temporalEase(kf.InEase),
+				OutEase: temporalEase(kf.OutEase),
+			})
+		}
+		return aep.AnimateEffectParam(layer, fx, param.MatchName, keyframes)
+	}
+	value, err := normalizeEffectParamValue(param.Value)
+	if err != nil {
+		return nil, err
+	}
+	return aep.SetEffectParam(layer, fx, param.MatchName, value)
 }
 
 func materializeTransformExpressions(project *aep.Project, compSpec CompSpec) (*aep.Project, error) {

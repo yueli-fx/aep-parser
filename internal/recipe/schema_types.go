@@ -346,9 +346,10 @@ type Effect struct {
 }
 
 type EffectParam struct {
-	MatchName  string          `json:"match_name"`
-	Value      any             `json:"value,omitempty"`
-	Expression *ExpressionSpec `json:"expression,omitempty"`
+	MatchName  string           `json:"match_name"`
+	Value      any              `json:"value,omitempty"`
+	Keyframes  []ScalarKeyframe `json:"keyframes,omitempty"`
+	Expression *ExpressionSpec  `json:"expression,omitempty"`
 }
 
 type Transform struct {

@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "project": {"name": "minimal-effect-param-keyframes"},
+  "comps": [{
+    "name": "Effect Param Keyframes",
+    "width": 640,
+    "height": 360,
+    "frame_rate": 24,
+    "duration": 3,
+    "layers": [{
+      "type": "text",
+      "name": "Title",
+      "text": "FX",
+      "effects": [{
+        "match_name": "ADBE Gaussian Blur 2",
+        "params": [{
+          "match_name": "ADBE Gaussian Blur 2-0001",
+          "keyframes": [
+            {"time": 0, "value": 0},
+            {"time": 2, "value": 50}
+          ]
+        }]
+      }]
+    }]
+  }],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 1,
+    "layers": [{"name": "Title", "type": "text"}],
+    "effects": [{
+      "layer_name": "Title",
+      "match_name": "ADBE Gaussian Blur 2"
+    }],
+    "keyframes": [{
+      "layer_name": "Title",
+      "match_name": "ADBE Gaussian Blur 2-0001",
+      "keyframes": [
+        {"time": 0, "value": 0},
+        {"time": 2, "value": 50}
+      ]
+    }]
+  }
+}

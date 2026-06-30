@@ -7368,8 +7368,117 @@
       "type": "object",
       "go_type": "interface {}",
       "description": "Effect parameter value.",
-      "x-aep-validation": "Supported values are numbers, booleans, or numeric arrays.",
+      "x-aep-validation": "Supported values are numbers, booleans, or numeric arrays. Optional when keyframes are present.",
       "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].effects[].params[].keyframes[]",
+      "json_name": "keyframes",
+      "source_type": "EffectParam",
+      "source_field": "Keyframes",
+      "type": "array",
+      "go_type": "[]recipe.ScalarKeyframe",
+      "element": "recipe.ScalarKeyframe",
+      "object_type": "ScalarKeyframe",
+      "description": "Effect parameter keyframe list.",
+      "x-aep-validation": "When present, requires at least 2 scalar keyframes sorted by non-negative time.",
+      "x-aep-capabilities": [
+        {
+          "key": "effect.animate_param",
+          "query": "AnimateEffectParam",
+          "status": "supported",
+          "symbol": "AnimateEffectParam",
+          "domain": "effect",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "boundary": "1D scalar only (use AnimateEffectParamVec for color/point); fx must be on a parsed layer (Reopen)",
+          "gate": [
+            "TestAnimEffect_AEShipGate_AE2020",
+            "TestAnimEffect_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-effect-param-keyframes.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].effects[].params[].keyframes[].time",
+      "json_name": "time",
+      "source_type": "ScalarKeyframe",
+      "source_field": "Time",
+      "type": "number",
+      "go_type": "float64",
+      "x-aep-structural-required": true,
+      "description": "Effect parameter keyframe time in seconds.",
+      "x-aep-example": "examples/recipes/minimal-effect-param-keyframes.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].effects[].params[].keyframes[].value",
+      "json_name": "value",
+      "source_type": "ScalarKeyframe",
+      "source_field": "Value",
+      "type": "number",
+      "go_type": "float64",
+      "x-aep-structural-required": true,
+      "description": "Effect parameter keyframe value.",
+      "x-aep-example": "examples/recipes/minimal-effect-param-keyframes.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].effects[].params[].keyframes[].in_ease",
+      "json_name": "in_ease",
+      "source_type": "ScalarKeyframe",
+      "source_field": "InEase",
+      "type": "object",
+      "go_type": "*recipe.TemporalEase",
+      "object_type": "TemporalEase",
+      "description": "Effect parameter keyframe incoming temporal ease."
+    },
+    {
+      "x-aep-path": "comps[].layers[].effects[].params[].keyframes[].in_ease.speed",
+      "json_name": "speed",
+      "source_type": "TemporalEase",
+      "source_field": "Speed",
+      "type": "number",
+      "go_type": "float64",
+      "description": "Effect parameter keyframe incoming ease speed."
+    },
+    {
+      "x-aep-path": "comps[].layers[].effects[].params[].keyframes[].in_ease.influence",
+      "json_name": "influence",
+      "source_type": "TemporalEase",
+      "source_field": "Influence",
+      "type": "number",
+      "go_type": "float64",
+      "x-aep-structural-required": true,
+      "description": "Effect parameter keyframe incoming ease influence."
+    },
+    {
+      "x-aep-path": "comps[].layers[].effects[].params[].keyframes[].out_ease",
+      "json_name": "out_ease",
+      "source_type": "ScalarKeyframe",
+      "source_field": "OutEase",
+      "type": "object",
+      "go_type": "*recipe.TemporalEase",
+      "object_type": "TemporalEase",
+      "description": "Effect parameter keyframe outgoing temporal ease."
+    },
+    {
+      "x-aep-path": "comps[].layers[].effects[].params[].keyframes[].out_ease.speed",
+      "json_name": "speed",
+      "source_type": "TemporalEase",
+      "source_field": "Speed",
+      "type": "number",
+      "go_type": "float64",
+      "description": "Effect parameter keyframe outgoing ease speed."
+    },
+    {
+      "x-aep-path": "comps[].layers[].effects[].params[].keyframes[].out_ease.influence",
+      "json_name": "influence",
+      "source_type": "TemporalEase",
+      "source_field": "Influence",
+      "type": "number",
+      "go_type": "float64",
+      "x-aep-structural-required": true,
+      "description": "Effect parameter keyframe outgoing ease influence."
     },
     {
       "x-aep-path": "comps[].layers[].effects[].params[].expression",
@@ -8507,7 +8616,7 @@
       "x-aep-structural-required": true,
       "description": "Layer name to inspect for expected keyframes.",
       "x-aep-validation": "Keyframe profile checks require a target layer name.",
-      "x-aep-example": "examples/recipes/minimal-layer-auto-orient.json"
+      "x-aep-example": "examples/recipes/minimal-effect-param-keyframes.json"
     },
     {
       "x-aep-path": "expected_profile.keyframes[].match_name",
@@ -8519,7 +8628,7 @@
       "x-aep-structural-required": true,
       "description": "Expected keyframed property match name.",
       "x-aep-validation": "Keyframe profile checks require a property match name.",
-      "x-aep-example": "examples/recipes/minimal-layer-auto-orient.json"
+      "x-aep-example": "examples/recipes/minimal-effect-param-keyframes.json"
     },
     {
       "x-aep-path": "expected_profile.keyframes[].keyframes[]",
@@ -8533,7 +8642,7 @@
       "x-aep-structural-required": true,
       "description": "Expected property keyframes.",
       "x-aep-validation": "Expected keyframes must contain at least one keyframe and be sorted by time.",
-      "x-aep-example": "examples/recipes/minimal-layer-auto-orient.json"
+      "x-aep-example": "examples/recipes/minimal-effect-param-keyframes.json"
     },
     {
       "x-aep-path": "expected_profile.keyframes[].keyframes[].time",
@@ -8545,7 +8654,7 @@
       "x-aep-structural-required": true,
       "description": "Expected property keyframe time in seconds.",
       "x-aep-validation": "Expected keyframe time must be non-negative and sorted in ascending order.",
-      "x-aep-example": "examples/recipes/minimal-layer-auto-orient.json"
+      "x-aep-example": "examples/recipes/minimal-effect-param-keyframes.json"
     },
     {
       "x-aep-path": "expected_profile.keyframes[].keyframes[].value",
@@ -8556,7 +8665,7 @@
       "go_type": "interface {}",
       "description": "Expected property keyframe value.",
       "x-aep-validation": "Expected keyframe value must be a number, boolean, or numeric array.",
-      "x-aep-example": "examples/recipes/minimal-layer-auto-orient.json"
+      "x-aep-example": "examples/recipes/minimal-effect-param-keyframes.json"
     },
     {
       "x-aep-path": "expected_profile.masks[]",

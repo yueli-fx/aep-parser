@@ -150,6 +150,10 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].transform.opacity_keyframes[].value` | `number` | structural | Opacity keyframe value. | - | - | examples/recipes/minimal-text-shape.json |
 | `comps[].layers[].transform.opacity_keyframes[].in_ease` | `object<TemporalEase>` | - | Opacity keyframe incoming temporal ease. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].transform.opacity_keyframes[].out_ease` | `object<TemporalEase>` | - | Opacity keyframe outgoing temporal ease. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
+| `comps[].layers[].effects[].params[].keyframes[].time` | `number` | structural | Effect parameter keyframe time in seconds. | - | - | examples/recipes/minimal-effect-param-keyframes.json |
+| `comps[].layers[].effects[].params[].keyframes[].value` | `number` | structural | Effect parameter keyframe value. | - | - | examples/recipes/minimal-effect-param-keyframes.json |
+| `comps[].layers[].effects[].params[].keyframes[].in_ease` | `object<TemporalEase>` | - | Effect parameter keyframe incoming temporal ease. | - | - | - |
+| `comps[].layers[].effects[].params[].keyframes[].out_ease` | `object<TemporalEase>` | - | Effect parameter keyframe outgoing temporal ease. | - | - | - |
 
 ## TemporalEase
 
@@ -183,6 +187,10 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].transform.opacity_keyframes[].in_ease.influence` | `number` | structural | Opacity keyframe incoming ease influence. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].transform.opacity_keyframes[].out_ease.speed` | `number` | - | Opacity keyframe outgoing ease speed. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].transform.opacity_keyframes[].out_ease.influence` | `number` | structural | Opacity keyframe outgoing ease influence. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
+| `comps[].layers[].effects[].params[].keyframes[].in_ease.speed` | `number` | - | Effect parameter keyframe incoming ease speed. | - | - | - |
+| `comps[].layers[].effects[].params[].keyframes[].in_ease.influence` | `number` | structural | Effect parameter keyframe incoming ease influence. | - | - | - |
+| `comps[].layers[].effects[].params[].keyframes[].out_ease.speed` | `number` | - | Effect parameter keyframe outgoing ease speed. | - | - | - |
+| `comps[].layers[].effects[].params[].keyframes[].out_ease.influence` | `number` | structural | Effect parameter keyframe outgoing ease influence. | - | - | - |
 
 ## ValueKeyframe
 
@@ -541,7 +549,8 @@ This reference is generated from the canonical recipe field model.
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
 | `comps[].layers[].effects[].params[].match_name` | `string` | structural | Effect parameter match name. | Must match a parameter exposed by the chosen effect. | - | examples/recipes/minimal-adjustment-layer.json |
-| `comps[].layers[].effects[].params[].value` | `any` | - | Effect parameter value. | Supported values are numbers, booleans, or numeric arrays. | - | examples/recipes/minimal-adjustment-layer.json |
+| `comps[].layers[].effects[].params[].value` | `any` | - | Effect parameter value. | Supported values are numbers, booleans, or numeric arrays. Optional when keyframes are present. | - | examples/recipes/minimal-adjustment-layer.json |
+| `comps[].layers[].effects[].params[].keyframes[]` | `array<recipe.ScalarKeyframe>` | - | Effect parameter keyframe list. | When present, requires at least 2 scalar keyframes sorted by non-negative time. | `effect.animate_param` (`AnimateEffectParam`) | examples/recipes/minimal-effect-param-keyframes.json |
 | `comps[].layers[].effects[].params[].expression` | `object<ExpressionSpec>` | - | Effect parameter expression settings. | - | - | examples/recipes/minimal-effect-param-expression.json |
 
 ## ExpectedProfile
@@ -696,16 +705,16 @@ This reference is generated from the canonical recipe field model.
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `expected_profile.keyframes[].layer_name` | `string` | structural | Layer name to inspect for expected keyframes. | Keyframe profile checks require a target layer name. | - | examples/recipes/minimal-layer-auto-orient.json |
-| `expected_profile.keyframes[].match_name` | `string` | structural | Expected keyframed property match name. | Keyframe profile checks require a property match name. | - | examples/recipes/minimal-layer-auto-orient.json |
-| `expected_profile.keyframes[].keyframes[]` | `array<recipe.ExpectedKeyframe>` | structural | Expected property keyframes. | Expected keyframes must contain at least one keyframe and be sorted by time. | - | examples/recipes/minimal-layer-auto-orient.json |
+| `expected_profile.keyframes[].layer_name` | `string` | structural | Layer name to inspect for expected keyframes. | Keyframe profile checks require a target layer name. | - | examples/recipes/minimal-effect-param-keyframes.json |
+| `expected_profile.keyframes[].match_name` | `string` | structural | Expected keyframed property match name. | Keyframe profile checks require a property match name. | - | examples/recipes/minimal-effect-param-keyframes.json |
+| `expected_profile.keyframes[].keyframes[]` | `array<recipe.ExpectedKeyframe>` | structural | Expected property keyframes. | Expected keyframes must contain at least one keyframe and be sorted by time. | - | examples/recipes/minimal-effect-param-keyframes.json |
 
 ## ExpectedKeyframe
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `expected_profile.keyframes[].keyframes[].time` | `number` | structural | Expected property keyframe time in seconds. | Expected keyframe time must be non-negative and sorted in ascending order. | - | examples/recipes/minimal-layer-auto-orient.json |
-| `expected_profile.keyframes[].keyframes[].value` | `any` | - | Expected property keyframe value. | Expected keyframe value must be a number, boolean, or numeric array. | - | examples/recipes/minimal-layer-auto-orient.json |
+| `expected_profile.keyframes[].keyframes[].time` | `number` | structural | Expected property keyframe time in seconds. | Expected keyframe time must be non-negative and sorted in ascending order. | - | examples/recipes/minimal-effect-param-keyframes.json |
+| `expected_profile.keyframes[].keyframes[].value` | `any` | - | Expected property keyframe value. | Expected keyframe value must be a number, boolean, or numeric array. | - | examples/recipes/minimal-effect-param-keyframes.json |
 
 ## ExpectedMask
 

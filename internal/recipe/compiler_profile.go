@@ -682,6 +682,11 @@ func findProfileLayerProperty(prof *profile.Profile, layerName, matchName string
 	if prop := findProfileParam(layer.Properties, matchName); prop != nil {
 		return prop
 	}
+	for i := range layer.Effects {
+		if prop := findProfileParam(layer.Effects[i].Params, matchName); prop != nil {
+			return prop
+		}
+	}
 	for i := range layer.Shapes {
 		if prop := findProfileParam(layer.Shapes[i].Properties, matchName); prop != nil {
 			return prop

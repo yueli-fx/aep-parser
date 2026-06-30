@@ -178,6 +178,9 @@ Done:
   `Property.SetExpression` and optional `Property.SetExpressionEnabled` on the
   returned effect-param property, and `expected_profile.effects[].params[]` can
   assert expression source strings.
+- Recipe effect params now support scalar `keyframes[]` through
+  `AnimateEffectParam`. `minimal-effect-param-keyframes.json` asserts Gaussian
+  Blur blurriness keyframes through `expected_profile.keyframes[]`.
 - Recipe comp settings now support `draft_3d`. Profile composition output now
   exposes `draft_3d` from the cdta flag, and `expected_profile.draft_3d` can
   assert it. This remains a roundtrip/profile contract because AE 2025 DOM
