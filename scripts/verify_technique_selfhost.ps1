@@ -24,8 +24,10 @@ try {
     $recipeDraftReparseDir = Join-Path $runRoot "recipe_draft_reparse"
     $acceptanceJsonPath = Join-Path $runRoot "acceptance.json"
     $acceptanceMdPath = Join-Path $runRoot "acceptance.md"
+    $effectivenessMdPath = Join-Path $runRoot "effectiveness.md"
     $latestRunPath = Join-Path $OutRoot "latest_run.txt"
     $latestAcceptancePath = Join-Path $OutRoot "latest_acceptance.md"
+    $latestEffectivenessPath = Join-Path $OutRoot "latest_effectiveness.md"
     $latestIndexPath = Join-Path $OutRoot "latest_index.html"
     New-Item -ItemType Directory -Force -Path $runRoot | Out-Null
 
@@ -261,9 +263,51 @@ try {
     [void]$b.AppendLine("| step | exit | seconds |")
     [void]$b.AppendLine("| --- | ---: | ---: |")
     foreach ($step in $steps) {
-        [void]$b.AppendLine("| $($step.name) | $($step.exit) | $($step.seconds) |")
+    [void]$b.AppendLine("| $($step.name) | $($step.exit) | $($step.seconds) |")
     }
     $b.ToString() | Set-Content -LiteralPath $acceptanceMdPath -Encoding UTF8
+
+    $e = [System.Text.StringBuilder]::new()
+    [void]$e.AppendLine("# Technique Effectiveness Snapshot")
+    [void]$e.AppendLine("")
+    [void]$e.AppendLine("- input: ``$InputPath``")
+    [void]$e.AppendLine("- run root: ``$runRoot``")
+    [void]$e.AppendLine("- latest index: ``$latestIndexPath``")
+    [void]$e.AppendLine("")
+    [void]$e.AppendLine("## Corpus")
+    [void]$e.AppendLine("")
+    [void]$e.AppendLine("- parsed projects: $($fullManifest.project_count)")
+    [void]$e.AppendLine("- parse errors: $($fullManifest.error_count)")
+    [void]$e.AppendLine("- technique patterns: $($fullManifest.pattern_count)")
+    [void]$e.AppendLine("- partial-error gate errors: $($partialManifest.error_count)")
+    [void]$e.AppendLine("- partial-to-full count diffs: $partialCountDiffs")
+    [void]$e.AppendLine("")
+    [void]$e.AppendLine("## Closed Loop")
+    [void]$e.AppendLine("")
+    [void]$e.AppendLine("- recipe draft compile valid: $($recipeDraftCompileJson.valid)")
+    [void]$e.AppendLine("- compiled recipe draft: ``$(Join-Path $recipeDraftCompileDir "recipe_draft.aep")``")
+    [void]$e.AppendLine("- compiled AEP bytes: $($compiledRecipeDraftAEP.Length)")
+    [void]$e.AppendLine("- compiled draft reparse passed: $($recipeDraftReparseSummary.passed)")
+    [void]$e.AppendLine("- reparse comp count: $($recipeDraftReparseSummary.actual_comp_count)/$($recipeDraftReparseSummary.expected_comp_count)")
+    [void]$e.AppendLine("- reparse layer count: $($recipeDraftReparseSummary.actual_layer_count)/$($recipeDraftReparseSummary.expected_layer_count)")
+    [void]$e.AppendLine("")
+    [void]$e.AppendLine("## Primary Artifacts")
+    [void]$e.AppendLine("")
+    [void]$e.AppendLine("- full report HTML: ``$(Join-Path $fullReportDir "report.html")``")
+    [void]$e.AppendLine("- coverage scorecard: ``$(Join-Path $fullReportDir "coverage_scorecard.csv")``")
+    [void]$e.AppendLine("- reconstruction blueprints: ``$(Join-Path $fullReportDir "reconstruction_blueprints.jsonl")``")
+    [void]$e.AppendLine("- recipe drafts: ``$(Join-Path $fullReportDir "recipe_drafts.jsonl")``")
+    [void]$e.AppendLine("- compiled draft facts: ``$(Join-Path $recipeDraftReparseDir "compiled_facts.json")``")
+    [void]$e.AppendLine("- reparse summary: ``$(Join-Path $recipeDraftReparseDir "reparse_summary.json")``")
+    [void]$e.AppendLine("")
+    [void]$e.AppendLine("## Gate Steps")
+    [void]$e.AppendLine("")
+    [void]$e.AppendLine("| step | exit | seconds |")
+    [void]$e.AppendLine("| --- | ---: | ---: |")
+    foreach ($step in $steps) {
+        [void]$e.AppendLine("| $($step.name) | $($step.exit) | $($step.seconds) |")
+    }
+    $e.ToString() | Set-Content -LiteralPath $effectivenessMdPath -Encoding UTF8
 
     function Escape-Html {
         param([AllowNull()][object]$Value)
@@ -299,6 +343,14 @@ try {
     [void]$index.AppendLine("<div class=""metric""><span>Patterns</span><strong>$($fullManifest.pattern_count)</strong></div>")
     [void]$index.AppendLine("<div class=""metric""><span>Partial Errors</span><strong>$($partialManifest.error_count)</strong></div>")
     [void]$index.AppendLine("</div>")
+    [void]$index.AppendLine("<section class=""panel""><h2>Effectiveness Snapshot</h2><table><thead><tr><th>Signal</th><th>Value</th></tr></thead><tbody>")
+    [void]$index.AppendLine("<tr><td>Parsed projects</td><td>$($fullManifest.project_count)</td></tr>")
+    [void]$index.AppendLine("<tr><td>Recipe draft compile</td><td>$(Escape-Html $recipeDraftCompileJson.valid)</td></tr>")
+    [void]$index.AppendLine("<tr><td>Compiled AEP bytes</td><td>$($compiledRecipeDraftAEP.Length)</td></tr>")
+    [void]$index.AppendLine("<tr><td>Compiled draft reparse</td><td>$(Escape-Html $recipeDraftReparseSummary.passed)</td></tr>")
+    [void]$index.AppendLine("<tr><td>Reparse comps</td><td>$($recipeDraftReparseSummary.actual_comp_count) / $($recipeDraftReparseSummary.expected_comp_count)</td></tr>")
+    [void]$index.AppendLine("<tr><td>Reparse layers</td><td>$($recipeDraftReparseSummary.actual_layer_count) / $($recipeDraftReparseSummary.expected_layer_count)</td></tr>")
+    [void]$index.AppendLine("</tbody></table></section>")
     [void]$index.AppendLine("<section class=""panel""><h2>Study Queue Preview</h2><table><thead><tr><th>Rank</th><th>Project</th><th>Score</th></tr></thead><tbody>")
     foreach ($row in $studyRows) {
         [void]$index.AppendLine("<tr><td>$(Escape-Html $row.rank)</td><td>$(Escape-Html $row.path)</td><td>$(Escape-Html $row.study_score)</td></tr>")
@@ -425,6 +477,7 @@ try {
     [void]$index.AppendLine("<a href=""$runRel/recipe_draft_compile/compile.json"">Recipe draft compile JSON</a>")
     [void]$index.AppendLine("<a href=""$runRel/recipe_draft_reparse/compiled_facts.json"">Compiled draft facts JSON</a>")
     [void]$index.AppendLine("<a href=""$runRel/recipe_draft_reparse/reparse_summary.json"">Compiled draft reparse summary</a>")
+    [void]$index.AppendLine("<a href=""latest_effectiveness.md"">Latest effectiveness snapshot</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/projects.csv"">Projects CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/patterns.csv"">Patterns CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/errors.csv"">Errors CSV</a>")
@@ -443,6 +496,9 @@ try {
     $index.ToString() | Set-Content -LiteralPath $latestIndexPath -Encoding UTF8
     if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Study Queue Preview" -Quiet)) {
         throw "latest index missing Study Queue Preview"
+    }
+    if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Effectiveness Snapshot" -Quiet)) {
+        throw "latest index missing Effectiveness Snapshot"
     }
     if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Project Playbooks Preview" -Quiet)) {
         throw "latest index missing Project Playbooks Preview"
@@ -529,11 +585,18 @@ try {
 
     $runRoot | Set-Content -LiteralPath $latestRunPath -Encoding UTF8
     Copy-Item -LiteralPath $acceptanceMdPath -Destination $latestAcceptancePath -Force
+    Copy-Item -LiteralPath $effectivenessMdPath -Destination $latestEffectivenessPath -Force
+    if (-not (Test-Path -LiteralPath $latestEffectivenessPath)) {
+        throw "latest effectiveness snapshot missing: $latestEffectivenessPath"
+    }
+    Require-LatestIndexLink -Label "latest effectiveness" -RelativePath "latest_effectiveness.md"
 
     Write-Host "acceptance json: $acceptanceJsonPath"
     Write-Host "acceptance md:   $acceptanceMdPath"
+    Write-Host "effectiveness:   $effectivenessMdPath"
     Write-Host "latest run:      $latestRunPath"
     Write-Host "latest summary:  $latestAcceptancePath"
+    Write-Host "latest effect:   $latestEffectivenessPath"
     Write-Host "latest index:    $latestIndexPath"
     Write-Host "full report:     $fullReportDir"
     Write-Host "partial report:  $partialReportDir"
