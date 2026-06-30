@@ -97,6 +97,7 @@ It defaults to `flightdeck\showcase` and writes generated output under
 - `mechanisms.csv`
 - `mechanism_examples.csv`
 - `coverage_scorecard.csv`
+- `reconstruction_blueprints.jsonl`
 - `errors.csv`
 - `manifest.json`
 - `report.md`
@@ -162,6 +163,10 @@ the full corpus JSONL.
 `coverage_scorecard.csv` records expected and actual row counts for each major
 artifact so report coverage can be checked directly from the browser entry or a
 spreadsheet.
+`reconstruction_blueprints.jsonl` writes one deterministic reconstruction plan
+per parsed project. Each line gives readiness, counts, ordered phases, blockers,
+key layers, mechanisms, and recreation steps so downstream recipe or codegen
+work can consume the corpus without scraping the HTML.
 `errors.csv` lists failed corpus records for retry or manual inspection.
 `manifest.json` records the input path, git revision, scan timing, project/error
 counts, and generated artifact inventory for repeatable self-hosted runs.

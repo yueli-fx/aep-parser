@@ -35,6 +35,7 @@ try {
     $mechanismsCsvPath = Join-Path $OutDir "mechanisms.csv"
     $mechanismExamplesCsvPath = Join-Path $OutDir "mechanism_examples.csv"
     $coverageScorecardCsvPath = Join-Path $OutDir "coverage_scorecard.csv"
+    $reconstructionBlueprintsPath = Join-Path $OutDir "reconstruction_blueprints.jsonl"
     $errorsCsvPath = Join-Path $OutDir "errors.csv"
     $manifestPath = Join-Path $OutDir "manifest.json"
     $reportPath = Join-Path $OutDir "report.md"
@@ -1014,6 +1015,78 @@ try {
     })
     $studyRows | Export-Csv -LiteralPath $studyQueueCsvPath -NoTypeInformation -Encoding UTF8
 
+    $reconstructionBlueprintRows = @()
+    foreach ($record in $records) {
+        $explanation = $record.explanation
+        if ($null -eq $explanation) {
+            continue
+        }
+        $portrait = $explanation.portrait
+        $readiness = ""
+        $readinessSummary = ""
+        $blockers = @()
+        if ($null -ne $explanation.recreation_readiness) {
+            $readiness = [string]$explanation.recreation_readiness.status
+            $readinessSummary = [string]$explanation.recreation_readiness.summary
+            $blockers = @($explanation.recreation_readiness.blockers | ForEach-Object { [string]$_ } | Where-Object { $_.Trim() -ne "" })
+        }
+        $steps = @($explanation.recreation_steps | ForEach-Object {
+            [ordered]@{
+                id       = [string]$_.id
+                priority = [int]$_.priority
+                title    = [string]$_.title
+                summary  = [string]$_.summary
+                risks    = @($_.risks | ForEach-Object { [string]$_ } | Where-Object { $_.Trim() -ne "" })
+            }
+        })
+        $keyLayers = @($explanation.top_signal_layers | Select-Object -First 8 | ForEach-Object {
+            [ordered]@{
+                comp_name  = [string]$_.comp_name
+                layer_name = [string]$_.layer_name
+                role       = [string]$_.role
+                score      = [int]$_.score
+                signals    = @($_.signals | ForEach-Object { [string]$_ } | Where-Object { $_.Trim() -ne "" })
+            }
+        })
+        $topMechanisms = [ordered]@{
+            effects        = Format-CountList -Rows (Convert-CountRows -Rows (Get-CountRows -Counts $portrait.mechanisms.effect_match_counts -Max 8))
+            plugin_effects = Format-CountList -Rows (Convert-CountRows -Rows (Get-CountRows -Counts $portrait.mechanisms.third_party_effect_match_counts -Max 8))
+            shape_families = Format-CountList -Rows (Convert-CountRows -Rows (Get-CountRows -Counts $portrait.mechanisms.shape_family_counts -Max 8))
+            text_animators = Format-CountList -Rows (Convert-CountRows -Rows (Get-CountRows -Counts $portrait.mechanisms.text_animator_kind_counts -Max 8))
+        }
+        $mechanismCount = [int]$portrait.fingerprint.effect_count + [int]$portrait.fingerprint.shape_operator_count + [int]$portrait.fingerprint.text_animator_count
+        $reconstructionBlueprintRows += [ordered]@{
+            schema_version = 1
+            project_path   = [string]$record.path
+            readiness      = $readiness
+            summary        = $readinessSummary
+            counts         = [ordered]@{
+                compositions     = [int]$portrait.fingerprint.comp_count
+                layers           = [int]$portrait.fingerprint.layer_count
+                effects          = [int]$portrait.fingerprint.effect_count
+                shape_operators  = [int]$portrait.fingerprint.shape_operator_count
+                text_animators   = [int]$portrait.fingerprint.text_animator_count
+                dependency_edges = [int]$portrait.fingerprint.dependency_count
+                recreation_steps = [int]$steps.Count
+                blockers         = [int]$blockers.Count
+            }
+            phases         = @(
+                [ordered]@{ id = "create_compositions"; order = 1; expected_count = [int]$portrait.fingerprint.comp_count; artifact = "compositions.csv"; action = "Create comps with parsed size, frame rate, duration, and main-candidate flags." },
+                [ordered]@{ id = "create_layers"; order = 2; expected_count = [int]$portrait.fingerprint.layer_count; artifact = "layers.csv"; action = "Create layers in comp/index order and assign parsed roles before mechanism application." },
+                [ordered]@{ id = "apply_mechanisms"; order = 3; expected_count = $mechanismCount; artifact = "effect_stacks.csv, shape_operators.csv, text_animators.csv"; action = "Apply effect stacks, shape operators, and text animator properties from mechanism exports." },
+                [ordered]@{ id = "wire_dependencies"; order = 4; expected_count = [int]$portrait.fingerprint.dependency_count; artifact = "dependency_edges.csv"; action = "Resolve parent, matte, source, and effect-parameter layer references after all layer IDs are available." },
+                [ordered]@{ id = "verify_recreation"; order = 5; expected_count = [int]$steps.Count; artifact = "recreation_steps.csv, recreation_blockers.csv"; action = "Execute ordered recreation checks and review blockers before claiming exact reproduction." }
+            )
+            blockers       = $blockers
+            key_layers     = $keyLayers
+            mechanisms     = $topMechanisms
+            steps          = $steps
+        }
+    }
+    $reconstructionBlueprintRows |
+        ForEach-Object { $_ | ConvertTo-Json -Depth 10 -Compress } |
+        Set-Content -LiteralPath $reconstructionBlueprintsPath -Encoding UTF8
+
     $coverageScorecardRows = @(
         New-CoverageRow -Artifact "projects.csv" -Metric "project rows" -Expected ([int]$summary.project_count) -Actual $projectRowsForCsv.Count -Notes "one explainable project row per parsed project"
         New-CoverageRow -Artifact "project_playbooks.csv" -Metric "project playbooks" -Expected ([int]$summary.project_count) -Actual $projectPlaybookRows.Count -Notes "one recreation playbook per parsed project"
@@ -1032,6 +1105,7 @@ try {
         New-CoverageRow -Artifact "learning_actions.csv" -Metric "learning actions" -Expected (@($digest.patterns).Count) -Actual $learningActionRows.Count -Notes "one recommended action per digest pattern"
         New-CoverageRow -Artifact "mechanisms.csv" -Metric "mechanism rows" -Expected $mechanismRows.Count -Actual $mechanismRows.Count -Notes "mechanism count depends on corpus signals"
         New-CoverageRow -Artifact "mechanism_examples.csv" -Metric "mechanism examples" -Expected $mechanismExampleRows.Count -Actual $mechanismExampleRows.Count -Notes "example count depends on mechanism/project intersections"
+        New-CoverageRow -Artifact "reconstruction_blueprints.jsonl" -Metric "project blueprints" -Expected ([int]$summary.project_count) -Actual $reconstructionBlueprintRows.Count -Notes "one deterministic reconstruction blueprint per parsed project"
         New-CoverageRow -Artifact "errors.csv" -Metric "parse errors" -Expected ([int]$errorCount) -Actual $errorRowsForCsv.Count -Notes "one row per per-file parse error"
     )
     $coverageScorecardRows | Export-Csv -LiteralPath $coverageScorecardCsvPath -NoTypeInformation -Encoding UTF8
@@ -1228,7 +1302,7 @@ try {
     [void]$h.AppendLine("</head><body><main>")
     [void]$h.AppendLine("<h1>Technique Corpus Report</h1>")
     [void]$h.AppendLine("<p class=""muted"">input <code>$(Escape-Html $InputPath)</code></p>")
-    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""manifest.json"">manifest.json</a> · <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""project_playbooks.csv"">project_playbooks.csv</a> · <a href=""compositions.csv"">compositions.csv</a> · <a href=""layers.csv"">layers.csv</a> · <a href=""recreation_steps.csv"">recreation_steps.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""study_queue.csv"">study_queue.csv</a> · <a href=""study_tasks.csv"">study_tasks.csv</a> · <a href=""recreation_blockers.csv"">recreation_blockers.csv</a> · <a href=""signal_layers.csv"">signal_layers.csv</a> · <a href=""effect_stacks.csv"">effect_stacks.csv</a> · <a href=""shape_operators.csv"">shape_operators.csv</a> · <a href=""text_animators.csv"">text_animators.csv</a> · <a href=""dependency_edges.csv"">dependency_edges.csv</a> · <a href=""learning_actions.csv"">learning_actions.csv</a> · <a href=""mechanisms.csv"">mechanisms.csv</a> · <a href=""mechanism_examples.csv"">mechanism_examples.csv</a> · <a href=""coverage_scorecard.csv"">coverage_scorecard.csv</a> · <a href=""errors.csv"">errors.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
+    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""manifest.json"">manifest.json</a> · <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""project_playbooks.csv"">project_playbooks.csv</a> · <a href=""compositions.csv"">compositions.csv</a> · <a href=""layers.csv"">layers.csv</a> · <a href=""recreation_steps.csv"">recreation_steps.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""study_queue.csv"">study_queue.csv</a> · <a href=""study_tasks.csv"">study_tasks.csv</a> · <a href=""recreation_blockers.csv"">recreation_blockers.csv</a> · <a href=""signal_layers.csv"">signal_layers.csv</a> · <a href=""effect_stacks.csv"">effect_stacks.csv</a> · <a href=""shape_operators.csv"">shape_operators.csv</a> · <a href=""text_animators.csv"">text_animators.csv</a> · <a href=""dependency_edges.csv"">dependency_edges.csv</a> · <a href=""learning_actions.csv"">learning_actions.csv</a> · <a href=""mechanisms.csv"">mechanisms.csv</a> · <a href=""mechanism_examples.csv"">mechanism_examples.csv</a> · <a href=""coverage_scorecard.csv"">coverage_scorecard.csv</a> · <a href=""reconstruction_blueprints.jsonl"">reconstruction_blueprints.jsonl</a> · <a href=""errors.csv"">errors.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
     [void]$h.AppendLine("<div class=""grid"">")
     foreach ($metric in @(
         @{ Label = "Projects"; Value = $summary.project_count },
@@ -1260,6 +1334,14 @@ try {
     [void]$h.AppendLine("<section class=""panel"" style=""margin-top:14px""><table><thead><tr><th>Artifact</th><th>Metric</th><th>Expected</th><th>Actual</th><th>Status</th></tr></thead><tbody>")
     foreach ($row in @($coverageScorecardRows)) {
         [void]$h.AppendLine("<tr><td>$(Escape-Html $row.artifact)</td><td>$(Escape-Html $row.metric)</td><td>$($row.expected_count)</td><td>$($row.actual_count)</td><td>$(Escape-Html $row.status)</td></tr>")
+    }
+    [void]$h.AppendLine("</tbody></table></section>")
+    [void]$h.AppendLine("<h2 style=""margin-top:28px"">Reconstruction Blueprints</h2>")
+    [void]$h.AppendLine("<section class=""panel"" style=""margin-top:14px""><table><thead><tr><th>Project</th><th>Readiness</th><th>Counts</th><th>Phases</th></tr></thead><tbody>")
+    foreach ($blueprint in @($reconstructionBlueprintRows | Select-Object -First 80)) {
+        $countText = "comps=$($blueprint.counts.compositions), layers=$($blueprint.counts.layers), mechanisms=$([int]$blueprint.counts.effects + [int]$blueprint.counts.shape_operators + [int]$blueprint.counts.text_animators), deps=$($blueprint.counts.dependency_edges)"
+        $phaseText = ((@($blueprint.phases) | ForEach-Object { "$($_.order).$($_.id)=$($_.expected_count)" }) -join "; ")
+        [void]$h.AppendLine("<tr><td>$(Escape-Html $blueprint.project_path)</td><td>$(Escape-Html $blueprint.readiness)</td><td>$(Escape-Html $countText)</td><td>$(Escape-Html $phaseText)</td></tr>")
     }
     [void]$h.AppendLine("</tbody></table></section>")
     [void]$h.AppendLine("<h2 style=""margin-top:28px"">Mechanism Explorer</h2>")
@@ -1576,6 +1658,7 @@ try {
         $mechanismsCsvPath,
         $mechanismExamplesCsvPath,
         $coverageScorecardCsvPath,
+        $reconstructionBlueprintsPath,
         $errorsCsvPath,
         $reportPath,
         $htmlPath
@@ -1646,6 +1729,7 @@ try {
     Write-Host "mechanisms csv: $mechanismsCsvPath"
     Write-Host "mechanism examples csv: $mechanismExamplesCsvPath"
     Write-Host "coverage scorecard csv: $coverageScorecardCsvPath"
+    Write-Host "reconstruction blueprints: $reconstructionBlueprintsPath"
     Write-Host "errors csv: $errorsCsvPath"
     Write-Host "manifest: $manifestPath"
     Write-Host "report:  $reportPath"

@@ -44,12 +44,13 @@ $learningActionsCsvPath = Join-Path $OutDir "learning_actions.csv"
 $mechanismsCsvPath = Join-Path $OutDir "mechanisms.csv"
 $mechanismExamplesCsvPath = Join-Path $OutDir "mechanism_examples.csv"
 $coverageScorecardCsvPath = Join-Path $OutDir "coverage_scorecard.csv"
+$reconstructionBlueprintsPath = Join-Path $OutDir "reconstruction_blueprints.jsonl"
 $errorsCsvPath = Join-Path $OutDir "errors.csv"
 $manifestPath = Join-Path $OutDir "manifest.json"
 $reportPath = Join-Path $OutDir "report.md"
 $htmlPath = Join-Path $OutDir "report.html"
 
-foreach ($path in @($summaryPath, $corpusPath, $digestPath, $learningPath, $projectsCsvPath, $projectPlaybooksCsvPath, $compositionsCsvPath, $layersCsvPath, $recreationStepsCsvPath, $patternsCsvPath, $studyQueueCsvPath, $studyTasksCsvPath, $recreationBlockersCsvPath, $signalLayersCsvPath, $effectStacksCsvPath, $shapeOperatorsCsvPath, $textAnimatorsCsvPath, $dependencyEdgesCsvPath, $learningActionsCsvPath, $mechanismsCsvPath, $mechanismExamplesCsvPath, $coverageScorecardCsvPath, $errorsCsvPath, $manifestPath, $reportPath, $htmlPath)) {
+foreach ($path in @($summaryPath, $corpusPath, $digestPath, $learningPath, $projectsCsvPath, $projectPlaybooksCsvPath, $compositionsCsvPath, $layersCsvPath, $recreationStepsCsvPath, $patternsCsvPath, $studyQueueCsvPath, $studyTasksCsvPath, $recreationBlockersCsvPath, $signalLayersCsvPath, $effectStacksCsvPath, $shapeOperatorsCsvPath, $textAnimatorsCsvPath, $dependencyEdgesCsvPath, $learningActionsCsvPath, $mechanismsCsvPath, $mechanismExamplesCsvPath, $coverageScorecardCsvPath, $reconstructionBlueprintsPath, $errorsCsvPath, $manifestPath, $reportPath, $htmlPath)) {
     Require-File -Path $path
 }
 
@@ -76,6 +77,8 @@ $learningActionRows = @(Import-Csv -LiteralPath $learningActionsCsvPath)
 $mechanismRows = @(Import-Csv -LiteralPath $mechanismsCsvPath)
 $mechanismExampleRows = @(Import-Csv -LiteralPath $mechanismExamplesCsvPath)
 $coverageScorecardRows = @(Import-Csv -LiteralPath $coverageScorecardCsvPath)
+$reconstructionBlueprintLines = @(Get-Content -LiteralPath $reconstructionBlueprintsPath | Where-Object { $_.Trim() -ne "" })
+$reconstructionBlueprintRows = @($reconstructionBlueprintLines | ForEach-Object { $_ | ConvertFrom-Json })
 $errorRows = @(Import-Csv -LiteralPath $errorsCsvPath)
 
 if ([int]$summary.project_count -lt $MinProjects) {
@@ -257,6 +260,23 @@ foreach ($artifact in @("projects.csv", "project_playbooks.csv", "compositions.c
         throw "coverage_scorecard.csv missing artifact row: $artifact"
     }
 }
+if ($reconstructionBlueprintRows.Count -ne [int]$summary.project_count) {
+    throw "reconstruction_blueprints.jsonl line count $($reconstructionBlueprintRows.Count) does not match summary project_count $($summary.project_count)"
+}
+foreach ($row in $reconstructionBlueprintRows) {
+    if ([string]$row.project_path -eq "" -or [string]$row.readiness -eq "" -or $null -eq $row.counts -or $null -eq $row.phases) {
+        throw "reconstruction_blueprints.jsonl contains incomplete row: $($row | ConvertTo-Json -Compress -Depth 8)"
+    }
+    if (@($row.phases).Count -lt 5) {
+        throw "reconstruction_blueprints.jsonl row has too few phases: $($row | ConvertTo-Json -Compress -Depth 8)"
+    }
+    $phaseIDs = @($row.phases | ForEach-Object { [string]$_.id })
+    foreach ($phase in @("create_compositions", "create_layers", "apply_mechanisms", "wire_dependencies", "verify_recreation")) {
+        if ($phaseIDs -notcontains $phase) {
+            throw "reconstruction_blueprints.jsonl row missing phase ${phase}: $($row.project_path)"
+        }
+    }
+}
 $recordsWithSteps = @($corpusRecords | Where-Object {
     $null -ne $_.explanation -and
     $null -ne $_.explanation.recreation_steps -and
@@ -302,8 +322,10 @@ Require-Text -Path $htmlPath -Pattern "learning_actions\.csv"
 Require-Text -Path $htmlPath -Pattern "mechanisms\.csv"
 Require-Text -Path $htmlPath -Pattern "mechanism_examples\.csv"
 Require-Text -Path $htmlPath -Pattern "coverage_scorecard\.csv"
+Require-Text -Path $htmlPath -Pattern "reconstruction_blueprints\.jsonl"
 Require-Text -Path $htmlPath -Pattern "errors\.csv"
 Require-Text -Path $htmlPath -Pattern "Coverage Scorecard"
+Require-Text -Path $htmlPath -Pattern "Reconstruction Blueprints"
 Require-Text -Path $htmlPath -Pattern "Mechanism Explorer"
 Require-Text -Path $htmlPath -Pattern "mechanismFilter"
 Require-Text -Path $htmlPath -Pattern "Study Task Queue"
