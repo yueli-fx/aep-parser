@@ -139,6 +139,38 @@ func TestConvertPreservesNoLayerCompMetadata(t *testing.T) {
 	}
 }
 
+func TestConvertPreservesNoLayerCompRendererAndTemplateName(t *testing.T) {
+	source := writeTempProjectWithRendererNoLayerComp(t)
+	outPath := filepath.Join(t.TempDir(), "converted.aep")
+
+	report, err := Convert(ConvertOptions{
+		InputPath:  source,
+		OutputPath: outPath,
+		Target:     VersionAE2025,
+	})
+	if err != nil {
+		t.Fatalf("Convert: %v", err)
+	}
+	if report.Summary.Status != StatusPass {
+		t.Fatalf("status = %q, entries=%+v", report.Summary.Status, report.Entries)
+	}
+	converted, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open converted: %v", err)
+	}
+	prof, err := profile.Build(converted, profile.Options{Path: outPath})
+	if err != nil {
+		t.Fatalf("profile.Build converted: %v", err)
+	}
+	if len(prof.Comps) != 1 {
+		t.Fatalf("converted comps = %d, want 1", len(prof.Comps))
+	}
+	comp := prof.Comps[0]
+	if comp.Renderer != "ADBE Calder" || comp.MotionGraphicsTemplateName != "Migration Template" {
+		t.Fatalf("renderer=%q template=%q, want renderer ADBE Calder and template preserved", comp.Renderer, comp.MotionGraphicsTemplateName)
+	}
+}
+
 func TestConvertRefusesLayerProjects(t *testing.T) {
 	source := writeTempProjectWithOneSolidLayer(t)
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
@@ -157,6 +189,20 @@ func TestConvertRefusesLayerProjects(t *testing.T) {
 	if _, err := os.Stat(outPath); !os.IsNotExist(err) {
 		t.Fatalf("output exists or stat failed unexpectedly: %v", err)
 	}
+}
+
+func writeTempProjectWithRendererNoLayerComp(t *testing.T) string {
+	t.Helper()
+	project := aep.NewProject(aep.TargetAE2020)
+	comp, err := aep.NewComposition(project, "Renderer", 800, 450, 24, 5)
+	if err != nil {
+		t.Fatalf("NewComposition: %v", err)
+	}
+	mustSetCompSetting(t, "SetRenderer", aep.SetRenderer(comp, "ADBE Calder"))
+	mustSetCompSetting(t, "SetMotionGraphicsTemplateName", comp.SetMotionGraphicsTemplateName("Migration Template"))
+	path := filepath.Join(t.TempDir(), "renderer-source.aep")
+	writeProjectFile(t, project, path)
+	return path
 }
 
 func writeTempProjectWithMetadataNoLayerComp(t *testing.T) string {

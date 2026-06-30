@@ -128,6 +128,16 @@ func applyStableCompSettings(dst *aep.Composition, src profile.Composition) erro
 	if err := dst.SetBGColor(src.BackgroundColor); err != nil {
 		return fmt.Errorf("comp %q background_color: %w", src.Name, err)
 	}
+	if src.MotionGraphicsTemplateName != "" {
+		if err := dst.SetMotionGraphicsTemplateName(src.MotionGraphicsTemplateName); err != nil {
+			return fmt.Errorf("comp %q motion_graphics_template_name: %w", src.Name, err)
+		}
+	}
+	if src.Renderer != "" {
+		if err := aep.SetRenderer(dst, src.Renderer); err != nil {
+			return fmt.Errorf("comp %q renderer: %w", src.Name, err)
+		}
+	}
 	if err := dst.SetResolutionFactor(src.ResolutionFactor[0], src.ResolutionFactor[1]); err != nil {
 		return fmt.Errorf("comp %q resolution_factor: %w", src.Name, err)
 	}
