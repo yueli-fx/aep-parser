@@ -52,7 +52,7 @@ public generated documentation:
     `ShapeSpec`, `Effect`, `ExpectedProfile`, and nested specs.
   - Each field row shows path, type, required/optional state, validation note,
     capability query, and short prose.
-- Optional later output: `docs/recipe_index.json`
+- `docs/recipe_index.json`
   - A compact lookup index keyed by stable recipe field path, for agents and
     editor integrations.
 
@@ -410,6 +410,9 @@ Done:
   fields.
 - Example-reference metadata added for 21 high-value recipe fields, and
   markdown output now exposes an Example column backed by file-existence tests.
+- Compact `docs/recipe_index.json` output added for editor/agent lookup by
+  stable recipe field path; generated from the same canonical model and covered
+  by the recipedocgen up-to-date drift gate.
 
 Current:
 
@@ -417,7 +420,5 @@ Current:
 
 ## Open questions
 
-- Whether `docs/recipe_index.json` is needed in the first implementation or can
-  wait until an editor/agent integration consumes it.
 - Whether example recipes should be copied into docs snippets or referenced by
   path only.

@@ -14,7 +14,7 @@ import (
 func main() {
 	outDir := flag.String("out", "docs", "output docs directory")
 	flag.Parse()
-	schema, markdown, err := generate(*outDir)
+	schema, markdown, index, err := generate(*outDir)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "recipedocgen:", err)
 		os.Exit(1)
@@ -31,16 +31,24 @@ func main() {
 		fmt.Fprintln(os.Stderr, "recipedocgen:", err)
 		os.Exit(1)
 	}
+	if err := os.WriteFile(filepath.Join(*outDir, "recipe_index.json"), []byte(index), 0o644); err != nil {
+		fmt.Fprintln(os.Stderr, "recipedocgen:", err)
+		os.Exit(1)
+	}
 }
 
-func generate(docsDir string) (string, string, error) {
+func generate(docsDir string) (string, string, string, error) {
 	doc, err := recipedoc.BuildDocumentWithCapabilities(filepath.Join(docsDir, "capabilities.json"))
 	if err != nil {
-		return "", "", err
+		return "", "", "", err
 	}
 	schema, err := recipedoc.RenderJSONSchema(doc)
 	if err != nil {
-		return "", "", err
+		return "", "", "", err
 	}
-	return schema, recipedoc.RenderMarkdown(doc), nil
+	index, err := recipedoc.RenderRecipeIndex(doc)
+	if err != nil {
+		return "", "", "", err
+	}
+	return schema, recipedoc.RenderMarkdown(doc), index, nil
 }

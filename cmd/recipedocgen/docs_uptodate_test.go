@@ -7,12 +7,13 @@ import (
 )
 
 func TestRecipeDocsUpToDate(t *testing.T) {
-	schema, markdown, err := generate("../../docs")
+	schema, markdown, index, err := generate("../../docs")
 	if err != nil {
 		t.Fatal(err)
 	}
 	assertFileCurrent(t, "../../docs/recipe_schema.json", schema)
 	assertFileCurrent(t, "../../docs/recipe.md", markdown)
+	assertFileCurrent(t, "../../docs/recipe_index.json", index)
 }
 
 func assertFileCurrent(t *testing.T, path, got string) {
