@@ -1296,6 +1296,29 @@ try {
     if (($outcomeCliOutput -join "`n") -notmatch "Next Actions") {
         throw "show technique outcome missing Next Actions"
     }
+    $watchDryRunRoot = Join-Path $OutRoot "watch_dry_run"
+    $watchDryRunOutput = & pwsh -NoProfile -File scripts\watch_technique_selfhost.ps1 -OutRoot $watchDryRunRoot -Iterations 1 -IntervalSeconds 1 -DryRun 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        throw "watch technique selfhost dry run failed: $watchDryRunOutput"
+    }
+    $watchDryRunText = $watchDryRunOutput -join "`n"
+    if ($watchDryRunText -notmatch "DRY RUN") {
+        throw "watch technique selfhost dry run missing DRY RUN marker"
+    }
+    if ($watchDryRunText -notmatch "verify_technique_selfhost.ps1") {
+        throw "watch technique selfhost dry run missing verify command"
+    }
+    if ($watchDryRunText -notmatch "show_technique_outcome.ps1") {
+        throw "watch technique selfhost dry run missing show command"
+    }
+    $watchStatusPath = Join-Path $watchDryRunRoot "watch_status.json"
+    if (-not (Test-Path -LiteralPath $watchStatusPath)) {
+        throw "watch technique selfhost dry run missing watch_status.json"
+    }
+    $watchStatus = Get-Content -Raw -LiteralPath $watchStatusPath | ConvertFrom-Json
+    if ([string]$watchStatus.mode -ne "dry_run") {
+        throw "watch technique selfhost dry run status mode mismatch"
+    }
     if (-not (Test-Path -LiteralPath $latestOutcomeHtmlPath)) {
         throw "latest outcome html missing: $latestOutcomeHtmlPath"
     }
