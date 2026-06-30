@@ -495,6 +495,10 @@ Done:
   `examples/recipes/minimal-text-animator-stroke-opacity.json` example compiles
   a stroke opacity text animator and asserts the `ADBE Text Stroke Opacity`
   profile property.
+- Text animator stroke-width recipe support is implemented. The dedicated
+  `examples/recipes/minimal-text-animator-stroke-width.json` example compiles a
+  stroke width text animator and asserts the `ADBE Text Stroke Width` profile
+  property.
 - Text animator Range Selector Offset keyframe recipe support is implemented.
   The dedicated
   `examples/recipes/minimal-text-animator-range-offset.json` example compiles

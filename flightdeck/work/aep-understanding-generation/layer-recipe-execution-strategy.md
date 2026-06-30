@@ -66,7 +66,7 @@ flags, and refs.
 | Transform keyframes/ease | `transform.*_keyframes` | `SetLayerTransform` | `properties[].keyframes[]` | `expected_profile.keyframes[]` | L3 | keep separate |
 | Transform expressions | `transform.expressions.*` | `Property.SetExpression` / `Property.SetExpressionEnabled` | `properties[].expression` / `expression_enabled` | `expected_profile.properties[].expression` / `expression_enabled` | L3 | keep separate |
 | Text style | `text_style.*` | text run/paragraph setters | `layers[].text.*` | `expected_profile.text_styles[]` | L3 | keep separate |
-| Text animators | `text_animators[].property: opacity/position/scale/rotation/color/tracking/character_offset/fill_opacity/stroke_opacity` static Range Selector + `range_offset_keyframes` | `AddTextOpacityAnimator` / `AddTextPositionAnimator` / `AddTextScaleAnimator` / `AddTextRotationAnimator` / `AddTextColorAnimator` / `AddTextTrackingAnimator` / `AddTextCharacterOffsetAnimator` / `AddTextFillOpacityAnimator` / `AddTextStrokeOpacityAnimator` / `AnimateTextRangeOffset` | `properties[]` / `properties[].keyframes[]` | `expected_profile.properties[]` / `expected_profile.keyframes[]` | L3/L4 | opacity + position + scale + rotation + color + tracking + character offset + fill opacity + stroke opacity + range offset done |
+| Text animators | `text_animators[].property: opacity/position/scale/rotation/color/tracking/character_offset/fill_opacity/stroke_opacity/stroke_width` static Range Selector + `range_offset_keyframes` | `AddTextOpacityAnimator` / `AddTextPositionAnimator` / `AddTextScaleAnimator` / `AddTextRotationAnimator` / `AddTextColorAnimator` / `AddTextTrackingAnimator` / `AddTextCharacterOffsetAnimator` / `AddTextFillOpacityAnimator` / `AddTextStrokeOpacityAnimator` / `AddTextStrokeWidthAnimator` / `AnimateTextRangeOffset` | `properties[]` / `properties[].keyframes[]` | `expected_profile.properties[]` / `expected_profile.keyframes[]` | L3/L4 | opacity + position + scale + rotation + color + tracking + character offset + fill opacity + stroke opacity + stroke width + range offset done |
 | Shape contents | `shape.*` | vector group writers | `layers[].shapes[]` / `properties[]` | `expected_profile.properties[]` | L3/L4 | keep separate |
 | Effects | `effects[]` | `AddEffect` / `SetEffectParam` | `layers[].effects[]` | `expected_profile.effects[]` | L3/L4 | keep separate |
 | Camera/light layer identity | `type: camera` / `type: light` | layer constructors | `layers[].name` / `type` | `expected_profile.layers[].name` / `type` | L3 | done |
@@ -267,6 +267,9 @@ animator and asserts `ADBE Text Fill Opacity` through
 `expected_profile.properties[]`.
 `minimal-text-animator-stroke-opacity.json` authors a static stroke-opacity text
 animator and asserts `ADBE Text Stroke Opacity` through
+`expected_profile.properties[]`.
+`minimal-text-animator-stroke-width.json` authors a static stroke-width text
+animator and asserts `ADBE Text Stroke Width` through
 `expected_profile.properties[]`.
 `minimal-text-animator-range-offset.json` adds animated Range Selector Offset
 through `range_offset_keyframes` and asserts `ADBE Text Percent Offset` through
