@@ -17,6 +17,7 @@ func BuildExplanation(portrait *Portrait) (*Explanation, error) {
 		Overview:             buildOverview(portrait),
 		Archetypes:           buildArchetypes(portrait),
 		RecreationReadiness:  buildRecreationReadiness(portrait),
+		RecreationSteps:      buildRecreationSteps(portrait),
 		Techniques:           buildTechniqueExplanations(portrait),
 		TopSignalLayers:      topSignalLayers(portrait.SignalLayers, 3),
 		ReproducibilityNotes: buildReproducibilityNotes(portrait),
@@ -75,6 +76,93 @@ func buildRecreationReadiness(portrait *Portrait) RecreationReadiness {
 		readiness.Blockers = append([]string{fmt.Sprintf("unknown parsed items: %d", unknowns)}, readiness.Blockers...)
 	}
 	return readiness
+}
+
+func buildRecreationSteps(portrait *Portrait) []RecreationStep {
+	fp := portrait.Fingerprint
+	if fp.CompCount == 0 && fp.LayerCount == 0 && fp.EffectCount == 0 &&
+		fp.TextAnimatorCount == 0 && fp.ShapeOperatorCount == 0 &&
+		fp.DependencyCount == 0 && fp.UnknownCount == 0 {
+		return nil
+	}
+
+	steps := make([]RecreationStep, 0, 7)
+	if fp.CompCount > 0 || fp.DependencyCount > 0 {
+		steps = append(steps, RecreationStep{
+			ID:       "structure",
+			Title:    "Rebuild composition structure",
+			Priority: 10,
+			Summary:  fmt.Sprintf("Create %d compositions and restore the dependency graph before recreating layer internals.", fp.CompCount),
+			Inputs:   nonEmptyStrings(fmt.Sprintf("comps: %d", fp.CompCount), fmt.Sprintf("dependency edges: %d", fp.DependencyCount)),
+			Evidence: topCountEvidence("graph", portrait.Graph.RelationCounts, 5),
+		})
+	}
+	if fp.LayerCount > 0 {
+		steps = append(steps, RecreationStep{
+			ID:       "layers",
+			Title:    "Rebuild layer stacks",
+			Priority: 20,
+			Summary:  fmt.Sprintf("Create %d layers with their ordering, roles, timing, sources, parents, and mattes.", fp.LayerCount),
+			Inputs:   topCountEvidence("roles", fp.LayerRoleCounts, 6),
+			Evidence: signalLayerEvidence(portrait.SignalLayers, 3),
+		})
+	}
+	if fp.ShapeOperatorCount > 0 {
+		steps = append(steps, RecreationStep{
+			ID:       "shapes",
+			Title:    "Rebuild shape operators",
+			Priority: 30,
+			Summary:  fmt.Sprintf("Restore %d shape operators and their family-specific properties.", fp.ShapeOperatorCount),
+			Inputs:   topCountEvidence("shape families", portrait.Mechanisms.ShapeFamilyCounts, 6),
+		})
+	}
+	if fp.TextAnimatorCount > 0 || fp.TextLayerCount > 0 {
+		steps = append(steps, RecreationStep{
+			ID:       "text",
+			Title:    "Rebuild text animation",
+			Priority: 40,
+			Summary:  textRecreationSummary(fp.TextLayerCount, fp.TextAnimatorCount),
+			Inputs:   topCountEvidence("text animators", portrait.Mechanisms.TextAnimatorKindCounts, 6),
+		})
+	}
+	if fp.EffectCount > 0 {
+		steps = append(steps, RecreationStep{
+			ID:       "effects",
+			Title:    "Rebuild effect stacks",
+			Priority: 50,
+			Summary:  fmt.Sprintf("Apply %d effects after layer identity and dependencies are in place.", fp.EffectCount),
+			Inputs:   topCountEvidence("effects", portrait.Mechanisms.EffectMatchCounts, 8),
+			Risks:    effectRecreationRisks(portrait),
+		})
+	}
+	if portrait.Fingerprint.LayerRoleCounts["controller"] > 0 || portrait.Graph.RelationCounts["effect_param_layer"] > 0 {
+		steps = append(steps, RecreationStep{
+			ID:       "controllers",
+			Title:    "Reconnect controller references",
+			Priority: 60,
+			Summary:  "Reconnect controller layers and layer-reference parameters after target layers exist.",
+			Inputs: nonEmptyStrings(
+				fmt.Sprintf("controller layers: %d", portrait.Fingerprint.LayerRoleCounts["controller"]),
+				fmt.Sprintf("effect layer-reference edges: %d", portrait.Graph.RelationCounts["effect_param_layer"]),
+			),
+		})
+	}
+	if fp.UnknownCount > 0 {
+		steps = append(steps, RecreationStep{
+			ID:       "unknowns",
+			Title:    "Resolve unknown parsed fields",
+			Priority: 90,
+			Summary:  "Unknown parsed fields block any claim of exact recreation until they are explained or intentionally ignored.",
+			Risks:    []string{fmt.Sprintf("unknown parsed items: %d", fp.UnknownCount)},
+		})
+	}
+	sort.Slice(steps, func(i, j int) bool {
+		if steps[i].Priority != steps[j].Priority {
+			return steps[i].Priority < steps[j].Priority
+		}
+		return steps[i].ID < steps[j].ID
+	})
+	return steps
 }
 
 func buildArchetypes(portrait *Portrait) []ProjectArchetype {
@@ -416,4 +504,65 @@ func topCounts(counts map[string]int, max int) []countRow {
 		rows = rows[:max]
 	}
 	return rows
+}
+
+func topCountEvidence(label string, counts map[string]int, max int) []string {
+	rows := topCounts(counts, max)
+	if len(rows) == 0 {
+		return nil
+	}
+	out := make([]string, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, fmt.Sprintf("%s: %s (%d)", label, row.name, row.count))
+	}
+	return out
+}
+
+func signalLayerEvidence(layers []SignalLayer, max int) []string {
+	layers = topSignalLayers(layers, max)
+	if len(layers) == 0 {
+		return nil
+	}
+	out := make([]string, 0, len(layers))
+	for _, layer := range layers {
+		out = append(out, fmt.Sprintf("signal layer: %s/%s role=%s score=%d", layer.CompName, layer.LayerName, layer.Role, layer.Score))
+	}
+	return out
+}
+
+func effectRecreationRisks(portrait *Portrait) []string {
+	var risks []string
+	counts := portrait.Mechanisms.ReproducibilityCounts
+	if counts["third_party"] > 0 {
+		plugins := formatTopCounts(portrait.Mechanisms.ThirdPartyEffectMatchCounts, 5)
+		risks = append(risks, "third-party effects: "+fallbackText(plugins, fmt.Sprintf("%d", counts["third_party"])))
+	}
+	if counts["unknown"] > 0 {
+		risks = append(risks, fmt.Sprintf("unknown effect reproducibility: %d", counts["unknown"]))
+	}
+	if counts["cycore"] > 0 {
+		risks = append(risks, fmt.Sprintf("cycore bundled effects: %d", counts["cycore"]))
+	}
+	return risks
+}
+
+func textRecreationSummary(textLayers, textAnimators int) string {
+	switch {
+	case textLayers > 0 && textAnimators > 0:
+		return fmt.Sprintf("Restore %d text animator properties across %d text layers.", textAnimators, textLayers)
+	case textLayers > 0:
+		return fmt.Sprintf("Restore %d text layers; no text animator properties were detected.", textLayers)
+	default:
+		return fmt.Sprintf("Restore %d text animator properties.", textAnimators)
+	}
+}
+
+func nonEmptyStrings(values ...string) []string {
+	out := make([]string, 0, len(values))
+	for _, value := range values {
+		if value != "" {
+			out = append(out, value)
+		}
+	}
+	return out
 }

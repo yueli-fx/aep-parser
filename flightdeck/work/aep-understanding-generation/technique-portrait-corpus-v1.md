@@ -87,15 +87,16 @@ exist, that `summary.json`, `corpus.jsonl`, and `digest.json` agree on project
 counts, and that the human reports contain the expected learning sections.
 
 The report script now uses `-mode explain`, so per-project cards include
-deterministic recreation readiness, archetype labels, and technique notes in
-addition to raw portrait counts.
+deterministic recreation readiness, recreation steps, archetype labels, and
+technique notes in addition to raw portrait counts.
 
 `digest.json` is the compact machine-readable learning entry point for larger
 corpora. `learning.md` is the compact human-readable learning entry point. They
 keep representative projects per pattern, archetype, and readiness bucket so a
 large run can be inspected before reading every project record. `projects.csv`
 and `patterns.csv` provide spreadsheet-friendly indexes for filtering projects
-and repeated technique patterns outside the HTML report.
+and repeated technique patterns outside the HTML report. `projects.csv` includes
+the stable recreation step IDs for each project.
 
 ## Non-Goals
 

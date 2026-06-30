@@ -14,10 +14,16 @@ Technique Portrait v1 adds:
 - JSON-ready portrait model types in `internal/technique`
 - `cmd/aeptechnique -mode portrait`
 - `cmd/aeptechnique -portrait` as a shorthand compatibility flag
+- `cmd/aeptechnique -mode explain` project explanations with deterministic
+  `recreation_steps`
 
 The portrait remains descriptive and conservative. It should expose mechanism
 usage, graph shape, signal layers, and low-risk technique hints. It must not
 claim style, artistic intent, or recipe-generation readiness.
+
+The explain layer may describe recreation order, but only from data already
+present in the portrait. It must not infer AE defaults or claim exact recreation
+without profile/render evidence.
 
 ## Inputs
 
@@ -119,6 +125,23 @@ Every hint records confidence and the signal labels that caused it.
 - No AE render validation.
 - No inference from raw AEP bytes.
 
+## Explanation Recreation Steps
+
+`BuildExplanation` emits `recreation_steps[]` as a deterministic execution
+outline for humans and downstream tools. The steps are sorted by `priority` and
+use stable IDs:
+
+- `structure`: create compositions and restore graph edges.
+- `layers`: restore layer stacks, roles, timing, sources, parents, and mattes.
+- `shapes`: restore shape operators and family-specific properties.
+- `text`: restore text animator properties.
+- `effects`: apply effect stacks after layer identity exists.
+- `controllers`: reconnect controller and layer-reference dependencies.
+- `unknowns`: resolve unknown parsed fields before claiming exact recreation.
+
+Each step contains `inputs`, `risks`, and `evidence` strings derived from the
+portrait summary. These are planning aids, not generated recipes.
+
 ## Testing
 
 Use TDD.
@@ -149,3 +172,5 @@ Current:
   aggregation for fingerprints, signal layers, mechanisms, graph summaries,
   conservative technique hints, and unknown summaries.
 - `cmd/aeptechnique` supports `-mode facts`, `-mode portrait`, and `-portrait`.
+- `BuildExplanation` emits `recreation_steps[]` so reports can show the
+  project-level recreation order and blockers without guessing missing fields.

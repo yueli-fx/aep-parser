@@ -181,6 +181,7 @@ type Explanation struct {
 	Archetypes           []ProjectArchetype     `json:"archetypes,omitempty"`
 	Patterns             []ProjectPattern       `json:"patterns,omitempty"`
 	RecreationReadiness  RecreationReadiness    `json:"recreation_readiness"`
+	RecreationSteps      []RecreationStep       `json:"recreation_steps,omitempty"`
 	Techniques           []TechniqueExplanation `json:"techniques,omitempty"`
 	TopSignalLayers      []SignalLayer          `json:"top_signal_layers,omitempty"`
 	ReproducibilityNotes []string               `json:"reproducibility_notes,omitempty"`
@@ -209,6 +210,16 @@ type RecreationReadiness struct {
 	Summary  string   `json:"summary"`
 	Blockers []string `json:"blockers,omitempty"`
 	Notes    []string `json:"notes,omitempty"`
+}
+
+type RecreationStep struct {
+	ID       string   `json:"id"`
+	Title    string   `json:"title"`
+	Priority int      `json:"priority"`
+	Summary  string   `json:"summary"`
+	Inputs   []string `json:"inputs,omitempty"`
+	Risks    []string `json:"risks,omitempty"`
+	Evidence []string `json:"evidence,omitempty"`
 }
 
 type TechniqueExplanation struct {

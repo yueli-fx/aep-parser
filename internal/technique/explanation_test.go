@@ -71,6 +71,9 @@ func TestBuildExplanationTurnsPortraitIntoDeterministicTechniqueNotes(t *testing
 	assertPattern(t, explanation, "effect_controlled_shape_system")
 	assertPattern(t, explanation, "plugin_dependent_effect_stack")
 	assertPattern(t, explanation, "kinetic_text_system")
+	assertRecreationStep(t, explanation, "structure", "source (2)")
+	assertRecreationStep(t, explanation, "effects", "Plugin Magic (1)")
+	assertRecreationStep(t, explanation, "unknowns", "unknown parsed items: 1")
 	if len(explanation.TopSignalLayers) != 3 || explanation.TopSignalLayers[0].LayerName != "Burst" {
 		t.Fatalf("top signal layers = %+v", explanation.TopSignalLayers)
 	}
@@ -116,12 +119,48 @@ func TestBuildExplanationAllowsEmptyPortrait(t *testing.T) {
 	if len(explanation.Patterns) != 0 {
 		t.Fatalf("empty patterns = %+v", explanation.Patterns)
 	}
+	if len(explanation.RecreationSteps) != 0 {
+		t.Fatalf("empty recreation steps = %+v", explanation.RecreationSteps)
+	}
 	if explanation.RecreationReadiness.Status != "analysis_ready" {
 		t.Fatalf("empty readiness = %+v", explanation.RecreationReadiness)
 	}
 	if !containsText(explanation.UnknownNotes, "No unknown") {
 		t.Fatalf("unknown notes = %+v", explanation.UnknownNotes)
 	}
+}
+
+func TestBuildExplanationTextLayerOnlyStepDoesNotClaimZeroAnimators(t *testing.T) {
+	explanation, err := technique.BuildExplanation(&technique.Portrait{
+		SchemaVersion: technique.SchemaVersion,
+		SourcePath:    "text-only.aep",
+		Fingerprint: technique.FingerprintSummary{
+			LayerCount:      1,
+			TextLayerCount:  1,
+			LayerRoleCounts: map[string]int{"text": 1},
+		},
+		Mechanisms: technique.MechanismSummary{
+			EffectClassCounts:           map[string]int{},
+			EffectMatchCounts:           map[string]int{},
+			TextAnimatorKindCounts:      map[string]int{},
+			ShapeFamilyCounts:           map[string]int{},
+			ReproducibilityCounts:       map[string]int{},
+			ThirdPartyEffectMatchCounts: map[string]int{},
+		},
+		Graph: technique.GraphSummary{RelationCounts: map[string]int{}},
+	})
+	if err != nil {
+		t.Fatalf("BuildExplanation: %v", err)
+	}
+	for _, step := range explanation.RecreationSteps {
+		if step.ID == "text" {
+			if strings.Contains(step.Summary, "0 text animators") {
+				t.Fatalf("text recreation step = %+v", step)
+			}
+			return
+		}
+	}
+	t.Fatalf("text recreation step not found in %+v", explanation.RecreationSteps)
 }
 
 func assertTechniqueNote(t *testing.T, explanation *technique.Explanation, id, wantText string) {
@@ -170,4 +209,24 @@ func assertPattern(t *testing.T, explanation *technique.Explanation, id string) 
 		}
 	}
 	t.Fatalf("pattern %s not found in %+v", id, explanation.Patterns)
+}
+
+func assertRecreationStep(t *testing.T, explanation *technique.Explanation, id, wantText string) {
+	t.Helper()
+	lastPriority := 0
+	for _, step := range explanation.RecreationSteps {
+		if step.Priority < lastPriority {
+			t.Fatalf("recreation steps are not sorted by priority: %+v", explanation.RecreationSteps)
+		}
+		lastPriority = step.Priority
+		if step.ID != id {
+			continue
+		}
+		joined := strings.Join(append(append([]string{step.Summary}, step.Inputs...), append(step.Risks, step.Evidence...)...), " ")
+		if !strings.Contains(joined, wantText) {
+			t.Fatalf("recreation step %s = %+v, want text %q", id, step, wantText)
+		}
+		return
+	}
+	t.Fatalf("recreation step %s not found in %+v", id, explanation.RecreationSteps)
 }

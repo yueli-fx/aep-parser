@@ -38,6 +38,7 @@ foreach ($path in @($summaryPath, $corpusPath, $digestPath, $learningPath, $proj
 $summary = Get-Content -Raw -LiteralPath $summaryPath | ConvertFrom-Json
 $digest = Get-Content -Raw -LiteralPath $digestPath | ConvertFrom-Json
 $corpusLines = @(Get-Content -LiteralPath $corpusPath | Where-Object { $_.Trim() -ne "" })
+$corpusRecords = @($corpusLines | ForEach-Object { $_ | ConvertFrom-Json })
 $projectRows = @(Import-Csv -LiteralPath $projectsCsvPath)
 $patternRows = @(Import-Csv -LiteralPath $patternsCsvPath)
 
@@ -59,12 +60,22 @@ if ($projectRows.Count -ne [int]$summary.project_count) {
 if ($patternRows.Count -ne @($digest.patterns).Count) {
     throw "patterns.csv row count $($patternRows.Count) does not match digest pattern count $(@($digest.patterns).Count)"
 }
+$recordsWithSteps = @($corpusRecords | Where-Object {
+    $null -ne $_.explanation -and
+    $null -ne $_.explanation.recreation_steps -and
+    @($_.explanation.recreation_steps).Count -gt 0
+})
+if ($summary.project_count -gt 0 -and $recordsWithSteps.Count -eq 0) {
+    throw "corpus has no explanation.recreation_steps entries"
+}
 
 Require-Text -Path $learningPath -Pattern "^## Pattern Playbook$"
 Require-Text -Path $learningPath -Pattern "^## Plugin Risk Queue$"
 Require-Text -Path $learningPath -Pattern "^## Readiness Queue$"
 Require-Text -Path $reportPath -Pattern "^## Pattern Representatives$"
+Require-Text -Path $reportPath -Pattern "Step [0-9]+:"
 Require-Text -Path $htmlPath -Pattern "Technique Corpus Report"
+Require-Text -Path $htmlPath -Pattern "Step [0-9]+:"
 Require-Text -Path $htmlPath -Pattern "learning\.md"
 Require-Text -Path $htmlPath -Pattern "projects\.csv"
 

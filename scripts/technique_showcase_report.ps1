@@ -359,6 +359,7 @@ try {
             top_shape_families   = Format-CountList -Rows (Convert-CountRows -Rows (Get-CountRows -Counts $portrait.mechanisms.shape_family_counts -Max 5))
             top_text_animators   = Format-CountList -Rows (Convert-CountRows -Rows (Get-CountRows -Counts $portrait.mechanisms.text_animator_kind_counts -Max 5))
             readiness_blockers   = ((@($explanation.recreation_readiness.blockers) | ForEach-Object { [string]$_ }) -join "; ")
+            recreation_steps     = ((@($explanation.recreation_steps) | ForEach-Object { [string]$_.id }) -join "; ")
         }
     }
     $projectRowsForCsv | Export-Csv -LiteralPath $projectsCsvPath -NoTypeInformation -Encoding UTF8
@@ -481,6 +482,13 @@ try {
         }
         if ($null -ne $explanation.recreation_readiness) {
             [void]$b.AppendLine("- Readiness: **$($explanation.recreation_readiness.status)** - $($explanation.recreation_readiness.summary)")
+        }
+        foreach ($step in @($explanation.recreation_steps | Select-Object -First 6)) {
+            $stepLine = "- Step $($step.priority): **$($step.title)** - $($step.summary)"
+            if ($step.risks.Count -gt 0) {
+                $stepLine += " Risks: $($step.risks -join '; ')"
+            }
+            [void]$b.AppendLine($stepLine)
         }
         foreach ($archetype in @($explanation.archetypes | Select-Object -First 4)) {
             [void]$b.AppendLine("- Archetype: **$($archetype.label)** - $($archetype.summary)")
@@ -684,8 +692,15 @@ try {
                     }
                 }
             }
-            if (($null -ne $explanation) -and ($null -ne $explanation.techniques)) {
+            if (($null -ne $explanation) -and (($null -ne $explanation.recreation_steps) -or ($null -ne $explanation.techniques))) {
                 [void]$h.AppendLine("<div class=""notes"">")
+                foreach ($step in @($explanation.recreation_steps | Select-Object -First 4)) {
+                    $riskText = ""
+                    if ($step.risks.Count -gt 0) {
+                        $riskText = " Risks: " + ($step.risks -join "; ")
+                    }
+                    [void]$h.AppendLine("<div class=""note""><strong>Step $($step.priority): $(Escape-Html $step.title)</strong><span>$(Escape-Html ($step.summary + $riskText))</span></div>")
+                }
                 foreach ($tech in @($explanation.techniques | Select-Object -First 4)) {
                     [void]$h.AppendLine("<div class=""note""><strong>$(Escape-Html $tech.title)</strong><span>$(Escape-Html $tech.summary)</span></div>")
                 }
