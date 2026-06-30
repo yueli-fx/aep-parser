@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"image"
 	"image/color"
@@ -9,6 +10,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/yueli-fx/aep-parser/internal/aehost"
 	"github.com/yueli-fx/aep-parser/internal/aeoracle"
 )
 
@@ -164,6 +166,39 @@ func TestRunCloneRequestWritesRequest(t *testing.T) {
 	}
 }
 
+func TestRunRenderUsesAEHost(t *testing.T) {
+	dir := t.TempDir()
+	outDir := filepath.Join(dir, "renders")
+	reqPath := filepath.Join(dir, "request.json")
+	req := aeoracle.NewRenderRequest("input.aep", "Main", outDir, []aeoracle.FrameTarget{
+		{Frame: 0, Seconds: 0, Tag: "f000000", Reason: "comp_start"},
+	})
+	if err := aeoracle.WriteRequest(reqPath, req); err != nil {
+		t.Fatalf("WriteRequest: %v", err)
+	}
+	host := &recordingAEHost{t: t}
+
+	code := runWithHost([]string{
+		"render",
+		"-request", reqPath,
+		"-ae", filepath.Join(dir, "AfterFX.exe"),
+		"-jsx", filepath.Join(dir, "render.jsx"),
+		"-timeout-sec", "9",
+	}, host)
+	if code != 0 {
+		t.Fatalf("run render exit = %d", code)
+	}
+	if !host.called {
+		t.Fatal("AE host was not called")
+	}
+	if host.request.TimeoutSec != 9 {
+		t.Fatalf("TimeoutSec = %d", host.request.TimeoutSec)
+	}
+	if host.request.Env["AEORACLE_REQUEST"] == "" || host.request.Env["AEORACLE_CWD"] == "" {
+		t.Fatalf("host env = %#v", host.request.Env)
+	}
+}
+
 func TestRunCompareSetReturnsZeroForIdenticalFrames(t *testing.T) {
 	dir := t.TempDir()
 	expectedPNG := filepath.Join(dir, "expected.png")
@@ -209,6 +244,38 @@ func TestRunCompareSetReturnsOneAndWritesReportForDifferentFrames(t *testing.T) 
 	if len(report) == 0 {
 		t.Fatal("report file is empty")
 	}
+}
+
+type recordingAEHost struct {
+	t       *testing.T
+	called  bool
+	request aehost.ScriptRequest
+}
+
+func (h *recordingAEHost) Available(context.Context) aehost.Availability {
+	return aehost.Availability{Status: aehost.CapabilityAvailable}
+}
+
+func (h *recordingAEHost) RunScript(_ context.Context, req aehost.ScriptRequest) (aehost.ScriptResult, error) {
+	h.called = true
+	h.request = req
+
+	requestPath := req.Env["AEORACLE_REQUEST"]
+	renderReq, err := aeoracle.ReadRequest(requestPath)
+	if err != nil {
+		h.t.Fatalf("ReadRequest: %v", err)
+	}
+	if err := os.MkdirAll(renderReq.OutputDir, 0o755); err != nil {
+		h.t.Fatalf("MkdirAll: %v", err)
+	}
+	if err := os.WriteFile(renderReq.DonePath, []byte("ok\n"), 0o644); err != nil {
+		h.t.Fatalf("WriteFile done: %v", err)
+	}
+	for _, frame := range renderReq.Frames {
+		writeCmdTestPNG(h.t, filepath.Join(renderReq.OutputDir, frame.Tag+".png"), color.RGBA{R: 1, G: 2, B: 3, A: 255})
+	}
+	writeCmdRenderMetadata(h.t, renderReq.OutputDir, filepath.Base(renderReq.MetadataPath), filepath.Join(renderReq.OutputDir, renderReq.Frames[0].Tag+".png"))
+	return aehost.ScriptResult{ExitCode: 0, DonePath: req.DonePath}, nil
 }
 
 func writeCmdRenderMetadata(t *testing.T, dir, name, pngPath string) string {

@@ -199,7 +199,10 @@ ordinary host process execution does not inherit AE-specific concepts:
 ```go
 package aehost
 
-import "context"
+import (
+	"context"
+	"io"
+)
 
 type CapabilityStatus string
 
@@ -220,7 +223,10 @@ type ScriptRequest struct {
 	JSXPath    string
 	DonePath   string
 	TimeoutSec int
+	WorkDir    string
 	Env        map[string]string
+	Stdout     io.Writer
+	Stderr     io.Writer
 }
 
 type ScriptResult struct {
@@ -572,16 +578,18 @@ git commit -m "feat: move selfhost verification gate to Go"
 
 - Create: `internal/aehost/aehost.go`
 - Create: `internal/aehost/unavailable.go`
-- Create: `internal/aehost/windows.go`
-- Create: `internal/aehost/darwin.go`
+- Create: `internal/aehost/powershell.go`
+- Create: `internal/aehost/default_windows.go`
+- Create: `internal/aehost/default_darwin.go`
+- Create: `internal/aehost/default_unix.go`
 - Modify: `cmd/aeoracle/main.go`
 - Test: `internal/aehost/aehost_test.go`
 
-- [ ] **Step 1: Add AE host interfaces**
+- [x] **Step 1: Add AE host interfaces**
 
 Use the `internal/aehost` interfaces from the Target Interfaces section.
 
-- [ ] **Step 2: Add unavailable host behavior**
+- [x] **Step 2: Add unavailable host behavior**
 
 Linux and unknown configurations must return:
 
@@ -589,32 +597,28 @@ Linux and unknown configurations must return:
 {"status":"unavailable","reason":"after effects automation is not configured on this platform"}
 ```
 
-- [ ] **Step 3: Route `aeoracle render` through `aehost.Host`**
+- [x] **Step 3: Route `aeoracle render` through `aehost.Host`**
 
 Replace direct `exec.Command("pwsh", ...)` in `cmd/aeoracle/main.go` with an
 AE host call. Keep the Windows adapter allowed to call the existing PS runner
 as an internal implementation detail during migration.
 
-- [ ] **Step 4: Update user-facing wording**
+- [x] **Step 4: Update user-facing wording**
 
 Change CLI usage from `AfterFX.exe path` to `After Effects executable path`.
 
-- [ ] **Step 5: Verify and commit**
+- [x] **Step 5: Verify**
 
 Run:
 
 ```powershell
 go test ./internal/aehost ./cmd/aeoracle -count=1
-go run ./cmd/aeoracle render -request tmp\nonexistent.json -dry-run
+go run ./cmd/aeoracle render -request tmp\aeoracle_dryrun_smoke\request.json -dry-run
 git diff --check
 ```
 
-Commit:
+Commit after Task 5 with the full cross-platform slice.
 
-```powershell
-git add internal/aehost cmd/aeoracle
-git commit -m "refactor: route AE rendering through host adapter"
-```
 
 ### Task 5: Add Cross-Platform Build Gate
 
@@ -623,7 +627,7 @@ git commit -m "refactor: route AE rendering through host adapter"
 - Create: `scripts/verify_cross_platform.ps1`
 - Modify: `README.md`
 
-- [ ] **Step 1: Add build script**
+- [x] **Step 1: Add build script**
 
 Create `scripts/verify_cross_platform.ps1`:
 
@@ -655,7 +659,7 @@ Remove-Item Env:\GOOS -ErrorAction SilentlyContinue
 Remove-Item Env:\GOARCH -ErrorAction SilentlyContinue
 ```
 
-- [ ] **Step 2: Add README command**
+- [x] **Step 2: Add README command**
 
 Add:
 
@@ -663,7 +667,7 @@ Add:
 pwsh -NoProfile -File scripts\verify_cross_platform.ps1
 ```
 
-- [ ] **Step 3: Verify and commit**
+- [x] **Step 3: Verify**
 
 Run:
 
@@ -676,8 +680,8 @@ git diff --check
 Commit:
 
 ```powershell
-git add scripts/verify_cross_platform.ps1 README.md
-git commit -m "test: add cross-platform build gate"
+git add internal/aehost cmd/aeoracle scripts/verify_cross_platform.ps1 README.md flightdeck/work/cross-platform-architecture/index.md
+git commit -m "refactor: add cross-platform AE host gate"
 ```
 
 ## Service Direction
@@ -744,6 +748,6 @@ Capability response should include:
 - [x] Move `aepselfhost verify` orchestration into Go and reduce PS selfhost verify to a wrapper.
 - [x] Move selfhost verification gate from PowerShell to Go.
 - [x] Move technique report rendering into Go and reduce report PS script to a wrapper.
-- [ ] Define AE host adapter.
-- [ ] Add cross-platform build gate.
+- [x] Define AE host adapter.
+- [x] Add cross-platform build gate.
 - [ ] Start pure parser service.

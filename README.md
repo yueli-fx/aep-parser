@@ -12,6 +12,14 @@
 - **API 参考**：[docs/](docs/) —— 每个核心类型一个 markdown，由 `cmd/docgen` 从导出符号的 doc comment **自动生成**（`go generate ./cmd/docgen`）。
 - **能力覆盖矩阵 / 暂搁 / 不可达 / negative findings**：[docs/capabilities.md](docs/capabilities.md)。
 
+## 跨平台构建验证
+
+解析、profile、diff、search、recipe、technique report 和自托管编排的 Go 入口应保持跨平台可构建；AE 自动化是可选 worker 能力，Linux/macOS 服务节点不应因为没有 AE 或 PowerShell 而阻断纯解析工作。
+
+```powershell
+pwsh -NoProfile -File scripts\verify_cross_platform.ps1
+```
+
 ## 自托管技法报告
 
 对本地 `.aep` 语料生成可浏览的 technique learning report：

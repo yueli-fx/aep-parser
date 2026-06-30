@@ -1,15 +1,16 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
 
+	"github.com/yueli-fx/aep-parser/internal/aehost"
 	"github.com/yueli-fx/aep-parser/internal/aeoracle"
 	"github.com/yueli-fx/aep-parser/internal/aep"
 	"github.com/yueli-fx/aep-parser/internal/profile"
@@ -20,6 +21,10 @@ func main() {
 }
 
 func run(args []string) int {
+	return runWithHost(args, aehost.DefaultHost())
+}
+
+func runWithHost(args []string, host aehost.Host) int {
 	if len(args) == 0 {
 		usage()
 		return 2
@@ -34,7 +39,7 @@ func run(args []string) int {
 	case "compare-set":
 		return runCompareSet(args[1:])
 	case "render":
-		return runRender(args[1:])
+		return runRender(args[1:], host)
 	default:
 		usage()
 		return 2
@@ -200,11 +205,11 @@ func runCompareSet(args []string) int {
 	return 0
 }
 
-func runRender(args []string) int {
+func runRender(args []string, aeHost aehost.Host) int {
 	fs := flag.NewFlagSet("aeoracle render", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
 	requestPath := fs.String("request", "", "render request JSON path")
-	aePath := fs.String("ae", "", "AfterFX.exe path")
+	aePath := fs.String("ae", "", "After Effects executable path")
 	jsxPath := fs.String("jsx", "scripts/aeoracle_render.jsx", "renderer JSX path")
 	timeout := fs.Int("timeout-sec", 180, "AE automation timeout seconds")
 	dryRun := fs.Bool("dry-run", false, "print command without launching AE")
@@ -212,7 +217,7 @@ func runRender(args []string) int {
 		return 2
 	}
 	if *requestPath == "" {
-		fmt.Fprintln(os.Stderr, "usage: aeoracle render -request request.json [-ae AfterFX.exe] [-jsx scripts/aeoracle_render.jsx] [-timeout-sec n] [-dry-run]")
+		fmt.Fprintln(os.Stderr, "usage: aeoracle render -request request.json [-ae path] [-jsx scripts/aeoracle_render.jsx] [-timeout-sec n] [-dry-run]")
 		return 2
 	}
 	cwd, err := os.Getwd()
@@ -240,11 +245,6 @@ func runRender(args []string) int {
 		fmt.Fprintln(os.Stderr, "jsx path:", err)
 		return 2
 	}
-	runScript, err := resolvePath(filepath.Join("scripts", "ae_run.ps1"), cwd)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "runner path:", err)
-		return 2
-	}
 	aeExe := *aePath
 	if aeExe != "" {
 		aeExe, err = resolvePath(aeExe, cwd)
@@ -254,6 +254,11 @@ func runRender(args []string) int {
 		}
 	}
 	if *dryRun {
+		runScript, err := resolvePath(filepath.Join("scripts", "ae_run.ps1"), cwd)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "runner path:", err)
+			return 2
+		}
 		fmt.Printf("AEORACLE_REQUEST=%s\nAEORACLE_CWD=%s\n%s\n", requestAbs, cwd, formatCommand("pwsh", renderCommand(runScript, aeExe, jsxAbs, req.DonePath, *timeout)))
 		return 0
 	}
@@ -261,13 +266,28 @@ func runRender(args []string) int {
 		fmt.Fprintln(os.Stderr, "render: -ae is required unless -dry-run is set")
 		return 2
 	}
-	cmdArgs := renderCommand(runScript, aeExe, jsxAbs, req.DonePath, *timeout)
-	cmd := exec.Command("pwsh", cmdArgs...)
-	cmd.Env = append(os.Environ(), "AEORACLE_REQUEST="+requestAbs, "AEORACLE_CWD="+cwd)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
+	if aeHost == nil {
+		aeHost = aehost.DefaultHost()
+	}
+	result, err := aeHost.RunScript(context.Background(), aehost.ScriptRequest{
+		AEPath:     aeExe,
+		JSXPath:    jsxAbs,
+		DonePath:   req.DonePath,
+		TimeoutSec: *timeout,
+		WorkDir:    cwd,
+		Env: map[string]string{
+			"AEORACLE_REQUEST": requestAbs,
+			"AEORACLE_CWD":     cwd,
+		},
+		Stdout: os.Stdout,
+		Stderr: os.Stderr,
+	})
+	if err != nil {
 		fmt.Fprintln(os.Stderr, "render:", err)
+		return 2
+	}
+	if result.ExitCode != 0 {
+		fmt.Fprintf(os.Stderr, "render: AE host exited %d\n", result.ExitCode)
 		return 2
 	}
 	status, err := readRenderDoneStatus(req.DonePath)
