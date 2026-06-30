@@ -2278,6 +2278,31 @@ func TestValidateReportsTextAnimatorRotationCapability(t *testing.T) {
 	assertCapability(t, report, "AddTextRotationAnimator")
 }
 
+func TestValidateReportsTextAnimatorColorCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0] = recipe.Layer{
+		Type: "text",
+		Name: "Title",
+		Text: "HELLO",
+		TextAnimators: []recipe.TextAnimatorSpec{
+			{
+				Property:    "color",
+				Value:       []any{255.0, 0.0, 0.0, 255.0},
+				RangeStart:  ptr(0),
+				RangeEnd:    ptr(100),
+				RangeOffset: ptr(0),
+			},
+		},
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, refusals = %+v", report.Refusals)
+	}
+	assertCapability(t, report, "AddTextColorAnimator")
+}
+
 func TestValidateReportsTextAnimatorRangeOffsetCapability(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0] = recipe.Layer{

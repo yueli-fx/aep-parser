@@ -3215,9 +3215,10 @@
         "text_animator.add_opacity",
         "text_animator.add_position",
         "text_animator.add_scale",
-        "text_animator.add_rotation"
+        "text_animator.add_rotation",
+        "text_animator.add_color"
       ],
-      "example": "examples/recipes/minimal-text-animator-opacity.json"
+      "example": "examples/recipes/minimal-text-animator-color.json"
     },
     "comps[].layers[].text_animators[].property": {
       "path": "comps[].layers[].text_animators[].property",
@@ -3235,9 +3236,10 @@
         "opacity",
         "position",
         "scale",
-        "rotation"
+        "rotation",
+        "color"
       ],
-      "example": "examples/recipes/minimal-text-animator-opacity.json"
+      "example": "examples/recipes/minimal-text-animator-color.json"
     },
     "comps[].layers[].text_animators[].range_end": {
       "path": "comps[].layers[].text_animators[].range_end",
@@ -3248,7 +3250,7 @@
       "go_type": "*float64",
       "summary": "Text animator range selector end percentage.",
       "validation": "Range selector end is required.",
-      "example": "examples/recipes/minimal-text-animator-opacity.json"
+      "example": "examples/recipes/minimal-text-animator-color.json"
     },
     "comps[].layers[].text_animators[].range_offset": {
       "path": "comps[].layers[].text_animators[].range_offset",
@@ -3259,7 +3261,7 @@
       "go_type": "*float64",
       "summary": "Text animator range selector offset percentage.",
       "validation": "Range selector offset is required.",
-      "example": "examples/recipes/minimal-text-animator-opacity.json"
+      "example": "examples/recipes/minimal-text-animator-color.json"
     },
     "comps[].layers[].text_animators[].range_offset_keyframes[]": {
       "path": "comps[].layers[].text_animators[].range_offset_keyframes[]",
@@ -3370,7 +3372,7 @@
       "go_type": "*float64",
       "summary": "Text animator range selector start percentage.",
       "validation": "Range selector start is required.",
-      "example": "examples/recipes/minimal-text-animator-opacity.json"
+      "example": "examples/recipes/minimal-text-animator-color.json"
     },
     "comps[].layers[].text_animators[].value": {
       "path": "comps[].layers[].text_animators[].value",
@@ -3380,8 +3382,8 @@
       "type": "any",
       "go_type": "interface {}",
       "summary": "Text animator property value.",
-      "validation": "Opacity and rotation values must be numbers; position and scale values must be 3-number arrays.",
-      "example": "examples/recipes/minimal-text-animator-opacity.json"
+      "validation": "Opacity and rotation values must be numbers; position and scale values must be 3-number arrays; color values must be 3- or 4-number arrays.",
+      "example": "examples/recipes/minimal-text-animator-color.json"
     },
     "comps[].layers[].text_style": {
       "path": "comps[].layers[].text_style",

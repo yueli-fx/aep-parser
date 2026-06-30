@@ -476,6 +476,9 @@ Done:
   `examples/recipes/minimal-text-animator-rotation.json` example compiles a
   rotation text animator, asserts the `ADBE Text Rotation` profile property,
   and passes recipe profile verification.
+- Text animator fill-color recipe support is implemented. The dedicated
+  `examples/recipes/minimal-text-animator-color.json` example compiles a fill
+  color text animator and asserts the `ADBE Text Fill Color` profile property.
 - Text animator Range Selector Offset keyframe recipe support is implemented.
   The dedicated
   `examples/recipes/minimal-text-animator-range-offset.json` example compiles
