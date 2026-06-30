@@ -32,6 +32,8 @@ func run(args []string, stdout, stderr io.Writer, platform host.Platform) int {
 		return runCompareReports(args[1:], stdout, stderr)
 	case "recipe-smoke":
 		return runRecipeSmoke(args[1:], stdout, stderr, platform)
+	case "verify-report":
+		return runVerifyReport(args[1:], stdout, stderr)
 	case "outcome":
 		return runOutcome(args[1:], stdout, stderr)
 	case "status":
@@ -77,6 +79,28 @@ func runCompareReports(args []string, stdout, stderr io.Writer) int {
 	_ = result
 	fmt.Fprintf(stdout, "compare json: %s\n", filepath.Join(reportOutDir, "compare.json"))
 	fmt.Fprintf(stdout, "compare md:   %s\n", filepath.Join(reportOutDir, "compare.md"))
+	return 0
+}
+
+func runVerifyReport(args []string, stdout, stderr io.Writer) int {
+	fs := flag.NewFlagSet("aepselfhost verify-report", flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	outDir := fs.String("out-dir", filepath.Join("tmp", "technique_showcase_report"), "technique report output directory")
+	minProjects := fs.Int("min-projects", 1, "minimum parsed project count")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	result, err := selfhost.VerifyTechniqueReport(selfhost.ReportVerifyOptions{
+		OutDir:      *outDir,
+		MinProjects: *minProjects,
+	})
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	fmt.Fprintf(stdout, "ok: %s\n", *outDir)
+	fmt.Fprintf(stdout, "projects: %d\n", result.ProjectCount)
+	fmt.Fprintf(stdout, "patterns: %d\n", result.PatternCount)
 	return 0
 }
 
@@ -722,5 +746,5 @@ func ptrIntValue(v *int) string {
 }
 
 func usage(stderr io.Writer) {
-	fmt.Fprintln(stderr, "usage: aepselfhost <verify|compare-reports|recipe-smoke|outcome|status|watch|start-watch> -out-root tmp\\technique_selfhost_gate")
+	fmt.Fprintln(stderr, "usage: aepselfhost <verify|compare-reports|verify-report|recipe-smoke|outcome|status|watch|start-watch> -out-root tmp\\technique_selfhost_gate")
 }

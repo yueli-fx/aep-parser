@@ -325,6 +325,19 @@ func TestRunRecipeSmokeWritesArtifacts(t *testing.T) {
 	}
 }
 
+func TestRunVerifyReportReturnsValidationError(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"verify-report", "-out-dir", t.TempDir()}, &stdout, &stderr, testPlatform())
+
+	if code != 1 {
+		t.Fatalf("run verify-report = %d, want 1", code)
+	}
+	if !strings.Contains(stderr.String(), "missing report artifact") {
+		t.Fatalf("stderr = %q, want missing artifact", stderr.String())
+	}
+}
+
 func writeFile(t *testing.T, path, text string) {
 	t.Helper()
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
