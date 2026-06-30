@@ -95,7 +95,21 @@ func writeMinimalTechniqueReport(t *testing.T) string {
 	writeFile(t, filepath.Join(dir, "learning.md"), "# Technique Learning Index\n\n## Pattern Playbook\n\n## Study Queue\n\nrecreation steps\n\n## Plugin Risk Queue\n\n## Readiness Queue\n")
 	writeFile(t, filepath.Join(dir, "report.md"), "# Report\n\n## Pattern Representatives\n\n## Study Queue\n\nStep 1: Build\n")
 	writeFile(t, filepath.Join(dir, "report.html"), strings.Join([]string{
-		"Technique Corpus Report", "Step 1:", "manifest.json", "learning.md", "projects.csv", "project_playbooks.csv", "compositions.csv", "layers.csv", "recreation_steps.csv", "study_queue.csv", "study_tasks.csv", "recreation_blockers.csv", "signal_layers.csv", "effect_stacks.csv", "shape_operators.csv", "text_animators.csv", "dependency_edges.csv", "learning_actions.csv", "mechanisms.csv", "mechanism_examples.csv", "coverage_scorecard.csv", "reconstruction_blueprints.jsonl", "recipe_drafts.jsonl", "errors.csv", "Coverage Scorecard", "Reconstruction Blueprints", "Recipe Drafts", "Mechanism Explorer", "mechanismFilter", "Study Task Queue", "studyTaskFilter", "Project Playbooks", "Compositions", "Layers", "Recreation Steps", "Recreation Blockers", "Effect Stacks", "Shape Operators", "Text Animators", "Dependency Edges", "Representative Projects", "mechanism-representatives",
+		"Technique Corpus Dashboard",
+		`data-tab="overview"`,
+		`data-tab="patterns"`,
+		`data-tab="projects"`,
+		`data-tab="recipes"`,
+		`data-tab="data"`,
+		`id="project-search"`,
+		`id="project-detail"`,
+		`window.__TECHNIQUE_REPORT__`,
+		"summary.json", "corpus.jsonl", "digest.json", "projects.csv", "project_playbooks.csv",
+		"compositions.csv", "layers.csv", "recreation_steps.csv", "study_queue.csv",
+		"study_tasks.csv", "recreation_blockers.csv", "signal_layers.csv", "effect_stacks.csv",
+		"shape_operators.csv", "text_animators.csv", "dependency_edges.csv", "learning_actions.csv",
+		"mechanisms.csv", "mechanism_examples.csv", "coverage_scorecard.csv",
+		"reconstruction_blueprints.jsonl", "recipe_drafts.jsonl", "errors.csv",
 	}, "\n"))
 	return dir
 }
