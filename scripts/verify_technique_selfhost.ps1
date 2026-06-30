@@ -158,6 +158,17 @@ try {
         return [System.Net.WebUtility]::HtmlEncode([string]$Value)
     }
 
+    function Require-LatestIndexLink {
+        param(
+            [string]$Label,
+            [string]$RelativePath
+        )
+        $target = Join-Path $OutRoot $RelativePath
+        if (-not (Test-Path -LiteralPath $target)) {
+            throw "latest index link target missing for ${Label}: $target"
+        }
+    }
+
     $runRel = $runID
     $index = [System.Text.StringBuilder]::new()
     [void]$index.AppendLine("<!doctype html>")
@@ -203,6 +214,17 @@ try {
     [void]$index.AppendLine("</tbody></table></section>")
     [void]$index.AppendLine("</main></body></html>")
     $index.ToString() | Set-Content -LiteralPath $latestIndexPath -Encoding UTF8
+    if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Study Queue Preview" -Quiet)) {
+        throw "latest index missing Study Queue Preview"
+    }
+    if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Pattern Playbook Preview" -Quiet)) {
+        throw "latest index missing Pattern Playbook Preview"
+    }
+    Require-LatestIndexLink -Label "full report" -RelativePath "$runRel/full_report/report.html"
+    Require-LatestIndexLink -Label "learning index" -RelativePath "$runRel/full_report/learning.md"
+    Require-LatestIndexLink -Label "study queue" -RelativePath "$runRel/full_report/study_queue.csv"
+    Require-LatestIndexLink -Label "partial report" -RelativePath "$runRel/partial_report/report.html"
+    Require-LatestIndexLink -Label "partial compare" -RelativePath "$runRel/compare_partial_to_full/compare.md"
 
     $runRoot | Set-Content -LiteralPath $latestRunPath -Encoding UTF8
     Copy-Item -LiteralPath $acceptanceMdPath -Destination $latestAcceptancePath -Force
