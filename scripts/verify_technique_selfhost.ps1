@@ -1319,6 +1319,29 @@ try {
     if ([string]$watchStatus.mode -ne "dry_run") {
         throw "watch technique selfhost dry run status mode mismatch"
     }
+    $startDryRunRoot = Join-Path $OutRoot "start_dry_run"
+    $startDryRunOutput = & pwsh -NoProfile -File scripts\start_technique_selfhost_watch.ps1 -OutRoot $startDryRunRoot -DurationMinutes 60 -IntervalSeconds 300 -DryRun 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        throw "start technique selfhost watch dry run failed: $startDryRunOutput"
+    }
+    $startDryRunText = $startDryRunOutput -join "`n"
+    if ($startDryRunText -notmatch "DRY RUN") {
+        throw "start technique selfhost watch dry run missing DRY RUN marker"
+    }
+    if ($startDryRunText -notmatch "Start-Process") {
+        throw "start technique selfhost watch dry run missing Start-Process marker"
+    }
+    $startProcessPath = Join-Path $startDryRunRoot "watch_process.json"
+    if (-not (Test-Path -LiteralPath $startProcessPath)) {
+        throw "start technique selfhost watch dry run missing watch_process.json"
+    }
+    $startProcess = Get-Content -Raw -LiteralPath $startProcessPath | ConvertFrom-Json
+    if ([string]$startProcess.mode -ne "dry_run") {
+        throw "start technique selfhost watch dry run process mode mismatch"
+    }
+    if ($null -eq $startProcess.stdout_log -or $null -eq $startProcess.stderr_log) {
+        throw "start technique selfhost watch dry run missing log paths"
+    }
     if (-not (Test-Path -LiteralPath $latestOutcomeHtmlPath)) {
         throw "latest outcome html missing: $latestOutcomeHtmlPath"
     }
