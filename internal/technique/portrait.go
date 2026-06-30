@@ -25,11 +25,12 @@ func BuildPortrait(facts *FactSet) (*Portrait, error) {
 			LayerRoleCounts:    map[string]int{},
 		},
 		Mechanisms: MechanismSummary{
-			EffectClassCounts:      map[string]int{},
-			EffectMatchCounts:      map[string]int{},
-			TextAnimatorKindCounts: map[string]int{},
-			ShapeFamilyCounts:      map[string]int{},
-			ReproducibilityCounts:  map[string]int{},
+			EffectClassCounts:           map[string]int{},
+			EffectMatchCounts:           map[string]int{},
+			ThirdPartyEffectMatchCounts: map[string]int{},
+			TextAnimatorKindCounts:      map[string]int{},
+			ShapeFamilyCounts:           map[string]int{},
+			ReproducibilityCounts:       map[string]int{},
 		},
 		Graph: GraphSummary{
 			RelationCounts: map[string]int{},
@@ -53,7 +54,11 @@ func BuildPortrait(facts *FactSet) (*Portrait, error) {
 		addSignal(signals, key, "effect:"+effectClass(effect.DependencyClass))
 		portrait.Mechanisms.EffectClassCounts[effectClass(effect.DependencyClass)]++
 		portrait.Mechanisms.EffectMatchCounts[effect.MatchName]++
-		portrait.Mechanisms.ReproducibilityCounts[reproducibilityClass(effect.DependencyClass)]++
+		reproducibility := reproducibilityClass(effect.DependencyClass)
+		portrait.Mechanisms.ReproducibilityCounts[reproducibility]++
+		if reproducibility == "third_party" {
+			portrait.Mechanisms.ThirdPartyEffectMatchCounts[effect.MatchName]++
+		}
 		if effect.HasKeyframes {
 			addSignal(signals, key, "effect:keyframed")
 		}
@@ -66,7 +71,7 @@ func BuildPortrait(facts *FactSet) (*Portrait, error) {
 		if effect.ChangedParamCount > 0 || effect.TunedParamCount > 0 || effect.HasKeyframes || effect.HasExpression || effect.HasLayerRef {
 			hints.add("effect_driven_layer", "high", "effect:"+effect.MatchName)
 		}
-		if reproducibilityClass(effect.DependencyClass) == "third_party" {
+		if reproducibility == "third_party" {
 			hints.add("plugin_dependent", "high", "effect:"+effect.MatchName)
 		}
 	}

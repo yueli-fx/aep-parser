@@ -62,7 +62,11 @@ func buildRecreationReadiness(portrait *Portrait) RecreationReadiness {
 	if thirdParty > 0 {
 		readiness.Status = "needs_plugins"
 		readiness.Summary = "Third-party effects must be available before exact recreation can be evaluated."
-		readiness.Blockers = append(readiness.Blockers, fmt.Sprintf("third-party effects: %d", thirdParty))
+		pluginEffects := formatTopCounts(portrait.Mechanisms.ThirdPartyEffectMatchCounts, 5)
+		if pluginEffects == "" {
+			pluginEffects = fmt.Sprintf("%d", thirdParty)
+		}
+		readiness.Blockers = append(readiness.Blockers, "third-party effects: "+pluginEffects)
 	}
 	if unknowns > 0 {
 		readiness.Status = "needs_reverse_engineering"
@@ -144,12 +148,16 @@ func buildArchetypes(portrait *Portrait) []ProjectArchetype {
 		})
 	}
 	if repro["third_party"] > 0 || hints["plugin_dependent"] {
+		pluginEffects := fallbackText(formatTopCounts(portrait.Mechanisms.ThirdPartyEffectMatchCounts, 3), "unknown")
 		out = append(out, ProjectArchetype{
 			ID:      "plugin_dependent",
 			Label:   "Plugin dependent",
 			Score:   repro["third_party"] * 5,
 			Summary: "The project uses third-party effects that affect exact recreation.",
-			Signals: []string{fmt.Sprintf("third-party effects: %d", repro["third_party"])},
+			Signals: []string{
+				fmt.Sprintf("third-party effects: %d", repro["third_party"]),
+				"plugin effects: " + pluginEffects,
+			},
 		})
 	}
 
@@ -203,7 +211,8 @@ func explainHint(hint TechniqueHint, portrait *Portrait) TechniqueExplanation {
 		note.Summary = "Track matte dependencies reveal cutout or layered compositing structure."
 	case "plugin_dependent":
 		thirdParty := portrait.Mechanisms.ReproducibilityCounts["third_party"]
-		note.Summary = fmt.Sprintf("Third-party effects are present; exact recreation depends on plugin availability (%d third-party effect occurrences).", thirdParty)
+		pluginEffects := fallbackText(formatTopCounts(portrait.Mechanisms.ThirdPartyEffectMatchCounts, 4), "unknown effects")
+		note.Summary = fmt.Sprintf("Third-party effects are present; exact recreation depends on plugin availability (%d third-party effect occurrences: %s).", thirdParty, pluginEffects)
 	case "precomp_assembly":
 		note.Summary = "Nested compositions are used to assemble reusable or staged scene parts."
 	case "shape_operator_stack":

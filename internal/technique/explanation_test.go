@@ -28,11 +28,12 @@ func TestBuildExplanationTurnsPortraitIntoDeterministicTechniqueNotes(t *testing
 			{CompName: "Main", LayerName: "BG", Role: "solid", Score: 1, Signals: []string{"effect:native"}},
 		},
 		Mechanisms: technique.MechanismSummary{
-			EffectClassCounts:      map[string]int{"native": 2, "third_party": 1},
-			EffectMatchCounts:      map[string]int{"ADBE Fill": 2, "Plugin Magic": 1},
-			TextAnimatorKindCounts: map[string]int{"position": 1, "opacity": 1},
-			ShapeFamilyCounts:      map[string]int{"trim": 2, "stroke": 2, "star": 1},
-			ReproducibilityCounts:  map[string]int{"native": 2, "third_party": 1},
+			EffectClassCounts:           map[string]int{"native": 2, "third_party": 1},
+			EffectMatchCounts:           map[string]int{"ADBE Fill": 2, "Plugin Magic": 1},
+			TextAnimatorKindCounts:      map[string]int{"position": 1, "opacity": 1},
+			ShapeFamilyCounts:           map[string]int{"trim": 2, "stroke": 2, "star": 1},
+			ReproducibilityCounts:       map[string]int{"native": 2, "third_party": 1},
+			ThirdPartyEffectMatchCounts: map[string]int{"Plugin Magic": 1},
 		},
 		Graph: technique.GraphSummary{
 			EdgeCount:      4,
@@ -75,7 +76,7 @@ func TestBuildExplanationTurnsPortraitIntoDeterministicTechniqueNotes(t *testing
 	}
 	if explanation.RecreationReadiness.Status != "needs_reverse_engineering" ||
 		!containsText(explanation.RecreationReadiness.Blockers, "unknown parsed items: 1") ||
-		!containsText(explanation.RecreationReadiness.Blockers, "third-party effects: 1") {
+		!containsText(explanation.RecreationReadiness.Blockers, "Plugin Magic (1)") {
 		t.Fatalf("readiness = %+v", explanation.RecreationReadiness)
 	}
 	if !containsText(explanation.UnknownNotes, "1 unknown") {
@@ -91,11 +92,12 @@ func TestBuildExplanationAllowsEmptyPortrait(t *testing.T) {
 			LayerRoleCounts: map[string]int{},
 		},
 		Mechanisms: technique.MechanismSummary{
-			EffectClassCounts:      map[string]int{},
-			EffectMatchCounts:      map[string]int{},
-			TextAnimatorKindCounts: map[string]int{},
-			ShapeFamilyCounts:      map[string]int{},
-			ReproducibilityCounts:  map[string]int{},
+			EffectClassCounts:           map[string]int{},
+			EffectMatchCounts:           map[string]int{},
+			TextAnimatorKindCounts:      map[string]int{},
+			ShapeFamilyCounts:           map[string]int{},
+			ReproducibilityCounts:       map[string]int{},
+			ThirdPartyEffectMatchCounts: map[string]int{},
 		},
 		Graph: technique.GraphSummary{RelationCounts: map[string]int{}},
 	})

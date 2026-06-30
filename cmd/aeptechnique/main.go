@@ -78,19 +78,20 @@ type corpusRecord struct {
 }
 
 type corpusSummary struct {
-	SchemaVersion   int                          `json:"schema_version"`
-	Mode            string                       `json:"mode"`
-	ProjectCount    int                          `json:"project_count"`
-	ErrorCount      int                          `json:"error_count,omitempty"`
-	Totals          technique.FingerprintSummary `json:"totals"`
-	HintCounts      map[string]int               `json:"hint_counts"`
-	ArchetypeCounts map[string]int               `json:"archetype_counts,omitempty"`
-	ReadinessCounts map[string]int               `json:"readiness_counts,omitempty"`
-	EffectCounts    map[string]int               `json:"effect_counts"`
-	ShapeFamilies   map[string]int               `json:"shape_families"`
-	TextAnimators   map[string]int               `json:"text_animators"`
-	LayerRoles      map[string]int               `json:"layer_roles"`
-	GraphEdges      map[string]int               `json:"graph_edges"`
+	SchemaVersion      int                          `json:"schema_version"`
+	Mode               string                       `json:"mode"`
+	ProjectCount       int                          `json:"project_count"`
+	ErrorCount         int                          `json:"error_count,omitempty"`
+	Totals             technique.FingerprintSummary `json:"totals"`
+	HintCounts         map[string]int               `json:"hint_counts"`
+	ArchetypeCounts    map[string]int               `json:"archetype_counts,omitempty"`
+	ReadinessCounts    map[string]int               `json:"readiness_counts,omitempty"`
+	PluginEffectCounts map[string]int               `json:"plugin_effect_counts"`
+	EffectCounts       map[string]int               `json:"effect_counts"`
+	ShapeFamilies      map[string]int               `json:"shape_families"`
+	TextAnimators      map[string]int               `json:"text_animators"`
+	LayerRoles         map[string]int               `json:"layer_roles"`
+	GraphEdges         map[string]int               `json:"graph_edges"`
 }
 
 func newCorpusSummary(mode string) *corpusSummary {
@@ -100,14 +101,15 @@ func newCorpusSummary(mode string) *corpusSummary {
 		Totals: technique.FingerprintSummary{
 			LayerRoleCounts: map[string]int{},
 		},
-		HintCounts:      map[string]int{},
-		ArchetypeCounts: map[string]int{},
-		ReadinessCounts: map[string]int{},
-		EffectCounts:    map[string]int{},
-		ShapeFamilies:   map[string]int{},
-		TextAnimators:   map[string]int{},
-		LayerRoles:      map[string]int{},
-		GraphEdges:      map[string]int{},
+		HintCounts:         map[string]int{},
+		ArchetypeCounts:    map[string]int{},
+		ReadinessCounts:    map[string]int{},
+		PluginEffectCounts: map[string]int{},
+		EffectCounts:       map[string]int{},
+		ShapeFamilies:      map[string]int{},
+		TextAnimators:      map[string]int{},
+		LayerRoles:         map[string]int{},
+		GraphEdges:         map[string]int{},
 	}
 }
 
@@ -284,6 +286,7 @@ func addPortraitToSummary(summary *corpusSummary, portrait *technique.Portrait) 
 	addCounts(summary.LayerRoles, portrait.Fingerprint.LayerRoleCounts)
 	addCounts(summary.Totals.LayerRoleCounts, portrait.Fingerprint.LayerRoleCounts)
 	addCounts(summary.EffectCounts, portrait.Mechanisms.EffectMatchCounts)
+	addCounts(summary.PluginEffectCounts, portrait.Mechanisms.ThirdPartyEffectMatchCounts)
 	addCounts(summary.ShapeFamilies, portrait.Mechanisms.ShapeFamilyCounts)
 	addCounts(summary.TextAnimators, portrait.Mechanisms.TextAnimatorKindCounts)
 	addCounts(summary.GraphEdges, portrait.Graph.RelationCounts)

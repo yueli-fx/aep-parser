@@ -208,6 +208,9 @@ func TestRunEmitsCorpusExplanationSummary(t *testing.T) {
 	if len(summary.ReadinessCounts) == 0 {
 		t.Fatalf("readiness counts = %+v", summary.ReadinessCounts)
 	}
+	if summary.PluginEffectCounts == nil {
+		t.Fatalf("plugin effect counts map is nil")
+	}
 }
 
 func TestRunWritesOutputFile(t *testing.T) {

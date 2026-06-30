@@ -199,6 +199,7 @@ try {
     Write-CountTable -Builder $b -Title "Recreation Readiness" -Counts $summary.readiness_counts
     Write-CountTable -Builder $b -Title "Archetypes" -Counts $summary.archetype_counts
     Write-CountTable -Builder $b -Title "Technique Hints" -Counts $summary.hint_counts
+    Write-CountTable -Builder $b -Title "Plugin Effects" -Counts $summary.plugin_effect_counts
     Write-CountTable -Builder $b -Title "Effects" -Counts $summary.effect_counts
     Write-CountTable -Builder $b -Title "Shape Families" -Counts $summary.shape_families
     Write-CountTable -Builder $b -Title "Text Animators" -Counts $summary.text_animators
@@ -323,6 +324,7 @@ try {
     Write-HtmlCountTable -Builder $h -Title "Technique Hints" -Counts $summary.hint_counts
     Write-HtmlCountTable -Builder $h -Title "Recreation Readiness" -Counts $summary.readiness_counts
     Write-HtmlCountTable -Builder $h -Title "Archetypes" -Counts $summary.archetype_counts
+    Write-HtmlCountTable -Builder $h -Title "Plugin Effects" -Counts $summary.plugin_effect_counts
     Write-HtmlCountTable -Builder $h -Title "Effects" -Counts $summary.effect_counts
     Write-HtmlCountTable -Builder $h -Title "Shape Families" -Counts $summary.shape_families
     Write-HtmlCountTable -Builder $h -Title "Text Animators" -Counts $summary.text_animators

@@ -93,6 +93,9 @@ func TestBuildPortraitSummarizesMechanismsGraphSignalsAndHints(t *testing.T) {
 	if portrait.Mechanisms.ReproducibilityCounts["native"] != 1 || portrait.Mechanisms.ReproducibilityCounts["third_party"] != 1 {
 		t.Fatalf("reproducibility counts = %+v", portrait.Mechanisms.ReproducibilityCounts)
 	}
+	if portrait.Mechanisms.ThirdPartyEffectMatchCounts["Plugin Magic"] != 1 {
+		t.Fatalf("third-party effect counts = %+v", portrait.Mechanisms.ThirdPartyEffectMatchCounts)
+	}
 	if portrait.Mechanisms.EffectMatchCounts["ADBE Gaussian Blur 2"] != 1 || portrait.Mechanisms.TextAnimatorKindCounts["position"] != 1 || portrait.Mechanisms.ShapeFamilyCounts["trim"] != 1 {
 		t.Fatalf("mechanisms = %+v", portrait.Mechanisms)
 	}
@@ -135,6 +138,7 @@ func TestBuildPortraitAllowsEmptyFactSet(t *testing.T) {
 		portrait.Mechanisms.TextAnimatorKindCounts == nil ||
 		portrait.Mechanisms.ShapeFamilyCounts == nil ||
 		portrait.Mechanisms.ReproducibilityCounts == nil ||
+		portrait.Mechanisms.ThirdPartyEffectMatchCounts == nil ||
 		portrait.Graph.RelationCounts == nil {
 		t.Fatalf("empty portrait has nil maps: %+v", portrait)
 	}

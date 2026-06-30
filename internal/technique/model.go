@@ -150,11 +150,12 @@ type SignalLayer struct {
 }
 
 type MechanismSummary struct {
-	EffectClassCounts      map[string]int `json:"effect_class_counts"`
-	EffectMatchCounts      map[string]int `json:"effect_match_counts"`
-	TextAnimatorKindCounts map[string]int `json:"text_animator_kind_counts"`
-	ShapeFamilyCounts      map[string]int `json:"shape_family_counts"`
-	ReproducibilityCounts  map[string]int `json:"reproducibility_counts"`
+	EffectClassCounts           map[string]int `json:"effect_class_counts"`
+	EffectMatchCounts           map[string]int `json:"effect_match_counts"`
+	ThirdPartyEffectMatchCounts map[string]int `json:"third_party_effect_match_counts,omitempty"`
+	TextAnimatorKindCounts      map[string]int `json:"text_animator_kind_counts"`
+	ShapeFamilyCounts           map[string]int `json:"shape_family_counts"`
+	ReproducibilityCounts       map[string]int `json:"reproducibility_counts"`
 }
 
 type GraphSummary struct {
