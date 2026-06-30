@@ -27,6 +27,7 @@ $corpusPath = Join-Path $OutDir "corpus.jsonl"
 $digestPath = Join-Path $OutDir "digest.json"
 $learningPath = Join-Path $OutDir "learning.md"
 $projectsCsvPath = Join-Path $OutDir "projects.csv"
+$projectPlaybooksCsvPath = Join-Path $OutDir "project_playbooks.csv"
 $patternsCsvPath = Join-Path $OutDir "patterns.csv"
 $studyQueueCsvPath = Join-Path $OutDir "study_queue.csv"
 $studyTasksCsvPath = Join-Path $OutDir "study_tasks.csv"
@@ -40,7 +41,7 @@ $manifestPath = Join-Path $OutDir "manifest.json"
 $reportPath = Join-Path $OutDir "report.md"
 $htmlPath = Join-Path $OutDir "report.html"
 
-foreach ($path in @($summaryPath, $corpusPath, $digestPath, $learningPath, $projectsCsvPath, $patternsCsvPath, $studyQueueCsvPath, $studyTasksCsvPath, $recreationBlockersCsvPath, $signalLayersCsvPath, $learningActionsCsvPath, $mechanismsCsvPath, $mechanismExamplesCsvPath, $errorsCsvPath, $manifestPath, $reportPath, $htmlPath)) {
+foreach ($path in @($summaryPath, $corpusPath, $digestPath, $learningPath, $projectsCsvPath, $projectPlaybooksCsvPath, $patternsCsvPath, $studyQueueCsvPath, $studyTasksCsvPath, $recreationBlockersCsvPath, $signalLayersCsvPath, $learningActionsCsvPath, $mechanismsCsvPath, $mechanismExamplesCsvPath, $errorsCsvPath, $manifestPath, $reportPath, $htmlPath)) {
     Require-File -Path $path
 }
 
@@ -50,6 +51,7 @@ $manifest = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
 $corpusLines = @(Get-Content -LiteralPath $corpusPath | Where-Object { $_.Trim() -ne "" })
 $corpusRecords = @($corpusLines | ForEach-Object { $_ | ConvertFrom-Json })
 $projectRows = @(Import-Csv -LiteralPath $projectsCsvPath)
+$projectPlaybookRows = @(Import-Csv -LiteralPath $projectPlaybooksCsvPath)
 $patternRows = @(Import-Csv -LiteralPath $patternsCsvPath)
 $studyQueueRows = @(Import-Csv -LiteralPath $studyQueueCsvPath)
 $studyTaskRows = @(Import-Csv -LiteralPath $studyTasksCsvPath)
@@ -90,6 +92,14 @@ if ($null -eq $digest.patterns -or @($digest.patterns).Count -eq 0) {
 }
 if ($projectRows.Count -ne [int]$summary.project_count) {
     throw "projects.csv row count $($projectRows.Count) does not match summary project_count $($summary.project_count)"
+}
+if ($projectPlaybookRows.Count -ne [int]$summary.project_count) {
+    throw "project_playbooks.csv row count $($projectPlaybookRows.Count) does not match summary project_count $($summary.project_count)"
+}
+foreach ($row in $projectPlaybookRows) {
+    if ([string]$row.project_path -eq "" -or [string]$row.readiness -eq "" -or [string]$row.overview -eq "" -or [string]$row.ordered_steps -eq "") {
+        throw "project_playbooks.csv contains incomplete row: $($row | ConvertTo-Json -Compress)"
+    }
 }
 if ($studyQueueRows.Count -ne [int]$summary.project_count) {
     throw "study_queue.csv row count $($studyQueueRows.Count) does not match summary project_count $($summary.project_count)"
@@ -178,6 +188,7 @@ Require-Text -Path $htmlPath -Pattern "Step [0-9]+:"
 Require-Text -Path $htmlPath -Pattern "manifest\.json"
 Require-Text -Path $htmlPath -Pattern "learning\.md"
 Require-Text -Path $htmlPath -Pattern "projects\.csv"
+Require-Text -Path $htmlPath -Pattern "project_playbooks\.csv"
 Require-Text -Path $htmlPath -Pattern "study_queue\.csv"
 Require-Text -Path $htmlPath -Pattern "study_tasks\.csv"
 Require-Text -Path $htmlPath -Pattern "recreation_blockers\.csv"
@@ -190,6 +201,7 @@ Require-Text -Path $htmlPath -Pattern "Mechanism Explorer"
 Require-Text -Path $htmlPath -Pattern "mechanismFilter"
 Require-Text -Path $htmlPath -Pattern "Study Task Queue"
 Require-Text -Path $htmlPath -Pattern "studyTaskFilter"
+Require-Text -Path $htmlPath -Pattern "Project Playbooks"
 Require-Text -Path $htmlPath -Pattern "Recreation Blockers"
 Require-Text -Path $htmlPath -Pattern "Representative Projects"
 Require-Text -Path $htmlPath -Pattern "mechanism-representatives"

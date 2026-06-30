@@ -91,6 +91,7 @@ try {
     $compareSelf = Get-Content -Raw -LiteralPath (Join-Path $compareSelfDir "compare.json") | ConvertFrom-Json
     $comparePartial = Get-Content -Raw -LiteralPath (Join-Path $comparePartialDir "compare.json") | ConvertFrom-Json
     $studyRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "study_queue.csv") | Select-Object -First 5)
+    $projectPlaybookRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "project_playbooks.csv") | Select-Object -First 5)
     $patternRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "patterns.csv") | Select-Object -First 5)
     $recreationBlockerRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "recreation_blockers.csv") | Select-Object -First 5)
     $signalLayerRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "signal_layers.csv") | Select-Object -First 5)
@@ -195,6 +196,11 @@ try {
         [void]$index.AppendLine("<tr><td>$(Escape-Html $row.rank)</td><td>$(Escape-Html $row.path)</td><td>$(Escape-Html $row.study_score)</td></tr>")
     }
     [void]$index.AppendLine("</tbody></table></section>")
+    [void]$index.AppendLine("<section class=""panel"" style=""margin-top:16px""><h2>Project Playbooks Preview</h2><table><thead><tr><th>Project</th><th>Readiness</th><th>Steps</th></tr></thead><tbody>")
+    foreach ($row in $projectPlaybookRows) {
+        [void]$index.AppendLine("<tr><td>$(Escape-Html $row.project_path)</td><td>$(Escape-Html $row.readiness)</td><td>$(Escape-Html $row.ordered_steps)</td></tr>")
+    }
+    [void]$index.AppendLine("</tbody></table></section>")
     [void]$index.AppendLine("<section class=""panel"" style=""margin-top:16px""><h2>Pattern Playbook Preview</h2><table><thead><tr><th>Pattern</th><th>Count</th><th>Steps</th></tr></thead><tbody>")
     foreach ($row in $patternRows) {
         [void]$index.AppendLine("<tr><td>$(Escape-Html $row.id)</td><td>$(Escape-Html $row.count)</td><td>$(Escape-Html $row.recreation_steps)</td></tr>")
@@ -226,6 +232,7 @@ try {
     [void]$index.AppendLine("<section class=""panel""><h2>Artifacts</h2><div class=""links"">")
     [void]$index.AppendLine("<a href=""$runRel/full_report/report.html"">Full report HTML</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/learning.md"">Learning index</a>")
+    [void]$index.AppendLine("<a href=""$runRel/full_report/project_playbooks.csv"">Project playbooks CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/study_queue.csv"">Study queue CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/study_tasks.csv"">Study tasks CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/recreation_blockers.csv"">Recreation blockers CSV</a>")
@@ -252,6 +259,9 @@ try {
     if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Study Queue Preview" -Quiet)) {
         throw "latest index missing Study Queue Preview"
     }
+    if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Project Playbooks Preview" -Quiet)) {
+        throw "latest index missing Project Playbooks Preview"
+    }
     if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Pattern Playbook Preview" -Quiet)) {
         throw "latest index missing Pattern Playbook Preview"
     }
@@ -269,6 +279,7 @@ try {
     }
     Require-LatestIndexLink -Label "full report" -RelativePath "$runRel/full_report/report.html"
     Require-LatestIndexLink -Label "learning index" -RelativePath "$runRel/full_report/learning.md"
+    Require-LatestIndexLink -Label "project playbooks" -RelativePath "$runRel/full_report/project_playbooks.csv"
     Require-LatestIndexLink -Label "study queue" -RelativePath "$runRel/full_report/study_queue.csv"
     Require-LatestIndexLink -Label "study tasks" -RelativePath "$runRel/full_report/study_tasks.csv"
     Require-LatestIndexLink -Label "recreation blockers" -RelativePath "$runRel/full_report/recreation_blockers.csv"
