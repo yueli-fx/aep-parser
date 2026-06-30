@@ -308,6 +308,38 @@ try {
             count = [int]$_.Count
         }
     })
+    $pluginBlockerCounts = @{}
+    foreach ($row in $allRecreationBlockerRows) {
+        if ([string]$row.blocker_type -ne "plugin") {
+            continue
+        }
+        $blockerText = ([string]$row.blocker) -replace '^third-party effects:\s*', ''
+        foreach ($part in ($blockerText -split ',\s*')) {
+            $entry = $part.Trim()
+            if ($entry -eq "") {
+                continue
+            }
+            $effectName = $entry
+            $effectCount = 1
+            if ($entry -match '^(?<name>.+)\s+\((?<count>\d+)\)$') {
+                $effectName = $Matches.name.Trim()
+                $effectCount = [int]$Matches.count
+            }
+            if (-not $pluginBlockerCounts.ContainsKey($effectName)) {
+                $pluginBlockerCounts[$effectName] = 0
+            }
+            $pluginBlockerCounts[$effectName] = [int]$pluginBlockerCounts[$effectName] + $effectCount
+        }
+    }
+    $pluginBlockerTopRows = @($pluginBlockerCounts.GetEnumerator() |
+        Sort-Object @{ Expression = { $_.Value }; Descending = $true }, @{ Expression = { $_.Key }; Ascending = $true } |
+        Select-Object -First 8 |
+        ForEach-Object {
+            [ordered]@{
+                effect = $_.Key
+                count = [int]$_.Value
+            }
+        })
 
     $selfCountDiffs = @($compareSelf.count_diffs).Count
     $partialCountDiffs = @($comparePartial.count_diffs).Count
@@ -507,6 +539,7 @@ try {
         reconstruction_status = [ordered]@{
             readiness_summary = $readinessSummaryRows
             blocker_summary = $blockerSummaryRows
+            plugin_blockers_top = $pluginBlockerTopRows
             blocker_count = [int]$allRecreationBlockerRows.Count
         }
         learning_signals = [ordered]@{
@@ -653,6 +686,14 @@ try {
     }
     if ($recreationBlockerRows.Count -eq 0) {
         [void]$outcomeHtml.AppendLine("<tr><td colspan=""3"">No blockers reported.</td></tr>")
+    }
+    [void]$outcomeHtml.AppendLine("</tbody></table>")
+    [void]$outcomeHtml.AppendLine("<h3>Top Plugin Blockers</h3><table><thead><tr><th>Effect</th><th>Count</th></tr></thead><tbody>")
+    foreach ($row in @($pluginBlockerTopRows | Select-Object -First 5)) {
+        [void]$outcomeHtml.AppendLine("<tr><td>$(Escape-Html $row.effect)</td><td>$(Escape-Html $row.count)</td></tr>")
+    }
+    if ($pluginBlockerTopRows.Count -eq 0) {
+        [void]$outcomeHtml.AppendLine("<tr><td colspan=""2"">No plugin blockers reported.</td></tr>")
     }
     [void]$outcomeHtml.AppendLine("</tbody></table></section>")
     [void]$outcomeHtml.AppendLine("<section class=""panel""><h2>History Delta</h2><table><tbody>")
@@ -1099,6 +1140,9 @@ try {
     if (-not (Select-String -LiteralPath $latestOutcomeHtmlPath -Pattern "Recreation Blockers" -Quiet)) {
         throw "latest outcome html missing Recreation Blockers"
     }
+    if (-not (Select-String -LiteralPath $latestOutcomeHtmlPath -Pattern "Top Plugin Blockers" -Quiet)) {
+        throw "latest outcome html missing Top Plugin Blockers"
+    }
     if (-not (Select-String -LiteralPath $latestOutcomeHtmlPath -Pattern "Recent Runs" -Quiet)) {
         throw "latest outcome html missing Recent Runs"
     }
@@ -1135,6 +1179,9 @@ try {
     }
     if ($null -eq $latestEffectivenessJson.reconstruction_status.blocker_summary) {
         throw "latest effectiveness json missing reconstruction_status.blocker_summary"
+    }
+    if ($null -eq $latestEffectivenessJson.reconstruction_status.plugin_blockers_top) {
+        throw "latest effectiveness json missing reconstruction_status.plugin_blockers_top"
     }
     if ($null -eq $latestEffectivenessJson.history_delta) {
         throw "latest effectiveness json missing history_delta"
