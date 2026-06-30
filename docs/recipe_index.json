@@ -765,6 +765,13 @@
       "type": "string",
       "go_type": "string",
       "summary": "Layer auto-orientation mode.",
+      "validation": "Layer auto-orient mode must use a supported recipe auto-orient value.",
+      "enum": [
+        "none",
+        "along_path",
+        "camera_or_point_of_interest",
+        "characters_toward_camera"
+      ],
       "capability_keys": [
         "layer.set_auto_orient"
       ],
@@ -778,6 +785,7 @@
       "type": "string",
       "go_type": "string",
       "summary": "Layer blending mode.",
+      "validation": "Layer blending mode must use a supported recipe blending mode value.",
       "capability_keys": [
         "layer.set_blending_mode"
       ],
@@ -1289,6 +1297,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Layer in point in seconds.",
+      "validation": "Layer in point must be between 0 and comp duration.",
       "capability_keys": [
         "layer.set_in_point"
       ],
@@ -1354,6 +1363,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Layer label color index.",
+      "validation": "Layer label must be a valid AE label index.",
       "capability_keys": [
         "layer.set_label"
       ],
@@ -1806,6 +1816,7 @@
         "structural"
       ],
       "summary": "Layer display name.",
+      "validation": "Layer name is required.",
       "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "comps[].layers[].out_point": {
@@ -1816,6 +1827,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Layer out point in seconds.",
+      "validation": "Layer out point must be between 0 and comp duration and greater than or equal to in_point when both are present.",
       "capability_keys": [
         "layer.set_out_point"
       ],
@@ -1855,6 +1867,12 @@
       "type": "string",
       "go_type": "string",
       "summary": "Layer quality mode.",
+      "validation": "Layer quality must use a supported recipe quality value.",
+      "enum": [
+        "wireframe",
+        "draft",
+        "best"
+      ],
       "capability_keys": [
         "layer.set_quality"
       ],
@@ -3494,6 +3512,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Layer time stretch ratio.",
+      "validation": "Layer stretch must be greater than 0.",
       "capability_keys": [
         "layer.set_stretch"
       ],
@@ -4325,6 +4344,14 @@
       "type": "string",
       "go_type": "string",
       "summary": "Layer track matte mode.",
+      "validation": "Layer track matte must use a supported recipe track matte value.",
+      "enum": [
+        "none",
+        "alpha",
+        "alpha_inverse",
+        "luma",
+        "luma_inverse"
+      ],
       "capability_keys": [
         "layer.set_track_matte"
       ],

@@ -82,9 +82,9 @@ This reference is generated from the canonical recipe field model.
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
 | `comps[].layers[].type` | `string` | structural | Layer creation type. | Supported values create the corresponding layer type. | `layer.create_text` (`NewTextLayer`)<br>`layer.create_shape` (`NewShapeLayer`)<br>`layer.create_solid` (`NewSolidLayer`)<br>`layer.create_precomp` (`NewPrecompLayer`)<br>`layer.create_camera` (`NewCameraLayer`)<br>`layer.create_light` (`NewLightLayer`)<br>`layer.create_null` (`NewNullLayer`)<br>`layer.create_adjustment` (`NewAdjustmentLayer`) | examples/recipes/minimal-adjustment-layer.json |
-| `comps[].layers[].name` | `string` | structural | Layer display name. | - | - | examples/recipes/minimal-adjustment-layer.json |
+| `comps[].layers[].name` | `string` | structural | Layer display name. | Layer name is required. | - | examples/recipes/minimal-adjustment-layer.json |
 | `comps[].layers[].source` | `string` | - | Source comp name for a precomp layer. | Required for precomp layers and must name a different comp declared in comps[]. | `layer.create_precomp` (`NewPrecompLayer`) | examples/recipes/minimal-precomp-layer.json |
-| `comps[].layers[].label` | `number` | - | Layer label color index. | - | `layer.set_label` (`Layer.SetLabel`) | examples/recipes/minimal-layer-label.json |
+| `comps[].layers[].label` | `number` | - | Layer label color index. | Layer label must be a valid AE label index. | `layer.set_label` (`Layer.SetLabel`) | examples/recipes/minimal-layer-label.json |
 | `comps[].layers[].comment` | `string` | - | Layer comment text. | - | `layer.set_comment` (`Layer.SetComment`) | examples/recipes/minimal-layer-comment.json |
 | `comps[].layers[].visible` | `boolean` | - | Layer video visibility switch. | - | `layer.set_visible` (`Layer.SetVisible`) | examples/recipes/minimal-layer-common-switches.json |
 | `comps[].layers[].solo` | `boolean` | - | Layer solo switch. | - | `layer.set_solo` (`Layer.SetSolo`) | examples/recipes/minimal-layer-common-switches.json |
@@ -103,15 +103,15 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].sampling_bicubic` | `boolean` | - | Bicubic sampling switch. | - | `layer.set_sampling_bicubic` (`Layer.SetSamplingBicubic`) | examples/recipes/minimal-layer-advanced-switches.json |
 | `comps[].layers[].frame_blend_pixel_motion` | `boolean` | - | Pixel-motion frame blending switch. | - | `layer.set_frame_blend_pixel_motion` (`Layer.SetFrameBlendPixelMotion`) | examples/recipes/minimal-layer-advanced-switches.json |
 | `comps[].layers[].preserve_transparency` | `boolean` | - | Preserve transparency switch. | - | `layer.set_preserve_transparency` (`Layer.SetPreserveTransparency`) | examples/recipes/minimal-layer-advanced-switches.json |
-| `comps[].layers[].quality` | `string` | - | Layer quality mode. | - | `layer.set_quality` (`Layer.SetQuality`) | examples/recipes/minimal-layer-object-profile.json |
-| `comps[].layers[].blending_mode` | `string` | - | Layer blending mode. | - | `layer.set_blending_mode` (`Layer.SetBlendingMode`) | examples/recipes/minimal-layer-object-profile.json |
-| `comps[].layers[].track_matte` | `string` | - | Layer track matte mode. | - | `layer.set_track_matte` (`Layer.SetTrackMatte`) | examples/recipes/minimal-layer-explicit-matte.json |
+| `comps[].layers[].quality` | `string` | - | Layer quality mode. | Layer quality must use a supported recipe quality value. | `layer.set_quality` (`Layer.SetQuality`) | examples/recipes/minimal-layer-object-profile.json |
+| `comps[].layers[].blending_mode` | `string` | - | Layer blending mode. | Layer blending mode must use a supported recipe blending mode value. | `layer.set_blending_mode` (`Layer.SetBlendingMode`) | examples/recipes/minimal-layer-object-profile.json |
+| `comps[].layers[].track_matte` | `string` | - | Layer track matte mode. | Layer track matte must use a supported recipe track matte value. | `layer.set_track_matte` (`Layer.SetTrackMatte`) | examples/recipes/minimal-layer-explicit-matte.json |
 | `comps[].layers[].matte` | `string` | - | Explicit track matte source layer name. | Requires project.target_version AE2025, a non-none track_matte mode, and a same-comp source layer name. | `layer.set_track_matte_source` (`Layer.SetTrackMatteSource`) | examples/recipes/minimal-layer-explicit-matte.json |
-| `comps[].layers[].auto_orient` | `string` | - | Layer auto-orientation mode. | - | `layer.set_auto_orient` (`Layer.SetAutoOrient`) | examples/recipes/minimal-layer-auto-orient.json |
+| `comps[].layers[].auto_orient` | `string` | - | Layer auto-orientation mode. | Layer auto-orient mode must use a supported recipe auto-orient value. | `layer.set_auto_orient` (`Layer.SetAutoOrient`) | examples/recipes/minimal-layer-auto-orient.json |
 | `comps[].layers[].start_time` | `number` | - | Layer start time in seconds. | - | `layer.set_start_time` (`Layer.SetStartTime`) | examples/recipes/minimal-layer-object-profile.json |
-| `comps[].layers[].in_point` | `number` | - | Layer in point in seconds. | - | `layer.set_in_point` (`Layer.SetInPoint`) | examples/recipes/minimal-layer-object-profile.json |
-| `comps[].layers[].out_point` | `number` | - | Layer out point in seconds. | - | `layer.set_out_point` (`Layer.SetOutPoint`) | examples/recipes/minimal-layer-object-profile.json |
-| `comps[].layers[].stretch` | `number` | - | Layer time stretch ratio. | - | `layer.set_stretch` (`Layer.SetStretch`) | examples/recipes/minimal-layer-timing.json |
+| `comps[].layers[].in_point` | `number` | - | Layer in point in seconds. | Layer in point must be between 0 and comp duration. | `layer.set_in_point` (`Layer.SetInPoint`) | examples/recipes/minimal-layer-object-profile.json |
+| `comps[].layers[].out_point` | `number` | - | Layer out point in seconds. | Layer out point must be between 0 and comp duration and greater than or equal to in_point when both are present. | `layer.set_out_point` (`Layer.SetOutPoint`) | examples/recipes/minimal-layer-object-profile.json |
+| `comps[].layers[].stretch` | `number` | - | Layer time stretch ratio. | Layer stretch must be greater than 0. | `layer.set_stretch` (`Layer.SetStretch`) | examples/recipes/minimal-layer-timing.json |
 | `comps[].layers[].parent` | `string` | - | Parent layer name. | - | `layer.set_parent` (`Layer.SetParent`) | examples/recipes/minimal-layer-null-flag.json |
 | `comps[].layers[].text` | `string` | - | Source text for a text layer. | - | `layer.set_text` (`Layer.SetText`) | examples/recipes/minimal-adjustment-layer.json |
 | `comps[].layers[].text_style` | `object<TextStyleSpec>` | - | Text layer style overrides. | - | - | examples/recipes/minimal-text-shape.json |

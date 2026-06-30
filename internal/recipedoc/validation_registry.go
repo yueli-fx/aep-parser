@@ -101,8 +101,38 @@ var fieldValidation = map[string]FieldMeta{
 		Validation: "Supported values create the corresponding layer type.",
 		Enum:       []string{"solid", "text", "shape", "precomp", "camera", "light", "null", "adjustment"},
 	},
+	"comps[].layers[].name": {
+		Validation: "Layer name is required.",
+	},
 	"comps[].layers[].source": {
 		Validation: "Required for precomp layers and must name a different comp declared in comps[].",
+	},
+	"comps[].layers[].label": {
+		Validation: "Layer label must be a valid AE label index.",
+	},
+	"comps[].layers[].quality": {
+		Validation: "Layer quality must use a supported recipe quality value.",
+		Enum:       []string{"wireframe", "draft", "best"},
+	},
+	"comps[].layers[].blending_mode": {
+		Validation: "Layer blending mode must use a supported recipe blending mode value.",
+	},
+	"comps[].layers[].track_matte": {
+		Validation: "Layer track matte must use a supported recipe track matte value.",
+		Enum:       []string{"none", "alpha", "alpha_inverse", "luma", "luma_inverse"},
+	},
+	"comps[].layers[].auto_orient": {
+		Validation: "Layer auto-orient mode must use a supported recipe auto-orient value.",
+		Enum:       []string{"none", "along_path", "camera_or_point_of_interest", "characters_toward_camera"},
+	},
+	"comps[].layers[].in_point": {
+		Validation: "Layer in point must be between 0 and comp duration.",
+	},
+	"comps[].layers[].out_point": {
+		Validation: "Layer out point must be between 0 and comp duration and greater than or equal to in_point when both are present.",
+	},
+	"comps[].layers[].stretch": {
+		Validation: "Layer stretch must be greater than 0.",
 	},
 	"comps[].layers[].text_animators[].property": {
 		Validation: "Supported values create the corresponding text animator property.",

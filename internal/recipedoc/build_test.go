@@ -165,6 +165,31 @@ func TestBuildDocumentIncludesCompValidationMetadata(t *testing.T) {
 	}
 }
 
+func TestBuildDocumentIncludesLayerValidationMetadata(t *testing.T) {
+	doc, err := BuildDocument()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []string{
+		"comps[].layers[].name",
+		"comps[].layers[].label",
+		"comps[].layers[].quality",
+		"comps[].layers[].blending_mode",
+		"comps[].layers[].track_matte",
+		"comps[].layers[].auto_orient",
+		"comps[].layers[].in_point",
+		"comps[].layers[].out_point",
+		"comps[].layers[].stretch",
+	}
+	for _, path := range tests {
+		field := requireField(t, doc, path)
+		if field.Validation == "" && len(field.Enum) == 0 {
+			t.Fatalf("%s has no validation metadata: %+v", path, field)
+		}
+	}
+}
+
 func TestBuildDocumentIncludesExpectedProfileValidationMetadata(t *testing.T) {
 	doc, err := BuildDocument()
 	if err != nil {

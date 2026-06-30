@@ -1288,6 +1288,7 @@
       "go_type": "string",
       "x-aep-structural-required": true,
       "description": "Layer display name.",
+      "x-aep-validation": "Layer name is required.",
       "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
@@ -1324,6 +1325,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Layer label color index.",
+      "x-aep-validation": "Layer label must be a valid AE label index.",
       "x-aep-capabilities": [
         {
           "key": "layer.set_label",
@@ -1814,6 +1816,12 @@
       "type": "string",
       "go_type": "string",
       "description": "Layer quality mode.",
+      "x-aep-validation": "Layer quality must use a supported recipe quality value.",
+      "enum": [
+        "wireframe",
+        "draft",
+        "best"
+      ],
       "x-aep-capabilities": [
         {
           "key": "layer.set_quality",
@@ -1840,6 +1848,7 @@
       "type": "string",
       "go_type": "string",
       "description": "Layer blending mode.",
+      "x-aep-validation": "Layer blending mode must use a supported recipe blending mode value.",
       "x-aep-capabilities": [
         {
           "key": "layer.set_blending_mode",
@@ -1866,6 +1875,14 @@
       "type": "string",
       "go_type": "string",
       "description": "Layer track matte mode.",
+      "x-aep-validation": "Layer track matte must use a supported recipe track matte value.",
+      "enum": [
+        "none",
+        "alpha",
+        "alpha_inverse",
+        "luma",
+        "luma_inverse"
+      ],
       "x-aep-capabilities": [
         {
           "key": "layer.set_track_matte",
@@ -1918,6 +1935,13 @@
       "type": "string",
       "go_type": "string",
       "description": "Layer auto-orientation mode.",
+      "x-aep-validation": "Layer auto-orient mode must use a supported recipe auto-orient value.",
+      "enum": [
+        "none",
+        "along_path",
+        "camera_or_point_of_interest",
+        "characters_toward_camera"
+      ],
       "x-aep-capabilities": [
         {
           "key": "layer.set_auto_orient",
@@ -1970,6 +1994,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Layer in point in seconds.",
+      "x-aep-validation": "Layer in point must be between 0 and comp duration.",
       "x-aep-capabilities": [
         {
           "key": "layer.set_in_point",
@@ -1996,6 +2021,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Layer out point in seconds.",
+      "x-aep-validation": "Layer out point must be between 0 and comp duration and greater than or equal to in_point when both are present.",
       "x-aep-capabilities": [
         {
           "key": "layer.set_out_point",
@@ -2022,6 +2048,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Layer time stretch ratio.",
+      "x-aep-validation": "Layer stretch must be greater than 0.",
       "x-aep-capabilities": [
         {
           "key": "layer.set_stretch",
