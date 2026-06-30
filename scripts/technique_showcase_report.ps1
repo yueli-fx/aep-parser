@@ -192,7 +192,7 @@ try {
 
     function Convert-CountRows {
         param([array]$Rows)
-        return @($Rows | ForEach-Object {
+        return @($Rows | Where-Object { $null -ne $_ -and $_.Name } | ForEach-Object {
             [ordered]@{
                 name  = [string]$_.Name
                 count = [int]$_.Value
@@ -202,7 +202,10 @@ try {
 
     function Format-CountList {
         param([array]$Rows)
-        $items = @($Rows | Select-Object -First 5 | ForEach-Object { "$($_.name) ($($_.count))" })
+        $items = @($Rows |
+            Where-Object { $null -ne $_ -and $_.name -and [int]$_.count -gt 0 } |
+            Select-Object -First 5 |
+            ForEach-Object { "$($_.name) ($($_.count))" })
         if ($items.Count -eq 0) {
             return ""
         }
@@ -567,6 +570,19 @@ try {
                 [void]$h.AppendLine("<span class=""chip"">$(Escape-Html $hint.id)</span>")
             }
             [void]$h.AppendLine("</div>")
+            if (($null -ne $portrait) -and ($null -ne $portrait.mechanisms)) {
+                $mechanismLines = @(
+                    @{ Label = "effects"; Value = Format-CountList -Rows (Convert-CountRows -Rows (Get-CountRows -Counts $portrait.mechanisms.effect_match_counts -Max 5)) },
+                    @{ Label = "plugin effects"; Value = Format-CountList -Rows (Convert-CountRows -Rows (Get-CountRows -Counts $portrait.mechanisms.third_party_effect_match_counts -Max 5)) },
+                    @{ Label = "shape families"; Value = Format-CountList -Rows (Convert-CountRows -Rows (Get-CountRows -Counts $portrait.mechanisms.shape_family_counts -Max 5)) },
+                    @{ Label = "text animators"; Value = Format-CountList -Rows (Convert-CountRows -Rows (Get-CountRows -Counts $portrait.mechanisms.text_animator_kind_counts -Max 5)) }
+                )
+                foreach ($line in $mechanismLines) {
+                    if ($line.Value) {
+                        [void]$h.AppendLine("<div class=""small""><strong>$(Escape-Html $line.Label)</strong>: $(Escape-Html $line.Value)</div>")
+                    }
+                }
+            }
             if (($null -ne $explanation) -and ($null -ne $explanation.techniques)) {
                 [void]$h.AppendLine("<div class=""notes"">")
                 foreach ($tech in @($explanation.techniques | Select-Object -First 4)) {
