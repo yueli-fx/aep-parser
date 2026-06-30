@@ -436,6 +436,18 @@ try {
     [void]$learn.AppendLine("- errors: $errorCount")
     [void]$learn.AppendLine("- scan seconds: $scanSeconds")
     [void]$learn.AppendLine("")
+    [void]$learn.AppendLine("## Study Queue")
+    [void]$learn.AppendLine("")
+    foreach ($project in @($studyRows | Select-Object -First 10)) {
+        [void]$learn.AppendLine("- #$($project.rank) ``$($project.path)`` score=$($project.study_score) readiness=$($project.readiness)")
+        if ($project.patterns) {
+            [void]$learn.AppendLine("  patterns: $($project.patterns)")
+        }
+        if ($project.readiness_blockers) {
+            [void]$learn.AppendLine("  blockers: $($project.readiness_blockers)")
+        }
+    }
+    [void]$learn.AppendLine("")
     [void]$learn.AppendLine("## Pattern Playbook")
     [void]$learn.AppendLine("")
     foreach ($group in @($digest.patterns)) {

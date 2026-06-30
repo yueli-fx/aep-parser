@@ -82,6 +82,7 @@ if (@($digest.patterns).Count -gt 0 -and $patternsWithSteps.Count -eq 0) {
 }
 
 Require-Text -Path $learningPath -Pattern "^## Pattern Playbook$"
+Require-Text -Path $learningPath -Pattern "^## Study Queue$"
 Require-Text -Path $learningPath -Pattern "recreation steps"
 Require-Text -Path $learningPath -Pattern "^## Plugin Risk Queue$"
 Require-Text -Path $learningPath -Pattern "^## Readiness Queue$"
