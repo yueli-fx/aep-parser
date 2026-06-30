@@ -121,6 +121,87 @@ Rules:
 
 ## Later Slices
 
+### Single-Project Search Result Schema
+
+Search should be built on top of `Index`, but the result schema should not be a
+bare list of pointers. The canonical search result is a stable location plus
+the matched value. Single-project callers may also receive pointers for
+convenience, but pointers are not the identity of a hit.
+
+First schema:
+
+```go
+type HitKind string
+
+const (
+	HitProjectItem HitKind = "project_item"
+	HitComposition HitKind = "composition"
+	HitLayer       HitKind = "layer"
+	HitEffect      HitKind = "effect"
+	HitProperty    HitKind = "property"
+	HitExpression  HitKind = "expression"
+	HitTextStyle   HitKind = "text_style"
+)
+
+type Hit struct {
+	Kind     HitKind
+	Match    Match
+	Location Location
+	Pointers HitPointers
+}
+
+type Match struct {
+	Field string
+	Value string
+}
+
+type Location struct {
+	ItemID   uint32
+	ItemKind string
+	ItemName string
+
+	CompID   uint32
+	CompName string
+
+	LayerID    uint32
+	LayerIndex int
+	LayerName  string
+
+	EffectMatchName string
+	EffectName      string
+	EffectOccurrence int
+
+	PropertyMatchName string
+	PropertyName      string
+	PropertyPath      string
+}
+
+type HitPointers struct {
+	Item        aep.AVItem
+	Comp        *aep.Composition
+	Layer       *aep.Layer
+	Effect      *aep.Effect
+	Property    *aep.Property
+}
+```
+
+Rules:
+
+- `Location` is the canonical machine-readable identity of a hit.
+- `Pointers` are a single-project convenience only and must not be serialized as
+  the corpus format.
+- Search results must be ordered by project order: composition slice order,
+  layer slice order within the composition, then effect/property occurrence.
+- Search APIs should start narrow:
+  - layers by source item ID
+  - layers/effects by effect match name
+  - later: expressions containing text, text layers by font, properties by match
+    name/display name
+- Display-name search is a search-layer concern, not part of the first
+  `LayersByEffect` primitive.
+- Corpus search should reuse `Location` and add project path/source evidence
+  instead of returning raw pointers.
+
 ### Recipe integration
 
 Use the index in recipe workflows where references are repeatedly resolved:
@@ -218,7 +299,7 @@ stay resident at once.
 - [x] Integrate one profile/diff lookup hotspot.
   - [x] Profile layer `source_ref` resolution now goes through
         `projectindex.AVItemByID` instead of ad hoc comp/footage maps.
-- [ ] Design single-project search result schema.
+- [x] Design single-project search result schema.
 - [ ] Design corpus-level learning/search index.
 
 ## Verification
