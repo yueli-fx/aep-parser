@@ -87,6 +87,8 @@ It defaults to `flightdeck\showcase` and writes generated output under
 - `recreation_blockers.csv`
 - `signal_layers.csv`
 - `effect_stacks.csv`
+- `shape_operators.csv`
+- `text_animators.csv`
 - `learning_actions.csv`
 - `mechanisms.csv`
 - `mechanism_examples.csv`
@@ -134,6 +136,9 @@ that actually drives the look.
 `effect_stacks.csv` expands every parsed effect occurrence with project, comp,
 layer, match name, changed/tuned/unknown parameter counts, and expression,
 keyframe, and layer-reference flags.
+`shape_operators.csv` and `text_animators.csv` expand every parsed shape
+operator and text animator property by project, comp, layer, family/kind, and
+match name so shape-motion and text-motion techniques can be studied directly.
 `learning_actions.csv` turns each repeated pattern into a review action with
 representative project, common steps, top mechanisms, and risk.
 `mechanisms.csv` expands effect, plugin-effect, shape, text-animator, layer-role,
