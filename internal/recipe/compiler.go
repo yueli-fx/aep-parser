@@ -37,6 +37,16 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 			return report, fmt.Errorf("recipe: project bits_per_channel: %w", err)
 		}
 	}
+	if rec.Project.LinearBlending != nil {
+		if err := project.SetLinearBlending(*rec.Project.LinearBlending); err != nil {
+			return report, fmt.Errorf("recipe: project linear_blending: %w", err)
+		}
+	}
+	if rec.Project.LinearizeWorkingSpace != nil {
+		if err := project.SetLinearizeWorkingSpace(*rec.Project.LinearizeWorkingSpace); err != nil {
+			return report, fmt.Errorf("recipe: project linearize_working_space: %w", err)
+		}
+	}
 	compSpec := rec.Comps[0]
 	comp, err := aep.NewComposition(project, compSpec.Name, uint16(compSpec.Width), uint16(compSpec.Height), compSpec.FrameRate, compSpec.Duration)
 	if err != nil {

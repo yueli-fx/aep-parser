@@ -4557,6 +4557,29 @@ func TestCompileToFileChecksProjectBitsPerChannelProfile(t *testing.T) {
 	assertProfileCheck(t, report, "expected_profile.bits_per_channel", true)
 }
 
+func TestCompileToFileChecksProjectLinearColorProfile(t *testing.T) {
+	rec := minimalRecipe()
+	enabled := true
+	rec.Project.LinearBlending = &enabled
+	rec.Project.LinearizeWorkingSpace = &enabled
+	rec.ExpectedProfile = recipe.ExpectedProfile{
+		CompCount:             intPtr(1),
+		LinearBlending:        &enabled,
+		LinearizeWorkingSpace: &enabled,
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	assertProfileCheck(t, report, "expected_profile.linear_blending", true)
+	assertProfileCheck(t, report, "expected_profile.linearize_working_space", true)
+}
+
 func TestCompileToFileRefusesExpectedProfileMismatch(t *testing.T) {
 	rec := minimalRecipe()
 	rec.ExpectedProfile = recipe.ExpectedProfile{

@@ -2,6 +2,8 @@ package recipedoc
 
 var fieldExamples = map[string]string{
 	"project.bits_per_channel":                               "examples/recipes/minimal-project-bits-per-channel.json",
+	"project.linear_blending":                                "examples/recipes/minimal-project-linear-color.json",
+	"project.linearize_working_space":                        "examples/recipes/minimal-project-linear-color.json",
 	"comps[].background_color":                               "examples/recipes/minimal-comp-background-color.json",
 	"comps[].motion_graphics_template_name":                  "examples/recipes/minimal-motion-graphics-template-name.json",
 	"comps[].renderer":                                       "examples/recipes/minimal-comp-renderer.json",
@@ -22,6 +24,8 @@ var fieldExamples = map[string]string{
 	"comps[].layers[].effects[].params[].expression.source":  "examples/recipes/minimal-effect-param-expression.json",
 	"expected_profile.background_color":                      "examples/recipes/minimal-comp-background-color.json",
 	"expected_profile.bits_per_channel":                      "examples/recipes/minimal-project-bits-per-channel.json",
+	"expected_profile.linear_blending":                       "examples/recipes/minimal-project-linear-color.json",
+	"expected_profile.linearize_working_space":               "examples/recipes/minimal-project-linear-color.json",
 	"expected_profile.motion_graphics_template_name":         "examples/recipes/minimal-motion-graphics-template-name.json",
 	"expected_profile.layers[]":                              "examples/recipes/minimal-layer-object-profile.json",
 	"expected_profile.effects[]":                             "examples/recipes/minimal-text-effect.json",

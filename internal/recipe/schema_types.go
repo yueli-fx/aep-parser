@@ -10,9 +10,11 @@ type Recipe struct {
 }
 
 type ProjectSpec struct {
-	Name           string `json:"name,omitempty"`
-	TargetVersion  string `json:"target_version,omitempty"`
-	BitsPerChannel string `json:"bits_per_channel,omitempty"`
+	Name                  string `json:"name,omitempty"`
+	TargetVersion         string `json:"target_version,omitempty"`
+	BitsPerChannel        string `json:"bits_per_channel,omitempty"`
+	LinearBlending        *bool  `json:"linear_blending,omitempty"`
+	LinearizeWorkingSpace *bool  `json:"linearize_working_space,omitempty"`
 }
 
 type CompSpec struct {
@@ -441,6 +443,8 @@ type ExpectedProfile struct {
 	TextLayerCount             *int                        `json:"text_layer_count,omitempty"`
 	ShapeLayerCount            *int                        `json:"shape_layer_count,omitempty"`
 	BitsPerChannel             string                      `json:"bits_per_channel,omitempty"`
+	LinearBlending             *bool                       `json:"linear_blending,omitempty"`
+	LinearizeWorkingSpace      *bool                       `json:"linearize_working_space,omitempty"`
 	Name                       string                      `json:"name,omitempty"`
 	Width                      *float64                    `json:"width,omitempty"`
 	Height                     *float64                    `json:"height,omitempty"`

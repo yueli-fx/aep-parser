@@ -235,6 +235,11 @@ Done:
   `meta.bits_per_channel`, `expected_profile.bits_per_channel` asserts the
   generated project color depth, and
   `examples/recipes/minimal-project-bits-per-channel.json` covers the field.
+- Recipe project linear color flags now support `project.linear_blending` and
+  `project.linearize_working_space` via their Project setters. Profile metadata
+  exposes `meta.linear_blending` and `meta.linearize_working_space`,
+  `expected_profile` asserts both flags, and
+  `examples/recipes/minimal-project-linear-color.json` covers the pair.
 - Comp-level recipe/profile work now has an object-level execution strategy:
   field order, evidence level, profile target, test shape, verification, and
   commit rules are captured in `comp-recipe-execution-strategy.md`.

@@ -127,6 +127,54 @@
       "x-aep-example": "examples/recipes/minimal-project-bits-per-channel.json"
     },
     {
+      "x-aep-path": "project.linear_blending",
+      "json_name": "linear_blending",
+      "source_type": "ProjectSpec",
+      "source_field": "LinearBlending",
+      "type": "boolean",
+      "go_type": "*bool",
+      "description": "Project linear blending switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "project.set_linear_blending",
+          "query": "Project.SetLinearBlending",
+          "status": "supported",
+          "symbol": "Project.SetLinearBlending",
+          "domain": "project",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "presence-encoded toggle: enabling adds the lnrb chunk under\nroot, disabling removes it. Verified on both AE versions, with the\nDOM's app.project.linearBlending reading back true after a round-trip.",
+          "gate": [
+            "TestProjectSettings_AEShipGate_AE2020",
+            "TestProjectSettings_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-project-linear-color.json"
+    },
+    {
+      "x-aep-path": "project.linearize_working_space",
+      "json_name": "linearize_working_space",
+      "source_type": "ProjectSpec",
+      "source_field": "LinearizeWorkingSpace",
+      "type": "boolean",
+      "go_type": "*bool",
+      "description": "Project linearized working space switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "project.set_linearize_working_space",
+          "query": "Project.SetLinearizeWorkingSpace",
+          "status": "supported",
+          "symbol": "Project.SetLinearizeWorkingSpace",
+          "domain": "project",
+          "verify": "roundtrip",
+          "minver": "2020",
+          "boundary": "presence-encoded toggle: enabling adds the lnrp chunk under\nroot, disabling removes it. The DOM's app.project.linearizeWorkingSpace\nis not a reliable verification surface — it reads false even on a file\nAE itself saved and reloaded, because the value is derived from the\ncolor-management profile rather than bound to the lnrp chunk. Acceptance\nis therefore capped at byte-preservation against AE's own save, hence\nroundtrip rather than ae-accept."
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-project-linear-color.json"
+    },
+    {
       "x-aep-path": "comps[]",
       "json_name": "comps",
       "source_type": "Recipe",
@@ -8408,6 +8456,26 @@
         "32bpc"
       ],
       "x-aep-example": "examples/recipes/minimal-project-bits-per-channel.json"
+    },
+    {
+      "x-aep-path": "expected_profile.linear_blending",
+      "json_name": "linear_blending",
+      "source_type": "ExpectedProfile",
+      "source_field": "LinearBlending",
+      "type": "boolean",
+      "go_type": "*bool",
+      "description": "Expected project linear blending switch.",
+      "x-aep-example": "examples/recipes/minimal-project-linear-color.json"
+    },
+    {
+      "x-aep-path": "expected_profile.linearize_working_space",
+      "json_name": "linearize_working_space",
+      "source_type": "ExpectedProfile",
+      "source_field": "LinearizeWorkingSpace",
+      "type": "boolean",
+      "go_type": "*bool",
+      "description": "Expected project linearized working space switch.",
+      "x-aep-example": "examples/recipes/minimal-project-linear-color.json"
     },
     {
       "x-aep-path": "expected_profile.name",

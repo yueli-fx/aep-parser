@@ -14,6 +14,8 @@ func hasExpectedProfile(expected ExpectedProfile) bool {
 		expected.TextLayerCount != nil ||
 		expected.ShapeLayerCount != nil ||
 		expected.BitsPerChannel != "" ||
+		expected.LinearBlending != nil ||
+		expected.LinearizeWorkingSpace != nil ||
 		expected.Name != "" ||
 		expected.Width != nil ||
 		expected.Height != nil ||
@@ -81,6 +83,12 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 		} else {
 			add("expected_profile.bits_per_channel", expectedBPC, prof.Meta.BitsPerChannel, prof.Meta.BitsPerChannel == expectedBPC)
 		}
+	}
+	if expected.LinearBlending != nil {
+		add("expected_profile.linear_blending", *expected.LinearBlending, prof.Meta.LinearBlending, prof.Meta.LinearBlending == *expected.LinearBlending)
+	}
+	if expected.LinearizeWorkingSpace != nil {
+		add("expected_profile.linearize_working_space", *expected.LinearizeWorkingSpace, prof.Meta.LinearizeWorkingSpace, prof.Meta.LinearizeWorkingSpace == *expected.LinearizeWorkingSpace)
 	}
 	if expected.Name != "" {
 		actual := ""

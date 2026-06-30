@@ -44,6 +44,8 @@ type Meta struct {
 	ParseWarnings           []string           `json:"parse_warnings,omitempty"`
 	StructuredParseWarnings []aep.ParseWarning `json:"structured_parse_warnings,omitempty"`
 	BitsPerChannel          string             `json:"bits_per_channel,omitempty"`
+	LinearBlending          bool               `json:"linear_blending"`
+	LinearizeWorkingSpace   bool               `json:"linearize_working_space"`
 }
 
 type Fingerprint struct {
@@ -408,6 +410,8 @@ func Build(project *aep.Project, opts Options) (*Profile, error) {
 			ParseWarnings:           append([]string(nil), project.Warnings...),
 			StructuredParseWarnings: append([]aep.ParseWarning(nil), project.ParseWarnings...),
 			BitsPerChannel:          project.BitsPerChannel.String(),
+			LinearBlending:          project.LinearBlending(),
+			LinearizeWorkingSpace:   project.LinearizeWorkingSpace(),
 		},
 		Fingerprint: Fingerprint{
 			CompCount:    len(project.Compositions),

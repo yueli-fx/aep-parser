@@ -6,6 +6,8 @@
     "project.name",
     "project.target_version",
     "project.bits_per_channel",
+    "project.linear_blending",
+    "project.linearize_working_space",
     "comps[]",
     "comps[].name",
     "comps[].width",
@@ -382,6 +384,8 @@
     "expected_profile.text_layer_count",
     "expected_profile.shape_layer_count",
     "expected_profile.bits_per_channel",
+    "expected_profile.linear_blending",
+    "expected_profile.linearize_working_space",
     "expected_profile.name",
     "expected_profile.width",
     "expected_profile.height",
@@ -6038,6 +6042,26 @@
       "summary": "Expected layer type.",
       "example": "examples/recipes/minimal-adjustment-layer.json"
     },
+    "expected_profile.linear_blending": {
+      "path": "expected_profile.linear_blending",
+      "json_name": "linear_blending",
+      "source_type": "ExpectedProfile",
+      "source_field": "LinearBlending",
+      "type": "boolean",
+      "go_type": "*bool",
+      "summary": "Expected project linear blending switch.",
+      "example": "examples/recipes/minimal-project-linear-color.json"
+    },
+    "expected_profile.linearize_working_space": {
+      "path": "expected_profile.linearize_working_space",
+      "json_name": "linearize_working_space",
+      "source_type": "ExpectedProfile",
+      "source_field": "LinearizeWorkingSpace",
+      "type": "boolean",
+      "go_type": "*bool",
+      "summary": "Expected project linearized working space switch.",
+      "example": "examples/recipes/minimal-project-linear-color.json"
+    },
     "expected_profile.masks[]": {
       "path": "expected_profile.masks[]",
       "json_name": "masks",
@@ -6949,6 +6973,32 @@
       ],
       "example": "examples/recipes/minimal-project-bits-per-channel.json"
     },
+    "project.linear_blending": {
+      "path": "project.linear_blending",
+      "json_name": "linear_blending",
+      "source_type": "ProjectSpec",
+      "source_field": "LinearBlending",
+      "type": "boolean",
+      "go_type": "*bool",
+      "summary": "Project linear blending switch.",
+      "capability_keys": [
+        "project.set_linear_blending"
+      ],
+      "example": "examples/recipes/minimal-project-linear-color.json"
+    },
+    "project.linearize_working_space": {
+      "path": "project.linearize_working_space",
+      "json_name": "linearize_working_space",
+      "source_type": "ProjectSpec",
+      "source_field": "LinearizeWorkingSpace",
+      "type": "boolean",
+      "go_type": "*bool",
+      "summary": "Project linearized working space switch.",
+      "capability_keys": [
+        "project.set_linearize_working_space"
+      ],
+      "example": "examples/recipes/minimal-project-linear-color.json"
+    },
     "project.name": {
       "path": "project.name",
       "json_name": "name",
@@ -7160,6 +7210,8 @@
       "expected_profile.text_layer_count",
       "expected_profile.shape_layer_count",
       "expected_profile.bits_per_channel",
+      "expected_profile.linear_blending",
+      "expected_profile.linearize_working_space",
       "expected_profile.name",
       "expected_profile.width",
       "expected_profile.height",
@@ -7374,7 +7426,9 @@
     "ProjectSpec": [
       "project.name",
       "project.target_version",
-      "project.bits_per_channel"
+      "project.bits_per_channel",
+      "project.linear_blending",
+      "project.linearize_working_space"
     ],
     "PuckerBloatSpec": [
       "comps[].layers[].shape.pucker_bloat.amount"

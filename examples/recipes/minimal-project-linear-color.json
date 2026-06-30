@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal project linear color",
+    "linear_blending": true,
+    "linearize_working_space": true
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 2
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 0,
+    "linear_blending": true,
+    "linearize_working_space": true
+  }
+}

@@ -3,6 +3,8 @@ package recipedoc
 var capabilitiesByPath = map[string][]string{
 	"project.target_version":                                      {"project.create_target"},
 	"project.bits_per_channel":                                    {"project.set_bits_per_channel"},
+	"project.linear_blending":                                     {"project.set_linear_blending"},
+	"project.linearize_working_space":                             {"project.set_linearize_working_space"},
 	"comps[]":                                                     {"comp.create"},
 	"comps[].background_color":                                    {"comp.set_background_color"},
 	"comps[].label":                                               {"comp.set_label"},
@@ -259,6 +261,14 @@ var capabilityRegistry = map[string]CapabilityMeta{
 	"project.set_bits_per_channel": {
 		Query:   "Project.SetBitsPerChannel",
 		Summary: "Set project color bit depth.",
+	},
+	"project.set_linear_blending": {
+		Query:   "Project.SetLinearBlending",
+		Summary: "Toggle project linear blending.",
+	},
+	"project.set_linearize_working_space": {
+		Query:   "Project.SetLinearizeWorkingSpace",
+		Summary: "Toggle project linearized working space.",
 	},
 	"comp.create":               {Query: "NewComposition", Summary: "Create a composition."},
 	"comp.set_background_color": {Query: "Composition.SetBGColor", Summary: "Set composition background color."},

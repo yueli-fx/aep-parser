@@ -8,13 +8,15 @@ var allowedMissingSemanticSummary = map[string]string{}
 
 func buildFieldSummaries() map[string]string {
 	out := map[string]string{
-		"schema_version":           "Recipe schema version.",
-		"project":                  "Project-level metadata used when materializing the recipe.",
-		"project.name":             "Project display name.",
-		"project.target_version":   "AE target template used when compiling the recipe.",
-		"project.bits_per_channel": "Project color bit depth.",
-		"comps[]":                  "Composition definitions to create or validate.",
-		"expected_profile":         "Optional assertions used to compare the generated project against expected structure.",
+		"schema_version":                  "Recipe schema version.",
+		"project":                         "Project-level metadata used when materializing the recipe.",
+		"project.name":                    "Project display name.",
+		"project.target_version":          "AE target template used when compiling the recipe.",
+		"project.bits_per_channel":        "Project color bit depth.",
+		"project.linear_blending":         "Project linear blending switch.",
+		"project.linearize_working_space": "Project linearized working space switch.",
+		"comps[]":                         "Composition definitions to create or validate.",
+		"expected_profile":                "Optional assertions used to compare the generated project against expected structure.",
 	}
 
 	addCompSummaries(out, "comps[]", "Composition")
@@ -521,6 +523,8 @@ func addExpectedProfileSummaries(out map[string]string) {
 		"text_layer_count":          "Expected number of text layers.",
 		"shape_layer_count":         "Expected number of shape layers.",
 		"bits_per_channel":          "Expected project color bit depth.",
+		"linear_blending":           "Expected project linear blending switch.",
+		"linearize_working_space":   "Expected project linearized working space switch.",
 		"effects[]":                 "Expected effect checks.",
 		"properties[]":              "Expected property checks.",
 		"essential_graphics[]":      "Expected Essential Graphics controller checks.",

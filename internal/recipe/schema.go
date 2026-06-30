@@ -62,6 +62,12 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 			addRefusal("invalid_project_bits_per_channel", "project.bits_per_channel", err.Error())
 		}
 	}
+	if rec.Project.LinearBlending != nil {
+		recordCapability("Project.SetLinearBlending", "project.linear_blending")
+	}
+	if rec.Project.LinearizeWorkingSpace != nil {
+		recordCapability("Project.SetLinearizeWorkingSpace", "project.linearize_working_space")
+	}
 	if len(rec.Comps) > 1 {
 		addRefusal("too_many_comps", "comps", "first recipe slice supports exactly one comp")
 	}
