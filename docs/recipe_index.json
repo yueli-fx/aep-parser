@@ -948,7 +948,7 @@
       "capability_keys": [
         "effect.add_essential_property"
       ],
-      "example": "examples/recipes/minimal-essential-graphics-controller.json"
+      "example": "examples/recipes/minimal-essential-graphics-color-controller.json"
     },
     "comps[].layers[].effects[].params[].expression": {
       "path": "comps[].layers[].effects[].params[].expression",
@@ -5050,7 +5050,7 @@
       ],
       "summary": "Expected Essential Graphics controller display name.",
       "validation": "Essential Graphics controller checks require the expected controller name.",
-      "example": "examples/recipes/minimal-essential-graphics-controller.json"
+      "example": "examples/recipes/minimal-essential-graphics-color-controller.json"
     },
     "expected_profile.essential_graphics[].type": {
       "path": "expected_profile.essential_graphics[].type",
@@ -5073,7 +5073,7 @@
         "dropdown",
         "unknown"
       ],
-      "example": "examples/recipes/minimal-essential-graphics-controller.json"
+      "example": "examples/recipes/minimal-essential-graphics-color-controller.json"
     },
     "expected_profile.frame_blending": {
       "path": "expected_profile.frame_blending",

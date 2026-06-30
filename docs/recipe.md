@@ -560,7 +560,7 @@ This reference is generated from the canonical recipe field model.
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].effects[].params[].essential_graphics.name` | `string` | - | Essential Graphics controller display name. | Optional controller display name. Empty uses the effect parameter's own name. | `effect.add_essential_property` (`AddEssentialProperty`) | examples/recipes/minimal-essential-graphics-controller.json |
+| `comps[].layers[].effects[].params[].essential_graphics.name` | `string` | - | Essential Graphics controller display name. | Optional controller display name. Empty uses the effect parameter's own name. | `effect.add_essential_property` (`AddEssentialProperty`) | examples/recipes/minimal-essential-graphics-color-controller.json |
 
 ## ExpectedProfile
 
@@ -619,8 +619,8 @@ This reference is generated from the canonical recipe field model.
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `expected_profile.essential_graphics[].name` | `string` | structural | Expected Essential Graphics controller display name. | Essential Graphics controller checks require the expected controller name. | - | examples/recipes/minimal-essential-graphics-controller.json |
-| `expected_profile.essential_graphics[].type` | `string` | - | Expected Essential Graphics controller type. | Expected controller type must be checkbox, slider, color, point, text, comment, multidimensional, group, dropdown, or unknown. | - | examples/recipes/minimal-essential-graphics-controller.json |
+| `expected_profile.essential_graphics[].name` | `string` | structural | Expected Essential Graphics controller display name. | Essential Graphics controller checks require the expected controller name. | - | examples/recipes/minimal-essential-graphics-color-controller.json |
+| `expected_profile.essential_graphics[].type` | `string` | - | Expected Essential Graphics controller type. | Expected controller type must be checkbox, slider, color, point, text, comment, multidimensional, group, dropdown, or unknown. | - | examples/recipes/minimal-essential-graphics-color-controller.json |
 
 ## ExpectedLayer
 

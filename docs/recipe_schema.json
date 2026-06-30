@@ -7672,7 +7672,7 @@
           ]
         }
       ],
-      "x-aep-example": "examples/recipes/minimal-essential-graphics-controller.json"
+      "x-aep-example": "examples/recipes/minimal-essential-graphics-color-controller.json"
     },
     {
       "x-aep-path": "expected_profile",
@@ -8034,7 +8034,7 @@
       "x-aep-structural-required": true,
       "description": "Expected Essential Graphics controller display name.",
       "x-aep-validation": "Essential Graphics controller checks require the expected controller name.",
-      "x-aep-example": "examples/recipes/minimal-essential-graphics-controller.json"
+      "x-aep-example": "examples/recipes/minimal-essential-graphics-color-controller.json"
     },
     {
       "x-aep-path": "expected_profile.essential_graphics[].type",
@@ -8057,7 +8057,7 @@
         "dropdown",
         "unknown"
       ],
-      "x-aep-example": "examples/recipes/minimal-essential-graphics-controller.json"
+      "x-aep-example": "examples/recipes/minimal-essential-graphics-color-controller.json"
     },
     {
       "x-aep-path": "expected_profile.layers[]",
