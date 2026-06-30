@@ -5427,7 +5427,8 @@
       "source_field": "BackgroundColor",
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
-      "summary": "Expected composition background color as RGB channels."
+      "summary": "Expected composition background color as RGB channels.",
+      "validation": "Expected composition RGB color must contain exactly three channels in the 0..255 range."
     },
     "expected_profile.comps[].comment": {
       "path": "expected_profile.comps[].comment",
@@ -5445,7 +5446,8 @@
       "source_field": "DisplayStartTime",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Expected composition display start time in seconds."
+      "summary": "Expected composition display start time in seconds.",
+      "validation": "Expected composition display start time must be non-negative."
     },
     "expected_profile.comps[].draft_3d": {
       "path": "expected_profile.comps[].draft_3d",
@@ -5464,6 +5466,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected composition duration in seconds.",
+      "validation": "Expected composition duration must be positive.",
       "example": "examples/recipes/minimal-precomp-layer.json"
     },
     "expected_profile.comps[].frame_blending": {
@@ -5483,6 +5486,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected composition frame rate in frames per second.",
+      "validation": "Expected composition frame rate must be positive.",
       "example": "examples/recipes/minimal-precomp-layer.json"
     },
     "expected_profile.comps[].height": {
@@ -5493,6 +5497,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected composition height in pixels.",
+      "validation": "Expected composition height must be a positive integer.",
       "example": "examples/recipes/minimal-precomp-layer.json"
     },
     "expected_profile.comps[].hide_shy_layers": {
@@ -5511,7 +5516,8 @@
       "source_field": "Label",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Expected composition label color index."
+      "summary": "Expected composition label color index.",
+      "validation": "Expected composition label must be a valid AE label index."
     },
     "expected_profile.comps[].motion_blur": {
       "path": "expected_profile.comps[].motion_blur",
@@ -5529,7 +5535,8 @@
       "source_field": "AdaptiveSampleLimit",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Expected composition motion blur adaptive sample limit."
+      "summary": "Expected composition motion blur adaptive sample limit.",
+      "validation": "Expected composition motion blur adaptive sample limit must be a non-negative integer."
     },
     "expected_profile.comps[].motion_blur.enabled": {
       "path": "expected_profile.comps[].motion_blur.enabled",
@@ -5547,7 +5554,8 @@
       "source_field": "SamplesPerFrame",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Expected composition motion blur samples per frame."
+      "summary": "Expected composition motion blur samples per frame.",
+      "validation": "Expected composition motion blur samples per frame must be a non-negative integer."
     },
     "expected_profile.comps[].motion_blur.shutter_angle": {
       "path": "expected_profile.comps[].motion_blur.shutter_angle",
@@ -5556,7 +5564,8 @@
       "source_field": "ShutterAngle",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Expected composition motion blur shutter angle."
+      "summary": "Expected composition motion blur shutter angle.",
+      "validation": "Expected composition motion blur shutter angle must be an integer between 0 and 720."
     },
     "expected_profile.comps[].motion_blur.shutter_phase": {
       "path": "expected_profile.comps[].motion_blur.shutter_phase",
@@ -5565,7 +5574,8 @@
       "source_field": "ShutterPhase",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Expected composition motion blur shutter phase."
+      "summary": "Expected composition motion blur shutter phase.",
+      "validation": "Expected composition motion blur shutter phase must be an integer."
     },
     "expected_profile.comps[].motion_graphics_template_name": {
       "path": "expected_profile.comps[].motion_graphics_template_name",
@@ -5587,6 +5597,7 @@
         "structural"
       ],
       "summary": "Expected composition display name.",
+      "validation": "Expected composition checks require a target composition name.",
       "example": "examples/recipes/minimal-precomp-layer.json"
     },
     "expected_profile.comps[].pixel_aspect": {
@@ -5596,7 +5607,8 @@
       "source_field": "PixelAspect",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Expected composition pixel aspect ratio."
+      "summary": "Expected composition pixel aspect ratio.",
+      "validation": "Expected composition pixel aspect ratio must be positive."
     },
     "expected_profile.comps[].preserve_nested_frame_rate": {
       "path": "expected_profile.comps[].preserve_nested_frame_rate",
@@ -5632,7 +5644,8 @@
       "source_field": "ResolutionFactor",
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
-      "summary": "Expected composition preview resolution factor."
+      "summary": "Expected composition preview resolution factor.",
+      "validation": "Expected composition resolution factor must contain two positive integer factors."
     },
     "expected_profile.comps[].width": {
       "path": "expected_profile.comps[].width",
@@ -5642,6 +5655,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected composition width in pixels.",
+      "validation": "Expected composition width must be a positive integer.",
       "example": "examples/recipes/minimal-precomp-layer.json"
     },
     "expected_profile.comps[].work_area": {
@@ -5660,7 +5674,8 @@
       "source_field": "End",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Expected composition work area end time in seconds."
+      "summary": "Expected composition work area end time in seconds.",
+      "validation": "Expected composition work area end must be non-negative and greater than or equal to start when both are present."
     },
     "expected_profile.comps[].work_area.start": {
       "path": "expected_profile.comps[].work_area.start",
@@ -5669,7 +5684,8 @@
       "source_field": "Start",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Expected composition work area start time in seconds."
+      "summary": "Expected composition work area start time in seconds.",
+      "validation": "Expected composition work area start must be non-negative."
     },
     "expected_profile.display_start_time": {
       "path": "expected_profile.display_start_time",
@@ -5679,6 +5695,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected composition display start time in seconds.",
+      "validation": "Expected display start time must be non-negative.",
       "example": "examples/recipes/minimal-comp-display-start-time.json"
     },
     "expected_profile.draft_3d": {
@@ -6725,6 +6742,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected composition motion blur adaptive sample limit.",
+      "validation": "Expected motion blur adaptive sample limit must be a non-negative integer.",
       "example": "examples/recipes/minimal-comp-motion-blur.json"
     },
     "expected_profile.motion_blur.enabled": {
@@ -6745,6 +6763,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected composition motion blur samples per frame.",
+      "validation": "Expected motion blur samples per frame must be a non-negative integer.",
       "example": "examples/recipes/minimal-comp-motion-blur.json"
     },
     "expected_profile.motion_blur.shutter_angle": {
@@ -6755,6 +6774,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected composition motion blur shutter angle.",
+      "validation": "Expected motion blur shutter angle must be an integer between 0 and 720.",
       "example": "examples/recipes/minimal-comp-motion-blur.json"
     },
     "expected_profile.motion_blur.shutter_phase": {
@@ -6765,6 +6785,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected composition motion blur shutter phase.",
+      "validation": "Expected motion blur shutter phase must be an integer.",
       "example": "examples/recipes/minimal-comp-motion-blur.json"
     },
     "expected_profile.motion_graphics_template_name": {
@@ -7404,6 +7425,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected composition work area end time in seconds.",
+      "validation": "Expected work area end must be non-negative and greater than or equal to start when both are present.",
       "example": "examples/recipes/minimal-comp-object-profile.json"
     },
     "expected_profile.work_area.start": {
@@ -7414,6 +7436,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected composition work area start time in seconds.",
+      "validation": "Expected work area start must be non-negative.",
       "example": "examples/recipes/minimal-comp-object-profile.json"
     },
     "expected_profile.working_gamma": {

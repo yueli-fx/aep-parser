@@ -634,7 +634,7 @@ This reference is generated from the canonical recipe field model.
 | `expected_profile.background_color` | `array<float64>` | - | Expected composition background color as RGB channels. | Expected RGB color must contain exactly three channels in the 0..255 range. | - | examples/recipes/minimal-comp-background-color.json |
 | `expected_profile.resolution_factor` | `array<float64>` | - | Expected composition preview resolution factor. | Expected resolution factor must contain two positive integer factors. | - | examples/recipes/minimal-comp-object-profile.json |
 | `expected_profile.pixel_aspect` | `number` | - | Expected composition pixel aspect ratio. | Expected pixel aspect ratio must be positive. | - | examples/recipes/minimal-comp-object-profile.json |
-| `expected_profile.display_start_time` | `number` | - | Expected composition display start time in seconds. | - | - | examples/recipes/minimal-comp-display-start-time.json |
+| `expected_profile.display_start_time` | `number` | - | Expected composition display start time in seconds. | Expected display start time must be non-negative. | - | examples/recipes/minimal-comp-display-start-time.json |
 | `expected_profile.renderer` | `string` | - | Expected composition renderer identifier. | - | - | examples/recipes/minimal-comp-object-profile.json |
 | `expected_profile.draft_3d` | `boolean` | - | Expected composition draft 3D switch. | - | - | examples/recipes/minimal-comp-draft-3d.json |
 | `expected_profile.frame_blending` | `boolean` | - | Expected composition frame blending switch. | - | - | examples/recipes/minimal-comp-flag-profile.json |
@@ -655,18 +655,18 @@ This reference is generated from the canonical recipe field model.
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `expected_profile.comps[].name` | `string` | structural | Expected composition display name. | - | - | examples/recipes/minimal-precomp-layer.json |
-| `expected_profile.comps[].width` | `number` | - | Expected composition width in pixels. | - | - | examples/recipes/minimal-precomp-layer.json |
-| `expected_profile.comps[].height` | `number` | - | Expected composition height in pixels. | - | - | examples/recipes/minimal-precomp-layer.json |
-| `expected_profile.comps[].frame_rate` | `number` | - | Expected composition frame rate in frames per second. | - | - | examples/recipes/minimal-precomp-layer.json |
-| `expected_profile.comps[].duration` | `number` | - | Expected composition duration in seconds. | - | - | examples/recipes/minimal-precomp-layer.json |
-| `expected_profile.comps[].label` | `number` | - | Expected composition label color index. | - | - | - |
+| `expected_profile.comps[].name` | `string` | structural | Expected composition display name. | Expected composition checks require a target composition name. | - | examples/recipes/minimal-precomp-layer.json |
+| `expected_profile.comps[].width` | `number` | - | Expected composition width in pixels. | Expected composition width must be a positive integer. | - | examples/recipes/minimal-precomp-layer.json |
+| `expected_profile.comps[].height` | `number` | - | Expected composition height in pixels. | Expected composition height must be a positive integer. | - | examples/recipes/minimal-precomp-layer.json |
+| `expected_profile.comps[].frame_rate` | `number` | - | Expected composition frame rate in frames per second. | Expected composition frame rate must be positive. | - | examples/recipes/minimal-precomp-layer.json |
+| `expected_profile.comps[].duration` | `number` | - | Expected composition duration in seconds. | Expected composition duration must be positive. | - | examples/recipes/minimal-precomp-layer.json |
+| `expected_profile.comps[].label` | `number` | - | Expected composition label color index. | Expected composition label must be a valid AE label index. | - | - |
 | `expected_profile.comps[].comment` | `string` | - | Expected composition comment text. | - | - | - |
 | `expected_profile.comps[].motion_graphics_template_name` | `string` | - | Expected composition Motion Graphics template name. | - | - | - |
-| `expected_profile.comps[].background_color` | `array<float64>` | - | Expected composition background color as RGB channels. | - | - | - |
-| `expected_profile.comps[].resolution_factor` | `array<float64>` | - | Expected composition preview resolution factor. | - | - | - |
-| `expected_profile.comps[].pixel_aspect` | `number` | - | Expected composition pixel aspect ratio. | - | - | - |
-| `expected_profile.comps[].display_start_time` | `number` | - | Expected composition display start time in seconds. | - | - | - |
+| `expected_profile.comps[].background_color` | `array<float64>` | - | Expected composition background color as RGB channels. | Expected composition RGB color must contain exactly three channels in the 0..255 range. | - | - |
+| `expected_profile.comps[].resolution_factor` | `array<float64>` | - | Expected composition preview resolution factor. | Expected composition resolution factor must contain two positive integer factors. | - | - |
+| `expected_profile.comps[].pixel_aspect` | `number` | - | Expected composition pixel aspect ratio. | Expected composition pixel aspect ratio must be positive. | - | - |
+| `expected_profile.comps[].display_start_time` | `number` | - | Expected composition display start time in seconds. | Expected composition display start time must be non-negative. | - | - |
 | `expected_profile.comps[].renderer` | `string` | - | Expected composition renderer identifier. | - | - | - |
 | `expected_profile.comps[].draft_3d` | `boolean` | - | Expected composition draft 3D switch. | - | - | - |
 | `expected_profile.comps[].frame_blending` | `boolean` | - | Expected composition frame blending switch. | - | - | - |
@@ -681,24 +681,24 @@ This reference is generated from the canonical recipe field model.
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
 | `expected_profile.comps[].motion_blur.enabled` | `boolean` | - | Expected composition motion blur enable switch. | - | - | - |
-| `expected_profile.comps[].motion_blur.shutter_angle` | `number` | - | Expected composition motion blur shutter angle. | - | - | - |
-| `expected_profile.comps[].motion_blur.shutter_phase` | `number` | - | Expected composition motion blur shutter phase. | - | - | - |
-| `expected_profile.comps[].motion_blur.adaptive_sample_limit` | `number` | - | Expected composition motion blur adaptive sample limit. | - | - | - |
-| `expected_profile.comps[].motion_blur.samples_per_frame` | `number` | - | Expected composition motion blur samples per frame. | - | - | - |
+| `expected_profile.comps[].motion_blur.shutter_angle` | `number` | - | Expected composition motion blur shutter angle. | Expected composition motion blur shutter angle must be an integer between 0 and 720. | - | - |
+| `expected_profile.comps[].motion_blur.shutter_phase` | `number` | - | Expected composition motion blur shutter phase. | Expected composition motion blur shutter phase must be an integer. | - | - |
+| `expected_profile.comps[].motion_blur.adaptive_sample_limit` | `number` | - | Expected composition motion blur adaptive sample limit. | Expected composition motion blur adaptive sample limit must be a non-negative integer. | - | - |
+| `expected_profile.comps[].motion_blur.samples_per_frame` | `number` | - | Expected composition motion blur samples per frame. | Expected composition motion blur samples per frame must be a non-negative integer. | - | - |
 | `expected_profile.motion_blur.enabled` | `boolean` | - | Expected composition motion blur enable switch. | - | - | examples/recipes/minimal-comp-flag-profile.json |
-| `expected_profile.motion_blur.shutter_angle` | `number` | - | Expected composition motion blur shutter angle. | - | - | examples/recipes/minimal-comp-motion-blur.json |
-| `expected_profile.motion_blur.shutter_phase` | `number` | - | Expected composition motion blur shutter phase. | - | - | examples/recipes/minimal-comp-motion-blur.json |
-| `expected_profile.motion_blur.adaptive_sample_limit` | `number` | - | Expected composition motion blur adaptive sample limit. | - | - | examples/recipes/minimal-comp-motion-blur.json |
-| `expected_profile.motion_blur.samples_per_frame` | `number` | - | Expected composition motion blur samples per frame. | - | - | examples/recipes/minimal-comp-motion-blur.json |
+| `expected_profile.motion_blur.shutter_angle` | `number` | - | Expected composition motion blur shutter angle. | Expected motion blur shutter angle must be an integer between 0 and 720. | - | examples/recipes/minimal-comp-motion-blur.json |
+| `expected_profile.motion_blur.shutter_phase` | `number` | - | Expected composition motion blur shutter phase. | Expected motion blur shutter phase must be an integer. | - | examples/recipes/minimal-comp-motion-blur.json |
+| `expected_profile.motion_blur.adaptive_sample_limit` | `number` | - | Expected composition motion blur adaptive sample limit. | Expected motion blur adaptive sample limit must be a non-negative integer. | - | examples/recipes/minimal-comp-motion-blur.json |
+| `expected_profile.motion_blur.samples_per_frame` | `number` | - | Expected composition motion blur samples per frame. | Expected motion blur samples per frame must be a non-negative integer. | - | examples/recipes/minimal-comp-motion-blur.json |
 
 ## ExpectedWorkAreaSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `expected_profile.comps[].work_area.start` | `number` | - | Expected composition work area start time in seconds. | - | - | - |
-| `expected_profile.comps[].work_area.end` | `number` | - | Expected composition work area end time in seconds. | - | - | - |
-| `expected_profile.work_area.start` | `number` | - | Expected composition work area start time in seconds. | - | - | examples/recipes/minimal-comp-object-profile.json |
-| `expected_profile.work_area.end` | `number` | - | Expected composition work area end time in seconds. | - | - | examples/recipes/minimal-comp-object-profile.json |
+| `expected_profile.comps[].work_area.start` | `number` | - | Expected composition work area start time in seconds. | Expected composition work area start must be non-negative. | - | - |
+| `expected_profile.comps[].work_area.end` | `number` | - | Expected composition work area end time in seconds. | Expected composition work area end must be non-negative and greater than or equal to start when both are present. | - | - |
+| `expected_profile.work_area.start` | `number` | - | Expected composition work area start time in seconds. | Expected work area start must be non-negative. | - | examples/recipes/minimal-comp-object-profile.json |
+| `expected_profile.work_area.end` | `number` | - | Expected composition work area end time in seconds. | Expected work area end must be non-negative and greater than or equal to start when both are present. | - | examples/recipes/minimal-comp-object-profile.json |
 
 ## ExpectedEGController
 

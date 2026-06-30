@@ -197,6 +197,75 @@ var fieldValidation = map[string]FieldMeta{
 	"expected_profile.pixel_aspect": {
 		Validation: "Expected pixel aspect ratio must be positive.",
 	},
+	"expected_profile.display_start_time": {
+		Validation: "Expected display start time must be non-negative.",
+	},
+	"expected_profile.motion_blur.shutter_angle": {
+		Validation: "Expected motion blur shutter angle must be an integer between 0 and 720.",
+	},
+	"expected_profile.motion_blur.shutter_phase": {
+		Validation: "Expected motion blur shutter phase must be an integer.",
+	},
+	"expected_profile.motion_blur.adaptive_sample_limit": {
+		Validation: "Expected motion blur adaptive sample limit must be a non-negative integer.",
+	},
+	"expected_profile.motion_blur.samples_per_frame": {
+		Validation: "Expected motion blur samples per frame must be a non-negative integer.",
+	},
+	"expected_profile.work_area.start": {
+		Validation: "Expected work area start must be non-negative.",
+	},
+	"expected_profile.work_area.end": {
+		Validation: "Expected work area end must be non-negative and greater than or equal to start when both are present.",
+	},
+	"expected_profile.comps[].name": {
+		Validation: "Expected composition checks require a target composition name.",
+	},
+	"expected_profile.comps[].width": {
+		Validation: "Expected composition width must be a positive integer.",
+	},
+	"expected_profile.comps[].height": {
+		Validation: "Expected composition height must be a positive integer.",
+	},
+	"expected_profile.comps[].frame_rate": {
+		Validation: "Expected composition frame rate must be positive.",
+	},
+	"expected_profile.comps[].duration": {
+		Validation: "Expected composition duration must be positive.",
+	},
+	"expected_profile.comps[].label": {
+		Validation: "Expected composition label must be a valid AE label index.",
+	},
+	"expected_profile.comps[].background_color": {
+		Validation: "Expected composition RGB color must contain exactly three channels in the 0..255 range.",
+	},
+	"expected_profile.comps[].resolution_factor": {
+		Validation: "Expected composition resolution factor must contain two positive integer factors.",
+	},
+	"expected_profile.comps[].pixel_aspect": {
+		Validation: "Expected composition pixel aspect ratio must be positive.",
+	},
+	"expected_profile.comps[].display_start_time": {
+		Validation: "Expected composition display start time must be non-negative.",
+	},
+	"expected_profile.comps[].motion_blur.shutter_angle": {
+		Validation: "Expected composition motion blur shutter angle must be an integer between 0 and 720.",
+	},
+	"expected_profile.comps[].motion_blur.shutter_phase": {
+		Validation: "Expected composition motion blur shutter phase must be an integer.",
+	},
+	"expected_profile.comps[].motion_blur.adaptive_sample_limit": {
+		Validation: "Expected composition motion blur adaptive sample limit must be a non-negative integer.",
+	},
+	"expected_profile.comps[].motion_blur.samples_per_frame": {
+		Validation: "Expected composition motion blur samples per frame must be a non-negative integer.",
+	},
+	"expected_profile.comps[].work_area.start": {
+		Validation: "Expected composition work area start must be non-negative.",
+	},
+	"expected_profile.comps[].work_area.end": {
+		Validation: "Expected composition work area end must be non-negative and greater than or equal to start when both are present.",
+	},
 	"expected_profile.layers[].name": {
 		Validation: "Layer profile checks require a target layer name.",
 	},
