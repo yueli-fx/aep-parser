@@ -3216,7 +3216,8 @@
         "text_animator.add_position",
         "text_animator.add_scale",
         "text_animator.add_rotation",
-        "text_animator.add_color"
+        "text_animator.add_color",
+        "text_animator.add_tracking"
       ],
       "example": "examples/recipes/minimal-text-animator-color.json"
     },
@@ -3237,7 +3238,8 @@
         "position",
         "scale",
         "rotation",
-        "color"
+        "color",
+        "tracking"
       ],
       "example": "examples/recipes/minimal-text-animator-color.json"
     },
@@ -3382,7 +3384,7 @@
       "type": "any",
       "go_type": "interface {}",
       "summary": "Text animator property value.",
-      "validation": "Opacity and rotation values must be numbers; position and scale values must be 3-number arrays; color values must be 3- or 4-number arrays.",
+      "validation": "Opacity, rotation, and tracking values must be numbers; position and scale values must be 3-number arrays; color values must be 3- or 4-number arrays.",
       "example": "examples/recipes/minimal-text-animator-color.json"
     },
     "comps[].layers[].text_style": {

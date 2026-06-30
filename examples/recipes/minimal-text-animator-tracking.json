@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "minimal-text-animator-tracking"
+  },
+  "comps": [
+    {
+      "name": "Text Animator Tracking",
+      "width": 640,
+      "height": 360,
+      "frame_rate": 24,
+      "duration": 2,
+      "layers": [
+        {
+          "type": "text",
+          "name": "Title",
+          "text": "HELLO",
+          "text_animators": [
+            {
+              "property": "tracking",
+              "value": 500,
+              "range_start": 0,
+              "range_end": 100,
+              "range_offset": 0
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 1,
+    "layers": [
+      {
+        "name": "Title",
+        "type": "text"
+      }
+    ],
+    "properties": [
+      {
+        "layer_name": "Title",
+        "match_name": "ADBE Text Tracking Amount",
+        "value": 500
+      }
+    ]
+  }
+}

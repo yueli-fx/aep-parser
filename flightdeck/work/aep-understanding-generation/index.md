@@ -479,6 +479,10 @@ Done:
 - Text animator fill-color recipe support is implemented. The dedicated
   `examples/recipes/minimal-text-animator-color.json` example compiles a fill
   color text animator and asserts the `ADBE Text Fill Color` profile property.
+- Text animator tracking recipe support is implemented. The dedicated
+  `examples/recipes/minimal-text-animator-tracking.json` example compiles a
+  tracking text animator and asserts the `ADBE Text Tracking Amount` profile
+  property.
 - Text animator Range Selector Offset keyframe recipe support is implemented.
   The dedicated
   `examples/recipes/minimal-text-animator-range-offset.json` example compiles

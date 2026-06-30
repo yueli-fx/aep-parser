@@ -1941,6 +1941,20 @@
             "TestTextColorAnimator_AEShipGate_AE2020",
             "TestTextColorAnimator_AEShipGate_AE2025"
           ]
+        },
+        {
+          "key": "text_animator.add_tracking",
+          "query": "AddTextTrackingAnimator",
+          "status": "supported",
+          "symbol": "AddTextTrackingAnimator",
+          "domain": "text",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "boundary": "typed parameter accessors are not yet wired (tune via Reopen); un-Reopened fresh layers are refused",
+          "gate": [
+            "TestTextTrackingAnimator_AEShipGate_AE2020",
+            "TestTextTrackingAnimator_AEShipGate_AE2025"
+          ]
         }
       ],
       "x-aep-example": "examples/recipes/minimal-text-animator-color.json"
@@ -1960,7 +1974,8 @@
         "position",
         "scale",
         "rotation",
-        "color"
+        "color",
+        "tracking"
       ],
       "x-aep-example": "examples/recipes/minimal-text-animator-color.json"
     },
@@ -1972,7 +1987,7 @@
       "type": "object",
       "go_type": "interface {}",
       "description": "Text animator property value.",
-      "x-aep-validation": "Opacity and rotation values must be numbers; position and scale values must be 3-number arrays; color values must be 3- or 4-number arrays.",
+      "x-aep-validation": "Opacity, rotation, and tracking values must be numbers; position and scale values must be 3-number arrays; color values must be 3- or 4-number arrays.",
       "x-aep-example": "examples/recipes/minimal-text-animator-color.json"
     },
     {
