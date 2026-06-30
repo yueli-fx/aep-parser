@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -297,6 +298,33 @@ func TestRunCompareReportsWritesArtifacts(t *testing.T) {
 	}
 }
 
+func TestRunRecipeSmokeWritesArtifacts(t *testing.T) {
+	root := t.TempDir()
+	fullReport := filepath.Join(root, "full_report")
+	writeFile(t, filepath.Join(fullReport, "recipe_drafts.jsonl"), `{"project_path":"demo.aep","recipe":{"schema_version":1,"expected_profile":{"comp_count":1,"layer_count":0}}}`+"\n")
+	platform := testPlatform()
+	platform.Runner = fakeRecipeSmokeRunner{t: t}
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"recipe-smoke", "-full-report", fullReport, "-run-root", root, "-batch-limit", "1"}, &stdout, &stderr, platform)
+
+	if code != 0 {
+		t.Fatalf("run recipe-smoke = %d, stderr=%s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "recipe draft batch summary:") {
+		t.Fatalf("stdout missing batch summary:\n%s", stdout.String())
+	}
+	for _, path := range []string{
+		filepath.Join(root, "recipe_draft_compile", "recipe_draft.aep"),
+		filepath.Join(root, "recipe_draft_reparse", "reparse_summary.json"),
+		filepath.Join(root, "recipe_draft_batch", "summary.json"),
+	} {
+		if _, err := os.Stat(path); err != nil {
+			t.Fatalf("expected artifact %s: %v", path, err)
+		}
+	}
+}
+
 func writeFile(t *testing.T, path, text string) {
 	t.Helper()
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
@@ -336,6 +364,39 @@ func (fakeRunner) Start(context.Context, host.Command) (host.Process, error) {
 	return fakeProcess{pid: 12345}, nil
 }
 
+type fakeRecipeSmokeRunner struct {
+	t *testing.T
+}
+
+func (r fakeRecipeSmokeRunner) Run(_ context.Context, cmd host.Command) host.Result {
+	joined := strings.Join(append([]string{cmd.Name}, cmd.Args...), " ")
+	switch {
+	case strings.Contains(joined, "./cmd/aeprecipe validate"):
+		writeCommandOutput(r.t, cmd.Stdout, `{"valid":true}`+"\n")
+	case strings.Contains(joined, "./cmd/aeprecipe compile"):
+		writeCommandOutput(r.t, cmd.Stdout, `{"valid":true}`+"\n")
+		outPath := argAfter(cmd.Args, "-out")
+		if outPath == "" {
+			r.t.Fatalf("compile command missing -out: %+v", cmd.Args)
+		}
+		writeFile(r.t, outPath, "fake aep")
+	case strings.Contains(joined, "./cmd/aeptechnique"):
+		outPath := argAfter(cmd.Args, "-out")
+		if outPath == "" {
+			r.t.Fatalf("technique command missing -out: %+v", cmd.Args)
+		}
+		writeFile(r.t, outPath, `{"summary":{"comp_count":1,"layer_count":0}}`+"\n")
+	default:
+		r.t.Fatalf("unexpected command: %s", joined)
+	}
+	return host.Result{ExitCode: 0}
+}
+
+func (r fakeRecipeSmokeRunner) Start(context.Context, host.Command) (host.Process, error) {
+	r.t.Fatalf("Start should not be called")
+	return nil, nil
+}
+
 type fakeProcess struct {
 	pid int
 }
@@ -352,4 +413,20 @@ type fakeInspector struct{}
 
 func (fakeInspector) IsRunning(pid int) bool {
 	return pid == os.Getpid()
+}
+
+func writeCommandOutput(t *testing.T, w io.Writer, text string) {
+	t.Helper()
+	if _, err := io.WriteString(w, text); err != nil {
+		t.Fatalf("WriteString: %v", err)
+	}
+}
+
+func argAfter(args []string, name string) string {
+	for i := 0; i < len(args)-1; i++ {
+		if args[i] == name {
+			return args[i+1]
+		}
+	}
+	return ""
 }

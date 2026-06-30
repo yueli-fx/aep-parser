@@ -736,8 +736,9 @@ Capability response should include:
 
 - [x] Direction accepted: cross-platform core/service, optional AE worker.
 - [x] Initial platform dependency inventory recorded.
-- [ ] Add host primitives.
-- [ ] Route `aepselfhost` through host primitives.
+- [x] Add host primitives.
+- [x] Route `aepselfhost` through host primitives.
+- [x] Move report compare and recipe draft smoke orchestration into Go.
 - [ ] Move selfhost verification gate from PowerShell to Go.
 - [ ] Define AE host adapter.
 - [ ] Add cross-platform build gate.

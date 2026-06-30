@@ -30,6 +30,8 @@ func run(args []string, stdout, stderr io.Writer, platform host.Platform) int {
 		return runVerify(args[1:], stdout, stderr, platform)
 	case "compare-reports":
 		return runCompareReports(args[1:], stdout, stderr)
+	case "recipe-smoke":
+		return runRecipeSmoke(args[1:], stdout, stderr, platform)
 	case "outcome":
 		return runOutcome(args[1:], stdout, stderr)
 	case "status":
@@ -75,6 +77,42 @@ func runCompareReports(args []string, stdout, stderr io.Writer) int {
 	_ = result
 	fmt.Fprintf(stdout, "compare json: %s\n", filepath.Join(reportOutDir, "compare.json"))
 	fmt.Fprintf(stdout, "compare md:   %s\n", filepath.Join(reportOutDir, "compare.md"))
+	return 0
+}
+
+func runRecipeSmoke(args []string, stdout, stderr io.Writer, platform host.Platform) int {
+	fs := flag.NewFlagSet("aepselfhost recipe-smoke", flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	fullReportDir := fs.String("full-report", "", "technique full_report directory containing recipe_drafts.jsonl")
+	runRoot := fs.String("run-root", "", "selfhost run root; defaults to parent of -full-report")
+	batchLimit := fs.Int("batch-limit", 3, "number of recipe draft rows to smoke test")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	if *fullReportDir == "" {
+		fmt.Fprintln(stderr, "usage: aepselfhost recipe-smoke -full-report run/full_report [-run-root run] [-batch-limit n]")
+		return 2
+	}
+	root := *runRoot
+	if root == "" {
+		root = filepath.Dir(*fullReportDir)
+	}
+	result, err := selfhost.RunRecipeDraftSmoke(context.Background(), selfhost.RecipeDraftSmokeOptions{
+		DraftsPath: filepath.Join(*fullReportDir, "recipe_drafts.jsonl"),
+		CompileDir: filepath.Join(root, "recipe_draft_compile"),
+		ReparseDir: filepath.Join(root, "recipe_draft_reparse"),
+		BatchDir:   filepath.Join(root, "recipe_draft_batch"),
+		BatchLimit: *batchLimit,
+		Runner:     platform.Runner,
+		WorkingDir: ".",
+	})
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	fmt.Fprintf(stdout, "recipe draft compile: %s\n", result.Compile.Output)
+	fmt.Fprintf(stdout, "recipe draft reparse summary: %s\n", filepath.Join(root, "recipe_draft_reparse", "reparse_summary.json"))
+	fmt.Fprintf(stdout, "recipe draft batch summary: %s\n", filepath.Join(root, "recipe_draft_batch", "summary.json"))
 	return 0
 }
 
@@ -684,5 +722,5 @@ func ptrIntValue(v *int) string {
 }
 
 func usage(stderr io.Writer) {
-	fmt.Fprintln(stderr, "usage: aepselfhost <verify|compare-reports|outcome|status|watch|start-watch> -out-root tmp\\technique_selfhost_gate")
+	fmt.Fprintln(stderr, "usage: aepselfhost <verify|compare-reports|recipe-smoke|outcome|status|watch|start-watch> -out-root tmp\\technique_selfhost_gate")
 }
