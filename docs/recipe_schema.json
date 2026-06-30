@@ -66,7 +66,23 @@
       "element": "recipe.CompSpec",
       "object_type": "CompSpec",
       "x-aep-structural-required": true,
-      "description": "Composition definitions to create or validate."
+      "description": "Composition definitions to create or validate.",
+      "x-aep-capabilities": [
+        {
+          "key": "comp.create",
+          "query": "NewComposition",
+          "status": "supported",
+          "symbol": "NewComposition",
+          "domain": "comp",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "optional settings default to AE-typical values; change the rest via Set* methods",
+          "gate": [
+            "TestV2_1_AEShipGate_AE2020",
+            "TestV2_1_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].name",
@@ -133,7 +149,7 @@
       "x-aep-capabilities": [
         {
           "key": "comp.set_background_color",
-          "query": "SetBGColor",
+          "query": "Composition.SetBGColor",
           "status": "supported",
           "symbol": "Composition.SetBGColor",
           "domain": "comp",
@@ -154,7 +170,23 @@
       "source_field": "Label",
       "type": "number",
       "go_type": "*float64",
-      "description": "Composition label color index."
+      "description": "Composition label color index.",
+      "x-aep-capabilities": [
+        {
+          "key": "comp.set_label",
+          "query": "Composition.SetLabel",
+          "status": "supported",
+          "symbol": "Composition.SetLabel",
+          "domain": "comp",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, 1 byte at idta offset 0x3A. Values outside\n0..16 are written verbatim and AE displays them as index 0.",
+          "gate": [
+            "TestCompIdta_AEShipGate_AE2020",
+            "TestCompIdta_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].comment",
@@ -163,7 +195,23 @@
       "source_field": "Comment",
       "type": "string",
       "go_type": "string",
-      "description": "Composition comment text."
+      "description": "Composition comment text.",
+      "x-aep-capabilities": [
+        {
+          "key": "comp.set_comment",
+          "query": "Composition.SetComment",
+          "status": "supported",
+          "symbol": "Composition.SetComment",
+          "domain": "comp",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-variable: the cmta chunk's data is replaced wholesale\nand WriteAEP recomputes the parent Item LIST size. When no cmta chunk\nexists yet, a fresh one is inserted right after the Utf8 chunk\n(position-sensitive — appending at the end of the LIST produces a file\nAE refuses to open), and the idta byte at offset 0x39 has-comment flag\nis set, otherwise AE silently drops the comment.",
+          "gate": [
+            "TestCompIdta_AEShipGate_AE2020",
+            "TestCompIdta_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].renderer",
@@ -198,7 +246,23 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "description": "Composition preview resolution factor."
+      "description": "Composition preview resolution factor.",
+      "x-aep-capabilities": [
+        {
+          "key": "comp.set_resolution_factor",
+          "query": "Composition.SetResolutionFactor",
+          "status": "supported",
+          "symbol": "Composition.SetResolutionFactor",
+          "domain": "comp",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, two uint16 BE values at cdta offsets\n0x00/0x02; AE clamps factors below 1, this setter rejects 0 outright to\nsurface caller bugs",
+          "gate": [
+            "TestCompSettings_AEShipGate_AE2020",
+            "TestCompSettings_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].pixel_aspect",
@@ -207,7 +271,23 @@
       "source_field": "PixelAspect",
       "type": "number",
       "go_type": "*float64",
-      "description": "Composition pixel aspect ratio."
+      "description": "Composition pixel aspect ratio.",
+      "x-aep-capabilities": [
+        {
+          "key": "comp.set_pixel_aspect",
+          "query": "Composition.SetPixelAspect",
+          "status": "supported",
+          "symbol": "Composition.SetPixelAspect",
+          "domain": "comp",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a numerator/denominator uint32 BE pair at\ncdta offsets 0x90/0x94",
+          "gate": [
+            "TestCompSettings_AEShipGate_AE2020",
+            "TestCompSettings_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].display_start_time",
@@ -216,7 +296,23 @@
       "source_field": "DisplayStartTime",
       "type": "number",
       "go_type": "*float64",
-      "description": "Composition display start time in seconds."
+      "description": "Composition display start time in seconds.",
+      "x-aep-capabilities": [
+        {
+          "key": "comp.set_display_start_time",
+          "query": "Composition.SetDisplayStartTime",
+          "status": "supported",
+          "symbol": "Composition.SetDisplayStartTime",
+          "domain": "comp",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, 8 bytes at cdta offsets 0xA4 (dividend) /\n0xA8 (divisor)",
+          "gate": [
+            "TestCompSettings_AEShipGate_AE2020",
+            "TestCompSettings_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].frame_blending",
@@ -225,7 +321,23 @@
       "source_field": "FrameBlending",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Composition frame blending switch."
+      "description": "Composition frame blending switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "comp.set_frame_blending",
+          "query": "Composition.SetFrameBlending",
+          "status": "supported",
+          "symbol": "Composition.SetFrameBlending",
+          "domain": "comp",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a single bit at cdta offset 0x8B bit 4",
+          "gate": [
+            "TestCompSettings_AEShipGate_AE2020",
+            "TestCompSettings_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].draft_3d",
@@ -234,7 +346,19 @@
       "source_field": "Draft3D",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Composition draft 3D switch."
+      "description": "Composition draft 3D switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "comp.set_draft_3d",
+          "query": "Composition.SetDraft3D",
+          "status": "supported",
+          "symbol": "Composition.SetDraft3D",
+          "domain": "comp",
+          "verify": "roundtrip",
+          "minver": "2020",
+          "boundary": "length-preserving, a single bit at cdta offset 0x8A bit 0; the\nwritten byte matches AE's own draft3d=true encoding bit-for-bit, but the\nDOM does not reflect this bit back on reopen (a derived/runtime state, not\nindependently value-verifiable through the DOM) — acceptance is capped at\nbyte-preservation rather than a DOM readback check"
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].hide_shy_layers",
@@ -243,7 +367,23 @@
       "source_field": "HideShyLayers",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Composition shy layer visibility switch."
+      "description": "Composition shy layer visibility switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "comp.set_hide_shy_layers",
+          "query": "Composition.SetHideShyLayers",
+          "status": "supported",
+          "symbol": "Composition.SetHideShyLayers",
+          "domain": "comp",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a single bit at cdta offset 0x8B bit 0",
+          "gate": [
+            "TestCompSettings_AEShipGate_AE2020",
+            "TestCompSettings_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].preserve_nested_frame_rate",
@@ -252,7 +392,23 @@
       "source_field": "PreserveNestedFrameRate",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Composition nested frame-rate preservation switch."
+      "description": "Composition nested frame-rate preservation switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "comp.set_preserve_nested_frame_rate",
+          "query": "Composition.SetPreserveNestedFrameRate",
+          "status": "supported",
+          "symbol": "Composition.SetPreserveNestedFrameRate",
+          "domain": "comp",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a single bit at cdta offset 0x8B bit 5",
+          "gate": [
+            "TestCompSettings_AEShipGate_AE2020",
+            "TestCompSettings_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].preserve_nested_resolution",
@@ -261,7 +417,23 @@
       "source_field": "PreserveNestedResolution",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Composition nested resolution preservation switch."
+      "description": "Composition nested resolution preservation switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "comp.set_preserve_nested_resolution",
+          "query": "Composition.SetPreserveNestedResolution",
+          "status": "supported",
+          "symbol": "Composition.SetPreserveNestedResolution",
+          "domain": "comp",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a single bit at cdta offset 0x8B bit 7",
+          "gate": [
+            "TestCompSettings_AEShipGate_AE2020",
+            "TestCompSettings_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].motion_blur",
@@ -280,7 +452,23 @@
       "source_field": "Enabled",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Composition motion blur enable switch."
+      "description": "Composition motion blur enable switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "comp.set_motion_blur",
+          "query": "Composition.SetCompMotionBlur",
+          "status": "supported",
+          "symbol": "Composition.SetCompMotionBlur",
+          "domain": "comp",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a single bit at cdta offset 0x8B bit 3",
+          "gate": [
+            "TestCompSettings_AEShipGate_AE2020",
+            "TestCompSettings_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].motion_blur.shutter_angle",
@@ -289,7 +477,23 @@
       "source_field": "ShutterAngle",
       "type": "number",
       "go_type": "*float64",
-      "description": "Composition motion blur shutter angle."
+      "description": "Composition motion blur shutter angle.",
+      "x-aep-capabilities": [
+        {
+          "key": "comp.set_motion_blur_shutter_angle",
+          "query": "Composition.SetShutterAngle",
+          "status": "supported",
+          "symbol": "Composition.SetShutterAngle",
+          "domain": "comp",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a uint16 BE value at cdta offset 0xAE",
+          "gate": [
+            "TestCompSettings_AEShipGate_AE2020",
+            "TestCompSettings_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].motion_blur.shutter_phase",
@@ -298,7 +502,23 @@
       "source_field": "ShutterPhase",
       "type": "number",
       "go_type": "*float64",
-      "description": "Composition motion blur shutter phase."
+      "description": "Composition motion blur shutter phase.",
+      "x-aep-capabilities": [
+        {
+          "key": "comp.set_motion_blur_shutter_phase",
+          "query": "Composition.SetShutterPhase",
+          "status": "supported",
+          "symbol": "Composition.SetShutterPhase",
+          "domain": "comp",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, an int32 BE value at cdta offset 0xB4",
+          "gate": [
+            "TestCompSettings_AEShipGate_AE2020",
+            "TestCompSettings_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].motion_blur.adaptive_sample_limit",
@@ -307,7 +527,23 @@
       "source_field": "AdaptiveSampleLimit",
       "type": "number",
       "go_type": "*float64",
-      "description": "Composition motion blur adaptive sample limit."
+      "description": "Composition motion blur adaptive sample limit.",
+      "x-aep-capabilities": [
+        {
+          "key": "comp.set_motion_blur_adaptive_sample_limit",
+          "query": "Composition.SetMotionBlurAdaptiveSampleLimit",
+          "status": "supported",
+          "symbol": "Composition.SetMotionBlurAdaptiveSampleLimit",
+          "domain": "comp",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, an int32 BE value at cdta offset 0xC4",
+          "gate": [
+            "TestCompSettings_AEShipGate_AE2020",
+            "TestCompSettings_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].motion_blur.samples_per_frame",
@@ -316,7 +552,23 @@
       "source_field": "SamplesPerFrame",
       "type": "number",
       "go_type": "*float64",
-      "description": "Composition motion blur samples per frame."
+      "description": "Composition motion blur samples per frame.",
+      "x-aep-capabilities": [
+        {
+          "key": "comp.set_motion_blur_samples_per_frame",
+          "query": "Composition.SetMotionBlurSamplesPerFrame",
+          "status": "supported",
+          "symbol": "Composition.SetMotionBlurSamplesPerFrame",
+          "domain": "comp",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, an int32 BE value at cdta offset 0xC8",
+          "gate": [
+            "TestCompSettings_AEShipGate_AE2020",
+            "TestCompSettings_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].work_area",
@@ -326,7 +578,23 @@
       "type": "object",
       "go_type": "*recipe.CompWorkAreaSpec",
       "object_type": "CompWorkAreaSpec",
-      "description": "Composition work area range."
+      "description": "Composition work area range.",
+      "x-aep-capabilities": [
+        {
+          "key": "comp.set_work_area",
+          "query": "Composition.SetWorkArea",
+          "status": "supported",
+          "symbol": "Composition.SetWorkArea",
+          "domain": "comp",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, 16 bytes total at cdta offsets 0x1C-0x2B",
+          "gate": [
+            "TestCompSettings_AEShipGate_AE2020",
+            "TestCompSettings_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].work_area.start",
@@ -335,7 +603,23 @@
       "source_field": "Start",
       "type": "number",
       "go_type": "*float64",
-      "description": "Composition work area start time in seconds."
+      "description": "Composition work area start time in seconds.",
+      "x-aep-capabilities": [
+        {
+          "key": "comp.set_work_area",
+          "query": "Composition.SetWorkArea",
+          "status": "supported",
+          "symbol": "Composition.SetWorkArea",
+          "domain": "comp",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, 16 bytes total at cdta offsets 0x1C-0x2B",
+          "gate": [
+            "TestCompSettings_AEShipGate_AE2020",
+            "TestCompSettings_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].work_area.end",
@@ -344,7 +628,23 @@
       "source_field": "End",
       "type": "number",
       "go_type": "*float64",
-      "description": "Composition work area end time in seconds."
+      "description": "Composition work area end time in seconds.",
+      "x-aep-capabilities": [
+        {
+          "key": "comp.set_work_area",
+          "query": "Composition.SetWorkArea",
+          "status": "supported",
+          "symbol": "Composition.SetWorkArea",
+          "domain": "comp",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, 16 bytes total at cdta offsets 0x1C-0x2B",
+          "gate": [
+            "TestCompSettings_AEShipGate_AE2020",
+            "TestCompSettings_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[]",
@@ -488,7 +788,23 @@
       "source_field": "Label",
       "type": "number",
       "go_type": "*float64",
-      "description": "Layer label color index."
+      "description": "Layer label color index.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_label",
+          "query": "Layer.SetLabel",
+          "status": "supported",
+          "symbol": "Layer.SetLabel",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a single byte at ldta offset 0x3D",
+          "gate": [
+            "TestLayerAVFields2_AEShipGate_AE2020",
+            "TestLayerAVFields2_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].comment",
@@ -497,7 +813,23 @@
       "source_field": "Comment",
       "type": "string",
       "go_type": "string",
-      "description": "Layer comment text."
+      "description": "Layer comment text.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_comment",
+          "query": "Layer.SetComment",
+          "status": "supported",
+          "symbol": "Layer.SetComment",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-variable: the underlying cmta chunk's data is\nreplaced, or a new cmta chunk is inserted when none existed; both the\ncmta double-NUL terminator and the ldta 0x3C has-comment flag must be\nset together, otherwise AE reads back an empty comment despite the\nbytes being correct",
+          "gate": [
+            "TestLayerAVFields3_AEShipGate_AE2020",
+            "TestLayerAVFields3_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].visible",
@@ -506,7 +838,23 @@
       "source_field": "Visible",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Layer video visibility switch."
+      "description": "Layer video visibility switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_visible",
+          "query": "Layer.SetVisible",
+          "status": "supported",
+          "symbol": "Layer.SetVisible",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a single bit at ldta offset 0x27",
+          "gate": [
+            "TestLayerAVFlags_AEShipGate_AE2020",
+            "TestLayerAVFlags_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].solo",
@@ -515,7 +863,23 @@
       "source_field": "Solo",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Layer solo switch."
+      "description": "Layer solo switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_solo",
+          "query": "Layer.SetSolo",
+          "status": "supported",
+          "symbol": "Layer.SetSolo",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a single bit at ldta offset 0x26",
+          "gate": [
+            "TestLayerAVFlags_AEShipGate_AE2020",
+            "TestLayerAVFlags_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].locked",
@@ -524,7 +888,23 @@
       "source_field": "Locked",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Layer lock switch."
+      "description": "Layer lock switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_locked",
+          "query": "Layer.SetLocked",
+          "status": "supported",
+          "symbol": "Layer.SetLocked",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a single bit at ldta offset 0x27",
+          "gate": [
+            "TestLayerAVFlags_AEShipGate_AE2020",
+            "TestLayerAVFlags_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].motion_blur",
@@ -533,7 +913,23 @@
       "source_field": "MotionBlur",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Layer motion blur switch."
+      "description": "Layer motion blur switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_motion_blur",
+          "query": "Layer.SetMotionBlur",
+          "status": "supported",
+          "symbol": "Layer.SetMotionBlur",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a single bit at ldta offset 0x27",
+          "gate": [
+            "TestLayerAVFlags_AEShipGate_AE2020",
+            "TestLayerAVFlags_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].shy",
@@ -542,7 +938,23 @@
       "source_field": "Shy",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Layer shy switch."
+      "description": "Layer shy switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_shy",
+          "query": "Layer.SetShy",
+          "status": "supported",
+          "symbol": "Layer.SetShy",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a single bit at ldta offset 0x27",
+          "gate": [
+            "TestLayerAVFlags_AEShipGate_AE2020",
+            "TestLayerAVFlags_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].effects_enabled",
@@ -551,7 +963,23 @@
       "source_field": "EffectsEnabled",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Layer effects enable switch."
+      "description": "Layer effects enable switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_effects_enabled",
+          "query": "Layer.SetEffectsEnabled",
+          "status": "supported",
+          "symbol": "Layer.SetEffectsEnabled",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a single bit at ldta offset 0x27",
+          "gate": [
+            "TestLayerFlags2_AEShipGate_AE2020",
+            "TestLayerFlags2_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].audio_enabled",
@@ -560,7 +988,23 @@
       "source_field": "AudioEnabled",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Layer audio enable switch."
+      "description": "Layer audio enable switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_audio_enabled",
+          "query": "Layer.SetAudioEnabled",
+          "status": "supported",
+          "symbol": "Layer.SetAudioEnabled",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a single bit at ldta offset 0x27; this is a\nnon-visual switch so ae-accept verification is read back from the DOM\naudioEnabled property rather than a rendered pixel",
+          "gate": [
+            "TestLayerAudio_AEShipGate_AE2020",
+            "TestLayerAudio_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].frame_blend_enabled",
@@ -569,7 +1013,23 @@
       "source_field": "FrameBlendEnabled",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Layer frame blending switch."
+      "description": "Layer frame blending switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_frame_blend_enabled",
+          "query": "Layer.SetFrameBlendEnabled",
+          "status": "supported",
+          "symbol": "Layer.SetFrameBlendEnabled",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a single bit at ldta offset 0x27; only has an\neffect on layers with time-based frames (video footage or nested comps)",
+          "gate": [
+            "TestLayerFrameBlend_AEShipGate_AE2020",
+            "TestLayerFrameBlend_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].markers_locked",
@@ -578,7 +1038,19 @@
       "source_field": "MarkersLocked",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Layer marker lock switch."
+      "description": "Layer marker lock switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_markers_locked",
+          "query": "Layer.SetMarkersLocked",
+          "status": "supported",
+          "symbol": "Layer.SetMarkersLocked",
+          "domain": "layer-set",
+          "verify": "roundtrip",
+          "minver": "2020",
+          "boundary": "length-preserving, a single bit at ldta offset 0x26"
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].collapse_transform",
@@ -587,7 +1059,23 @@
       "source_field": "CollapseTransform",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Layer collapse transformations switch."
+      "description": "Layer collapse transformations switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_collapse_transform",
+          "query": "Layer.SetCollapseTransform",
+          "status": "supported",
+          "symbol": "Layer.SetCollapseTransform",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a single bit at ldta offset 0x27",
+          "gate": [
+            "TestLayerBool_AEShipGate_AE2020",
+            "TestLayerBool_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].is_3d",
@@ -596,7 +1084,23 @@
       "source_field": "Is3D",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Layer 3D switch."
+      "description": "Layer 3D switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_is_3d",
+          "query": "Layer.SetIs3D",
+          "status": "supported",
+          "symbol": "Layer.SetIs3D",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a single bit at ldta offset 0x26",
+          "gate": [
+            "TestLayer3DEnable_AEShipGate_AE2020",
+            "TestLayer3DEnable_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].is_adjust",
@@ -605,7 +1109,23 @@
       "source_field": "IsAdjust",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Adjustment-layer switch."
+      "description": "Adjustment-layer switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_is_adjust",
+          "query": "Layer.SetIsAdjust",
+          "status": "supported",
+          "symbol": "Layer.SetIsAdjust",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a single bit at ldta offset 0x26",
+          "gate": [
+            "TestLayerAVFields2_AEShipGate_AE2020",
+            "TestLayerAVFields2_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].is_null",
@@ -614,7 +1134,23 @@
       "source_field": "IsNull",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Null-layer switch."
+      "description": "Null-layer switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_is_null",
+          "query": "Layer.SetIsNull",
+          "status": "supported",
+          "symbol": "Layer.SetIsNull",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a single bit at ldta offset 0x26",
+          "gate": [
+            "TestLayerFlags2_AEShipGate_AE2020",
+            "TestLayerFlags2_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].is_guide",
@@ -623,7 +1159,23 @@
       "source_field": "IsGuide",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Guide-layer switch."
+      "description": "Guide-layer switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_is_guide",
+          "query": "Layer.SetIsGuide",
+          "status": "supported",
+          "symbol": "Layer.SetIsGuide",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a single bit at ldta offset 0x25",
+          "gate": [
+            "TestLayerAVFields2_AEShipGate_AE2020",
+            "TestLayerAVFields2_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].sampling_bicubic",
@@ -632,7 +1184,23 @@
       "source_field": "SamplingBicubic",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Bicubic sampling switch."
+      "description": "Bicubic sampling switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_sampling_bicubic",
+          "query": "Layer.SetSamplingBicubic",
+          "status": "supported",
+          "symbol": "Layer.SetSamplingBicubic",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a single bit at ldta offset 0x25",
+          "gate": [
+            "TestLayerAVFields2_AEShipGate_AE2020",
+            "TestLayerAVFields2_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].frame_blend_pixel_motion",
@@ -641,7 +1209,23 @@
       "source_field": "FrameBlendPixelMotion",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Pixel-motion frame blending switch."
+      "description": "Pixel-motion frame blending switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_frame_blend_pixel_motion",
+          "query": "Layer.SetFrameBlendPixelMotion",
+          "status": "supported",
+          "symbol": "Layer.SetFrameBlendPixelMotion",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a single bit at ldta offset 0x25; requires\nFrameBlendEnabled=true to have any visible effect",
+          "gate": [
+            "TestLayerFrameBlend_AEShipGate_AE2020",
+            "TestLayerFrameBlend_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].preserve_transparency",
@@ -650,7 +1234,23 @@
       "source_field": "PreserveTransparency",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Preserve transparency switch."
+      "description": "Preserve transparency switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_preserve_transparency",
+          "query": "Layer.SetPreserveTransparency",
+          "status": "supported",
+          "symbol": "Layer.SetPreserveTransparency",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a single byte at ldta offset 0x67",
+          "gate": [
+            "TestLayerAVFields2_AEShipGate_AE2020",
+            "TestLayerAVFields2_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].quality",
@@ -659,7 +1259,23 @@
       "source_field": "Quality",
       "type": "string",
       "go_type": "string",
-      "description": "Layer quality mode."
+      "description": "Layer quality mode.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_quality",
+          "query": "Layer.SetQuality",
+          "status": "supported",
+          "symbol": "Layer.SetQuality",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a big-endian uint16 at ldta offset 0x04",
+          "gate": [
+            "TestLayerAVFlags_AEShipGate_AE2020",
+            "TestLayerAVFlags_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].blending_mode",
@@ -668,7 +1284,23 @@
       "source_field": "BlendingMode",
       "type": "string",
       "go_type": "string",
-      "description": "Layer blending mode."
+      "description": "Layer blending mode.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_blending_mode",
+          "query": "Layer.SetBlendingMode",
+          "status": "supported",
+          "symbol": "Layer.SetBlendingMode",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a single byte at ldta offset 0x63",
+          "gate": [
+            "TestLayerAVFlags_AEShipGate_AE2020",
+            "TestLayerAVFlags_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].track_matte",
@@ -677,7 +1309,23 @@
       "source_field": "TrackMatte",
       "type": "string",
       "go_type": "string",
-      "description": "Layer track matte mode."
+      "description": "Layer track matte mode.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_track_matte",
+          "query": "Layer.SetTrackMatte",
+          "status": "supported",
+          "symbol": "Layer.SetTrackMatte",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a single byte at ldta offset 0x6B; AE 2025\nauto-migrates classic track mattes to the explicit form on load",
+          "gate": [
+            "TestTrackMatteClassic_AEShipGate_AE2020",
+            "TestTrackMatteClassic_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].auto_orient",
@@ -686,7 +1334,23 @@
       "source_field": "AutoOrient",
       "type": "string",
       "go_type": "string",
-      "description": "Layer auto-orientation mode."
+      "description": "Layer auto-orientation mode.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_auto_orient",
+          "query": "Layer.SetAutoOrient",
+          "status": "supported",
+          "symbol": "Layer.SetAutoOrient",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving; touches a mutually-exclusive bit group\nspread across ldta offsets 0x25 and 0x26",
+          "gate": [
+            "TestLayerBool_AEShipGate_AE2020",
+            "TestLayerBool_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].start_time",
@@ -695,7 +1359,23 @@
       "source_field": "StartTime",
       "type": "number",
       "go_type": "*float64",
-      "description": "Layer start time in seconds."
+      "description": "Layer start time in seconds.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_start_time",
+          "query": "Layer.SetStartTime",
+          "status": "supported",
+          "symbol": "Layer.SetStartTime",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, an 8-byte dividend/divisor pair at ldta\noffsets 0x0C/0x10; negative values (pre-roll) are supported",
+          "gate": [
+            "TestLayerAVFields3_AEShipGate_AE2020",
+            "TestLayerAVFields3_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].in_point",
@@ -704,7 +1384,23 @@
       "source_field": "InPoint",
       "type": "number",
       "go_type": "*float64",
-      "description": "Layer in point in seconds."
+      "description": "Layer in point in seconds.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_in_point",
+          "query": "Layer.SetInPoint",
+          "status": "supported",
+          "symbol": "Layer.SetInPoint",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, an 8-byte dividend/divisor pair at ldta\noffsets 0x14/0x18",
+          "gate": [
+            "TestLayerAVFields2_AEShipGate_AE2020",
+            "TestLayerAVFields2_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].out_point",
@@ -713,7 +1409,23 @@
       "source_field": "OutPoint",
       "type": "number",
       "go_type": "*float64",
-      "description": "Layer out point in seconds."
+      "description": "Layer out point in seconds.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_out_point",
+          "query": "Layer.SetOutPoint",
+          "status": "supported",
+          "symbol": "Layer.SetOutPoint",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, an 8-byte dividend/divisor pair at ldta\noffsets 0x1C/0x20",
+          "gate": [
+            "TestLayerAVFields2_AEShipGate_AE2020",
+            "TestLayerAVFields2_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].parent",
@@ -722,7 +1434,23 @@
       "source_field": "Parent",
       "type": "string",
       "go_type": "string",
-      "description": "Parent layer name."
+      "description": "Parent layer name.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_parent",
+          "query": "Layer.SetParent",
+          "status": "supported",
+          "symbol": "Layer.SetParent",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a 4-byte field at ldta offset 0x84",
+          "gate": [
+            "TestLayerAVFields3_AEShipGate_AE2020",
+            "TestLayerAVFields3_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].text",
@@ -731,7 +1459,23 @@
       "source_field": "Text",
       "type": "string",
       "go_type": "string",
-      "description": "Source text for a text layer."
+      "description": "Source text for a text layer.",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.set_text",
+          "query": "Layer.SetText",
+          "status": "supported",
+          "symbol": "Layer.SetText",
+          "domain": "text",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-variable: the PostScript string is spliced and the\nparagraph/run arrays are rebuilt; supports multiple paragraphs and\nmultiple style runs collapsing to one; manual per-character kerning\nis dropped on a length-changing replacement",
+          "gate": [
+            "TestSetTextVariable_AEShipGate_AE2020",
+            "TestSetTextVariable_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].text_style",
@@ -768,7 +1512,23 @@
       "source_field": "FontSize",
       "type": "number",
       "go_type": "*float64",
-      "description": "Layer text style font size."
+      "description": "Layer text style font size.",
+      "x-aep-capabilities": [
+        {
+          "key": "text.set_run_font_size",
+          "query": "Layer.SetRunFontSize",
+          "status": "supported",
+          "symbol": "Layer.SetRunFontSize",
+          "domain": "text",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "boundary": "length-variable btdk PostScript body splice; the point-size key\nmust be written as REAL (FormatPSReal) — writing a bare integer makes AE\nread it as a 16.16 fixed-point value, dividing fontSize by 65536",
+          "gate": [
+            "TestMGTextStyle_AEShipGate_AE2020",
+            "TestMGTextStyle_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].text_style.fill_color",
@@ -778,7 +1538,23 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "description": "Layer text style fill color as RGB channels."
+      "description": "Layer text style fill color as RGB channels.",
+      "x-aep-capabilities": [
+        {
+          "key": "text.set_run_fill_color",
+          "query": "Layer.SetRunFillColor",
+          "status": "supported",
+          "symbol": "Layer.SetRunFillColor",
+          "domain": "text",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-variable btdk PostScript body splice; each RGBA\ncomponent is in 0..1; verified against a single-run DOM fixture on both\nAE versions",
+          "gate": [
+            "TestTextRun_AEShipGate_AE2020",
+            "TestTextRun_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].text_style.tracking",
@@ -787,7 +1563,23 @@
       "source_field": "Tracking",
       "type": "number",
       "go_type": "*float64",
-      "description": "Layer text style character tracking amount."
+      "description": "Layer text style character tracking amount.",
+      "x-aep-capabilities": [
+        {
+          "key": "text.set_run_tracking",
+          "query": "Layer.SetRunTracking",
+          "status": "supported",
+          "symbol": "Layer.SetRunTracking",
+          "domain": "text",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "boundary": "length-variable btdk PostScript body splice; tracking is a true\ninteger key (FormatPSNumber)",
+          "gate": [
+            "TestMGTextStyle_AEShipGate_AE2020",
+            "TestMGTextStyle_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].text_style.faux_bold",
@@ -796,7 +1588,23 @@
       "source_field": "FauxBold",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Layer text style faux bold switch."
+      "description": "Layer text style faux bold switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "text.set_run_faux_bold",
+          "query": "Layer.SetRunFauxBold",
+          "status": "supported",
+          "symbol": "Layer.SetRunFauxBold",
+          "domain": "text",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-variable btdk PostScript body splice; verified against\na single-run DOM fixture on both AE versions",
+          "gate": [
+            "TestTextRun_AEShipGate_AE2020",
+            "TestTextRun_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].text_style.faux_italic",
@@ -805,7 +1613,23 @@
       "source_field": "FauxItalic",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Layer text style faux italic switch."
+      "description": "Layer text style faux italic switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "text.set_run_faux_italic",
+          "query": "Layer.SetRunFauxItalic",
+          "status": "supported",
+          "symbol": "Layer.SetRunFauxItalic",
+          "domain": "text",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-variable btdk PostScript body splice; verified against\na single-run DOM fixture on both AE versions",
+          "gate": [
+            "TestTextRun_AEShipGate_AE2020",
+            "TestTextRun_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].text_style.apply_stroke",
@@ -814,7 +1638,23 @@
       "source_field": "ApplyStroke",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Layer text style stroke enable switch."
+      "description": "Layer text style stroke enable switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "text.set_run_apply_stroke",
+          "query": "Layer.SetRunApplyStroke",
+          "status": "supported",
+          "symbol": "Layer.SetRunApplyStroke",
+          "domain": "text",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-variable btdk PostScript body splice; verified against\na single-run DOM fixture on both AE versions",
+          "gate": [
+            "TestTextRun_AEShipGate_AE2020",
+            "TestTextRun_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].text_style.stroke_color",
@@ -824,7 +1664,23 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "description": "Layer text style stroke color as RGB channels."
+      "description": "Layer text style stroke color as RGB channels.",
+      "x-aep-capabilities": [
+        {
+          "key": "text.set_run_stroke_color",
+          "query": "Layer.SetRunStrokeColor",
+          "status": "supported",
+          "symbol": "Layer.SetRunStrokeColor",
+          "domain": "text",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-variable btdk PostScript body splice; each RGBA\ncomponent is in 0..1; verified against a single-run DOM fixture on both\nAE versions",
+          "gate": [
+            "TestTextRun_AEShipGate_AE2020",
+            "TestTextRun_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].text_style.stroke_width",
@@ -833,7 +1689,23 @@
       "source_field": "StrokeWidth",
       "type": "number",
       "go_type": "*float64",
-      "description": "Layer text style stroke width."
+      "description": "Layer text style stroke width.",
+      "x-aep-capabilities": [
+        {
+          "key": "text.set_run_stroke_width",
+          "query": "Layer.SetRunStrokeWidth",
+          "status": "supported",
+          "symbol": "Layer.SetRunStrokeWidth",
+          "domain": "text",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-variable btdk PostScript body splice; the point key\nmust be written as REAL (FormatPSReal) or AE reads it as a 16.16\nfixed-point value; verified against a single-run DOM fixture on both AE\nversions",
+          "gate": [
+            "TestTextRun_AEShipGate_AE2020",
+            "TestTextRun_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].text_style.justification",
@@ -842,7 +1714,23 @@
       "source_field": "Justification",
       "type": "string",
       "go_type": "string",
-      "description": "Layer text style paragraph justification mode."
+      "description": "Layer text style paragraph justification mode.",
+      "x-aep-capabilities": [
+        {
+          "key": "text.set_paragraph_justification",
+          "query": "Layer.SetParagraphJustification",
+          "status": "supported",
+          "symbol": "Layer.SetParagraphJustification",
+          "domain": "text",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "boundary": "length-variable btdk PostScript paragraph body splice",
+          "gate": [
+            "TestMGTextStyle_AEShipGate_AE2020",
+            "TestMGTextStyle_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].camera",
@@ -861,7 +1749,23 @@
       "source_field": "Zoom",
       "type": "number",
       "go_type": "*float64",
-      "description": "Camera zoom value."
+      "description": "Camera zoom value.",
+      "x-aep-capabilities": [
+        {
+          "key": "camera.set_zoom",
+          "query": "Layer.SetCameraZoom",
+          "status": "supported",
+          "symbol": "Layer.SetCameraZoom",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, low risk; camera layers only. Errors on\nnon-camera layers or when Zoom is keyframed.",
+          "gate": [
+            "TestNewCameraLight_AEShipGate_AE2020",
+            "TestNewCameraLight_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].camera.depth_of_field",
@@ -870,7 +1774,22 @@
       "source_field": "DepthOfField",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Depth of field enable switch."
+      "description": "Depth of field enable switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "camera.set_depth_of_field",
+          "query": "Layer.SetCameraDepthOfField",
+          "status": "supported",
+          "symbol": "Layer.SetCameraDepthOfField",
+          "domain": "layer-set",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "gate": [
+            "TestLayer3DDoF_AEShipGate_AE2020",
+            "TestLayer3DDoF_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].camera.focus_distance",
@@ -879,7 +1798,22 @@
       "source_field": "FocusDistance",
       "type": "number",
       "go_type": "*float64",
-      "description": "Camera focus distance."
+      "description": "Camera focus distance.",
+      "x-aep-capabilities": [
+        {
+          "key": "camera.set_focus_distance",
+          "query": "Layer.SetCameraFocusDistance",
+          "status": "supported",
+          "symbol": "Layer.SetCameraFocusDistance",
+          "domain": "layer-set",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "gate": [
+            "TestLayer3DDoF_AEShipGate_AE2020",
+            "TestLayer3DDoF_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].camera.aperture",
@@ -888,7 +1822,22 @@
       "source_field": "Aperture",
       "type": "number",
       "go_type": "*float64",
-      "description": "Camera aperture."
+      "description": "Camera aperture.",
+      "x-aep-capabilities": [
+        {
+          "key": "camera.set_aperture",
+          "query": "Layer.SetCameraAperture",
+          "status": "supported",
+          "symbol": "Layer.SetCameraAperture",
+          "domain": "layer-set",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "gate": [
+            "TestLayer3DDoF_AEShipGate_AE2020",
+            "TestLayer3DDoF_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].camera.blur_level",
@@ -897,7 +1846,22 @@
       "source_field": "BlurLevel",
       "type": "number",
       "go_type": "*float64",
-      "description": "Camera blur level."
+      "description": "Camera blur level.",
+      "x-aep-capabilities": [
+        {
+          "key": "camera.set_blur_level",
+          "query": "Layer.SetCameraBlurLevel",
+          "status": "supported",
+          "symbol": "Layer.SetCameraBlurLevel",
+          "domain": "layer-set",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "gate": [
+            "TestLayer3DDoF_AEShipGate_AE2020",
+            "TestLayer3DDoF_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].camera.iris_shape",
@@ -906,7 +1870,23 @@
       "source_field": "IrisShape",
       "type": "number",
       "go_type": "*float64",
-      "description": "Camera iris shape."
+      "description": "Camera iris shape.",
+      "x-aep-capabilities": [
+        {
+          "key": "camera.set_iris_shape",
+          "query": "Layer.SetIrisShape",
+          "status": "supported",
+          "symbol": "Layer.SetIrisShape",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, low risk; camera layers only.",
+          "gate": [
+            "TestNewCameraLight_AEShipGate_AE2020",
+            "TestNewCameraLight_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].camera.iris_rotation",
@@ -915,7 +1895,23 @@
       "source_field": "IrisRotation",
       "type": "number",
       "go_type": "*float64",
-      "description": "Camera iris rotation."
+      "description": "Camera iris rotation.",
+      "x-aep-capabilities": [
+        {
+          "key": "camera.set_iris_rotation",
+          "query": "Layer.SetIrisRotation",
+          "status": "supported",
+          "symbol": "Layer.SetIrisRotation",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, low risk; camera layers only.",
+          "gate": [
+            "TestNewCameraLight_AEShipGate_AE2020",
+            "TestNewCameraLight_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].camera.iris_roundness",
@@ -924,7 +1920,23 @@
       "source_field": "IrisRoundness",
       "type": "number",
       "go_type": "*float64",
-      "description": "Camera iris roundness."
+      "description": "Camera iris roundness.",
+      "x-aep-capabilities": [
+        {
+          "key": "camera.set_iris_roundness",
+          "query": "Layer.SetIrisRoundness",
+          "status": "supported",
+          "symbol": "Layer.SetIrisRoundness",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, low risk; camera layers only.",
+          "gate": [
+            "TestNewCameraLight_AEShipGate_AE2020",
+            "TestNewCameraLight_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].camera.iris_aspect_ratio",
@@ -933,7 +1945,23 @@
       "source_field": "IrisAspectRatio",
       "type": "number",
       "go_type": "*float64",
-      "description": "Camera iris aspect ratio."
+      "description": "Camera iris aspect ratio.",
+      "x-aep-capabilities": [
+        {
+          "key": "camera.set_iris_aspect_ratio",
+          "query": "Layer.SetIrisAspectRatio",
+          "status": "supported",
+          "symbol": "Layer.SetIrisAspectRatio",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, low risk; camera layers only.",
+          "gate": [
+            "TestNewCameraLight_AEShipGate_AE2020",
+            "TestNewCameraLight_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].camera.iris_diffraction_fringe",
@@ -942,7 +1970,23 @@
       "source_field": "IrisDiffractionFringe",
       "type": "number",
       "go_type": "*float64",
-      "description": "Camera iris diffraction fringe amount."
+      "description": "Camera iris diffraction fringe amount.",
+      "x-aep-capabilities": [
+        {
+          "key": "camera.set_iris_diffraction_fringe",
+          "query": "Layer.SetIrisDiffractionFringe",
+          "status": "supported",
+          "symbol": "Layer.SetIrisDiffractionFringe",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, low risk; camera layers only.",
+          "gate": [
+            "TestNewCameraLight_AEShipGate_AE2020",
+            "TestNewCameraLight_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].camera.iris_highlight_gain",
@@ -951,7 +1995,23 @@
       "source_field": "IrisHighlightGain",
       "type": "number",
       "go_type": "*float64",
-      "description": "Camera iris highlight gain."
+      "description": "Camera iris highlight gain.",
+      "x-aep-capabilities": [
+        {
+          "key": "camera.set_iris_highlight_gain",
+          "query": "Layer.SetIrisHighlightGain",
+          "status": "supported",
+          "symbol": "Layer.SetIrisHighlightGain",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, low risk; camera layers only.",
+          "gate": [
+            "TestNewCameraLight_AEShipGate_AE2020",
+            "TestNewCameraLight_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].camera.iris_highlight_threshold",
@@ -960,7 +2020,23 @@
       "source_field": "IrisHighlightThreshold",
       "type": "number",
       "go_type": "*float64",
-      "description": "Camera iris highlight threshold."
+      "description": "Camera iris highlight threshold.",
+      "x-aep-capabilities": [
+        {
+          "key": "camera.set_iris_highlight_threshold",
+          "query": "Layer.SetIrisHighlightThreshold",
+          "status": "supported",
+          "symbol": "Layer.SetIrisHighlightThreshold",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, low risk; camera layers only.",
+          "gate": [
+            "TestNewCameraLight_AEShipGate_AE2020",
+            "TestNewCameraLight_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].camera.iris_highlight_saturation",
@@ -969,7 +2045,23 @@
       "source_field": "IrisHighlightSaturation",
       "type": "number",
       "go_type": "*float64",
-      "description": "Camera iris highlight saturation."
+      "description": "Camera iris highlight saturation.",
+      "x-aep-capabilities": [
+        {
+          "key": "camera.set_iris_highlight_saturation",
+          "query": "Layer.SetIrisHighlightSaturation",
+          "status": "supported",
+          "symbol": "Layer.SetIrisHighlightSaturation",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, low risk; camera layers only.",
+          "gate": [
+            "TestNewCameraLight_AEShipGate_AE2020",
+            "TestNewCameraLight_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].light",
@@ -988,7 +2080,23 @@
       "source_field": "Kind",
       "type": "string",
       "go_type": "string",
-      "description": "Light type."
+      "description": "Light type.",
+      "x-aep-capabilities": [
+        {
+          "key": "light.set_kind",
+          "query": "Layer.SetLightKind",
+          "status": "supported",
+          "symbol": "Layer.SetLightKind",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, a big-endian uint32 at ldta offset 0x88",
+          "gate": [
+            "TestLayer3DLight_AEShipGate_AE2020",
+            "TestLayer3DLight_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].light.source_layer",
@@ -997,7 +2105,19 @@
       "source_field": "SourceLayer",
       "type": "string",
       "go_type": "string",
-      "description": "Source layer for environment light data."
+      "description": "Source layer for environment light data.",
+      "x-aep-capabilities": [
+        {
+          "key": "light.set_source_layer",
+          "query": "Layer.SetLightSource",
+          "status": "supported",
+          "symbol": "Layer.SetLightSource",
+          "domain": "layer-set",
+          "verify": "roundtrip",
+          "minver": "2025",
+          "boundary": "length-preserving, a 4-byte field at ldta offset 0x28;\nonly applies to environment lights on newer AE versions"
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].light.intensity",
@@ -1006,7 +2126,22 @@
       "source_field": "Intensity",
       "type": "number",
       "go_type": "*float64",
-      "description": "Light intensity."
+      "description": "Light intensity.",
+      "x-aep-capabilities": [
+        {
+          "key": "light.set_intensity",
+          "query": "Layer.SetLightIntensity",
+          "status": "supported",
+          "symbol": "Layer.SetLightIntensity",
+          "domain": "layer-set",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "gate": [
+            "TestLayer3DLight_AEShipGate_AE2020",
+            "TestLayer3DLight_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].light.color",
@@ -1016,7 +2151,23 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "description": "Light color as RGB channels."
+      "description": "Light color as RGB channels.",
+      "x-aep-capabilities": [
+        {
+          "key": "light.set_color",
+          "query": "Layer.SetLightColor",
+          "status": "supported",
+          "symbol": "Layer.SetLightColor",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, low risk; light layers only.",
+          "gate": [
+            "TestNewCameraLight_AEShipGate_AE2020",
+            "TestNewCameraLight_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].light.casts_shadows",
@@ -1025,7 +2176,22 @@
       "source_field": "CastsShadows",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Light shadow-casting switch."
+      "description": "Light shadow-casting switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "light.set_casts_shadows",
+          "query": "Layer.SetLightCastsShadows",
+          "status": "supported",
+          "symbol": "Layer.SetLightCastsShadows",
+          "domain": "layer-set",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "gate": [
+            "TestLayer3DShadow_AEShipGate_AE2020",
+            "TestLayer3DShadow_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].light.shadow_darkness",
@@ -1034,7 +2200,23 @@
       "source_field": "ShadowDarkness",
       "type": "number",
       "go_type": "*float64",
-      "description": "Light shadow darkness."
+      "description": "Light shadow darkness.",
+      "x-aep-capabilities": [
+        {
+          "key": "light.set_shadow_darkness",
+          "query": "Layer.SetLightShadowDarkness",
+          "status": "supported",
+          "symbol": "Layer.SetLightShadowDarkness",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, low risk; light layers only.",
+          "gate": [
+            "TestNewCameraLight_AEShipGate_AE2020",
+            "TestNewCameraLight_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].light.shadow_diffusion",
@@ -1043,7 +2225,23 @@
       "source_field": "ShadowDiffusion",
       "type": "number",
       "go_type": "*float64",
-      "description": "Light shadow diffusion."
+      "description": "Light shadow diffusion.",
+      "x-aep-capabilities": [
+        {
+          "key": "light.set_shadow_diffusion",
+          "query": "Layer.SetLightShadowDiffusion",
+          "status": "supported",
+          "symbol": "Layer.SetLightShadowDiffusion",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, low risk; light layers only.",
+          "gate": [
+            "TestNewCameraLight_AEShipGate_AE2020",
+            "TestNewCameraLight_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].light.falloff_type",
@@ -1052,7 +2250,23 @@
       "source_field": "FalloffType",
       "type": "number",
       "go_type": "*float64",
-      "description": "Light falloff type."
+      "description": "Light falloff type.",
+      "x-aep-capabilities": [
+        {
+          "key": "light.set_falloff_type",
+          "query": "Layer.SetLightFalloffType",
+          "status": "supported",
+          "symbol": "Layer.SetLightFalloffType",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, low risk; light layers only.",
+          "gate": [
+            "TestNewCameraLight_AEShipGate_AE2020",
+            "TestNewCameraLight_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].light.falloff_start",
@@ -1061,7 +2275,23 @@
       "source_field": "FalloffStart",
       "type": "number",
       "go_type": "*float64",
-      "description": "Light falloff start distance."
+      "description": "Light falloff start distance.",
+      "x-aep-capabilities": [
+        {
+          "key": "light.set_falloff_start",
+          "query": "Layer.SetLightFalloffStart",
+          "status": "supported",
+          "symbol": "Layer.SetLightFalloffStart",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, low risk; light layers only. Only\nmeaningful when the falloff type is not None.",
+          "gate": [
+            "TestNewCameraLight_AEShipGate_AE2020",
+            "TestNewCameraLight_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].light.falloff_distance",
@@ -1070,7 +2300,23 @@
       "source_field": "FalloffDistance",
       "type": "number",
       "go_type": "*float64",
-      "description": "Light falloff distance."
+      "description": "Light falloff distance.",
+      "x-aep-capabilities": [
+        {
+          "key": "light.set_falloff_distance",
+          "query": "Layer.SetLightFalloffDistance",
+          "status": "supported",
+          "symbol": "Layer.SetLightFalloffDistance",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, low risk; light layers only.",
+          "gate": [
+            "TestNewCameraLight_AEShipGate_AE2020",
+            "TestNewCameraLight_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].light.cone_angle",
@@ -1079,7 +2325,23 @@
       "source_field": "ConeAngle",
       "type": "number",
       "go_type": "*float64",
-      "description": "Spotlight cone angle."
+      "description": "Spotlight cone angle.",
+      "x-aep-capabilities": [
+        {
+          "key": "light.set_cone_angle",
+          "query": "Layer.SetLightConeAngle",
+          "status": "supported",
+          "symbol": "Layer.SetLightConeAngle",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, low risk; spot light layers only.",
+          "gate": [
+            "TestNewCameraLight_AEShipGate_AE2020",
+            "TestNewCameraLight_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].light.cone_feather",
@@ -1088,7 +2350,23 @@
       "source_field": "ConeFeather",
       "type": "number",
       "go_type": "*float64",
-      "description": "Spotlight cone feather amount."
+      "description": "Spotlight cone feather amount.",
+      "x-aep-capabilities": [
+        {
+          "key": "light.set_cone_feather",
+          "query": "Layer.SetLightConeFeather",
+          "status": "supported",
+          "symbol": "Layer.SetLightConeFeather",
+          "domain": "layer-set",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving, low risk; spot light layers only.",
+          "gate": [
+            "TestNewCameraLight_AEShipGate_AE2020",
+            "TestNewCameraLight_AEShipGate_AE2025"
+          ]
+        }
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].shape",

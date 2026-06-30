@@ -41,6 +41,35 @@ func TestBuildDocumentJoinsFieldMetadata(t *testing.T) {
 	}
 }
 
+func TestBuildDocumentIncludesCoreCapabilityMetadata(t *testing.T) {
+	doc, err := BuildDocument()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tests := map[string]string{
+		"comps[]":                                          "comp.create",
+		"comps[].label":                                    "comp.set_label",
+		"comps[].motion_blur.shutter_angle":                "comp.set_motion_blur_shutter_angle",
+		"comps[].work_area":                                "comp.set_work_area",
+		"comps[].layers[].visible":                         "layer.set_visible",
+		"comps[].layers[].parent":                          "layer.set_parent",
+		"comps[].layers[].start_time":                      "layer.set_start_time",
+		"comps[].layers[].text":                            "layer.set_text",
+		"comps[].layers[].text_style.font_size":            "text.set_run_font_size",
+		"comps[].layers[].camera.zoom":                     "camera.set_zoom",
+		"comps[].layers[].camera.iris_highlight_threshold": "camera.set_iris_highlight_threshold",
+		"comps[].layers[].light.intensity":                 "light.set_intensity",
+		"comps[].layers[].light.source_layer":              "light.set_source_layer",
+	}
+	for path, key := range tests {
+		field := requireField(t, doc, path)
+		if !hasCapability(field, key) {
+			t.Fatalf("%s capabilities = %+v, want key %q", path, field.Capabilities, key)
+		}
+	}
+}
+
 func TestNoUnexpectedMissingSemanticSummaries(t *testing.T) {
 	doc, err := BuildDocument()
 	if err != nil {
@@ -58,4 +87,13 @@ func TestNoUnexpectedMissingSemanticSummaries(t *testing.T) {
 	if len(missing) > 0 {
 		t.Fatalf("unexpected missing semantic summaries:\n%s", strings.Join(missing, "\n"))
 	}
+}
+
+func hasCapability(field FieldModel, key string) bool {
+	for _, capRef := range field.Capabilities {
+		if capRef.Key == key {
+			return true
+		}
+	}
+	return false
 }

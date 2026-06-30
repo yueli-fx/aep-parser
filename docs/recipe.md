@@ -10,7 +10,7 @@ This reference is generated from the canonical recipe field model.
 | --- | --- | --- | --- | --- | --- |
 | `schema_version` | `number` | structural | Recipe schema version. | Must equal the supported recipe schema version. | - |
 | `project` | `object<ProjectSpec>` | structural | Project-level metadata used when materializing the recipe. | - | - |
-| `comps[]` | `array<recipe.CompSpec>` | structural | Composition definitions to create or validate. | - | - |
+| `comps[]` | `array<recipe.CompSpec>` | structural | Composition definitions to create or validate. | - | `comp.create` (`NewComposition`) |
 | `expected_profile` | `object<ExpectedProfile>` | - | Optional assertions used to compare the generated project against expected structure. | - | - |
 
 ## ProjectSpec
@@ -28,38 +28,38 @@ This reference is generated from the canonical recipe field model.
 | `comps[].height` | `number` | structural | Composition height in pixels. | Pixel height must fit the composition writer's uint16 range. | - |
 | `comps[].frame_rate` | `number` | structural | Composition frame rate in frames per second. | - | - |
 | `comps[].duration` | `number` | structural | Composition duration in seconds. | - | - |
-| `comps[].background_color` | `array<float64>` | - | Composition background color as RGB channels. | RGB color must contain exactly three channels in the 0..255 range. | `comp.set_background_color` (`SetBGColor`) |
-| `comps[].label` | `number` | - | Composition label color index. | - | - |
-| `comps[].comment` | `string` | - | Composition comment text. | - | - |
+| `comps[].background_color` | `array<float64>` | - | Composition background color as RGB channels. | RGB color must contain exactly three channels in the 0..255 range. | `comp.set_background_color` (`Composition.SetBGColor`) |
+| `comps[].label` | `number` | - | Composition label color index. | - | `comp.set_label` (`Composition.SetLabel`) |
+| `comps[].comment` | `string` | - | Composition comment text. | - | `comp.set_comment` (`Composition.SetComment`) |
 | `comps[].renderer` | `string` | - | Composition renderer identifier. | - | `comp.set_renderer` (`SetRenderer`) |
-| `comps[].resolution_factor` | `array<float64>` | - | Composition preview resolution factor. | - | - |
-| `comps[].pixel_aspect` | `number` | - | Composition pixel aspect ratio. | - | - |
-| `comps[].display_start_time` | `number` | - | Composition display start time in seconds. | - | - |
-| `comps[].frame_blending` | `boolean` | - | Composition frame blending switch. | - | - |
-| `comps[].draft_3d` | `boolean` | - | Composition draft 3D switch. | - | - |
-| `comps[].hide_shy_layers` | `boolean` | - | Composition shy layer visibility switch. | - | - |
-| `comps[].preserve_nested_frame_rate` | `boolean` | - | Composition nested frame-rate preservation switch. | - | - |
-| `comps[].preserve_nested_resolution` | `boolean` | - | Composition nested resolution preservation switch. | - | - |
+| `comps[].resolution_factor` | `array<float64>` | - | Composition preview resolution factor. | - | `comp.set_resolution_factor` (`Composition.SetResolutionFactor`) |
+| `comps[].pixel_aspect` | `number` | - | Composition pixel aspect ratio. | - | `comp.set_pixel_aspect` (`Composition.SetPixelAspect`) |
+| `comps[].display_start_time` | `number` | - | Composition display start time in seconds. | - | `comp.set_display_start_time` (`Composition.SetDisplayStartTime`) |
+| `comps[].frame_blending` | `boolean` | - | Composition frame blending switch. | - | `comp.set_frame_blending` (`Composition.SetFrameBlending`) |
+| `comps[].draft_3d` | `boolean` | - | Composition draft 3D switch. | - | `comp.set_draft_3d` (`Composition.SetDraft3D`) |
+| `comps[].hide_shy_layers` | `boolean` | - | Composition shy layer visibility switch. | - | `comp.set_hide_shy_layers` (`Composition.SetHideShyLayers`) |
+| `comps[].preserve_nested_frame_rate` | `boolean` | - | Composition nested frame-rate preservation switch. | - | `comp.set_preserve_nested_frame_rate` (`Composition.SetPreserveNestedFrameRate`) |
+| `comps[].preserve_nested_resolution` | `boolean` | - | Composition nested resolution preservation switch. | - | `comp.set_preserve_nested_resolution` (`Composition.SetPreserveNestedResolution`) |
 | `comps[].motion_blur` | `object<CompMotionBlurSpec>` | - | Composition motion blur settings. | - | - |
-| `comps[].work_area` | `object<CompWorkAreaSpec>` | - | Composition work area range. | - | - |
+| `comps[].work_area` | `object<CompWorkAreaSpec>` | - | Composition work area range. | - | `comp.set_work_area` (`Composition.SetWorkArea`) |
 | `comps[].layers[]` | `array<recipe.Layer>` | - | Composition layer definitions. | - | - |
 
 ## CompMotionBlurSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].motion_blur.enabled` | `boolean` | - | Composition motion blur enable switch. | - | - |
-| `comps[].motion_blur.shutter_angle` | `number` | - | Composition motion blur shutter angle. | - | - |
-| `comps[].motion_blur.shutter_phase` | `number` | - | Composition motion blur shutter phase. | - | - |
-| `comps[].motion_blur.adaptive_sample_limit` | `number` | - | Composition motion blur adaptive sample limit. | - | - |
-| `comps[].motion_blur.samples_per_frame` | `number` | - | Composition motion blur samples per frame. | - | - |
+| `comps[].motion_blur.enabled` | `boolean` | - | Composition motion blur enable switch. | - | `comp.set_motion_blur` (`Composition.SetCompMotionBlur`) |
+| `comps[].motion_blur.shutter_angle` | `number` | - | Composition motion blur shutter angle. | - | `comp.set_motion_blur_shutter_angle` (`Composition.SetShutterAngle`) |
+| `comps[].motion_blur.shutter_phase` | `number` | - | Composition motion blur shutter phase. | - | `comp.set_motion_blur_shutter_phase` (`Composition.SetShutterPhase`) |
+| `comps[].motion_blur.adaptive_sample_limit` | `number` | - | Composition motion blur adaptive sample limit. | - | `comp.set_motion_blur_adaptive_sample_limit` (`Composition.SetMotionBlurAdaptiveSampleLimit`) |
+| `comps[].motion_blur.samples_per_frame` | `number` | - | Composition motion blur samples per frame. | - | `comp.set_motion_blur_samples_per_frame` (`Composition.SetMotionBlurSamplesPerFrame`) |
 
 ## CompWorkAreaSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].work_area.start` | `number` | - | Composition work area start time in seconds. | - | - |
-| `comps[].work_area.end` | `number` | - | Composition work area end time in seconds. | - | - |
+| `comps[].work_area.start` | `number` | - | Composition work area start time in seconds. | - | `comp.set_work_area` (`Composition.SetWorkArea`) |
+| `comps[].work_area.end` | `number` | - | Composition work area end time in seconds. | - | `comp.set_work_area` (`Composition.SetWorkArea`) |
 
 ## Layer
 
@@ -67,34 +67,34 @@ This reference is generated from the canonical recipe field model.
 | --- | --- | --- | --- | --- | --- |
 | `comps[].layers[].type` | `string` | structural | Layer creation type. | Supported values create the corresponding layer type. | `layer.create_text` (`NewTextLayer`)<br>`layer.create_shape` (`NewShapeLayer`)<br>`layer.create_solid` (`NewSolidLayer`)<br>`layer.create_camera` (`NewCameraLayer`)<br>`layer.create_light` (`NewLightLayer`)<br>`layer.create_null` (`NewNullLayer`)<br>`layer.create_adjustment` (`NewAdjustmentLayer`) |
 | `comps[].layers[].name` | `string` | structural | Layer display name. | - | - |
-| `comps[].layers[].label` | `number` | - | Layer label color index. | - | - |
-| `comps[].layers[].comment` | `string` | - | Layer comment text. | - | - |
-| `comps[].layers[].visible` | `boolean` | - | Layer video visibility switch. | - | - |
-| `comps[].layers[].solo` | `boolean` | - | Layer solo switch. | - | - |
-| `comps[].layers[].locked` | `boolean` | - | Layer lock switch. | - | - |
-| `comps[].layers[].motion_blur` | `boolean` | - | Layer motion blur switch. | - | - |
-| `comps[].layers[].shy` | `boolean` | - | Layer shy switch. | - | - |
-| `comps[].layers[].effects_enabled` | `boolean` | - | Layer effects enable switch. | - | - |
-| `comps[].layers[].audio_enabled` | `boolean` | - | Layer audio enable switch. | - | - |
-| `comps[].layers[].frame_blend_enabled` | `boolean` | - | Layer frame blending switch. | - | - |
-| `comps[].layers[].markers_locked` | `boolean` | - | Layer marker lock switch. | - | - |
-| `comps[].layers[].collapse_transform` | `boolean` | - | Layer collapse transformations switch. | - | - |
-| `comps[].layers[].is_3d` | `boolean` | - | Layer 3D switch. | - | - |
-| `comps[].layers[].is_adjust` | `boolean` | - | Adjustment-layer switch. | - | - |
-| `comps[].layers[].is_null` | `boolean` | - | Null-layer switch. | - | - |
-| `comps[].layers[].is_guide` | `boolean` | - | Guide-layer switch. | - | - |
-| `comps[].layers[].sampling_bicubic` | `boolean` | - | Bicubic sampling switch. | - | - |
-| `comps[].layers[].frame_blend_pixel_motion` | `boolean` | - | Pixel-motion frame blending switch. | - | - |
-| `comps[].layers[].preserve_transparency` | `boolean` | - | Preserve transparency switch. | - | - |
-| `comps[].layers[].quality` | `string` | - | Layer quality mode. | - | - |
-| `comps[].layers[].blending_mode` | `string` | - | Layer blending mode. | - | - |
-| `comps[].layers[].track_matte` | `string` | - | Layer track matte mode. | - | - |
-| `comps[].layers[].auto_orient` | `string` | - | Layer auto-orientation mode. | - | - |
-| `comps[].layers[].start_time` | `number` | - | Layer start time in seconds. | - | - |
-| `comps[].layers[].in_point` | `number` | - | Layer in point in seconds. | - | - |
-| `comps[].layers[].out_point` | `number` | - | Layer out point in seconds. | - | - |
-| `comps[].layers[].parent` | `string` | - | Parent layer name. | - | - |
-| `comps[].layers[].text` | `string` | - | Source text for a text layer. | - | - |
+| `comps[].layers[].label` | `number` | - | Layer label color index. | - | `layer.set_label` (`Layer.SetLabel`) |
+| `comps[].layers[].comment` | `string` | - | Layer comment text. | - | `layer.set_comment` (`Layer.SetComment`) |
+| `comps[].layers[].visible` | `boolean` | - | Layer video visibility switch. | - | `layer.set_visible` (`Layer.SetVisible`) |
+| `comps[].layers[].solo` | `boolean` | - | Layer solo switch. | - | `layer.set_solo` (`Layer.SetSolo`) |
+| `comps[].layers[].locked` | `boolean` | - | Layer lock switch. | - | `layer.set_locked` (`Layer.SetLocked`) |
+| `comps[].layers[].motion_blur` | `boolean` | - | Layer motion blur switch. | - | `layer.set_motion_blur` (`Layer.SetMotionBlur`) |
+| `comps[].layers[].shy` | `boolean` | - | Layer shy switch. | - | `layer.set_shy` (`Layer.SetShy`) |
+| `comps[].layers[].effects_enabled` | `boolean` | - | Layer effects enable switch. | - | `layer.set_effects_enabled` (`Layer.SetEffectsEnabled`) |
+| `comps[].layers[].audio_enabled` | `boolean` | - | Layer audio enable switch. | - | `layer.set_audio_enabled` (`Layer.SetAudioEnabled`) |
+| `comps[].layers[].frame_blend_enabled` | `boolean` | - | Layer frame blending switch. | - | `layer.set_frame_blend_enabled` (`Layer.SetFrameBlendEnabled`) |
+| `comps[].layers[].markers_locked` | `boolean` | - | Layer marker lock switch. | - | `layer.set_markers_locked` (`Layer.SetMarkersLocked`) |
+| `comps[].layers[].collapse_transform` | `boolean` | - | Layer collapse transformations switch. | - | `layer.set_collapse_transform` (`Layer.SetCollapseTransform`) |
+| `comps[].layers[].is_3d` | `boolean` | - | Layer 3D switch. | - | `layer.set_is_3d` (`Layer.SetIs3D`) |
+| `comps[].layers[].is_adjust` | `boolean` | - | Adjustment-layer switch. | - | `layer.set_is_adjust` (`Layer.SetIsAdjust`) |
+| `comps[].layers[].is_null` | `boolean` | - | Null-layer switch. | - | `layer.set_is_null` (`Layer.SetIsNull`) |
+| `comps[].layers[].is_guide` | `boolean` | - | Guide-layer switch. | - | `layer.set_is_guide` (`Layer.SetIsGuide`) |
+| `comps[].layers[].sampling_bicubic` | `boolean` | - | Bicubic sampling switch. | - | `layer.set_sampling_bicubic` (`Layer.SetSamplingBicubic`) |
+| `comps[].layers[].frame_blend_pixel_motion` | `boolean` | - | Pixel-motion frame blending switch. | - | `layer.set_frame_blend_pixel_motion` (`Layer.SetFrameBlendPixelMotion`) |
+| `comps[].layers[].preserve_transparency` | `boolean` | - | Preserve transparency switch. | - | `layer.set_preserve_transparency` (`Layer.SetPreserveTransparency`) |
+| `comps[].layers[].quality` | `string` | - | Layer quality mode. | - | `layer.set_quality` (`Layer.SetQuality`) |
+| `comps[].layers[].blending_mode` | `string` | - | Layer blending mode. | - | `layer.set_blending_mode` (`Layer.SetBlendingMode`) |
+| `comps[].layers[].track_matte` | `string` | - | Layer track matte mode. | - | `layer.set_track_matte` (`Layer.SetTrackMatte`) |
+| `comps[].layers[].auto_orient` | `string` | - | Layer auto-orientation mode. | - | `layer.set_auto_orient` (`Layer.SetAutoOrient`) |
+| `comps[].layers[].start_time` | `number` | - | Layer start time in seconds. | - | `layer.set_start_time` (`Layer.SetStartTime`) |
+| `comps[].layers[].in_point` | `number` | - | Layer in point in seconds. | - | `layer.set_in_point` (`Layer.SetInPoint`) |
+| `comps[].layers[].out_point` | `number` | - | Layer out point in seconds. | - | `layer.set_out_point` (`Layer.SetOutPoint`) |
+| `comps[].layers[].parent` | `string` | - | Parent layer name. | - | `layer.set_parent` (`Layer.SetParent`) |
+| `comps[].layers[].text` | `string` | - | Source text for a text layer. | - | `layer.set_text` (`Layer.SetText`) |
 | `comps[].layers[].text_style` | `object<TextStyleSpec>` | - | Text layer style overrides. | - | - |
 | `comps[].layers[].camera` | `object<CameraSpec>` | - | Camera layer options. | - | - |
 | `comps[].layers[].light` | `object<LightSpec>` | - | Light layer options. | - | - |
@@ -109,50 +109,50 @@ This reference is generated from the canonical recipe field model.
 | --- | --- | --- | --- | --- | --- |
 | `comps[].layers[].text_style.run_index` | `number` | - | Layer text style text run index. | - | - |
 | `comps[].layers[].text_style.paragraph_index` | `number` | - | Layer text style paragraph index. | - | - |
-| `comps[].layers[].text_style.font_size` | `number` | - | Layer text style font size. | - | - |
-| `comps[].layers[].text_style.fill_color` | `array<float64>` | - | Layer text style fill color as RGB channels. | - | - |
-| `comps[].layers[].text_style.tracking` | `number` | - | Layer text style character tracking amount. | - | - |
-| `comps[].layers[].text_style.faux_bold` | `boolean` | - | Layer text style faux bold switch. | - | - |
-| `comps[].layers[].text_style.faux_italic` | `boolean` | - | Layer text style faux italic switch. | - | - |
-| `comps[].layers[].text_style.apply_stroke` | `boolean` | - | Layer text style stroke enable switch. | - | - |
-| `comps[].layers[].text_style.stroke_color` | `array<float64>` | - | Layer text style stroke color as RGB channels. | - | - |
-| `comps[].layers[].text_style.stroke_width` | `number` | - | Layer text style stroke width. | - | - |
-| `comps[].layers[].text_style.justification` | `string` | - | Layer text style paragraph justification mode. | - | - |
+| `comps[].layers[].text_style.font_size` | `number` | - | Layer text style font size. | - | `text.set_run_font_size` (`Layer.SetRunFontSize`) |
+| `comps[].layers[].text_style.fill_color` | `array<float64>` | - | Layer text style fill color as RGB channels. | - | `text.set_run_fill_color` (`Layer.SetRunFillColor`) |
+| `comps[].layers[].text_style.tracking` | `number` | - | Layer text style character tracking amount. | - | `text.set_run_tracking` (`Layer.SetRunTracking`) |
+| `comps[].layers[].text_style.faux_bold` | `boolean` | - | Layer text style faux bold switch. | - | `text.set_run_faux_bold` (`Layer.SetRunFauxBold`) |
+| `comps[].layers[].text_style.faux_italic` | `boolean` | - | Layer text style faux italic switch. | - | `text.set_run_faux_italic` (`Layer.SetRunFauxItalic`) |
+| `comps[].layers[].text_style.apply_stroke` | `boolean` | - | Layer text style stroke enable switch. | - | `text.set_run_apply_stroke` (`Layer.SetRunApplyStroke`) |
+| `comps[].layers[].text_style.stroke_color` | `array<float64>` | - | Layer text style stroke color as RGB channels. | - | `text.set_run_stroke_color` (`Layer.SetRunStrokeColor`) |
+| `comps[].layers[].text_style.stroke_width` | `number` | - | Layer text style stroke width. | - | `text.set_run_stroke_width` (`Layer.SetRunStrokeWidth`) |
+| `comps[].layers[].text_style.justification` | `string` | - | Layer text style paragraph justification mode. | - | `text.set_paragraph_justification` (`Layer.SetParagraphJustification`) |
 
 ## CameraSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].camera.zoom` | `number` | - | Camera zoom value. | - | - |
-| `comps[].layers[].camera.depth_of_field` | `boolean` | - | Depth of field enable switch. | - | - |
-| `comps[].layers[].camera.focus_distance` | `number` | - | Camera focus distance. | - | - |
-| `comps[].layers[].camera.aperture` | `number` | - | Camera aperture. | - | - |
-| `comps[].layers[].camera.blur_level` | `number` | - | Camera blur level. | - | - |
-| `comps[].layers[].camera.iris_shape` | `number` | - | Camera iris shape. | - | - |
-| `comps[].layers[].camera.iris_rotation` | `number` | - | Camera iris rotation. | - | - |
-| `comps[].layers[].camera.iris_roundness` | `number` | - | Camera iris roundness. | - | - |
-| `comps[].layers[].camera.iris_aspect_ratio` | `number` | - | Camera iris aspect ratio. | - | - |
-| `comps[].layers[].camera.iris_diffraction_fringe` | `number` | - | Camera iris diffraction fringe amount. | - | - |
-| `comps[].layers[].camera.iris_highlight_gain` | `number` | - | Camera iris highlight gain. | - | - |
-| `comps[].layers[].camera.iris_highlight_threshold` | `number` | - | Camera iris highlight threshold. | - | - |
-| `comps[].layers[].camera.iris_highlight_saturation` | `number` | - | Camera iris highlight saturation. | - | - |
+| `comps[].layers[].camera.zoom` | `number` | - | Camera zoom value. | - | `camera.set_zoom` (`Layer.SetCameraZoom`) |
+| `comps[].layers[].camera.depth_of_field` | `boolean` | - | Depth of field enable switch. | - | `camera.set_depth_of_field` (`Layer.SetCameraDepthOfField`) |
+| `comps[].layers[].camera.focus_distance` | `number` | - | Camera focus distance. | - | `camera.set_focus_distance` (`Layer.SetCameraFocusDistance`) |
+| `comps[].layers[].camera.aperture` | `number` | - | Camera aperture. | - | `camera.set_aperture` (`Layer.SetCameraAperture`) |
+| `comps[].layers[].camera.blur_level` | `number` | - | Camera blur level. | - | `camera.set_blur_level` (`Layer.SetCameraBlurLevel`) |
+| `comps[].layers[].camera.iris_shape` | `number` | - | Camera iris shape. | - | `camera.set_iris_shape` (`Layer.SetIrisShape`) |
+| `comps[].layers[].camera.iris_rotation` | `number` | - | Camera iris rotation. | - | `camera.set_iris_rotation` (`Layer.SetIrisRotation`) |
+| `comps[].layers[].camera.iris_roundness` | `number` | - | Camera iris roundness. | - | `camera.set_iris_roundness` (`Layer.SetIrisRoundness`) |
+| `comps[].layers[].camera.iris_aspect_ratio` | `number` | - | Camera iris aspect ratio. | - | `camera.set_iris_aspect_ratio` (`Layer.SetIrisAspectRatio`) |
+| `comps[].layers[].camera.iris_diffraction_fringe` | `number` | - | Camera iris diffraction fringe amount. | - | `camera.set_iris_diffraction_fringe` (`Layer.SetIrisDiffractionFringe`) |
+| `comps[].layers[].camera.iris_highlight_gain` | `number` | - | Camera iris highlight gain. | - | `camera.set_iris_highlight_gain` (`Layer.SetIrisHighlightGain`) |
+| `comps[].layers[].camera.iris_highlight_threshold` | `number` | - | Camera iris highlight threshold. | - | `camera.set_iris_highlight_threshold` (`Layer.SetIrisHighlightThreshold`) |
+| `comps[].layers[].camera.iris_highlight_saturation` | `number` | - | Camera iris highlight saturation. | - | `camera.set_iris_highlight_saturation` (`Layer.SetIrisHighlightSaturation`) |
 
 ## LightSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].light.kind` | `string` | - | Light type. | - | - |
-| `comps[].layers[].light.source_layer` | `string` | - | Source layer for environment light data. | - | - |
-| `comps[].layers[].light.intensity` | `number` | - | Light intensity. | - | - |
-| `comps[].layers[].light.color` | `array<float64>` | - | Light color as RGB channels. | - | - |
-| `comps[].layers[].light.casts_shadows` | `boolean` | - | Light shadow-casting switch. | - | - |
-| `comps[].layers[].light.shadow_darkness` | `number` | - | Light shadow darkness. | - | - |
-| `comps[].layers[].light.shadow_diffusion` | `number` | - | Light shadow diffusion. | - | - |
-| `comps[].layers[].light.falloff_type` | `number` | - | Light falloff type. | - | - |
-| `comps[].layers[].light.falloff_start` | `number` | - | Light falloff start distance. | - | - |
-| `comps[].layers[].light.falloff_distance` | `number` | - | Light falloff distance. | - | - |
-| `comps[].layers[].light.cone_angle` | `number` | - | Spotlight cone angle. | - | - |
-| `comps[].layers[].light.cone_feather` | `number` | - | Spotlight cone feather amount. | - | - |
+| `comps[].layers[].light.kind` | `string` | - | Light type. | - | `light.set_kind` (`Layer.SetLightKind`) |
+| `comps[].layers[].light.source_layer` | `string` | - | Source layer for environment light data. | - | `light.set_source_layer` (`Layer.SetLightSource`) |
+| `comps[].layers[].light.intensity` | `number` | - | Light intensity. | - | `light.set_intensity` (`Layer.SetLightIntensity`) |
+| `comps[].layers[].light.color` | `array<float64>` | - | Light color as RGB channels. | - | `light.set_color` (`Layer.SetLightColor`) |
+| `comps[].layers[].light.casts_shadows` | `boolean` | - | Light shadow-casting switch. | - | `light.set_casts_shadows` (`Layer.SetLightCastsShadows`) |
+| `comps[].layers[].light.shadow_darkness` | `number` | - | Light shadow darkness. | - | `light.set_shadow_darkness` (`Layer.SetLightShadowDarkness`) |
+| `comps[].layers[].light.shadow_diffusion` | `number` | - | Light shadow diffusion. | - | `light.set_shadow_diffusion` (`Layer.SetLightShadowDiffusion`) |
+| `comps[].layers[].light.falloff_type` | `number` | - | Light falloff type. | - | `light.set_falloff_type` (`Layer.SetLightFalloffType`) |
+| `comps[].layers[].light.falloff_start` | `number` | - | Light falloff start distance. | - | `light.set_falloff_start` (`Layer.SetLightFalloffStart`) |
+| `comps[].layers[].light.falloff_distance` | `number` | - | Light falloff distance. | - | `light.set_falloff_distance` (`Layer.SetLightFalloffDistance`) |
+| `comps[].layers[].light.cone_angle` | `number` | - | Spotlight cone angle. | - | `light.set_cone_angle` (`Layer.SetLightConeAngle`) |
+| `comps[].layers[].light.cone_feather` | `number` | - | Spotlight cone feather amount. | - | `light.set_cone_feather` (`Layer.SetLightConeFeather`) |
 
 ## ShapeSpec
 
