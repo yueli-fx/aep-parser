@@ -28,6 +28,8 @@ $digestPath = Join-Path $OutDir "digest.json"
 $learningPath = Join-Path $OutDir "learning.md"
 $projectsCsvPath = Join-Path $OutDir "projects.csv"
 $projectPlaybooksCsvPath = Join-Path $OutDir "project_playbooks.csv"
+$compositionsCsvPath = Join-Path $OutDir "compositions.csv"
+$layersCsvPath = Join-Path $OutDir "layers.csv"
 $patternsCsvPath = Join-Path $OutDir "patterns.csv"
 $studyQueueCsvPath = Join-Path $OutDir "study_queue.csv"
 $studyTasksCsvPath = Join-Path $OutDir "study_tasks.csv"
@@ -45,7 +47,7 @@ $manifestPath = Join-Path $OutDir "manifest.json"
 $reportPath = Join-Path $OutDir "report.md"
 $htmlPath = Join-Path $OutDir "report.html"
 
-foreach ($path in @($summaryPath, $corpusPath, $digestPath, $learningPath, $projectsCsvPath, $projectPlaybooksCsvPath, $patternsCsvPath, $studyQueueCsvPath, $studyTasksCsvPath, $recreationBlockersCsvPath, $signalLayersCsvPath, $effectStacksCsvPath, $shapeOperatorsCsvPath, $textAnimatorsCsvPath, $dependencyEdgesCsvPath, $learningActionsCsvPath, $mechanismsCsvPath, $mechanismExamplesCsvPath, $errorsCsvPath, $manifestPath, $reportPath, $htmlPath)) {
+foreach ($path in @($summaryPath, $corpusPath, $digestPath, $learningPath, $projectsCsvPath, $projectPlaybooksCsvPath, $compositionsCsvPath, $layersCsvPath, $patternsCsvPath, $studyQueueCsvPath, $studyTasksCsvPath, $recreationBlockersCsvPath, $signalLayersCsvPath, $effectStacksCsvPath, $shapeOperatorsCsvPath, $textAnimatorsCsvPath, $dependencyEdgesCsvPath, $learningActionsCsvPath, $mechanismsCsvPath, $mechanismExamplesCsvPath, $errorsCsvPath, $manifestPath, $reportPath, $htmlPath)) {
     Require-File -Path $path
 }
 
@@ -56,6 +58,8 @@ $corpusLines = @(Get-Content -LiteralPath $corpusPath | Where-Object { $_.Trim()
 $corpusRecords = @($corpusLines | ForEach-Object { $_ | ConvertFrom-Json })
 $projectRows = @(Import-Csv -LiteralPath $projectsCsvPath)
 $projectPlaybookRows = @(Import-Csv -LiteralPath $projectPlaybooksCsvPath)
+$compositionRows = @(Import-Csv -LiteralPath $compositionsCsvPath)
+$layerRows = @(Import-Csv -LiteralPath $layersCsvPath)
 $patternRows = @(Import-Csv -LiteralPath $patternsCsvPath)
 $studyQueueRows = @(Import-Csv -LiteralPath $studyQueueCsvPath)
 $studyTaskRows = @(Import-Csv -LiteralPath $studyTasksCsvPath)
@@ -107,6 +111,22 @@ if ($projectPlaybookRows.Count -ne [int]$summary.project_count) {
 foreach ($row in $projectPlaybookRows) {
     if ([string]$row.project_path -eq "" -or [string]$row.readiness -eq "" -or [string]$row.overview -eq "" -or [string]$row.ordered_steps -eq "") {
         throw "project_playbooks.csv contains incomplete row: $($row | ConvertTo-Json -Compress)"
+    }
+}
+if ($compositionRows.Count -ne [int]$summary.totals.comp_count) {
+    throw "compositions.csv row count $($compositionRows.Count) does not match summary totals.comp_count $($summary.totals.comp_count)"
+}
+foreach ($row in $compositionRows) {
+    if ([string]$row.project_path -eq "" -or [string]$row.name -eq "" -or [int]$row.width -le 0 -or [int]$row.height -le 0 -or [int]$row.layer_count -lt 0) {
+        throw "compositions.csv contains incomplete row: $($row | ConvertTo-Json -Compress)"
+    }
+}
+if ($layerRows.Count -ne [int]$summary.totals.layer_count) {
+    throw "layers.csv row count $($layerRows.Count) does not match summary totals.layer_count $($summary.totals.layer_count)"
+}
+foreach ($row in $layerRows) {
+    if ([string]$row.project_path -eq "" -or [string]$row.comp_name -eq "" -or [string]$row.type -eq "" -or [string]$row.role -eq "" -or [int]$row.index -lt 0) {
+        throw "layers.csv contains incomplete row: $($row | ConvertTo-Json -Compress)"
     }
 }
 if ($studyQueueRows.Count -ne [int]$summary.project_count) {
@@ -229,6 +249,8 @@ Require-Text -Path $htmlPath -Pattern "manifest\.json"
 Require-Text -Path $htmlPath -Pattern "learning\.md"
 Require-Text -Path $htmlPath -Pattern "projects\.csv"
 Require-Text -Path $htmlPath -Pattern "project_playbooks\.csv"
+Require-Text -Path $htmlPath -Pattern "compositions\.csv"
+Require-Text -Path $htmlPath -Pattern "layers\.csv"
 Require-Text -Path $htmlPath -Pattern "study_queue\.csv"
 Require-Text -Path $htmlPath -Pattern "study_tasks\.csv"
 Require-Text -Path $htmlPath -Pattern "recreation_blockers\.csv"
@@ -246,6 +268,8 @@ Require-Text -Path $htmlPath -Pattern "mechanismFilter"
 Require-Text -Path $htmlPath -Pattern "Study Task Queue"
 Require-Text -Path $htmlPath -Pattern "studyTaskFilter"
 Require-Text -Path $htmlPath -Pattern "Project Playbooks"
+Require-Text -Path $htmlPath -Pattern "Compositions"
+Require-Text -Path $htmlPath -Pattern "Layers"
 Require-Text -Path $htmlPath -Pattern "Recreation Blockers"
 Require-Text -Path $htmlPath -Pattern "Effect Stacks"
 Require-Text -Path $htmlPath -Pattern "Shape Operators"

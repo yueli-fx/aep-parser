@@ -19,6 +19,8 @@ try {
     $learningPath = Join-Path $OutDir "learning.md"
     $projectsCsvPath = Join-Path $OutDir "projects.csv"
     $projectPlaybooksCsvPath = Join-Path $OutDir "project_playbooks.csv"
+    $compositionsCsvPath = Join-Path $OutDir "compositions.csv"
+    $layersCsvPath = Join-Path $OutDir "layers.csv"
     $patternsCsvPath = Join-Path $OutDir "patterns.csv"
     $studyQueueCsvPath = Join-Path $OutDir "study_queue.csv"
     $studyTasksCsvPath = Join-Path $OutDir "study_tasks.csv"
@@ -873,6 +875,45 @@ try {
         Sort-Object @{ Expression = { [int]$_.study_score }; Descending = $true }, project_path |
         Export-Csv -LiteralPath $projectPlaybooksCsvPath -NoTypeInformation -Encoding UTF8
 
+    $compositionRows = @()
+    $layerRowsForCsv = @()
+    foreach ($record in $records) {
+        if ($null -eq $record.facts) {
+            continue
+        }
+        foreach ($comp in @($record.facts.comps)) {
+            $compositionRows += [pscustomobject]@{
+                project_path   = [string]$record.path
+                id             = [uint32]$comp.id
+                name           = [string]$comp.name
+                width          = [int]$comp.width
+                height         = [int]$comp.height
+                frame_rate     = [double]$comp.frame_rate
+                duration       = [double]$comp.duration_seconds
+                layer_count    = [int]$comp.layer_count
+                main_candidate = [bool]$comp.main_candidate
+            }
+        }
+        foreach ($layer in @($record.facts.layers)) {
+            $layerRowsForCsv += [pscustomobject]@{
+                project_path = [string]$record.path
+                comp_name    = [string]$layer.comp_name
+                id           = [uint32]$layer.id
+                index        = [int]$layer.index
+                name         = [string]$layer.name
+                type         = [string]$layer.type
+                role         = [string]$layer.role
+                confidence   = [string]$layer.confidence
+            }
+        }
+    }
+    $compositionRows |
+        Sort-Object project_path, name, id |
+        Export-Csv -LiteralPath $compositionsCsvPath -NoTypeInformation -Encoding UTF8
+    $layerRowsForCsv |
+        Sort-Object project_path, comp_name, index, name |
+        Export-Csv -LiteralPath $layersCsvPath -NoTypeInformation -Encoding UTF8
+
     $errorRowsForCsv = @($records | Where-Object { $_.error } | ForEach-Object {
         [pscustomobject]@{
             path  = [string]$_.path
@@ -1113,7 +1154,7 @@ try {
     [void]$h.AppendLine("</head><body><main>")
     [void]$h.AppendLine("<h1>Technique Corpus Report</h1>")
     [void]$h.AppendLine("<p class=""muted"">input <code>$(Escape-Html $InputPath)</code></p>")
-    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""manifest.json"">manifest.json</a> · <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""project_playbooks.csv"">project_playbooks.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""study_queue.csv"">study_queue.csv</a> · <a href=""study_tasks.csv"">study_tasks.csv</a> · <a href=""recreation_blockers.csv"">recreation_blockers.csv</a> · <a href=""signal_layers.csv"">signal_layers.csv</a> · <a href=""effect_stacks.csv"">effect_stacks.csv</a> · <a href=""shape_operators.csv"">shape_operators.csv</a> · <a href=""text_animators.csv"">text_animators.csv</a> · <a href=""dependency_edges.csv"">dependency_edges.csv</a> · <a href=""learning_actions.csv"">learning_actions.csv</a> · <a href=""mechanisms.csv"">mechanisms.csv</a> · <a href=""mechanism_examples.csv"">mechanism_examples.csv</a> · <a href=""errors.csv"">errors.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
+    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""manifest.json"">manifest.json</a> · <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""project_playbooks.csv"">project_playbooks.csv</a> · <a href=""compositions.csv"">compositions.csv</a> · <a href=""layers.csv"">layers.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""study_queue.csv"">study_queue.csv</a> · <a href=""study_tasks.csv"">study_tasks.csv</a> · <a href=""recreation_blockers.csv"">recreation_blockers.csv</a> · <a href=""signal_layers.csv"">signal_layers.csv</a> · <a href=""effect_stacks.csv"">effect_stacks.csv</a> · <a href=""shape_operators.csv"">shape_operators.csv</a> · <a href=""text_animators.csv"">text_animators.csv</a> · <a href=""dependency_edges.csv"">dependency_edges.csv</a> · <a href=""learning_actions.csv"">learning_actions.csv</a> · <a href=""mechanisms.csv"">mechanisms.csv</a> · <a href=""mechanism_examples.csv"">mechanism_examples.csv</a> · <a href=""errors.csv"">errors.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
     [void]$h.AppendLine("<div class=""grid"">")
     foreach ($metric in @(
         @{ Label = "Projects"; Value = $summary.project_count },
@@ -1167,6 +1208,18 @@ try {
     [void]$h.AppendLine("<section class=""panel"" style=""margin-top:14px""><table><thead><tr><th>Project</th><th>Readiness</th><th>Key Layers</th><th>Ordered Steps</th></tr></thead><tbody>")
     foreach ($playbook in @($projectPlaybookRows | Select-Object -First 40)) {
         [void]$h.AppendLine("<tr><td>$(Escape-Html $playbook.project_path)</td><td>$(Escape-Html $playbook.readiness)</td><td>$(Escape-Html $playbook.key_layers)</td><td>$(Escape-Html $playbook.ordered_steps)</td></tr>")
+    }
+    [void]$h.AppendLine("</tbody></table></section>")
+    [void]$h.AppendLine("<h2 style=""margin-top:28px"">Compositions</h2>")
+    [void]$h.AppendLine("<section class=""panel"" style=""margin-top:14px""><table><thead><tr><th>Project</th><th>Name</th><th>Size</th><th>Duration</th><th>Layers</th></tr></thead><tbody>")
+    foreach ($comp in @($compositionRows | Select-Object -First 100)) {
+        [void]$h.AppendLine("<tr><td>$(Escape-Html $comp.project_path)</td><td>$(Escape-Html $comp.name)</td><td>$($comp.width)x$($comp.height)</td><td>$($comp.duration)</td><td>$($comp.layer_count)</td></tr>")
+    }
+    [void]$h.AppendLine("</tbody></table></section>")
+    [void]$h.AppendLine("<h2 style=""margin-top:28px"">Layers</h2>")
+    [void]$h.AppendLine("<section class=""panel"" style=""margin-top:14px""><table><thead><tr><th>Project</th><th>Comp</th><th>Index</th><th>Name</th><th>Role</th></tr></thead><tbody>")
+    foreach ($layer in @($layerRowsForCsv | Select-Object -First 120)) {
+        [void]$h.AppendLine("<tr><td>$(Escape-Html $layer.project_path)</td><td>$(Escape-Html $layer.comp_name)</td><td>$($layer.index)</td><td>$(Escape-Html $layer.name)</td><td>$(Escape-Html $layer.role)</td></tr>")
     }
     [void]$h.AppendLine("</tbody></table></section>")
     [void]$h.AppendLine("<h2 style=""margin-top:28px"">Recreation Blockers</h2>")
@@ -1421,6 +1474,8 @@ try {
         $learningPath,
         $projectsCsvPath,
         $projectPlaybooksCsvPath,
+        $compositionsCsvPath,
+        $layersCsvPath,
         $patternsCsvPath,
         $studyQueueCsvPath,
         $studyTasksCsvPath,
@@ -1487,6 +1542,8 @@ try {
     Write-Host "learn:   $learningPath"
     Write-Host "projects csv: $projectsCsvPath"
     Write-Host "project playbooks csv: $projectPlaybooksCsvPath"
+    Write-Host "compositions csv: $compositionsCsvPath"
+    Write-Host "layers csv: $layersCsvPath"
     Write-Host "patterns csv: $patternsCsvPath"
     Write-Host "study queue csv: $studyQueueCsvPath"
     Write-Host "study tasks csv: $studyTasksCsvPath"
