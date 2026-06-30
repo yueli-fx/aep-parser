@@ -642,7 +642,7 @@ Current:
 - `scripts\technique_showcase_report.ps1` is the self-hosted corpus dashboard.
   It runs explain-mode corpus analysis once with `-summary-out`, then writes
   `summary.json`, `corpus.jsonl`, `digest.json`, `learning.md`, `projects.csv`,
-  `patterns.csv`, `study_queue.csv`, `report.md`, and self-contained
+  `patterns.csv`, `study_queue.csv`, `manifest.json`, `report.md`, and self-contained
   `report.html` under the selected output directory.
   Per-file parse/profile errors no longer abort the report; they remain visible
   as error records while successful projects still feed the learning artifacts.

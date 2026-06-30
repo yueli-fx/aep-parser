@@ -29,15 +29,17 @@ $learningPath = Join-Path $OutDir "learning.md"
 $projectsCsvPath = Join-Path $OutDir "projects.csv"
 $patternsCsvPath = Join-Path $OutDir "patterns.csv"
 $studyQueueCsvPath = Join-Path $OutDir "study_queue.csv"
+$manifestPath = Join-Path $OutDir "manifest.json"
 $reportPath = Join-Path $OutDir "report.md"
 $htmlPath = Join-Path $OutDir "report.html"
 
-foreach ($path in @($summaryPath, $corpusPath, $digestPath, $learningPath, $projectsCsvPath, $patternsCsvPath, $studyQueueCsvPath, $reportPath, $htmlPath)) {
+foreach ($path in @($summaryPath, $corpusPath, $digestPath, $learningPath, $projectsCsvPath, $patternsCsvPath, $studyQueueCsvPath, $manifestPath, $reportPath, $htmlPath)) {
     Require-File -Path $path
 }
 
 $summary = Get-Content -Raw -LiteralPath $summaryPath | ConvertFrom-Json
 $digest = Get-Content -Raw -LiteralPath $digestPath | ConvertFrom-Json
+$manifest = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
 $corpusLines = @(Get-Content -LiteralPath $corpusPath | Where-Object { $_.Trim() -ne "" })
 $corpusRecords = @($corpusLines | ForEach-Object { $_ | ConvertFrom-Json })
 $projectRows = @(Import-Csv -LiteralPath $projectsCsvPath)
@@ -56,6 +58,18 @@ if ($corpusLines.Count -ne $expectedCorpusLines) {
 }
 if ([int]$digest.project_count -ne [int]$summary.project_count) {
     throw "digest project_count $($digest.project_count) does not match summary project_count $($summary.project_count)"
+}
+if ([int]$manifest.project_count -ne [int]$summary.project_count) {
+    throw "manifest project_count $($manifest.project_count) does not match summary project_count $($summary.project_count)"
+}
+if ([int]$manifest.error_count -ne [int]$summary.error_count) {
+    throw "manifest error_count $($manifest.error_count) does not match summary error_count $($summary.error_count)"
+}
+if ($null -eq $manifest.artifacts -or @($manifest.artifacts).Count -lt 8) {
+    throw "manifest has no artifact inventory"
+}
+if ($null -eq $manifest.git -or [string]$manifest.git.commit -eq "") {
+    throw "manifest has no git commit"
 }
 if ($null -eq $digest.patterns -or @($digest.patterns).Count -eq 0) {
     throw "digest has no pattern entries"
@@ -95,6 +109,7 @@ Require-Text -Path $reportPath -Pattern "^## Study Queue$"
 Require-Text -Path $reportPath -Pattern "Step [0-9]+:"
 Require-Text -Path $htmlPath -Pattern "Technique Corpus Report"
 Require-Text -Path $htmlPath -Pattern "Step [0-9]+:"
+Require-Text -Path $htmlPath -Pattern "manifest\.json"
 Require-Text -Path $htmlPath -Pattern "learning\.md"
 Require-Text -Path $htmlPath -Pattern "projects\.csv"
 Require-Text -Path $htmlPath -Pattern "study_queue\.csv"

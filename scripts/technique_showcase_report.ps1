@@ -19,6 +19,7 @@ try {
     $projectsCsvPath = Join-Path $OutDir "projects.csv"
     $patternsCsvPath = Join-Path $OutDir "patterns.csv"
     $studyQueueCsvPath = Join-Path $OutDir "study_queue.csv"
+    $manifestPath = Join-Path $OutDir "manifest.json"
     $reportPath = Join-Path $OutDir "report.md"
     $htmlPath = Join-Path $OutDir "report.html"
 
@@ -123,6 +124,32 @@ try {
         }
         [void]$Builder.AppendLine("</tbody></table>")
         [void]$Builder.AppendLine("</section>")
+    }
+
+    function Get-GitValue {
+        param([string[]]$GitArgs)
+        $value = & git @GitArgs 2>$null
+        if ($LASTEXITCODE -ne 0) {
+            return ""
+        }
+        return ([string]$value).Trim()
+    }
+
+    function Get-ArtifactRows {
+        param([array]$Paths)
+        $rows = @()
+        foreach ($path in $Paths) {
+            if (-not (Test-Path -LiteralPath $path)) {
+                continue
+            }
+            $item = Get-Item -LiteralPath $path
+            $rows += [ordered]@{
+                name  = [string]$item.Name
+                path  = [string]$path
+                bytes = [int64]$item.Length
+            }
+        }
+        return $rows
     }
 
     function Get-RepresentativeProjects {
@@ -612,7 +639,7 @@ try {
     [void]$h.AppendLine("</head><body><main>")
     [void]$h.AppendLine("<h1>Technique Corpus Report</h1>")
     [void]$h.AppendLine("<p class=""muted"">input <code>$(Escape-Html $InputPath)</code></p>")
-    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""study_queue.csv"">study_queue.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
+    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""manifest.json"">manifest.json</a> · <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""study_queue.csv"">study_queue.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
     [void]$h.AppendLine("<div class=""grid"">")
     foreach ($metric in @(
         @{ Label = "Projects"; Value = $summary.project_count },
@@ -833,6 +860,61 @@ try {
     [void]$h.AppendLine("</main></body></html>")
     $h.ToString() | Set-Content -Path $htmlPath -Encoding UTF8
 
+    $artifactPaths = @(
+        $summaryPath,
+        $corpusPath,
+        $digestPath,
+        $learningPath,
+        $projectsCsvPath,
+        $patternsCsvPath,
+        $studyQueueCsvPath,
+        $reportPath,
+        $htmlPath
+    )
+    $gitStatus = Get-GitValue -GitArgs @("status", "--short")
+    $commandParts = @(
+        "pwsh",
+        "-NoProfile",
+        "-File",
+        "scripts\technique_showcase_report.ps1",
+        "-InputPath",
+        $InputPath,
+        "-OutDir",
+        $OutDir
+    )
+    if ($Limit -gt 0) {
+        $commandParts += @("-Limit", "$Limit")
+    }
+    if ($Verify) {
+        $commandParts += "-Verify"
+    }
+    if ($Open) {
+        $commandParts += "-Open"
+    }
+
+    $manifest = [ordered]@{
+        schema_version   = 1
+        generated_at_utc = [DateTime]::UtcNow.ToString("o")
+        input_path       = $InputPath
+        out_dir          = $OutDir
+        mode             = "explain"
+        recursive        = $true
+        limit            = [int]$Limit
+        command          = ($commandParts -join " ")
+        go_exit_code     = [int]$goExitCode
+        scan_seconds     = [double]$scanSeconds
+        project_count    = [int]$summary.project_count
+        error_count      = [int]$errorCount
+        pattern_count    = [int]@($digest.patterns).Count
+        git              = [ordered]@{
+            commit         = Get-GitValue -GitArgs @("rev-parse", "--short", "HEAD")
+            branch         = Get-GitValue -GitArgs @("branch", "--show-current")
+            worktree_dirty = ($gitStatus -ne "")
+        }
+        artifacts        = @(Get-ArtifactRows -Paths $artifactPaths)
+    }
+    $manifest | ConvertTo-Json -Depth 6 | Set-Content -Path $manifestPath -Encoding UTF8
+
     Write-Host "summary: $summaryPath"
     Write-Host "corpus:  $corpusPath"
     Write-Host "digest:  $digestPath"
@@ -840,6 +922,7 @@ try {
     Write-Host "projects csv: $projectsCsvPath"
     Write-Host "patterns csv: $patternsCsvPath"
     Write-Host "study queue csv: $studyQueueCsvPath"
+    Write-Host "manifest: $manifestPath"
     Write-Host "report:  $reportPath"
     Write-Host "html:    $htmlPath"
     if ($Verify) {
