@@ -620,7 +620,7 @@ Done:
 - `cmd/aeptechnique` corpus mode is implemented:
   `-in <dir-or-file> -mode portrait -corpus -recursive [-limit N]` emits
   deterministic JSONL records, one per `.aep`, and continues across per-file
-  build failures.
+  build failures. `-summary` emits aggregate counts instead of JSONL.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven
@@ -637,6 +637,10 @@ Current:
   surfaces 12 comps, 61 layers, 41 effects, 109 dependency edges, and
   `kinetic_text` / `precomp_assembly` / `effect_driven_layer` /
   `shape_operator_stack` / `controller_rig` hints.
+- `cmd/aeptechnique -in flightdeck\showcase -mode portrait -corpus -recursive
+  -limit 3 -summary` produces an aggregate report with 3 projects, 14 comps,
+  69 layers, 41 effects, 207 shape operators, and hint counts across the
+  sample batch.
 - Recipe IR coverage for the current comp and layer strategy matrices is
   complete: comp settings have object-level and field-level profile checks,
   authored-layer examples carry `expected_profile.layers[]`, camera/light

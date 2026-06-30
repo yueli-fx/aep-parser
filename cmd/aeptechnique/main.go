@@ -29,6 +29,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 	corpusMode := fs.Bool("corpus", false, "emit one JSONL record per discovered project")
 	recursive := fs.Bool("recursive", false, "discover .aep files recursively when -in is a directory")
 	limit := fs.Int("limit", 0, "maximum number of discovered projects to process; 0 means no limit")
+	summaryMode := fs.Bool("summary", false, "emit a single aggregate JSON summary in corpus mode")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
@@ -44,7 +45,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return 2
 	}
 	if *corpusMode {
-		return runCorpus(*input, *mode, *recursive, *limit, stdout, stderr)
+		return runCorpus(*input, *mode, *recursive, *limit, *summaryMode, stdout, stderr)
 	}
 
 	output, code := buildOutput(*input, *mode, stderr)
@@ -66,6 +67,36 @@ type corpusRecord struct {
 	Facts    *technique.FactSet  `json:"facts,omitempty"`
 	Portrait *technique.Portrait `json:"portrait,omitempty"`
 	Error    string              `json:"error,omitempty"`
+}
+
+type corpusSummary struct {
+	SchemaVersion int                          `json:"schema_version"`
+	Mode          string                       `json:"mode"`
+	ProjectCount  int                          `json:"project_count"`
+	ErrorCount    int                          `json:"error_count,omitempty"`
+	Totals        technique.FingerprintSummary `json:"totals"`
+	HintCounts    map[string]int               `json:"hint_counts"`
+	EffectCounts  map[string]int               `json:"effect_counts"`
+	ShapeFamilies map[string]int               `json:"shape_families"`
+	TextAnimators map[string]int               `json:"text_animators"`
+	LayerRoles    map[string]int               `json:"layer_roles"`
+	GraphEdges    map[string]int               `json:"graph_edges"`
+}
+
+func newCorpusSummary(mode string) *corpusSummary {
+	return &corpusSummary{
+		SchemaVersion: technique.SchemaVersion,
+		Mode:          mode,
+		Totals: technique.FingerprintSummary{
+			LayerRoleCounts: map[string]int{},
+		},
+		HintCounts:    map[string]int{},
+		EffectCounts:  map[string]int{},
+		ShapeFamilies: map[string]int{},
+		TextAnimators: map[string]int{},
+		LayerRoles:    map[string]int{},
+		GraphEdges:    map[string]int{},
+	}
 }
 
 func buildOutput(input, mode string, stderr io.Writer) (any, int) {
@@ -100,7 +131,7 @@ func buildOutput(input, mode string, stderr io.Writer) (any, int) {
 	}
 }
 
-func runCorpus(input, mode string, recursive bool, limit int, stdout, stderr io.Writer) int {
+func runCorpus(input, mode string, recursive bool, limit int, summaryMode bool, stdout, stderr io.Writer) int {
 	paths, err := discoverAEPs(input, recursive)
 	if err != nil {
 		fmt.Fprintln(stderr, err)
@@ -110,23 +141,36 @@ func runCorpus(input, mode string, recursive bool, limit int, stdout, stderr io.
 		paths = paths[:limit]
 	}
 	enc := json.NewEncoder(stdout)
+	summary := newCorpusSummary(mode)
 	hadError := false
 	for _, path := range paths {
 		record := corpusRecord{Path: path, Mode: mode}
 		output, code := buildOutput(path, mode, stderr)
 		if code != 0 {
 			hadError = true
+			summary.ErrorCount++
 			record.Error = fmt.Sprintf("build failed with exit code %d", code)
 		} else {
 			switch value := output.(type) {
 			case *technique.FactSet:
 				record.Facts = value
+				addFactsToSummary(summary, value)
 			case *technique.Portrait:
 				record.Portrait = value
+				addPortraitToSummary(summary, value)
 			}
 		}
-		if err := enc.Encode(record); err != nil {
-			fmt.Fprintf(stderr, "jsonl: %v\n", err)
+		if !summaryMode {
+			if err := enc.Encode(record); err != nil {
+				fmt.Fprintf(stderr, "jsonl: %v\n", err)
+				return 1
+			}
+		}
+	}
+	if summaryMode {
+		enc.SetIndent("", "  ")
+		if err := enc.Encode(summary); err != nil {
+			fmt.Fprintf(stderr, "json: %v\n", err)
 			return 1
 		}
 	}
@@ -134,6 +178,71 @@ func runCorpus(input, mode string, recursive bool, limit int, stdout, stderr io.
 		return 1
 	}
 	return 0
+}
+
+func addFactsToSummary(summary *corpusSummary, facts *technique.FactSet) {
+	if facts == nil {
+		return
+	}
+	summary.ProjectCount++
+	summary.Totals.CompCount += facts.Summary.CompCount
+	summary.Totals.LayerCount += facts.Summary.LayerCount
+	summary.Totals.EffectCount += facts.Summary.EffectCount
+	summary.Totals.TextLayerCount += facts.Summary.TextLayerCount
+	summary.Totals.ShapeLayerCount += facts.Summary.ShapeLayerCount
+	summary.Totals.TextAnimatorCount += len(facts.TextAnimators)
+	summary.Totals.ShapeOperatorCount += len(facts.ShapeOperators)
+	summary.Totals.DependencyCount += len(facts.Dependencies)
+	summary.Totals.UnknownCount += len(facts.Unknowns)
+	for _, layer := range facts.Layers {
+		if layer.Role != "" {
+			summary.LayerRoles[layer.Role]++
+			summary.Totals.LayerRoleCounts[layer.Role]++
+		}
+	}
+	for _, effect := range facts.Effects {
+		summary.EffectCounts[effect.MatchName]++
+	}
+	for _, operator := range facts.ShapeOperators {
+		summary.ShapeFamilies[operator.Family]++
+	}
+	for _, animator := range facts.TextAnimators {
+		summary.TextAnimators[animator.PropertyKind]++
+	}
+	for _, dep := range facts.Dependencies {
+		summary.GraphEdges[dep.Relation]++
+	}
+}
+
+func addPortraitToSummary(summary *corpusSummary, portrait *technique.Portrait) {
+	if portrait == nil {
+		return
+	}
+	summary.ProjectCount++
+	summary.Totals.CompCount += portrait.Fingerprint.CompCount
+	summary.Totals.LayerCount += portrait.Fingerprint.LayerCount
+	summary.Totals.EffectCount += portrait.Fingerprint.EffectCount
+	summary.Totals.TextLayerCount += portrait.Fingerprint.TextLayerCount
+	summary.Totals.ShapeLayerCount += portrait.Fingerprint.ShapeLayerCount
+	summary.Totals.TextAnimatorCount += portrait.Fingerprint.TextAnimatorCount
+	summary.Totals.ShapeOperatorCount += portrait.Fingerprint.ShapeOperatorCount
+	summary.Totals.DependencyCount += portrait.Fingerprint.DependencyCount
+	summary.Totals.UnknownCount += portrait.Fingerprint.UnknownCount
+	addCounts(summary.LayerRoles, portrait.Fingerprint.LayerRoleCounts)
+	addCounts(summary.Totals.LayerRoleCounts, portrait.Fingerprint.LayerRoleCounts)
+	addCounts(summary.EffectCounts, portrait.Mechanisms.EffectMatchCounts)
+	addCounts(summary.ShapeFamilies, portrait.Mechanisms.ShapeFamilyCounts)
+	addCounts(summary.TextAnimators, portrait.Mechanisms.TextAnimatorKindCounts)
+	addCounts(summary.GraphEdges, portrait.Graph.RelationCounts)
+	for _, hint := range portrait.TechniqueHints {
+		summary.HintCounts[hint.ID]++
+	}
+}
+
+func addCounts(dst, src map[string]int) {
+	for key, value := range src {
+		dst[key] += value
+	}
 }
 
 func discoverAEPs(input string, recursive bool) ([]string, error) {

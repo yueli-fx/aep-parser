@@ -11,6 +11,7 @@ Extend `cmd/aeptechnique` with corpus JSONL mode:
 
 ```powershell
 go run ./cmd/aeptechnique -in <dir-or-file> -mode portrait -corpus -recursive
+go run ./cmd/aeptechnique -in <dir-or-file> -mode portrait -corpus -recursive -summary
 ```
 
 For every discovered `.aep`, emit one JSON object per line:
@@ -20,6 +21,18 @@ For every discovered `.aep`, emit one JSON object per line:
 - `portrait` for `-mode portrait`
 - `facts` for `-mode facts`
 - `error` when a project cannot be opened or profiled
+
+With `-summary`, emit one aggregate JSON object instead of JSONL:
+
+- `project_count`
+- `error_count`
+- aggregate fingerprint totals
+- hint counts
+- effect match counts
+- shape family counts
+- text animator kind counts
+- layer role counts
+- graph edge relation counts
 
 The command should continue after per-file failures and return exit code `1`
 when any record has an error. Usage or flag errors still return `2`.
@@ -32,6 +45,7 @@ when any record has an error. Usage or flag errors still return `2`.
 - Discovered paths are sorted for deterministic output.
 - `-limit N` processes at most N discovered files when N is positive.
 - Corpus mode does not retain parsed projects after each record is emitted.
+- Summary mode aggregates the emitted records and keeps only counts.
 
 ## Non-Goals
 

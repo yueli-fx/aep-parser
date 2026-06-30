@@ -136,6 +136,33 @@ func TestRunRejectsDirectoryCorpusWithoutRecursive(t *testing.T) {
 	}
 }
 
+func TestRunEmitsCorpusSummary(t *testing.T) {
+	fixture := filepath.Join("..", "..", "flightdeck", "showcase", "text", "text.aep")
+	root := t.TempDir()
+	writeFixtureCopy(t, fixture, filepath.Join(root, "one.aep"))
+	writeFixtureCopy(t, fixture, filepath.Join(root, "two.aep"))
+
+	var stdout, stderr bytes.Buffer
+	code := run([]string{"-in", root, "-mode", "portrait", "-corpus", "-recursive", "-summary"}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("run exit = %d, stderr=%s", code, stderr.String())
+	}
+
+	var summary corpusSummary
+	if err := json.Unmarshal(stdout.Bytes(), &summary); err != nil {
+		t.Fatalf("json.Unmarshal: %v\nstdout=%s", err, stdout.String())
+	}
+	if summary.ProjectCount != 2 || summary.ErrorCount != 0 {
+		t.Fatalf("summary counts = %+v", summary)
+	}
+	if summary.Totals.LayerCount != 4 || summary.Totals.ShapeOperatorCount == 0 {
+		t.Fatalf("summary totals = %+v", summary.Totals)
+	}
+	if summary.HintCounts["shape_operator_stack"] != 2 {
+		t.Fatalf("hint counts = %+v", summary.HintCounts)
+	}
+}
+
 func writeFixtureCopy(t *testing.T, src, dst string) {
 	t.Helper()
 	data, err := os.ReadFile(src)
