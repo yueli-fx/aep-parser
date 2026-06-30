@@ -18,6 +18,7 @@ pwsh -NoProfile -File scripts\technique_showcase_report.ps1 -Limit 3
 pwsh -NoProfile -File scripts\technique_showcase_report.ps1 -Limit 3 -Verify
 pwsh -NoProfile -File scripts\technique_showcase_report.ps1 -Open
 pwsh -NoProfile -File scripts\verify_technique_report.ps1 -OutDir tmp\technique_showcase_report
+pwsh -NoProfile -File scripts\compare_technique_reports.ps1 -BaseDir tmp\old_report -NewDir tmp\technique_showcase_report
 ```
 
 For every discovered `.aep`, emit one JSON object per line:
@@ -111,6 +112,12 @@ projects by readiness and signal density so large corpora have an immediate
 review order. `manifest.json` records the input path, git revision, scan timing,
 project/error counts, and generated artifact inventory for repeatable self-hosted
 runs.
+
+`scripts/compare_technique_reports.ps1` compares two generated report
+directories and writes `compare.json` plus `compare.md`. It reports scalar
+changes such as project/error totals and count-map changes for readiness,
+patterns, archetypes, hints, plugin effects, effects, shapes, text animators,
+layer roles, and graph edges.
 
 ## Non-Goals
 

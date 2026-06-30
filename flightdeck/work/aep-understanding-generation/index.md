@@ -656,6 +656,10 @@ Current:
   deterministic recreation steps. Pattern playbooks now include the common
   recreation-step distribution for each repeated technique pattern, and the
   study queue ranks projects by readiness and signal density.
+- `scripts\compare_technique_reports.ps1` compares two generated report
+  directories and writes `compare.json` / `compare.md` for scalar totals and
+  count-map deltas across readiness, patterns, effects, plugin effects, shapes,
+  text animators, layer roles, and graph edges.
 - Recipe IR coverage for the current comp and layer strategy matrices is
   complete: comp settings have object-level and field-level profile checks,
   authored-layer examples carry `expected_profile.layers[]`, camera/light
