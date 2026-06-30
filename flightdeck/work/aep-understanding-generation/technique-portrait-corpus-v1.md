@@ -16,6 +16,7 @@ go run ./cmd/aeptechnique -in <dir-or-file> -mode explain -corpus -recursive -ou
 go run ./cmd/aeptechnique -in <dir-or-file> -mode explain -corpus -recursive
 pwsh -NoProfile -File scripts\technique_showcase_report.ps1 -Limit 3
 pwsh -NoProfile -File scripts\technique_showcase_report.ps1 -Open
+pwsh -NoProfile -File scripts\verify_technique_report.ps1 -OutDir tmp\technique_showcase_report
 ```
 
 For every discovered `.aep`, emit one JSON object per line:
@@ -77,6 +78,9 @@ It defaults to `flightdeck\showcase` and writes generated output under
 - `report.html`
 
 Passing `-Open` opens the generated HTML report after writing all files.
+`scripts/verify_technique_report.ps1` validates that all generated artifacts
+exist, that `summary.json`, `corpus.jsonl`, and `digest.json` agree on project
+counts, and that the human reports contain the expected learning sections.
 
 The report script now uses `-mode explain`, so per-project cards include
 deterministic recreation readiness, archetype labels, and technique notes in
