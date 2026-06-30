@@ -2045,6 +2045,20 @@
           "verify": "roundtrip",
           "minver": "2020",
           "boundary": "visually inert on a plain 2D text layer (needs per-character 3D, not yet supported); value is write-only round-trip, not render-gated"
+        },
+        {
+          "key": "text_animator.add_stroke_color",
+          "query": "AddTextStrokeColorAnimator",
+          "status": "supported",
+          "symbol": "AddTextStrokeColorAnimator",
+          "domain": "text",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "boundary": "the text must carry a stroke to be visible; typed parameter accessors are not yet wired (tune via Reopen)",
+          "gate": [
+            "TestTextNeighborAnimators_AEShipGate_AE2020",
+            "TestTextNeighborAnimators_AEShipGate_AE2025"
+          ]
         }
       ],
       "x-aep-example": "examples/recipes/minimal-text-animator-character-offset.json"
@@ -2072,7 +2086,8 @@
         "stroke_width",
         "skew",
         "rotation_x",
-        "rotation_y"
+        "rotation_y",
+        "stroke_color"
       ],
       "x-aep-example": "examples/recipes/minimal-text-animator-character-offset.json"
     },
@@ -2084,7 +2099,7 @@
       "type": "object",
       "go_type": "interface {}",
       "description": "Text animator property value.",
-      "x-aep-validation": "Opacity, rotation, tracking, character_offset, fill_opacity, stroke_opacity, stroke_width, skew, rotation_x, and rotation_y values must be numbers; position and scale values must be 3-number arrays; color values must be 3- or 4-number arrays.",
+      "x-aep-validation": "Opacity, rotation, tracking, character_offset, fill_opacity, stroke_opacity, stroke_width, skew, rotation_x, and rotation_y values must be numbers; position and scale values must be 3-number arrays; color and stroke_color values must be 3- or 4-number arrays.",
       "x-aep-example": "examples/recipes/minimal-text-animator-character-offset.json"
     },
     {

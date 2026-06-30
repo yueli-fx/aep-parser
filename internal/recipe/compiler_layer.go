@@ -548,6 +548,21 @@ func applyTextAnimators(layer *aep.Layer, animators []TextAnimatorSpec) error {
 			if err := applyTextRangeOffsetKeyframes(layer, animator); err != nil {
 				return err
 			}
+		case "stroke_color":
+			value, ok := numericSliceValue(animator.Value)
+			if !ok || (len(value) != 3 && len(value) != 4) {
+				return fmt.Errorf("text_animators[%d].value must be a 3- or 4-number array", i)
+			}
+			if animator.RangeStart == nil || animator.RangeEnd == nil || animator.RangeOffset == nil {
+				return fmt.Errorf("text_animators[%d] range_start, range_end, and range_offset are required", i)
+			}
+			color := rgbaColor(value)
+			if _, err := aep.AddTextStrokeColorAnimator(layer, color[0], color[1], color[2], color[3], *animator.RangeStart, *animator.RangeEnd, *animator.RangeOffset); err != nil {
+				return err
+			}
+			if err := applyTextRangeOffsetKeyframes(layer, animator); err != nil {
+				return err
+			}
 		case "tracking":
 			value, ok := animator.Value.(float64)
 			if !ok {

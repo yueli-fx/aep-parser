@@ -3224,7 +3224,8 @@
         "text_animator.add_stroke_width",
         "text_animator.add_skew",
         "text_animator.add_rotation_x",
-        "text_animator.add_rotation_y"
+        "text_animator.add_rotation_y",
+        "text_animator.add_stroke_color"
       ],
       "example": "examples/recipes/minimal-text-animator-character-offset.json"
     },
@@ -3253,7 +3254,8 @@
         "stroke_width",
         "skew",
         "rotation_x",
-        "rotation_y"
+        "rotation_y",
+        "stroke_color"
       ],
       "example": "examples/recipes/minimal-text-animator-character-offset.json"
     },
@@ -3398,7 +3400,7 @@
       "type": "any",
       "go_type": "interface {}",
       "summary": "Text animator property value.",
-      "validation": "Opacity, rotation, tracking, character_offset, fill_opacity, stroke_opacity, stroke_width, skew, rotation_x, and rotation_y values must be numbers; position and scale values must be 3-number arrays; color values must be 3- or 4-number arrays.",
+      "validation": "Opacity, rotation, tracking, character_offset, fill_opacity, stroke_opacity, stroke_width, skew, rotation_x, and rotation_y values must be numbers; position and scale values must be 3-number arrays; color and stroke_color values must be 3- or 4-number arrays.",
       "example": "examples/recipes/minimal-text-animator-character-offset.json"
     },
     "comps[].layers[].text_style": {

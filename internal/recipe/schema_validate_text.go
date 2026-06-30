@@ -278,8 +278,10 @@ func validateTextAnimator(animator TextAnimatorSpec, path string, recordCapabili
 		recordCapability("AddTextRotationXAnimator", path)
 	case "rotation_y":
 		recordCapability("AddTextRotationYAnimator", path)
+	case "stroke_color":
+		recordCapability("AddTextStrokeColorAnimator", path)
 	default:
-		addRefusal("unsupported_text_animator_property", path+".property", "text animator property must be opacity, position, scale, rotation, color, tracking, character_offset, fill_opacity, stroke_opacity, stroke_width, skew, rotation_x, or rotation_y")
+		addRefusal("unsupported_text_animator_property", path+".property", "text animator property must be opacity, position, scale, rotation, color, tracking, character_offset, fill_opacity, stroke_opacity, stroke_width, skew, rotation_x, rotation_y, or stroke_color")
 	}
 	if animator.Value == nil {
 		addRefusal("missing_text_animator_value", path+".value", "text animator value is required")
@@ -303,10 +305,10 @@ func validateTextAnimator(animator TextAnimatorSpec, path string, recordCapabili
 			if !ok || len(values) != 3 {
 				addRefusal("invalid_text_animator_value", path+".value", "text animator scale value must be a 3-number array")
 			}
-		case "color":
+		case "color", "stroke_color":
 			values, ok := numericSliceValue(animator.Value)
 			if !ok {
-				addRefusal("invalid_text_animator_value", path+".value", "text animator color value must be a 3- or 4-number array")
+				addRefusal("invalid_text_animator_value", path+".value", "text animator "+animator.Property+" value must be a 3- or 4-number array")
 			} else {
 				validateColor(values, path+".value", "invalid_text_animator_value", addRefusal)
 			}
