@@ -22,6 +22,8 @@ func run(args []string, stdout, stderr io.Writer) int {
 	switch args[0] {
 	case "assess":
 		return runAssess(args[1:], stdout, stderr)
+	case "convert":
+		return runConvert(args[1:], stdout, stderr)
 	default:
 		fmt.Fprintf(stderr, "unknown command %q\n", args[0])
 		return 2
@@ -67,6 +69,52 @@ func runAssess(args []string, stdout, stderr io.Writer) int {
 	}
 	fmt.Fprint(stdout, string(data))
 	return statusCode(report.Summary.Status)
+}
+
+func runConvert(args []string, stdout, stderr io.Writer) int {
+	fs := flag.NewFlagSet("aepmigrate convert", flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	input := fs.String("in", "", "source .aep path")
+	targetRaw := fs.String("target", "", "target AE version: AE2020, AE2022, or AE2025")
+	outPath := fs.String("out", "", "target .aep output path")
+	reportPath := fs.String("report", "", "JSON migration report output path")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	if *input == "" || *targetRaw == "" || *outPath == "" || *reportPath == "" {
+		fmt.Fprintln(stderr, "usage: aepmigrate convert -in source.aep -target AE2025 -out migrated.aep -report report.json")
+		return 2
+	}
+	target, err := aepmigrate.ParseVersionLabel(*targetRaw)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 2
+	}
+	report, err := aepmigrate.Convert(aepmigrate.ConvertOptions{InputPath: *input, OutputPath: *outPath, Target: target})
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	if err := writeJSONReport(*reportPath, report); err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	if report.Summary.Status == aepmigrate.StatusBlocked {
+		fmt.Fprintf(stdout, "migration convert blocked: %s\n", *reportPath)
+		return 1
+	}
+	fmt.Fprintf(stdout, "migration convert: %s\n", *outPath)
+	fmt.Fprintf(stdout, "migration report: %s\n", *reportPath)
+	return statusCode(report.Summary.Status)
+}
+
+func writeJSONReport(path string, report aepmigrate.Report) error {
+	data, err := json.MarshalIndent(report, "", "  ")
+	if err != nil {
+		return err
+	}
+	data = append(data, '\n')
+	return os.WriteFile(path, data, 0o644)
 }
 
 func statusCode(status aepmigrate.Status) int {

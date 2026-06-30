@@ -67,6 +67,9 @@ Phase 0 export-surface audit and contract lock before extracting
 - `versioned-aep-migration-assess-plan.md` — first implementation plan for
   read-only version migration assessment via `internal/aepmigrate` and
   `cmd/aepmigrate assess`.
+- `versioned-aep-migration-convert-plan.md` — first conservative convert slice:
+  target-version skeleton rebuild for no-layer comp projects, with layer-bearing
+  projects blocked before output.
 - `flightdeck/knowledge/techniques/understand-a-project.md` — existing
   reference-project internalization workflow.
 - `flightdeck/knowledge/techniques/fx-techniques.md` — current technique
@@ -678,6 +681,11 @@ Current:
   and `cmd/aepmigrate assess`. It detects/normalizes source and target version
   labels, builds a stable profile, reports first-slice compatibility entries,
   and blocks AE2025 explicit matte downgrades to AE2020/AE2022.
+- Versioned AEP migration convert first slice is implemented as
+  `cmd/aepmigrate convert`. It retargets no-layer composition skeleton projects
+  to AE2020/AE2022/AE2025, preserving comp name/size/frame-rate/duration through
+  target-version writers. Source projects with layers are intentionally blocked
+  before output so conversion cannot silently drop layer content.
 - Recipe IR coverage for the current comp and layer strategy matrices is
   complete: comp settings have object-level and field-level profile checks,
   authored-layer examples carry `expected_profile.layers[]`, camera/light

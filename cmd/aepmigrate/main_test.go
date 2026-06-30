@@ -48,6 +48,47 @@ func TestRunRejectsMissingAssessInput(t *testing.T) {
 	}
 }
 
+func TestRunConvertWritesOutputAndReport(t *testing.T) {
+	input := writeTempProjectWithOneComp(t, aep.TargetAE2020)
+	outPath := filepath.Join(t.TempDir(), "converted.aep")
+	reportPath := filepath.Join(t.TempDir(), "convert.json")
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"convert", "-in", input, "-target", "AE2025", "-out", outPath, "-report", reportPath}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("run convert = %d, stderr=%s", code, stderr.String())
+	}
+	if _, err := os.Stat(outPath); err != nil {
+		t.Fatalf("converted output missing: %v", err)
+	}
+	report := readReportSummary(t, reportPath)
+	if report.Summary.Status != "pass" {
+		t.Fatalf("report status = %q, want pass", report.Summary.Status)
+	}
+	if !bytes.Contains(stdout.Bytes(), []byte("migration convert:")) {
+		t.Fatalf("stdout missing output path: %s", stdout.String())
+	}
+}
+
+func TestRunConvertWritesBlockedReportWithoutOutput(t *testing.T) {
+	input := writeTempProjectWithOneSolidLayer(t)
+	outPath := filepath.Join(t.TempDir(), "converted.aep")
+	reportPath := filepath.Join(t.TempDir(), "convert.json")
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"convert", "-in", input, "-target", "AE2025", "-out", outPath, "-report", reportPath}, &stdout, &stderr)
+	if code != 1 {
+		t.Fatalf("run blocked convert = %d, want 1; stderr=%s", code, stderr.String())
+	}
+	if _, err := os.Stat(outPath); !os.IsNotExist(err) {
+		t.Fatalf("blocked output exists or stat failed unexpectedly: %v", err)
+	}
+	report := readReportSummary(t, reportPath)
+	if report.Summary.Status != "blocked" {
+		t.Fatalf("report status = %q, want blocked", report.Summary.Status)
+	}
+}
+
 func writeTempProject(t *testing.T, target aep.AETarget) string {
 	t.Helper()
 	project := aep.NewProject(target)
@@ -61,4 +102,61 @@ func writeTempProject(t *testing.T, target aep.AETarget) string {
 		t.Fatalf("WriteAEP: %v", err)
 	}
 	return path
+}
+
+func writeTempProjectWithOneComp(t *testing.T, target aep.AETarget) string {
+	t.Helper()
+	project := aep.NewProject(target)
+	if _, err := aep.NewComposition(project, "Main", 640, 360, 24, 2.5); err != nil {
+		t.Fatalf("NewComposition: %v", err)
+	}
+	return writeProject(t, project, "one-comp.aep")
+}
+
+func writeTempProjectWithOneSolidLayer(t *testing.T) string {
+	t.Helper()
+	project := aep.NewProject(aep.TargetAE2020)
+	comp, err := aep.NewComposition(project, "Main", 640, 360, 24, 2)
+	if err != nil {
+		t.Fatalf("NewComposition: %v", err)
+	}
+	if _, err := aep.NewSolidLayer(comp, "Solid", 640, 360, [3]float64{1, 0, 0}); err != nil {
+		t.Fatalf("NewSolidLayer: %v", err)
+	}
+	return writeProject(t, project, "one-layer.aep")
+}
+
+func writeProject(t *testing.T, project *aep.Project, name string) string {
+	t.Helper()
+	path := filepath.Join(t.TempDir(), name)
+	out, err := os.Create(path)
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	defer out.Close()
+	if err := project.WriteAEP(out); err != nil {
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	return path
+}
+
+func readReportSummary(t *testing.T, path string) struct {
+	Summary struct {
+		Status string `json:"status"`
+	} `json:"summary"`
+} {
+	t.Helper()
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("ReadFile report: %v", err)
+	}
+	var report struct {
+		Summary struct {
+			Status string `json:"status"`
+		} `json:"summary"`
+	}
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatalf("Unmarshal report: %v", err)
+	}
+	return report
 }
