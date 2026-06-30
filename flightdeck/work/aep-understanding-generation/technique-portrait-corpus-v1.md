@@ -78,6 +78,7 @@ It defaults to `flightdeck\showcase` and writes generated output under
 - `learning.md`
 - `projects.csv`
 - `patterns.csv`
+- `study_queue.csv`
 - `report.md`
 - `report.html`
 
@@ -98,7 +99,9 @@ large run can be inspected before reading every project record. `projects.csv`
 and `patterns.csv` provide spreadsheet-friendly indexes for filtering projects
 and repeated technique patterns outside the HTML report. `projects.csv` includes
 the stable recreation step IDs for each project; `patterns.csv` includes the
-step distribution for each repeated pattern.
+step distribution for each repeated pattern. `study_queue.csv` ranks parsed
+projects by readiness and signal density so large corpora have an immediate
+review order.
 
 ## Non-Goals
 

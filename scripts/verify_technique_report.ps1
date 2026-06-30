@@ -28,10 +28,11 @@ $digestPath = Join-Path $OutDir "digest.json"
 $learningPath = Join-Path $OutDir "learning.md"
 $projectsCsvPath = Join-Path $OutDir "projects.csv"
 $patternsCsvPath = Join-Path $OutDir "patterns.csv"
+$studyQueueCsvPath = Join-Path $OutDir "study_queue.csv"
 $reportPath = Join-Path $OutDir "report.md"
 $htmlPath = Join-Path $OutDir "report.html"
 
-foreach ($path in @($summaryPath, $corpusPath, $digestPath, $learningPath, $projectsCsvPath, $patternsCsvPath, $reportPath, $htmlPath)) {
+foreach ($path in @($summaryPath, $corpusPath, $digestPath, $learningPath, $projectsCsvPath, $patternsCsvPath, $studyQueueCsvPath, $reportPath, $htmlPath)) {
     Require-File -Path $path
 }
 
@@ -41,6 +42,7 @@ $corpusLines = @(Get-Content -LiteralPath $corpusPath | Where-Object { $_.Trim()
 $corpusRecords = @($corpusLines | ForEach-Object { $_ | ConvertFrom-Json })
 $projectRows = @(Import-Csv -LiteralPath $projectsCsvPath)
 $patternRows = @(Import-Csv -LiteralPath $patternsCsvPath)
+$studyQueueRows = @(Import-Csv -LiteralPath $studyQueueCsvPath)
 
 if ([int]$summary.project_count -lt $MinProjects) {
     throw "project_count $($summary.project_count) is lower than MinProjects $MinProjects"
@@ -56,6 +58,9 @@ if ($null -eq $digest.patterns -or @($digest.patterns).Count -eq 0) {
 }
 if ($projectRows.Count -ne [int]$summary.project_count) {
     throw "projects.csv row count $($projectRows.Count) does not match summary project_count $($summary.project_count)"
+}
+if ($studyQueueRows.Count -ne [int]$summary.project_count) {
+    throw "study_queue.csv row count $($studyQueueRows.Count) does not match summary project_count $($summary.project_count)"
 }
 if ($patternRows.Count -ne @($digest.patterns).Count) {
     throw "patterns.csv row count $($patternRows.Count) does not match digest pattern count $(@($digest.patterns).Count)"
@@ -81,11 +86,13 @@ Require-Text -Path $learningPath -Pattern "recreation steps"
 Require-Text -Path $learningPath -Pattern "^## Plugin Risk Queue$"
 Require-Text -Path $learningPath -Pattern "^## Readiness Queue$"
 Require-Text -Path $reportPath -Pattern "^## Pattern Representatives$"
+Require-Text -Path $reportPath -Pattern "^## Study Queue$"
 Require-Text -Path $reportPath -Pattern "Step [0-9]+:"
 Require-Text -Path $htmlPath -Pattern "Technique Corpus Report"
 Require-Text -Path $htmlPath -Pattern "Step [0-9]+:"
 Require-Text -Path $htmlPath -Pattern "learning\.md"
 Require-Text -Path $htmlPath -Pattern "projects\.csv"
+Require-Text -Path $htmlPath -Pattern "study_queue\.csv"
 
 Write-Host "ok: $OutDir"
 Write-Host "projects: $($summary.project_count)"

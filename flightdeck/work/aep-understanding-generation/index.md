@@ -642,8 +642,8 @@ Current:
 - `scripts\technique_showcase_report.ps1` is the self-hosted corpus dashboard.
   It runs explain-mode corpus analysis once with `-summary-out`, then writes
   `summary.json`, `corpus.jsonl`, `digest.json`, `learning.md`, `projects.csv`,
-  `patterns.csv`, `report.md`, and self-contained `report.html` under the
-  selected output directory.
+  `patterns.csv`, `study_queue.csv`, `report.md`, and self-contained
+  `report.html` under the selected output directory.
 - `tmp\technique_samples_report` currently demonstrates the 90-project
   `data\samples` corpus: 90 parsed projects, 0 errors, 4 repeated pattern
   families, and a compact `learning.md` for selecting high-signal reference
@@ -652,7 +652,8 @@ Current:
   path/readiness/pattern/effect/plugin filtering, and displays per-project top
   effects, plugin effects, shape families, text animator mechanisms, and
   deterministic recreation steps. Pattern playbooks now include the common
-  recreation-step distribution for each repeated technique pattern.
+  recreation-step distribution for each repeated technique pattern, and the
+  study queue ranks projects by readiness and signal density.
 - Recipe IR coverage for the current comp and layer strategy matrices is
   complete: comp settings have object-level and field-level profile checks,
   authored-layer examples carry `expected_profile.layers[]`, camera/light

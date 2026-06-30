@@ -18,6 +18,7 @@ try {
     $learningPath = Join-Path $OutDir "learning.md"
     $projectsCsvPath = Join-Path $OutDir "projects.csv"
     $patternsCsvPath = Join-Path $OutDir "patterns.csv"
+    $studyQueueCsvPath = Join-Path $OutDir "study_queue.csv"
     $reportPath = Join-Path $OutDir "report.md"
     $htmlPath = Join-Path $OutDir "report.html"
 
@@ -243,6 +244,32 @@ try {
         return @($rows | Sort-Object path | Select-Object -First $Max)
     }
 
+    function Get-ReadinessRank {
+        param([string]$Status)
+        switch ($Status) {
+            "analysis_ready" { return 0 }
+            "needs_reverse_engineering" { return 1 }
+            "needs_plugins" { return 2 }
+            default { return 3 }
+        }
+    }
+
+    function Get-StudyScore {
+        param([object]$Explanation)
+        if ($null -eq $Explanation) {
+            return 0
+        }
+        $fp = $Explanation.portrait.fingerprint
+        return (
+            (@($Explanation.patterns).Count * 100) +
+            (@($Explanation.archetypes).Count * 40) +
+            [Math]::Min([int]$fp.effect_count, 120) +
+            [Math]::Min([int]$fp.text_animator_count * 2, 120) +
+            [Math]::Min([int]([Math]::Floor([int]$fp.shape_operator_count / 10)), 120) +
+            [Math]::Min([int]([Math]::Floor([int]$fp.dependency_count / 5)), 120)
+        )
+    }
+
     $b = [System.Text.StringBuilder]::new()
     [void]$b.AppendLine("# Technique Corpus Report")
     [void]$b.AppendLine("")
@@ -366,6 +393,41 @@ try {
     }
     $projectRowsForCsv | Export-Csv -LiteralPath $projectsCsvPath -NoTypeInformation -Encoding UTF8
 
+    $studyRows = @()
+    foreach ($record in $records) {
+        $explanation = $record.explanation
+        if ($null -eq $explanation) {
+            continue
+        }
+        $portrait = $explanation.portrait
+        $readiness = ""
+        if ($null -ne $explanation.recreation_readiness) {
+            $readiness = [string]$explanation.recreation_readiness.status
+        }
+        $studyRows += [pscustomobject]@{
+            rank                = 0
+            path                = [string]$record.path
+            readiness           = $readiness
+            study_score         = Get-StudyScore -Explanation $explanation
+            patterns            = ((@($explanation.patterns) | ForEach-Object { [string]$_.id }) -join "; ")
+            archetypes          = ((@($explanation.archetypes) | ForEach-Object { [string]$_.id }) -join "; ")
+            recreation_steps    = ((@($explanation.recreation_steps) | ForEach-Object { [string]$_.id }) -join "; ")
+            top_effects         = Format-CountList -Rows (Convert-CountRows -Rows (Get-CountRows -Counts $portrait.mechanisms.effect_match_counts -Max 5))
+            top_plugin_effects  = Format-CountList -Rows (Convert-CountRows -Rows (Get-CountRows -Counts $portrait.mechanisms.third_party_effect_match_counts -Max 5))
+            top_shape_families  = Format-CountList -Rows (Convert-CountRows -Rows (Get-CountRows -Counts $portrait.mechanisms.shape_family_counts -Max 5))
+            top_text_animators  = Format-CountList -Rows (Convert-CountRows -Rows (Get-CountRows -Counts $portrait.mechanisms.text_animator_kind_counts -Max 5))
+            readiness_blockers  = ((@($explanation.recreation_readiness.blockers) | ForEach-Object { [string]$_ }) -join "; ")
+            _readiness_rank     = Get-ReadinessRank -Status $readiness
+        }
+    }
+    $rank = 1
+    $studyRows = @($studyRows | Sort-Object @{ Expression = { $_._readiness_rank }; Ascending = $true }, @{ Expression = { [int]$_.study_score }; Descending = $true }, path | ForEach-Object {
+        $_.rank = $rank
+        $rank++
+        $_ | Select-Object rank,path,readiness,study_score,patterns,archetypes,recreation_steps,top_effects,top_plugin_effects,top_shape_families,top_text_animators,readiness_blockers
+    })
+    $studyRows | Export-Csv -LiteralPath $studyQueueCsvPath -NoTypeInformation -Encoding UTF8
+
     $learn = [System.Text.StringBuilder]::new()
     [void]$learn.AppendLine("# Technique Learning Index")
     [void]$learn.AppendLine("")
@@ -417,6 +479,19 @@ try {
         [void]$learn.AppendLine("")
     }
     $learn.ToString() | Set-Content -Path $learningPath -Encoding UTF8
+
+    [void]$b.AppendLine("## Study Queue")
+    [void]$b.AppendLine("")
+    foreach ($project in @($studyRows | Select-Object -First 10)) {
+        [void]$b.AppendLine("- #$($project.rank) ``$($project.path)`` score=$($project.study_score) readiness=$($project.readiness)")
+        if ($project.patterns) {
+            [void]$b.AppendLine("  patterns: $($project.patterns)")
+        }
+        if ($project.readiness_blockers) {
+            [void]$b.AppendLine("  blockers: $($project.readiness_blockers)")
+        }
+    }
+    [void]$b.AppendLine("")
 
     [void]$b.AppendLine("## Representative Projects")
     [void]$b.AppendLine("")
@@ -520,7 +595,7 @@ try {
     [void]$h.AppendLine("</head><body><main>")
     [void]$h.AppendLine("<h1>Technique Corpus Report</h1>")
     [void]$h.AppendLine("<p class=""muted"">input <code>$(Escape-Html $InputPath)</code></p>")
-    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
+    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""study_queue.csv"">study_queue.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
     [void]$h.AppendLine("<div class=""grid"">")
     foreach ($metric in @(
         @{ Label = "Projects"; Value = $summary.project_count },
@@ -547,6 +622,22 @@ try {
     Write-HtmlCountTable -Builder $h -Title "Text Animators" -Counts $summary.text_animators
     Write-HtmlCountTable -Builder $h -Title "Layer Roles" -Counts $summary.layer_roles
     Write-HtmlCountTable -Builder $h -Title "Graph Edges" -Counts $summary.graph_edges
+    [void]$h.AppendLine("</div>")
+    [void]$h.AppendLine("<h2 style=""margin-top:28px"">Study Queue</h2>")
+    [void]$h.AppendLine("<div class=""representatives"">")
+    foreach ($project in @($studyRows | Select-Object -First 6)) {
+        [void]$h.AppendLine("<section class=""representative"">")
+        [void]$h.AppendLine("<h3>#$($project.rank) $(Escape-Html $project.readiness)</h3>")
+        [void]$h.AppendLine("<p><code>$(Escape-Html $project.path)</code></p>")
+        [void]$h.AppendLine("<div class=""small"">score=$($project.study_score)</div>")
+        if ($project.patterns) {
+            [void]$h.AppendLine("<div class=""small""><strong>patterns</strong>: $(Escape-Html $project.patterns)</div>")
+        }
+        if ($project.readiness_blockers) {
+            [void]$h.AppendLine("<div class=""small""><strong>blockers</strong>: $(Escape-Html $project.readiness_blockers)</div>")
+        }
+        [void]$h.AppendLine("</section>")
+    }
     [void]$h.AppendLine("</div>")
     [void]$h.AppendLine("<h2 style=""margin-top:28px"">Representative Projects</h2>")
     [void]$h.AppendLine("<div class=""representatives"">")
@@ -731,6 +822,7 @@ try {
     Write-Host "learn:   $learningPath"
     Write-Host "projects csv: $projectsCsvPath"
     Write-Host "patterns csv: $patternsCsvPath"
+    Write-Host "study queue csv: $studyQueueCsvPath"
     Write-Host "report:  $reportPath"
     Write-Host "html:    $htmlPath"
     if ($Verify) {
