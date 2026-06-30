@@ -105,6 +105,28 @@ func (b *Builder) AddProject(path string, project *aep.Project) error {
 	idx.walkTextStyles(func(comp *aep.Composition, layer *aep.Layer, runIndex int, font string) {
 		b.facts = append(b.facts, textStyleFact(meta.ID, textStyleHit(comp, layer, runIndex, font)))
 	})
+	for _, comp := range project.Compositions {
+		if comp == nil {
+			continue
+		}
+		for _, layer := range comp.Layers {
+			if layer == nil {
+				continue
+			}
+			for i, primitive := range layer.ShapePrimitives {
+				if primitive == nil || primitive.Kind == "" {
+					continue
+				}
+				b.facts = append(b.facts, shapeUsageFact(meta.ID, comp, layer, "shape.kind", string(primitive.Kind), "layers[].shapes.primitives["+strconv.Itoa(i+1)+"]"))
+			}
+			for i, path := range layer.ShapePaths {
+				if path == nil {
+					continue
+				}
+				b.facts = append(b.facts, shapeUsageFact(meta.ID, comp, layer, "shape.kind", "path", "layers[].shapes.paths["+strconv.Itoa(i+1)+"]"))
+			}
+		}
+	}
 	return nil
 }
 
@@ -220,6 +242,23 @@ func textStyleFact(projectID string, hit Hit) CorpusFact {
 		Location:  hit.Location,
 		Match:     hit.Match,
 		Summary:   fmt.Sprintf("layer %q uses font %q", hit.Location.LayerName, hit.Match.Value),
+	}
+}
+
+func shapeUsageFact(projectID string, comp *aep.Composition, layer *aep.Layer, field, value, path string) CorpusFact {
+	return CorpusFact{
+		ProjectID: projectID,
+		Kind:      FactShapeUsage,
+		Location: Location{
+			CompID:       comp.ID,
+			CompName:     comp.Name,
+			LayerID:      layer.ID,
+			LayerIndex:   layer.Index,
+			LayerName:    layer.Name,
+			PropertyPath: path,
+		},
+		Match:   Match{Field: field, Value: value},
+		Summary: fmt.Sprintf("layer %q uses shape %q", layer.Name, value),
 	}
 }
 

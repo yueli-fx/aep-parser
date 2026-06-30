@@ -10,9 +10,9 @@ implemented, and first corpus fact extraction slice implemented.
 `internal/projectindex` exists, recipe/profile hotspots are wired to it, callers
 can obtain stable hit locations for source-layer, effect-match, property-match,
 expression-substring, and text-font searches, and batch workflows can now
-extract durable layer-source/effect-usage/expression/text-style facts without
-retaining parsed project graphs. Later work should add broader search/corpus
-APIs only when a caller needs them.
+extract durable layer-source/effect-usage/expression/text-style/shape-usage
+facts without retaining parsed project graphs. Later work should add broader
+search/corpus APIs only when a caller needs them.
 
 The current architecture decision from `work/scene-architecture/index.md` is:
 keep `Project.Compositions`, `Project.Footage`, `Project.Folders`, and
@@ -383,7 +383,7 @@ Memory rules:
   - [x] `NewCorpusBuilder` ingests projects one at a time and emits
         serializable `CorpusProject` summaries plus `CorpusFact` rows.
   - [x] First facts cover layer source references, effect usage, property
-        expressions, and text style font usage.
+        expressions, text style font usage, and shape primitive/path usage.
   - [x] Corpus JSON contains stable project IDs, locations, matches, and
         summaries, but no `Project`, `Index`, or pointer graph.
 

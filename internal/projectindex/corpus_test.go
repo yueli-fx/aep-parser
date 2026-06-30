@@ -150,6 +150,55 @@ func TestCorpusBuilderExtractsTextStyleFacts(t *testing.T) {
 	}
 }
 
+func TestCorpusBuilderExtractsShapeUsageFacts(t *testing.T) {
+	project := &aep.Project{
+		Compositions: []*aep.Composition{
+			{ID: 7, Name: "Main", Layers: []*aep.Layer{
+				{
+					ID:    31,
+					Index: 0,
+					Name:  "Shape Layer",
+					Type:  aep.LayerTypeShape,
+					ShapePrimitives: []*aep.ShapePrimitive{
+						{Kind: aep.ShapePrimitiveRect, GroupName: "Box"},
+						{Kind: aep.ShapePrimitiveStar, GroupName: "Spark"},
+					},
+					ShapePaths: []*aep.ShapePath{
+						{Name: "Logo Path", Closed: true},
+					},
+				},
+			}},
+		},
+	}
+	builder := NewCorpusBuilder()
+
+	if err := builder.AddProject("samples/shapes.aep", project); err != nil {
+		t.Fatalf("AddProject: %v", err)
+	}
+	corpus, err := builder.Build()
+	if err != nil {
+		t.Fatalf("Build: %v", err)
+	}
+
+	projectID := corpus.Projects[0].ID
+	shapeFacts := factsByKind(corpus.Facts, FactShapeUsage)
+	if len(shapeFacts) != 3 {
+		t.Fatalf("len(shapeFacts) = %d, want 3; facts=%+v", len(shapeFacts), corpus.Facts)
+	}
+	assertCorpusFact(t, shapeFacts[0], projectID, FactShapeUsage, "shape.kind", "rect", "Shape Layer")
+	if shapeFacts[0].Location.PropertyPath != "layers[].shapes.primitives[1]" {
+		t.Fatalf("first shape location = %+v, want first primitive", shapeFacts[0].Location)
+	}
+	assertCorpusFact(t, shapeFacts[1], projectID, FactShapeUsage, "shape.kind", "star", "Shape Layer")
+	if shapeFacts[1].Location.PropertyPath != "layers[].shapes.primitives[2]" {
+		t.Fatalf("second shape location = %+v, want second primitive", shapeFacts[1].Location)
+	}
+	assertCorpusFact(t, shapeFacts[2], projectID, FactShapeUsage, "shape.kind", "path", "Shape Layer")
+	if shapeFacts[2].Location.PropertyPath != "layers[].shapes.paths[1]" {
+		t.Fatalf("third shape location = %+v, want first path", shapeFacts[2].Location)
+	}
+}
+
 func TestCorpusJSONDoesNotExposeProjectPointers(t *testing.T) {
 	builder := NewCorpusBuilder()
 	if err := builder.AddProject("", &aep.Project{
