@@ -249,8 +249,32 @@ var fieldValidation = map[string]FieldMeta{
 	"comps[].layers[].text_animators[].range_offset_keyframes[]": {
 		Validation: "When present, requires at least 2 keyframes sorted by non-negative time.",
 	},
+	"comps[].layers[].text_animators[].range_offset_keyframes[].time": {
+		Validation: "Range offset keyframe time must be non-negative and sorted in ascending order.",
+	},
+	"comps[].layers[].text_animators[].range_offset_keyframes[].value": {
+		Validation: "Range offset keyframe value must be numeric.",
+	},
+	"comps[].layers[].text_animators[].range_offset_keyframes[].in_ease.influence": {
+		Validation: "Keyframe ease influence must be greater than 0 and at most 1.",
+	},
+	"comps[].layers[].text_animators[].range_offset_keyframes[].out_ease.influence": {
+		Validation: "Keyframe ease influence must be greater than 0 and at most 1.",
+	},
 	"comps[].layers[].text_animators[].value_keyframes[]": {
 		Validation: "When present, requires at least 2 keyframes sorted by non-negative time. Value is a number for opacity, rotation, tracking, and character_offset; a 3-number array for position and scale; a 3- or 4-number color array for color.",
+	},
+	"comps[].layers[].text_animators[].value_keyframes[].time": {
+		Validation: "Text animator value keyframe time must be non-negative and sorted in ascending order.",
+	},
+	"comps[].layers[].text_animators[].value_keyframes[].value": {
+		Validation: "Value type depends on the text animator property: scalar number, 3-number vector, or 3-/4-number color array.",
+	},
+	"comps[].layers[].text_animators[].value_keyframes[].in_ease.influence": {
+		Validation: "Keyframe ease influence must be greater than 0 and at most 1.",
+	},
+	"comps[].layers[].text_animators[].value_keyframes[].out_ease.influence": {
+		Validation: "Keyframe ease influence must be greater than 0 and at most 1.",
 	},
 	"comps[].layers[].text_style.font_size": {
 		Validation: "Text font size must be positive.",
@@ -299,6 +323,15 @@ var fieldValidation = map[string]FieldMeta{
 		Validation: "Text paragraph direction must use a supported value.",
 		Enum:       []string{"ltr", "rtl"},
 	},
+	"comps[].layers[].masks[].path_keyframes[]": {
+		Validation: "When present, requires at least 2 keyframes sorted by time within comp duration.",
+	},
+	"comps[].layers[].masks[].path_keyframes[].time": {
+		Validation: "Mask path keyframe time must be non-negative, within comp duration, and sorted in ascending order.",
+	},
+	"comps[].layers[].masks[].path_keyframes[].vertices": {
+		Validation: "Mask path keyframe vertices must include at least 3 two-number points.",
+	},
 	"comps[].layers[].matte": {
 		Validation: "Requires project.target_version AE2025, a non-none track_matte mode, and a same-comp source layer name.",
 	},
@@ -316,6 +349,18 @@ var fieldValidation = map[string]FieldMeta{
 	},
 	"comps[].layers[].effects[].params[].keyframes[]": {
 		Validation: "When present, requires at least 2 keyframes sorted by non-negative time. Values must be all scalar numbers or all 2-, 3-, or 4-number arrays.",
+	},
+	"comps[].layers[].effects[].params[].keyframes[].time": {
+		Validation: "Effect parameter keyframe time must be non-negative and sorted in ascending order.",
+	},
+	"comps[].layers[].effects[].params[].keyframes[].value": {
+		Validation: "Effect parameter keyframe values must be all scalar numbers or all 2-, 3-, or 4-number arrays.",
+	},
+	"comps[].layers[].effects[].params[].keyframes[].in_ease.influence": {
+		Validation: "Keyframe ease influence must be greater than 0 and at most 1.",
+	},
+	"comps[].layers[].effects[].params[].keyframes[].out_ease.influence": {
+		Validation: "Keyframe ease influence must be greater than 0 and at most 1.",
 	},
 	"comps[].layers[].effects[].params[].essential_graphics": {
 		Validation: "First slice requires a static value on the same parameter and cannot be combined with target_layer, keyframes, or expression.",

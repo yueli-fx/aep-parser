@@ -1140,6 +1140,7 @@
         "structural"
       ],
       "summary": "Effect parameter keyframe incoming ease influence.",
+      "validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "example": "examples/recipes/minimal-effect-param-vector-keyframes.json"
     },
     "comps[].layers[].effects[].params[].keyframes[].in_ease.speed": {
@@ -1173,6 +1174,7 @@
         "structural"
       ],
       "summary": "Effect parameter keyframe outgoing ease influence.",
+      "validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "example": "examples/recipes/minimal-effect-param-vector-keyframes.json"
     },
     "comps[].layers[].effects[].params[].keyframes[].out_ease.speed": {
@@ -1196,6 +1198,7 @@
         "structural"
       ],
       "summary": "Effect parameter keyframe time in seconds.",
+      "validation": "Effect parameter keyframe time must be non-negative and sorted in ascending order.",
       "example": "examples/recipes/minimal-effect-param-keyframes.json"
     },
     "comps[].layers[].effects[].params[].keyframes[].value": {
@@ -1209,6 +1212,7 @@
         "structural"
       ],
       "summary": "Effect parameter keyframe value.",
+      "validation": "Effect parameter keyframe values must be all scalar numbers or all 2-, 3-, or 4-number arrays.",
       "example": "examples/recipes/minimal-effect-param-keyframes.json"
     },
     "comps[].layers[].effects[].params[].match_name": {
@@ -1725,6 +1729,7 @@
       "type": "array\u003crecipe.MaskPathKeyframeSpec\u003e",
       "go_type": "[]recipe.MaskPathKeyframeSpec",
       "summary": "Layer mask path keyframes.",
+      "validation": "When present, requires at least 2 keyframes sorted by time within comp duration.",
       "capability_keys": [
         "mask.set_path_keyframes"
       ],
@@ -1741,6 +1746,7 @@
         "structural"
       ],
       "summary": "Layer mask path keyframe time in seconds.",
+      "validation": "Mask path keyframe time must be non-negative, within comp duration, and sorted in ascending order.",
       "capability_keys": [
         "mask.set_path_keyframes"
       ],
@@ -1757,6 +1763,7 @@
         "structural"
       ],
       "summary": "Layer mask path keyframe vertices.",
+      "validation": "Mask path keyframe vertices must include at least 3 two-number points.",
       "capability_keys": [
         "mask.set_path_keyframes"
       ],
@@ -3644,6 +3651,7 @@
         "structural"
       ],
       "summary": "Incoming temporal ease influence percentage.",
+      "validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "example": "examples/recipes/minimal-text-animator-range-offset.json"
     },
     "comps[].layers[].text_animators[].range_offset_keyframes[].in_ease.speed": {
@@ -3677,6 +3685,7 @@
         "structural"
       ],
       "summary": "Outgoing temporal ease influence percentage.",
+      "validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "example": "examples/recipes/minimal-text-animator-range-offset.json"
     },
     "comps[].layers[].text_animators[].range_offset_keyframes[].out_ease.speed": {
@@ -3700,6 +3709,7 @@
         "structural"
       ],
       "summary": "Range selector offset keyframe time in seconds.",
+      "validation": "Range offset keyframe time must be non-negative and sorted in ascending order.",
       "example": "examples/recipes/minimal-text-animator-range-offset.json"
     },
     "comps[].layers[].text_animators[].range_offset_keyframes[].value": {
@@ -3713,6 +3723,7 @@
         "structural"
       ],
       "summary": "Range selector offset keyframe value.",
+      "validation": "Range offset keyframe value must be numeric.",
       "example": "examples/recipes/minimal-text-animator-range-offset.json"
     },
     "comps[].layers[].text_animators[].range_start": {
@@ -3778,6 +3789,7 @@
         "structural"
       ],
       "summary": "Incoming temporal ease influence percentage.",
+      "validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "example": "examples/recipes/minimal-text-animator-position-value-keyframes.json"
     },
     "comps[].layers[].text_animators[].value_keyframes[].in_ease.speed": {
@@ -3811,6 +3823,7 @@
         "structural"
       ],
       "summary": "Outgoing temporal ease influence percentage.",
+      "validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "example": "examples/recipes/minimal-text-animator-position-value-keyframes.json"
     },
     "comps[].layers[].text_animators[].value_keyframes[].out_ease.speed": {
@@ -3834,6 +3847,7 @@
         "structural"
       ],
       "summary": "Text animator value keyframe time in seconds.",
+      "validation": "Text animator value keyframe time must be non-negative and sorted in ascending order.",
       "example": "examples/recipes/minimal-text-animator-character-offset-value-keyframes.json"
     },
     "comps[].layers[].text_animators[].value_keyframes[].value": {
@@ -3847,6 +3861,7 @@
         "structural"
       ],
       "summary": "Text animator value keyframe value.",
+      "validation": "Value type depends on the text animator property: scalar number, 3-number vector, or 3-/4-number color array.",
       "example": "examples/recipes/minimal-text-animator-character-offset-value-keyframes.json"
     },
     "comps[].layers[].text_style": {

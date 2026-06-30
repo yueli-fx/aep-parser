@@ -3320,6 +3320,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Range selector offset keyframe time in seconds.",
+      "x-aep-validation": "Range offset keyframe time must be non-negative and sorted in ascending order.",
       "x-aep-example": "examples/recipes/minimal-text-animator-range-offset.json"
     },
     {
@@ -3331,6 +3332,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Range selector offset keyframe value.",
+      "x-aep-validation": "Range offset keyframe value must be numeric.",
       "x-aep-example": "examples/recipes/minimal-text-animator-range-offset.json"
     },
     {
@@ -3363,6 +3365,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Incoming temporal ease influence percentage.",
+      "x-aep-validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "x-aep-example": "examples/recipes/minimal-text-animator-range-offset.json"
     },
     {
@@ -3395,6 +3398,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Outgoing temporal ease influence percentage.",
+      "x-aep-validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "x-aep-example": "examples/recipes/minimal-text-animator-range-offset.json"
     },
     {
@@ -3507,6 +3511,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Text animator value keyframe time in seconds.",
+      "x-aep-validation": "Text animator value keyframe time must be non-negative and sorted in ascending order.",
       "x-aep-example": "examples/recipes/minimal-text-animator-character-offset-value-keyframes.json"
     },
     {
@@ -3518,6 +3523,7 @@
       "go_type": "interface {}",
       "x-aep-structural-required": true,
       "description": "Text animator value keyframe value.",
+      "x-aep-validation": "Value type depends on the text animator property: scalar number, 3-number vector, or 3-/4-number color array.",
       "x-aep-example": "examples/recipes/minimal-text-animator-character-offset-value-keyframes.json"
     },
     {
@@ -3550,6 +3556,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Incoming temporal ease influence percentage.",
+      "x-aep-validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "x-aep-example": "examples/recipes/minimal-text-animator-position-value-keyframes.json"
     },
     {
@@ -3582,6 +3589,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Outgoing temporal ease influence percentage.",
+      "x-aep-validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "x-aep-example": "examples/recipes/minimal-text-animator-position-value-keyframes.json"
     },
     {
@@ -7488,6 +7496,7 @@
       "element": "recipe.MaskPathKeyframeSpec",
       "object_type": "MaskPathKeyframeSpec",
       "description": "Layer mask path keyframes.",
+      "x-aep-validation": "When present, requires at least 2 keyframes sorted by time within comp duration.",
       "x-aep-capabilities": [
         {
           "key": "mask.set_path_keyframes",
@@ -7515,6 +7524,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Layer mask path keyframe time in seconds.",
+      "x-aep-validation": "Mask path keyframe time must be non-negative, within comp duration, and sorted in ascending order.",
       "x-aep-capabilities": [
         {
           "key": "mask.set_path_keyframes",
@@ -7543,6 +7553,7 @@
       "element": "[]float64",
       "x-aep-structural-required": true,
       "description": "Layer mask path keyframe vertices.",
+      "x-aep-validation": "Mask path keyframe vertices must include at least 3 two-number points.",
       "x-aep-capabilities": [
         {
           "key": "mask.set_path_keyframes",
@@ -8679,6 +8690,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Effect parameter keyframe time in seconds.",
+      "x-aep-validation": "Effect parameter keyframe time must be non-negative and sorted in ascending order.",
       "x-aep-example": "examples/recipes/minimal-effect-param-keyframes.json"
     },
     {
@@ -8690,6 +8702,7 @@
       "go_type": "interface {}",
       "x-aep-structural-required": true,
       "description": "Effect parameter keyframe value.",
+      "x-aep-validation": "Effect parameter keyframe values must be all scalar numbers or all 2-, 3-, or 4-number arrays.",
       "x-aep-example": "examples/recipes/minimal-effect-param-keyframes.json"
     },
     {
@@ -8722,6 +8735,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Effect parameter keyframe incoming ease influence.",
+      "x-aep-validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "x-aep-example": "examples/recipes/minimal-effect-param-vector-keyframes.json"
     },
     {
@@ -8754,6 +8768,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Effect parameter keyframe outgoing ease influence.",
+      "x-aep-validation": "Keyframe ease influence must be greater than 0 and at most 1.",
       "x-aep-example": "examples/recipes/minimal-effect-param-vector-keyframes.json"
     },
     {

@@ -177,8 +177,8 @@ This reference is generated from the canonical recipe field model.
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].text_animators[].range_offset_keyframes[].time` | `number` | structural | Range selector offset keyframe time in seconds. | - | - | examples/recipes/minimal-text-animator-range-offset.json |
-| `comps[].layers[].text_animators[].range_offset_keyframes[].value` | `number` | structural | Range selector offset keyframe value. | - | - | examples/recipes/minimal-text-animator-range-offset.json |
+| `comps[].layers[].text_animators[].range_offset_keyframes[].time` | `number` | structural | Range selector offset keyframe time in seconds. | Range offset keyframe time must be non-negative and sorted in ascending order. | - | examples/recipes/minimal-text-animator-range-offset.json |
+| `comps[].layers[].text_animators[].range_offset_keyframes[].value` | `number` | structural | Range selector offset keyframe value. | Range offset keyframe value must be numeric. | - | examples/recipes/minimal-text-animator-range-offset.json |
 | `comps[].layers[].text_animators[].range_offset_keyframes[].in_ease` | `object<TemporalEase>` | - | Incoming temporal ease for the keyframe. | - | - | examples/recipes/minimal-text-animator-range-offset.json |
 | `comps[].layers[].text_animators[].range_offset_keyframes[].out_ease` | `object<TemporalEase>` | - | Outgoing temporal ease for the keyframe. | - | - | examples/recipes/minimal-text-animator-range-offset.json |
 | `comps[].layers[].transform.rotation_keyframes[].time` | `number` | structural | Rotation keyframe time in seconds. | Keyframe time must be non-negative, within comp duration, and sorted in ascending order. | - | examples/recipes/minimal-text-shape.json |
@@ -195,13 +195,13 @@ This reference is generated from the canonical recipe field model.
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
 | `comps[].layers[].text_animators[].range_offset_keyframes[].in_ease.speed` | `number` | - | Incoming temporal ease speed. | - | - | examples/recipes/minimal-text-animator-range-offset.json |
-| `comps[].layers[].text_animators[].range_offset_keyframes[].in_ease.influence` | `number` | structural | Incoming temporal ease influence percentage. | - | - | examples/recipes/minimal-text-animator-range-offset.json |
+| `comps[].layers[].text_animators[].range_offset_keyframes[].in_ease.influence` | `number` | structural | Incoming temporal ease influence percentage. | Keyframe ease influence must be greater than 0 and at most 1. | - | examples/recipes/minimal-text-animator-range-offset.json |
 | `comps[].layers[].text_animators[].range_offset_keyframes[].out_ease.speed` | `number` | - | Outgoing temporal ease speed. | - | - | examples/recipes/minimal-text-animator-range-offset.json |
-| `comps[].layers[].text_animators[].range_offset_keyframes[].out_ease.influence` | `number` | structural | Outgoing temporal ease influence percentage. | - | - | examples/recipes/minimal-text-animator-range-offset.json |
+| `comps[].layers[].text_animators[].range_offset_keyframes[].out_ease.influence` | `number` | structural | Outgoing temporal ease influence percentage. | Keyframe ease influence must be greater than 0 and at most 1. | - | examples/recipes/minimal-text-animator-range-offset.json |
 | `comps[].layers[].text_animators[].value_keyframes[].in_ease.speed` | `number` | - | Incoming temporal ease speed. | - | - | examples/recipes/minimal-text-animator-position-value-keyframes.json |
-| `comps[].layers[].text_animators[].value_keyframes[].in_ease.influence` | `number` | structural | Incoming temporal ease influence percentage. | - | - | examples/recipes/minimal-text-animator-position-value-keyframes.json |
+| `comps[].layers[].text_animators[].value_keyframes[].in_ease.influence` | `number` | structural | Incoming temporal ease influence percentage. | Keyframe ease influence must be greater than 0 and at most 1. | - | examples/recipes/minimal-text-animator-position-value-keyframes.json |
 | `comps[].layers[].text_animators[].value_keyframes[].out_ease.speed` | `number` | - | Outgoing temporal ease speed. | - | - | examples/recipes/minimal-text-animator-position-value-keyframes.json |
-| `comps[].layers[].text_animators[].value_keyframes[].out_ease.influence` | `number` | structural | Outgoing temporal ease influence percentage. | - | - | examples/recipes/minimal-text-animator-position-value-keyframes.json |
+| `comps[].layers[].text_animators[].value_keyframes[].out_ease.influence` | `number` | structural | Outgoing temporal ease influence percentage. | Keyframe ease influence must be greater than 0 and at most 1. | - | examples/recipes/minimal-text-animator-position-value-keyframes.json |
 | `comps[].layers[].transform.position_keyframes[].in_ease.speed` | `number` | - | Position keyframe incoming ease speed. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].transform.position_keyframes[].in_ease.influence` | `number` | structural | Position keyframe incoming ease influence. | Keyframe ease influence must be greater than 0 and at most 1. | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].transform.position_keyframes[].out_ease.speed` | `number` | - | Position keyframe outgoing ease speed. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
@@ -223,20 +223,20 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].transform.opacity_keyframes[].out_ease.speed` | `number` | - | Opacity keyframe outgoing ease speed. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].transform.opacity_keyframes[].out_ease.influence` | `number` | structural | Opacity keyframe outgoing ease influence. | Keyframe ease influence must be greater than 0 and at most 1. | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].effects[].params[].keyframes[].in_ease.speed` | `number` | - | Effect parameter keyframe incoming ease speed. | - | - | examples/recipes/minimal-effect-param-vector-keyframes.json |
-| `comps[].layers[].effects[].params[].keyframes[].in_ease.influence` | `number` | structural | Effect parameter keyframe incoming ease influence. | - | - | examples/recipes/minimal-effect-param-vector-keyframes.json |
+| `comps[].layers[].effects[].params[].keyframes[].in_ease.influence` | `number` | structural | Effect parameter keyframe incoming ease influence. | Keyframe ease influence must be greater than 0 and at most 1. | - | examples/recipes/minimal-effect-param-vector-keyframes.json |
 | `comps[].layers[].effects[].params[].keyframes[].out_ease.speed` | `number` | - | Effect parameter keyframe outgoing ease speed. | - | - | examples/recipes/minimal-effect-param-vector-keyframes.json |
-| `comps[].layers[].effects[].params[].keyframes[].out_ease.influence` | `number` | structural | Effect parameter keyframe outgoing ease influence. | - | - | examples/recipes/minimal-effect-param-vector-keyframes.json |
+| `comps[].layers[].effects[].params[].keyframes[].out_ease.influence` | `number` | structural | Effect parameter keyframe outgoing ease influence. | Keyframe ease influence must be greater than 0 and at most 1. | - | examples/recipes/minimal-effect-param-vector-keyframes.json |
 
 ## ValueKeyframe
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].text_animators[].value_keyframes[].time` | `number` | structural | Text animator value keyframe time in seconds. | - | - | examples/recipes/minimal-text-animator-character-offset-value-keyframes.json |
-| `comps[].layers[].text_animators[].value_keyframes[].value` | `any` | structural | Text animator value keyframe value. | - | - | examples/recipes/minimal-text-animator-character-offset-value-keyframes.json |
+| `comps[].layers[].text_animators[].value_keyframes[].time` | `number` | structural | Text animator value keyframe time in seconds. | Text animator value keyframe time must be non-negative and sorted in ascending order. | - | examples/recipes/minimal-text-animator-character-offset-value-keyframes.json |
+| `comps[].layers[].text_animators[].value_keyframes[].value` | `any` | structural | Text animator value keyframe value. | Value type depends on the text animator property: scalar number, 3-number vector, or 3-/4-number color array. | - | examples/recipes/minimal-text-animator-character-offset-value-keyframes.json |
 | `comps[].layers[].text_animators[].value_keyframes[].in_ease` | `object<TemporalEase>` | - | Incoming temporal ease for the keyframe. | - | - | examples/recipes/minimal-text-animator-position-value-keyframes.json |
 | `comps[].layers[].text_animators[].value_keyframes[].out_ease` | `object<TemporalEase>` | - | Outgoing temporal ease for the keyframe. | - | - | examples/recipes/minimal-text-animator-position-value-keyframes.json |
-| `comps[].layers[].effects[].params[].keyframes[].time` | `number` | structural | Effect parameter keyframe time in seconds. | - | - | examples/recipes/minimal-effect-param-keyframes.json |
-| `comps[].layers[].effects[].params[].keyframes[].value` | `any` | structural | Effect parameter keyframe value. | - | - | examples/recipes/minimal-effect-param-keyframes.json |
+| `comps[].layers[].effects[].params[].keyframes[].time` | `number` | structural | Effect parameter keyframe time in seconds. | Effect parameter keyframe time must be non-negative and sorted in ascending order. | - | examples/recipes/minimal-effect-param-keyframes.json |
+| `comps[].layers[].effects[].params[].keyframes[].value` | `any` | structural | Effect parameter keyframe value. | Effect parameter keyframe values must be all scalar numbers or all 2-, 3-, or 4-number arrays. | - | examples/recipes/minimal-effect-param-keyframes.json |
 | `comps[].layers[].effects[].params[].keyframes[].in_ease` | `object<TemporalEase>` | - | Effect parameter keyframe incoming temporal ease. | - | - | examples/recipes/minimal-effect-param-vector-keyframes.json |
 | `comps[].layers[].effects[].params[].keyframes[].out_ease` | `object<TemporalEase>` | - | Effect parameter keyframe outgoing temporal ease. | - | - | examples/recipes/minimal-effect-param-vector-keyframes.json |
 
@@ -507,14 +507,14 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].masks[].expansion` | `number` | - | Layer mask expansion. | - | `mask.set_expansion` (`Mask.SetExpansion`) | examples/recipes/minimal-layer-mask.json |
 | `comps[].layers[].masks[].closed` | `boolean` | - | Layer mask closed path switch. | - | `mask.add` (`AddMask`) | examples/recipes/minimal-layer-mask.json |
 | `comps[].layers[].masks[].vertices` | `array<[]float64>` | structural | Layer mask path vertices. | - | `mask.add` (`AddMask`) | examples/recipes/minimal-layer-mask.json |
-| `comps[].layers[].masks[].path_keyframes[]` | `array<recipe.MaskPathKeyframeSpec>` | - | Layer mask path keyframes. | - | `mask.set_path_keyframes` (`SetMaskPathKeyframes`) | examples/recipes/minimal-layer-mask.json |
+| `comps[].layers[].masks[].path_keyframes[]` | `array<recipe.MaskPathKeyframeSpec>` | - | Layer mask path keyframes. | When present, requires at least 2 keyframes sorted by time within comp duration. | `mask.set_path_keyframes` (`SetMaskPathKeyframes`) | examples/recipes/minimal-layer-mask.json |
 
 ## MaskPathKeyframeSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].masks[].path_keyframes[].time` | `number` | structural | Layer mask path keyframe time in seconds. | - | `mask.set_path_keyframes` (`SetMaskPathKeyframes`) | examples/recipes/minimal-layer-mask.json |
-| `comps[].layers[].masks[].path_keyframes[].vertices` | `array<[]float64>` | structural | Layer mask path keyframe vertices. | - | `mask.set_path_keyframes` (`SetMaskPathKeyframes`) | examples/recipes/minimal-layer-mask.json |
+| `comps[].layers[].masks[].path_keyframes[].time` | `number` | structural | Layer mask path keyframe time in seconds. | Mask path keyframe time must be non-negative, within comp duration, and sorted in ascending order. | `mask.set_path_keyframes` (`SetMaskPathKeyframes`) | examples/recipes/minimal-layer-mask.json |
+| `comps[].layers[].masks[].path_keyframes[].vertices` | `array<[]float64>` | structural | Layer mask path keyframe vertices. | Mask path keyframe vertices must include at least 3 two-number points. | `mask.set_path_keyframes` (`SetMaskPathKeyframes`) | examples/recipes/minimal-layer-mask.json |
 
 ## Transform
 
