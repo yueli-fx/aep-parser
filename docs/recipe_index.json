@@ -6115,6 +6115,7 @@
       "type": "string",
       "go_type": "string",
       "summary": "Expected effect parameter expression source.",
+      "validation": "Expected effect parameter expression checks compare the profiled expression source. Each expected param needs at least one assertion field.",
       "example": "examples/recipes/minimal-effect-param-expression.json"
     },
     "expected_profile.effects[].params[].expression_enabled": {
@@ -6125,6 +6126,7 @@
       "type": "boolean",
       "go_type": "*bool",
       "summary": "Expected effect parameter expression enable switch.",
+      "validation": "Expected effect parameter expression_enabled checks compare the profiled expression enabled state. Each expected param needs at least one assertion field.",
       "example": "examples/recipes/minimal-effect-param-expression.json"
     },
     "expected_profile.effects[].params[].match_name": {
@@ -6331,6 +6333,7 @@
       "type": "array\u003crecipe.ExpectedKeyframedProperty\u003e",
       "go_type": "[]recipe.ExpectedKeyframedProperty",
       "summary": "Expected keyframes for a layer property.",
+      "validation": "Each expected keyframed property requires a layer name, property match name, and at least one keyframe.",
       "example": "examples/recipes/minimal-transform-keyframes.json"
     },
     "expected_profile.keyframes[].keyframes[]": {
@@ -6759,6 +6762,7 @@
       "type": "object\u003cExpectedLayerTiming\u003e",
       "go_type": "*recipe.ExpectedLayerTiming",
       "summary": "Expected layer timing checks.",
+      "validation": "Expected layer timing values, when present, must satisfy non-negative time constraints.",
       "example": "examples/recipes/minimal-layer-object-profile.json"
     },
     "expected_profile.layers[].timing.duration": {
@@ -6769,6 +6773,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected layer duration in seconds.",
+      "validation": "Expected layer duration must be non-negative.",
       "example": "examples/recipes/minimal-layer-object-profile.json"
     },
     "expected_profile.layers[].timing.in_point": {
@@ -6779,6 +6784,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected layer in point in seconds.",
+      "validation": "Expected layer in_point must be non-negative.",
       "example": "examples/recipes/minimal-layer-object-profile.json"
     },
     "expected_profile.layers[].timing.out_point": {
@@ -6789,6 +6795,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected layer out point in seconds.",
+      "validation": "Expected layer out_point must be non-negative and greater than or equal to in_point when both are present.",
       "example": "examples/recipes/minimal-layer-object-profile.json"
     },
     "expected_profile.layers[].timing.start_time": {
@@ -6799,6 +6806,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected layer start time in seconds.",
+      "validation": "Expected layer start_time must be non-negative.",
       "example": "examples/recipes/minimal-layer-object-profile.json"
     },
     "expected_profile.layers[].timing.stretch": {
@@ -6868,6 +6876,7 @@
       "type": "array\u003crecipe.ExpectedMask\u003e",
       "go_type": "[]recipe.ExpectedMask",
       "summary": "Expected mask checks.",
+      "validation": "Each expected mask requires a layer name; optional mask fields are compared when present.",
       "example": "examples/recipes/minimal-layer-mask.json"
     },
     "expected_profile.masks[].closed": {
@@ -6909,6 +6918,7 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Expected mask feather vector.",
+      "validation": "Expected mask feather must contain two non-negative numeric values.",
       "example": "examples/recipes/minimal-layer-mask.json"
     },
     "expected_profile.masks[].feather_falloff": {
@@ -7025,6 +7035,7 @@
       "type": "array\u003crecipe.ExpectedMaskPathKeyframe\u003e",
       "go_type": "[]recipe.ExpectedMaskPathKeyframe",
       "summary": "Expected mask path keyframes.",
+      "validation": "Expected mask path keyframes must be sorted by non-negative time.",
       "example": "examples/recipes/minimal-layer-mask.json"
     },
     "expected_profile.masks[].path_keyframes[].time": {
@@ -7187,6 +7198,7 @@
       "type": "array\u003crecipe.ExpectedProperty\u003e",
       "go_type": "[]recipe.ExpectedProperty",
       "summary": "Expected property checks.",
+      "validation": "Each expected property needs at least one of value, expression, or expression_enabled.",
       "example": "examples/recipes/minimal-camera-aperture.json"
     },
     "expected_profile.properties[].expression": {
@@ -7197,6 +7209,7 @@
       "type": "string",
       "go_type": "string",
       "summary": "Expected property expression source.",
+      "validation": "Expected property expression checks compare the profiled expression source. Each expected property needs at least one assertion field.",
       "example": "examples/recipes/minimal-transform-expression.json"
     },
     "expected_profile.properties[].expression_enabled": {
@@ -7207,6 +7220,7 @@
       "type": "boolean",
       "go_type": "*bool",
       "summary": "Expected property expression enable switch.",
+      "validation": "Expected property expression_enabled checks compare the profiled expression enabled state. Each expected property needs at least one assertion field.",
       "example": "examples/recipes/minimal-transform-expression.json"
     },
     "expected_profile.properties[].layer_name": {

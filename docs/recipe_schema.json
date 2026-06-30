@@ -10138,6 +10138,7 @@
       "go_type": "*recipe.ExpectedLayerTiming",
       "object_type": "ExpectedLayerTiming",
       "description": "Expected layer timing checks.",
+      "x-aep-validation": "Expected layer timing values, when present, must satisfy non-negative time constraints.",
       "x-aep-example": "examples/recipes/minimal-layer-object-profile.json"
     },
     {
@@ -10148,6 +10149,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Expected layer start time in seconds.",
+      "x-aep-validation": "Expected layer start_time must be non-negative.",
       "x-aep-example": "examples/recipes/minimal-layer-object-profile.json"
     },
     {
@@ -10158,6 +10160,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Expected layer in point in seconds.",
+      "x-aep-validation": "Expected layer in_point must be non-negative.",
       "x-aep-example": "examples/recipes/minimal-layer-object-profile.json"
     },
     {
@@ -10168,6 +10171,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Expected layer out point in seconds.",
+      "x-aep-validation": "Expected layer out_point must be non-negative and greater than or equal to in_point when both are present.",
       "x-aep-example": "examples/recipes/minimal-layer-object-profile.json"
     },
     {
@@ -10178,6 +10182,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Expected layer duration in seconds.",
+      "x-aep-validation": "Expected layer duration must be non-negative.",
       "x-aep-example": "examples/recipes/minimal-layer-object-profile.json"
     },
     {
@@ -10463,6 +10468,7 @@
       "type": "string",
       "go_type": "string",
       "description": "Expected effect parameter expression source.",
+      "x-aep-validation": "Expected effect parameter expression checks compare the profiled expression source. Each expected param needs at least one assertion field.",
       "x-aep-example": "examples/recipes/minimal-effect-param-expression.json"
     },
     {
@@ -10473,6 +10479,7 @@
       "type": "boolean",
       "go_type": "*bool",
       "description": "Expected effect parameter expression enable switch.",
+      "x-aep-validation": "Expected effect parameter expression_enabled checks compare the profiled expression enabled state. Each expected param needs at least one assertion field.",
       "x-aep-example": "examples/recipes/minimal-effect-param-expression.json"
     },
     {
@@ -10485,6 +10492,7 @@
       "element": "recipe.ExpectedProperty",
       "object_type": "ExpectedProperty",
       "description": "Expected property checks.",
+      "x-aep-validation": "Each expected property needs at least one of value, expression, or expression_enabled.",
       "x-aep-example": "examples/recipes/minimal-camera-aperture.json"
     },
     {
@@ -10530,6 +10538,7 @@
       "type": "string",
       "go_type": "string",
       "description": "Expected property expression source.",
+      "x-aep-validation": "Expected property expression checks compare the profiled expression source. Each expected property needs at least one assertion field.",
       "x-aep-example": "examples/recipes/minimal-transform-expression.json"
     },
     {
@@ -10540,6 +10549,7 @@
       "type": "boolean",
       "go_type": "*bool",
       "description": "Expected property expression enable switch.",
+      "x-aep-validation": "Expected property expression_enabled checks compare the profiled expression enabled state. Each expected property needs at least one assertion field.",
       "x-aep-example": "examples/recipes/minimal-transform-expression.json"
     },
     {
@@ -10964,6 +10974,7 @@
       "element": "recipe.ExpectedKeyframedProperty",
       "object_type": "ExpectedKeyframedProperty",
       "description": "Expected keyframes for a layer property.",
+      "x-aep-validation": "Each expected keyframed property requires a layer name, property match name, and at least one keyframe.",
       "x-aep-example": "examples/recipes/minimal-transform-keyframes.json"
     },
     {
@@ -11037,6 +11048,7 @@
       "element": "recipe.ExpectedMask",
       "object_type": "ExpectedMask",
       "description": "Expected mask checks.",
+      "x-aep-validation": "Each expected mask requires a layer name; optional mask fields are compared when present.",
       "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
@@ -11164,6 +11176,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Expected mask feather vector.",
+      "x-aep-validation": "Expected mask feather must contain two non-negative numeric values.",
       "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {
@@ -11207,6 +11220,7 @@
       "element": "recipe.ExpectedMaskPathKeyframe",
       "object_type": "ExpectedMaskPathKeyframe",
       "description": "Expected mask path keyframes.",
+      "x-aep-validation": "Expected mask path keyframes must be sorted by non-negative time.",
       "x-aep-example": "examples/recipes/minimal-layer-mask.json"
     },
     {

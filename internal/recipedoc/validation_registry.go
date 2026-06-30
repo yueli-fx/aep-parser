@@ -777,6 +777,21 @@ var fieldValidation = map[string]FieldMeta{
 	"expected_profile.layers[].timing.stretch": {
 		Validation: "Expected layer stretch must be greater than 0.",
 	},
+	"expected_profile.layers[].timing": {
+		Validation: "Expected layer timing values, when present, must satisfy non-negative time constraints.",
+	},
+	"expected_profile.layers[].timing.start_time": {
+		Validation: "Expected layer start_time must be non-negative.",
+	},
+	"expected_profile.layers[].timing.in_point": {
+		Validation: "Expected layer in_point must be non-negative.",
+	},
+	"expected_profile.layers[].timing.out_point": {
+		Validation: "Expected layer out_point must be non-negative and greater than or equal to in_point when both are present.",
+	},
+	"expected_profile.layers[].timing.duration": {
+		Validation: "Expected layer duration must be non-negative.",
+	},
 	"expected_profile.effects[].layer_name": {
 		Validation: "Effect profile checks require a target layer name.",
 	},
@@ -795,6 +810,12 @@ var fieldValidation = map[string]FieldMeta{
 	"expected_profile.effects[].params[].target_layer": {
 		Validation: "Expected target layer checks compare against the profiled effect parameter layer reference name.",
 	},
+	"expected_profile.effects[].params[].expression": {
+		Validation: "Expected effect parameter expression checks compare the profiled expression source. Each expected param needs at least one assertion field.",
+	},
+	"expected_profile.effects[].params[].expression_enabled": {
+		Validation: "Expected effect parameter expression_enabled checks compare the profiled expression enabled state. Each expected param needs at least one assertion field.",
+	},
 	"expected_profile.essential_graphics[].name": {
 		Validation: "Essential Graphics controller checks require the expected controller name.",
 	},
@@ -808,8 +829,17 @@ var fieldValidation = map[string]FieldMeta{
 	"expected_profile.properties[].match_name": {
 		Validation: "Property profile checks require a property match name.",
 	},
+	"expected_profile.properties[]": {
+		Validation: "Each expected property needs at least one of value, expression, or expression_enabled.",
+	},
 	"expected_profile.properties[].value": {
 		Validation: "Expected property value must be a number, boolean, or numeric array.",
+	},
+	"expected_profile.properties[].expression": {
+		Validation: "Expected property expression checks compare the profiled expression source. Each expected property needs at least one assertion field.",
+	},
+	"expected_profile.properties[].expression_enabled": {
+		Validation: "Expected property expression_enabled checks compare the profiled expression enabled state. Each expected property needs at least one assertion field.",
 	},
 	"expected_profile.text_styles[].layer_name": {
 		Validation: "Text style profile checks require a target layer name.",
@@ -905,6 +935,9 @@ var fieldValidation = map[string]FieldMeta{
 	"expected_profile.keyframes[].layer_name": {
 		Validation: "Keyframe profile checks require a target layer name.",
 	},
+	"expected_profile.keyframes[]": {
+		Validation: "Each expected keyframed property requires a layer name, property match name, and at least one keyframe.",
+	},
 	"expected_profile.keyframes[].match_name": {
 		Validation: "Keyframe profile checks require a property match name.",
 	},
@@ -919,6 +952,9 @@ var fieldValidation = map[string]FieldMeta{
 	},
 	"expected_profile.masks[].layer_name": {
 		Validation: "Mask profile checks require a target layer name.",
+	},
+	"expected_profile.masks[]": {
+		Validation: "Each expected mask requires a layer name; optional mask fields are compared when present.",
 	},
 	"expected_profile.masks[].mode": {
 		Validation: "Expected mask mode must use a supported mask mode value.",
@@ -938,8 +974,14 @@ var fieldValidation = map[string]FieldMeta{
 	"expected_profile.masks[].opacity": {
 		Validation: "Expected mask opacity must be between 0 and 1.",
 	},
+	"expected_profile.masks[].feather": {
+		Validation: "Expected mask feather must contain two non-negative numeric values.",
+	},
 	"expected_profile.masks[].vertex_count": {
 		Validation: "Expected mask vertex count must be non-negative.",
+	},
+	"expected_profile.masks[].path_keyframes[]": {
+		Validation: "Expected mask path keyframes must be sorted by non-negative time.",
 	},
 	"expected_profile.masks[].path_keyframes[].time": {
 		Validation: "Expected mask path keyframe time must be non-negative and sorted in ascending order.",

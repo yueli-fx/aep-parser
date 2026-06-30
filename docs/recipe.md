@@ -646,10 +646,10 @@ This reference is generated from the canonical recipe field model.
 | `expected_profile.essential_graphics[]` | `array<recipe.ExpectedEGController>` | - | Expected Essential Graphics controller checks. | - | - | examples/recipes/minimal-essential-graphics-controller.json |
 | `expected_profile.layers[]` | `array<recipe.ExpectedLayer>` | - | Expected composition layer definitions. | - | - | examples/recipes/minimal-layer-object-profile.json |
 | `expected_profile.effects[]` | `array<recipe.ExpectedEffect>` | - | Expected effect checks. | - | - | examples/recipes/minimal-text-effect.json |
-| `expected_profile.properties[]` | `array<recipe.ExpectedProperty>` | - | Expected property checks. | - | - | examples/recipes/minimal-camera-aperture.json |
+| `expected_profile.properties[]` | `array<recipe.ExpectedProperty>` | - | Expected property checks. | Each expected property needs at least one of value, expression, or expression_enabled. | - | examples/recipes/minimal-camera-aperture.json |
 | `expected_profile.text_styles[]` | `array<recipe.ExpectedTextStyle>` | - | Expected text style checks. | - | - | examples/recipes/minimal-text-style.json |
-| `expected_profile.keyframes[]` | `array<recipe.ExpectedKeyframedProperty>` | - | Expected keyframes for a layer property. | - | - | examples/recipes/minimal-transform-keyframes.json |
-| `expected_profile.masks[]` | `array<recipe.ExpectedMask>` | - | Expected mask checks. | - | - | examples/recipes/minimal-layer-mask.json |
+| `expected_profile.keyframes[]` | `array<recipe.ExpectedKeyframedProperty>` | - | Expected keyframes for a layer property. | Each expected keyframed property requires a layer name, property match name, and at least one keyframe. | - | examples/recipes/minimal-transform-keyframes.json |
+| `expected_profile.masks[]` | `array<recipe.ExpectedMask>` | - | Expected mask checks. | Each expected mask requires a layer name; optional mask fields are compared when present. | - | examples/recipes/minimal-layer-mask.json |
 
 ## ExpectedComp
 
@@ -725,17 +725,17 @@ This reference is generated from the canonical recipe field model.
 | `expected_profile.layers[].matte` | `string` | - | Expected matte layer name. | - | - | examples/recipes/minimal-layer-explicit-matte.json |
 | `expected_profile.layers[].label` | `number` | - | Expected layer label color index. | Expected layer label must be a valid AE label index. | - | examples/recipes/minimal-layer-label.json |
 | `expected_profile.layers[].comment` | `string` | - | Expected layer comment text. | - | - | examples/recipes/minimal-layer-comment.json |
-| `expected_profile.layers[].timing` | `object<ExpectedLayerTiming>` | - | Expected layer timing checks. | - | - | examples/recipes/minimal-layer-object-profile.json |
+| `expected_profile.layers[].timing` | `object<ExpectedLayerTiming>` | - | Expected layer timing checks. | Expected layer timing values, when present, must satisfy non-negative time constraints. | - | examples/recipes/minimal-layer-object-profile.json |
 | `expected_profile.layers[].flags` | `object<ExpectedLayerFlags>` | - | Expected layer switch checks. | - | - | examples/recipes/minimal-adjustment-layer.json |
 
 ## ExpectedLayerTiming
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `expected_profile.layers[].timing.start_time` | `number` | - | Expected layer start time in seconds. | - | - | examples/recipes/minimal-layer-object-profile.json |
-| `expected_profile.layers[].timing.in_point` | `number` | - | Expected layer in point in seconds. | - | - | examples/recipes/minimal-layer-object-profile.json |
-| `expected_profile.layers[].timing.out_point` | `number` | - | Expected layer out point in seconds. | - | - | examples/recipes/minimal-layer-object-profile.json |
-| `expected_profile.layers[].timing.duration` | `number` | - | Expected layer duration in seconds. | - | - | examples/recipes/minimal-layer-object-profile.json |
+| `expected_profile.layers[].timing.start_time` | `number` | - | Expected layer start time in seconds. | Expected layer start_time must be non-negative. | - | examples/recipes/minimal-layer-object-profile.json |
+| `expected_profile.layers[].timing.in_point` | `number` | - | Expected layer in point in seconds. | Expected layer in_point must be non-negative. | - | examples/recipes/minimal-layer-object-profile.json |
+| `expected_profile.layers[].timing.out_point` | `number` | - | Expected layer out point in seconds. | Expected layer out_point must be non-negative and greater than or equal to in_point when both are present. | - | examples/recipes/minimal-layer-object-profile.json |
+| `expected_profile.layers[].timing.duration` | `number` | - | Expected layer duration in seconds. | Expected layer duration must be non-negative. | - | examples/recipes/minimal-layer-object-profile.json |
 | `expected_profile.layers[].timing.stretch` | `number` | - | Expected layer stretch ratio. | Expected layer stretch must be greater than 0. | - | examples/recipes/minimal-layer-object-profile.json |
 
 ## ExpectedLayerFlags
@@ -775,8 +775,8 @@ This reference is generated from the canonical recipe field model.
 | `expected_profile.effects[].params[].match_name` | `string` | structural | Expected effect parameter match name. | Expected effect parameter checks require a parameter match name. | - | examples/recipes/minimal-adjustment-layer.json |
 | `expected_profile.effects[].params[].value` | `any` | - | Expected effect parameter value. | Expected parameter value must be a number, boolean, or numeric array. | - | examples/recipes/minimal-adjustment-layer.json |
 | `expected_profile.effects[].params[].target_layer` | `string` | - | Expected effect parameter target layer name. | Expected target layer checks compare against the profiled effect parameter layer reference name. | - | examples/recipes/minimal-effect-layer-param.json |
-| `expected_profile.effects[].params[].expression` | `string` | - | Expected effect parameter expression source. | - | - | examples/recipes/minimal-effect-param-expression.json |
-| `expected_profile.effects[].params[].expression_enabled` | `boolean` | - | Expected effect parameter expression enable switch. | - | - | examples/recipes/minimal-effect-param-expression.json |
+| `expected_profile.effects[].params[].expression` | `string` | - | Expected effect parameter expression source. | Expected effect parameter expression checks compare the profiled expression source. Each expected param needs at least one assertion field. | - | examples/recipes/minimal-effect-param-expression.json |
+| `expected_profile.effects[].params[].expression_enabled` | `boolean` | - | Expected effect parameter expression enable switch. | Expected effect parameter expression_enabled checks compare the profiled expression enabled state. Each expected param needs at least one assertion field. | - | examples/recipes/minimal-effect-param-expression.json |
 
 ## ExpectedProperty
 
@@ -785,8 +785,8 @@ This reference is generated from the canonical recipe field model.
 | `expected_profile.properties[].layer_name` | `string` | structural | Expected property layer name. | Property profile checks require a target layer name. | - | examples/recipes/minimal-camera-aperture.json |
 | `expected_profile.properties[].match_name` | `string` | structural | Expected property match name. | Property profile checks require a property match name. | - | examples/recipes/minimal-camera-aperture.json |
 | `expected_profile.properties[].value` | `any` | - | Expected property value. | Expected property value must be a number, boolean, or numeric array. | - | examples/recipes/minimal-camera-aperture.json |
-| `expected_profile.properties[].expression` | `string` | - | Expected property expression source. | - | - | examples/recipes/minimal-transform-expression.json |
-| `expected_profile.properties[].expression_enabled` | `boolean` | - | Expected property expression enable switch. | - | - | examples/recipes/minimal-transform-expression.json |
+| `expected_profile.properties[].expression` | `string` | - | Expected property expression source. | Expected property expression checks compare the profiled expression source. Each expected property needs at least one assertion field. | - | examples/recipes/minimal-transform-expression.json |
+| `expected_profile.properties[].expression_enabled` | `boolean` | - | Expected property expression enable switch. | Expected property expression_enabled checks compare the profiled expression enabled state. Each expected property needs at least one assertion field. | - | examples/recipes/minimal-transform-expression.json |
 
 ## ExpectedTextStyle
 
@@ -855,11 +855,11 @@ This reference is generated from the canonical recipe field model.
 | `expected_profile.masks[].motion_blur` | `string` | - | Expected mask motion blur mode. | Expected mask motion blur must use a supported mask motion blur value. | - | examples/recipes/minimal-layer-mask.json |
 | `expected_profile.masks[].feather_falloff` | `string` | - | Expected mask feather falloff mode. | Expected mask feather falloff must use a supported feather falloff value. | - | examples/recipes/minimal-layer-mask.json |
 | `expected_profile.masks[].opacity` | `number` | - | Expected mask opacity. | Expected mask opacity must be between 0 and 1. | - | examples/recipes/minimal-layer-mask.json |
-| `expected_profile.masks[].feather` | `array<float64>` | - | Expected mask feather vector. | - | - | examples/recipes/minimal-layer-mask.json |
+| `expected_profile.masks[].feather` | `array<float64>` | - | Expected mask feather vector. | Expected mask feather must contain two non-negative numeric values. | - | examples/recipes/minimal-layer-mask.json |
 | `expected_profile.masks[].expansion` | `number` | - | Expected mask expansion. | - | - | examples/recipes/minimal-layer-mask.json |
 | `expected_profile.masks[].closed` | `boolean` | - | Expected mask closed path switch. | - | - | examples/recipes/minimal-layer-mask.json |
 | `expected_profile.masks[].vertex_count` | `number` | - | Expected mask vertex count. | Expected mask vertex count must be non-negative. | - | examples/recipes/minimal-layer-mask.json |
-| `expected_profile.masks[].path_keyframes[]` | `array<recipe.ExpectedMaskPathKeyframe>` | - | Expected mask path keyframes. | - | - | examples/recipes/minimal-layer-mask.json |
+| `expected_profile.masks[].path_keyframes[]` | `array<recipe.ExpectedMaskPathKeyframe>` | - | Expected mask path keyframes. | Expected mask path keyframes must be sorted by non-negative time. | - | examples/recipes/minimal-layer-mask.json |
 
 ## ExpectedMaskPathKeyframe
 

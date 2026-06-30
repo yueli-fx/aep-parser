@@ -484,6 +484,38 @@ func TestBuildDocumentIncludesExpectedProfileValidationMetadata(t *testing.T) {
 	}
 }
 
+func TestBuildDocumentIncludesExpectedProfileObjectValidationMetadata(t *testing.T) {
+	doc, err := BuildDocument()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []string{
+		"expected_profile.layers[].timing",
+		"expected_profile.layers[].timing.start_time",
+		"expected_profile.layers[].timing.in_point",
+		"expected_profile.layers[].timing.out_point",
+		"expected_profile.layers[].timing.duration",
+		"expected_profile.layers[].timing.stretch",
+		"expected_profile.effects[].params[]",
+		"expected_profile.effects[].params[].expression",
+		"expected_profile.effects[].params[].expression_enabled",
+		"expected_profile.properties[]",
+		"expected_profile.properties[].expression",
+		"expected_profile.properties[].expression_enabled",
+		"expected_profile.keyframes[]",
+		"expected_profile.masks[]",
+		"expected_profile.masks[].feather",
+		"expected_profile.masks[].path_keyframes[]",
+	}
+	for _, path := range tests {
+		field := requireField(t, doc, path)
+		if field.Validation == "" && len(field.Enum) == 0 {
+			t.Fatalf("%s has no validation metadata: %+v", path, field)
+		}
+	}
+}
+
 func TestBuildDocumentIncludesExampleMetadata(t *testing.T) {
 	doc, err := BuildDocument()
 	if err != nil {
