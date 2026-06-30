@@ -5,9 +5,11 @@
 This work package tracks the dedicated lookup/search/index layer that sits
 outside the core `scene.Project` model.
 
-Status: first slice complete. `internal/projectindex` exists, recipe/profile
-hotspots are wired to it, and search/corpus result models are specified. Later
-work should add concrete search APIs only when a caller needs them.
+Status: lookup first slice complete, and the first narrow single-project search
+slice is implemented. `internal/projectindex` exists, recipe/profile hotspots
+are wired to it, search/corpus result models are specified, and callers can now
+obtain stable hit locations for source-layer and effect-match searches. Later
+work should add broader search/corpus APIs only when a caller needs them.
 
 The current architecture decision from `work/scene-architecture/index.md` is:
 keep `Project.Compositions`, `Project.Footage`, `Project.Folders`, and
@@ -360,6 +362,13 @@ Memory rules:
   - [x] Profile layer `source_ref` resolution now goes through
         `projectindex.AVItemByID` instead of ad hoc comp/footage maps.
 - [x] Design single-project search result schema.
+- [x] Implement first single-project search API slice.
+  - [x] `SearchLayersBySourceID` returns stable layer hits with source item
+        evidence and pointers for single-project convenience.
+  - [x] `SearchEffectsByMatchName` returns stable effect hits with deterministic
+        per-layer effect occurrence.
+  - [x] Search hits serialize with stable snake_case JSON names and do not
+        serialize raw Go pointers.
 - [x] Design corpus-level learning/search index.
 
 ## Verification
@@ -371,3 +380,8 @@ Current first implementation slice:
 - `go test ./internal/profile -run TestBuildSyntheticProjectIncludesLayerSourceRefs -count=1`
 - `go test ./internal/projectindex ./internal/profile -count=1`
 - `git diff --check` (CRLF warnings only)
+
+Current search slice:
+
+- `go test ./internal/projectindex -run 'TestSearch' -count=1`
+- `go test ./internal/projectindex -count=1`
