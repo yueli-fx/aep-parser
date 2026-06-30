@@ -308,6 +308,69 @@ func TestBuildDocumentIncludesLightValidationMetadata(t *testing.T) {
 	}
 }
 
+func TestBuildDocumentIncludesShapePaintValidationMetadata(t *testing.T) {
+	doc, err := BuildDocument()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []string{
+		"comps[].layers[].shape.kind",
+		"comps[].layers[].shape.position",
+		"comps[].layers[].shape.roundness",
+		"comps[].layers[].shape.points",
+		"comps[].layers[].shape.inner_radius",
+		"comps[].layers[].shape.outer_radius",
+		"comps[].layers[].shape.fill_opacity",
+		"comps[].layers[].shape.fill_blend_mode",
+		"comps[].layers[].shape.fill_composite_order",
+		"comps[].layers[].shape.fill_rule",
+		"comps[].layers[].shape.gradient_fill.type",
+		"comps[].layers[].shape.gradient_fill.start_point",
+		"comps[].layers[].shape.gradient_fill.end_point",
+		"comps[].layers[].shape.gradient_fill.highlight_length",
+		"comps[].layers[].shape.gradient_fill.color_stops[]",
+		"comps[].layers[].shape.gradient_fill.color_stops[].offset",
+		"comps[].layers[].shape.gradient_fill.color_stops[].midpoint",
+		"comps[].layers[].shape.gradient_fill.color_stops[].color",
+		"comps[].layers[].shape.gradient_fill.alpha_stops[]",
+		"comps[].layers[].shape.gradient_fill.alpha_stops[].offset",
+		"comps[].layers[].shape.gradient_fill.alpha_stops[].midpoint",
+		"comps[].layers[].shape.gradient_fill.alpha_stops[].alpha",
+		"comps[].layers[].shape.gradient_stroke.type",
+		"comps[].layers[].shape.gradient_stroke.start_point",
+		"comps[].layers[].shape.gradient_stroke.end_point",
+		"comps[].layers[].shape.gradient_stroke.highlight_length",
+		"comps[].layers[].shape.gradient_stroke.width",
+		"comps[].layers[].shape.gradient_stroke.line_cap",
+		"comps[].layers[].shape.gradient_stroke.line_join",
+		"comps[].layers[].shape.gradient_stroke.miter_limit",
+		"comps[].layers[].shape.gradient_stroke.color_stops[]",
+		"comps[].layers[].shape.gradient_stroke.color_stops[].offset",
+		"comps[].layers[].shape.gradient_stroke.color_stops[].midpoint",
+		"comps[].layers[].shape.gradient_stroke.color_stops[].color",
+		"comps[].layers[].shape.gradient_stroke.alpha_stops[]",
+		"comps[].layers[].shape.gradient_stroke.alpha_stops[].offset",
+		"comps[].layers[].shape.gradient_stroke.alpha_stops[].midpoint",
+		"comps[].layers[].shape.gradient_stroke.alpha_stops[].alpha",
+		"comps[].layers[].shape.stroke.color",
+		"comps[].layers[].shape.stroke.width",
+		"comps[].layers[].shape.stroke.opacity",
+		"comps[].layers[].shape.stroke.line_cap",
+		"comps[].layers[].shape.stroke.line_join",
+		"comps[].layers[].shape.stroke.miter_limit",
+		"comps[].layers[].shape.stroke.composite_order",
+		"comps[].layers[].shape.stroke.dashes.dash",
+		"comps[].layers[].shape.stroke.dashes.gap",
+	}
+	for _, path := range tests {
+		field := requireField(t, doc, path)
+		if field.Validation == "" && len(field.Enum) == 0 {
+			t.Fatalf("%s has no validation metadata: %+v", path, field)
+		}
+	}
+}
+
 func TestBuildDocumentIncludesExpectedProfileValidationMetadata(t *testing.T) {
 	doc, err := BuildDocument()
 	if err != nil {

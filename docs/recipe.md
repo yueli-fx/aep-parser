@@ -279,21 +279,21 @@ This reference is generated from the canonical recipe field model.
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.kind` | `string` | structural | Shape primitive type. | - | `shape.star.add` (`VectorGroup.AddStar`)<br>`shape.star.set_type` (`StarNode.SetStarType`) | examples/recipes/minimal-shape-fill-blend-mode.json |
+| `comps[].layers[].shape.kind` | `string` | structural | Shape primitive type. | Shape kind must use a supported primitive type. | `shape.star.add` (`VectorGroup.AddStar`)<br>`shape.star.set_type` (`StarNode.SetStarType`) | examples/recipes/minimal-shape-fill-blend-mode.json |
 | `comps[].layers[].shape.size` | `array<float64>` | - | Shape size vector. | - | `shape.rect.set_size` (`RectNode.SetSize`)<br>`shape.ellipse.set_size` (`EllipseNode.SetSize`) | examples/recipes/minimal-shape-fill-blend-mode.json |
-| `comps[].layers[].shape.position` | `array<float64>` | - | Shape local position vector. | - | `shape.rect.set_position` (`RectNode.SetPosition`)<br>`shape.ellipse.set_position` (`EllipseNode.SetPosition`)<br>`shape.star.set_position` (`StarNode.SetPosition`) | examples/recipes/minimal-shape-polystar.json |
-| `comps[].layers[].shape.roundness` | `number` | - | Rectangle corner roundness. | - | `shape.rect.set_roundness` (`RectNode.SetRoundness`) | examples/recipes/minimal-text-shape.json |
-| `comps[].layers[].shape.points` | `number` | - | Star or polygon point count. | - | `shape.star.set_points` (`StarNode.SetPoints`) | examples/recipes/minimal-shape-polystar.json |
+| `comps[].layers[].shape.position` | `array<float64>` | - | Shape local position vector. | When present, shape position must contain exactly two numeric values. | `shape.rect.set_position` (`RectNode.SetPosition`)<br>`shape.ellipse.set_position` (`EllipseNode.SetPosition`)<br>`shape.star.set_position` (`StarNode.SetPosition`) | examples/recipes/minimal-shape-polystar.json |
+| `comps[].layers[].shape.roundness` | `number` | - | Rectangle corner roundness. | Shape roundness is supported only for rect shapes and must be non-negative. | `shape.rect.set_roundness` (`RectNode.SetRoundness`) | examples/recipes/minimal-text-shape.json |
+| `comps[].layers[].shape.points` | `number` | - | Star or polygon point count. | Star and polygon point count must be at least 3. | `shape.star.set_points` (`StarNode.SetPoints`) | examples/recipes/minimal-shape-polystar.json |
 | `comps[].layers[].shape.rotation` | `number` | - | Shape local rotation. | - | `shape.star.set_rotation` (`StarNode.SetRotation`) | examples/recipes/minimal-shape-polystar.json |
-| `comps[].layers[].shape.inner_radius` | `number` | - | Star inner radius. | - | `shape.star.set_inner_radius` (`StarNode.SetInnerRadius`) | examples/recipes/minimal-shape-polystar.json |
-| `comps[].layers[].shape.outer_radius` | `number` | - | Star or polygon outer radius. | - | `shape.star.set_outer_radius` (`StarNode.SetOuterRadius`) | examples/recipes/minimal-shape-polystar.json |
+| `comps[].layers[].shape.inner_radius` | `number` | - | Star inner radius. | Star inner_radius must be non-negative. | `shape.star.set_inner_radius` (`StarNode.SetInnerRadius`) | examples/recipes/minimal-shape-polystar.json |
+| `comps[].layers[].shape.outer_radius` | `number` | - | Star or polygon outer radius. | Star outer_radius must be non-negative. | `shape.star.set_outer_radius` (`StarNode.SetOuterRadius`) | examples/recipes/minimal-shape-polystar.json |
 | `comps[].layers[].shape.inner_roundness` | `number` | - | Star inner roundness. | - | `shape.star.set_inner_roundness` (`StarNode.SetInnerRoundness`) | examples/recipes/minimal-shape-polystar.json |
 | `comps[].layers[].shape.outer_roundness` | `number` | - | Star or polygon outer roundness. | - | `shape.star.set_outer_roundness` (`StarNode.SetOuterRoundness`) | examples/recipes/minimal-shape-polystar.json |
 | `comps[].layers[].shape.fill_color` | `array<float64>` | - | Solid fill color as RGB channels. | - | `shape.fill.set_color` (`FillNode.SetColor`) | examples/recipes/minimal-effect-layer-param.json |
-| `comps[].layers[].shape.fill_opacity` | `number` | - | Solid fill opacity. | - | `shape.fill.set_opacity` (`FillNode.SetOpacity`) | examples/recipes/minimal-text-shape.json |
-| `comps[].layers[].shape.fill_blend_mode` | `number` | - | Solid fill blend mode. | - | `shape.fill.set_blend_mode` (`FillNode.SetBlendMode`) | examples/recipes/minimal-shape-fill-blend-mode.json |
-| `comps[].layers[].shape.fill_composite_order` | `string` | - | Solid fill composite order. | - | `shape.fill.set_composite_order` (`FillNode.SetCompositeOrder`) | examples/recipes/minimal-shape-fill-composite-order.json |
-| `comps[].layers[].shape.fill_rule` | `string` | - | Solid fill rule. | - | `shape.fill.set_fill_rule` (`FillNode.SetFillRule`) | examples/recipes/minimal-shape-fill-rule.json |
+| `comps[].layers[].shape.fill_opacity` | `number` | - | Solid fill opacity. | Fill opacity must be between 0 and 100. | `shape.fill.set_opacity` (`FillNode.SetOpacity`) | examples/recipes/minimal-text-shape.json |
+| `comps[].layers[].shape.fill_blend_mode` | `number` | - | Solid fill blend mode. | Fill blend mode must be an integer of at least 1. | `shape.fill.set_blend_mode` (`FillNode.SetBlendMode`) | examples/recipes/minimal-shape-fill-blend-mode.json |
+| `comps[].layers[].shape.fill_composite_order` | `string` | - | Solid fill composite order. | Fill composite order must use a supported value. | `shape.fill.set_composite_order` (`FillNode.SetCompositeOrder`) | examples/recipes/minimal-shape-fill-composite-order.json |
+| `comps[].layers[].shape.fill_rule` | `string` | - | Solid fill rule. | Fill rule must use a supported value. | `shape.fill.set_fill_rule` (`FillNode.SetFillRule`) | examples/recipes/minimal-shape-fill-rule.json |
 | `comps[].layers[].shape.gradient_fill` | `object<GradientFillSpec>` | - | Gradient fill settings. | - | `shape.gradient_fill.add` (`VectorGroup.AddGradientFill`) | examples/recipes/minimal-shape-gradient-fill.json |
 | `comps[].layers[].shape.gradient_stroke` | `object<GradientStrokeSpec>` | - | Gradient stroke settings. | - | `shape.gradient_stroke.add` (`VectorGroup.AddGradientStroke`) | examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json |
 | `comps[].layers[].shape.stroke` | `object<StrokeSpec>` | - | Solid stroke settings. | - | `shape.stroke.add` (`VectorGroup.AddStroke`) | examples/recipes/minimal-shape-stroke-composite-order.json |
@@ -312,63 +312,63 @@ This reference is generated from the canonical recipe field model.
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.gradient_fill.type` | `string` | - | Gradient fill type. | - | `shape.gradient_fill.set_type` (`GradientFillNode.SetGradientType`) | examples/recipes/minimal-shape-gradient-fill-alpha-stops.json |
-| `comps[].layers[].shape.gradient_fill.start_point` | `array<float64>` | - | Gradient fill start point. | - | `shape.gradient_fill.set_start_point` (`GradientFillNode.SetStartPoint`) | examples/recipes/minimal-shape-gradient-fill-alpha-stops.json |
-| `comps[].layers[].shape.gradient_fill.end_point` | `array<float64>` | - | Gradient fill end point. | - | `shape.gradient_fill.set_end_point` (`GradientFillNode.SetEndPoint`) | examples/recipes/minimal-shape-gradient-fill-alpha-stops.json |
-| `comps[].layers[].shape.gradient_fill.highlight_length` | `number` | - | Radial gradient fill highlight length. | - | `shape.gradient_fill.set_highlight_length` (`GradientFillNode.SetHighlightLength`) | examples/recipes/minimal-shape-gradient-fill-highlight.json |
+| `comps[].layers[].shape.gradient_fill.type` | `string` | - | Gradient fill type. | Gradient fill type must use a supported value. | `shape.gradient_fill.set_type` (`GradientFillNode.SetGradientType`) | examples/recipes/minimal-shape-gradient-fill-alpha-stops.json |
+| `comps[].layers[].shape.gradient_fill.start_point` | `array<float64>` | - | Gradient fill start point. | Gradient fill start_point must contain exactly two numeric values. | `shape.gradient_fill.set_start_point` (`GradientFillNode.SetStartPoint`) | examples/recipes/minimal-shape-gradient-fill-alpha-stops.json |
+| `comps[].layers[].shape.gradient_fill.end_point` | `array<float64>` | - | Gradient fill end point. | Gradient fill end_point must contain exactly two numeric values. | `shape.gradient_fill.set_end_point` (`GradientFillNode.SetEndPoint`) | examples/recipes/minimal-shape-gradient-fill-alpha-stops.json |
+| `comps[].layers[].shape.gradient_fill.highlight_length` | `number` | - | Radial gradient fill highlight length. | Gradient fill highlight_length must be between -100 and 100. | `shape.gradient_fill.set_highlight_length` (`GradientFillNode.SetHighlightLength`) | examples/recipes/minimal-shape-gradient-fill-highlight.json |
 | `comps[].layers[].shape.gradient_fill.highlight_angle` | `number` | - | Radial gradient fill highlight angle. | - | `shape.gradient_fill.set_highlight_angle` (`GradientFillNode.SetHighlightAngle`) | examples/recipes/minimal-shape-gradient-fill-highlight.json |
-| `comps[].layers[].shape.gradient_fill.color_stops[]` | `array<recipe.GradientColorStopSpec>` | - | Gradient fill color stops. | - | `shape.gradient_fill.set_color_stops` (`GradientFillNode.SetColorStops`) | examples/recipes/minimal-shape-gradient-fill-alpha-stops.json |
-| `comps[].layers[].shape.gradient_fill.alpha_stops[]` | `array<recipe.GradientAlphaStopSpec>` | - | Gradient fill alpha stops. | - | `shape.gradient_fill.set_alpha_stops` (`GradientFillNode.SetAlphaStops`) | examples/recipes/minimal-shape-gradient-fill-alpha-stops.json |
+| `comps[].layers[].shape.gradient_fill.color_stops[]` | `array<recipe.GradientColorStopSpec>` | - | Gradient fill color stops. | Gradient fill color_stops must include at least 2 stops. | `shape.gradient_fill.set_color_stops` (`GradientFillNode.SetColorStops`) | examples/recipes/minimal-shape-gradient-fill-alpha-stops.json |
+| `comps[].layers[].shape.gradient_fill.alpha_stops[]` | `array<recipe.GradientAlphaStopSpec>` | - | Gradient fill alpha stops. | Gradient fill alpha_stops must include at least 2 stops. | `shape.gradient_fill.set_alpha_stops` (`GradientFillNode.SetAlphaStops`) | examples/recipes/minimal-shape-gradient-fill-alpha-stops.json |
 
 ## GradientColorStopSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.gradient_fill.color_stops[].offset` | `number` | structural | Gradient fill color stop offset. | - | - | examples/recipes/minimal-shape-gradient-fill-alpha-stops.json |
-| `comps[].layers[].shape.gradient_fill.color_stops[].midpoint` | `number` | - | Gradient fill color stop midpoint. | - | - | examples/recipes/minimal-shape-gradient-fill-alpha-stops.json |
-| `comps[].layers[].shape.gradient_fill.color_stops[].color` | `array<float64>` | structural | Gradient fill color stop RGB color. | - | - | examples/recipes/minimal-shape-gradient-fill-alpha-stops.json |
-| `comps[].layers[].shape.gradient_stroke.color_stops[].offset` | `number` | structural | Gradient stroke color stop offset. | - | - | examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json |
-| `comps[].layers[].shape.gradient_stroke.color_stops[].midpoint` | `number` | - | Gradient stroke color stop midpoint. | - | - | examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json |
-| `comps[].layers[].shape.gradient_stroke.color_stops[].color` | `array<float64>` | structural | Gradient stroke color stop RGB color. | - | - | examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json |
+| `comps[].layers[].shape.gradient_fill.color_stops[].offset` | `number` | structural | Gradient fill color stop offset. | Gradient fill color stop offset must be between 0 and 1. | - | examples/recipes/minimal-shape-gradient-fill-alpha-stops.json |
+| `comps[].layers[].shape.gradient_fill.color_stops[].midpoint` | `number` | - | Gradient fill color stop midpoint. | Gradient fill color stop midpoint must be between 0 and 1. | - | examples/recipes/minimal-shape-gradient-fill-alpha-stops.json |
+| `comps[].layers[].shape.gradient_fill.color_stops[].color` | `array<float64>` | structural | Gradient fill color stop RGB color. | Gradient fill color stop color must contain RGB or RGBA channels in the 0..255 range. | - | examples/recipes/minimal-shape-gradient-fill-alpha-stops.json |
+| `comps[].layers[].shape.gradient_stroke.color_stops[].offset` | `number` | structural | Gradient stroke color stop offset. | Gradient stroke color stop offset must be between 0 and 1. | - | examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json |
+| `comps[].layers[].shape.gradient_stroke.color_stops[].midpoint` | `number` | - | Gradient stroke color stop midpoint. | Gradient stroke color stop midpoint must be between 0 and 1. | - | examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json |
+| `comps[].layers[].shape.gradient_stroke.color_stops[].color` | `array<float64>` | structural | Gradient stroke color stop RGB color. | Gradient stroke color stop color must contain RGB or RGBA channels in the 0..255 range. | - | examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json |
 
 ## GradientAlphaStopSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.gradient_fill.alpha_stops[].offset` | `number` | structural | Gradient fill alpha stop offset. | - | - | examples/recipes/minimal-shape-gradient-fill-alpha-stops.json |
-| `comps[].layers[].shape.gradient_fill.alpha_stops[].midpoint` | `number` | - | Gradient fill alpha stop midpoint. | - | - | examples/recipes/minimal-shape-gradient-fill-alpha-stops.json |
-| `comps[].layers[].shape.gradient_fill.alpha_stops[].alpha` | `number` | structural | Gradient fill alpha stop opacity value. | - | - | examples/recipes/minimal-shape-gradient-fill-alpha-stops.json |
-| `comps[].layers[].shape.gradient_stroke.alpha_stops[].offset` | `number` | structural | Gradient stroke alpha stop offset. | - | - | examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json |
-| `comps[].layers[].shape.gradient_stroke.alpha_stops[].midpoint` | `number` | - | Gradient stroke alpha stop midpoint. | - | - | examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json |
-| `comps[].layers[].shape.gradient_stroke.alpha_stops[].alpha` | `number` | structural | Gradient stroke alpha stop opacity value. | - | - | examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json |
+| `comps[].layers[].shape.gradient_fill.alpha_stops[].offset` | `number` | structural | Gradient fill alpha stop offset. | Gradient fill alpha stop offset must be between 0 and 1. | - | examples/recipes/minimal-shape-gradient-fill-alpha-stops.json |
+| `comps[].layers[].shape.gradient_fill.alpha_stops[].midpoint` | `number` | - | Gradient fill alpha stop midpoint. | Gradient fill alpha stop midpoint must be between 0 and 1. | - | examples/recipes/minimal-shape-gradient-fill-alpha-stops.json |
+| `comps[].layers[].shape.gradient_fill.alpha_stops[].alpha` | `number` | structural | Gradient fill alpha stop opacity value. | Gradient fill alpha stop alpha must be between 0 and 1. | - | examples/recipes/minimal-shape-gradient-fill-alpha-stops.json |
+| `comps[].layers[].shape.gradient_stroke.alpha_stops[].offset` | `number` | structural | Gradient stroke alpha stop offset. | Gradient stroke alpha stop offset must be between 0 and 1. | - | examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json |
+| `comps[].layers[].shape.gradient_stroke.alpha_stops[].midpoint` | `number` | - | Gradient stroke alpha stop midpoint. | Gradient stroke alpha stop midpoint must be between 0 and 1. | - | examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json |
+| `comps[].layers[].shape.gradient_stroke.alpha_stops[].alpha` | `number` | structural | Gradient stroke alpha stop opacity value. | Gradient stroke alpha stop alpha must be between 0 and 1. | - | examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json |
 
 ## GradientStrokeSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.gradient_stroke.type` | `string` | - | Gradient stroke type. | - | `shape.gradient_stroke.set_type` (`GradientStrokeNode.SetGradientType`) | examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json |
-| `comps[].layers[].shape.gradient_stroke.start_point` | `array<float64>` | - | Gradient stroke start point. | - | `shape.gradient_stroke.set_start_point` (`GradientStrokeNode.SetStartPoint`) | examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json |
-| `comps[].layers[].shape.gradient_stroke.end_point` | `array<float64>` | - | Gradient stroke end point. | - | `shape.gradient_stroke.set_end_point` (`GradientStrokeNode.SetEndPoint`) | examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json |
-| `comps[].layers[].shape.gradient_stroke.highlight_length` | `number` | - | Radial gradient stroke highlight length. | - | `shape.gradient_stroke.set_highlight_length` (`GradientStrokeNode.SetHighlightLength`) | examples/recipes/minimal-shape-gradient-stroke-highlight.json |
+| `comps[].layers[].shape.gradient_stroke.type` | `string` | - | Gradient stroke type. | Gradient stroke type must use a supported value. | `shape.gradient_stroke.set_type` (`GradientStrokeNode.SetGradientType`) | examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json |
+| `comps[].layers[].shape.gradient_stroke.start_point` | `array<float64>` | - | Gradient stroke start point. | Gradient stroke start_point must contain exactly two numeric values. | `shape.gradient_stroke.set_start_point` (`GradientStrokeNode.SetStartPoint`) | examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json |
+| `comps[].layers[].shape.gradient_stroke.end_point` | `array<float64>` | - | Gradient stroke end point. | Gradient stroke end_point must contain exactly two numeric values. | `shape.gradient_stroke.set_end_point` (`GradientStrokeNode.SetEndPoint`) | examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json |
+| `comps[].layers[].shape.gradient_stroke.highlight_length` | `number` | - | Radial gradient stroke highlight length. | Gradient stroke highlight_length must be between -100 and 100. | `shape.gradient_stroke.set_highlight_length` (`GradientStrokeNode.SetHighlightLength`) | examples/recipes/minimal-shape-gradient-stroke-highlight.json |
 | `comps[].layers[].shape.gradient_stroke.highlight_angle` | `number` | - | Radial gradient stroke highlight angle. | - | `shape.gradient_stroke.set_highlight_angle` (`GradientStrokeNode.SetHighlightAngle`) | examples/recipes/minimal-shape-gradient-stroke-highlight.json |
-| `comps[].layers[].shape.gradient_stroke.width` | `number` | - | Gradient stroke width. | - | `shape.gradient_stroke.set_width` (`GradientStrokeNode.SetStrokeWidth`) | examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json |
-| `comps[].layers[].shape.gradient_stroke.line_cap` | `string` | - | Gradient stroke line cap mode. | - | `shape.gradient_stroke.set_line_cap` (`GradientStrokeNode.SetLineCap`) | examples/recipes/minimal-shape-gradient-stroke-style.json |
-| `comps[].layers[].shape.gradient_stroke.line_join` | `string` | - | Gradient stroke line join mode. | - | `shape.gradient_stroke.set_line_join` (`GradientStrokeNode.SetLineJoin`) | examples/recipes/minimal-shape-gradient-stroke-style.json |
-| `comps[].layers[].shape.gradient_stroke.miter_limit` | `number` | - | Gradient stroke miter limit. | - | `shape.gradient_stroke.set_miter_limit` (`GradientStrokeNode.SetMiterLimit`) | examples/recipes/minimal-shape-gradient-stroke-style.json |
-| `comps[].layers[].shape.gradient_stroke.color_stops[]` | `array<recipe.GradientColorStopSpec>` | - | Gradient stroke color stops. | - | `shape.gradient_stroke.set_color_stops` (`GradientStrokeNode.SetColorStops`) | examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json |
-| `comps[].layers[].shape.gradient_stroke.alpha_stops[]` | `array<recipe.GradientAlphaStopSpec>` | - | Gradient stroke alpha stops. | - | `shape.gradient_stroke.set_alpha_stops` (`GradientStrokeNode.SetAlphaStops`) | examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json |
+| `comps[].layers[].shape.gradient_stroke.width` | `number` | - | Gradient stroke width. | Gradient stroke width must be non-negative. | `shape.gradient_stroke.set_width` (`GradientStrokeNode.SetStrokeWidth`) | examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json |
+| `comps[].layers[].shape.gradient_stroke.line_cap` | `string` | - | Gradient stroke line cap mode. | Gradient stroke line_cap must use a supported value. | `shape.gradient_stroke.set_line_cap` (`GradientStrokeNode.SetLineCap`) | examples/recipes/minimal-shape-gradient-stroke-style.json |
+| `comps[].layers[].shape.gradient_stroke.line_join` | `string` | - | Gradient stroke line join mode. | Gradient stroke line_join must use a supported value. | `shape.gradient_stroke.set_line_join` (`GradientStrokeNode.SetLineJoin`) | examples/recipes/minimal-shape-gradient-stroke-style.json |
+| `comps[].layers[].shape.gradient_stroke.miter_limit` | `number` | - | Gradient stroke miter limit. | Gradient stroke miter_limit must be at least 1. | `shape.gradient_stroke.set_miter_limit` (`GradientStrokeNode.SetMiterLimit`) | examples/recipes/minimal-shape-gradient-stroke-style.json |
+| `comps[].layers[].shape.gradient_stroke.color_stops[]` | `array<recipe.GradientColorStopSpec>` | - | Gradient stroke color stops. | Gradient stroke color_stops must include at least 2 stops. | `shape.gradient_stroke.set_color_stops` (`GradientStrokeNode.SetColorStops`) | examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json |
+| `comps[].layers[].shape.gradient_stroke.alpha_stops[]` | `array<recipe.GradientAlphaStopSpec>` | - | Gradient stroke alpha stops. | Gradient stroke alpha_stops must include at least 2 stops. | `shape.gradient_stroke.set_alpha_stops` (`GradientStrokeNode.SetAlphaStops`) | examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json |
 
 ## StrokeSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.stroke.color` | `array<float64>` | - | Stroke color as RGB channels. | - | `shape.stroke.set_color` (`StrokeNode.SetColor`) | examples/recipes/minimal-shape-stroke-composite-order.json |
-| `comps[].layers[].shape.stroke.width` | `number` | - | Stroke width. | - | `shape.stroke.set_width` (`StrokeNode.SetWidth`) | examples/recipes/minimal-shape-stroke-composite-order.json |
-| `comps[].layers[].shape.stroke.opacity` | `number` | - | Stroke opacity. | - | `shape.stroke.set_opacity` (`StrokeNode.SetOpacity`) | examples/recipes/minimal-shape-stroke-dashes.json |
-| `comps[].layers[].shape.stroke.line_cap` | `string` | - | Stroke line cap mode. | - | `shape.stroke.set_line_cap` (`StrokeNode.SetLineCap`) | examples/recipes/minimal-shape-stroke-style.json |
-| `comps[].layers[].shape.stroke.line_join` | `string` | - | Stroke line join mode. | - | `shape.stroke.set_line_join` (`StrokeNode.SetLineJoin`) | examples/recipes/minimal-shape-stroke-style.json |
-| `comps[].layers[].shape.stroke.miter_limit` | `number` | - | Stroke miter limit. | - | `shape.stroke.set_miter_limit` (`StrokeNode.SetMiterLimit`) | examples/recipes/minimal-shape-stroke-style.json |
-| `comps[].layers[].shape.stroke.composite_order` | `string` | - | Stroke composite order. | - | `shape.stroke.set_composite_order` (`StrokeNode.SetCompositeOrder`) | examples/recipes/minimal-shape-stroke-composite-order.json |
+| `comps[].layers[].shape.stroke.color` | `array<float64>` | - | Stroke color as RGB channels. | Stroke color must contain RGB or RGBA channels in the 0..255 range. | `shape.stroke.set_color` (`StrokeNode.SetColor`) | examples/recipes/minimal-shape-stroke-composite-order.json |
+| `comps[].layers[].shape.stroke.width` | `number` | - | Stroke width. | Stroke width must be non-negative. | `shape.stroke.set_width` (`StrokeNode.SetWidth`) | examples/recipes/minimal-shape-stroke-composite-order.json |
+| `comps[].layers[].shape.stroke.opacity` | `number` | - | Stroke opacity. | Stroke opacity must be between 0 and 100. | `shape.stroke.set_opacity` (`StrokeNode.SetOpacity`) | examples/recipes/minimal-shape-stroke-dashes.json |
+| `comps[].layers[].shape.stroke.line_cap` | `string` | - | Stroke line cap mode. | Stroke line_cap must use a supported value. | `shape.stroke.set_line_cap` (`StrokeNode.SetLineCap`) | examples/recipes/minimal-shape-stroke-style.json |
+| `comps[].layers[].shape.stroke.line_join` | `string` | - | Stroke line join mode. | Stroke line_join must use a supported value. | `shape.stroke.set_line_join` (`StrokeNode.SetLineJoin`) | examples/recipes/minimal-shape-stroke-style.json |
+| `comps[].layers[].shape.stroke.miter_limit` | `number` | - | Stroke miter limit. | Stroke miter_limit must be at least 1. | `shape.stroke.set_miter_limit` (`StrokeNode.SetMiterLimit`) | examples/recipes/minimal-shape-stroke-style.json |
+| `comps[].layers[].shape.stroke.composite_order` | `string` | - | Stroke composite order. | Stroke composite_order must use a supported value. | `shape.stroke.set_composite_order` (`StrokeNode.SetCompositeOrder`) | examples/recipes/minimal-shape-stroke-composite-order.json |
 | `comps[].layers[].shape.stroke.taper` | `object<StrokeTaperSpec>` | - | Stroke taper settings. | - | - | examples/recipes/minimal-shape-stroke-taper.json |
 | `comps[].layers[].shape.stroke.wave` | `object<StrokeWaveSpec>` | - | Stroke wave settings. | - | - | examples/recipes/minimal-shape-stroke-wave.json |
 | `comps[].layers[].shape.stroke.dashes` | `object<StrokeDashesSpec>` | - | Stroke dash pattern settings. | - | - | examples/recipes/minimal-shape-stroke-dashes.json |
@@ -396,8 +396,8 @@ This reference is generated from the canonical recipe field model.
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.stroke.dashes.dash` | `number` | - | Stroke dash length. | - | `shape.stroke_dashes.set_dash` (`StrokeDashes.SetDash`) | examples/recipes/minimal-shape-stroke-dashes.json |
-| `comps[].layers[].shape.stroke.dashes.gap` | `number` | - | Stroke gap length. | - | `shape.stroke_dashes.set_gap` (`StrokeDashes.SetGap`) | examples/recipes/minimal-shape-stroke-dashes.json |
+| `comps[].layers[].shape.stroke.dashes.dash` | `number` | - | Stroke dash length. | Stroke dash must be non-negative. | `shape.stroke_dashes.set_dash` (`StrokeDashes.SetDash`) | examples/recipes/minimal-shape-stroke-dashes.json |
+| `comps[].layers[].shape.stroke.dashes.gap` | `number` | - | Stroke gap length. | Stroke gap must be non-negative. | `shape.stroke_dashes.set_gap` (`StrokeDashes.SetGap`) | examples/recipes/minimal-shape-stroke-dashes.json |
 
 ## TrimSpec
 

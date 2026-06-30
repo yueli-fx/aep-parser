@@ -323,6 +323,157 @@ var fieldValidation = map[string]FieldMeta{
 		Validation: "Text paragraph direction must use a supported value.",
 		Enum:       []string{"ltr", "rtl"},
 	},
+	"comps[].layers[].shape.kind": {
+		Validation: "Shape kind must use a supported primitive type.",
+		Enum:       []string{"rect", "ellipse", "star", "polygon"},
+	},
+	"comps[].layers[].shape.position": {
+		Validation: "When present, shape position must contain exactly two numeric values.",
+	},
+	"comps[].layers[].shape.roundness": {
+		Validation: "Shape roundness is supported only for rect shapes and must be non-negative.",
+	},
+	"comps[].layers[].shape.points": {
+		Validation: "Star and polygon point count must be at least 3.",
+	},
+	"comps[].layers[].shape.inner_radius": {
+		Validation: "Star inner_radius must be non-negative.",
+	},
+	"comps[].layers[].shape.outer_radius": {
+		Validation: "Star outer_radius must be non-negative.",
+	},
+	"comps[].layers[].shape.fill_opacity": {
+		Validation: "Fill opacity must be between 0 and 100.",
+	},
+	"comps[].layers[].shape.fill_blend_mode": {
+		Validation: "Fill blend mode must be an integer of at least 1.",
+	},
+	"comps[].layers[].shape.fill_composite_order": {
+		Validation: "Fill composite order must use a supported value.",
+		Enum:       []string{"above_previous", "below_previous"},
+	},
+	"comps[].layers[].shape.fill_rule": {
+		Validation: "Fill rule must use a supported value.",
+		Enum:       []string{"nonzero_winding", "even_odd"},
+	},
+	"comps[].layers[].shape.gradient_fill.type": {
+		Validation: "Gradient fill type must use a supported value.",
+		Enum:       []string{"linear", "radial"},
+	},
+	"comps[].layers[].shape.gradient_fill.start_point": {
+		Validation: "Gradient fill start_point must contain exactly two numeric values.",
+	},
+	"comps[].layers[].shape.gradient_fill.end_point": {
+		Validation: "Gradient fill end_point must contain exactly two numeric values.",
+	},
+	"comps[].layers[].shape.gradient_fill.highlight_length": {
+		Validation: "Gradient fill highlight_length must be between -100 and 100.",
+	},
+	"comps[].layers[].shape.gradient_fill.color_stops[]": {
+		Validation: "Gradient fill color_stops must include at least 2 stops.",
+	},
+	"comps[].layers[].shape.gradient_fill.color_stops[].offset": {
+		Validation: "Gradient fill color stop offset must be between 0 and 1.",
+	},
+	"comps[].layers[].shape.gradient_fill.color_stops[].midpoint": {
+		Validation: "Gradient fill color stop midpoint must be between 0 and 1.",
+	},
+	"comps[].layers[].shape.gradient_fill.color_stops[].color": {
+		Validation: "Gradient fill color stop color must contain RGB or RGBA channels in the 0..255 range.",
+	},
+	"comps[].layers[].shape.gradient_fill.alpha_stops[]": {
+		Validation: "Gradient fill alpha_stops must include at least 2 stops.",
+	},
+	"comps[].layers[].shape.gradient_fill.alpha_stops[].offset": {
+		Validation: "Gradient fill alpha stop offset must be between 0 and 1.",
+	},
+	"comps[].layers[].shape.gradient_fill.alpha_stops[].midpoint": {
+		Validation: "Gradient fill alpha stop midpoint must be between 0 and 1.",
+	},
+	"comps[].layers[].shape.gradient_fill.alpha_stops[].alpha": {
+		Validation: "Gradient fill alpha stop alpha must be between 0 and 1.",
+	},
+	"comps[].layers[].shape.gradient_stroke.type": {
+		Validation: "Gradient stroke type must use a supported value.",
+		Enum:       []string{"linear", "radial"},
+	},
+	"comps[].layers[].shape.gradient_stroke.start_point": {
+		Validation: "Gradient stroke start_point must contain exactly two numeric values.",
+	},
+	"comps[].layers[].shape.gradient_stroke.end_point": {
+		Validation: "Gradient stroke end_point must contain exactly two numeric values.",
+	},
+	"comps[].layers[].shape.gradient_stroke.highlight_length": {
+		Validation: "Gradient stroke highlight_length must be between -100 and 100.",
+	},
+	"comps[].layers[].shape.gradient_stroke.width": {
+		Validation: "Gradient stroke width must be non-negative.",
+	},
+	"comps[].layers[].shape.gradient_stroke.line_cap": {
+		Validation: "Gradient stroke line_cap must use a supported value.",
+		Enum:       []string{"butt", "round", "projecting"},
+	},
+	"comps[].layers[].shape.gradient_stroke.line_join": {
+		Validation: "Gradient stroke line_join must use a supported value.",
+		Enum:       []string{"miter", "round", "bevel"},
+	},
+	"comps[].layers[].shape.gradient_stroke.miter_limit": {
+		Validation: "Gradient stroke miter_limit must be at least 1.",
+	},
+	"comps[].layers[].shape.gradient_stroke.color_stops[]": {
+		Validation: "Gradient stroke color_stops must include at least 2 stops.",
+	},
+	"comps[].layers[].shape.gradient_stroke.color_stops[].offset": {
+		Validation: "Gradient stroke color stop offset must be between 0 and 1.",
+	},
+	"comps[].layers[].shape.gradient_stroke.color_stops[].midpoint": {
+		Validation: "Gradient stroke color stop midpoint must be between 0 and 1.",
+	},
+	"comps[].layers[].shape.gradient_stroke.color_stops[].color": {
+		Validation: "Gradient stroke color stop color must contain RGB or RGBA channels in the 0..255 range.",
+	},
+	"comps[].layers[].shape.gradient_stroke.alpha_stops[]": {
+		Validation: "Gradient stroke alpha_stops must include at least 2 stops.",
+	},
+	"comps[].layers[].shape.gradient_stroke.alpha_stops[].offset": {
+		Validation: "Gradient stroke alpha stop offset must be between 0 and 1.",
+	},
+	"comps[].layers[].shape.gradient_stroke.alpha_stops[].midpoint": {
+		Validation: "Gradient stroke alpha stop midpoint must be between 0 and 1.",
+	},
+	"comps[].layers[].shape.gradient_stroke.alpha_stops[].alpha": {
+		Validation: "Gradient stroke alpha stop alpha must be between 0 and 1.",
+	},
+	"comps[].layers[].shape.stroke.color": {
+		Validation: "Stroke color must contain RGB or RGBA channels in the 0..255 range.",
+	},
+	"comps[].layers[].shape.stroke.width": {
+		Validation: "Stroke width must be non-negative.",
+	},
+	"comps[].layers[].shape.stroke.opacity": {
+		Validation: "Stroke opacity must be between 0 and 100.",
+	},
+	"comps[].layers[].shape.stroke.line_cap": {
+		Validation: "Stroke line_cap must use a supported value.",
+		Enum:       []string{"butt", "round", "projecting"},
+	},
+	"comps[].layers[].shape.stroke.line_join": {
+		Validation: "Stroke line_join must use a supported value.",
+		Enum:       []string{"miter", "round", "bevel"},
+	},
+	"comps[].layers[].shape.stroke.miter_limit": {
+		Validation: "Stroke miter_limit must be at least 1.",
+	},
+	"comps[].layers[].shape.stroke.composite_order": {
+		Validation: "Stroke composite_order must use a supported value.",
+		Enum:       []string{"above_previous", "below_previous"},
+	},
+	"comps[].layers[].shape.stroke.dashes.dash": {
+		Validation: "Stroke dash must be non-negative.",
+	},
+	"comps[].layers[].shape.stroke.dashes.gap": {
+		Validation: "Stroke gap must be non-negative.",
+	},
 	"comps[].layers[].masks[]": {
 		Validation: "Masks are supported on AV, text, shape, solid, null, adjustment, and precomp layers; camera and light layers reject masks.",
 	},

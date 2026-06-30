@@ -4285,6 +4285,13 @@
       "go_type": "string",
       "x-aep-structural-required": true,
       "description": "Shape primitive type.",
+      "x-aep-validation": "Shape kind must use a supported primitive type.",
+      "enum": [
+        "rect",
+        "ellipse",
+        "star",
+        "polygon"
+      ],
       "x-aep-capabilities": [
         {
           "key": "shape.star.add",
@@ -4363,6 +4370,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Shape local position vector.",
+      "x-aep-validation": "When present, shape position must contain exactly two numeric values.",
       "x-aep-capabilities": [
         {
           "key": "shape.rect.set_position",
@@ -4416,6 +4424,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Rectangle corner roundness.",
+      "x-aep-validation": "Shape roundness is supported only for rect shapes and must be non-negative.",
       "x-aep-capabilities": [
         {
           "key": "shape.rect.set_roundness",
@@ -4442,6 +4451,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Star or polygon point count.",
+      "x-aep-validation": "Star and polygon point count must be at least 3.",
       "x-aep-capabilities": [
         {
           "key": "shape.star.set_points",
@@ -4492,6 +4502,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Star inner radius.",
+      "x-aep-validation": "Star inner_radius must be non-negative.",
       "x-aep-capabilities": [
         {
           "key": "shape.star.set_inner_radius",
@@ -4517,6 +4528,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Star or polygon outer radius.",
+      "x-aep-validation": "Star outer_radius must be non-negative.",
       "x-aep-capabilities": [
         {
           "key": "shape.star.set_outer_radius",
@@ -4620,6 +4632,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Solid fill opacity.",
+      "x-aep-validation": "Fill opacity must be between 0 and 100.",
       "x-aep-capabilities": [
         {
           "key": "shape.fill.set_opacity",
@@ -4645,6 +4658,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Solid fill blend mode.",
+      "x-aep-validation": "Fill blend mode must be an integer of at least 1.",
       "x-aep-capabilities": [
         {
           "key": "shape.fill.set_blend_mode",
@@ -4670,6 +4684,11 @@
       "type": "string",
       "go_type": "string",
       "description": "Solid fill composite order.",
+      "x-aep-validation": "Fill composite order must use a supported value.",
+      "enum": [
+        "above_previous",
+        "below_previous"
+      ],
       "x-aep-capabilities": [
         {
           "key": "shape.fill.set_composite_order",
@@ -4695,6 +4714,11 @@
       "type": "string",
       "go_type": "string",
       "description": "Solid fill rule.",
+      "x-aep-validation": "Fill rule must use a supported value.",
+      "enum": [
+        "nonzero_winding",
+        "even_odd"
+      ],
       "x-aep-capabilities": [
         {
           "key": "shape.fill.set_fill_rule",
@@ -4746,6 +4770,11 @@
       "type": "string",
       "go_type": "string",
       "description": "Gradient fill type.",
+      "x-aep-validation": "Gradient fill type must use a supported value.",
+      "enum": [
+        "linear",
+        "radial"
+      ],
       "x-aep-capabilities": [
         {
           "key": "shape.gradient_fill.set_type",
@@ -4772,6 +4801,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Gradient fill start point.",
+      "x-aep-validation": "Gradient fill start_point must contain exactly two numeric values.",
       "x-aep-capabilities": [
         {
           "key": "shape.gradient_fill.set_start_point",
@@ -4798,6 +4828,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Gradient fill end point.",
+      "x-aep-validation": "Gradient fill end_point must contain exactly two numeric values.",
       "x-aep-capabilities": [
         {
           "key": "shape.gradient_fill.set_end_point",
@@ -4823,6 +4854,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Radial gradient fill highlight length.",
+      "x-aep-validation": "Gradient fill highlight_length must be between -100 and 100.",
       "x-aep-capabilities": [
         {
           "key": "shape.gradient_fill.set_highlight_length",
@@ -4875,6 +4907,7 @@
       "element": "recipe.GradientColorStopSpec",
       "object_type": "GradientColorStopSpec",
       "description": "Gradient fill color stops.",
+      "x-aep-validation": "Gradient fill color_stops must include at least 2 stops.",
       "x-aep-capabilities": [
         {
           "key": "shape.gradient_fill.set_color_stops",
@@ -4901,6 +4934,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Gradient fill color stop offset.",
+      "x-aep-validation": "Gradient fill color stop offset must be between 0 and 1.",
       "x-aep-example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     {
@@ -4911,6 +4945,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Gradient fill color stop midpoint.",
+      "x-aep-validation": "Gradient fill color stop midpoint must be between 0 and 1.",
       "x-aep-example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     {
@@ -4923,6 +4958,7 @@
       "element": "float64",
       "x-aep-structural-required": true,
       "description": "Gradient fill color stop RGB color.",
+      "x-aep-validation": "Gradient fill color stop color must contain RGB or RGBA channels in the 0..255 range.",
       "x-aep-example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     {
@@ -4935,6 +4971,7 @@
       "element": "recipe.GradientAlphaStopSpec",
       "object_type": "GradientAlphaStopSpec",
       "description": "Gradient fill alpha stops.",
+      "x-aep-validation": "Gradient fill alpha_stops must include at least 2 stops.",
       "x-aep-capabilities": [
         {
           "key": "shape.gradient_fill.set_alpha_stops",
@@ -4961,6 +4998,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Gradient fill alpha stop offset.",
+      "x-aep-validation": "Gradient fill alpha stop offset must be between 0 and 1.",
       "x-aep-example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     {
@@ -4971,6 +5009,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Gradient fill alpha stop midpoint.",
+      "x-aep-validation": "Gradient fill alpha stop midpoint must be between 0 and 1.",
       "x-aep-example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     {
@@ -4982,6 +5021,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Gradient fill alpha stop opacity value.",
+      "x-aep-validation": "Gradient fill alpha stop alpha must be between 0 and 1.",
       "x-aep-example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     {
@@ -5018,6 +5058,11 @@
       "type": "string",
       "go_type": "string",
       "description": "Gradient stroke type.",
+      "x-aep-validation": "Gradient stroke type must use a supported value.",
+      "enum": [
+        "linear",
+        "radial"
+      ],
       "x-aep-capabilities": [
         {
           "key": "shape.gradient_stroke.set_type",
@@ -5044,6 +5089,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Gradient stroke start point.",
+      "x-aep-validation": "Gradient stroke start_point must contain exactly two numeric values.",
       "x-aep-capabilities": [
         {
           "key": "shape.gradient_stroke.set_start_point",
@@ -5070,6 +5116,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Gradient stroke end point.",
+      "x-aep-validation": "Gradient stroke end_point must contain exactly two numeric values.",
       "x-aep-capabilities": [
         {
           "key": "shape.gradient_stroke.set_end_point",
@@ -5095,6 +5142,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Radial gradient stroke highlight length.",
+      "x-aep-validation": "Gradient stroke highlight_length must be between -100 and 100.",
       "x-aep-capabilities": [
         {
           "key": "shape.gradient_stroke.set_highlight_length",
@@ -5145,6 +5193,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Gradient stroke width.",
+      "x-aep-validation": "Gradient stroke width must be non-negative.",
       "x-aep-capabilities": [
         {
           "key": "shape.gradient_stroke.set_width",
@@ -5170,6 +5219,12 @@
       "type": "string",
       "go_type": "string",
       "description": "Gradient stroke line cap mode.",
+      "x-aep-validation": "Gradient stroke line_cap must use a supported value.",
+      "enum": [
+        "butt",
+        "round",
+        "projecting"
+      ],
       "x-aep-capabilities": [
         {
           "key": "shape.gradient_stroke.set_line_cap",
@@ -5195,6 +5250,12 @@
       "type": "string",
       "go_type": "string",
       "description": "Gradient stroke line join mode.",
+      "x-aep-validation": "Gradient stroke line_join must use a supported value.",
+      "enum": [
+        "miter",
+        "round",
+        "bevel"
+      ],
       "x-aep-capabilities": [
         {
           "key": "shape.gradient_stroke.set_line_join",
@@ -5220,6 +5281,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Gradient stroke miter limit.",
+      "x-aep-validation": "Gradient stroke miter_limit must be at least 1.",
       "x-aep-capabilities": [
         {
           "key": "shape.gradient_stroke.set_miter_limit",
@@ -5247,6 +5309,7 @@
       "element": "recipe.GradientColorStopSpec",
       "object_type": "GradientColorStopSpec",
       "description": "Gradient stroke color stops.",
+      "x-aep-validation": "Gradient stroke color_stops must include at least 2 stops.",
       "x-aep-capabilities": [
         {
           "key": "shape.gradient_stroke.set_color_stops",
@@ -5273,6 +5336,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Gradient stroke color stop offset.",
+      "x-aep-validation": "Gradient stroke color stop offset must be between 0 and 1.",
       "x-aep-example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     {
@@ -5283,6 +5347,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Gradient stroke color stop midpoint.",
+      "x-aep-validation": "Gradient stroke color stop midpoint must be between 0 and 1.",
       "x-aep-example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     {
@@ -5295,6 +5360,7 @@
       "element": "float64",
       "x-aep-structural-required": true,
       "description": "Gradient stroke color stop RGB color.",
+      "x-aep-validation": "Gradient stroke color stop color must contain RGB or RGBA channels in the 0..255 range.",
       "x-aep-example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     {
@@ -5307,6 +5373,7 @@
       "element": "recipe.GradientAlphaStopSpec",
       "object_type": "GradientAlphaStopSpec",
       "description": "Gradient stroke alpha stops.",
+      "x-aep-validation": "Gradient stroke alpha_stops must include at least 2 stops.",
       "x-aep-capabilities": [
         {
           "key": "shape.gradient_stroke.set_alpha_stops",
@@ -5333,6 +5400,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Gradient stroke alpha stop offset.",
+      "x-aep-validation": "Gradient stroke alpha stop offset must be between 0 and 1.",
       "x-aep-example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     {
@@ -5343,6 +5411,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Gradient stroke alpha stop midpoint.",
+      "x-aep-validation": "Gradient stroke alpha stop midpoint must be between 0 and 1.",
       "x-aep-example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     {
@@ -5354,6 +5423,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Gradient stroke alpha stop opacity value.",
+      "x-aep-validation": "Gradient stroke alpha stop alpha must be between 0 and 1.",
       "x-aep-example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     {
@@ -5391,6 +5461,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Stroke color as RGB channels.",
+      "x-aep-validation": "Stroke color must contain RGB or RGBA channels in the 0..255 range.",
       "x-aep-capabilities": [
         {
           "key": "shape.stroke.set_color",
@@ -5416,6 +5487,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Stroke width.",
+      "x-aep-validation": "Stroke width must be non-negative.",
       "x-aep-capabilities": [
         {
           "key": "shape.stroke.set_width",
@@ -5441,6 +5513,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Stroke opacity.",
+      "x-aep-validation": "Stroke opacity must be between 0 and 100.",
       "x-aep-capabilities": [
         {
           "key": "shape.stroke.set_opacity",
@@ -5466,6 +5539,12 @@
       "type": "string",
       "go_type": "string",
       "description": "Stroke line cap mode.",
+      "x-aep-validation": "Stroke line_cap must use a supported value.",
+      "enum": [
+        "butt",
+        "round",
+        "projecting"
+      ],
       "x-aep-capabilities": [
         {
           "key": "shape.stroke.set_line_cap",
@@ -5491,6 +5570,12 @@
       "type": "string",
       "go_type": "string",
       "description": "Stroke line join mode.",
+      "x-aep-validation": "Stroke line_join must use a supported value.",
+      "enum": [
+        "miter",
+        "round",
+        "bevel"
+      ],
       "x-aep-capabilities": [
         {
           "key": "shape.stroke.set_line_join",
@@ -5516,6 +5601,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Stroke miter limit.",
+      "x-aep-validation": "Stroke miter_limit must be at least 1.",
       "x-aep-capabilities": [
         {
           "key": "shape.stroke.set_miter_limit",
@@ -5541,6 +5627,11 @@
       "type": "string",
       "go_type": "string",
       "description": "Stroke composite order.",
+      "x-aep-validation": "Stroke composite_order must use a supported value.",
+      "enum": [
+        "above_previous",
+        "below_previous"
+      ],
       "x-aep-capabilities": [
         {
           "key": "shape.stroke.set_composite_order",
@@ -5824,6 +5915,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Stroke dash length.",
+      "x-aep-validation": "Stroke dash must be non-negative.",
       "x-aep-capabilities": [
         {
           "key": "shape.stroke_dashes.set_dash",
@@ -5849,6 +5941,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Stroke gap length.",
+      "x-aep-validation": "Stroke gap must be non-negative.",
       "x-aep-capabilities": [
         {
           "key": "shape.stroke_dashes.set_gap",

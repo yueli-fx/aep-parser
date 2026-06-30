@@ -1952,6 +1952,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Solid fill blend mode.",
+      "validation": "Fill blend mode must be an integer of at least 1.",
       "capability_keys": [
         "shape.fill.set_blend_mode"
       ],
@@ -1978,6 +1979,11 @@
       "type": "string",
       "go_type": "string",
       "summary": "Solid fill composite order.",
+      "validation": "Fill composite order must use a supported value.",
+      "enum": [
+        "above_previous",
+        "below_previous"
+      ],
       "capability_keys": [
         "shape.fill.set_composite_order"
       ],
@@ -1991,6 +1997,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Solid fill opacity.",
+      "validation": "Fill opacity must be between 0 and 100.",
       "capability_keys": [
         "shape.fill.set_opacity"
       ],
@@ -2004,6 +2011,11 @@
       "type": "string",
       "go_type": "string",
       "summary": "Solid fill rule.",
+      "validation": "Fill rule must use a supported value.",
+      "enum": [
+        "nonzero_winding",
+        "even_odd"
+      ],
       "capability_keys": [
         "shape.fill.set_fill_rule"
       ],
@@ -2030,6 +2042,7 @@
       "type": "array\u003crecipe.GradientAlphaStopSpec\u003e",
       "go_type": "[]recipe.GradientAlphaStopSpec",
       "summary": "Gradient fill alpha stops.",
+      "validation": "Gradient fill alpha_stops must include at least 2 stops.",
       "capability_keys": [
         "shape.gradient_fill.set_alpha_stops"
       ],
@@ -2046,6 +2059,7 @@
         "structural"
       ],
       "summary": "Gradient fill alpha stop opacity value.",
+      "validation": "Gradient fill alpha stop alpha must be between 0 and 1.",
       "example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_fill.alpha_stops[].midpoint": {
@@ -2056,6 +2070,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Gradient fill alpha stop midpoint.",
+      "validation": "Gradient fill alpha stop midpoint must be between 0 and 1.",
       "example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_fill.alpha_stops[].offset": {
@@ -2069,6 +2084,7 @@
         "structural"
       ],
       "summary": "Gradient fill alpha stop offset.",
+      "validation": "Gradient fill alpha stop offset must be between 0 and 1.",
       "example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_fill.color_stops[]": {
@@ -2079,6 +2095,7 @@
       "type": "array\u003crecipe.GradientColorStopSpec\u003e",
       "go_type": "[]recipe.GradientColorStopSpec",
       "summary": "Gradient fill color stops.",
+      "validation": "Gradient fill color_stops must include at least 2 stops.",
       "capability_keys": [
         "shape.gradient_fill.set_color_stops"
       ],
@@ -2095,6 +2112,7 @@
         "structural"
       ],
       "summary": "Gradient fill color stop RGB color.",
+      "validation": "Gradient fill color stop color must contain RGB or RGBA channels in the 0..255 range.",
       "example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_fill.color_stops[].midpoint": {
@@ -2105,6 +2123,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Gradient fill color stop midpoint.",
+      "validation": "Gradient fill color stop midpoint must be between 0 and 1.",
       "example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_fill.color_stops[].offset": {
@@ -2118,6 +2137,7 @@
         "structural"
       ],
       "summary": "Gradient fill color stop offset.",
+      "validation": "Gradient fill color stop offset must be between 0 and 1.",
       "example": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_fill.end_point": {
@@ -2128,6 +2148,7 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Gradient fill end point.",
+      "validation": "Gradient fill end_point must contain exactly two numeric values.",
       "capability_keys": [
         "shape.gradient_fill.set_end_point"
       ],
@@ -2154,6 +2175,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Radial gradient fill highlight length.",
+      "validation": "Gradient fill highlight_length must be between -100 and 100.",
       "capability_keys": [
         "shape.gradient_fill.set_highlight_length"
       ],
@@ -2167,6 +2189,7 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Gradient fill start point.",
+      "validation": "Gradient fill start_point must contain exactly two numeric values.",
       "capability_keys": [
         "shape.gradient_fill.set_start_point"
       ],
@@ -2180,6 +2203,11 @@
       "type": "string",
       "go_type": "string",
       "summary": "Gradient fill type.",
+      "validation": "Gradient fill type must use a supported value.",
+      "enum": [
+        "linear",
+        "radial"
+      ],
       "capability_keys": [
         "shape.gradient_fill.set_type"
       ],
@@ -2206,6 +2234,7 @@
       "type": "array\u003crecipe.GradientAlphaStopSpec\u003e",
       "go_type": "[]recipe.GradientAlphaStopSpec",
       "summary": "Gradient stroke alpha stops.",
+      "validation": "Gradient stroke alpha_stops must include at least 2 stops.",
       "capability_keys": [
         "shape.gradient_stroke.set_alpha_stops"
       ],
@@ -2222,6 +2251,7 @@
         "structural"
       ],
       "summary": "Gradient stroke alpha stop opacity value.",
+      "validation": "Gradient stroke alpha stop alpha must be between 0 and 1.",
       "example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_stroke.alpha_stops[].midpoint": {
@@ -2232,6 +2262,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Gradient stroke alpha stop midpoint.",
+      "validation": "Gradient stroke alpha stop midpoint must be between 0 and 1.",
       "example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_stroke.alpha_stops[].offset": {
@@ -2245,6 +2276,7 @@
         "structural"
       ],
       "summary": "Gradient stroke alpha stop offset.",
+      "validation": "Gradient stroke alpha stop offset must be between 0 and 1.",
       "example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_stroke.color_stops[]": {
@@ -2255,6 +2287,7 @@
       "type": "array\u003crecipe.GradientColorStopSpec\u003e",
       "go_type": "[]recipe.GradientColorStopSpec",
       "summary": "Gradient stroke color stops.",
+      "validation": "Gradient stroke color_stops must include at least 2 stops.",
       "capability_keys": [
         "shape.gradient_stroke.set_color_stops"
       ],
@@ -2271,6 +2304,7 @@
         "structural"
       ],
       "summary": "Gradient stroke color stop RGB color.",
+      "validation": "Gradient stroke color stop color must contain RGB or RGBA channels in the 0..255 range.",
       "example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_stroke.color_stops[].midpoint": {
@@ -2281,6 +2315,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Gradient stroke color stop midpoint.",
+      "validation": "Gradient stroke color stop midpoint must be between 0 and 1.",
       "example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_stroke.color_stops[].offset": {
@@ -2294,6 +2329,7 @@
         "structural"
       ],
       "summary": "Gradient stroke color stop offset.",
+      "validation": "Gradient stroke color stop offset must be between 0 and 1.",
       "example": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json"
     },
     "comps[].layers[].shape.gradient_stroke.end_point": {
@@ -2304,6 +2340,7 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Gradient stroke end point.",
+      "validation": "Gradient stroke end_point must contain exactly two numeric values.",
       "capability_keys": [
         "shape.gradient_stroke.set_end_point"
       ],
@@ -2330,6 +2367,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Radial gradient stroke highlight length.",
+      "validation": "Gradient stroke highlight_length must be between -100 and 100.",
       "capability_keys": [
         "shape.gradient_stroke.set_highlight_length"
       ],
@@ -2343,6 +2381,12 @@
       "type": "string",
       "go_type": "string",
       "summary": "Gradient stroke line cap mode.",
+      "validation": "Gradient stroke line_cap must use a supported value.",
+      "enum": [
+        "butt",
+        "round",
+        "projecting"
+      ],
       "capability_keys": [
         "shape.gradient_stroke.set_line_cap"
       ],
@@ -2356,6 +2400,12 @@
       "type": "string",
       "go_type": "string",
       "summary": "Gradient stroke line join mode.",
+      "validation": "Gradient stroke line_join must use a supported value.",
+      "enum": [
+        "miter",
+        "round",
+        "bevel"
+      ],
       "capability_keys": [
         "shape.gradient_stroke.set_line_join"
       ],
@@ -2369,6 +2419,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Gradient stroke miter limit.",
+      "validation": "Gradient stroke miter_limit must be at least 1.",
       "capability_keys": [
         "shape.gradient_stroke.set_miter_limit"
       ],
@@ -2382,6 +2433,7 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Gradient stroke start point.",
+      "validation": "Gradient stroke start_point must contain exactly two numeric values.",
       "capability_keys": [
         "shape.gradient_stroke.set_start_point"
       ],
@@ -2395,6 +2447,11 @@
       "type": "string",
       "go_type": "string",
       "summary": "Gradient stroke type.",
+      "validation": "Gradient stroke type must use a supported value.",
+      "enum": [
+        "linear",
+        "radial"
+      ],
       "capability_keys": [
         "shape.gradient_stroke.set_type"
       ],
@@ -2408,6 +2465,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Gradient stroke width.",
+      "validation": "Gradient stroke width must be non-negative.",
       "capability_keys": [
         "shape.gradient_stroke.set_width"
       ],
@@ -2421,6 +2479,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Star inner radius.",
+      "validation": "Star inner_radius must be non-negative.",
       "capability_keys": [
         "shape.star.set_inner_radius"
       ],
@@ -2450,6 +2509,13 @@
         "structural"
       ],
       "summary": "Shape primitive type.",
+      "validation": "Shape kind must use a supported primitive type.",
+      "enum": [
+        "rect",
+        "ellipse",
+        "star",
+        "polygon"
+      ],
       "capability_keys": [
         "shape.star.add",
         "shape.star.set_type"
@@ -2568,6 +2634,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Star or polygon outer radius.",
+      "validation": "Star outer_radius must be non-negative.",
       "capability_keys": [
         "shape.star.set_outer_radius"
       ],
@@ -2594,6 +2661,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Star or polygon point count.",
+      "validation": "Star and polygon point count must be at least 3.",
       "capability_keys": [
         "shape.star.set_points"
       ],
@@ -2607,6 +2675,7 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Shape local position vector.",
+      "validation": "When present, shape position must contain exactly two numeric values.",
       "capability_keys": [
         "shape.rect.set_position",
         "shape.ellipse.set_position",
@@ -2817,6 +2886,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Rectangle corner roundness.",
+      "validation": "Shape roundness is supported only for rect shapes and must be non-negative.",
       "capability_keys": [
         "shape.rect.set_roundness"
       ],
@@ -2857,6 +2927,7 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Stroke color as RGB channels.",
+      "validation": "Stroke color must contain RGB or RGBA channels in the 0..255 range.",
       "capability_keys": [
         "shape.stroke.set_color"
       ],
@@ -2870,6 +2941,11 @@
       "type": "string",
       "go_type": "string",
       "summary": "Stroke composite order.",
+      "validation": "Stroke composite_order must use a supported value.",
+      "enum": [
+        "above_previous",
+        "below_previous"
+      ],
       "capability_keys": [
         "shape.stroke.set_composite_order"
       ],
@@ -2893,6 +2969,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Stroke dash length.",
+      "validation": "Stroke dash must be non-negative.",
       "capability_keys": [
         "shape.stroke_dashes.set_dash"
       ],
@@ -2906,6 +2983,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Stroke gap length.",
+      "validation": "Stroke gap must be non-negative.",
       "capability_keys": [
         "shape.stroke_dashes.set_gap"
       ],
@@ -2919,6 +2997,12 @@
       "type": "string",
       "go_type": "string",
       "summary": "Stroke line cap mode.",
+      "validation": "Stroke line_cap must use a supported value.",
+      "enum": [
+        "butt",
+        "round",
+        "projecting"
+      ],
       "capability_keys": [
         "shape.stroke.set_line_cap"
       ],
@@ -2932,6 +3016,12 @@
       "type": "string",
       "go_type": "string",
       "summary": "Stroke line join mode.",
+      "validation": "Stroke line_join must use a supported value.",
+      "enum": [
+        "miter",
+        "round",
+        "bevel"
+      ],
       "capability_keys": [
         "shape.stroke.set_line_join"
       ],
@@ -2945,6 +3035,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Stroke miter limit.",
+      "validation": "Stroke miter_limit must be at least 1.",
       "capability_keys": [
         "shape.stroke.set_miter_limit"
       ],
@@ -2958,6 +3049,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Stroke opacity.",
+      "validation": "Stroke opacity must be between 0 and 100.",
       "capability_keys": [
         "shape.stroke.set_opacity"
       ],
@@ -3108,6 +3200,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Stroke width.",
+      "validation": "Stroke width must be non-negative.",
       "capability_keys": [
         "shape.stroke.set_width"
       ],
