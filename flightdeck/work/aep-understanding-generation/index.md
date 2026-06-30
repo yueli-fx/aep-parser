@@ -196,7 +196,8 @@ Done:
   shape is static `value` plus optional controller name; keyframes, expressions,
   and layer-reference params remain outside this slice. `expected_profile`
   can assert controller name/type through `essential_graphics[]`, covered by
-  `minimal-essential-graphics-controller.json` and
+  `minimal-essential-graphics-controller.json`,
+  `minimal-essential-graphics-checkbox-controller.json`, and
   `minimal-essential-graphics-color-controller.json`.
 - Recipe comp settings now support `draft_3d`. Profile composition output now
   exposes `draft_3d` from the cdta flag, and `expected_profile.draft_3d` can

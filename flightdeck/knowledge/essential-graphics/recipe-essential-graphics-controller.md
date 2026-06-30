@@ -19,9 +19,9 @@ Recipe syntax:
 
 This first recipe slice is intentionally narrow:
 
-- The parameter must have a static `value`. Slider and color control examples
-  are covered; color works because `SetEffectParam` materializes the color value
-  before `AddEssentialProperty`.
+- The parameter must have a static `value`. Slider, checkbox, and color control
+  examples are covered; color works because `SetEffectParam` materializes the
+  color value before `AddEssentialProperty`.
 - `target_layer`, `keyframes`, and `expression` are refused when
   `essential_graphics` is present.
 - The compiler materializes the effect param, then calls
@@ -32,6 +32,7 @@ This first recipe slice is intentionally narrow:
 Coverage recipes:
 
 - `examples/recipes/minimal-essential-graphics-controller.json`
+- `examples/recipes/minimal-essential-graphics-checkbox-controller.json`
 - `examples/recipes/minimal-essential-graphics-color-controller.json`
 
 This does not mean recipe IR supports full EG panel authoring yet. Color
