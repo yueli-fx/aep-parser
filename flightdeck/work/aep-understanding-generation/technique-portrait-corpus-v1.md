@@ -189,10 +189,11 @@ compares a report to itself, compares the partial report to the full report,
 validates and compiles generated recipe drafts into smoke `.aep` files, reparses
 those compiled `.aep` files with `aeptechnique`, and writes `acceptance.json` plus
 `acceptance.md`. It also writes
-`latest_run.txt`, `latest_outcome.md`, `latest_effectiveness.md`, `latest_effectiveness.json`,
+`latest_run.txt`, `latest_outcome.html`, `latest_outcome.md`, `latest_effectiveness.md`, `latest_effectiveness.json`,
 `latest_acceptance.md`, `latest_index.html`, `history.jsonl`, and `history.csv`
 at the selected output root so the most recent result and trend history have
-stable paths. `latest_outcome.md` is the shortest human-readable outcome,
+stable paths. `latest_outcome.html` is the shortest browser-readable outcome,
+`latest_outcome.md` is the shortest human-readable outcome,
 `latest_effectiveness.md` is the fuller human-readable outcome summary, while
 `latest_effectiveness.json` is the script/frontend-friendly version of the same effectiveness snapshot,
 including corpus counters, closed-loop reconstruction smoke results, primary

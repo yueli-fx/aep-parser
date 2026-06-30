@@ -26,11 +26,13 @@ try {
     $acceptanceJsonPath = Join-Path $runRoot "acceptance.json"
     $acceptanceMdPath = Join-Path $runRoot "acceptance.md"
     $outcomeMdPath = Join-Path $runRoot "outcome.md"
+    $outcomeHtmlPath = Join-Path $runRoot "outcome.html"
     $effectivenessMdPath = Join-Path $runRoot "effectiveness.md"
     $effectivenessJsonPath = Join-Path $runRoot "effectiveness.json"
     $latestRunPath = Join-Path $OutRoot "latest_run.txt"
     $latestAcceptancePath = Join-Path $OutRoot "latest_acceptance.md"
     $latestOutcomePath = Join-Path $OutRoot "latest_outcome.md"
+    $latestOutcomeHtmlPath = Join-Path $OutRoot "latest_outcome.html"
     $latestEffectivenessPath = Join-Path $OutRoot "latest_effectiveness.md"
     $latestEffectivenessJsonPath = Join-Path $OutRoot "latest_effectiveness.json"
     $historyJsonlPath = Join-Path $OutRoot "history.jsonl"
@@ -451,6 +453,7 @@ try {
             latest_run = $latestRunPath
             latest_acceptance = $latestAcceptancePath
             latest_outcome = $latestOutcomePath
+            latest_outcome_html = $latestOutcomeHtmlPath
             latest_effectiveness = $latestEffectivenessPath
             latest_effectiveness_json = $latestEffectivenessJsonPath
             history_jsonl = $historyJsonlPath
@@ -532,6 +535,14 @@ try {
     }
     $effectiveness | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $effectivenessJsonPath -Encoding UTF8
 
+    function Escape-Html {
+        param([AllowNull()][object]$Value)
+        if ($null -eq $Value) {
+            return ""
+        }
+        return [System.Net.WebUtility]::HtmlEncode([string]$Value)
+    }
+
     $b = [System.Text.StringBuilder]::new()
     [void]$b.AppendLine("# Technique Self-Hosted Acceptance")
     [void]$b.AppendLine("")
@@ -582,6 +593,40 @@ try {
     [void]$o.AppendLine("- effectiveness json: ``$latestEffectivenessJsonPath``")
     [void]$o.AppendLine("- run root: ``$runRoot``")
     $o.ToString() | Set-Content -LiteralPath $outcomeMdPath -Encoding UTF8
+
+    $statusClass = "ok"
+    if ($outcomeStatusInfo.status -eq "watch") {
+        $statusClass = "watch"
+    } elseif ($outcomeStatusInfo.status -ne "pass") {
+        $statusClass = "fail"
+    }
+    $outcomeHtml = [System.Text.StringBuilder]::new()
+    [void]$outcomeHtml.AppendLine("<!doctype html>")
+    [void]$outcomeHtml.AppendLine("<html lang=""en""><head><meta charset=""utf-8""><meta name=""viewport"" content=""width=device-width, initial-scale=1"">")
+    [void]$outcomeHtml.AppendLine("<title>Self-Hosted Outcome</title>")
+    [void]$outcomeHtml.AppendLine("<style>body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#f6f8fb;color:#1f2937}main{max-width:760px;margin:0 auto;padding:32px}.hero,.panel{background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:18px;margin-bottom:16px}h1{font-size:28px;margin:0 0 8px}.status{display:inline-block;border-radius:6px;padding:6px 10px;font-weight:700;text-transform:uppercase}.ok{background:#dcfce7;color:#166534}.watch{background:#fef3c7;color:#92400e}.fail{background:#fee2e2;color:#991b1b}.muted{color:#667085}table{width:100%;border-collapse:collapse;font-size:14px}td,th{border-bottom:1px solid #e5e7eb;padding:8px;text-align:left}td:last-child,th:last-child{text-align:right}.links{display:grid;gap:10px}.links a{display:block;border:1px solid #d8dee8;border-radius:8px;padding:10px 12px;color:#1d4ed8;text-decoration:none;background:#fff}</style>")
+    [void]$outcomeHtml.AppendLine("</head><body><main>")
+    [void]$outcomeHtml.AppendLine("<section class=""hero""><h1>Self-Hosted Outcome</h1><p class=""muted"">run <code>$runID</code> · input <code>$InputPath</code></p><h2>Outcome Status</h2><p><span class=""status $statusClass"">$(Escape-Html $outcomeStatusInfo.status)</span></p><p>$(Escape-Html ((@($outcomeStatusInfo.reasons)) -join "; "))</p></section>")
+    [void]$outcomeHtml.AppendLine("<section class=""panel""><h2>Numbers</h2><table><tbody>")
+    [void]$outcomeHtml.AppendLine("<tr><td>Projects</td><td>$($fullManifest.project_count)</td></tr>")
+    [void]$outcomeHtml.AppendLine("<tr><td>Patterns</td><td>$($fullManifest.pattern_count)</td></tr>")
+    [void]$outcomeHtml.AppendLine("<tr><td>Full parse errors</td><td>$($fullManifest.error_count)</td></tr>")
+    [void]$outcomeHtml.AppendLine("<tr><td>Recipe batch smoke</td><td>$($recipeDraftBatchSummary.passed) / $($recipeDraftBatchSummary.attempted)</td></tr>")
+    [void]$outcomeHtml.AppendLine("</tbody></table></section>")
+    [void]$outcomeHtml.AppendLine("<section class=""panel""><h2>History Delta</h2><table><tbody>")
+    [void]$outcomeHtml.AppendLine("<tr><td>Previous run</td><td>$(Escape-Html $historyDelta.previous_run_id)</td></tr>")
+    [void]$outcomeHtml.AppendLine("<tr><td>Projects</td><td>$(Escape-Html $historyDelta.parsed_projects_delta)</td></tr>")
+    [void]$outcomeHtml.AppendLine("<tr><td>Patterns</td><td>$(Escape-Html $historyDelta.technique_patterns_delta)</td></tr>")
+    [void]$outcomeHtml.AppendLine("<tr><td>Batch passed</td><td>$(Escape-Html $historyDelta.batch_passed_delta)</td></tr>")
+    [void]$outcomeHtml.AppendLine("</tbody></table></section>")
+    [void]$outcomeHtml.AppendLine("<section class=""panel""><h2>Links</h2><div class=""links"">")
+    [void]$outcomeHtml.AppendLine("<a href=""latest_index.html"">Latest full index</a>")
+    [void]$outcomeHtml.AppendLine("<a href=""latest_outcome.md"">Latest outcome markdown</a>")
+    [void]$outcomeHtml.AppendLine("<a href=""latest_effectiveness.json"">Latest effectiveness JSON</a>")
+    [void]$outcomeHtml.AppendLine("<a href=""$runID/outcome.md"">Run outcome markdown</a>")
+    [void]$outcomeHtml.AppendLine("</div></section>")
+    [void]$outcomeHtml.AppendLine("</main></body></html>")
+    $outcomeHtml.ToString() | Set-Content -LiteralPath $outcomeHtmlPath -Encoding UTF8
 
     $e = [System.Text.StringBuilder]::new()
     [void]$e.AppendLine("# Technique Effectiveness Snapshot")
@@ -635,14 +680,6 @@ try {
         [void]$e.AppendLine("| $($step.name) | $($step.exit) | $($step.seconds) |")
     }
     $e.ToString() | Set-Content -LiteralPath $effectivenessMdPath -Encoding UTF8
-
-    function Escape-Html {
-        param([AllowNull()][object]$Value)
-        if ($null -eq $Value) {
-            return ""
-        }
-        return [System.Net.WebUtility]::HtmlEncode([string]$Value)
-    }
 
     function Require-LatestIndexLink {
         param(
@@ -831,6 +868,7 @@ try {
     [void]$index.AppendLine("<a href=""$runRel/effectiveness.json"">Effectiveness JSON</a>")
     [void]$index.AppendLine("<a href=""latest_effectiveness.md"">Latest effectiveness snapshot</a>")
     [void]$index.AppendLine("<a href=""latest_outcome.md"">Latest outcome</a>")
+    [void]$index.AppendLine("<a href=""latest_outcome.html"">Latest outcome HTML</a>")
     [void]$index.AppendLine("<a href=""latest_effectiveness.json"">Latest effectiveness JSON</a>")
     [void]$index.AppendLine("<a href=""history.jsonl"">Effectiveness history JSONL</a>")
     [void]$index.AppendLine("<a href=""history.csv"">Effectiveness history CSV</a>")
@@ -842,6 +880,7 @@ try {
     [void]$index.AppendLine("<a href=""$runRel/compare_partial_to_full/compare.md"">Partial-to-full compare</a>")
     [void]$index.AppendLine("<a href=""$runRel/acceptance.md"">Acceptance markdown</a>")
     [void]$index.AppendLine("<a href=""$runRel/outcome.md"">Outcome markdown</a>")
+    [void]$index.AppendLine("<a href=""$runRel/outcome.html"">Outcome HTML</a>")
     [void]$index.AppendLine("<a href=""$runRel/acceptance.json"">Acceptance JSON</a>")
     [void]$index.AppendLine("</div></section>")
     [void]$index.AppendLine("<section class=""panel"" style=""margin-top:16px""><h2>Steps</h2><table><thead><tr><th>Step</th><th>Seconds</th></tr></thead><tbody>")
@@ -954,10 +993,12 @@ try {
     Require-LatestIndexLink -Label "partial report" -RelativePath "$runRel/partial_report/report.html"
     Require-LatestIndexLink -Label "partial compare" -RelativePath "$runRel/compare_partial_to_full/compare.md"
     Require-LatestIndexLink -Label "outcome markdown" -RelativePath "$runRel/outcome.md"
+    Require-LatestIndexLink -Label "outcome html" -RelativePath "$runRel/outcome.html"
 
     $runRoot | Set-Content -LiteralPath $latestRunPath -Encoding UTF8
     Copy-Item -LiteralPath $acceptanceMdPath -Destination $latestAcceptancePath -Force
     Copy-Item -LiteralPath $outcomeMdPath -Destination $latestOutcomePath -Force
+    Copy-Item -LiteralPath $outcomeHtmlPath -Destination $latestOutcomeHtmlPath -Force
     Copy-Item -LiteralPath $effectivenessMdPath -Destination $latestEffectivenessPath -Force
     Copy-Item -LiteralPath $effectivenessJsonPath -Destination $latestEffectivenessJsonPath -Force
     if (-not (Test-Path -LiteralPath $latestEffectivenessPath)) {
@@ -971,6 +1012,16 @@ try {
         throw "latest outcome missing Outcome Status"
     }
     Require-LatestIndexLink -Label "latest outcome" -RelativePath "latest_outcome.md"
+    if (-not (Test-Path -LiteralPath $latestOutcomeHtmlPath)) {
+        throw "latest outcome html missing: $latestOutcomeHtmlPath"
+    }
+    if (-not (Select-String -LiteralPath $latestOutcomeHtmlPath -Pattern "Self-Hosted Outcome" -Quiet)) {
+        throw "latest outcome html missing Self-Hosted Outcome"
+    }
+    if (-not (Select-String -LiteralPath $latestOutcomeHtmlPath -Pattern "Outcome Status" -Quiet)) {
+        throw "latest outcome html missing Outcome Status"
+    }
+    Require-LatestIndexLink -Label "latest outcome html" -RelativePath "latest_outcome.html"
     if (-not (Test-Path -LiteralPath $latestEffectivenessJsonPath)) {
         throw "latest effectiveness json missing: $latestEffectivenessJsonPath"
     }
@@ -1033,6 +1084,7 @@ try {
     Write-Host "latest run:      $latestRunPath"
     Write-Host "latest summary:  $latestAcceptancePath"
     Write-Host "latest outcome:  $latestOutcomePath"
+    Write-Host "latest outcome h: $latestOutcomeHtmlPath"
     Write-Host "latest effect:   $latestEffectivenessPath"
     Write-Host "latest effect j: $latestEffectivenessJsonPath"
     Write-Host "latest index:    $latestIndexPath"
