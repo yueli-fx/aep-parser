@@ -22,6 +22,7 @@ try {
     $studyQueueCsvPath = Join-Path $OutDir "study_queue.csv"
     $learningActionsCsvPath = Join-Path $OutDir "learning_actions.csv"
     $mechanismsCsvPath = Join-Path $OutDir "mechanisms.csv"
+    $mechanismExamplesCsvPath = Join-Path $OutDir "mechanism_examples.csv"
     $errorsCsvPath = Join-Path $OutDir "errors.csv"
     $manifestPath = Join-Path $OutDir "manifest.json"
     $reportPath = Join-Path $OutDir "report.md"
@@ -315,6 +316,46 @@ try {
         }
     }
 
+    function Add-MechanismExamples {
+        param(
+            [hashtable]$Examples,
+            [string]$Category,
+            [object]$Counts,
+            [object]$Record,
+            [object]$Explanation
+        )
+        if ($null -eq $Counts -or $null -eq $Record -or $null -eq $Explanation) {
+            return
+        }
+        $readiness = ""
+        if ($null -ne $Explanation.recreation_readiness) {
+            $readiness = [string]$Explanation.recreation_readiness.status
+        }
+        $patterns = ((@($Explanation.patterns) | ForEach-Object { [string]$_.id }) -join "; ")
+        $score = Get-StudyScore -Explanation $Explanation
+        foreach ($property in @($Counts.PSObject.Properties)) {
+            if ([string]$property.Name -eq "" -or [int]$property.Value -le 0) {
+                continue
+            }
+            $key = "$Category`u{1f}$($property.Name)"
+            $rows = @()
+            if ($Examples.ContainsKey($key)) {
+                $rows = @($Examples[$key])
+            }
+            $rows += [pscustomobject]@{
+                category      = $Category
+                name          = [string]$property.Name
+                project_path  = [string]$Record.path
+                project_count = [int]$property.Value
+                readiness     = $readiness
+                patterns      = $patterns
+                study_score   = [int]$score
+                action        = Get-MechanismAction -Category $Category -Name $property.Name
+            }
+            $Examples[$key] = @($rows | Sort-Object @{ Expression = { [int]$_.project_count }; Descending = $true }, @{ Expression = { [int]$_.study_score }; Descending = $true }, project_path | Select-Object -First 5)
+        }
+    }
+
     function Get-ReadinessProjects {
         param(
             [array]$Records,
@@ -495,6 +536,23 @@ try {
         Convert-MechanismRows -Category "hint" -Counts $summary.hint_counts
     ) | Sort-Object category, @{ Expression = { [int]$_.count }; Descending = $true }, name
     $mechanismRows | Export-Csv -LiteralPath $mechanismsCsvPath -NoTypeInformation -Encoding UTF8
+
+    $mechanismExamples = @{}
+    foreach ($record in $records) {
+        $explanation = $record.explanation
+        if ($null -eq $explanation -or $null -eq $explanation.portrait -or $null -eq $explanation.portrait.mechanisms) {
+            continue
+        }
+        $portrait = $explanation.portrait
+        Add-MechanismExamples -Examples $mechanismExamples -Category "effect" -Counts $portrait.mechanisms.effect_match_counts -Record $record -Explanation $explanation
+        Add-MechanismExamples -Examples $mechanismExamples -Category "plugin_effect" -Counts $portrait.mechanisms.third_party_effect_match_counts -Record $record -Explanation $explanation
+        Add-MechanismExamples -Examples $mechanismExamples -Category "shape_family" -Counts $portrait.mechanisms.shape_family_counts -Record $record -Explanation $explanation
+        Add-MechanismExamples -Examples $mechanismExamples -Category "text_animator" -Counts $portrait.mechanisms.text_animator_kind_counts -Record $record -Explanation $explanation
+        Add-MechanismExamples -Examples $mechanismExamples -Category "layer_role" -Counts $portrait.fingerprint.layer_role_counts -Record $record -Explanation $explanation
+        Add-MechanismExamples -Examples $mechanismExamples -Category "graph_edge" -Counts $portrait.graph.relation_counts -Record $record -Explanation $explanation
+    }
+    $mechanismExampleRows = @($mechanismExamples.Values | ForEach-Object { $_ } | Sort-Object category, name, @{ Expression = { [int]$_.project_count }; Descending = $true }, project_path)
+    $mechanismExampleRows | Export-Csv -LiteralPath $mechanismExamplesCsvPath -NoTypeInformation -Encoding UTF8
 
     $projectRowsForCsv = @()
     foreach ($record in $records) {
@@ -768,7 +826,7 @@ try {
     [void]$h.AppendLine("</head><body><main>")
     [void]$h.AppendLine("<h1>Technique Corpus Report</h1>")
     [void]$h.AppendLine("<p class=""muted"">input <code>$(Escape-Html $InputPath)</code></p>")
-    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""manifest.json"">manifest.json</a> · <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""study_queue.csv"">study_queue.csv</a> · <a href=""learning_actions.csv"">learning_actions.csv</a> · <a href=""mechanisms.csv"">mechanisms.csv</a> · <a href=""errors.csv"">errors.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
+    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""manifest.json"">manifest.json</a> · <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""study_queue.csv"">study_queue.csv</a> · <a href=""learning_actions.csv"">learning_actions.csv</a> · <a href=""mechanisms.csv"">mechanisms.csv</a> · <a href=""mechanism_examples.csv"">mechanism_examples.csv</a> · <a href=""errors.csv"">errors.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
     [void]$h.AppendLine("<div class=""grid"">")
     foreach ($metric in @(
         @{ Label = "Projects"; Value = $summary.project_count },
@@ -1008,6 +1066,7 @@ try {
         $studyQueueCsvPath,
         $learningActionsCsvPath,
         $mechanismsCsvPath,
+        $mechanismExamplesCsvPath,
         $errorsCsvPath,
         $reportPath,
         $htmlPath
@@ -1065,6 +1124,7 @@ try {
     Write-Host "study queue csv: $studyQueueCsvPath"
     Write-Host "learning actions csv: $learningActionsCsvPath"
     Write-Host "mechanisms csv: $mechanismsCsvPath"
+    Write-Host "mechanism examples csv: $mechanismExamplesCsvPath"
     Write-Host "errors csv: $errorsCsvPath"
     Write-Host "manifest: $manifestPath"
     Write-Host "report:  $reportPath"
