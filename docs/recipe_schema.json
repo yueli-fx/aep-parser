@@ -1955,9 +1955,23 @@
             "TestTextTrackingAnimator_AEShipGate_AE2020",
             "TestTextTrackingAnimator_AEShipGate_AE2025"
           ]
+        },
+        {
+          "key": "text_animator.add_character_offset",
+          "query": "AddTextCharacterOffsetAnimator",
+          "status": "supported",
+          "symbol": "AddTextCharacterOffsetAnimator",
+          "domain": "text",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "boundary": "typed parameter accessors are not yet wired (tune via Reopen); un-Reopened fresh layers are refused",
+          "gate": [
+            "TestTextCharOffsetAnimator_AEShipGate_AE2020",
+            "TestTextCharOffsetAnimator_AEShipGate_AE2025"
+          ]
         }
       ],
-      "x-aep-example": "examples/recipes/minimal-text-animator-color.json"
+      "x-aep-example": "examples/recipes/minimal-text-animator-character-offset.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_animators[].property",
@@ -1975,9 +1989,10 @@
         "scale",
         "rotation",
         "color",
-        "tracking"
+        "tracking",
+        "character_offset"
       ],
-      "x-aep-example": "examples/recipes/minimal-text-animator-color.json"
+      "x-aep-example": "examples/recipes/minimal-text-animator-character-offset.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_animators[].value",
@@ -1987,8 +2002,8 @@
       "type": "object",
       "go_type": "interface {}",
       "description": "Text animator property value.",
-      "x-aep-validation": "Opacity, rotation, and tracking values must be numbers; position and scale values must be 3-number arrays; color values must be 3- or 4-number arrays.",
-      "x-aep-example": "examples/recipes/minimal-text-animator-color.json"
+      "x-aep-validation": "Opacity, rotation, tracking, and character_offset values must be numbers; position and scale values must be 3-number arrays; color values must be 3- or 4-number arrays.",
+      "x-aep-example": "examples/recipes/minimal-text-animator-character-offset.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_animators[].range_start",
@@ -1999,7 +2014,7 @@
       "go_type": "*float64",
       "description": "Text animator range selector start percentage.",
       "x-aep-validation": "Range selector start is required.",
-      "x-aep-example": "examples/recipes/minimal-text-animator-color.json"
+      "x-aep-example": "examples/recipes/minimal-text-animator-character-offset.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_animators[].range_end",
@@ -2010,7 +2025,7 @@
       "go_type": "*float64",
       "description": "Text animator range selector end percentage.",
       "x-aep-validation": "Range selector end is required.",
-      "x-aep-example": "examples/recipes/minimal-text-animator-color.json"
+      "x-aep-example": "examples/recipes/minimal-text-animator-character-offset.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_animators[].range_offset",
@@ -2021,7 +2036,7 @@
       "go_type": "*float64",
       "description": "Text animator range selector offset percentage.",
       "x-aep-validation": "Range selector offset is required.",
-      "x-aep-example": "examples/recipes/minimal-text-animator-color.json"
+      "x-aep-example": "examples/recipes/minimal-text-animator-character-offset.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_animators[].range_offset_keyframes[]",

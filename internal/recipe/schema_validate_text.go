@@ -264,8 +264,10 @@ func validateTextAnimator(animator TextAnimatorSpec, path string, recordCapabili
 		recordCapability("AddTextColorAnimator", path)
 	case "tracking":
 		recordCapability("AddTextTrackingAnimator", path)
+	case "character_offset":
+		recordCapability("AddTextCharacterOffsetAnimator", path)
 	default:
-		addRefusal("unsupported_text_animator_property", path+".property", "text animator property must be opacity, position, scale, rotation, color, or tracking")
+		addRefusal("unsupported_text_animator_property", path+".property", "text animator property must be opacity, position, scale, rotation, color, tracking, or character_offset")
 	}
 	if animator.Value == nil {
 		addRefusal("missing_text_animator_value", path+".value", "text animator value is required")
@@ -275,7 +277,7 @@ func validateTextAnimator(animator TextAnimatorSpec, path string, recordCapabili
 			if _, ok := animator.Value.(float64); !ok {
 				addRefusal("invalid_text_animator_value", path+".value", "text animator opacity value must be a number")
 			}
-		case "rotation", "tracking":
+		case "rotation", "tracking", "character_offset":
 			if _, ok := animator.Value.(float64); !ok {
 				addRefusal("invalid_text_animator_value", path+".value", "text animator "+animator.Property+" value must be a number")
 			}

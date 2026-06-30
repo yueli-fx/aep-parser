@@ -3217,9 +3217,10 @@
         "text_animator.add_scale",
         "text_animator.add_rotation",
         "text_animator.add_color",
-        "text_animator.add_tracking"
+        "text_animator.add_tracking",
+        "text_animator.add_character_offset"
       ],
-      "example": "examples/recipes/minimal-text-animator-color.json"
+      "example": "examples/recipes/minimal-text-animator-character-offset.json"
     },
     "comps[].layers[].text_animators[].property": {
       "path": "comps[].layers[].text_animators[].property",
@@ -3239,9 +3240,10 @@
         "scale",
         "rotation",
         "color",
-        "tracking"
+        "tracking",
+        "character_offset"
       ],
-      "example": "examples/recipes/minimal-text-animator-color.json"
+      "example": "examples/recipes/minimal-text-animator-character-offset.json"
     },
     "comps[].layers[].text_animators[].range_end": {
       "path": "comps[].layers[].text_animators[].range_end",
@@ -3252,7 +3254,7 @@
       "go_type": "*float64",
       "summary": "Text animator range selector end percentage.",
       "validation": "Range selector end is required.",
-      "example": "examples/recipes/minimal-text-animator-color.json"
+      "example": "examples/recipes/minimal-text-animator-character-offset.json"
     },
     "comps[].layers[].text_animators[].range_offset": {
       "path": "comps[].layers[].text_animators[].range_offset",
@@ -3263,7 +3265,7 @@
       "go_type": "*float64",
       "summary": "Text animator range selector offset percentage.",
       "validation": "Range selector offset is required.",
-      "example": "examples/recipes/minimal-text-animator-color.json"
+      "example": "examples/recipes/minimal-text-animator-character-offset.json"
     },
     "comps[].layers[].text_animators[].range_offset_keyframes[]": {
       "path": "comps[].layers[].text_animators[].range_offset_keyframes[]",
@@ -3374,7 +3376,7 @@
       "go_type": "*float64",
       "summary": "Text animator range selector start percentage.",
       "validation": "Range selector start is required.",
-      "example": "examples/recipes/minimal-text-animator-color.json"
+      "example": "examples/recipes/minimal-text-animator-character-offset.json"
     },
     "comps[].layers[].text_animators[].value": {
       "path": "comps[].layers[].text_animators[].value",
@@ -3384,8 +3386,8 @@
       "type": "any",
       "go_type": "interface {}",
       "summary": "Text animator property value.",
-      "validation": "Opacity, rotation, and tracking values must be numbers; position and scale values must be 3-number arrays; color values must be 3- or 4-number arrays.",
-      "example": "examples/recipes/minimal-text-animator-color.json"
+      "validation": "Opacity, rotation, tracking, and character_offset values must be numbers; position and scale values must be 3-number arrays; color values must be 3- or 4-number arrays.",
+      "example": "examples/recipes/minimal-text-animator-character-offset.json"
     },
     "comps[].layers[].text_style": {
       "path": "comps[].layers[].text_style",

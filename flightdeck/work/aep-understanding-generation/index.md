@@ -483,6 +483,10 @@ Done:
   `examples/recipes/minimal-text-animator-tracking.json` example compiles a
   tracking text animator and asserts the `ADBE Text Tracking Amount` profile
   property.
+- Text animator character-offset recipe support is implemented. The dedicated
+  `examples/recipes/minimal-text-animator-character-offset.json` example
+  compiles a character offset text animator and asserts the
+  `ADBE Text Character Offset` profile property.
 - Text animator Range Selector Offset keyframe recipe support is implemented.
   The dedicated
   `examples/recipes/minimal-text-animator-range-offset.json` example compiles
