@@ -3213,7 +3213,8 @@
       "summary": "Text animator definitions.",
       "capability_keys": [
         "text_animator.add_opacity",
-        "text_animator.add_position"
+        "text_animator.add_position",
+        "text_animator.add_scale"
       ],
       "example": "examples/recipes/minimal-text-animator-opacity.json"
     },
@@ -3231,7 +3232,8 @@
       "validation": "Supported values create the corresponding text animator property.",
       "enum": [
         "opacity",
-        "position"
+        "position",
+        "scale"
       ],
       "example": "examples/recipes/minimal-text-animator-opacity.json"
     },
@@ -3376,7 +3378,7 @@
       "type": "any",
       "go_type": "interface {}",
       "summary": "Text animator property value.",
-      "validation": "Opacity value must be a number; position value must be a 3-number array.",
+      "validation": "Opacity value must be a number; position and scale values must be 3-number arrays.",
       "example": "examples/recipes/minimal-text-animator-opacity.json"
     },
     "comps[].layers[].text_style": {

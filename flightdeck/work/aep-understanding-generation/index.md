@@ -468,6 +468,10 @@ Done:
   `examples/recipes/minimal-text-animator-position.json` example compiles a 3D
   position text animator, asserts the `ADBE Text Position 3D` profile property,
   and passes recipe profile verification.
+- Text animator scale recipe support is implemented. The dedicated
+  `examples/recipes/minimal-text-animator-scale.json` example compiles a 3D
+  scale text animator, asserts the `ADBE Text Scale 3D` profile property, and
+  passes recipe profile verification.
 - Text animator Range Selector Offset keyframe recipe support is implemented.
   The dedicated
   `examples/recipes/minimal-text-animator-range-offset.json` example compiles

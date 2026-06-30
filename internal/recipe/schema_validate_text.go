@@ -256,8 +256,10 @@ func validateTextAnimator(animator TextAnimatorSpec, path string, recordCapabili
 		recordCapability("AddTextOpacityAnimator", path)
 	case "position":
 		recordCapability("AddTextPositionAnimator", path)
+	case "scale":
+		recordCapability("AddTextScaleAnimator", path)
 	default:
-		addRefusal("unsupported_text_animator_property", path+".property", "text animator property must be opacity or position")
+		addRefusal("unsupported_text_animator_property", path+".property", "text animator property must be opacity, position, or scale")
 	}
 	if animator.Value == nil {
 		addRefusal("missing_text_animator_value", path+".value", "text animator value is required")
@@ -271,6 +273,11 @@ func validateTextAnimator(animator TextAnimatorSpec, path string, recordCapabili
 			values, ok := numericSliceValue(animator.Value)
 			if !ok || len(values) != 3 {
 				addRefusal("invalid_text_animator_value", path+".value", "text animator position value must be a 3-number array")
+			}
+		case "scale":
+			values, ok := numericSliceValue(animator.Value)
+			if !ok || len(values) != 3 {
+				addRefusal("invalid_text_animator_value", path+".value", "text animator scale value must be a 3-number array")
 			}
 		}
 	}

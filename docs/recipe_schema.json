@@ -1899,6 +1899,20 @@
             "TestTextPosAnimator_AEShipGate_AE2020",
             "TestTextPosAnimator_AEShipGate_AE2025"
           ]
+        },
+        {
+          "key": "text_animator.add_scale",
+          "query": "AddTextScaleAnimator",
+          "status": "supported",
+          "symbol": "AddTextScaleAnimator",
+          "domain": "text",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "boundary": "typed parameter accessors are not yet wired (tune via Reopen); un-Reopened fresh layers are refused",
+          "gate": [
+            "TestTextScaleAnimator_AEShipGate_AE2020",
+            "TestTextScaleAnimator_AEShipGate_AE2025"
+          ]
         }
       ],
       "x-aep-example": "examples/recipes/minimal-text-animator-opacity.json"
@@ -1915,7 +1929,8 @@
       "x-aep-validation": "Supported values create the corresponding text animator property.",
       "enum": [
         "opacity",
-        "position"
+        "position",
+        "scale"
       ],
       "x-aep-example": "examples/recipes/minimal-text-animator-opacity.json"
     },
@@ -1927,7 +1942,7 @@
       "type": "object",
       "go_type": "interface {}",
       "description": "Text animator property value.",
-      "x-aep-validation": "Opacity value must be a number; position value must be a 3-number array.",
+      "x-aep-validation": "Opacity value must be a number; position and scale values must be 3-number arrays.",
       "x-aep-example": "examples/recipes/minimal-text-animator-opacity.json"
     },
     {
