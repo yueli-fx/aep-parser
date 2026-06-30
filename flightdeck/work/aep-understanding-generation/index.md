@@ -51,6 +51,10 @@ Phase 0 export-surface audit and contract lock before extracting
   execution strategy and field matrix.
 - `layer-recipe-execution-strategy.md` — object-level layer recipe/profile
   execution strategy and field matrix.
+- `technique-facts-v1.md` — first reusable project-understanding fact layer
+  over stable profile data.
+- `technique-facts-v1-plan.md` — implementation plan and verification record
+  for `internal/technique` and `cmd/aeptechnique`.
 - `flightdeck/knowledge/techniques/understand-a-project.md` — existing
   reference-project internalization workflow.
 - `flightdeck/knowledge/techniques/fx-techniques.md` — current technique
@@ -599,10 +603,18 @@ Done:
 - Text animator vector value-keyframe recipe support is implemented for
   position, scale, and fill color. `value_keyframes[].value` now accepts a
   number or numeric array according to the selected text animator property.
+- Technique Facts v1 is implemented as `internal/technique` plus
+  `cmd/aeptechnique`. It derives comp/layer/effect/text-animator/shape-operator,
+  dependency, and unknown facts from `profile.Profile` only, and the CLI emits
+  stable JSON for an input `.aep`.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven
   with AE 2025 render gates.
+- `cmd/aeptechnique -in <file.aep>` now provides the first machine-readable
+  AE-understanding layer for downstream project explanation, corpus search, and
+  later technique extraction. It is descriptive only; recipe generation and
+  natural-language interpretation remain later layers.
 - Recipe IR coverage for the current comp and layer strategy matrices is
   complete: comp settings have object-level and field-level profile checks,
   authored-layer examples carry `expected_profile.layers[]`, camera/light
