@@ -141,6 +141,8 @@ Require-Text -Path $htmlPath -Pattern "study_queue\.csv"
 Require-Text -Path $htmlPath -Pattern "learning_actions\.csv"
 Require-Text -Path $htmlPath -Pattern "mechanisms\.csv"
 Require-Text -Path $htmlPath -Pattern "errors\.csv"
+Require-Text -Path $htmlPath -Pattern "Mechanism Explorer"
+Require-Text -Path $htmlPath -Pattern "mechanismFilter"
 
 Write-Host "ok: $OutDir"
 Write-Host "projects: $($summary.project_count)"

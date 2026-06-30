@@ -796,6 +796,14 @@ try {
     Write-HtmlCountTable -Builder $h -Title "Layer Roles" -Counts $summary.layer_roles
     Write-HtmlCountTable -Builder $h -Title "Graph Edges" -Counts $summary.graph_edges
     [void]$h.AppendLine("</div>")
+    [void]$h.AppendLine("<h2 style=""margin-top:28px"">Mechanism Explorer</h2>")
+    [void]$h.AppendLine("<div class=""toolbar""><input id=""mechanismFilter"" type=""search"" aria-label=""Filter mechanisms"" placeholder=""Filter by category, name, risk, or action""><span id=""mechanismCount"" class=""muted""></span></div>")
+    [void]$h.AppendLine("<section class=""panel"" style=""margin-top:14px""><table><thead><tr><th>Category</th><th>Name</th><th>Risk</th><th>Action</th><th>Count</th></tr></thead><tbody>")
+    foreach ($mechanism in @($mechanismRows | Sort-Object @{ Expression = { [int]$_.count }; Descending = $true }, category, name | Select-Object -First 120)) {
+        $searchText = ((@($mechanism.category, $mechanism.name, $mechanism.risk, $mechanism.action) | Where-Object { $_ }) -join " ").ToLowerInvariant()
+        [void]$h.AppendLine("<tr class=""mechanism-row"" data-search=""$(Escape-Html $searchText)""><td>$(Escape-Html $mechanism.category)</td><td>$(Escape-Html $mechanism.name)</td><td>$(Escape-Html $mechanism.risk)</td><td>$(Escape-Html $mechanism.action)</td><td>$($mechanism.count)</td></tr>")
+    }
+    [void]$h.AppendLine("</tbody></table></section>")
     [void]$h.AppendLine("<h2 style=""margin-top:28px"">Study Queue</h2>")
     [void]$h.AppendLine("<div class=""representatives"">")
     foreach ($project in @($studyRows | Select-Object -First 6)) {
@@ -985,6 +993,7 @@ try {
         [void]$h.AppendLine("</article>")
     }
     [void]$h.AppendLine("</div>")
+    [void]$h.AppendLine("<script>(function(){const input=document.getElementById('mechanismFilter');const count=document.getElementById('mechanismCount');const rows=[...document.querySelectorAll('.mechanism-row')];function apply(){const q=(input.value||'').trim().toLowerCase();let shown=0;for(const row of rows){const ok=!q||row.dataset.search.includes(q);row.hidden=!ok;if(ok)shown++;}count.textContent=shown+' / '+rows.length+' mechanisms';}input.addEventListener('input',apply);apply();})();</script>")
     [void]$h.AppendLine("<script>(function(){const input=document.getElementById('projectFilter');const count=document.getElementById('projectCount');const cards=[...document.querySelectorAll('.project')];function apply(){const q=(input.value||'').trim().toLowerCase();let shown=0;for(const card of cards){const ok=!q||card.dataset.search.includes(q);card.hidden=!ok;if(ok)shown++;}count.textContent=shown+' / '+cards.length+' projects';}input.addEventListener('input',apply);apply();})();</script>")
     [void]$h.AppendLine("</main></body></html>")
     $h.ToString() | Set-Content -Path $htmlPath -Encoding UTF8
