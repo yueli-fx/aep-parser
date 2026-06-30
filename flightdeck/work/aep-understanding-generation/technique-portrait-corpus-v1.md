@@ -83,6 +83,7 @@ It defaults to `flightdeck\showcase` and writes generated output under
 - `project_playbooks.csv`
 - `compositions.csv`
 - `layers.csv`
+- `recreation_steps.csv`
 - `patterns.csv`
 - `study_queue.csv`
 - `study_tasks.csv`
@@ -127,7 +128,10 @@ expands each parsed project into overview, readiness, key layers, ordered
 recreation steps, blockers, and top mechanisms; it is the table to feed into
 manual review or downstream learning jobs. `compositions.csv` and `layers.csv`
 export the parsed comp and layer structure with dimensions, durations, layer
-ordering, type, role, and confidence. `patterns.csv` includes the
+ordering, type, role, and confidence. `recreation_steps.csv` expands each
+project's ordered recreation steps into one row per step, including inputs,
+risks, and evidence for task execution or code-generation planning.
+`patterns.csv` includes the
 step distribution for each repeated pattern. `study_queue.csv` ranks parsed
 projects by readiness and signal density so large corpora have an immediate
 review order. `study_tasks.csv` combines mechanism examples, project readiness,

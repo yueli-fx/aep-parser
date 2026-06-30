@@ -30,6 +30,7 @@ $projectsCsvPath = Join-Path $OutDir "projects.csv"
 $projectPlaybooksCsvPath = Join-Path $OutDir "project_playbooks.csv"
 $compositionsCsvPath = Join-Path $OutDir "compositions.csv"
 $layersCsvPath = Join-Path $OutDir "layers.csv"
+$recreationStepsCsvPath = Join-Path $OutDir "recreation_steps.csv"
 $patternsCsvPath = Join-Path $OutDir "patterns.csv"
 $studyQueueCsvPath = Join-Path $OutDir "study_queue.csv"
 $studyTasksCsvPath = Join-Path $OutDir "study_tasks.csv"
@@ -47,7 +48,7 @@ $manifestPath = Join-Path $OutDir "manifest.json"
 $reportPath = Join-Path $OutDir "report.md"
 $htmlPath = Join-Path $OutDir "report.html"
 
-foreach ($path in @($summaryPath, $corpusPath, $digestPath, $learningPath, $projectsCsvPath, $projectPlaybooksCsvPath, $compositionsCsvPath, $layersCsvPath, $patternsCsvPath, $studyQueueCsvPath, $studyTasksCsvPath, $recreationBlockersCsvPath, $signalLayersCsvPath, $effectStacksCsvPath, $shapeOperatorsCsvPath, $textAnimatorsCsvPath, $dependencyEdgesCsvPath, $learningActionsCsvPath, $mechanismsCsvPath, $mechanismExamplesCsvPath, $errorsCsvPath, $manifestPath, $reportPath, $htmlPath)) {
+foreach ($path in @($summaryPath, $corpusPath, $digestPath, $learningPath, $projectsCsvPath, $projectPlaybooksCsvPath, $compositionsCsvPath, $layersCsvPath, $recreationStepsCsvPath, $patternsCsvPath, $studyQueueCsvPath, $studyTasksCsvPath, $recreationBlockersCsvPath, $signalLayersCsvPath, $effectStacksCsvPath, $shapeOperatorsCsvPath, $textAnimatorsCsvPath, $dependencyEdgesCsvPath, $learningActionsCsvPath, $mechanismsCsvPath, $mechanismExamplesCsvPath, $errorsCsvPath, $manifestPath, $reportPath, $htmlPath)) {
     Require-File -Path $path
 }
 
@@ -60,6 +61,7 @@ $projectRows = @(Import-Csv -LiteralPath $projectsCsvPath)
 $projectPlaybookRows = @(Import-Csv -LiteralPath $projectPlaybooksCsvPath)
 $compositionRows = @(Import-Csv -LiteralPath $compositionsCsvPath)
 $layerRows = @(Import-Csv -LiteralPath $layersCsvPath)
+$recreationStepRows = @(Import-Csv -LiteralPath $recreationStepsCsvPath)
 $patternRows = @(Import-Csv -LiteralPath $patternsCsvPath)
 $studyQueueRows = @(Import-Csv -LiteralPath $studyQueueCsvPath)
 $studyTaskRows = @(Import-Csv -LiteralPath $studyTasksCsvPath)
@@ -127,6 +129,20 @@ if ($layerRows.Count -ne [int]$summary.totals.layer_count) {
 foreach ($row in $layerRows) {
     if ([string]$row.project_path -eq "" -or [string]$row.comp_name -eq "" -or [string]$row.type -eq "" -or [string]$row.role -eq "" -or [int]$row.index -lt 0) {
         throw "layers.csv contains incomplete row: $($row | ConvertTo-Json -Compress)"
+    }
+}
+$expectedRecreationStepRows = 0
+foreach ($record in $corpusRecords) {
+    if ($null -ne $record.explanation -and $null -ne $record.explanation.recreation_steps) {
+        $expectedRecreationStepRows += @($record.explanation.recreation_steps).Count
+    }
+}
+if ($recreationStepRows.Count -ne $expectedRecreationStepRows) {
+    throw "recreation_steps.csv row count $($recreationStepRows.Count) does not match corpus recreation step count $expectedRecreationStepRows"
+}
+foreach ($row in $recreationStepRows) {
+    if ([string]$row.project_path -eq "" -or [string]$row.step_id -eq "" -or [int]$row.priority -le 0 -or [string]$row.title -eq "" -or [string]$row.summary -eq "") {
+        throw "recreation_steps.csv contains incomplete row: $($row | ConvertTo-Json -Compress)"
     }
 }
 if ($studyQueueRows.Count -ne [int]$summary.project_count) {
@@ -251,6 +267,7 @@ Require-Text -Path $htmlPath -Pattern "projects\.csv"
 Require-Text -Path $htmlPath -Pattern "project_playbooks\.csv"
 Require-Text -Path $htmlPath -Pattern "compositions\.csv"
 Require-Text -Path $htmlPath -Pattern "layers\.csv"
+Require-Text -Path $htmlPath -Pattern "recreation_steps\.csv"
 Require-Text -Path $htmlPath -Pattern "study_queue\.csv"
 Require-Text -Path $htmlPath -Pattern "study_tasks\.csv"
 Require-Text -Path $htmlPath -Pattern "recreation_blockers\.csv"
@@ -270,6 +287,7 @@ Require-Text -Path $htmlPath -Pattern "studyTaskFilter"
 Require-Text -Path $htmlPath -Pattern "Project Playbooks"
 Require-Text -Path $htmlPath -Pattern "Compositions"
 Require-Text -Path $htmlPath -Pattern "Layers"
+Require-Text -Path $htmlPath -Pattern "Recreation Steps"
 Require-Text -Path $htmlPath -Pattern "Recreation Blockers"
 Require-Text -Path $htmlPath -Pattern "Effect Stacks"
 Require-Text -Path $htmlPath -Pattern "Shape Operators"
