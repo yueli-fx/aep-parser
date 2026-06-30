@@ -21,6 +21,7 @@ try {
     $patternsCsvPath = Join-Path $OutDir "patterns.csv"
     $studyQueueCsvPath = Join-Path $OutDir "study_queue.csv"
     $studyTasksCsvPath = Join-Path $OutDir "study_tasks.csv"
+    $recreationBlockersCsvPath = Join-Path $OutDir "recreation_blockers.csv"
     $learningActionsCsvPath = Join-Path $OutDir "learning_actions.csv"
     $mechanismsCsvPath = Join-Path $OutDir "mechanisms.csv"
     $mechanismExamplesCsvPath = Join-Path $OutDir "mechanism_examples.csv"
@@ -296,6 +297,26 @@ try {
             "graph_edge" { return "Trace this dependency type before recreating downstream properties." }
             "hint" { return "Use this technique hint as a corpus filter for deeper manual review." }
             default { return "Review this mechanism in representative projects." }
+        }
+    }
+
+    function Get-BlockerType {
+        param([string]$Blocker)
+        if ($Blocker -match "unknown") {
+            return "unknown"
+        }
+        if ($Blocker -match "third-party|plugin") {
+            return "plugin"
+        }
+        return "readiness"
+    }
+
+    function Get-BlockerAction {
+        param([string]$BlockerType)
+        switch ($BlockerType) {
+            "unknown" { return "Inspect parser unknown facts before claiming exact recreation." }
+            "plugin" { return "Verify plugin availability or document native fallback limits." }
+            default { return "Review readiness blocker before 1:1 recreation work." }
         }
     }
 
@@ -581,6 +602,35 @@ try {
             $row
         })
     $studyTaskRows | Export-Csv -LiteralPath $studyTasksCsvPath -NoTypeInformation -Encoding UTF8
+    $recreationBlockerRows = @()
+    foreach ($record in $records) {
+        $explanation = $record.explanation
+        if ($null -eq $explanation -or $null -eq $explanation.recreation_readiness) {
+            continue
+        }
+        $readiness = [string]$explanation.recreation_readiness.status
+        foreach ($blocker in @($explanation.recreation_readiness.blockers)) {
+            $blockerText = [string]$blocker
+            if ($blockerText -eq "") {
+                continue
+            }
+            $blockerType = Get-BlockerType -Blocker $blockerText
+            $recreationBlockerRows += [pscustomobject]@{
+                project_path = [string]$record.path
+                readiness    = $readiness
+                blocker_type = $blockerType
+                blocker      = $blockerText
+                action       = Get-BlockerAction -BlockerType $blockerType
+            }
+        }
+    }
+    if ($recreationBlockerRows.Count -gt 0) {
+        $recreationBlockerRows |
+            Sort-Object blocker_type, project_path, blocker |
+            Export-Csv -LiteralPath $recreationBlockersCsvPath -NoTypeInformation -Encoding UTF8
+    } else {
+        '"project_path","readiness","blocker_type","blocker","action"' | Set-Content -LiteralPath $recreationBlockersCsvPath -Encoding UTF8
+    }
     $mechanismExampleIndex = @{}
     foreach ($example in $mechanismExampleRows) {
         $key = "$($example.category)`u{1f}$($example.name)"
@@ -864,7 +914,7 @@ try {
     [void]$h.AppendLine("</head><body><main>")
     [void]$h.AppendLine("<h1>Technique Corpus Report</h1>")
     [void]$h.AppendLine("<p class=""muted"">input <code>$(Escape-Html $InputPath)</code></p>")
-    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""manifest.json"">manifest.json</a> · <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""study_queue.csv"">study_queue.csv</a> · <a href=""study_tasks.csv"">study_tasks.csv</a> · <a href=""learning_actions.csv"">learning_actions.csv</a> · <a href=""mechanisms.csv"">mechanisms.csv</a> · <a href=""mechanism_examples.csv"">mechanism_examples.csv</a> · <a href=""errors.csv"">errors.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
+    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""manifest.json"">manifest.json</a> · <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""study_queue.csv"">study_queue.csv</a> · <a href=""study_tasks.csv"">study_tasks.csv</a> · <a href=""recreation_blockers.csv"">recreation_blockers.csv</a> · <a href=""learning_actions.csv"">learning_actions.csv</a> · <a href=""mechanisms.csv"">mechanisms.csv</a> · <a href=""mechanism_examples.csv"">mechanism_examples.csv</a> · <a href=""errors.csv"">errors.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
     [void]$h.AppendLine("<div class=""grid"">")
     foreach ($metric in @(
         @{ Label = "Projects"; Value = $summary.project_count },
@@ -912,6 +962,15 @@ try {
     foreach ($task in @($studyTaskRows | Select-Object -First 80)) {
         $searchText = ((@($task.project_path, $task.focus, $task.readiness, $task.patterns, $task.action, $task.reason) | Where-Object { $_ }) -join " ").ToLowerInvariant()
         [void]$h.AppendLine("<tr class=""study-task"" data-search=""$(Escape-Html $searchText)""><td>$($task.rank)</td><td>$(Escape-Html $task.project_path)</td><td>$(Escape-Html $task.focus)</td><td>$(Escape-Html $task.action)</td><td>$(Escape-Html $task.reason)</td></tr>")
+    }
+    [void]$h.AppendLine("</tbody></table></section>")
+    [void]$h.AppendLine("<h2 style=""margin-top:28px"">Recreation Blockers</h2>")
+    [void]$h.AppendLine("<section class=""panel"" style=""margin-top:14px""><table><thead><tr><th>Project</th><th>Readiness</th><th>Type</th><th>Blocker</th><th>Action</th></tr></thead><tbody>")
+    foreach ($blocker in @($recreationBlockerRows | Select-Object -First 80)) {
+        [void]$h.AppendLine("<tr><td>$(Escape-Html $blocker.project_path)</td><td>$(Escape-Html $blocker.readiness)</td><td>$(Escape-Html $blocker.blocker_type)</td><td>$(Escape-Html $blocker.blocker)</td><td>$(Escape-Html $blocker.action)</td></tr>")
+    }
+    if ($recreationBlockerRows.Count -eq 0) {
+        [void]$h.AppendLine("<tr><td colspan=""5"" class=""empty"">No recreation blockers reported.</td></tr>")
     }
     [void]$h.AppendLine("</tbody></table></section>")
     [void]$h.AppendLine("<h2 style=""margin-top:28px"">Study Queue</h2>")
@@ -1118,6 +1177,7 @@ try {
         $patternsCsvPath,
         $studyQueueCsvPath,
         $studyTasksCsvPath,
+        $recreationBlockersCsvPath,
         $learningActionsCsvPath,
         $mechanismsCsvPath,
         $mechanismExamplesCsvPath,
@@ -1177,6 +1237,7 @@ try {
     Write-Host "patterns csv: $patternsCsvPath"
     Write-Host "study queue csv: $studyQueueCsvPath"
     Write-Host "study tasks csv: $studyTasksCsvPath"
+    Write-Host "recreation blockers csv: $recreationBlockersCsvPath"
     Write-Host "learning actions csv: $learningActionsCsvPath"
     Write-Host "mechanisms csv: $mechanismsCsvPath"
     Write-Host "mechanism examples csv: $mechanismExamplesCsvPath"

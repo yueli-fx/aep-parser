@@ -83,6 +83,7 @@ It defaults to `flightdeck\showcase` and writes generated output under
 - `patterns.csv`
 - `study_queue.csv`
 - `study_tasks.csv`
+- `recreation_blockers.csv`
 - `learning_actions.csv`
 - `mechanisms.csv`
 - `mechanism_examples.csv`
@@ -118,6 +119,9 @@ step distribution for each repeated pattern. `study_queue.csv` ranks parsed
 projects by readiness and signal density so large corpora have an immediate
 review order. `study_tasks.csv` combines mechanism examples, project readiness,
 and action text into a concrete queue of project/focus pairs to study next.
+`recreation_blockers.csv` extracts plugin and reverse-engineering blockers into
+one table so exact-recreation gaps can be reviewed independently from project
+ranking.
 `learning_actions.csv` turns each repeated pattern into a review action with
 representative project, common steps, top mechanisms, and risk.
 `mechanisms.csv` expands effect, plugin-effect, shape, text-animator, layer-role,
