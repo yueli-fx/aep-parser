@@ -29,11 +29,12 @@ $learningPath = Join-Path $OutDir "learning.md"
 $projectsCsvPath = Join-Path $OutDir "projects.csv"
 $patternsCsvPath = Join-Path $OutDir "patterns.csv"
 $studyQueueCsvPath = Join-Path $OutDir "study_queue.csv"
+$errorsCsvPath = Join-Path $OutDir "errors.csv"
 $manifestPath = Join-Path $OutDir "manifest.json"
 $reportPath = Join-Path $OutDir "report.md"
 $htmlPath = Join-Path $OutDir "report.html"
 
-foreach ($path in @($summaryPath, $corpusPath, $digestPath, $learningPath, $projectsCsvPath, $patternsCsvPath, $studyQueueCsvPath, $manifestPath, $reportPath, $htmlPath)) {
+foreach ($path in @($summaryPath, $corpusPath, $digestPath, $learningPath, $projectsCsvPath, $patternsCsvPath, $studyQueueCsvPath, $errorsCsvPath, $manifestPath, $reportPath, $htmlPath)) {
     Require-File -Path $path
 }
 
@@ -45,6 +46,7 @@ $corpusRecords = @($corpusLines | ForEach-Object { $_ | ConvertFrom-Json })
 $projectRows = @(Import-Csv -LiteralPath $projectsCsvPath)
 $patternRows = @(Import-Csv -LiteralPath $patternsCsvPath)
 $studyQueueRows = @(Import-Csv -LiteralPath $studyQueueCsvPath)
+$errorRows = @(Import-Csv -LiteralPath $errorsCsvPath)
 
 if ([int]$summary.project_count -lt $MinProjects) {
     throw "project_count $($summary.project_count) is lower than MinProjects $MinProjects"
@@ -80,6 +82,9 @@ if ($projectRows.Count -ne [int]$summary.project_count) {
 if ($studyQueueRows.Count -ne [int]$summary.project_count) {
     throw "study_queue.csv row count $($studyQueueRows.Count) does not match summary project_count $($summary.project_count)"
 }
+if ($errorRows.Count -ne [int]$summary.error_count) {
+    throw "errors.csv row count $($errorRows.Count) does not match summary error_count $($summary.error_count)"
+}
 if ($patternRows.Count -ne @($digest.patterns).Count) {
     throw "patterns.csv row count $($patternRows.Count) does not match digest pattern count $(@($digest.patterns).Count)"
 }
@@ -113,6 +118,7 @@ Require-Text -Path $htmlPath -Pattern "manifest\.json"
 Require-Text -Path $htmlPath -Pattern "learning\.md"
 Require-Text -Path $htmlPath -Pattern "projects\.csv"
 Require-Text -Path $htmlPath -Pattern "study_queue\.csv"
+Require-Text -Path $htmlPath -Pattern "errors\.csv"
 
 Write-Host "ok: $OutDir"
 Write-Host "projects: $($summary.project_count)"

@@ -19,6 +19,7 @@ try {
     $projectsCsvPath = Join-Path $OutDir "projects.csv"
     $patternsCsvPath = Join-Path $OutDir "patterns.csv"
     $studyQueueCsvPath = Join-Path $OutDir "study_queue.csv"
+    $errorsCsvPath = Join-Path $OutDir "errors.csv"
     $manifestPath = Join-Path $OutDir "manifest.json"
     $reportPath = Join-Path $OutDir "report.md"
     $htmlPath = Join-Path $OutDir "report.html"
@@ -425,6 +426,19 @@ try {
     }
     $projectRowsForCsv | Export-Csv -LiteralPath $projectsCsvPath -NoTypeInformation -Encoding UTF8
 
+    $errorRowsForCsv = @($records | Where-Object { $_.error } | ForEach-Object {
+        [pscustomobject]@{
+            path  = [string]$_.path
+            mode  = [string]$_.mode
+            error = [string]$_.error
+        }
+    })
+    if ($errorRowsForCsv.Count -gt 0) {
+        $errorRowsForCsv | Export-Csv -LiteralPath $errorsCsvPath -NoTypeInformation -Encoding UTF8
+    } else {
+        '"path","mode","error"' | Set-Content -LiteralPath $errorsCsvPath -Encoding UTF8
+    }
+
     $studyRows = @()
     foreach ($record in $records) {
         $explanation = $record.explanation
@@ -639,7 +653,7 @@ try {
     [void]$h.AppendLine("</head><body><main>")
     [void]$h.AppendLine("<h1>Technique Corpus Report</h1>")
     [void]$h.AppendLine("<p class=""muted"">input <code>$(Escape-Html $InputPath)</code></p>")
-    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""manifest.json"">manifest.json</a> · <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""study_queue.csv"">study_queue.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
+    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""manifest.json"">manifest.json</a> · <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""study_queue.csv"">study_queue.csv</a> · <a href=""errors.csv"">errors.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
     [void]$h.AppendLine("<div class=""grid"">")
     foreach ($metric in @(
         @{ Label = "Projects"; Value = $summary.project_count },
@@ -868,6 +882,7 @@ try {
         $projectsCsvPath,
         $patternsCsvPath,
         $studyQueueCsvPath,
+        $errorsCsvPath,
         $reportPath,
         $htmlPath
     )
@@ -922,6 +937,7 @@ try {
     Write-Host "projects csv: $projectsCsvPath"
     Write-Host "patterns csv: $patternsCsvPath"
     Write-Host "study queue csv: $studyQueueCsvPath"
+    Write-Host "errors csv: $errorsCsvPath"
     Write-Host "manifest: $manifestPath"
     Write-Host "report:  $reportPath"
     Write-Host "html:    $htmlPath"
