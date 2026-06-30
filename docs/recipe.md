@@ -19,6 +19,7 @@ This reference is generated from the canonical recipe field model.
 | --- | --- | --- | --- | --- | --- | --- |
 | `project.name` | `string` | - | Project display name. | - | - | examples/recipes/minimal-adjustment-layer.json |
 | `project.target_version` | `string` | - | AE target template used when compiling the recipe. | Must be AE2020, AE2022, or AE2025. Omitted target_version defaults to AE2020. | `project.create_target` (`NewProject`) | examples/recipes/minimal-layer-explicit-matte.json |
+| `project.bits_per_channel` | `string` | - | Project color bit depth. | Must be 8, 16, or 32 bits per channel. | `project.set_bits_per_channel` (`Project.SetBitsPerChannel`) | examples/recipes/minimal-project-bits-per-channel.json |
 
 ## CompSpec
 
@@ -592,6 +593,7 @@ This reference is generated from the canonical recipe field model.
 | `expected_profile.layer_count` | `number` | - | Expected total number of layers. | Expected count must be non-negative. | - | examples/recipes/minimal-adjustment-layer.json |
 | `expected_profile.text_layer_count` | `number` | - | Expected number of text layers. | Expected count must be non-negative. | - | examples/recipes/minimal-adjustment-layer.json |
 | `expected_profile.shape_layer_count` | `number` | - | Expected number of shape layers. | Expected count must be non-negative. | - | examples/recipes/minimal-shape-fill-blend-mode.json |
+| `expected_profile.bits_per_channel` | `string` | - | Expected project color bit depth. | Expected project color bit depth must be 8, 16, or 32 bits per channel. | - | examples/recipes/minimal-project-bits-per-channel.json |
 | `expected_profile.name` | `string` | - | Expected composition display name. | - | - | examples/recipes/minimal-comp-object-profile.json |
 | `expected_profile.width` | `number` | - | Expected composition width in pixels. | Expected width must be a positive integer. | - | examples/recipes/minimal-comp-object-profile.json |
 | `expected_profile.height` | `number` | - | Expected composition height in pixels. | Expected height must be a positive integer. | - | examples/recipes/minimal-comp-object-profile.json |

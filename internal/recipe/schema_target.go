@@ -28,6 +28,27 @@ func parseRecipeProjectTarget(version string) (recipeProjectTarget, error) {
 	}
 }
 
+func projectBitsPerChannel(value string) (aep.BitsPerChannel, error) {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "8", "8bpc":
+		return aep.BPC8, nil
+	case "16", "16bpc":
+		return aep.BPC16, nil
+	case "32", "32bpc":
+		return aep.BPC32, nil
+	default:
+		return 0, fmt.Errorf("bits_per_channel must be 8, 16, or 32")
+	}
+}
+
+func projectBitsPerChannelProfileValue(value string) (string, error) {
+	bpc, err := projectBitsPerChannel(value)
+	if err != nil {
+		return "", err
+	}
+	return bpc.String(), nil
+}
+
 func (target recipeProjectTarget) aepTarget() aep.AETarget {
 	switch target {
 	case aepTargetAE2022:

@@ -56,6 +56,12 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 	if rec.Project.TargetVersion != "" {
 		recordCapability("NewProject", "project.target_version")
 	}
+	if rec.Project.BitsPerChannel != "" {
+		recordCapability("Project.SetBitsPerChannel", "project.bits_per_channel")
+		if _, err := projectBitsPerChannel(rec.Project.BitsPerChannel); err != nil {
+			addRefusal("invalid_project_bits_per_channel", "project.bits_per_channel", err.Error())
+		}
+	}
 	if len(rec.Comps) > 1 {
 		addRefusal("too_many_comps", "comps", "first recipe slice supports exactly one comp")
 	}
@@ -176,6 +182,11 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 	}
 	if expected.ShapeLayerCount != nil && *expected.ShapeLayerCount < 0 {
 		addRefusal("invalid_expected_profile", "expected_profile.shape_layer_count", "expected count must be non-negative")
+	}
+	if expected.BitsPerChannel != "" {
+		if _, err := projectBitsPerChannel(expected.BitsPerChannel); err != nil {
+			addRefusal("invalid_expected_profile", "expected_profile.bits_per_channel", err.Error())
+		}
 	}
 	if expected.Label != nil {
 		validateCompLabel(*expected.Label, "expected_profile.label", addRefusal)

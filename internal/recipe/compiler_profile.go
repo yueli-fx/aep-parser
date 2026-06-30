@@ -13,6 +13,7 @@ func hasExpectedProfile(expected ExpectedProfile) bool {
 		expected.LayerCount != nil ||
 		expected.TextLayerCount != nil ||
 		expected.ShapeLayerCount != nil ||
+		expected.BitsPerChannel != "" ||
 		expected.Name != "" ||
 		expected.Width != nil ||
 		expected.Height != nil ||
@@ -72,6 +73,14 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 	if expected.ShapeLayerCount != nil {
 		actual := countProfileLayers(prof, func(layer profile.Layer) bool { return len(layer.Shapes) > 0 })
 		add("expected_profile.shape_layer_count", *expected.ShapeLayerCount, actual, actual == *expected.ShapeLayerCount)
+	}
+	if expected.BitsPerChannel != "" {
+		expectedBPC, err := projectBitsPerChannelProfileValue(expected.BitsPerChannel)
+		if err != nil {
+			add("expected_profile.bits_per_channel", expected.BitsPerChannel, prof.Meta.BitsPerChannel, false)
+		} else {
+			add("expected_profile.bits_per_channel", expectedBPC, prof.Meta.BitsPerChannel, prof.Meta.BitsPerChannel == expectedBPC)
+		}
 	}
 	if expected.Name != "" {
 		actual := ""

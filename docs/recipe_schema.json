@@ -92,6 +92,41 @@
       "x-aep-example": "examples/recipes/minimal-layer-explicit-matte.json"
     },
     {
+      "x-aep-path": "project.bits_per_channel",
+      "json_name": "bits_per_channel",
+      "source_type": "ProjectSpec",
+      "source_field": "BitsPerChannel",
+      "type": "string",
+      "go_type": "string",
+      "description": "Project color bit depth.",
+      "x-aep-validation": "Must be 8, 16, or 32 bits per channel.",
+      "enum": [
+        "8",
+        "16",
+        "32",
+        "8bpc",
+        "16bpc",
+        "32bpc"
+      ],
+      "x-aep-capabilities": [
+        {
+          "key": "project.set_bits_per_channel",
+          "query": "Project.SetBitsPerChannel",
+          "status": "supported",
+          "symbol": "Project.SetBitsPerChannel",
+          "domain": "project",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-preserving (2 bytes total, 1 in each header); verified\nby reading app.project.bitsPerChannel back through the AE DOM",
+          "gate": [
+            "TestProjectSettings_AEShipGate_AE2020",
+            "TestProjectSettings_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-project-bits-per-channel.json"
+    },
+    {
       "x-aep-path": "comps[]",
       "json_name": "comps",
       "source_type": "Recipe",
@@ -8354,6 +8389,25 @@
       "description": "Expected number of shape layers.",
       "x-aep-validation": "Expected count must be non-negative.",
       "x-aep-example": "examples/recipes/minimal-shape-fill-blend-mode.json"
+    },
+    {
+      "x-aep-path": "expected_profile.bits_per_channel",
+      "json_name": "bits_per_channel",
+      "source_type": "ExpectedProfile",
+      "source_field": "BitsPerChannel",
+      "type": "string",
+      "go_type": "string",
+      "description": "Expected project color bit depth.",
+      "x-aep-validation": "Expected project color bit depth must be 8, 16, or 32 bits per channel.",
+      "enum": [
+        "8",
+        "16",
+        "32",
+        "8bpc",
+        "16bpc",
+        "32bpc"
+      ],
+      "x-aep-example": "examples/recipes/minimal-project-bits-per-channel.json"
     },
     {
       "x-aep-path": "expected_profile.name",

@@ -8,12 +8,13 @@ var allowedMissingSemanticSummary = map[string]string{}
 
 func buildFieldSummaries() map[string]string {
 	out := map[string]string{
-		"schema_version":         "Recipe schema version.",
-		"project":                "Project-level metadata used when materializing the recipe.",
-		"project.name":           "Project display name.",
-		"project.target_version": "AE target template used when compiling the recipe.",
-		"comps[]":                "Composition definitions to create or validate.",
-		"expected_profile":       "Optional assertions used to compare the generated project against expected structure.",
+		"schema_version":           "Recipe schema version.",
+		"project":                  "Project-level metadata used when materializing the recipe.",
+		"project.name":             "Project display name.",
+		"project.target_version":   "AE target template used when compiling the recipe.",
+		"project.bits_per_channel": "Project color bit depth.",
+		"comps[]":                  "Composition definitions to create or validate.",
+		"expected_profile":         "Optional assertions used to compare the generated project against expected structure.",
 	}
 
 	addCompSummaries(out, "comps[]", "Composition")
@@ -519,6 +520,7 @@ func addExpectedProfileSummaries(out map[string]string) {
 		"layer_count":               "Expected total number of layers.",
 		"text_layer_count":          "Expected number of text layers.",
 		"shape_layer_count":         "Expected number of shape layers.",
+		"bits_per_channel":          "Expected project color bit depth.",
 		"effects[]":                 "Expected effect checks.",
 		"properties[]":              "Expected property checks.",
 		"essential_graphics[]":      "Expected Essential Graphics controller checks.",

@@ -230,6 +230,11 @@ Done:
   already exposes the parsed Essential Graphics template name, and
   `expected_profile.motion_graphics_template_name` asserts it. The minimal
   coverage recipe is `examples/recipes/minimal-motion-graphics-template-name.json`.
+- Recipe project settings now support `project.bits_per_channel` via
+  `Project.SetBitsPerChannel`. Profile metadata already exposes
+  `meta.bits_per_channel`, `expected_profile.bits_per_channel` asserts the
+  generated project color depth, and
+  `examples/recipes/minimal-project-bits-per-channel.json` covers the field.
 - Comp-level recipe/profile work now has an object-level execution strategy:
   field order, evidence level, profile target, test shape, verification, and
   commit rules are captured in `comp-recipe-execution-strategy.md`.

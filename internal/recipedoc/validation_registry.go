@@ -8,6 +8,10 @@ var fieldValidation = map[string]FieldMeta{
 		Validation: "Must be AE2020, AE2022, or AE2025. Omitted target_version defaults to AE2020.",
 		Enum:       []string{"AE2020", "AE2022", "AE2025"},
 	},
+	"project.bits_per_channel": {
+		Validation: "Must be 8, 16, or 32 bits per channel.",
+		Enum:       []string{"8", "16", "32", "8bpc", "16bpc", "32bpc"},
+	},
 	"comps[].width": {
 		Validation: "Pixel width must fit the composition writer's uint16 range.",
 	},
@@ -269,6 +273,10 @@ var fieldValidation = map[string]FieldMeta{
 	"expected_profile.text_styles[].paragraph_direction": {
 		Validation: "Expected paragraph direction must use a supported value.",
 		Enum:       []string{"ltr", "rtl"},
+	},
+	"expected_profile.bits_per_channel": {
+		Validation: "Expected project color bit depth must be 8, 16, or 32 bits per channel.",
+		Enum:       []string{"8", "16", "32", "8bpc", "16bpc", "32bpc"},
 	},
 	"expected_profile.keyframes[].layer_name": {
 		Validation: "Keyframe profile checks require a target layer name.",

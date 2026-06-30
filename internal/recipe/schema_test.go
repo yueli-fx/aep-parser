@@ -21,6 +21,30 @@ func TestValidateAcceptsMinimalTextShapeRecipe(t *testing.T) {
 	}
 }
 
+func TestValidateReportsProjectBitsPerChannelCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Project.BitsPerChannel = "16"
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "Project.SetBitsPerChannel")
+}
+
+func TestValidateRejectsInvalidProjectBitsPerChannel(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Project.BitsPerChannel = "12"
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_project_bits_per_channel")
+}
+
 func TestValidateRejectsUnsupportedLayerType(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers = append(rec.Comps[0].Layers, recipe.Layer{

@@ -5,6 +5,7 @@
     "project",
     "project.name",
     "project.target_version",
+    "project.bits_per_channel",
     "comps[]",
     "comps[].name",
     "comps[].width",
@@ -380,6 +381,7 @@
     "expected_profile.layer_count",
     "expected_profile.text_layer_count",
     "expected_profile.shape_layer_count",
+    "expected_profile.bits_per_channel",
     "expected_profile.name",
     "expected_profile.width",
     "expected_profile.height",
@@ -5255,6 +5257,25 @@
       "validation": "Expected RGB color must contain exactly three channels in the 0..255 range.",
       "example": "examples/recipes/minimal-comp-background-color.json"
     },
+    "expected_profile.bits_per_channel": {
+      "path": "expected_profile.bits_per_channel",
+      "json_name": "bits_per_channel",
+      "source_type": "ExpectedProfile",
+      "source_field": "BitsPerChannel",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Expected project color bit depth.",
+      "validation": "Expected project color bit depth must be 8, 16, or 32 bits per channel.",
+      "enum": [
+        "8",
+        "16",
+        "32",
+        "8bpc",
+        "16bpc",
+        "32bpc"
+      ],
+      "example": "examples/recipes/minimal-project-bits-per-channel.json"
+    },
     "expected_profile.comment": {
       "path": "expected_profile.comment",
       "json_name": "comment",
@@ -6906,6 +6927,28 @@
       "summary": "Project-level metadata used when materializing the recipe.",
       "example": "examples/recipes/minimal-adjustment-layer.json"
     },
+    "project.bits_per_channel": {
+      "path": "project.bits_per_channel",
+      "json_name": "bits_per_channel",
+      "source_type": "ProjectSpec",
+      "source_field": "BitsPerChannel",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Project color bit depth.",
+      "validation": "Must be 8, 16, or 32 bits per channel.",
+      "enum": [
+        "8",
+        "16",
+        "32",
+        "8bpc",
+        "16bpc",
+        "32bpc"
+      ],
+      "capability_keys": [
+        "project.set_bits_per_channel"
+      ],
+      "example": "examples/recipes/minimal-project-bits-per-channel.json"
+    },
     "project.name": {
       "path": "project.name",
       "json_name": "name",
@@ -7116,6 +7159,7 @@
       "expected_profile.layer_count",
       "expected_profile.text_layer_count",
       "expected_profile.shape_layer_count",
+      "expected_profile.bits_per_channel",
       "expected_profile.name",
       "expected_profile.width",
       "expected_profile.height",
@@ -7329,7 +7373,8 @@
     ],
     "ProjectSpec": [
       "project.name",
-      "project.target_version"
+      "project.target_version",
+      "project.bits_per_channel"
     ],
     "PuckerBloatSpec": [
       "comps[].layers[].shape.pucker_bloat.amount"
