@@ -521,6 +521,10 @@ Done:
   `examples/recipes/minimal-text-animator-opacity-value-keyframes.json` example
   compiles `value_keyframes` and asserts `ADBE Text Opacity` keyframes through
   `expected_profile.keyframes[]`.
+- Text animator scalar value-keyframe recipe support now also covers rotation,
+  tracking, and character offset. The dedicated `*-value-keyframes.json`
+  examples assert `ADBE Text Rotation`, `ADBE Text Tracking Amount`, and
+  `ADBE Text Character Offset` keyframes through `expected_profile.keyframes[]`.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven

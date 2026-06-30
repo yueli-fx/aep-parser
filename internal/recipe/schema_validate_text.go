@@ -331,8 +331,14 @@ func validateTextAnimator(animator TextAnimatorSpec, path string, recordCapabili
 		switch animator.Property {
 		case "opacity":
 			recordCapability("AnimateTextOpacity", path+".value_keyframes")
+		case "rotation":
+			recordCapability("AnimateTextRotation", path+".value_keyframes")
+		case "tracking":
+			recordCapability("AnimateTextTracking", path+".value_keyframes")
+		case "character_offset":
+			recordCapability("AnimateTextCharacterOffset", path+".value_keyframes")
 		default:
-			addRefusal("unsupported_text_animator_value_keyframes", path+".value_keyframes", "value_keyframes currently support opacity text animators")
+			addRefusal("unsupported_text_animator_value_keyframes", path+".value_keyframes", "value_keyframes currently support opacity, rotation, tracking, and character_offset text animators")
 		}
 		validateScalarKeyframes(animator.ValueKeyframes, path+".value_keyframes", "value_keyframes", addRefusal)
 	}

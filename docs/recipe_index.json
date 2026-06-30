@@ -3236,7 +3236,7 @@
         "text_animator.add_rotation_y",
         "text_animator.add_stroke_color"
       ],
-      "example": "examples/recipes/minimal-text-animator-character-offset.json"
+      "example": "examples/recipes/minimal-text-animator-character-offset-value-keyframes.json"
     },
     "comps[].layers[].text_animators[].property": {
       "path": "comps[].layers[].text_animators[].property",
@@ -3266,7 +3266,7 @@
         "rotation_y",
         "stroke_color"
       ],
-      "example": "examples/recipes/minimal-text-animator-character-offset.json"
+      "example": "examples/recipes/minimal-text-animator-character-offset-value-keyframes.json"
     },
     "comps[].layers[].text_animators[].range_end": {
       "path": "comps[].layers[].text_animators[].range_end",
@@ -3277,7 +3277,7 @@
       "go_type": "*float64",
       "summary": "Text animator range selector end percentage.",
       "validation": "Range selector end is required.",
-      "example": "examples/recipes/minimal-text-animator-character-offset.json"
+      "example": "examples/recipes/minimal-text-animator-character-offset-value-keyframes.json"
     },
     "comps[].layers[].text_animators[].range_offset": {
       "path": "comps[].layers[].text_animators[].range_offset",
@@ -3288,7 +3288,7 @@
       "go_type": "*float64",
       "summary": "Text animator range selector offset percentage.",
       "validation": "Range selector offset is required.",
-      "example": "examples/recipes/minimal-text-animator-character-offset.json"
+      "example": "examples/recipes/minimal-text-animator-character-offset-value-keyframes.json"
     },
     "comps[].layers[].text_animators[].range_offset_keyframes[]": {
       "path": "comps[].layers[].text_animators[].range_offset_keyframes[]",
@@ -3399,7 +3399,7 @@
       "go_type": "*float64",
       "summary": "Text animator range selector start percentage.",
       "validation": "Range selector start is required.",
-      "example": "examples/recipes/minimal-text-animator-character-offset.json"
+      "example": "examples/recipes/minimal-text-animator-character-offset-value-keyframes.json"
     },
     "comps[].layers[].text_animators[].value": {
       "path": "comps[].layers[].text_animators[].value",
@@ -3410,7 +3410,7 @@
       "go_type": "interface {}",
       "summary": "Text animator property value.",
       "validation": "Opacity, rotation, tracking, character_offset, fill_opacity, stroke_opacity, stroke_width, skew, rotation_x, and rotation_y values must be numbers; position and scale values must be 3-number arrays; color and stroke_color values must be 3- or 4-number arrays.",
-      "example": "examples/recipes/minimal-text-animator-character-offset.json"
+      "example": "examples/recipes/minimal-text-animator-character-offset-value-keyframes.json"
     },
     "comps[].layers[].text_animators[].value_keyframes[]": {
       "path": "comps[].layers[].text_animators[].value_keyframes[]",
@@ -3420,11 +3420,14 @@
       "type": "array\u003crecipe.ScalarKeyframe\u003e",
       "go_type": "[]recipe.ScalarKeyframe",
       "summary": "Text animator value keyframes.",
-      "validation": "When present, requires at least 2 keyframes sorted by non-negative time. Currently supported for opacity text animators.",
+      "validation": "When present, requires at least 2 keyframes sorted by non-negative time. Currently supported for opacity, rotation, tracking, and character_offset text animators.",
       "capability_keys": [
-        "text_animator.animate_opacity"
+        "text_animator.animate_opacity",
+        "text_animator.animate_rotation",
+        "text_animator.animate_tracking",
+        "text_animator.animate_character_offset"
       ],
-      "example": "examples/recipes/minimal-text-animator-opacity-value-keyframes.json"
+      "example": "examples/recipes/minimal-text-animator-character-offset-value-keyframes.json"
     },
     "comps[].layers[].text_animators[].value_keyframes[].in_ease": {
       "path": "comps[].layers[].text_animators[].value_keyframes[].in_ease",
@@ -3497,7 +3500,7 @@
         "structural"
       ],
       "summary": "Text animator value keyframe time in seconds.",
-      "example": "examples/recipes/minimal-text-animator-opacity-value-keyframes.json"
+      "example": "examples/recipes/minimal-text-animator-character-offset-value-keyframes.json"
     },
     "comps[].layers[].text_animators[].value_keyframes[].value": {
       "path": "comps[].layers[].text_animators[].value_keyframes[].value",
@@ -3510,7 +3513,7 @@
         "structural"
       ],
       "summary": "Text animator value keyframe value.",
-      "example": "examples/recipes/minimal-text-animator-opacity-value-keyframes.json"
+      "example": "examples/recipes/minimal-text-animator-character-offset-value-keyframes.json"
     },
     "comps[].layers[].text_style": {
       "path": "comps[].layers[].text_style",

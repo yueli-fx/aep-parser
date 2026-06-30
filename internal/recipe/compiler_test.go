@@ -1083,6 +1083,35 @@ func TestCompileToFileChecksTextAnimatorOpacityValueKeyframesExample(t *testing.
 	assertProfileCheck(t, report, "expected_profile.keyframes[0].keyframes[1]", true)
 }
 
+func TestCompileToFileChecksTextAnimatorScalarValueKeyframesExamples(t *testing.T) {
+	for _, name := range []string{
+		"minimal-text-animator-rotation-value-keyframes.json",
+		"minimal-text-animator-tracking-value-keyframes.json",
+		"minimal-text-animator-character-offset-value-keyframes.json",
+	} {
+		t.Run(name, func(t *testing.T) {
+			raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "recipes", name))
+			if err != nil {
+				t.Fatalf("ReadFile: %v", err)
+			}
+			rec := mustUnmarshalRecipe(t, string(raw))
+			outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+			report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+			if err != nil {
+				t.Fatalf("CompileToFile: %v", err)
+			}
+			if !report.Valid {
+				t.Fatalf("report = %+v, want valid", report)
+			}
+			assertProfileCheck(t, report, "expected_profile.layers[0].name", true)
+			assertProfileCheck(t, report, "expected_profile.layers[0].type", true)
+			assertProfileCheck(t, report, "expected_profile.keyframes[0].keyframes[0]", true)
+			assertProfileCheck(t, report, "expected_profile.keyframes[0].keyframes[1]", true)
+		})
+	}
+}
+
 func TestCompileToFileChecksShapeFilterProfileExamples(t *testing.T) {
 	cases := []struct {
 		recipe string

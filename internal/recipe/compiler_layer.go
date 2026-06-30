@@ -536,6 +536,9 @@ func applyTextAnimators(layer *aep.Layer, animators []TextAnimatorSpec) error {
 			if err := applyTextRangeOffsetKeyframes(layer, animator); err != nil {
 				return err
 			}
+			if err := applyTextValueKeyframes(layer, animator); err != nil {
+				return err
+			}
 		case "color":
 			value, ok := numericSliceValue(animator.Value)
 			if !ok || (len(value) != 3 && len(value) != 4) {
@@ -580,6 +583,9 @@ func applyTextAnimators(layer *aep.Layer, animators []TextAnimatorSpec) error {
 			if err := applyTextRangeOffsetKeyframes(layer, animator); err != nil {
 				return err
 			}
+			if err := applyTextValueKeyframes(layer, animator); err != nil {
+				return err
+			}
 		case "character_offset":
 			value, ok := animator.Value.(float64)
 			if !ok {
@@ -592,6 +598,9 @@ func applyTextAnimators(layer *aep.Layer, animators []TextAnimatorSpec) error {
 				return err
 			}
 			if err := applyTextRangeOffsetKeyframes(layer, animator); err != nil {
+				return err
+			}
+			if err := applyTextValueKeyframes(layer, animator); err != nil {
 				return err
 			}
 		case "fill_opacity":
@@ -717,6 +726,12 @@ func applyTextValueKeyframes(layer *aep.Layer, animator TextAnimatorSpec) error 
 	switch animator.Property {
 	case "opacity":
 		return aep.AnimateTextOpacity(layer, 0, keyframes)
+	case "rotation":
+		return aep.AnimateTextRotation(layer, 0, keyframes)
+	case "tracking":
+		return aep.AnimateTextTracking(layer, 0, keyframes)
+	case "character_offset":
+		return aep.AnimateTextCharacterOffset(layer, 0, keyframes)
 	default:
 		return fmt.Errorf("text_animators[].value_keyframes are not supported for property %q", animator.Property)
 	}

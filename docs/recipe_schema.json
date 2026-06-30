@@ -2061,7 +2061,7 @@
           ]
         }
       ],
-      "x-aep-example": "examples/recipes/minimal-text-animator-character-offset.json"
+      "x-aep-example": "examples/recipes/minimal-text-animator-character-offset-value-keyframes.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_animators[].property",
@@ -2089,7 +2089,7 @@
         "rotation_y",
         "stroke_color"
       ],
-      "x-aep-example": "examples/recipes/minimal-text-animator-character-offset.json"
+      "x-aep-example": "examples/recipes/minimal-text-animator-character-offset-value-keyframes.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_animators[].value",
@@ -2100,7 +2100,7 @@
       "go_type": "interface {}",
       "description": "Text animator property value.",
       "x-aep-validation": "Opacity, rotation, tracking, character_offset, fill_opacity, stroke_opacity, stroke_width, skew, rotation_x, and rotation_y values must be numbers; position and scale values must be 3-number arrays; color and stroke_color values must be 3- or 4-number arrays.",
-      "x-aep-example": "examples/recipes/minimal-text-animator-character-offset.json"
+      "x-aep-example": "examples/recipes/minimal-text-animator-character-offset-value-keyframes.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_animators[].range_start",
@@ -2111,7 +2111,7 @@
       "go_type": "*float64",
       "description": "Text animator range selector start percentage.",
       "x-aep-validation": "Range selector start is required.",
-      "x-aep-example": "examples/recipes/minimal-text-animator-character-offset.json"
+      "x-aep-example": "examples/recipes/minimal-text-animator-character-offset-value-keyframes.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_animators[].range_end",
@@ -2122,7 +2122,7 @@
       "go_type": "*float64",
       "description": "Text animator range selector end percentage.",
       "x-aep-validation": "Range selector end is required.",
-      "x-aep-example": "examples/recipes/minimal-text-animator-character-offset.json"
+      "x-aep-example": "examples/recipes/minimal-text-animator-character-offset-value-keyframes.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_animators[].range_offset",
@@ -2133,7 +2133,7 @@
       "go_type": "*float64",
       "description": "Text animator range selector offset percentage.",
       "x-aep-validation": "Range selector offset is required.",
-      "x-aep-example": "examples/recipes/minimal-text-animator-character-offset.json"
+      "x-aep-example": "examples/recipes/minimal-text-animator-character-offset-value-keyframes.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_animators[].range_offset_keyframes[]",
@@ -2254,7 +2254,7 @@
       "element": "recipe.ScalarKeyframe",
       "object_type": "ScalarKeyframe",
       "description": "Text animator value keyframes.",
-      "x-aep-validation": "When present, requires at least 2 keyframes sorted by non-negative time. Currently supported for opacity text animators.",
+      "x-aep-validation": "When present, requires at least 2 keyframes sorted by non-negative time. Currently supported for opacity, rotation, tracking, and character_offset text animators.",
       "x-aep-capabilities": [
         {
           "key": "text_animator.animate_opacity",
@@ -2265,9 +2265,43 @@
           "verify": "roundtrip",
           "minver": "2020",
           "boundary": "the shared 1D scalar leaf path is render-gated via AnimateTextRangeOffset / AnimateTextRotation; this function itself is round-trip-verified only"
+        },
+        {
+          "key": "text_animator.animate_rotation",
+          "query": "AnimateTextRotation",
+          "status": "supported",
+          "symbol": "AnimateTextRotation",
+          "domain": "text",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "boundary": "requires AddTextRotationAnimator first; refuses an already-animated leaf; needs \u003e= 2 keyframes",
+          "gate": [
+            "TestTextRotLeafAnimator_AEShipGate_AE2020",
+            "TestTextRotLeafAnimator_AEShipGate_AE2025"
+          ]
+        },
+        {
+          "key": "text_animator.animate_tracking",
+          "query": "AnimateTextTracking",
+          "status": "supported",
+          "symbol": "AnimateTextTracking",
+          "domain": "text",
+          "verify": "roundtrip",
+          "minver": "2020",
+          "boundary": "the shared 1D scalar leaf path is render-gated via AnimateTextRangeOffset / AnimateTextRotation; this function itself is round-trip-verified only"
+        },
+        {
+          "key": "text_animator.animate_character_offset",
+          "query": "AnimateTextCharacterOffset",
+          "status": "supported",
+          "symbol": "AnimateTextCharacterOffset",
+          "domain": "text",
+          "verify": "roundtrip",
+          "minver": "2020",
+          "boundary": "the shared 1D scalar leaf path is render-gated via AnimateTextRangeOffset / AnimateTextRotation; this function itself is round-trip-verified only"
         }
       ],
-      "x-aep-example": "examples/recipes/minimal-text-animator-opacity-value-keyframes.json"
+      "x-aep-example": "examples/recipes/minimal-text-animator-character-offset-value-keyframes.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_animators[].value_keyframes[].time",
@@ -2278,7 +2312,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Text animator value keyframe time in seconds.",
-      "x-aep-example": "examples/recipes/minimal-text-animator-opacity-value-keyframes.json"
+      "x-aep-example": "examples/recipes/minimal-text-animator-character-offset-value-keyframes.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_animators[].value_keyframes[].value",
@@ -2289,7 +2323,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Text animator value keyframe value.",
-      "x-aep-example": "examples/recipes/minimal-text-animator-opacity-value-keyframes.json"
+      "x-aep-example": "examples/recipes/minimal-text-animator-character-offset-value-keyframes.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_animators[].value_keyframes[].in_ease",
