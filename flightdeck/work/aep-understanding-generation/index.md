@@ -499,6 +499,9 @@ Done:
   `examples/recipes/minimal-text-animator-stroke-width.json` example compiles a
   stroke width text animator and asserts the `ADBE Text Stroke Width` profile
   property.
+- Text animator skew recipe support is implemented. The dedicated
+  `examples/recipes/minimal-text-animator-skew.json` example compiles a skew
+  text animator and asserts the `ADBE Text Skew` profile property.
 - Text animator Range Selector Offset keyframe recipe support is implemented.
   The dedicated
   `examples/recipes/minimal-text-animator-range-offset.json` example compiles
