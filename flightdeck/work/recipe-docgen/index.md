@@ -380,13 +380,11 @@ The design is ready to implement when:
 
 ## Next
 
-Execute `plan.md` for the first implementation slice:
+The first implementation slice is complete. Future work is optional extension:
 
-1. Build `internal/recipedoc` reflection model and tests.
-2. Add split metadata registries for the highest-value fields.
-3. Render JSON Schema-like `recipe_schema.json`.
-4. Render `recipe.md`.
-5. Add drift tests and wire `go generate`.
+1. Deeper editor integration backed by `docs/recipe_index.json`.
+2. Richer authoring examples or snippets if field references are not enough.
+3. Additional metadata expansion when new recipe-owned feature families land.
 
 ## Progress
 
@@ -428,7 +426,8 @@ Done:
 
 Current:
 
-- Ready for deeper editor integration or the next recipe-owned feature family.
+- First slice complete; ready for deeper editor integration or the next
+  recipe-owned feature family.
 
 ## Open questions
 

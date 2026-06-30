@@ -1,6 +1,6 @@
 # Recipe Docgen Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox syntax for tracking.
 
 **Goal:** Implement the first slice of a dedicated recipe documentation generator that emits `docs/recipe_schema.json` and `docs/recipe.md` from a canonical recipe field model.
 
@@ -58,7 +58,7 @@
 - Create: `internal/recipedoc/reflect.go`
 - Create: `internal/recipedoc/reflect_test.go`
 
-- [ ] **Step 1: Write structural model tests**
+- [x] **Step 1: Write structural model tests**
 
 Create `internal/recipedoc/reflect_test.go` with tests that prove stable path
 generation, source type names, JSON names, array handling, and structural
@@ -110,7 +110,7 @@ func requireField(t *testing.T, doc Document, path string) FieldModel {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run:
 
@@ -120,7 +120,7 @@ go test ./internal/recipedoc -run TestReflectRecipeFields -count=1
 
 Expected: FAIL because `internal/recipedoc` and `BuildStructuralModel` do not exist.
 
-- [ ] **Step 3: Implement model types**
+- [x] **Step 3: Implement model types**
 
 Create `internal/recipedoc/model.go`:
 
@@ -181,7 +181,7 @@ type CapabilityMeta struct {
 }
 ```
 
-- [ ] **Step 4: Implement reflection walker**
+- [x] **Step 4: Implement reflection walker**
 
 Create `internal/recipedoc/reflect.go`. It should import
 `github.com/yueli-fx/aep-parser/internal/recipe`, walk only the explicit root
@@ -211,7 +211,7 @@ func walkStruct(t reflect.Type, prefix string, out *[]FieldModel, seen map[refle
 Use stable source order by iterating struct fields in declaration order. Do not
 sort fields in the reflection layer.
 
-- [ ] **Step 5: Run structural tests**
+- [x] **Step 5: Run structural tests**
 
 Run:
 
@@ -221,7 +221,7 @@ go test ./internal/recipedoc -run TestReflectRecipeFields -count=1
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit structural model**
+- [x] **Step 6: Commit structural model**
 
 Run:
 
@@ -240,7 +240,7 @@ git commit -m "feat: add recipe doc structural model"
 - Create: `internal/recipedoc/build.go`
 - Create: `internal/recipedoc/build_test.go`
 
-- [ ] **Step 1: Write registry validation tests**
+- [x] **Step 1: Write registry validation tests**
 
 Create `internal/recipedoc/build_test.go`:
 
@@ -286,7 +286,7 @@ func TestBuildDocumentJoinsFieldMetadata(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run:
 
@@ -296,7 +296,7 @@ go test ./internal/recipedoc -run TestBuildDocument -count=1
 
 Expected: FAIL because registry and build functions do not exist.
 
-- [ ] **Step 3: Implement split registries**
+- [x] **Step 3: Implement split registries**
 
 Create small first-slice registries. Start with high-value fields and allow
 missing summaries explicitly in `build.go`; do not attempt all 300+ fields in
@@ -356,7 +356,7 @@ var capabilityRegistry = map[string]CapabilityMeta{
 }
 ```
 
-- [ ] **Step 4: Implement canonical build**
+- [x] **Step 4: Implement canonical build**
 
 Create `internal/recipedoc/build.go` with:
 
@@ -388,7 +388,7 @@ reject:
 For first slice, capindex lookup can be joined in Task 5 from CLI; here the
 document should at least carry key/query pairs.
 
-- [ ] **Step 5: Run registry tests**
+- [x] **Step 5: Run registry tests**
 
 Run:
 
@@ -398,7 +398,7 @@ go test ./internal/recipedoc -run 'TestBuildDocument|TestReflectRecipeFields' -c
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit registries and canonical build**
+- [x] **Step 6: Commit registries and canonical build**
 
 Run:
 
@@ -413,7 +413,7 @@ git commit -m "feat: add recipe doc metadata registries"
 - Create: `internal/recipedoc/render_json.go`
 - Create: `internal/recipedoc/render_json_test.go`
 
-- [ ] **Step 1: Write JSON renderer tests**
+- [x] **Step 1: Write JSON renderer tests**
 
 Create `internal/recipedoc/render_json_test.go`:
 
@@ -469,7 +469,7 @@ func TestRenderJSONSchemaIsDeterministic(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run:
 
@@ -479,7 +479,7 @@ go test ./internal/recipedoc -run TestRenderJSONSchema -count=1
 
 Expected: FAIL because `RenderJSONSchema` does not exist.
 
-- [ ] **Step 3: Implement JSON renderer**
+- [x] **Step 3: Implement JSON renderer**
 
 Create `internal/recipedoc/render_json.go`:
 
@@ -502,7 +502,7 @@ Use `json.MarshalIndent` over deterministic structs and slices. Do not marshal
 maps directly when field order matters; prebuild sorted key lists or stable
 struct slices where needed.
 
-- [ ] **Step 4: Run JSON renderer tests**
+- [x] **Step 4: Run JSON renderer tests**
 
 Run:
 
@@ -512,7 +512,7 @@ go test ./internal/recipedoc -run TestRenderJSONSchema -count=1
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit JSON renderer**
+- [x] **Step 5: Commit JSON renderer**
 
 Run:
 
@@ -527,7 +527,7 @@ git commit -m "feat: render recipe JSON schema"
 - Create: `internal/recipedoc/render_md.go`
 - Create: `internal/recipedoc/render_md_test.go`
 
-- [ ] **Step 1: Write Markdown renderer tests**
+- [x] **Step 1: Write Markdown renderer tests**
 
 Create `internal/recipedoc/render_md_test.go`:
 
@@ -573,7 +573,7 @@ func requireSubstring(t *testing.T, s, want string) {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run:
 
@@ -583,7 +583,7 @@ go test ./internal/recipedoc -run TestRenderMarkdown -count=1
 
 Expected: FAIL because `RenderMarkdown` does not exist.
 
-- [ ] **Step 3: Implement Markdown renderer**
+- [x] **Step 3: Implement Markdown renderer**
 
 Create `internal/recipedoc/render_md.go`:
 
@@ -604,7 +604,7 @@ Required rendering:
 Keep renderer deterministic by preserving source order from `Document.Fields`
 within each source type section.
 
-- [ ] **Step 4: Run Markdown renderer tests**
+- [x] **Step 4: Run Markdown renderer tests**
 
 Run:
 
@@ -614,7 +614,7 @@ go test ./internal/recipedoc -run TestRenderMarkdown -count=1
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit Markdown renderer**
+- [x] **Step 5: Commit Markdown renderer**
 
 Run:
 
@@ -631,7 +631,7 @@ git commit -m "feat: render recipe field reference"
 - Modify: `internal/recipedoc/build.go`
 - Modify: `internal/recipedoc/model.go`
 
-- [ ] **Step 1: Write CLI drift test**
+- [x] **Step 1: Write CLI drift test**
 
 Create `cmd/recipedocgen/docs_uptodate_test.go`:
 
@@ -666,7 +666,7 @@ func assertFileCurrent(t *testing.T, path, got string) {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run:
 
@@ -676,7 +676,7 @@ go test ./cmd/recipedocgen -run TestRecipeDocsUpToDate -count=1
 
 Expected: FAIL because `cmd/recipedocgen` and generated docs do not exist.
 
-- [ ] **Step 3: Implement CLI**
+- [x] **Step 3: Implement CLI**
 
 Create `cmd/recipedocgen/main.go`:
 
@@ -729,7 +729,7 @@ func generate(docsDir string) (string, string, error) {
 }
 ```
 
-- [ ] **Step 4: Implement capindex join**
+- [x] **Step 4: Implement capindex join**
 
 Add to `internal/recipedoc/build.go`:
 
@@ -751,7 +751,7 @@ This should load `internal/capindex.Load(capabilitiesPath)` and enrich each
 If the capindex lookup does not resolve and `CapabilityMeta.AllowUnknown` is
 false, return an error.
 
-- [ ] **Step 5: Generate docs**
+- [x] **Step 5: Generate docs**
 
 Run:
 
@@ -764,7 +764,7 @@ Expected:
 - `docs/recipe_schema.json` exists
 - `docs/recipe.md` exists
 
-- [ ] **Step 6: Run CLI and drift tests**
+- [x] **Step 6: Run CLI and drift tests**
 
 Run:
 
@@ -775,7 +775,7 @@ go test ./internal/recipedoc -count=1
 
 Expected: PASS.
 
-- [ ] **Step 7: Commit CLI and generated docs**
+- [x] **Step 7: Commit CLI and generated docs**
 
 Run:
 
@@ -795,7 +795,7 @@ git commit -m "feat: add recipe doc generator"
 - Modify: `docs/recipe.md`
 - Modify: `flightdeck/work/recipe-docgen/index.md`
 
-- [ ] **Step 1: Expand metadata for first-slice fields**
+- [x] **Step 1: Expand metadata for first-slice fields**
 
 Cover at least these groups:
 
@@ -818,7 +818,7 @@ var allowedMissingSemanticSummary = map[string]string{
 
 Do not allow broad prefixes in this map. Every entry must be a full stable path.
 
-- [ ] **Step 2: Add coverage test**
+- [x] **Step 2: Add coverage test**
 
 Add to `internal/recipedoc/build_test.go`:
 
@@ -838,7 +838,7 @@ func TestNoUnexpectedMissingSemanticSummaries(t *testing.T) {
 }
 ```
 
-- [ ] **Step 3: Regenerate docs**
+- [x] **Step 3: Regenerate docs**
 
 Run:
 
@@ -848,7 +848,7 @@ go generate ./cmd/recipedocgen
 
 Expected: `docs/recipe_schema.json` and `docs/recipe.md` update deterministically.
 
-- [ ] **Step 4: Run full verification**
+- [x] **Step 4: Run full verification**
 
 Run:
 
@@ -867,14 +867,14 @@ Expected:
 - vet exits 0
 - diff check has no whitespace errors; CRLF warnings are acceptable on Windows
 
-- [ ] **Step 5: Update work index**
+- [x] **Step 5: Update work index**
 
 In `flightdeck/work/recipe-docgen/index.md`, update:
 
 - `Progress` Done: add "First implementation slice landed."
 - `Current`: "Ready for next metadata expansion or editor integration."
 
-- [ ] **Step 6: Commit final metadata pass**
+- [x] **Step 6: Commit final metadata pass**
 
 Run:
 
@@ -901,4 +901,4 @@ The final response should report:
 - commits created
 - generated files
 - verification commands and outcomes
-- remaining optional scope: `docs/recipe_index.json`, richer examples, editor integration
+- remaining optional scope: richer examples and editor integration
