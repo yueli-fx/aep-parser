@@ -86,6 +86,7 @@ type corpusSummary struct {
 	HintCounts         map[string]int               `json:"hint_counts"`
 	ArchetypeCounts    map[string]int               `json:"archetype_counts,omitempty"`
 	PatternCounts      map[string]int               `json:"pattern_counts,omitempty"`
+	PatternExamples    map[string][]corpusExample   `json:"pattern_examples,omitempty"`
 	ReadinessCounts    map[string]int               `json:"readiness_counts,omitempty"`
 	PluginEffectCounts map[string]int               `json:"plugin_effect_counts"`
 	EffectCounts       map[string]int               `json:"effect_counts"`
@@ -93,6 +94,14 @@ type corpusSummary struct {
 	TextAnimators      map[string]int               `json:"text_animators"`
 	LayerRoles         map[string]int               `json:"layer_roles"`
 	GraphEdges         map[string]int               `json:"graph_edges"`
+}
+
+type corpusExample struct {
+	Path      string `json:"path"`
+	Label     string `json:"label,omitempty"`
+	Score     int    `json:"score,omitempty"`
+	Readiness string `json:"readiness,omitempty"`
+	Summary   string `json:"summary,omitempty"`
 }
 
 func newCorpusSummary(mode string) *corpusSummary {
@@ -105,6 +114,7 @@ func newCorpusSummary(mode string) *corpusSummary {
 		HintCounts:         map[string]int{},
 		ArchetypeCounts:    map[string]int{},
 		PatternCounts:      map[string]int{},
+		PatternExamples:    map[string][]corpusExample{},
 		ReadinessCounts:    map[string]int{},
 		PluginEffectCounts: map[string]int{},
 		EffectCounts:       map[string]int{},
@@ -200,6 +210,7 @@ func runCorpus(input, mode string, recursive bool, limit int, summaryMode bool, 
 				}
 				for _, pattern := range value.Patterns {
 					summary.PatternCounts[pattern.ID]++
+					addPatternExample(summary, pattern, value, path)
 				}
 				if value.RecreationReadiness.Status != "" {
 					summary.ReadinessCounts[value.RecreationReadiness.Status]++
@@ -224,6 +235,30 @@ func runCorpus(input, mode string, recursive bool, limit int, summaryMode bool, 
 		return 1
 	}
 	return 0
+}
+
+func addPatternExample(summary *corpusSummary, pattern technique.ProjectPattern, explanation *technique.Explanation, path string) {
+	if summary == nil || pattern.ID == "" {
+		return
+	}
+	example := corpusExample{
+		Path:      path,
+		Label:     pattern.Label,
+		Score:     pattern.Score,
+		Readiness: explanation.RecreationReadiness.Status,
+		Summary:   pattern.Summary,
+	}
+	examples := append(summary.PatternExamples[pattern.ID], example)
+	sort.SliceStable(examples, func(i, j int) bool {
+		if examples[i].Score != examples[j].Score {
+			return examples[i].Score > examples[j].Score
+		}
+		return examples[i].Path < examples[j].Path
+	})
+	if len(examples) > 5 {
+		examples = examples[:5]
+	}
+	summary.PatternExamples[pattern.ID] = examples
 }
 
 func outputWriter(path string, stdout io.Writer) (io.Writer, func(), error) {

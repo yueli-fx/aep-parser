@@ -154,6 +154,26 @@ try {
         return @($rows | Sort-Object @{ Expression = { $_.score }; Descending = $true }, path | Select-Object -First $Max)
     }
 
+    function Get-PatternExamples {
+        param(
+            [object]$Summary,
+            [string]$PatternID,
+            [int]$Max = 5
+        )
+        if ($null -eq $Summary -or $null -eq $Summary.pattern_examples) {
+            return @()
+        }
+        foreach ($property in @($Summary.pattern_examples.PSObject.Properties)) {
+            if ($property.Name -ne $PatternID) {
+                continue
+            }
+            return @($property.Value |
+                Sort-Object @{ Expression = { [int]$_.score }; Descending = $true }, path |
+                Select-Object -First $Max)
+        }
+        return @()
+    }
+
     function Get-ReadinessProjects {
         param(
             [array]$Records,
@@ -240,8 +260,9 @@ try {
         archetypes    = $digestArchetypes
         patterns      = @($patternRows | ForEach-Object {
             [ordered]@{
-                id    = [string]$_.Name
-                count = [int]$_.Value
+                id              = [string]$_.Name
+                count           = [int]$_.Value
+                representatives = @(Get-PatternExamples -Summary $summary -PatternID $_.Name -Max 5)
             }
         })
         readiness     = $digestReadiness
@@ -257,6 +278,20 @@ try {
             [void]$b.AppendLine("- ``$($project.path)`` score=$($project.score) readiness=$($project.readiness)")
             if ($project.overview) {
                 [void]$b.AppendLine("  $($project.overview)")
+            }
+        }
+        [void]$b.AppendLine("")
+    }
+
+    [void]$b.AppendLine("## Pattern Representatives")
+    [void]$b.AppendLine("")
+    foreach ($group in @($digest.patterns)) {
+        [void]$b.AppendLine("### $($group.id)")
+        [void]$b.AppendLine("")
+        foreach ($project in @($group.representatives)) {
+            [void]$b.AppendLine("- ``$($project.path)`` score=$($project.score) readiness=$($project.readiness)")
+            if ($project.summary) {
+                [void]$b.AppendLine("  $($project.summary)")
             }
         }
         [void]$b.AppendLine("")
@@ -346,6 +381,20 @@ try {
     [void]$h.AppendLine("<h2 style=""margin-top:28px"">Representative Projects</h2>")
     [void]$h.AppendLine("<div class=""representatives"">")
     foreach ($group in $digestArchetypes) {
+        [void]$h.AppendLine("<section class=""representative"">")
+        [void]$h.AppendLine("<h3>$(Escape-Html $group.id)</h3>")
+        [void]$h.AppendLine("<p class=""muted"">$($group.count) projects</p>")
+        [void]$h.AppendLine("<ul class=""compact"">")
+        foreach ($project in @($group.representatives | Select-Object -First 5)) {
+            [void]$h.AppendLine("<li><code>$(Escape-Html $project.path)</code><div class=""small"">score=$($project.score) · readiness=$(Escape-Html $project.readiness)</div></li>")
+        }
+        [void]$h.AppendLine("</ul>")
+        [void]$h.AppendLine("</section>")
+    }
+    [void]$h.AppendLine("</div>")
+    [void]$h.AppendLine("<h2 style=""margin-top:28px"">Pattern Representatives</h2>")
+    [void]$h.AppendLine("<div class=""representatives"">")
+    foreach ($group in @($digest.patterns)) {
         [void]$h.AppendLine("<section class=""representative"">")
         [void]$h.AppendLine("<h3>$(Escape-Html $group.id)</h3>")
         [void]$h.AppendLine("<p class=""muted"">$($group.count) projects</p>")

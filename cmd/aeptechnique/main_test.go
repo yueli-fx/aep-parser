@@ -208,6 +208,17 @@ func TestRunEmitsCorpusExplanationSummary(t *testing.T) {
 	if len(summary.PatternCounts) == 0 {
 		t.Fatalf("pattern counts = %+v", summary.PatternCounts)
 	}
+	if len(summary.PatternExamples) == 0 {
+		t.Fatalf("pattern examples = %+v", summary.PatternExamples)
+	}
+	for id, examples := range summary.PatternExamples {
+		if len(examples) == 0 {
+			t.Fatalf("pattern examples[%s] is empty", id)
+		}
+		if examples[0].Path == "" || examples[0].Score <= 0 || examples[0].Readiness == "" {
+			t.Fatalf("pattern examples[%s][0] = %+v", id, examples[0])
+		}
+	}
 	if len(summary.ReadinessCounts) == 0 {
 		t.Fatalf("readiness counts = %+v", summary.ReadinessCounts)
 	}
