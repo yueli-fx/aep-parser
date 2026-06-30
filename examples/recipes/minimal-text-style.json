@@ -69,6 +69,8 @@
     "text_styles": [
       {
         "layer_name": "Title",
+        "run_index": 0,
+        "paragraph_index": 0,
         "font_size": 96,
         "fill_color": [0.25098039215686274, 0.5019607843137255, 1, 1],
         "auto_leading": false,

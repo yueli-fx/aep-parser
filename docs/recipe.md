@@ -793,8 +793,8 @@ This reference is generated from the canonical recipe field model.
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
 | `expected_profile.text_styles[].layer_name` | `string` | structural | Layer name to inspect for the expected text style. | Text style profile checks require a target layer name. | - | examples/recipes/minimal-text-shape.json |
-| `expected_profile.text_styles[].run_index` | `number` | - | Expected text style text run index. | Expected text style run index must be non-negative. | - | - |
-| `expected_profile.text_styles[].paragraph_index` | `number` | - | Expected text style paragraph index. | Expected text style paragraph index must be non-negative. | - | - |
+| `expected_profile.text_styles[].run_index` | `number` | - | Expected text style text run index. | Expected text style run index must be non-negative. | - | examples/recipes/minimal-text-style.json |
+| `expected_profile.text_styles[].paragraph_index` | `number` | - | Expected text style paragraph index. | Expected text style paragraph index must be non-negative. | - | examples/recipes/minimal-text-style.json |
 | `expected_profile.text_styles[].font_size` | `number` | - | Expected text style font size. | Expected font size must be positive. | - | examples/recipes/minimal-text-shape.json |
 | `expected_profile.text_styles[].fill_color` | `array<float64>` | - | Expected text style fill color as RGB channels. | Expected fill color must contain RGB or RGBA channels in the 0..1 range. | - | examples/recipes/minimal-text-shape.json |
 | `expected_profile.text_styles[].auto_leading` | `boolean` | - | Expected text style auto-leading switch. | - | - | examples/recipes/minimal-text-style.json |

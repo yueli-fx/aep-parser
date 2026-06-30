@@ -7277,7 +7277,8 @@
       "type": "number",
       "go_type": "int",
       "summary": "Expected text style paragraph index.",
-      "validation": "Expected text style paragraph index must be non-negative."
+      "validation": "Expected text style paragraph index must be non-negative.",
+      "example": "examples/recipes/minimal-text-style.json"
     },
     "expected_profile.text_styles[].run_index": {
       "path": "expected_profile.text_styles[].run_index",
@@ -7287,7 +7288,8 @@
       "type": "number",
       "go_type": "int",
       "summary": "Expected text style text run index.",
-      "validation": "Expected text style run index must be non-negative."
+      "validation": "Expected text style run index must be non-negative.",
+      "example": "examples/recipes/minimal-text-style.json"
     },
     "expected_profile.text_styles[].space_after": {
       "path": "expected_profile.text_styles[].space_after",

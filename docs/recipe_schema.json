@@ -10257,7 +10257,8 @@
       "type": "number",
       "go_type": "int",
       "description": "Expected text style text run index.",
-      "x-aep-validation": "Expected text style run index must be non-negative."
+      "x-aep-validation": "Expected text style run index must be non-negative.",
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
     },
     {
       "x-aep-path": "expected_profile.text_styles[].paragraph_index",
@@ -10267,7 +10268,8 @@
       "type": "number",
       "go_type": "int",
       "description": "Expected text style paragraph index.",
-      "x-aep-validation": "Expected text style paragraph index must be non-negative."
+      "x-aep-validation": "Expected text style paragraph index must be non-negative.",
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
     },
     {
       "x-aep-path": "expected_profile.text_styles[].font_size",
