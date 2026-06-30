@@ -402,6 +402,38 @@ try {
         $historyDelta.batch_passed_delta = [int]$historyEntry.batch_passed - [int]$previousHistoryRow.batch_passed
         $historyDelta.partial_to_full_count_diffs_delta = [int]$historyEntry.partial_to_full_count_diffs - [int]$previousHistoryRow.partial_to_full_count_diffs
     }
+    $outcomeReasons = [System.Collections.ArrayList]::new()
+    $outcomeStatus = "pass"
+    if ([int]$fullManifest.error_count -ne 0) {
+        $outcomeStatus = "fail"
+        [void]$outcomeReasons.Add("full report has $($fullManifest.error_count) parse error(s)")
+    }
+    if (-not [bool]$recipeDraftCompileJson.valid) {
+        $outcomeStatus = "fail"
+        [void]$outcomeReasons.Add("recipe draft compile validation is not valid")
+    }
+    if (-not [bool]$recipeDraftReparseSummary.passed) {
+        $outcomeStatus = "fail"
+        [void]$outcomeReasons.Add("compiled recipe draft reparse did not match expected counts")
+    }
+    if ([int]$recipeDraftBatchSummary.passed -ne [int]$recipeDraftBatchSummary.attempted) {
+        $outcomeStatus = "fail"
+        [void]$outcomeReasons.Add("recipe draft batch smoke passed $($recipeDraftBatchSummary.passed)/$($recipeDraftBatchSummary.attempted)")
+    }
+    if ($outcomeStatus -eq "pass" -and [bool]$historyDelta.has_previous) {
+        if ([int]$historyDelta.parsed_projects_delta -lt 0 -or [int]$historyDelta.technique_patterns_delta -lt 0 -or [int]$historyDelta.batch_passed_delta -lt 0) {
+            $outcomeStatus = "watch"
+            [void]$outcomeReasons.Add("key metric decreased from previous run $($historyDelta.previous_run_id)")
+        }
+    }
+    if ($outcomeReasons.Count -eq 0) {
+        [void]$outcomeReasons.Add("self-hosted gate passed with no full-report parse errors and recipe smoke checks passing")
+    }
+    $outcomeStatusInfo = [ordered]@{
+        status = $outcomeStatus
+        has_regression = ($outcomeStatus -ne "pass")
+        reasons = @($outcomeReasons)
+    }
     $historyPreviewRows = @($existingHistoryRows)
     $historyPreviewRows += $historyEntryObject
     $historyPreviewRows = @($historyPreviewRows | Select-Object -Last 5)
@@ -492,6 +524,7 @@ try {
             })
         }
         history_delta = $historyDelta
+        outcome_status = $outcomeStatusInfo
         steps = @($steps)
     }
     $effectiveness | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $effectivenessJsonPath -Encoding UTF8
@@ -527,6 +560,14 @@ try {
     [void]$e.AppendLine("- input: ``$InputPath``")
     [void]$e.AppendLine("- run root: ``$runRoot``")
     [void]$e.AppendLine("- latest index: ``$latestIndexPath``")
+    [void]$e.AppendLine("")
+    [void]$e.AppendLine("## Outcome Status")
+    [void]$e.AppendLine("")
+    [void]$e.AppendLine("- status: $($outcomeStatusInfo.status)")
+    [void]$e.AppendLine("- regression: $($outcomeStatusInfo.has_regression)")
+    foreach ($reason in $outcomeStatusInfo.reasons) {
+        [void]$e.AppendLine("- reason: $reason")
+    }
     [void]$e.AppendLine("")
     [void]$e.AppendLine("## Corpus")
     [void]$e.AppendLine("")
@@ -600,6 +641,11 @@ try {
     [void]$index.AppendLine("<div class=""metric""><span>Patterns</span><strong>$($fullManifest.pattern_count)</strong></div>")
     [void]$index.AppendLine("<div class=""metric""><span>Partial Errors</span><strong>$($partialManifest.error_count)</strong></div>")
     [void]$index.AppendLine("</div>")
+    [void]$index.AppendLine("<section class=""panel""><h2>Outcome Status</h2><table><thead><tr><th>Signal</th><th>Value</th></tr></thead><tbody>")
+    [void]$index.AppendLine("<tr><td>Status</td><td>$(Escape-Html $outcomeStatusInfo.status)</td></tr>")
+    [void]$index.AppendLine("<tr><td>Regression</td><td>$(Escape-Html $outcomeStatusInfo.has_regression)</td></tr>")
+    [void]$index.AppendLine("<tr><td>Reason</td><td>$(Escape-Html ((@($outcomeStatusInfo.reasons)) -join "; "))</td></tr>")
+    [void]$index.AppendLine("</tbody></table></section>")
     [void]$index.AppendLine("<section class=""panel""><h2>Effectiveness Snapshot</h2><table><thead><tr><th>Signal</th><th>Value</th></tr></thead><tbody>")
     [void]$index.AppendLine("<tr><td>Parsed projects</td><td>$($fullManifest.project_count)</td></tr>")
     [void]$index.AppendLine("<tr><td>Recipe draft compile</td><td>$(Escape-Html $recipeDraftCompileJson.valid)</td></tr>")
@@ -786,6 +832,9 @@ try {
     if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "History Delta" -Quiet)) {
         throw "latest index missing History Delta"
     }
+    if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Outcome Status" -Quiet)) {
+        throw "latest index missing Outcome Status"
+    }
     if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Project Playbooks Preview" -Quiet)) {
         throw "latest index missing Project Playbooks Preview"
     }
@@ -904,6 +953,18 @@ try {
     }
     if ($null -eq $latestEffectivenessJson.history_delta.parsed_projects_delta) {
         throw "latest effectiveness json missing history_delta.parsed_projects_delta"
+    }
+    if ($null -eq $latestEffectivenessJson.outcome_status) {
+        throw "latest effectiveness json missing outcome_status"
+    }
+    if ($null -eq $latestEffectivenessJson.outcome_status.status) {
+        throw "latest effectiveness json missing outcome_status.status"
+    }
+    if ($null -eq $latestEffectivenessJson.outcome_status.reasons) {
+        throw "latest effectiveness json missing outcome_status.reasons"
+    }
+    if (-not (Select-String -LiteralPath $latestEffectivenessPath -Pattern "Outcome Status" -Quiet)) {
+        throw "latest effectiveness markdown missing Outcome Status"
     }
     $historyEntryJson = $historyEntry | ConvertTo-Json -Depth 6 -Compress
     Add-Content -LiteralPath $historyJsonlPath -Value $historyEntryJson -Encoding UTF8

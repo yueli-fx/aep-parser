@@ -196,11 +196,11 @@ stable paths. `latest_effectiveness.md` is the shortest human-readable outcome
 summary, while `latest_effectiveness.json` is the script/frontend-friendly
 version of the same effectiveness snapshot,
 including corpus counters, closed-loop reconstruction smoke results, primary
-artifact paths, and top learning signals from the study queue, learning actions,
-and coverage scorecard. The history files append one compact metrics row per
+artifact paths, an outcome status, and top learning signals from the study
+queue, learning actions, and coverage scorecard. The history files append one compact metrics row per
 gate run for trend checks across repeated self-hosted validation, and the latest
-HTML index renders the current run delta plus recent rows in History Delta and
-Effectiveness History Preview panels.
+HTML index renders the outcome, current run delta, and recent rows in Outcome
+Status, History Delta, and Effectiveness History Preview panels.
 Passing `-Open` opens the latest HTML index after the gate finishes.
 
 ## Non-Goals
