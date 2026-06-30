@@ -11,8 +11,9 @@ implemented, and first corpus fact extraction slice implemented.
 can obtain stable hit locations for source-layer, effect-match, property-match,
 expression-substring, and text-font searches, and batch workflows can now
 extract durable layer-source/effect-usage/expression/text-style/shape-usage
-facts without retaining parsed project graphs. Later work should add broader
-search/corpus APIs only when a caller needs them.
+facts without retaining parsed project graphs. `cmd/aepsearch` is the first
+real caller for single-project search and multi-project corpus extraction.
+Later work should add broader search/corpus APIs only when a caller needs them.
 
 The current architecture decision from `work/scene-architecture/index.md` is:
 keep `Project.Compositions`, `Project.Footage`, `Project.Folders`, and
@@ -386,6 +387,11 @@ Memory rules:
         expressions, text style font usage, and shape primitive/path usage.
   - [x] Corpus JSON contains stable project IDs, locations, matches, and
         summaries, but no `Project`, `Index`, or pointer graph.
+- [x] Add first CLI caller.
+  - [x] `cmd/aepsearch search` opens one `.aep` and emits stable search hits
+        for effect/source/property/expression/font queries.
+  - [x] `cmd/aepsearch corpus` opens one or more `.aep` files and emits
+        durable corpus facts without exposing live project pointers.
 
 ## Verification
 
@@ -406,3 +412,9 @@ Current corpus slice:
 
 - `go test ./internal/projectindex -run 'TestCorpus' -count=1`
 - `go test ./internal/projectindex -count=1`
+
+Current CLI slice:
+
+- `go test ./cmd/aepsearch -count=1`
+- `go test ./...`
+- `go vet ./...`
