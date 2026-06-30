@@ -30,6 +30,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 	recursive := fs.Bool("recursive", false, "discover .aep files recursively when -in is a directory")
 	limit := fs.Int("limit", 0, "maximum number of discovered projects to process; 0 means no limit")
 	summaryMode := fs.Bool("summary", false, "emit a single aggregate JSON summary in corpus mode")
+	outPath := fs.String("out", "", "optional output file")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
@@ -45,14 +46,20 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return 2
 	}
 	if *corpusMode {
-		return runCorpus(*input, *mode, *recursive, *limit, *summaryMode, stdout, stderr)
+		return runCorpus(*input, *mode, *recursive, *limit, *summaryMode, *outPath, stdout, stderr)
 	}
 
 	output, code := buildOutput(*input, *mode, stderr)
 	if code != 0 {
 		return code
 	}
-	enc := json.NewEncoder(stdout)
+	out, closeOut, err := outputWriter(*outPath, stdout)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 2
+	}
+	defer closeOut()
+	enc := json.NewEncoder(out)
 	enc.SetIndent("", "  ")
 	if err := enc.Encode(output); err != nil {
 		fmt.Fprintf(stderr, "json: %v\n", err)
@@ -131,7 +138,7 @@ func buildOutput(input, mode string, stderr io.Writer) (any, int) {
 	}
 }
 
-func runCorpus(input, mode string, recursive bool, limit int, summaryMode bool, stdout, stderr io.Writer) int {
+func runCorpus(input, mode string, recursive bool, limit int, summaryMode bool, outPath string, stdout, stderr io.Writer) int {
 	paths, err := discoverAEPs(input, recursive)
 	if err != nil {
 		fmt.Fprintln(stderr, err)
@@ -140,7 +147,13 @@ func runCorpus(input, mode string, recursive bool, limit int, summaryMode bool, 
 	if limit > 0 && len(paths) > limit {
 		paths = paths[:limit]
 	}
-	enc := json.NewEncoder(stdout)
+	out, closeOut, err := outputWriter(outPath, stdout)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 2
+	}
+	defer closeOut()
+	enc := json.NewEncoder(out)
 	summary := newCorpusSummary(mode)
 	hadError := false
 	for _, path := range paths {
@@ -178,6 +191,20 @@ func runCorpus(input, mode string, recursive bool, limit int, summaryMode bool, 
 		return 1
 	}
 	return 0
+}
+
+func outputWriter(path string, stdout io.Writer) (io.Writer, func(), error) {
+	if path == "" {
+		return stdout, func() {}, nil
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return nil, nil, err
+	}
+	file, err := os.Create(path)
+	if err != nil {
+		return nil, nil, err
+	}
+	return file, func() { _ = file.Close() }, nil
 }
 
 func addFactsToSummary(summary *corpusSummary, facts *technique.FactSet) {

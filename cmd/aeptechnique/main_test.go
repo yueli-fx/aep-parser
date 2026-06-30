@@ -163,6 +163,58 @@ func TestRunEmitsCorpusSummary(t *testing.T) {
 	}
 }
 
+func TestRunWritesOutputFile(t *testing.T) {
+	input := filepath.Join("..", "..", "flightdeck", "showcase", "text", "text.aep")
+	outPath := filepath.Join(t.TempDir(), "portrait.json")
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"-in", input, "-mode", "portrait", "-out", outPath}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("run exit = %d, stderr=%s", code, stderr.String())
+	}
+	if stdout.Len() != 0 {
+		t.Fatalf("stdout = %s, want empty when -out is used", stdout.String())
+	}
+	data, err := os.ReadFile(outPath)
+	if err != nil {
+		t.Fatalf("ReadFile output: %v", err)
+	}
+	var portrait technique.Portrait
+	if err := json.Unmarshal(data, &portrait); err != nil {
+		t.Fatalf("json.Unmarshal output: %v\n%s", err, string(data))
+	}
+	if portrait.Fingerprint.LayerCount == 0 {
+		t.Fatalf("portrait fingerprint = %+v", portrait.Fingerprint)
+	}
+}
+
+func TestRunWritesCorpusSummaryOutputFile(t *testing.T) {
+	fixture := filepath.Join("..", "..", "flightdeck", "showcase", "text", "text.aep")
+	root := t.TempDir()
+	writeFixtureCopy(t, fixture, filepath.Join(root, "one.aep"))
+	outPath := filepath.Join(t.TempDir(), "summary.json")
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"-in", root, "-mode", "portrait", "-corpus", "-recursive", "-summary", "-out", outPath}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("run exit = %d, stderr=%s", code, stderr.String())
+	}
+	if stdout.Len() != 0 {
+		t.Fatalf("stdout = %s, want empty when -out is used", stdout.String())
+	}
+	data, err := os.ReadFile(outPath)
+	if err != nil {
+		t.Fatalf("ReadFile output: %v", err)
+	}
+	var summary corpusSummary
+	if err := json.Unmarshal(data, &summary); err != nil {
+		t.Fatalf("json.Unmarshal output: %v\n%s", err, string(data))
+	}
+	if summary.ProjectCount != 1 {
+		t.Fatalf("summary = %+v", summary)
+	}
+}
+
 func writeFixtureCopy(t *testing.T, src, dst string) {
 	t.Helper()
 	data, err := os.ReadFile(src)

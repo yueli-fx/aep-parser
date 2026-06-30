@@ -641,6 +641,9 @@ Current:
   -limit 3 -summary` produces an aggregate report with 3 projects, 14 comps,
   69 layers, 41 effects, 207 shape operators, and hint counts across the
   sample batch.
+- `scripts\technique_showcase_report.ps1 -Limit 3` now produces the same
+  self-hosted demo as files under `tmp\technique_showcase_report`: `summary.json`,
+  `corpus.jsonl`, and a readable `report.md`.
 - Recipe IR coverage for the current comp and layer strategy matrices is
   complete: comp settings have object-level and field-level profile checks,
   authored-layer examples carry `expected_profile.layers[]`, camera/light

@@ -12,6 +12,7 @@ Extend `cmd/aeptechnique` with corpus JSONL mode:
 ```powershell
 go run ./cmd/aeptechnique -in <dir-or-file> -mode portrait -corpus -recursive
 go run ./cmd/aeptechnique -in <dir-or-file> -mode portrait -corpus -recursive -summary
+pwsh -NoProfile -File scripts\technique_showcase_report.ps1 -Limit 3
 ```
 
 For every discovered `.aep`, emit one JSON object per line:
@@ -46,6 +47,16 @@ when any record has an error. Usage or flag errors still return `2`.
 - `-limit N` processes at most N discovered files when N is positive.
 - Corpus mode does not retain parsed projects after each record is emitted.
 - Summary mode aggregates the emitted records and keeps only counts.
+
+## Showcase Report Script
+
+`scripts/technique_showcase_report.ps1` is the self-hosted demonstration entry.
+It defaults to `flightdeck\showcase` and writes generated output under
+`tmp\technique_showcase_report`:
+
+- `summary.json`
+- `corpus.jsonl`
+- `report.md`
 
 ## Non-Goals
 
