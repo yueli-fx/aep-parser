@@ -347,11 +347,16 @@ type Effect struct {
 }
 
 type EffectParam struct {
-	MatchName   string          `json:"match_name"`
-	Value       any             `json:"value,omitempty"`
-	TargetLayer string          `json:"target_layer,omitempty"`
-	Keyframes   []ValueKeyframe `json:"keyframes,omitempty"`
-	Expression  *ExpressionSpec `json:"expression,omitempty"`
+	MatchName         string                 `json:"match_name"`
+	Value             any                    `json:"value,omitempty"`
+	TargetLayer       string                 `json:"target_layer,omitempty"`
+	Keyframes         []ValueKeyframe        `json:"keyframes,omitempty"`
+	Expression        *ExpressionSpec        `json:"expression,omitempty"`
+	EssentialGraphics *EssentialGraphicsSpec `json:"essential_graphics,omitempty"`
+}
+
+type EssentialGraphicsSpec struct {
+	Name string `json:"name,omitempty"`
 }
 
 type Transform struct {
@@ -432,6 +437,7 @@ type ExpectedProfile struct {
 	PreserveNestedResolution   *bool                       `json:"preserve_nested_resolution,omitempty"`
 	MotionBlur                 *ExpectedMotionBlurSpec     `json:"motion_blur,omitempty"`
 	WorkArea                   *ExpectedWorkAreaSpec       `json:"work_area,omitempty"`
+	EssentialGraphics          []ExpectedEGController      `json:"essential_graphics,omitempty"`
 	Layers                     []ExpectedLayer             `json:"layers,omitempty"`
 	Effects                    []ExpectedEffect            `json:"effects,omitempty"`
 	Properties                 []ExpectedProperty          `json:"properties,omitempty"`
@@ -498,6 +504,11 @@ type ExpectedMotionBlurSpec struct {
 	ShutterPhase        *float64 `json:"shutter_phase,omitempty"`
 	AdaptiveSampleLimit *float64 `json:"adaptive_sample_limit,omitempty"`
 	SamplesPerFrame     *float64 `json:"samples_per_frame,omitempty"`
+}
+
+type ExpectedEGController struct {
+	Name string `json:"name"`
+	Type string `json:"type,omitempty"`
 }
 
 type ExpectedProperty struct {

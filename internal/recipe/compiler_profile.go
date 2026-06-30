@@ -33,6 +33,7 @@ func hasExpectedProfile(expected ExpectedProfile) bool {
 		expected.PreserveNestedResolution != nil ||
 		expected.MotionBlur != nil ||
 		expected.WorkArea != nil ||
+		len(expected.EssentialGraphics) > 0 ||
 		len(expected.Layers) > 0 ||
 		len(expected.Effects) > 0 ||
 		len(expected.Properties) > 0 ||
@@ -203,6 +204,19 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 	}
 	if expected.WorkArea != nil {
 		checkExpectedWorkArea(expected.WorkArea, prof, add)
+	}
+	for i, controller := range expected.EssentialGraphics {
+		controllerPath := fmt.Sprintf("expected_profile.essential_graphics[%d]", i)
+		var actualName any
+		var actualType any
+		if len(prof.Comps) > 0 && i < len(prof.Comps[0].EssentialGraphics) {
+			actualName = prof.Comps[0].EssentialGraphics[i].Name
+			actualType = prof.Comps[0].EssentialGraphics[i].Type
+		}
+		add(controllerPath+".name", controller.Name, actualName, actualName == controller.Name)
+		if controller.Type != "" {
+			add(controllerPath+".type", controller.Type, actualType, actualType == controller.Type)
+		}
 	}
 	for i, expectedLayer := range expected.Layers {
 		checkExpectedLayer(i, expectedLayer, prof, add)

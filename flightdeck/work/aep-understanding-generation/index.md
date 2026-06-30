@@ -191,6 +191,12 @@ Done:
   `properties[].layer_ref`, and `expected_profile.effects[].params[]` can
   assert the target layer name. `minimal-effect-layer-param.json` covers the
   Set Matte layer picker.
+- Recipe effect params now support first-slice Essential Graphics exposure
+  through `essential_graphics` and `AddEssentialProperty`. The supported recipe
+  shape is static `value` plus optional controller name; keyframes, expressions,
+  and layer-reference params remain outside this slice. `expected_profile`
+  can assert controller name/type through `essential_graphics[]`, covered by
+  `minimal-essential-graphics-controller.json`.
 - Recipe comp settings now support `draft_3d`. Profile composition output now
   exposes `draft_3d` from the cdta flag, and `expected_profile.draft_3d` can
   assert it. This remains a roundtrip/profile contract because AE 2025 DOM

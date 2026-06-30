@@ -554,6 +554,13 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].effects[].params[].target_layer` | `string` | - | Effect parameter target layer name. | For layer-reference effect parameters, must name a layer in the same comp. Cannot be combined with value, keyframes, or expression. | `effect.set_layer_param` (`SetEffectLayerParam`) | examples/recipes/minimal-effect-layer-param.json |
 | `comps[].layers[].effects[].params[].keyframes[]` | `array<recipe.ValueKeyframe>` | - | Effect parameter keyframe list. | When present, requires at least 2 keyframes sorted by non-negative time. Values must be all scalar numbers or all 2-, 3-, or 4-number arrays. | `effect.animate_param` (`AnimateEffectParam`)<br>`effect.animate_param_vec` (`AnimateEffectParamVec`) | examples/recipes/minimal-effect-param-vector-keyframes.json |
 | `comps[].layers[].effects[].params[].expression` | `object<ExpressionSpec>` | - | Effect parameter expression settings. | - | - | examples/recipes/minimal-effect-param-expression.json |
+| `comps[].layers[].effects[].params[].essential_graphics` | `object<EssentialGraphicsSpec>` | - | Effect parameter Essential Graphics exposure settings. | First slice requires a static value on the same parameter and cannot be combined with target_layer, keyframes, or expression. | `effect.add_essential_property` (`AddEssentialProperty`) | examples/recipes/minimal-essential-graphics-controller.json |
+
+## EssentialGraphicsSpec
+
+| Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
+| --- | --- | --- | --- | --- | --- | --- |
+| `comps[].layers[].effects[].params[].essential_graphics.name` | `string` | - | Essential Graphics controller display name. | Optional controller display name. Empty uses the effect parameter's own name. | `effect.add_essential_property` (`AddEssentialProperty`) | examples/recipes/minimal-essential-graphics-controller.json |
 
 ## ExpectedProfile
 
@@ -583,6 +590,7 @@ This reference is generated from the canonical recipe field model.
 | `expected_profile.preserve_nested_resolution` | `boolean` | - | Expected composition nested resolution preservation switch. | - | - | examples/recipes/minimal-comp-flag-profile.json |
 | `expected_profile.motion_blur` | `object<ExpectedMotionBlurSpec>` | - | Expected composition motion blur settings. | - | - | examples/recipes/minimal-comp-flag-profile.json |
 | `expected_profile.work_area` | `object<ExpectedWorkAreaSpec>` | - | Expected composition work area range. | - | - | examples/recipes/minimal-comp-object-profile.json |
+| `expected_profile.essential_graphics[]` | `array<recipe.ExpectedEGController>` | - | Expected Essential Graphics controller checks. | - | - | examples/recipes/minimal-essential-graphics-controller.json |
 | `expected_profile.layers[]` | `array<recipe.ExpectedLayer>` | - | Expected composition layer definitions. | - | - | examples/recipes/minimal-layer-object-profile.json |
 | `expected_profile.effects[]` | `array<recipe.ExpectedEffect>` | - | Expected effect checks. | - | - | examples/recipes/minimal-text-effect.json |
 | `expected_profile.properties[]` | `array<recipe.ExpectedProperty>` | - | Expected property checks. | - | - | examples/recipes/minimal-camera-aperture.json |
@@ -606,6 +614,13 @@ This reference is generated from the canonical recipe field model.
 | --- | --- | --- | --- | --- | --- | --- |
 | `expected_profile.work_area.start` | `number` | - | Expected composition work area start time in seconds. | - | - | examples/recipes/minimal-comp-object-profile.json |
 | `expected_profile.work_area.end` | `number` | - | Expected composition work area end time in seconds. | - | - | examples/recipes/minimal-comp-object-profile.json |
+
+## ExpectedEGController
+
+| Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
+| --- | --- | --- | --- | --- | --- | --- |
+| `expected_profile.essential_graphics[].name` | `string` | structural | Expected Essential Graphics controller display name. | Essential Graphics controller checks require the expected controller name. | - | examples/recipes/minimal-essential-graphics-controller.json |
+| `expected_profile.essential_graphics[].type` | `string` | - | Expected Essential Graphics controller type. | Expected controller type must be checkbox, slider, color, point, text, comment, multidimensional, group, dropdown, or unknown. | - | examples/recipes/minimal-essential-graphics-controller.json |
 
 ## ExpectedLayer
 

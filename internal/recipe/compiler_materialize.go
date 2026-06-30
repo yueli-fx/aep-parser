@@ -212,6 +212,11 @@ func materializeEffects(project *aep.Project, compSpec CompSpec) (*aep.Project, 
 						return nil, fmt.Errorf("recipe: layer %q effect %q param %q expression: %w", layerSpec.Name, effect.MatchName, param.MatchName, err)
 					}
 				}
+				if param.EssentialGraphics != nil {
+					if _, err := aep.AddEssentialProperty(layer, fx, param.MatchName, param.EssentialGraphics.Name); err != nil {
+						return nil, fmt.Errorf("recipe: layer %q effect %q param %q essential_graphics: %w", layerSpec.Name, effect.MatchName, param.MatchName, err)
+					}
+				}
 			}
 		}
 	}

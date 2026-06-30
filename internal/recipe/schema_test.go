@@ -3081,6 +3081,77 @@ func TestValidateReportsEffectParamVectorKeyframesCapability(t *testing.T) {
 	assertCapability(t, report, "AnimateEffectParamVec")
 }
 
+func TestValidateReportsEssentialGraphicsCapability(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "EG controller"},
+		"comps": [{
+			"name": "Main",
+			"width": 1920,
+			"height": 1080,
+			"frame_rate": 30,
+			"duration": 1,
+			"background_color": [0, 0, 0],
+			"layers": [{
+				"type": "text",
+				"name": "Title",
+				"text": "EG",
+				"transform": {"position": [960, 540]},
+				"effects": [{
+					"match_name": "ADBE Slider Control",
+					"params": [{
+						"match_name": "ADBE Slider Control-0001",
+						"value": 42,
+						"essential_graphics": {"name": "Amount"}
+					}]
+				}]
+			}]
+		}]
+	}`)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "AddEssentialProperty")
+}
+
+func TestValidateRejectsEssentialGraphicsWithoutStaticValue(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Effects = []recipe.Effect{{
+		MatchName: "ADBE Slider Control",
+		Params: []recipe.EffectParam{{
+			MatchName:         "ADBE Slider Control-0001",
+			EssentialGraphics: &recipe.EssentialGraphicsSpec{Name: "Amount"},
+		}},
+	}}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "missing_essential_graphics_param_value")
+}
+
+func TestValidateRejectsEssentialGraphicsWithKeyframes(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Effects = []recipe.Effect{{
+		MatchName: "ADBE Slider Control",
+		Params: []recipe.EffectParam{{
+			MatchName:         "ADBE Slider Control-0001",
+			Value:             42.0,
+			Keyframes:         []recipe.ValueKeyframe{{Time: 0, Value: 0}, {Time: 1, Value: 42}},
+			EssentialGraphics: &recipe.EssentialGraphicsSpec{Name: "Amount"},
+		}},
+	}}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_essential_graphics_param_combo")
+}
+
 func TestValidateRejectsMixedEffectParamKeyframeValues(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].Effects = []recipe.Effect{{

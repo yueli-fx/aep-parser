@@ -477,13 +477,15 @@ func addExpressionSummaries(out map[string]string, prefix, label string) {
 
 func addEffectSummaries(out map[string]string, prefix, label string) {
 	addSummaries(out, prefix, map[string]string{
-		"match_name":            label + " match name.",
-		"params[]":              label + " parameter assignments.",
-		"params[].match_name":   "Effect parameter match name.",
-		"params[].value":        "Effect parameter value.",
-		"params[].target_layer": "Effect parameter target layer name.",
-		"params[].keyframes[]":  "Effect parameter scalar or vector keyframes.",
-		"params[].expression":   "Effect parameter expression settings.",
+		"match_name":                       label + " match name.",
+		"params[]":                         label + " parameter assignments.",
+		"params[].match_name":              "Effect parameter match name.",
+		"params[].value":                   "Effect parameter value.",
+		"params[].target_layer":            "Effect parameter target layer name.",
+		"params[].keyframes[]":             "Effect parameter scalar or vector keyframes.",
+		"params[].expression":              "Effect parameter expression settings.",
+		"params[].essential_graphics":      "Effect parameter Essential Graphics exposure settings.",
+		"params[].essential_graphics.name": "Essential Graphics controller display name.",
 	})
 	addKeyframeSummaries(out, prefix+".params[].keyframes[]", "Effect parameter keyframe", "scalar/vector")
 	addExpressionSummaries(out, prefix+".params[].expression", "effect parameter expression")
@@ -491,15 +493,18 @@ func addEffectSummaries(out map[string]string, prefix, label string) {
 
 func addExpectedProfileSummaries(out map[string]string) {
 	addSummaries(out, "expected_profile", map[string]string{
-		"comp_count":        "Expected number of compositions.",
-		"layer_count":       "Expected total number of layers.",
-		"text_layer_count":  "Expected number of text layers.",
-		"shape_layer_count": "Expected number of shape layers.",
-		"effects[]":         "Expected effect checks.",
-		"properties[]":      "Expected property checks.",
-		"text_styles[]":     "Expected text style checks.",
-		"keyframes[]":       "Expected keyframes for a layer property.",
-		"masks[]":           "Expected mask checks.",
+		"comp_count":                "Expected number of compositions.",
+		"layer_count":               "Expected total number of layers.",
+		"text_layer_count":          "Expected number of text layers.",
+		"shape_layer_count":         "Expected number of shape layers.",
+		"effects[]":                 "Expected effect checks.",
+		"properties[]":              "Expected property checks.",
+		"essential_graphics[]":      "Expected Essential Graphics controller checks.",
+		"essential_graphics[].name": "Expected Essential Graphics controller display name.",
+		"essential_graphics[].type": "Expected Essential Graphics controller type.",
+		"text_styles[]":             "Expected text style checks.",
+		"keyframes[]":               "Expected keyframes for a layer property.",
+		"masks[]":                   "Expected mask checks.",
 	})
 	addCompSummaries(out, "expected_profile", "Expected composition")
 	addExpectedLayerSummaries(out, "expected_profile.layers[]")

@@ -4403,6 +4403,66 @@ func TestCompileToFileSetsEffectParamExpression(t *testing.T) {
 	}
 }
 
+func TestCompileToFileExposesEffectParamAsEssentialGraphicsController(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "EG controller"},
+		"comps": [{
+			"name": "Main",
+			"width": 1920,
+			"height": 1080,
+			"frame_rate": 30,
+			"duration": 1,
+			"background_color": [0, 0, 0],
+			"layers": [{
+				"type": "text",
+				"name": "Title",
+				"text": "EG",
+				"transform": {"position": [960, 540]},
+				"effects": [{
+					"match_name": "ADBE Slider Control",
+					"params": [{
+						"match_name": "ADBE Slider Control-0001",
+						"value": 42,
+						"essential_graphics": {"name": "Amount"}
+					}]
+				}]
+			}]
+		}],
+		"expected_profile": {
+			"essential_graphics": [{
+				"name": "Amount",
+				"type": "slider"
+			}]
+		}
+	}`)
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	controllers := project.Compositions[0].EssentialGraphicsControllers
+	if len(controllers) != 1 {
+		t.Fatalf("EssentialGraphicsControllers = %d, want 1", len(controllers))
+	}
+	if got := controllers[0].Name; got != "Amount" {
+		t.Fatalf("EG controller name = %q, want Amount", got)
+	}
+	if got := controllers[0].Type.String(); got != "slider" {
+		t.Fatalf("EG controller type = %q, want slider", got)
+	}
+	assertProfileCheck(t, report, "expected_profile.essential_graphics[0].name", true)
+	assertProfileCheck(t, report, "expected_profile.essential_graphics[0].type", true)
+}
+
 func TestCompileToFileChecksEffectParamKeyframesProfileExample(t *testing.T) {
 	raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "recipes", "minimal-effect-param-keyframes.json"))
 	if err != nil {

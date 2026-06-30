@@ -215,6 +215,8 @@ var capabilitiesByPath = map[string][]string{
 	"comps[].layers[].effects[].params[]":                         {"effect.set_param"},
 	"comps[].layers[].effects[].params[].target_layer":            {"effect.set_layer_param"},
 	"comps[].layers[].effects[].params[].keyframes[]":             {"effect.animate_param", "effect.animate_param_vec"},
+	"comps[].layers[].effects[].params[].essential_graphics":      {"effect.add_essential_property"},
+	"comps[].layers[].effects[].params[].essential_graphics.name": {"effect.add_essential_property"},
 	"comps[].layers[].effects[].params[].expression.source":       {"property.set_expression"},
 	"comps[].layers[].transform.expressions.position.source":      {"property.set_expression"},
 	"comps[].layers[].transform.expressions.anchor_point.source":  {"property.set_expression"},
@@ -500,6 +502,7 @@ var capabilityRegistry = map[string]CapabilityMeta{
 	"effect.set_layer_param":          {Query: "SetEffectLayerParam", Summary: "Point a layer-reference effect parameter at a target layer."},
 	"effect.animate_param":            {Query: "AnimateEffectParam", Summary: "Keyframe a scalar effect parameter."},
 	"effect.animate_param_vec":        {Query: "AnimateEffectParamVec", Summary: "Keyframe a vector effect parameter."},
+	"effect.add_essential_property":   {Query: "AddEssentialProperty", Summary: "Expose an effect parameter as an Essential Graphics controller."},
 	"property.set_expression":         {Query: "Property.SetExpression", Summary: "Set a property expression."},
 	"property.set_expression_enabled": {Query: "Property.SetExpressionEnabled", Summary: "Toggle property expression evaluation."},
 }

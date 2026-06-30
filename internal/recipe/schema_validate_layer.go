@@ -900,6 +900,15 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 			} else {
 				recordCapability("SetEffectParam", paramPath)
 			}
+			if param.EssentialGraphics != nil {
+				recordCapability("AddEssentialProperty", paramPath+".essential_graphics")
+				if param.Value == nil {
+					addRefusal("missing_essential_graphics_param_value", paramPath+".value", "essential_graphics params require a static value in this recipe slice")
+				}
+				if param.TargetLayer != "" || len(param.Keyframes) > 0 || param.Expression != nil {
+					addRefusal("invalid_essential_graphics_param_combo", paramPath+".essential_graphics", "essential_graphics params currently require a static value without target_layer, keyframes, or expression")
+				}
+			}
 			if param.Expression != nil {
 				recordCapability("Property.SetExpression", paramPath+".expression.source")
 				if param.Expression.Source == "" {

@@ -257,6 +257,19 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 			}
 		}
 	}
+	for i, controller := range expected.EssentialGraphics {
+		controllerPath := fmt.Sprintf("expected_profile.essential_graphics[%d]", i)
+		if controller.Name == "" {
+			addRefusal("invalid_expected_profile", controllerPath+".name", "controller name is required")
+		}
+		if controller.Type != "" {
+			switch controller.Type {
+			case "checkbox", "slider", "color", "point", "text", "comment", "multidimensional", "group", "dropdown", "unknown":
+			default:
+				addRefusal("invalid_expected_profile", controllerPath+".type", "controller type must be checkbox, slider, color, point, text, comment, multidimensional, group, dropdown, or unknown")
+			}
+		}
+	}
 	for i, prop := range expected.Properties {
 		propPath := fmt.Sprintf("expected_profile.properties[%d]", i)
 		if prop.LayerName == "" {

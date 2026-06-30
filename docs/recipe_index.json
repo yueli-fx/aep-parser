@@ -351,6 +351,8 @@
     "comps[].layers[].effects[].params[].expression",
     "comps[].layers[].effects[].params[].expression.source",
     "comps[].layers[].effects[].params[].expression.enabled",
+    "comps[].layers[].effects[].params[].essential_graphics",
+    "comps[].layers[].effects[].params[].essential_graphics.name",
     "expected_profile",
     "expected_profile.comp_count",
     "expected_profile.layer_count",
@@ -383,6 +385,9 @@
     "expected_profile.work_area",
     "expected_profile.work_area.start",
     "expected_profile.work_area.end",
+    "expected_profile.essential_graphics[]",
+    "expected_profile.essential_graphics[].name",
+    "expected_profile.essential_graphics[].type",
     "expected_profile.layers[]",
     "expected_profile.layers[].name",
     "expected_profile.layers[].type",
@@ -916,6 +921,34 @@
         "effect.set_param"
       ],
       "example": "examples/recipes/minimal-adjustment-layer.json"
+    },
+    "comps[].layers[].effects[].params[].essential_graphics": {
+      "path": "comps[].layers[].effects[].params[].essential_graphics",
+      "json_name": "essential_graphics",
+      "source_type": "EffectParam",
+      "source_field": "EssentialGraphics",
+      "type": "object\u003cEssentialGraphicsSpec\u003e",
+      "go_type": "*recipe.EssentialGraphicsSpec",
+      "summary": "Effect parameter Essential Graphics exposure settings.",
+      "validation": "First slice requires a static value on the same parameter and cannot be combined with target_layer, keyframes, or expression.",
+      "capability_keys": [
+        "effect.add_essential_property"
+      ],
+      "example": "examples/recipes/minimal-essential-graphics-controller.json"
+    },
+    "comps[].layers[].effects[].params[].essential_graphics.name": {
+      "path": "comps[].layers[].effects[].params[].essential_graphics.name",
+      "json_name": "name",
+      "source_type": "EssentialGraphicsSpec",
+      "source_field": "Name",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Essential Graphics controller display name.",
+      "validation": "Optional controller display name. Empty uses the effect parameter's own name.",
+      "capability_keys": [
+        "effect.add_essential_property"
+      ],
+      "example": "examples/recipes/minimal-essential-graphics-controller.json"
     },
     "comps[].layers[].effects[].params[].expression": {
       "path": "comps[].layers[].effects[].params[].expression",
@@ -4995,6 +5028,53 @@
       "validation": "Expected parameter value must be a number, boolean, or numeric array.",
       "example": "examples/recipes/minimal-adjustment-layer.json"
     },
+    "expected_profile.essential_graphics[]": {
+      "path": "expected_profile.essential_graphics[]",
+      "json_name": "essential_graphics",
+      "source_type": "ExpectedProfile",
+      "source_field": "EssentialGraphics",
+      "type": "array\u003crecipe.ExpectedEGController\u003e",
+      "go_type": "[]recipe.ExpectedEGController",
+      "summary": "Expected Essential Graphics controller checks.",
+      "example": "examples/recipes/minimal-essential-graphics-controller.json"
+    },
+    "expected_profile.essential_graphics[].name": {
+      "path": "expected_profile.essential_graphics[].name",
+      "json_name": "name",
+      "source_type": "ExpectedEGController",
+      "source_field": "Name",
+      "type": "string",
+      "go_type": "string",
+      "requiredness": [
+        "structural"
+      ],
+      "summary": "Expected Essential Graphics controller display name.",
+      "validation": "Essential Graphics controller checks require the expected controller name.",
+      "example": "examples/recipes/minimal-essential-graphics-controller.json"
+    },
+    "expected_profile.essential_graphics[].type": {
+      "path": "expected_profile.essential_graphics[].type",
+      "json_name": "type",
+      "source_type": "ExpectedEGController",
+      "source_field": "Type",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Expected Essential Graphics controller type.",
+      "validation": "Expected controller type must be checkbox, slider, color, point, text, comment, multidimensional, group, dropdown, or unknown.",
+      "enum": [
+        "checkbox",
+        "slider",
+        "color",
+        "point",
+        "text",
+        "comment",
+        "multidimensional",
+        "group",
+        "dropdown",
+        "unknown"
+      ],
+      "example": "examples/recipes/minimal-essential-graphics-controller.json"
+    },
     "expected_profile.frame_blending": {
       "path": "expected_profile.frame_blending",
       "json_name": "frame_blending",
@@ -6281,7 +6361,15 @@
       "comps[].layers[].effects[].params[].value",
       "comps[].layers[].effects[].params[].target_layer",
       "comps[].layers[].effects[].params[].keyframes[]",
-      "comps[].layers[].effects[].params[].expression"
+      "comps[].layers[].effects[].params[].expression",
+      "comps[].layers[].effects[].params[].essential_graphics"
+    ],
+    "EssentialGraphicsSpec": [
+      "comps[].layers[].effects[].params[].essential_graphics.name"
+    ],
+    "ExpectedEGController": [
+      "expected_profile.essential_graphics[].name",
+      "expected_profile.essential_graphics[].type"
     ],
     "ExpectedEffect": [
       "expected_profile.effects[].layer_name",
@@ -6400,6 +6488,7 @@
       "expected_profile.preserve_nested_resolution",
       "expected_profile.motion_blur",
       "expected_profile.work_area",
+      "expected_profile.essential_graphics[]",
       "expected_profile.layers[]",
       "expected_profile.effects[]",
       "expected_profile.properties[]",

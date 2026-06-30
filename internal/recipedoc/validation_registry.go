@@ -64,6 +64,12 @@ var fieldValidation = map[string]FieldMeta{
 	"comps[].layers[].effects[].params[].keyframes[]": {
 		Validation: "When present, requires at least 2 keyframes sorted by non-negative time. Values must be all scalar numbers or all 2-, 3-, or 4-number arrays.",
 	},
+	"comps[].layers[].effects[].params[].essential_graphics": {
+		Validation: "First slice requires a static value on the same parameter and cannot be combined with target_layer, keyframes, or expression.",
+	},
+	"comps[].layers[].effects[].params[].essential_graphics.name": {
+		Validation: "Optional controller display name. Empty uses the effect parameter's own name.",
+	},
 	"comps[].layers[].effects[].params[].expression.source": {
 		Validation: "Expression source is applied only when non-empty.",
 	},
@@ -144,6 +150,13 @@ var fieldValidation = map[string]FieldMeta{
 	},
 	"expected_profile.effects[].params[].target_layer": {
 		Validation: "Expected target layer checks compare against the profiled effect parameter layer reference name.",
+	},
+	"expected_profile.essential_graphics[].name": {
+		Validation: "Essential Graphics controller checks require the expected controller name.",
+	},
+	"expected_profile.essential_graphics[].type": {
+		Validation: "Expected controller type must be checkbox, slider, color, point, text, comment, multidimensional, group, dropdown, or unknown.",
+		Enum:       []string{"checkbox", "slider", "color", "point", "text", "comment", "multidimensional", "group", "dropdown", "unknown"},
 	},
 	"expected_profile.properties[].layer_name": {
 		Validation: "Property profile checks require a target layer name.",

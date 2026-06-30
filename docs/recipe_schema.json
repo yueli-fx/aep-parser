@@ -7620,6 +7620,61 @@
       "x-aep-example": "examples/recipes/minimal-effect-param-expression.json"
     },
     {
+      "x-aep-path": "comps[].layers[].effects[].params[].essential_graphics",
+      "json_name": "essential_graphics",
+      "source_type": "EffectParam",
+      "source_field": "EssentialGraphics",
+      "type": "object",
+      "go_type": "*recipe.EssentialGraphicsSpec",
+      "object_type": "EssentialGraphicsSpec",
+      "description": "Effect parameter Essential Graphics exposure settings.",
+      "x-aep-validation": "First slice requires a static value on the same parameter and cannot be combined with target_layer, keyframes, or expression.",
+      "x-aep-capabilities": [
+        {
+          "key": "effect.add_essential_property",
+          "query": "AddEssentialProperty",
+          "status": "supported",
+          "symbol": "AddEssentialProperty",
+          "domain": "eg",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "scalar/slider/checkbox/color controls supported; point/dropdown/text/Transform deferred; a freshly-built layer not yet reopened is refused",
+          "gate": [
+            "TestEGAdd_AEShipGate_AE2020",
+            "TestEGAdd_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-essential-graphics-controller.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].effects[].params[].essential_graphics.name",
+      "json_name": "name",
+      "source_type": "EssentialGraphicsSpec",
+      "source_field": "Name",
+      "type": "string",
+      "go_type": "string",
+      "description": "Essential Graphics controller display name.",
+      "x-aep-validation": "Optional controller display name. Empty uses the effect parameter's own name.",
+      "x-aep-capabilities": [
+        {
+          "key": "effect.add_essential_property",
+          "query": "AddEssentialProperty",
+          "status": "supported",
+          "symbol": "AddEssentialProperty",
+          "domain": "eg",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "scalar/slider/checkbox/color controls supported; point/dropdown/text/Transform deferred; a freshly-built layer not yet reopened is refused",
+          "gate": [
+            "TestEGAdd_AEShipGate_AE2020",
+            "TestEGAdd_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-essential-graphics-controller.json"
+    },
+    {
       "x-aep-path": "expected_profile",
       "json_name": "expected_profile",
       "source_type": "Recipe",
@@ -7956,6 +8011,53 @@
       "go_type": "*float64",
       "description": "Expected composition work area end time in seconds.",
       "x-aep-example": "examples/recipes/minimal-comp-object-profile.json"
+    },
+    {
+      "x-aep-path": "expected_profile.essential_graphics[]",
+      "json_name": "essential_graphics",
+      "source_type": "ExpectedProfile",
+      "source_field": "EssentialGraphics",
+      "type": "array",
+      "go_type": "[]recipe.ExpectedEGController",
+      "element": "recipe.ExpectedEGController",
+      "object_type": "ExpectedEGController",
+      "description": "Expected Essential Graphics controller checks.",
+      "x-aep-example": "examples/recipes/minimal-essential-graphics-controller.json"
+    },
+    {
+      "x-aep-path": "expected_profile.essential_graphics[].name",
+      "json_name": "name",
+      "source_type": "ExpectedEGController",
+      "source_field": "Name",
+      "type": "string",
+      "go_type": "string",
+      "x-aep-structural-required": true,
+      "description": "Expected Essential Graphics controller display name.",
+      "x-aep-validation": "Essential Graphics controller checks require the expected controller name.",
+      "x-aep-example": "examples/recipes/minimal-essential-graphics-controller.json"
+    },
+    {
+      "x-aep-path": "expected_profile.essential_graphics[].type",
+      "json_name": "type",
+      "source_type": "ExpectedEGController",
+      "source_field": "Type",
+      "type": "string",
+      "go_type": "string",
+      "description": "Expected Essential Graphics controller type.",
+      "x-aep-validation": "Expected controller type must be checkbox, slider, color, point, text, comment, multidimensional, group, dropdown, or unknown.",
+      "enum": [
+        "checkbox",
+        "slider",
+        "color",
+        "point",
+        "text",
+        "comment",
+        "multidimensional",
+        "group",
+        "dropdown",
+        "unknown"
+      ],
+      "x-aep-example": "examples/recipes/minimal-essential-graphics-controller.json"
     },
     {
       "x-aep-path": "expected_profile.layers[]",
