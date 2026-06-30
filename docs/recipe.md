@@ -132,7 +132,7 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].text_animators[].range_end` | `number` | - | Text animator range selector end percentage. | Range selector end is required. | - | examples/recipes/minimal-text-animator-character-offset-value-keyframes.json |
 | `comps[].layers[].text_animators[].range_offset` | `number` | - | Text animator range selector offset percentage. | Range selector offset is required. | - | examples/recipes/minimal-text-animator-character-offset-value-keyframes.json |
 | `comps[].layers[].text_animators[].range_offset_keyframes[]` | `array<recipe.ScalarKeyframe>` | - | Range selector offset keyframes. | When present, requires at least 2 keyframes sorted by non-negative time. | `text_animator.animate_range_offset` (`AnimateTextRangeOffset`) | examples/recipes/minimal-text-animator-range-offset.json |
-| `comps[].layers[].text_animators[].value_keyframes[]` | `array<recipe.ScalarKeyframe>` | - | Text animator value keyframes. | When present, requires at least 2 keyframes sorted by non-negative time. Currently supported for opacity, rotation, tracking, and character_offset text animators. | `text_animator.animate_opacity` (`AnimateTextOpacity`)<br>`text_animator.animate_rotation` (`AnimateTextRotation`)<br>`text_animator.animate_tracking` (`AnimateTextTracking`)<br>`text_animator.animate_character_offset` (`AnimateTextCharacterOffset`) | examples/recipes/minimal-text-animator-character-offset-value-keyframes.json |
+| `comps[].layers[].text_animators[].value_keyframes[]` | `array<recipe.ValueKeyframe>` | - | Text animator value keyframes. | When present, requires at least 2 keyframes sorted by non-negative time. Value is a number for opacity, rotation, tracking, and character_offset; a 3-number array for position and scale; a 3- or 4-number color array for color. | `text_animator.animate_opacity` (`AnimateTextOpacity`)<br>`text_animator.animate_position` (`AnimateTextPosition`)<br>`text_animator.animate_scale` (`AnimateTextScale`)<br>`text_animator.animate_rotation` (`AnimateTextRotation`)<br>`text_animator.animate_color` (`AnimateTextColor`)<br>`text_animator.animate_tracking` (`AnimateTextTracking`)<br>`text_animator.animate_character_offset` (`AnimateTextCharacterOffset`) | examples/recipes/minimal-text-animator-character-offset-value-keyframes.json |
 
 ## ScalarKeyframe
 
@@ -142,10 +142,6 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].text_animators[].range_offset_keyframes[].value` | `number` | structural | Range selector offset keyframe value. | - | - | examples/recipes/minimal-text-animator-range-offset.json |
 | `comps[].layers[].text_animators[].range_offset_keyframes[].in_ease` | `object<TemporalEase>` | - | Incoming temporal ease for the keyframe. | - | - | - |
 | `comps[].layers[].text_animators[].range_offset_keyframes[].out_ease` | `object<TemporalEase>` | - | Outgoing temporal ease for the keyframe. | - | - | - |
-| `comps[].layers[].text_animators[].value_keyframes[].time` | `number` | structural | Text animator value keyframe time in seconds. | - | - | examples/recipes/minimal-text-animator-character-offset-value-keyframes.json |
-| `comps[].layers[].text_animators[].value_keyframes[].value` | `number` | structural | Text animator value keyframe value. | - | - | examples/recipes/minimal-text-animator-character-offset-value-keyframes.json |
-| `comps[].layers[].text_animators[].value_keyframes[].in_ease` | `object<TemporalEase>` | - | Incoming temporal ease for the keyframe. | - | - | - |
-| `comps[].layers[].text_animators[].value_keyframes[].out_ease` | `object<TemporalEase>` | - | Outgoing temporal ease for the keyframe. | - | - | - |
 | `comps[].layers[].transform.rotation_keyframes[].time` | `number` | structural | Rotation keyframe time in seconds. | - | - | examples/recipes/minimal-text-shape.json |
 | `comps[].layers[].transform.rotation_keyframes[].value` | `number` | structural | Rotation keyframe value. | - | - | examples/recipes/minimal-text-shape.json |
 | `comps[].layers[].transform.rotation_keyframes[].in_ease` | `object<TemporalEase>` | - | Rotation keyframe incoming temporal ease. | - | - | - |
@@ -187,6 +183,15 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].transform.opacity_keyframes[].in_ease.influence` | `number` | structural | Opacity keyframe incoming ease influence. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].transform.opacity_keyframes[].out_ease.speed` | `number` | - | Opacity keyframe outgoing ease speed. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].transform.opacity_keyframes[].out_ease.influence` | `number` | structural | Opacity keyframe outgoing ease influence. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
+
+## ValueKeyframe
+
+| Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
+| --- | --- | --- | --- | --- | --- | --- |
+| `comps[].layers[].text_animators[].value_keyframes[].time` | `number` | structural | Text animator value keyframe time in seconds. | - | - | examples/recipes/minimal-text-animator-character-offset-value-keyframes.json |
+| `comps[].layers[].text_animators[].value_keyframes[].value` | `any` | structural | Text animator value keyframe value. | - | - | examples/recipes/minimal-text-animator-character-offset-value-keyframes.json |
+| `comps[].layers[].text_animators[].value_keyframes[].in_ease` | `object<TemporalEase>` | - | Incoming temporal ease for the keyframe. | - | - | - |
+| `comps[].layers[].text_animators[].value_keyframes[].out_ease` | `object<TemporalEase>` | - | Outgoing temporal ease for the keyframe. | - | - | - |
 
 ## CameraSpec
 

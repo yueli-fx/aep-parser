@@ -2570,7 +2570,7 @@ func TestValidateReportsTextAnimatorOpacityValueKeyframesCapability(t *testing.T
 				RangeStart:  ptr(0),
 				RangeEnd:    ptr(100),
 				RangeOffset: ptr(0),
-				ValueKeyframes: []recipe.ScalarKeyframe{
+				ValueKeyframes: []recipe.ValueKeyframe{
 					{Time: 0, Value: 100},
 					{Time: 2, Value: 0},
 				},
@@ -2609,9 +2609,51 @@ func TestValidateReportsTextAnimatorScalarValueKeyframesCapabilities(t *testing.
 						RangeStart:  ptr(0),
 						RangeEnd:    ptr(100),
 						RangeOffset: ptr(0),
-						ValueKeyframes: []recipe.ScalarKeyframe{
+						ValueKeyframes: []recipe.ValueKeyframe{
 							{Time: 0, Value: 0},
 							{Time: 2, Value: 100},
+						},
+					},
+				},
+			}
+
+			report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+			if !report.Valid {
+				t.Fatalf("Valid = false, refusals = %+v", report.Refusals)
+			}
+			assertCapability(t, report, tc.capability)
+		})
+	}
+}
+
+func TestValidateReportsTextAnimatorVectorValueKeyframesCapabilities(t *testing.T) {
+	cases := []struct {
+		property   string
+		value      []float64
+		capability string
+	}{
+		{"position", []float64{0, -80, 0}, "AnimateTextPosition"},
+		{"scale", []float64{100, 100, 100}, "AnimateTextScale"},
+		{"color", []float64{255, 0, 0, 255}, "AnimateTextColor"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.property, func(t *testing.T) {
+			rec := minimalRecipe()
+			rec.Comps[0].Layers[0] = recipe.Layer{
+				Type: "text",
+				Name: "Title",
+				Text: "HELLO",
+				TextAnimators: []recipe.TextAnimatorSpec{
+					{
+						Property:    tc.property,
+						Value:       tc.value,
+						RangeStart:  ptr(0),
+						RangeEnd:    ptr(100),
+						RangeOffset: ptr(0),
+						ValueKeyframes: []recipe.ValueKeyframe{
+							{Time: 0, Value: tc.value},
+							{Time: 2, Value: tc.value},
 						},
 					},
 				},

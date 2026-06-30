@@ -525,6 +525,9 @@ Done:
   tracking, and character offset. The dedicated `*-value-keyframes.json`
   examples assert `ADBE Text Rotation`, `ADBE Text Tracking Amount`, and
   `ADBE Text Character Offset` keyframes through `expected_profile.keyframes[]`.
+- Text animator vector value-keyframe recipe support is implemented for
+  position, scale, and fill color. `value_keyframes[].value` now accepts a
+  number or numeric array according to the selected text animator property.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven

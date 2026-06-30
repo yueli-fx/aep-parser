@@ -2250,11 +2250,11 @@
       "source_type": "TextAnimatorSpec",
       "source_field": "ValueKeyframes",
       "type": "array",
-      "go_type": "[]recipe.ScalarKeyframe",
-      "element": "recipe.ScalarKeyframe",
-      "object_type": "ScalarKeyframe",
+      "go_type": "[]recipe.ValueKeyframe",
+      "element": "recipe.ValueKeyframe",
+      "object_type": "ValueKeyframe",
       "description": "Text animator value keyframes.",
-      "x-aep-validation": "When present, requires at least 2 keyframes sorted by non-negative time. Currently supported for opacity, rotation, tracking, and character_offset text animators.",
+      "x-aep-validation": "When present, requires at least 2 keyframes sorted by non-negative time. Value is a number for opacity, rotation, tracking, and character_offset; a 3-number array for position and scale; a 3- or 4-number color array for color.",
       "x-aep-capabilities": [
         {
           "key": "text_animator.animate_opacity",
@@ -2265,6 +2265,34 @@
           "verify": "roundtrip",
           "minver": "2020",
           "boundary": "the shared 1D scalar leaf path is render-gated via AnimateTextRangeOffset / AnimateTextRotation; this function itself is round-trip-verified only"
+        },
+        {
+          "key": "text_animator.animate_position",
+          "query": "AnimateTextPosition",
+          "status": "supported",
+          "symbol": "AnimateTextPosition",
+          "domain": "text",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "boundary": "requires AddTextPositionAnimator first; refuses an already-animated leaf; needs \u003e= 2 keyframes",
+          "gate": [
+            "TestTextColorLeafAnimator_AEShipGate_AE2020",
+            "TestTextColorLeafAnimator_AEShipGate_AE2025"
+          ]
+        },
+        {
+          "key": "text_animator.animate_scale",
+          "query": "AnimateTextScale",
+          "status": "supported",
+          "symbol": "AnimateTextScale",
+          "domain": "text",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "boundary": "requires AddTextScaleAnimator first; refuses an already-animated leaf; needs \u003e= 2 keyframes",
+          "gate": [
+            "TestTextColorLeafAnimator_AEShipGate_AE2020",
+            "TestTextColorLeafAnimator_AEShipGate_AE2025"
+          ]
         },
         {
           "key": "text_animator.animate_rotation",
@@ -2278,6 +2306,20 @@
           "gate": [
             "TestTextRotLeafAnimator_AEShipGate_AE2020",
             "TestTextRotLeafAnimator_AEShipGate_AE2025"
+          ]
+        },
+        {
+          "key": "text_animator.animate_color",
+          "query": "AnimateTextColor",
+          "status": "supported",
+          "symbol": "AnimateTextColor",
+          "domain": "text",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "boundary": "requires AddTextColorAnimator first; refuses an already-animated leaf; needs \u003e= 2 keyframes; values must be 4-channel",
+          "gate": [
+            "TestTextColorLeafAnimator_AEShipGate_AE2020",
+            "TestTextColorLeafAnimator_AEShipGate_AE2025"
           ]
         },
         {
@@ -2306,7 +2348,7 @@
     {
       "x-aep-path": "comps[].layers[].text_animators[].value_keyframes[].time",
       "json_name": "time",
-      "source_type": "ScalarKeyframe",
+      "source_type": "ValueKeyframe",
       "source_field": "Time",
       "type": "number",
       "go_type": "float64",
@@ -2317,10 +2359,10 @@
     {
       "x-aep-path": "comps[].layers[].text_animators[].value_keyframes[].value",
       "json_name": "value",
-      "source_type": "ScalarKeyframe",
+      "source_type": "ValueKeyframe",
       "source_field": "Value",
-      "type": "number",
-      "go_type": "float64",
+      "type": "object",
+      "go_type": "interface {}",
       "x-aep-structural-required": true,
       "description": "Text animator value keyframe value.",
       "x-aep-example": "examples/recipes/minimal-text-animator-character-offset-value-keyframes.json"
@@ -2328,7 +2370,7 @@
     {
       "x-aep-path": "comps[].layers[].text_animators[].value_keyframes[].in_ease",
       "json_name": "in_ease",
-      "source_type": "ScalarKeyframe",
+      "source_type": "ValueKeyframe",
       "source_field": "InEase",
       "type": "object",
       "go_type": "*recipe.TemporalEase",
@@ -2357,7 +2399,7 @@
     {
       "x-aep-path": "comps[].layers[].text_animators[].value_keyframes[].out_ease",
       "json_name": "out_ease",
-      "source_type": "ScalarKeyframe",
+      "source_type": "ValueKeyframe",
       "source_field": "OutEase",
       "type": "object",
       "go_type": "*recipe.TemporalEase",

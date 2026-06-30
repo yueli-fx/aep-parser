@@ -331,16 +331,29 @@ func validateTextAnimator(animator TextAnimatorSpec, path string, recordCapabili
 		switch animator.Property {
 		case "opacity":
 			recordCapability("AnimateTextOpacity", path+".value_keyframes")
+			validateValueKeyframes(animator.ValueKeyframes, path+".value_keyframes", "scalar", 0, addRefusal)
+		case "position":
+			recordCapability("AnimateTextPosition", path+".value_keyframes")
+			validateValueKeyframes(animator.ValueKeyframes, path+".value_keyframes", "vector", 3, addRefusal)
+		case "scale":
+			recordCapability("AnimateTextScale", path+".value_keyframes")
+			validateValueKeyframes(animator.ValueKeyframes, path+".value_keyframes", "vector", 3, addRefusal)
 		case "rotation":
 			recordCapability("AnimateTextRotation", path+".value_keyframes")
+			validateValueKeyframes(animator.ValueKeyframes, path+".value_keyframes", "scalar", 0, addRefusal)
+		case "color":
+			recordCapability("AnimateTextColor", path+".value_keyframes")
+			validateValueKeyframes(animator.ValueKeyframes, path+".value_keyframes", "color", 0, addRefusal)
 		case "tracking":
 			recordCapability("AnimateTextTracking", path+".value_keyframes")
+			validateValueKeyframes(animator.ValueKeyframes, path+".value_keyframes", "scalar", 0, addRefusal)
 		case "character_offset":
 			recordCapability("AnimateTextCharacterOffset", path+".value_keyframes")
+			validateValueKeyframes(animator.ValueKeyframes, path+".value_keyframes", "scalar", 0, addRefusal)
 		default:
-			addRefusal("unsupported_text_animator_value_keyframes", path+".value_keyframes", "value_keyframes currently support opacity, rotation, tracking, and character_offset text animators")
+			addRefusal("unsupported_text_animator_value_keyframes", path+".value_keyframes", "value_keyframes currently support opacity, position, scale, rotation, color, tracking, and character_offset text animators")
+			validateValueKeyframes(animator.ValueKeyframes, path+".value_keyframes", "any", 0, addRefusal)
 		}
-		validateScalarKeyframes(animator.ValueKeyframes, path+".value_keyframes", "value_keyframes", addRefusal)
 	}
 }
 
@@ -358,6 +371,58 @@ func validateScalarKeyframes(keyframes []ScalarKeyframe, path, label string, add
 		}
 		validateKeyframeEase(kf.InEase, kfPath+".in_ease", addRefusal)
 		validateKeyframeEase(kf.OutEase, kfPath+".out_ease", addRefusal)
+	}
+}
+
+func validateValueKeyframes(keyframes []ValueKeyframe, path, kind string, vectorSize int, addRefusal func(string, string, string)) {
+	if len(keyframes) < 2 {
+		addRefusal("invalid_text_animator_keyframes", path, "value_keyframes must include at least 2 keyframes")
+	}
+	for i, kf := range keyframes {
+		kfPath := fmt.Sprintf("%s[%d]", path, i)
+		if kf.Time < 0 {
+			addRefusal("keyframe_time_out_of_range", kfPath+".time", "keyframe time must be non-negative")
+		}
+		if i > 0 && kf.Time < keyframes[i-1].Time {
+			addRefusal("keyframes_not_sorted", kfPath+".time", "keyframes must be sorted by time")
+		}
+		switch kind {
+		case "scalar":
+			if _, ok := numericValue(kf.Value); !ok {
+				addRefusal("invalid_text_animator_keyframe_value", kfPath+".value", "value_keyframes value must be a number for this text animator property")
+			}
+		case "vector":
+			values, ok := numericSliceValue(kf.Value)
+			if !ok || len(values) != vectorSize {
+				addRefusal("invalid_text_animator_keyframe_value", kfPath+".value", fmt.Sprintf("value_keyframes value must be a %d-number array for this text animator property", vectorSize))
+			}
+		case "color":
+			values, ok := numericSliceValue(kf.Value)
+			if !ok || (len(values) != 3 && len(values) != 4) {
+				addRefusal("invalid_text_animator_keyframe_value", kfPath+".value", "value_keyframes value must be a 3- or 4-number color array for this text animator property")
+			}
+		}
+		validateKeyframeEase(kf.InEase, kfPath+".in_ease", addRefusal)
+		validateKeyframeEase(kf.OutEase, kfPath+".out_ease", addRefusal)
+	}
+}
+
+func numericValue(value any) (float64, bool) {
+	switch v := value.(type) {
+	case float64:
+		return v, true
+	case float32:
+		return float64(v), true
+	case int:
+		return float64(v), true
+	case int64:
+		return float64(v), true
+	case uint:
+		return float64(v), true
+	case uint64:
+		return float64(v), true
+	default:
+		return 0, false
 	}
 }
 

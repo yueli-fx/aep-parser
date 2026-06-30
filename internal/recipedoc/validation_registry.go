@@ -41,7 +41,7 @@ var fieldValidation = map[string]FieldMeta{
 		Validation: "When present, requires at least 2 keyframes sorted by non-negative time.",
 	},
 	"comps[].layers[].text_animators[].value_keyframes[]": {
-		Validation: "When present, requires at least 2 keyframes sorted by non-negative time. Currently supported for opacity, rotation, tracking, and character_offset text animators.",
+		Validation: "When present, requires at least 2 keyframes sorted by non-negative time. Value is a number for opacity, rotation, tracking, and character_offset; a 3-number array for position and scale; a 3- or 4-number color array for color.",
 	},
 	"comps[].layers[].matte": {
 		Validation: "Requires project.target_version AE2025, a non-none track_matte mode, and a same-comp source layer name.",

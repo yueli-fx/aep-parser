@@ -3417,13 +3417,16 @@
       "json_name": "value_keyframes",
       "source_type": "TextAnimatorSpec",
       "source_field": "ValueKeyframes",
-      "type": "array\u003crecipe.ScalarKeyframe\u003e",
-      "go_type": "[]recipe.ScalarKeyframe",
+      "type": "array\u003crecipe.ValueKeyframe\u003e",
+      "go_type": "[]recipe.ValueKeyframe",
       "summary": "Text animator value keyframes.",
-      "validation": "When present, requires at least 2 keyframes sorted by non-negative time. Currently supported for opacity, rotation, tracking, and character_offset text animators.",
+      "validation": "When present, requires at least 2 keyframes sorted by non-negative time. Value is a number for opacity, rotation, tracking, and character_offset; a 3-number array for position and scale; a 3- or 4-number color array for color.",
       "capability_keys": [
         "text_animator.animate_opacity",
+        "text_animator.animate_position",
+        "text_animator.animate_scale",
         "text_animator.animate_rotation",
+        "text_animator.animate_color",
         "text_animator.animate_tracking",
         "text_animator.animate_character_offset"
       ],
@@ -3432,7 +3435,7 @@
     "comps[].layers[].text_animators[].value_keyframes[].in_ease": {
       "path": "comps[].layers[].text_animators[].value_keyframes[].in_ease",
       "json_name": "in_ease",
-      "source_type": "ScalarKeyframe",
+      "source_type": "ValueKeyframe",
       "source_field": "InEase",
       "type": "object\u003cTemporalEase\u003e",
       "go_type": "*recipe.TemporalEase",
@@ -3462,7 +3465,7 @@
     "comps[].layers[].text_animators[].value_keyframes[].out_ease": {
       "path": "comps[].layers[].text_animators[].value_keyframes[].out_ease",
       "json_name": "out_ease",
-      "source_type": "ScalarKeyframe",
+      "source_type": "ValueKeyframe",
       "source_field": "OutEase",
       "type": "object\u003cTemporalEase\u003e",
       "go_type": "*recipe.TemporalEase",
@@ -3492,7 +3495,7 @@
     "comps[].layers[].text_animators[].value_keyframes[].time": {
       "path": "comps[].layers[].text_animators[].value_keyframes[].time",
       "json_name": "time",
-      "source_type": "ScalarKeyframe",
+      "source_type": "ValueKeyframe",
       "source_field": "Time",
       "type": "number",
       "go_type": "float64",
@@ -3505,10 +3508,10 @@
     "comps[].layers[].text_animators[].value_keyframes[].value": {
       "path": "comps[].layers[].text_animators[].value_keyframes[].value",
       "json_name": "value",
-      "source_type": "ScalarKeyframe",
+      "source_type": "ValueKeyframe",
       "source_field": "Value",
-      "type": "number",
-      "go_type": "float64",
+      "type": "any",
+      "go_type": "interface {}",
       "requiredness": [
         "structural"
       ],
@@ -6428,10 +6431,6 @@
       "comps[].layers[].text_animators[].range_offset_keyframes[].value",
       "comps[].layers[].text_animators[].range_offset_keyframes[].in_ease",
       "comps[].layers[].text_animators[].range_offset_keyframes[].out_ease",
-      "comps[].layers[].text_animators[].value_keyframes[].time",
-      "comps[].layers[].text_animators[].value_keyframes[].value",
-      "comps[].layers[].text_animators[].value_keyframes[].in_ease",
-      "comps[].layers[].text_animators[].value_keyframes[].out_ease",
       "comps[].layers[].transform.rotation_keyframes[].time",
       "comps[].layers[].transform.rotation_keyframes[].value",
       "comps[].layers[].transform.rotation_keyframes[].in_ease",
@@ -6580,6 +6579,12 @@
     "TwistSpec": [
       "comps[].layers[].shape.twist.angle",
       "comps[].layers[].shape.twist.center"
+    ],
+    "ValueKeyframe": [
+      "comps[].layers[].text_animators[].value_keyframes[].time",
+      "comps[].layers[].text_animators[].value_keyframes[].value",
+      "comps[].layers[].text_animators[].value_keyframes[].in_ease",
+      "comps[].layers[].text_animators[].value_keyframes[].out_ease"
     ],
     "VectorKeyframe": [
       "comps[].layers[].transform.position_keyframes[].time",

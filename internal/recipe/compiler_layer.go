@@ -508,6 +508,9 @@ func applyTextAnimators(layer *aep.Layer, animators []TextAnimatorSpec) error {
 			if err := applyTextRangeOffsetKeyframes(layer, animator); err != nil {
 				return err
 			}
+			if err := applyTextValueKeyframes(layer, animator); err != nil {
+				return err
+			}
 		case "scale":
 			value, ok := numericSliceValue(animator.Value)
 			if !ok || len(value) != 3 {
@@ -520,6 +523,9 @@ func applyTextAnimators(layer *aep.Layer, animators []TextAnimatorSpec) error {
 				return err
 			}
 			if err := applyTextRangeOffsetKeyframes(layer, animator); err != nil {
+				return err
+			}
+			if err := applyTextValueKeyframes(layer, animator); err != nil {
 				return err
 			}
 		case "rotation":
@@ -552,6 +558,9 @@ func applyTextAnimators(layer *aep.Layer, animators []TextAnimatorSpec) error {
 				return err
 			}
 			if err := applyTextRangeOffsetKeyframes(layer, animator); err != nil {
+				return err
+			}
+			if err := applyTextValueKeyframes(layer, animator); err != nil {
 				return err
 			}
 		case "stroke_color":
@@ -714,27 +723,104 @@ func applyTextValueKeyframes(layer *aep.Layer, animator TextAnimatorSpec) error 
 	if len(animator.ValueKeyframes) == 0 {
 		return nil
 	}
-	keyframes := make([]aep.ScalarKeyframe, 0, len(animator.ValueKeyframes))
-	for _, kf := range animator.ValueKeyframes {
-		keyframes = append(keyframes, aep.ScalarKeyframe{
-			Time:    kf.Time,
-			Value:   kf.Value,
-			InEase:  temporalEase(kf.InEase),
-			OutEase: temporalEase(kf.OutEase),
-		})
-	}
 	switch animator.Property {
 	case "opacity":
+		keyframes, err := scalarValueKeyframes(animator.ValueKeyframes)
+		if err != nil {
+			return err
+		}
 		return aep.AnimateTextOpacity(layer, 0, keyframes)
+	case "position":
+		keyframes, err := vectorValueKeyframes(animator.ValueKeyframes, 3)
+		if err != nil {
+			return err
+		}
+		return aep.AnimateTextPosition(layer, 0, keyframes)
+	case "scale":
+		keyframes, err := vectorValueKeyframes(animator.ValueKeyframes, 3)
+		if err != nil {
+			return err
+		}
+		return aep.AnimateTextScale(layer, 0, keyframes)
 	case "rotation":
+		keyframes, err := scalarValueKeyframes(animator.ValueKeyframes)
+		if err != nil {
+			return err
+		}
 		return aep.AnimateTextRotation(layer, 0, keyframes)
+	case "color":
+		keyframes, err := colorValueKeyframes(animator.ValueKeyframes)
+		if err != nil {
+			return err
+		}
+		return aep.AnimateTextColor(layer, 0, keyframes)
 	case "tracking":
+		keyframes, err := scalarValueKeyframes(animator.ValueKeyframes)
+		if err != nil {
+			return err
+		}
 		return aep.AnimateTextTracking(layer, 0, keyframes)
 	case "character_offset":
+		keyframes, err := scalarValueKeyframes(animator.ValueKeyframes)
+		if err != nil {
+			return err
+		}
 		return aep.AnimateTextCharacterOffset(layer, 0, keyframes)
 	default:
 		return fmt.Errorf("text_animators[].value_keyframes are not supported for property %q", animator.Property)
 	}
+}
+
+func scalarValueKeyframes(in []ValueKeyframe) ([]aep.ScalarKeyframe, error) {
+	out := make([]aep.ScalarKeyframe, 0, len(in))
+	for i, kf := range in {
+		value, ok := numericValue(kf.Value)
+		if !ok {
+			return nil, fmt.Errorf("text_animators[].value_keyframes[%d].value must be a number", i)
+		}
+		out = append(out, aep.ScalarKeyframe{
+			Time:    kf.Time,
+			Value:   value,
+			InEase:  temporalEase(kf.InEase),
+			OutEase: temporalEase(kf.OutEase),
+		})
+	}
+	return out, nil
+}
+
+func vectorValueKeyframes(in []ValueKeyframe, want int) ([]aep.VectorKeyframe, error) {
+	out := make([]aep.VectorKeyframe, 0, len(in))
+	for i, kf := range in {
+		value, ok := numericSliceValue(kf.Value)
+		if !ok || len(value) != want {
+			return nil, fmt.Errorf("text_animators[].value_keyframes[%d].value must be a %d-number array", i, want)
+		}
+		out = append(out, aep.VectorKeyframe{
+			Time:    kf.Time,
+			Value:   value,
+			InEase:  temporalEase(kf.InEase),
+			OutEase: temporalEase(kf.OutEase),
+		})
+	}
+	return out, nil
+}
+
+func colorValueKeyframes(in []ValueKeyframe) ([]aep.VectorKeyframe, error) {
+	out := make([]aep.VectorKeyframe, 0, len(in))
+	for i, kf := range in {
+		value, ok := numericSliceValue(kf.Value)
+		if !ok || (len(value) != 3 && len(value) != 4) {
+			return nil, fmt.Errorf("text_animators[].value_keyframes[%d].value must be a 3- or 4-number color array", i)
+		}
+		color := rgbaColor(value)
+		out = append(out, aep.VectorKeyframe{
+			Time:    kf.Time,
+			Value:   []float64{color[0], color[1], color[2], color[3]},
+			InEase:  temporalEase(kf.InEase),
+			OutEase: temporalEase(kf.OutEase),
+		})
+	}
+	return out, nil
 }
 
 func textJustification(value string) (aep.TextJustification, error) {

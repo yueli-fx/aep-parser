@@ -165,7 +165,7 @@ type TextAnimatorSpec struct {
 	RangeEnd             *float64         `json:"range_end,omitempty"`
 	RangeOffset          *float64         `json:"range_offset,omitempty"`
 	RangeOffsetKeyframes []ScalarKeyframe `json:"range_offset_keyframes,omitempty"`
-	ValueKeyframes       []ScalarKeyframe `json:"value_keyframes,omitempty"`
+	ValueKeyframes       []ValueKeyframe  `json:"value_keyframes,omitempty"`
 }
 
 type ShapeSpec struct {
@@ -375,6 +375,13 @@ type VectorKeyframe struct {
 type ScalarKeyframe struct {
 	Time    float64       `json:"time"`
 	Value   float64       `json:"value"`
+	InEase  *TemporalEase `json:"in_ease,omitempty"`
+	OutEase *TemporalEase `json:"out_ease,omitempty"`
+}
+
+type ValueKeyframe struct {
+	Time    float64       `json:"time"`
+	Value   any           `json:"value"`
 	InEase  *TemporalEase `json:"in_ease,omitempty"`
 	OutEase *TemporalEase `json:"out_ease,omitempty"`
 }
