@@ -83,6 +83,7 @@ It defaults to `flightdeck\showcase` and writes generated output under
 - `patterns.csv`
 - `study_queue.csv`
 - `learning_actions.csv`
+- `mechanisms.csv`
 - `errors.csv`
 - `manifest.json`
 - `report.md`
@@ -115,6 +116,8 @@ step distribution for each repeated pattern. `study_queue.csv` ranks parsed
 projects by readiness and signal density so large corpora have an immediate
 review order. `learning_actions.csv` turns each repeated pattern into a review
 action with representative project, common steps, top mechanisms, and risk.
+`mechanisms.csv` expands effect, plugin-effect, shape, text-animator, layer-role,
+graph-edge, and hint counts into a filterable technique mechanism catalog.
 `errors.csv` lists failed corpus records for retry or manual inspection.
 `manifest.json` records the input path, git revision, scan timing, project/error
 counts, and generated artifact inventory for repeatable self-hosted runs.

@@ -30,12 +30,13 @@ $projectsCsvPath = Join-Path $OutDir "projects.csv"
 $patternsCsvPath = Join-Path $OutDir "patterns.csv"
 $studyQueueCsvPath = Join-Path $OutDir "study_queue.csv"
 $learningActionsCsvPath = Join-Path $OutDir "learning_actions.csv"
+$mechanismsCsvPath = Join-Path $OutDir "mechanisms.csv"
 $errorsCsvPath = Join-Path $OutDir "errors.csv"
 $manifestPath = Join-Path $OutDir "manifest.json"
 $reportPath = Join-Path $OutDir "report.md"
 $htmlPath = Join-Path $OutDir "report.html"
 
-foreach ($path in @($summaryPath, $corpusPath, $digestPath, $learningPath, $projectsCsvPath, $patternsCsvPath, $studyQueueCsvPath, $learningActionsCsvPath, $errorsCsvPath, $manifestPath, $reportPath, $htmlPath)) {
+foreach ($path in @($summaryPath, $corpusPath, $digestPath, $learningPath, $projectsCsvPath, $patternsCsvPath, $studyQueueCsvPath, $learningActionsCsvPath, $mechanismsCsvPath, $errorsCsvPath, $manifestPath, $reportPath, $htmlPath)) {
     Require-File -Path $path
 }
 
@@ -48,6 +49,7 @@ $projectRows = @(Import-Csv -LiteralPath $projectsCsvPath)
 $patternRows = @(Import-Csv -LiteralPath $patternsCsvPath)
 $studyQueueRows = @(Import-Csv -LiteralPath $studyQueueCsvPath)
 $learningActionRows = @(Import-Csv -LiteralPath $learningActionsCsvPath)
+$mechanismRows = @(Import-Csv -LiteralPath $mechanismsCsvPath)
 $errorRows = @(Import-Csv -LiteralPath $errorsCsvPath)
 
 if ([int]$summary.project_count -lt $MinProjects) {
@@ -98,6 +100,14 @@ foreach ($row in $learningActionRows) {
         throw "learning_actions.csv contains incomplete row: $($row | ConvertTo-Json -Compress)"
     }
 }
+if ($mechanismRows.Count -eq 0) {
+    throw "mechanisms.csv has no rows"
+}
+foreach ($row in $mechanismRows) {
+    if ([string]$row.category -eq "" -or [string]$row.name -eq "" -or [int]$row.count -le 0 -or [string]$row.action -eq "") {
+        throw "mechanisms.csv contains incomplete row: $($row | ConvertTo-Json -Compress)"
+    }
+}
 $recordsWithSteps = @($corpusRecords | Where-Object {
     $null -ne $_.explanation -and
     $null -ne $_.explanation.recreation_steps -and
@@ -129,6 +139,7 @@ Require-Text -Path $htmlPath -Pattern "learning\.md"
 Require-Text -Path $htmlPath -Pattern "projects\.csv"
 Require-Text -Path $htmlPath -Pattern "study_queue\.csv"
 Require-Text -Path $htmlPath -Pattern "learning_actions\.csv"
+Require-Text -Path $htmlPath -Pattern "mechanisms\.csv"
 Require-Text -Path $htmlPath -Pattern "errors\.csv"
 
 Write-Host "ok: $OutDir"
