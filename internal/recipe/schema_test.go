@@ -2170,28 +2170,37 @@ func TestValidateReportsShapeWiggleTransformCapabilities(t *testing.T) {
 func TestValidateReportsTextStyleCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].TextStyle = &recipe.TextStyleSpec{
-		FontSize:        ptr(96),
-		FillColor:       []float64{64, 128, 255, 255},
-		AutoLeading:     boolPtr(false),
-		Leading:         ptr(110),
-		Tracking:        ptr(120),
-		BaselineShift:   ptr(12),
-		HorizontalScale: ptr(80),
-		VerticalScale:   ptr(120),
-		Tsume:           ptr(50),
-		CapsOption:      "all_caps",
-		BaselineOption:  "superscript",
-		AutoKernType:    "optical",
-		LineJoinType:    "round",
-		DigitSet:        "hindi",
-		StrokeOverFill:  boolPtr(false),
-		NoBreak:         boolPtr(true),
-		FauxBold:        boolPtr(true),
-		FauxItalic:      boolPtr(true),
-		ApplyStroke:     boolPtr(true),
-		StrokeColor:     []float64{255, 32, 64, 255},
-		StrokeWidth:     ptr(8),
-		Justification:   "center",
+		FontSize:           ptr(96),
+		FillColor:          []float64{64, 128, 255, 255},
+		AutoLeading:        boolPtr(false),
+		Leading:            ptr(110),
+		Tracking:           ptr(120),
+		BaselineShift:      ptr(12),
+		HorizontalScale:    ptr(80),
+		VerticalScale:      ptr(120),
+		Tsume:              ptr(50),
+		CapsOption:         "all_caps",
+		BaselineOption:     "superscript",
+		AutoKernType:       "optical",
+		LineJoinType:       "round",
+		DigitSet:           "hindi",
+		StrokeOverFill:     boolPtr(false),
+		NoBreak:            boolPtr(true),
+		FauxBold:           boolPtr(true),
+		FauxItalic:         boolPtr(true),
+		ApplyStroke:        boolPtr(true),
+		StrokeColor:        []float64{255, 32, 64, 255},
+		StrokeWidth:        ptr(8),
+		Justification:      "center",
+		FirstLineIndent:    ptr(12),
+		StartIndent:        ptr(24),
+		EndIndent:          ptr(6),
+		SpaceBefore:        ptr(8),
+		SpaceAfter:         ptr(10),
+		AutoHyphenate:      boolPtr(false),
+		LeadingType:        "japanese",
+		HangingRoman:       boolPtr(true),
+		ParagraphDirection: "rtl",
 	}
 
 	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
@@ -2221,6 +2230,15 @@ func TestValidateReportsTextStyleCapabilities(t *testing.T) {
 	assertCapability(t, report, "Layer.SetRunStrokeColor")
 	assertCapability(t, report, "Layer.SetRunStrokeWidth")
 	assertCapability(t, report, "Layer.SetParagraphJustification")
+	assertCapability(t, report, "Layer.SetParagraphFirstLineIndent")
+	assertCapability(t, report, "Layer.SetParagraphStartIndent")
+	assertCapability(t, report, "Layer.SetParagraphEndIndent")
+	assertCapability(t, report, "Layer.SetParagraphSpaceBefore")
+	assertCapability(t, report, "Layer.SetParagraphSpaceAfter")
+	assertCapability(t, report, "Layer.SetParagraphAutoHyphenate")
+	assertCapability(t, report, "Layer.SetParagraphLeadingType")
+	assertCapability(t, report, "Layer.SetParagraphHangingRoman")
+	assertCapability(t, report, "Layer.SetParagraphDirection")
 }
 
 func TestValidateReportsTextAnimatorOpacityCapability(t *testing.T) {
@@ -2717,19 +2735,21 @@ func TestValidateReportsTextAnimatorVectorValueKeyframesCapabilities(t *testing.
 func TestValidateRejectsInvalidTextStyle(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].TextStyle = &recipe.TextStyleSpec{
-		RunIndex:       -1,
-		ParagraphIndex: -1,
-		FontSize:       ptr(0),
-		FillColor:      []float64{255, 0},
-		Tsume:          ptr(101),
-		CapsOption:     "loud",
-		BaselineOption: "middle",
-		AutoKernType:   "manual",
-		LineJoinType:   "square",
-		DigitSet:       "roman",
-		StrokeColor:    []float64{255, 0, 300},
-		StrokeWidth:    ptr(-1),
-		Justification:  "middle",
+		RunIndex:           -1,
+		ParagraphIndex:     -1,
+		FontSize:           ptr(0),
+		FillColor:          []float64{255, 0},
+		Tsume:              ptr(101),
+		CapsOption:         "loud",
+		BaselineOption:     "middle",
+		AutoKernType:       "manual",
+		LineJoinType:       "square",
+		DigitSet:           "roman",
+		StrokeColor:        []float64{255, 0, 300},
+		StrokeWidth:        ptr(-1),
+		Justification:      "middle",
+		LeadingType:        "casual",
+		ParagraphDirection: "down",
 	}
 
 	report := recipe.Validate(rec)
@@ -2750,6 +2770,8 @@ func TestValidateRejectsInvalidTextStyle(t *testing.T) {
 	assertRefusal(t, report, "invalid_text_stroke_color")
 	assertRefusal(t, report, "invalid_text_stroke_width")
 	assertRefusal(t, report, "invalid_text_justification")
+	assertRefusal(t, report, "invalid_text_leading_type")
+	assertRefusal(t, report, "invalid_text_paragraph_direction")
 }
 
 func TestValidateRejectsInvalidShapeDetail(t *testing.T) {

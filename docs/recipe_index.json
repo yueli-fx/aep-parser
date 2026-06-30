@@ -90,6 +90,15 @@
     "comps[].layers[].text_style.stroke_over_fill",
     "comps[].layers[].text_style.no_break",
     "comps[].layers[].text_style.justification",
+    "comps[].layers[].text_style.first_line_indent",
+    "comps[].layers[].text_style.start_indent",
+    "comps[].layers[].text_style.end_indent",
+    "comps[].layers[].text_style.space_before",
+    "comps[].layers[].text_style.space_after",
+    "comps[].layers[].text_style.auto_hyphenate",
+    "comps[].layers[].text_style.leading_type",
+    "comps[].layers[].text_style.hanging_roman",
+    "comps[].layers[].text_style.paragraph_direction",
     "comps[].layers[].text_animators[]",
     "comps[].layers[].text_animators[].property",
     "comps[].layers[].text_animators[].value",
@@ -481,6 +490,15 @@
     "expected_profile.text_styles[].stroke_over_fill",
     "expected_profile.text_styles[].no_break",
     "expected_profile.text_styles[].justification",
+    "expected_profile.text_styles[].first_line_indent",
+    "expected_profile.text_styles[].start_indent",
+    "expected_profile.text_styles[].end_indent",
+    "expected_profile.text_styles[].space_before",
+    "expected_profile.text_styles[].space_after",
+    "expected_profile.text_styles[].auto_hyphenate",
+    "expected_profile.text_styles[].leading_type",
+    "expected_profile.text_styles[].hanging_roman",
+    "expected_profile.text_styles[].paragraph_direction",
     "expected_profile.keyframes[]",
     "expected_profile.keyframes[].layer_name",
     "expected_profile.keyframes[].match_name",
@@ -3728,6 +3746,19 @@
       ],
       "example": "examples/recipes/minimal-text-shape.json"
     },
+    "comps[].layers[].text_style.auto_hyphenate": {
+      "path": "comps[].layers[].text_style.auto_hyphenate",
+      "json_name": "auto_hyphenate",
+      "source_type": "TextStyleSpec",
+      "source_field": "AutoHyphenate",
+      "type": "boolean",
+      "go_type": "*bool",
+      "summary": "Layer text style paragraph auto-hyphenation switch.",
+      "capability_keys": [
+        "text.set_paragraph_auto_hyphenate"
+      ],
+      "example": "examples/recipes/minimal-text-style.json"
+    },
     "comps[].layers[].text_style.auto_kern_type": {
       "path": "comps[].layers[].text_style.auto_kern_type",
       "json_name": "auto_kern_type",
@@ -3833,6 +3864,19 @@
       ],
       "example": "examples/recipes/minimal-text-style.json"
     },
+    "comps[].layers[].text_style.end_indent": {
+      "path": "comps[].layers[].text_style.end_indent",
+      "json_name": "end_indent",
+      "source_type": "TextStyleSpec",
+      "source_field": "EndIndent",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Layer text style paragraph end indent.",
+      "capability_keys": [
+        "text.set_paragraph_end_indent"
+      ],
+      "example": "examples/recipes/minimal-text-style.json"
+    },
     "comps[].layers[].text_style.faux_bold": {
       "path": "comps[].layers[].text_style.faux_bold",
       "json_name": "faux_bold",
@@ -3873,6 +3917,19 @@
       ],
       "example": "examples/recipes/minimal-text-shape.json"
     },
+    "comps[].layers[].text_style.first_line_indent": {
+      "path": "comps[].layers[].text_style.first_line_indent",
+      "json_name": "first_line_indent",
+      "source_type": "TextStyleSpec",
+      "source_field": "FirstLineIndent",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Layer text style paragraph first-line indent.",
+      "capability_keys": [
+        "text.set_paragraph_first_line_indent"
+      ],
+      "example": "examples/recipes/minimal-text-style.json"
+    },
     "comps[].layers[].text_style.font_size": {
       "path": "comps[].layers[].text_style.font_size",
       "json_name": "font_size",
@@ -3884,6 +3941,19 @@
       "validation": "Text font size must be positive.",
       "capability_keys": [
         "text.set_run_font_size"
+      ],
+      "example": "examples/recipes/minimal-text-style.json"
+    },
+    "comps[].layers[].text_style.hanging_roman": {
+      "path": "comps[].layers[].text_style.hanging_roman",
+      "json_name": "hanging_roman",
+      "source_type": "TextStyleSpec",
+      "source_field": "HangingRoman",
+      "type": "boolean",
+      "go_type": "*bool",
+      "summary": "Layer text style paragraph hanging Roman punctuation switch.",
+      "capability_keys": [
+        "text.set_paragraph_hanging_roman"
       ],
       "example": "examples/recipes/minimal-text-style.json"
     },
@@ -3932,6 +4002,24 @@
       ],
       "example": "examples/recipes/minimal-text-style.json"
     },
+    "comps[].layers[].text_style.leading_type": {
+      "path": "comps[].layers[].text_style.leading_type",
+      "json_name": "leading_type",
+      "source_type": "TextStyleSpec",
+      "source_field": "LeadingType",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Layer text style paragraph leading type.",
+      "validation": "Text paragraph leading type must use a supported value.",
+      "enum": [
+        "roman",
+        "japanese"
+      ],
+      "capability_keys": [
+        "text.set_paragraph_leading_type"
+      ],
+      "example": "examples/recipes/minimal-text-style.json"
+    },
     "comps[].layers[].text_style.line_join_type": {
       "path": "comps[].layers[].text_style.line_join_type",
       "json_name": "line_join_type",
@@ -3964,6 +4052,24 @@
       ],
       "example": "examples/recipes/minimal-text-style.json"
     },
+    "comps[].layers[].text_style.paragraph_direction": {
+      "path": "comps[].layers[].text_style.paragraph_direction",
+      "json_name": "paragraph_direction",
+      "source_type": "TextStyleSpec",
+      "source_field": "ParagraphDirection",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Layer text style paragraph reading direction.",
+      "validation": "Text paragraph direction must use a supported value.",
+      "enum": [
+        "ltr",
+        "rtl"
+      ],
+      "capability_keys": [
+        "text.set_paragraph_direction"
+      ],
+      "example": "examples/recipes/minimal-text-style.json"
+    },
     "comps[].layers[].text_style.paragraph_index": {
       "path": "comps[].layers[].text_style.paragraph_index",
       "json_name": "paragraph_index",
@@ -3981,6 +4087,45 @@
       "type": "number",
       "go_type": "int",
       "summary": "Layer text style text run index."
+    },
+    "comps[].layers[].text_style.space_after": {
+      "path": "comps[].layers[].text_style.space_after",
+      "json_name": "space_after",
+      "source_type": "TextStyleSpec",
+      "source_field": "SpaceAfter",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Layer text style paragraph space after.",
+      "capability_keys": [
+        "text.set_paragraph_space_after"
+      ],
+      "example": "examples/recipes/minimal-text-style.json"
+    },
+    "comps[].layers[].text_style.space_before": {
+      "path": "comps[].layers[].text_style.space_before",
+      "json_name": "space_before",
+      "source_type": "TextStyleSpec",
+      "source_field": "SpaceBefore",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Layer text style paragraph space before.",
+      "capability_keys": [
+        "text.set_paragraph_space_before"
+      ],
+      "example": "examples/recipes/minimal-text-style.json"
+    },
+    "comps[].layers[].text_style.start_indent": {
+      "path": "comps[].layers[].text_style.start_indent",
+      "json_name": "start_indent",
+      "source_type": "TextStyleSpec",
+      "source_field": "StartIndent",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Layer text style paragraph start indent.",
+      "capability_keys": [
+        "text.set_paragraph_start_indent"
+      ],
+      "example": "examples/recipes/minimal-text-style.json"
     },
     "comps[].layers[].text_style.stroke_color": {
       "path": "comps[].layers[].text_style.stroke_color",
@@ -6319,6 +6464,16 @@
       "summary": "Expected text style stroke enable switch.",
       "example": "examples/recipes/minimal-text-shape.json"
     },
+    "expected_profile.text_styles[].auto_hyphenate": {
+      "path": "expected_profile.text_styles[].auto_hyphenate",
+      "json_name": "auto_hyphenate",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "AutoHyphenate",
+      "type": "boolean",
+      "go_type": "*bool",
+      "summary": "Expected text style paragraph auto-hyphenation switch.",
+      "example": "examples/recipes/minimal-text-style.json"
+    },
     "expected_profile.text_styles[].auto_kern_type": {
       "path": "expected_profile.text_styles[].auto_kern_type",
       "json_name": "auto_kern_type",
@@ -6406,6 +6561,16 @@
       ],
       "example": "examples/recipes/minimal-text-style.json"
     },
+    "expected_profile.text_styles[].end_indent": {
+      "path": "expected_profile.text_styles[].end_indent",
+      "json_name": "end_indent",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "EndIndent",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Expected text style paragraph end indent.",
+      "example": "examples/recipes/minimal-text-style.json"
+    },
     "expected_profile.text_styles[].faux_bold": {
       "path": "expected_profile.text_styles[].faux_bold",
       "json_name": "faux_bold",
@@ -6437,6 +6602,16 @@
       "validation": "Expected fill color must contain RGB or RGBA channels in the 0..1 range.",
       "example": "examples/recipes/minimal-text-shape.json"
     },
+    "expected_profile.text_styles[].first_line_indent": {
+      "path": "expected_profile.text_styles[].first_line_indent",
+      "json_name": "first_line_indent",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "FirstLineIndent",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Expected text style paragraph first-line indent.",
+      "example": "examples/recipes/minimal-text-style.json"
+    },
     "expected_profile.text_styles[].font_size": {
       "path": "expected_profile.text_styles[].font_size",
       "json_name": "font_size",
@@ -6447,6 +6622,16 @@
       "summary": "Expected text style font size.",
       "validation": "Expected font size must be positive.",
       "example": "examples/recipes/minimal-text-shape.json"
+    },
+    "expected_profile.text_styles[].hanging_roman": {
+      "path": "expected_profile.text_styles[].hanging_roman",
+      "json_name": "hanging_roman",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "HangingRoman",
+      "type": "boolean",
+      "go_type": "*bool",
+      "summary": "Expected text style paragraph hanging Roman punctuation switch.",
+      "example": "examples/recipes/minimal-text-style.json"
     },
     "expected_profile.text_styles[].horizontal_scale": {
       "path": "expected_profile.text_styles[].horizontal_scale",
@@ -6498,6 +6683,21 @@
       "summary": "Expected text style explicit leading value.",
       "example": "examples/recipes/minimal-text-style.json"
     },
+    "expected_profile.text_styles[].leading_type": {
+      "path": "expected_profile.text_styles[].leading_type",
+      "json_name": "leading_type",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "LeadingType",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Expected text style paragraph leading type.",
+      "validation": "Expected paragraph leading type must use a supported value.",
+      "enum": [
+        "roman",
+        "japanese"
+      ],
+      "example": "examples/recipes/minimal-text-style.json"
+    },
     "expected_profile.text_styles[].line_join_type": {
       "path": "expected_profile.text_styles[].line_join_type",
       "json_name": "line_join_type",
@@ -6524,6 +6724,21 @@
       "summary": "Expected text style no-break line wrapping flag.",
       "example": "examples/recipes/minimal-text-style.json"
     },
+    "expected_profile.text_styles[].paragraph_direction": {
+      "path": "expected_profile.text_styles[].paragraph_direction",
+      "json_name": "paragraph_direction",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "ParagraphDirection",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Expected text style paragraph reading direction.",
+      "validation": "Expected paragraph direction must use a supported value.",
+      "enum": [
+        "ltr",
+        "rtl"
+      ],
+      "example": "examples/recipes/minimal-text-style.json"
+    },
     "expected_profile.text_styles[].paragraph_index": {
       "path": "expected_profile.text_styles[].paragraph_index",
       "json_name": "paragraph_index",
@@ -6543,6 +6758,36 @@
       "go_type": "int",
       "summary": "Expected text style text run index.",
       "validation": "Expected text style run index must be non-negative."
+    },
+    "expected_profile.text_styles[].space_after": {
+      "path": "expected_profile.text_styles[].space_after",
+      "json_name": "space_after",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "SpaceAfter",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Expected text style paragraph space after.",
+      "example": "examples/recipes/minimal-text-style.json"
+    },
+    "expected_profile.text_styles[].space_before": {
+      "path": "expected_profile.text_styles[].space_before",
+      "json_name": "space_before",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "SpaceBefore",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Expected text style paragraph space before.",
+      "example": "examples/recipes/minimal-text-style.json"
+    },
+    "expected_profile.text_styles[].start_indent": {
+      "path": "expected_profile.text_styles[].start_indent",
+      "json_name": "start_indent",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "StartIndent",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Expected text style paragraph start indent.",
+      "example": "examples/recipes/minimal-text-style.json"
     },
     "expected_profile.text_styles[].stroke_color": {
       "path": "expected_profile.text_styles[].stroke_color",
@@ -6931,7 +7176,16 @@
       "expected_profile.text_styles[].stroke_width",
       "expected_profile.text_styles[].stroke_over_fill",
       "expected_profile.text_styles[].no_break",
-      "expected_profile.text_styles[].justification"
+      "expected_profile.text_styles[].justification",
+      "expected_profile.text_styles[].first_line_indent",
+      "expected_profile.text_styles[].start_indent",
+      "expected_profile.text_styles[].end_indent",
+      "expected_profile.text_styles[].space_before",
+      "expected_profile.text_styles[].space_after",
+      "expected_profile.text_styles[].auto_hyphenate",
+      "expected_profile.text_styles[].leading_type",
+      "expected_profile.text_styles[].hanging_roman",
+      "expected_profile.text_styles[].paragraph_direction"
     ],
     "ExpectedWorkAreaSpec": [
       "expected_profile.work_area.start",
@@ -7240,7 +7494,16 @@
       "comps[].layers[].text_style.stroke_width",
       "comps[].layers[].text_style.stroke_over_fill",
       "comps[].layers[].text_style.no_break",
-      "comps[].layers[].text_style.justification"
+      "comps[].layers[].text_style.justification",
+      "comps[].layers[].text_style.first_line_indent",
+      "comps[].layers[].text_style.start_indent",
+      "comps[].layers[].text_style.end_indent",
+      "comps[].layers[].text_style.space_before",
+      "comps[].layers[].text_style.space_after",
+      "comps[].layers[].text_style.auto_hyphenate",
+      "comps[].layers[].text_style.leading_type",
+      "comps[].layers[].text_style.hanging_roman",
+      "comps[].layers[].text_style.paragraph_direction"
     ],
     "Transform": [
       "comps[].layers[].transform.position",

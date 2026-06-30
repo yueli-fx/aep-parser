@@ -108,6 +108,39 @@ func validateTextStyle(style TextStyleSpec, stylePath string, recordCapability f
 			addRefusal("invalid_text_justification", stylePath+".justification", "justification must be left, right, or center")
 		}
 	}
+	if style.FirstLineIndent != nil {
+		recordCapability("Layer.SetParagraphFirstLineIndent", stylePath+".first_line_indent")
+	}
+	if style.StartIndent != nil {
+		recordCapability("Layer.SetParagraphStartIndent", stylePath+".start_indent")
+	}
+	if style.EndIndent != nil {
+		recordCapability("Layer.SetParagraphEndIndent", stylePath+".end_indent")
+	}
+	if style.SpaceBefore != nil {
+		recordCapability("Layer.SetParagraphSpaceBefore", stylePath+".space_before")
+	}
+	if style.SpaceAfter != nil {
+		recordCapability("Layer.SetParagraphSpaceAfter", stylePath+".space_after")
+	}
+	if style.AutoHyphenate != nil {
+		recordCapability("Layer.SetParagraphAutoHyphenate", stylePath+".auto_hyphenate")
+	}
+	if style.LeadingType != "" {
+		recordCapability("Layer.SetParagraphLeadingType", stylePath+".leading_type")
+		if _, err := textLeadingType(style.LeadingType); err != nil {
+			addRefusal("invalid_text_leading_type", stylePath+".leading_type", "leading_type must be roman or japanese")
+		}
+	}
+	if style.HangingRoman != nil {
+		recordCapability("Layer.SetParagraphHangingRoman", stylePath+".hanging_roman")
+	}
+	if style.ParagraphDirection != "" {
+		recordCapability("Layer.SetParagraphDirection", stylePath+".paragraph_direction")
+		if _, err := textParagraphDirection(style.ParagraphDirection); err != nil {
+			addRefusal("invalid_text_paragraph_direction", stylePath+".paragraph_direction", "paragraph_direction must be ltr or rtl")
+		}
+	}
 }
 
 func validTextJustification(value string) bool {

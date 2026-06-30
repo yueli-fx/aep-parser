@@ -153,6 +153,12 @@ Done:
   the same contract, `minimal-text-style.json` asserts all five fields, and
   whole-recipe profile verification passes with 127 recipes and 168 covered
   profile paths.
+- Text-style recipe/profile coverage now also includes paragraph controls:
+  first/start/end indent, space before/after, auto-hyphenation, leading type,
+  hanging Roman punctuation, and paragraph direction. Scene JSON and profile
+  output preserve the parsed paragraph fields, `minimal-text-style.json`
+  asserts them through `expected_profile.text_styles[]`, and whole-recipe
+  profile verification passes with 127 recipes and 177 covered profile paths.
 - Recipe embedded profile contracts now support `expected_profile.keyframes[]`
   for property keyframe count/time/value checks. The updated shape/text example
   animates the title Position across three keyframes, passed `go test ./...`,

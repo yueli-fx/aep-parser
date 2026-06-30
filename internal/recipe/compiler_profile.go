@@ -445,6 +445,69 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 			actual, ok := profileParagraphJustification(layer.Text.Paragraphs, expectedStyle.ParagraphIndex)
 			add(path, expectedStyle.Justification, actual, ok && strings.EqualFold(actual, expectedStyle.Justification))
 		}
+		if expectedStyle.FirstLineIndent != nil {
+			path := stylePath + ".first_line_indent"
+			actual, ok := profileParagraphFloat(layer.Text.Paragraphs, expectedStyle.ParagraphIndex, func(paragraph profile.TextParagraph) float64 {
+				return paragraph.FirstLineIndent
+			})
+			add(path, *expectedStyle.FirstLineIndent, actual, ok && math.Abs(actual-*expectedStyle.FirstLineIndent) < 1e-9)
+		}
+		if expectedStyle.StartIndent != nil {
+			path := stylePath + ".start_indent"
+			actual, ok := profileParagraphFloat(layer.Text.Paragraphs, expectedStyle.ParagraphIndex, func(paragraph profile.TextParagraph) float64 {
+				return paragraph.StartIndent
+			})
+			add(path, *expectedStyle.StartIndent, actual, ok && math.Abs(actual-*expectedStyle.StartIndent) < 1e-9)
+		}
+		if expectedStyle.EndIndent != nil {
+			path := stylePath + ".end_indent"
+			actual, ok := profileParagraphFloat(layer.Text.Paragraphs, expectedStyle.ParagraphIndex, func(paragraph profile.TextParagraph) float64 {
+				return paragraph.EndIndent
+			})
+			add(path, *expectedStyle.EndIndent, actual, ok && math.Abs(actual-*expectedStyle.EndIndent) < 1e-9)
+		}
+		if expectedStyle.SpaceBefore != nil {
+			path := stylePath + ".space_before"
+			actual, ok := profileParagraphFloat(layer.Text.Paragraphs, expectedStyle.ParagraphIndex, func(paragraph profile.TextParagraph) float64 {
+				return paragraph.SpaceBefore
+			})
+			add(path, *expectedStyle.SpaceBefore, actual, ok && math.Abs(actual-*expectedStyle.SpaceBefore) < 1e-9)
+		}
+		if expectedStyle.SpaceAfter != nil {
+			path := stylePath + ".space_after"
+			actual, ok := profileParagraphFloat(layer.Text.Paragraphs, expectedStyle.ParagraphIndex, func(paragraph profile.TextParagraph) float64 {
+				return paragraph.SpaceAfter
+			})
+			add(path, *expectedStyle.SpaceAfter, actual, ok && math.Abs(actual-*expectedStyle.SpaceAfter) < 1e-9)
+		}
+		if expectedStyle.AutoHyphenate != nil {
+			path := stylePath + ".auto_hyphenate"
+			actual, ok := profileParagraphBool(layer.Text.Paragraphs, expectedStyle.ParagraphIndex, func(paragraph profile.TextParagraph) bool {
+				return paragraph.AutoHyphenate
+			})
+			add(path, *expectedStyle.AutoHyphenate, actual, ok && actual == *expectedStyle.AutoHyphenate)
+		}
+		if expectedStyle.LeadingType != "" {
+			path := stylePath + ".leading_type"
+			actual, ok := profileParagraphString(layer.Text.Paragraphs, expectedStyle.ParagraphIndex, func(paragraph profile.TextParagraph) string {
+				return paragraph.LeadingType
+			})
+			add(path, expectedStyle.LeadingType, actual, ok && actual == normalizeEnum(expectedStyle.LeadingType))
+		}
+		if expectedStyle.HangingRoman != nil {
+			path := stylePath + ".hanging_roman"
+			actual, ok := profileParagraphBool(layer.Text.Paragraphs, expectedStyle.ParagraphIndex, func(paragraph profile.TextParagraph) bool {
+				return paragraph.HangingRoman
+			})
+			add(path, *expectedStyle.HangingRoman, actual, ok && actual == *expectedStyle.HangingRoman)
+		}
+		if expectedStyle.ParagraphDirection != "" {
+			path := stylePath + ".paragraph_direction"
+			actual, ok := profileParagraphString(layer.Text.Paragraphs, expectedStyle.ParagraphIndex, func(paragraph profile.TextParagraph) string {
+				return paragraph.Direction
+			})
+			add(path, expectedStyle.ParagraphDirection, actual, ok && actual == normalizeEnum(expectedStyle.ParagraphDirection))
+		}
 	}
 	for i, expectedKeyframes := range expected.Keyframes {
 		kfPropPath := fmt.Sprintf("expected_profile.keyframes[%d]", i)
@@ -851,6 +914,27 @@ func profileParagraphJustification(paragraphs []profile.TextParagraph, index int
 		return "", false
 	}
 	return paragraphs[index].Justification, true
+}
+
+func profileParagraphFloat(paragraphs []profile.TextParagraph, index int, value func(profile.TextParagraph) float64) (float64, bool) {
+	if index < 0 || index >= len(paragraphs) {
+		return 0, false
+	}
+	return value(paragraphs[index]), true
+}
+
+func profileParagraphBool(paragraphs []profile.TextParagraph, index int, value func(profile.TextParagraph) bool) (bool, bool) {
+	if index < 0 || index >= len(paragraphs) {
+		return false, false
+	}
+	return value(paragraphs[index]), true
+}
+
+func profileParagraphString(paragraphs []profile.TextParagraph, index int, value func(profile.TextParagraph) string) (string, bool) {
+	if index < 0 || index >= len(paragraphs) {
+		return "", false
+	}
+	return value(paragraphs[index]), true
 }
 
 func profileValueEqual(expected, actual any) bool {

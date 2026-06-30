@@ -79,6 +79,15 @@ var capabilitiesByPath = map[string][]string{
 	"comps[].layers[].text_style.stroke_width":                    {"text.set_run_stroke_width"},
 	"comps[].layers[].text_style.stroke_over_fill":                {"text.set_run_stroke_over_fill"},
 	"comps[].layers[].text_style.justification":                   {"text.set_paragraph_justification"},
+	"comps[].layers[].text_style.first_line_indent":               {"text.set_paragraph_first_line_indent"},
+	"comps[].layers[].text_style.start_indent":                    {"text.set_paragraph_start_indent"},
+	"comps[].layers[].text_style.end_indent":                      {"text.set_paragraph_end_indent"},
+	"comps[].layers[].text_style.space_before":                    {"text.set_paragraph_space_before"},
+	"comps[].layers[].text_style.space_after":                     {"text.set_paragraph_space_after"},
+	"comps[].layers[].text_style.auto_hyphenate":                  {"text.set_paragraph_auto_hyphenate"},
+	"comps[].layers[].text_style.leading_type":                    {"text.set_paragraph_leading_type"},
+	"comps[].layers[].text_style.hanging_roman":                   {"text.set_paragraph_hanging_roman"},
+	"comps[].layers[].text_style.paragraph_direction":             {"text.set_paragraph_direction"},
 	"comps[].layers[].camera.zoom":                                {"camera.set_zoom"},
 	"comps[].layers[].camera.depth_of_field":                      {"camera.set_depth_of_field"},
 	"comps[].layers[].camera.focus_distance":                      {"camera.set_focus_distance"},
@@ -388,6 +397,42 @@ var capabilityRegistry = map[string]CapabilityMeta{
 	"text.set_paragraph_justification": {
 		Query:   "Layer.SetParagraphJustification",
 		Summary: "Set paragraph justification.",
+	},
+	"text.set_paragraph_first_line_indent": {
+		Query:   "Layer.SetParagraphFirstLineIndent",
+		Summary: "Set paragraph first-line indent.",
+	},
+	"text.set_paragraph_start_indent": {
+		Query:   "Layer.SetParagraphStartIndent",
+		Summary: "Set paragraph start indent.",
+	},
+	"text.set_paragraph_end_indent": {
+		Query:   "Layer.SetParagraphEndIndent",
+		Summary: "Set paragraph end indent.",
+	},
+	"text.set_paragraph_space_before": {
+		Query:   "Layer.SetParagraphSpaceBefore",
+		Summary: "Set paragraph space before.",
+	},
+	"text.set_paragraph_space_after": {
+		Query:   "Layer.SetParagraphSpaceAfter",
+		Summary: "Set paragraph space after.",
+	},
+	"text.set_paragraph_auto_hyphenate": {
+		Query:   "Layer.SetParagraphAutoHyphenate",
+		Summary: "Set paragraph auto-hyphenation.",
+	},
+	"text.set_paragraph_leading_type": {
+		Query:   "Layer.SetParagraphLeadingType",
+		Summary: "Set paragraph leading type.",
+	},
+	"text.set_paragraph_hanging_roman": {
+		Query:   "Layer.SetParagraphHangingRoman",
+		Summary: "Set paragraph hanging Roman punctuation.",
+	},
+	"text.set_paragraph_direction": {
+		Query:   "Layer.SetParagraphDirection",
+		Summary: "Set paragraph reading direction.",
 	},
 	"camera.set_zoom":                      {Query: "Layer.SetCameraZoom", Summary: "Set camera zoom."},
 	"camera.set_depth_of_field":            {Query: "Layer.SetCameraDepthOfField", Summary: "Set camera depth of field."},

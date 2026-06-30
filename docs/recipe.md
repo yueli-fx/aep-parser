@@ -135,6 +135,15 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].text_style.stroke_over_fill` | `boolean` | - | Layer text style stroke-over-fill render order flag. | - | `text.set_run_stroke_over_fill` (`Layer.SetRunStrokeOverFill`) | examples/recipes/minimal-text-style.json |
 | `comps[].layers[].text_style.no_break` | `boolean` | - | Layer text style no-break line wrapping flag. | - | `text.set_run_no_break` (`Layer.SetRunNoBreak`) | examples/recipes/minimal-text-style.json |
 | `comps[].layers[].text_style.justification` | `string` | - | Layer text style paragraph justification mode. | Text justification must use a supported value. | `text.set_paragraph_justification` (`Layer.SetParagraphJustification`) | examples/recipes/minimal-text-shape.json |
+| `comps[].layers[].text_style.first_line_indent` | `number` | - | Layer text style paragraph first-line indent. | - | `text.set_paragraph_first_line_indent` (`Layer.SetParagraphFirstLineIndent`) | examples/recipes/minimal-text-style.json |
+| `comps[].layers[].text_style.start_indent` | `number` | - | Layer text style paragraph start indent. | - | `text.set_paragraph_start_indent` (`Layer.SetParagraphStartIndent`) | examples/recipes/minimal-text-style.json |
+| `comps[].layers[].text_style.end_indent` | `number` | - | Layer text style paragraph end indent. | - | `text.set_paragraph_end_indent` (`Layer.SetParagraphEndIndent`) | examples/recipes/minimal-text-style.json |
+| `comps[].layers[].text_style.space_before` | `number` | - | Layer text style paragraph space before. | - | `text.set_paragraph_space_before` (`Layer.SetParagraphSpaceBefore`) | examples/recipes/minimal-text-style.json |
+| `comps[].layers[].text_style.space_after` | `number` | - | Layer text style paragraph space after. | - | `text.set_paragraph_space_after` (`Layer.SetParagraphSpaceAfter`) | examples/recipes/minimal-text-style.json |
+| `comps[].layers[].text_style.auto_hyphenate` | `boolean` | - | Layer text style paragraph auto-hyphenation switch. | - | `text.set_paragraph_auto_hyphenate` (`Layer.SetParagraphAutoHyphenate`) | examples/recipes/minimal-text-style.json |
+| `comps[].layers[].text_style.leading_type` | `string` | - | Layer text style paragraph leading type. | Text paragraph leading type must use a supported value. | `text.set_paragraph_leading_type` (`Layer.SetParagraphLeadingType`) | examples/recipes/minimal-text-style.json |
+| `comps[].layers[].text_style.hanging_roman` | `boolean` | - | Layer text style paragraph hanging Roman punctuation switch. | - | `text.set_paragraph_hanging_roman` (`Layer.SetParagraphHangingRoman`) | examples/recipes/minimal-text-style.json |
+| `comps[].layers[].text_style.paragraph_direction` | `string` | - | Layer text style paragraph reading direction. | Text paragraph direction must use a supported value. | `text.set_paragraph_direction` (`Layer.SetParagraphDirection`) | examples/recipes/minimal-text-style.json |
 
 ## TextAnimatorSpec
 
@@ -745,6 +754,15 @@ This reference is generated from the canonical recipe field model.
 | `expected_profile.text_styles[].stroke_over_fill` | `boolean` | - | Expected text style stroke-over-fill render order flag. | - | - | examples/recipes/minimal-text-style.json |
 | `expected_profile.text_styles[].no_break` | `boolean` | - | Expected text style no-break line wrapping flag. | - | - | examples/recipes/minimal-text-style.json |
 | `expected_profile.text_styles[].justification` | `string` | - | Expected text style paragraph justification mode. | Expected justification must use a supported text justification value. | - | examples/recipes/minimal-text-shape.json |
+| `expected_profile.text_styles[].first_line_indent` | `number` | - | Expected text style paragraph first-line indent. | - | - | examples/recipes/minimal-text-style.json |
+| `expected_profile.text_styles[].start_indent` | `number` | - | Expected text style paragraph start indent. | - | - | examples/recipes/minimal-text-style.json |
+| `expected_profile.text_styles[].end_indent` | `number` | - | Expected text style paragraph end indent. | - | - | examples/recipes/minimal-text-style.json |
+| `expected_profile.text_styles[].space_before` | `number` | - | Expected text style paragraph space before. | - | - | examples/recipes/minimal-text-style.json |
+| `expected_profile.text_styles[].space_after` | `number` | - | Expected text style paragraph space after. | - | - | examples/recipes/minimal-text-style.json |
+| `expected_profile.text_styles[].auto_hyphenate` | `boolean` | - | Expected text style paragraph auto-hyphenation switch. | - | - | examples/recipes/minimal-text-style.json |
+| `expected_profile.text_styles[].leading_type` | `string` | - | Expected text style paragraph leading type. | Expected paragraph leading type must use a supported value. | - | examples/recipes/minimal-text-style.json |
+| `expected_profile.text_styles[].hanging_roman` | `boolean` | - | Expected text style paragraph hanging Roman punctuation switch. | - | - | examples/recipes/minimal-text-style.json |
+| `expected_profile.text_styles[].paragraph_direction` | `string` | - | Expected text style paragraph reading direction. | Expected paragraph direction must use a supported value. | - | examples/recipes/minimal-text-style.json |
 
 ## ExpectedKeyframedProperty
 

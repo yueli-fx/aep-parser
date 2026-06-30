@@ -339,6 +339,16 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 		if style.Justification != "" && !validTextJustification(style.Justification) {
 			addRefusal("invalid_expected_profile", stylePath+".justification", "justification must be left, right, or center")
 		}
+		if style.LeadingType != "" {
+			if _, err := textLeadingType(style.LeadingType); err != nil {
+				addRefusal("invalid_expected_profile", stylePath+".leading_type", "leading_type must be roman or japanese")
+			}
+		}
+		if style.ParagraphDirection != "" {
+			if _, err := textParagraphDirection(style.ParagraphDirection); err != nil {
+				addRefusal("invalid_expected_profile", stylePath+".paragraph_direction", "paragraph_direction must be ltr or rtl")
+			}
+		}
 	}
 	for i, keyframed := range expected.Keyframes {
 		kfPropPath := fmt.Sprintf("expected_profile.keyframes[%d]", i)

@@ -364,7 +364,16 @@ type TextStyleRun struct {
 }
 
 type TextParagraph struct {
-	Justification string `json:"justification,omitempty"`
+	Justification   string  `json:"justification,omitempty"`
+	FirstLineIndent float64 `json:"first_line_indent,omitempty"`
+	StartIndent     float64 `json:"start_indent,omitempty"`
+	EndIndent       float64 `json:"end_indent,omitempty"`
+	SpaceBefore     float64 `json:"space_before,omitempty"`
+	SpaceAfter      float64 `json:"space_after,omitempty"`
+	LeadingType     string  `json:"leading_type,omitempty"`
+	AutoHyphenate   bool    `json:"auto_hyphenate,omitempty"`
+	HangingRoman    bool    `json:"hanging_roman,omitempty"`
+	Direction       string  `json:"paragraph_direction,omitempty"`
 }
 
 type PathRef struct {
@@ -878,7 +887,18 @@ func buildText(c *aep.JSONComposition, l *aep.JSONLayer, ts *aep.JSONTextSource)
 		})
 	}
 	for _, p := range ts.Paragraphs {
-		out.Paragraphs = append(out.Paragraphs, TextParagraph{Justification: p.Justification})
+		out.Paragraphs = append(out.Paragraphs, TextParagraph{
+			Justification:   p.Justification,
+			FirstLineIndent: p.FirstLineIndent,
+			StartIndent:     p.StartIndent,
+			EndIndent:       p.EndIndent,
+			SpaceBefore:     p.SpaceBefore,
+			SpaceAfter:      p.SpaceAfter,
+			LeadingType:     p.LeadingType,
+			AutoHyphenate:   p.AutoHyphenate,
+			HangingRoman:    p.HangingRoman,
+			Direction:       p.Direction,
+		})
 	}
 	return out
 }

@@ -85,6 +85,14 @@ var fieldValidation = map[string]FieldMeta{
 		Validation: "Text justification must use a supported value.",
 		Enum:       []string{"left", "right", "center"},
 	},
+	"comps[].layers[].text_style.leading_type": {
+		Validation: "Text paragraph leading type must use a supported value.",
+		Enum:       []string{"roman", "japanese"},
+	},
+	"comps[].layers[].text_style.paragraph_direction": {
+		Validation: "Text paragraph direction must use a supported value.",
+		Enum:       []string{"ltr", "rtl"},
+	},
 	"comps[].layers[].matte": {
 		Validation: "Requires project.target_version AE2025, a non-none track_matte mode, and a same-comp source layer name.",
 	},
@@ -253,6 +261,14 @@ var fieldValidation = map[string]FieldMeta{
 	"expected_profile.text_styles[].justification": {
 		Validation: "Expected justification must use a supported text justification value.",
 		Enum:       []string{"left", "right", "center"},
+	},
+	"expected_profile.text_styles[].leading_type": {
+		Validation: "Expected paragraph leading type must use a supported value.",
+		Enum:       []string{"roman", "japanese"},
+	},
+	"expected_profile.text_styles[].paragraph_direction": {
+		Validation: "Expected paragraph direction must use a supported value.",
+		Enum:       []string{"ltr", "rtl"},
 	},
 	"expected_profile.keyframes[].layer_name": {
 		Validation: "Keyframe profile checks require a target layer name.",

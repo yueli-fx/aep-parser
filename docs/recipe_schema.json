@@ -2271,6 +2271,250 @@
       "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
+      "x-aep-path": "comps[].layers[].text_style.first_line_indent",
+      "json_name": "first_line_indent",
+      "source_type": "TextStyleSpec",
+      "source_field": "FirstLineIndent",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Layer text style paragraph first-line indent.",
+      "x-aep-capabilities": [
+        {
+          "key": "text.set_paragraph_first_line_indent",
+          "query": "Layer.SetParagraphFirstLineIndent",
+          "status": "supported",
+          "symbol": "Layer.SetParagraphFirstLineIndent",
+          "domain": "text",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-variable btdk paragraph splice; the key must be\nwritten as REAL (FormatPSReal) or AE divides the value by 65536;\nverified against the DOM firstLineIndent value plus a resave-preservation\ncheck on both AE versions",
+          "gate": [
+            "TestTextPara_AEShipGate_AE2020",
+            "TestTextPara_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_style.start_indent",
+      "json_name": "start_indent",
+      "source_type": "TextStyleSpec",
+      "source_field": "StartIndent",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Layer text style paragraph start indent.",
+      "x-aep-capabilities": [
+        {
+          "key": "text.set_paragraph_start_indent",
+          "query": "Layer.SetParagraphStartIndent",
+          "status": "supported",
+          "symbol": "Layer.SetParagraphStartIndent",
+          "domain": "text",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-variable btdk paragraph splice; the key must be\nwritten as REAL (FormatPSReal) or AE divides the value by 65536; the AE\ntextDocument has no leftMargin DOM property, so this is verified by\nresave-preservation — confirming the value survives a round trip\nthrough the AE engine — on both AE versions",
+          "gate": [
+            "TestTextPara_AEShipGate_AE2020",
+            "TestTextPara_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_style.end_indent",
+      "json_name": "end_indent",
+      "source_type": "TextStyleSpec",
+      "source_field": "EndIndent",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Layer text style paragraph end indent.",
+      "x-aep-capabilities": [
+        {
+          "key": "text.set_paragraph_end_indent",
+          "query": "Layer.SetParagraphEndIndent",
+          "status": "supported",
+          "symbol": "Layer.SetParagraphEndIndent",
+          "domain": "text",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-variable btdk paragraph splice; the key must be\nwritten as REAL (FormatPSReal) or AE divides the value by 65536; the AE\ntextDocument has no rightMargin DOM property, so this is verified by\nresave-preservation — confirming the value survives a round trip\nthrough the AE engine — on both AE versions",
+          "gate": [
+            "TestTextPara_AEShipGate_AE2020",
+            "TestTextPara_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_style.space_before",
+      "json_name": "space_before",
+      "source_type": "TextStyleSpec",
+      "source_field": "SpaceBefore",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Layer text style paragraph space before.",
+      "x-aep-capabilities": [
+        {
+          "key": "text.set_paragraph_space_before",
+          "query": "Layer.SetParagraphSpaceBefore",
+          "status": "supported",
+          "symbol": "Layer.SetParagraphSpaceBefore",
+          "domain": "text",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-variable btdk paragraph splice; the key must be\nwritten as REAL (FormatPSReal) or AE divides the value by 65536;\nverified against the DOM spaceBefore value plus a resave-preservation\ncheck on both AE versions",
+          "gate": [
+            "TestTextPara_AEShipGate_AE2020",
+            "TestTextPara_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_style.space_after",
+      "json_name": "space_after",
+      "source_type": "TextStyleSpec",
+      "source_field": "SpaceAfter",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Layer text style paragraph space after.",
+      "x-aep-capabilities": [
+        {
+          "key": "text.set_paragraph_space_after",
+          "query": "Layer.SetParagraphSpaceAfter",
+          "status": "supported",
+          "symbol": "Layer.SetParagraphSpaceAfter",
+          "domain": "text",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-variable btdk paragraph splice; the key must be\nwritten as REAL (FormatPSReal) or AE divides the value by 65536;\nverified against the DOM spaceAfter value plus a resave-preservation\ncheck on both AE versions",
+          "gate": [
+            "TestTextPara_AEShipGate_AE2020",
+            "TestTextPara_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_style.auto_hyphenate",
+      "json_name": "auto_hyphenate",
+      "source_type": "TextStyleSpec",
+      "source_field": "AutoHyphenate",
+      "type": "boolean",
+      "go_type": "*bool",
+      "description": "Layer text style paragraph auto-hyphenation switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "text.set_paragraph_auto_hyphenate",
+          "query": "Layer.SetParagraphAutoHyphenate",
+          "status": "supported",
+          "symbol": "Layer.SetParagraphAutoHyphenate",
+          "domain": "text",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-variable btdk PostScript paragraph body splice; only\nwriteable through the AE 24+ scripting API; verified against the DOM\nautoHyphenate value plus a resave-preservation check on both AE versions",
+          "gate": [
+            "TestTextEnum_AEShipGate_AE2020",
+            "TestTextEnum_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_style.leading_type",
+      "json_name": "leading_type",
+      "source_type": "TextStyleSpec",
+      "source_field": "LeadingType",
+      "type": "string",
+      "go_type": "string",
+      "description": "Layer text style paragraph leading type.",
+      "x-aep-validation": "Text paragraph leading type must use a supported value.",
+      "enum": [
+        "roman",
+        "japanese"
+      ],
+      "x-aep-capabilities": [
+        {
+          "key": "text.set_paragraph_leading_type",
+          "query": "Layer.SetParagraphLeadingType",
+          "status": "supported",
+          "symbol": "Layer.SetParagraphLeadingType",
+          "domain": "text",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-variable btdk PostScript paragraph body splice; only\nwriteable through the AE 24+ scripting API; on AE 2020 the enum\nround-trips as an opaque preserved value, while AE 2025 exposes it\nthrough the DOM — verified by re-saving and re-reading on both AE\nversions",
+          "gate": [
+            "TestTextEnum_AEShipGate_AE2020",
+            "TestTextEnum_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_style.hanging_roman",
+      "json_name": "hanging_roman",
+      "source_type": "TextStyleSpec",
+      "source_field": "HangingRoman",
+      "type": "boolean",
+      "go_type": "*bool",
+      "description": "Layer text style paragraph hanging Roman punctuation switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "text.set_paragraph_hanging_roman",
+          "query": "Layer.SetParagraphHangingRoman",
+          "status": "supported",
+          "symbol": "Layer.SetParagraphHangingRoman",
+          "domain": "text",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-variable btdk PostScript paragraph body splice; only\nwriteable through the AE 24+ scripting API; only meaningful for\nbox-text; verified against the DOM hangingRoman value plus a\nresave-preservation check on both AE versions",
+          "gate": [
+            "TestTextEnum_AEShipGate_AE2020",
+            "TestTextEnum_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_style.paragraph_direction",
+      "json_name": "paragraph_direction",
+      "source_type": "TextStyleSpec",
+      "source_field": "ParagraphDirection",
+      "type": "string",
+      "go_type": "string",
+      "description": "Layer text style paragraph reading direction.",
+      "x-aep-validation": "Text paragraph direction must use a supported value.",
+      "enum": [
+        "ltr",
+        "rtl"
+      ],
+      "x-aep-capabilities": [
+        {
+          "key": "text.set_paragraph_direction",
+          "query": "Layer.SetParagraphDirection",
+          "status": "supported",
+          "symbol": "Layer.SetParagraphDirection",
+          "domain": "text",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-variable btdk PostScript paragraph body splice; only\nwriteable through the AE 24+ scripting API; on AE 2020 the enum\nround-trips as an opaque preserved value, while AE 2025 exposes it\nthrough the DOM — verified by re-saving and re-reading on both AE\nversions",
+          "gate": [
+            "TestTextEnum_AEShipGate_AE2020",
+            "TestTextEnum_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
       "x-aep-path": "comps[].layers[].text_animators[]",
       "json_name": "text_animators",
       "source_type": "Layer",
@@ -9339,6 +9583,106 @@
         "center"
       ],
       "x-aep-example": "examples/recipes/minimal-text-shape.json"
+    },
+    {
+      "x-aep-path": "expected_profile.text_styles[].first_line_indent",
+      "json_name": "first_line_indent",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "FirstLineIndent",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Expected text style paragraph first-line indent.",
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
+      "x-aep-path": "expected_profile.text_styles[].start_indent",
+      "json_name": "start_indent",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "StartIndent",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Expected text style paragraph start indent.",
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
+      "x-aep-path": "expected_profile.text_styles[].end_indent",
+      "json_name": "end_indent",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "EndIndent",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Expected text style paragraph end indent.",
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
+      "x-aep-path": "expected_profile.text_styles[].space_before",
+      "json_name": "space_before",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "SpaceBefore",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Expected text style paragraph space before.",
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
+      "x-aep-path": "expected_profile.text_styles[].space_after",
+      "json_name": "space_after",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "SpaceAfter",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Expected text style paragraph space after.",
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
+      "x-aep-path": "expected_profile.text_styles[].auto_hyphenate",
+      "json_name": "auto_hyphenate",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "AutoHyphenate",
+      "type": "boolean",
+      "go_type": "*bool",
+      "description": "Expected text style paragraph auto-hyphenation switch.",
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
+      "x-aep-path": "expected_profile.text_styles[].leading_type",
+      "json_name": "leading_type",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "LeadingType",
+      "type": "string",
+      "go_type": "string",
+      "description": "Expected text style paragraph leading type.",
+      "x-aep-validation": "Expected paragraph leading type must use a supported value.",
+      "enum": [
+        "roman",
+        "japanese"
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
+      "x-aep-path": "expected_profile.text_styles[].hanging_roman",
+      "json_name": "hanging_roman",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "HangingRoman",
+      "type": "boolean",
+      "go_type": "*bool",
+      "description": "Expected text style paragraph hanging Roman punctuation switch.",
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
+    },
+    {
+      "x-aep-path": "expected_profile.text_styles[].paragraph_direction",
+      "json_name": "paragraph_direction",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "ParagraphDirection",
+      "type": "string",
+      "go_type": "string",
+      "description": "Expected text style paragraph reading direction.",
+      "x-aep-validation": "Expected paragraph direction must use a supported value.",
+      "enum": [
+        "ltr",
+        "rtl"
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
     },
     {
       "x-aep-path": "expected_profile.keyframes[]",

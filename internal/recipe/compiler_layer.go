@@ -556,6 +556,59 @@ func applyTextStyle(layer *aep.Layer, spec TextStyleSpec) error {
 			return err
 		}
 	}
+	if spec.FirstLineIndent != nil {
+		if err := layer.SetParagraphFirstLineIndent(spec.ParagraphIndex, *spec.FirstLineIndent); err != nil {
+			return err
+		}
+	}
+	if spec.StartIndent != nil {
+		if err := layer.SetParagraphStartIndent(spec.ParagraphIndex, *spec.StartIndent); err != nil {
+			return err
+		}
+	}
+	if spec.EndIndent != nil {
+		if err := layer.SetParagraphEndIndent(spec.ParagraphIndex, *spec.EndIndent); err != nil {
+			return err
+		}
+	}
+	if spec.SpaceBefore != nil {
+		if err := layer.SetParagraphSpaceBefore(spec.ParagraphIndex, *spec.SpaceBefore); err != nil {
+			return err
+		}
+	}
+	if spec.SpaceAfter != nil {
+		if err := layer.SetParagraphSpaceAfter(spec.ParagraphIndex, *spec.SpaceAfter); err != nil {
+			return err
+		}
+	}
+	if spec.AutoHyphenate != nil {
+		if err := layer.SetParagraphAutoHyphenate(spec.ParagraphIndex, *spec.AutoHyphenate); err != nil {
+			return err
+		}
+	}
+	if spec.LeadingType != "" {
+		value, err := textLeadingType(spec.LeadingType)
+		if err != nil {
+			return err
+		}
+		if err := layer.SetParagraphLeadingType(spec.ParagraphIndex, value); err != nil {
+			return err
+		}
+	}
+	if spec.HangingRoman != nil {
+		if err := layer.SetParagraphHangingRoman(spec.ParagraphIndex, *spec.HangingRoman); err != nil {
+			return err
+		}
+	}
+	if spec.ParagraphDirection != "" {
+		value, err := textParagraphDirection(spec.ParagraphDirection)
+		if err != nil {
+			return err
+		}
+		if err := layer.SetParagraphDirection(spec.ParagraphIndex, value); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -989,6 +1042,28 @@ func textDigitSet(value string) (aep.TextDigitSet, error) {
 		return aep.TextDigitSetArabicRTL, nil
 	default:
 		return 0, fmt.Errorf("unsupported digit_set %q", value)
+	}
+}
+
+func textLeadingType(value string) (aep.TextLeadingType, error) {
+	switch normalizeEnum(value) {
+	case "roman":
+		return aep.TextLeadingRoman, nil
+	case "japanese":
+		return aep.TextLeadingJapanese, nil
+	default:
+		return 0, fmt.Errorf("unsupported leading_type %q", value)
+	}
+}
+
+func textParagraphDirection(value string) (aep.TextParagraphDirection, error) {
+	switch normalizeEnum(value) {
+	case "ltr":
+		return aep.TextDirectionLeftToRight, nil
+	case "rtl":
+		return aep.TextDirectionRightToLeft, nil
+	default:
+		return 0, fmt.Errorf("unsupported paragraph_direction %q", value)
 	}
 }
 

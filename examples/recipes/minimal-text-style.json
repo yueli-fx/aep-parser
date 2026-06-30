@@ -38,7 +38,16 @@
             "apply_stroke": true,
             "stroke_color": [255, 32, 64, 255],
             "stroke_width": 8,
-            "justification": "center"
+            "justification": "center",
+            "first_line_indent": 12,
+            "start_indent": 24,
+            "end_indent": 6,
+            "space_before": 8,
+            "space_after": 10,
+            "auto_hyphenate": false,
+            "leading_type": "japanese",
+            "hanging_roman": true,
+            "paragraph_direction": "rtl"
           },
           "transform": {
             "position": [960, 540]
@@ -81,7 +90,16 @@
         "apply_stroke": true,
         "stroke_color": [1, 0.12549019607843137, 0.25098039215686274, 1],
         "stroke_width": 8,
-        "justification": "center"
+        "justification": "center",
+        "first_line_indent": 12,
+        "start_indent": 24,
+        "end_indent": 6,
+        "space_before": 8,
+        "space_after": 10,
+        "auto_hyphenate": false,
+        "leading_type": "japanese",
+        "hanging_roman": true,
+        "paragraph_direction": "rtl"
       }
     ]
   }
