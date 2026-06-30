@@ -154,6 +154,8 @@ Require-Text -Path $htmlPath -Pattern "mechanism_examples\.csv"
 Require-Text -Path $htmlPath -Pattern "errors\.csv"
 Require-Text -Path $htmlPath -Pattern "Mechanism Explorer"
 Require-Text -Path $htmlPath -Pattern "mechanismFilter"
+Require-Text -Path $htmlPath -Pattern "Representative Projects"
+Require-Text -Path $htmlPath -Pattern "mechanism-representatives"
 
 Write-Host "ok: $OutDir"
 Write-Host "projects: $($summary.project_count)"

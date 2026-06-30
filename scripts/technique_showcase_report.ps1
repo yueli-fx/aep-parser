@@ -553,6 +553,16 @@ try {
     }
     $mechanismExampleRows = @($mechanismExamples.Values | ForEach-Object { $_ } | Sort-Object category, name, @{ Expression = { [int]$_.project_count }; Descending = $true }, project_path)
     $mechanismExampleRows | Export-Csv -LiteralPath $mechanismExamplesCsvPath -NoTypeInformation -Encoding UTF8
+    $mechanismExampleIndex = @{}
+    foreach ($example in $mechanismExampleRows) {
+        $key = "$($example.category)`u{1f}$($example.name)"
+        $values = @()
+        if ($mechanismExampleIndex.ContainsKey($key)) {
+            $values = @($mechanismExampleIndex[$key])
+        }
+        $values += [string]$example.project_path
+        $mechanismExampleIndex[$key] = @($values | Select-Object -First 5)
+    }
 
     $projectRowsForCsv = @()
     foreach ($record in $records) {
@@ -856,10 +866,16 @@ try {
     [void]$h.AppendLine("</div>")
     [void]$h.AppendLine("<h2 style=""margin-top:28px"">Mechanism Explorer</h2>")
     [void]$h.AppendLine("<div class=""toolbar""><input id=""mechanismFilter"" type=""search"" aria-label=""Filter mechanisms"" placeholder=""Filter by category, name, risk, or action""><span id=""mechanismCount"" class=""muted""></span></div>")
-    [void]$h.AppendLine("<section class=""panel"" style=""margin-top:14px""><table><thead><tr><th>Category</th><th>Name</th><th>Risk</th><th>Action</th><th>Count</th></tr></thead><tbody>")
+    [void]$h.AppendLine("<section class=""panel"" style=""margin-top:14px""><table><thead><tr><th>Category</th><th>Name</th><th>Risk</th><th>Action</th><th>Representative Projects</th><th>Count</th></tr></thead><tbody>")
     foreach ($mechanism in @($mechanismRows | Sort-Object @{ Expression = { [int]$_.count }; Descending = $true }, category, name | Select-Object -First 120)) {
-        $searchText = ((@($mechanism.category, $mechanism.name, $mechanism.risk, $mechanism.action) | Where-Object { $_ }) -join " ").ToLowerInvariant()
-        [void]$h.AppendLine("<tr class=""mechanism-row"" data-search=""$(Escape-Html $searchText)""><td>$(Escape-Html $mechanism.category)</td><td>$(Escape-Html $mechanism.name)</td><td>$(Escape-Html $mechanism.risk)</td><td>$(Escape-Html $mechanism.action)</td><td>$($mechanism.count)</td></tr>")
+        $exampleKey = "$($mechanism.category)`u{1f}$($mechanism.name)"
+        $representatives = @()
+        if ($mechanismExampleIndex.ContainsKey($exampleKey)) {
+            $representatives = @($mechanismExampleIndex[$exampleKey])
+        }
+        $representativeText = ($representatives -join "; ")
+        $searchText = ((@($mechanism.category, $mechanism.name, $mechanism.risk, $mechanism.action, $representativeText) | Where-Object { $_ }) -join " ").ToLowerInvariant()
+        [void]$h.AppendLine("<tr class=""mechanism-row"" data-search=""$(Escape-Html $searchText)""><td>$(Escape-Html $mechanism.category)</td><td>$(Escape-Html $mechanism.name)</td><td>$(Escape-Html $mechanism.risk)</td><td>$(Escape-Html $mechanism.action)</td><td class=""mechanism-representatives"">$(Escape-Html $representativeText)</td><td>$($mechanism.count)</td></tr>")
     }
     [void]$h.AppendLine("</tbody></table></section>")
     [void]$h.AppendLine("<h2 style=""margin-top:28px"">Study Queue</h2>")
