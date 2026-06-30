@@ -159,11 +159,12 @@ type TextStyleSpec struct {
 }
 
 type TextAnimatorSpec struct {
-	Property    string   `json:"property"`
-	Value       any      `json:"value,omitempty"`
-	RangeStart  *float64 `json:"range_start,omitempty"`
-	RangeEnd    *float64 `json:"range_end,omitempty"`
-	RangeOffset *float64 `json:"range_offset,omitempty"`
+	Property             string           `json:"property"`
+	Value                any              `json:"value,omitempty"`
+	RangeStart           *float64         `json:"range_start,omitempty"`
+	RangeEnd             *float64         `json:"range_end,omitempty"`
+	RangeOffset          *float64         `json:"range_offset,omitempty"`
+	RangeOffsetKeyframes []ScalarKeyframe `json:"range_offset_keyframes,omitempty"`
 }
 
 type ShapeSpec struct {

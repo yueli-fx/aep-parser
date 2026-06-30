@@ -488,6 +488,20 @@ func applyTextAnimators(layer *aep.Layer, animators []TextAnimatorSpec) error {
 			if _, err := aep.AddTextOpacityAnimator(layer, value, *animator.RangeStart, *animator.RangeEnd, *animator.RangeOffset); err != nil {
 				return err
 			}
+			if len(animator.RangeOffsetKeyframes) > 0 {
+				keyframes := make([]aep.ScalarKeyframe, 0, len(animator.RangeOffsetKeyframes))
+				for _, kf := range animator.RangeOffsetKeyframes {
+					keyframes = append(keyframes, aep.ScalarKeyframe{
+						Time:    kf.Time,
+						Value:   kf.Value,
+						InEase:  temporalEase(kf.InEase),
+						OutEase: temporalEase(kf.OutEase),
+					})
+				}
+				if err := aep.AnimateTextRangeOffset(layer, 0, keyframes); err != nil {
+					return err
+				}
+			}
 		default:
 			return fmt.Errorf("text_animators[%d].property %q is not supported", i, animator.Property)
 		}

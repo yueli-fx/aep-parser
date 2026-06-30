@@ -37,6 +37,9 @@ var fieldValidation = map[string]FieldMeta{
 	"comps[].layers[].text_animators[].range_offset": {
 		Validation: "Range selector offset is required.",
 	},
+	"comps[].layers[].text_animators[].range_offset_keyframes[]": {
+		Validation: "When present, requires at least 2 keyframes sorted by non-negative time.",
+	},
 	"comps[].layers[].matte": {
 		Validation: "Requires project.target_version AE2025, a non-none track_matte mode, and a same-comp source layer name.",
 	},

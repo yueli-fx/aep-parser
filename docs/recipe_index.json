@@ -82,6 +82,15 @@
     "comps[].layers[].text_animators[].range_start",
     "comps[].layers[].text_animators[].range_end",
     "comps[].layers[].text_animators[].range_offset",
+    "comps[].layers[].text_animators[].range_offset_keyframes[]",
+    "comps[].layers[].text_animators[].range_offset_keyframes[].time",
+    "comps[].layers[].text_animators[].range_offset_keyframes[].value",
+    "comps[].layers[].text_animators[].range_offset_keyframes[].in_ease",
+    "comps[].layers[].text_animators[].range_offset_keyframes[].in_ease.speed",
+    "comps[].layers[].text_animators[].range_offset_keyframes[].in_ease.influence",
+    "comps[].layers[].text_animators[].range_offset_keyframes[].out_ease",
+    "comps[].layers[].text_animators[].range_offset_keyframes[].out_ease.speed",
+    "comps[].layers[].text_animators[].range_offset_keyframes[].out_ease.influence",
     "comps[].layers[].camera",
     "comps[].layers[].camera.zoom",
     "comps[].layers[].camera.depth_of_field",
@@ -3246,6 +3255,106 @@
       "validation": "Range selector offset is required.",
       "example": "examples/recipes/minimal-text-animator-opacity.json"
     },
+    "comps[].layers[].text_animators[].range_offset_keyframes[]": {
+      "path": "comps[].layers[].text_animators[].range_offset_keyframes[]",
+      "json_name": "range_offset_keyframes",
+      "source_type": "TextAnimatorSpec",
+      "source_field": "RangeOffsetKeyframes",
+      "type": "array\u003crecipe.ScalarKeyframe\u003e",
+      "go_type": "[]recipe.ScalarKeyframe",
+      "summary": "Range selector offset keyframes.",
+      "validation": "When present, requires at least 2 keyframes sorted by non-negative time.",
+      "capability_keys": [
+        "text_animator.animate_range_offset"
+      ],
+      "example": "examples/recipes/minimal-text-animator-range-offset.json"
+    },
+    "comps[].layers[].text_animators[].range_offset_keyframes[].in_ease": {
+      "path": "comps[].layers[].text_animators[].range_offset_keyframes[].in_ease",
+      "json_name": "in_ease",
+      "source_type": "ScalarKeyframe",
+      "source_field": "InEase",
+      "type": "object\u003cTemporalEase\u003e",
+      "go_type": "*recipe.TemporalEase",
+      "summary": "Incoming temporal ease for the keyframe."
+    },
+    "comps[].layers[].text_animators[].range_offset_keyframes[].in_ease.influence": {
+      "path": "comps[].layers[].text_animators[].range_offset_keyframes[].in_ease.influence",
+      "json_name": "influence",
+      "source_type": "TemporalEase",
+      "source_field": "Influence",
+      "type": "number",
+      "go_type": "float64",
+      "requiredness": [
+        "structural"
+      ],
+      "summary": "Incoming temporal ease influence percentage."
+    },
+    "comps[].layers[].text_animators[].range_offset_keyframes[].in_ease.speed": {
+      "path": "comps[].layers[].text_animators[].range_offset_keyframes[].in_ease.speed",
+      "json_name": "speed",
+      "source_type": "TemporalEase",
+      "source_field": "Speed",
+      "type": "number",
+      "go_type": "float64",
+      "summary": "Incoming temporal ease speed."
+    },
+    "comps[].layers[].text_animators[].range_offset_keyframes[].out_ease": {
+      "path": "comps[].layers[].text_animators[].range_offset_keyframes[].out_ease",
+      "json_name": "out_ease",
+      "source_type": "ScalarKeyframe",
+      "source_field": "OutEase",
+      "type": "object\u003cTemporalEase\u003e",
+      "go_type": "*recipe.TemporalEase",
+      "summary": "Outgoing temporal ease for the keyframe."
+    },
+    "comps[].layers[].text_animators[].range_offset_keyframes[].out_ease.influence": {
+      "path": "comps[].layers[].text_animators[].range_offset_keyframes[].out_ease.influence",
+      "json_name": "influence",
+      "source_type": "TemporalEase",
+      "source_field": "Influence",
+      "type": "number",
+      "go_type": "float64",
+      "requiredness": [
+        "structural"
+      ],
+      "summary": "Outgoing temporal ease influence percentage."
+    },
+    "comps[].layers[].text_animators[].range_offset_keyframes[].out_ease.speed": {
+      "path": "comps[].layers[].text_animators[].range_offset_keyframes[].out_ease.speed",
+      "json_name": "speed",
+      "source_type": "TemporalEase",
+      "source_field": "Speed",
+      "type": "number",
+      "go_type": "float64",
+      "summary": "Outgoing temporal ease speed."
+    },
+    "comps[].layers[].text_animators[].range_offset_keyframes[].time": {
+      "path": "comps[].layers[].text_animators[].range_offset_keyframes[].time",
+      "json_name": "time",
+      "source_type": "ScalarKeyframe",
+      "source_field": "Time",
+      "type": "number",
+      "go_type": "float64",
+      "requiredness": [
+        "structural"
+      ],
+      "summary": "Range selector offset keyframe time in seconds.",
+      "example": "examples/recipes/minimal-text-animator-range-offset.json"
+    },
+    "comps[].layers[].text_animators[].range_offset_keyframes[].value": {
+      "path": "comps[].layers[].text_animators[].range_offset_keyframes[].value",
+      "json_name": "value",
+      "source_type": "ScalarKeyframe",
+      "source_field": "Value",
+      "type": "number",
+      "go_type": "float64",
+      "requiredness": [
+        "structural"
+      ],
+      "summary": "Range selector offset keyframe value.",
+      "example": "examples/recipes/minimal-text-animator-range-offset.json"
+    },
     "comps[].layers[].text_animators[].range_start": {
       "path": "comps[].layers[].text_animators[].range_start",
       "json_name": "range_start",
@@ -6177,6 +6286,10 @@
       "comps[].layers[].shape.round_corners.radius"
     ],
     "ScalarKeyframe": [
+      "comps[].layers[].text_animators[].range_offset_keyframes[].time",
+      "comps[].layers[].text_animators[].range_offset_keyframes[].value",
+      "comps[].layers[].text_animators[].range_offset_keyframes[].in_ease",
+      "comps[].layers[].text_animators[].range_offset_keyframes[].out_ease",
       "comps[].layers[].transform.rotation_keyframes[].time",
       "comps[].layers[].transform.rotation_keyframes[].value",
       "comps[].layers[].transform.rotation_keyframes[].in_ease",
@@ -6246,6 +6359,10 @@
       "comps[].layers[].shape.stroke.wave.phase"
     ],
     "TemporalEase": [
+      "comps[].layers[].text_animators[].range_offset_keyframes[].in_ease.speed",
+      "comps[].layers[].text_animators[].range_offset_keyframes[].in_ease.influence",
+      "comps[].layers[].text_animators[].range_offset_keyframes[].out_ease.speed",
+      "comps[].layers[].text_animators[].range_offset_keyframes[].out_ease.influence",
       "comps[].layers[].transform.position_keyframes[].in_ease.speed",
       "comps[].layers[].transform.position_keyframes[].in_ease.influence",
       "comps[].layers[].transform.position_keyframes[].out_ease.speed",
@@ -6272,7 +6389,8 @@
       "comps[].layers[].text_animators[].value",
       "comps[].layers[].text_animators[].range_start",
       "comps[].layers[].text_animators[].range_end",
-      "comps[].layers[].text_animators[].range_offset"
+      "comps[].layers[].text_animators[].range_offset",
+      "comps[].layers[].text_animators[].range_offset_keyframes[]"
     ],
     "TextStyleSpec": [
       "comps[].layers[].text_style.run_index",

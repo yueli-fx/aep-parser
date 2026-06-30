@@ -271,6 +271,23 @@ func validateTextAnimator(animator TextAnimatorSpec, path string, recordCapabili
 	if animator.RangeOffset == nil {
 		addRefusal("missing_text_animator_range_offset", path+".range_offset", "range_offset is required")
 	}
+	if len(animator.RangeOffsetKeyframes) > 0 {
+		recordCapability("AnimateTextRangeOffset", path+".range_offset_keyframes")
+		if len(animator.RangeOffsetKeyframes) < 2 {
+			addRefusal("invalid_text_animator_range_offset_keyframes", path+".range_offset_keyframes", "range_offset_keyframes must include at least 2 keyframes")
+		}
+		for i, kf := range animator.RangeOffsetKeyframes {
+			kfPath := fmt.Sprintf("%s.range_offset_keyframes[%d]", path, i)
+			if kf.Time < 0 {
+				addRefusal("keyframe_time_out_of_range", kfPath+".time", "keyframe time must be non-negative")
+			}
+			if i > 0 && kf.Time < animator.RangeOffsetKeyframes[i-1].Time {
+				addRefusal("keyframes_not_sorted", kfPath+".time", "keyframes must be sorted by time")
+			}
+			validateKeyframeEase(kf.InEase, kfPath+".in_ease", addRefusal)
+			validateKeyframeEase(kf.OutEase, kfPath+".out_ease", addRefusal)
+		}
+	}
 }
 
 func validateColor(values []float64, path, code string, addRefusal func(string, string, string)) {
