@@ -277,13 +277,15 @@ try {
     $recipeDraftCompileJson = Get-Content -Raw -LiteralPath (Join-Path $recipeDraftCompileDir "compile.json") | ConvertFrom-Json
     $compiledRecipeDraftAEP = Get-Item -LiteralPath (Join-Path $recipeDraftCompileDir "recipe_draft.aep")
     $recipeDraftReparseSummary = Get-Content -Raw -LiteralPath (Join-Path $recipeDraftReparseDir "reparse_summary.json") | ConvertFrom-Json
+    $projectRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "projects.csv"))
+    $allRecreationBlockerRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "recreation_blockers.csv"))
     $studyRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "study_queue.csv") | Select-Object -First 5)
     $projectPlaybookRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "project_playbooks.csv") | Select-Object -First 5)
     $compositionRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "compositions.csv") | Select-Object -First 5)
     $layerRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "layers.csv") | Select-Object -First 5)
     $recreationStepRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "recreation_steps.csv") | Select-Object -First 5)
     $patternRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "patterns.csv") | Select-Object -First 5)
-    $recreationBlockerRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "recreation_blockers.csv") | Select-Object -First 5)
+    $recreationBlockerRows = @($allRecreationBlockerRows | Select-Object -First 5)
     $signalLayerRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "signal_layers.csv") | Select-Object -First 5)
     $effectStackRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "effect_stacks.csv") | Select-Object -First 5)
     $shapeOperatorRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "shape_operators.csv") | Select-Object -First 5)
@@ -294,6 +296,18 @@ try {
     $coverageScorecardRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "coverage_scorecard.csv") | Select-Object -First 12)
     $reconstructionBlueprintRows = @(Get-Content -LiteralPath (Join-Path $fullReportDir "reconstruction_blueprints.jsonl") | Where-Object { $_.Trim() -ne "" } | Select-Object -First 5 | ForEach-Object { $_ | ConvertFrom-Json })
     $recipeDraftRows = @(Get-Content -LiteralPath (Join-Path $fullReportDir "recipe_drafts.jsonl") | Where-Object { $_.Trim() -ne "" } | Select-Object -First 5 | ForEach-Object { $_ | ConvertFrom-Json })
+    $readinessSummaryRows = @($projectRows | Group-Object readiness | Sort-Object Name | ForEach-Object {
+        [ordered]@{
+            readiness = $_.Name
+            count = [int]$_.Count
+        }
+    })
+    $blockerSummaryRows = @($allRecreationBlockerRows | Group-Object blocker_type | Sort-Object Name | ForEach-Object {
+        [ordered]@{
+            blocker_type = $_.Name
+            count = [int]$_.Count
+        }
+    })
 
     $selfCountDiffs = @($compareSelf.count_diffs).Count
     $partialCountDiffs = @($comparePartial.count_diffs).Count
@@ -490,6 +504,11 @@ try {
             compiled_draft_facts = Join-Path $recipeDraftReparseDir "compiled_facts.json"
             reparse_summary = Join-Path $recipeDraftReparseDir "reparse_summary.json"
         }
+        reconstruction_status = [ordered]@{
+            readiness_summary = $readinessSummaryRows
+            blocker_summary = $blockerSummaryRows
+            blocker_count = [int]$allRecreationBlockerRows.Count
+        }
         learning_signals = [ordered]@{
             study_queue_top = @($studyRows | ForEach-Object {
                 [ordered]@{
@@ -613,6 +632,19 @@ try {
     [void]$outcomeHtml.AppendLine("<tr><td>Patterns</td><td>$($fullManifest.pattern_count)</td></tr>")
     [void]$outcomeHtml.AppendLine("<tr><td>Full parse errors</td><td>$($fullManifest.error_count)</td></tr>")
     [void]$outcomeHtml.AppendLine("<tr><td>Recipe batch smoke</td><td>$($recipeDraftBatchSummary.passed) / $($recipeDraftBatchSummary.attempted)</td></tr>")
+    [void]$outcomeHtml.AppendLine("</tbody></table></section>")
+    [void]$outcomeHtml.AppendLine("<section class=""panel""><h2>Reconstruction Readiness</h2><table><thead><tr><th>Readiness</th><th>Projects</th></tr></thead><tbody>")
+    foreach ($row in $readinessSummaryRows) {
+        [void]$outcomeHtml.AppendLine("<tr><td>$(Escape-Html $row.readiness)</td><td>$(Escape-Html $row.count)</td></tr>")
+    }
+    [void]$outcomeHtml.AppendLine("</tbody></table>")
+    [void]$outcomeHtml.AppendLine("<h3>Recreation Blockers</h3><table><thead><tr><th>Project</th><th>Type</th><th>Blocker</th></tr></thead><tbody>")
+    foreach ($row in @($recreationBlockerRows | Select-Object -First 3)) {
+        [void]$outcomeHtml.AppendLine("<tr><td>$(Escape-Html $row.project_path)</td><td>$(Escape-Html $row.blocker_type)</td><td>$(Escape-Html $row.blocker)</td></tr>")
+    }
+    if ($recreationBlockerRows.Count -eq 0) {
+        [void]$outcomeHtml.AppendLine("<tr><td colspan=""3"">No blockers reported.</td></tr>")
+    }
     [void]$outcomeHtml.AppendLine("</tbody></table></section>")
     [void]$outcomeHtml.AppendLine("<section class=""panel""><h2>History Delta</h2><table><tbody>")
     [void]$outcomeHtml.AppendLine("<tr><td>Previous run</td><td>$(Escape-Html $historyDelta.previous_run_id)</td></tr>")
@@ -1047,6 +1079,12 @@ try {
     if (-not (Select-String -LiteralPath $latestOutcomeHtmlPath -Pattern "Learning Actions" -Quiet)) {
         throw "latest outcome html missing Learning Actions"
     }
+    if (-not (Select-String -LiteralPath $latestOutcomeHtmlPath -Pattern "Reconstruction Readiness" -Quiet)) {
+        throw "latest outcome html missing Reconstruction Readiness"
+    }
+    if (-not (Select-String -LiteralPath $latestOutcomeHtmlPath -Pattern "Recreation Blockers" -Quiet)) {
+        throw "latest outcome html missing Recreation Blockers"
+    }
     $topStudyPath = ""
     if ($studyRows.Count -gt 0) {
         $topStudyPath = [string]$studyRows[0].path
@@ -1071,6 +1109,15 @@ try {
     }
     if ($null -eq $latestEffectivenessJson.learning_signals.coverage_summary) {
         throw "latest effectiveness json missing learning_signals.coverage_summary"
+    }
+    if ($null -eq $latestEffectivenessJson.reconstruction_status) {
+        throw "latest effectiveness json missing reconstruction_status"
+    }
+    if ($null -eq $latestEffectivenessJson.reconstruction_status.readiness_summary) {
+        throw "latest effectiveness json missing reconstruction_status.readiness_summary"
+    }
+    if ($null -eq $latestEffectivenessJson.reconstruction_status.blocker_summary) {
+        throw "latest effectiveness json missing reconstruction_status.blocker_summary"
     }
     if ($null -eq $latestEffectivenessJson.history_delta) {
         throw "latest effectiveness json missing history_delta"
