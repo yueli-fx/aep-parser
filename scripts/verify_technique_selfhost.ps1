@@ -212,6 +212,7 @@ try {
     [void]$index.AppendLine("<a href=""$runRel/full_report/report.html"">Full report HTML</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/learning.md"">Learning index</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/study_queue.csv"">Study queue CSV</a>")
+    [void]$index.AppendLine("<a href=""$runRel/full_report/study_tasks.csv"">Study tasks CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/learning_actions.csv"">Learning actions CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/mechanisms.csv"">Mechanisms CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/mechanism_examples.csv"">Mechanism examples CSV</a>")
@@ -246,6 +247,7 @@ try {
     Require-LatestIndexLink -Label "full report" -RelativePath "$runRel/full_report/report.html"
     Require-LatestIndexLink -Label "learning index" -RelativePath "$runRel/full_report/learning.md"
     Require-LatestIndexLink -Label "study queue" -RelativePath "$runRel/full_report/study_queue.csv"
+    Require-LatestIndexLink -Label "study tasks" -RelativePath "$runRel/full_report/study_tasks.csv"
     Require-LatestIndexLink -Label "learning actions" -RelativePath "$runRel/full_report/learning_actions.csv"
     Require-LatestIndexLink -Label "mechanisms" -RelativePath "$runRel/full_report/mechanisms.csv"
     Require-LatestIndexLink -Label "mechanism examples" -RelativePath "$runRel/full_report/mechanism_examples.csv"

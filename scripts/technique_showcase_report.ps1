@@ -20,6 +20,7 @@ try {
     $projectsCsvPath = Join-Path $OutDir "projects.csv"
     $patternsCsvPath = Join-Path $OutDir "patterns.csv"
     $studyQueueCsvPath = Join-Path $OutDir "study_queue.csv"
+    $studyTasksCsvPath = Join-Path $OutDir "study_tasks.csv"
     $learningActionsCsvPath = Join-Path $OutDir "learning_actions.csv"
     $mechanismsCsvPath = Join-Path $OutDir "mechanisms.csv"
     $mechanismExamplesCsvPath = Join-Path $OutDir "mechanism_examples.csv"
@@ -553,6 +554,33 @@ try {
     }
     $mechanismExampleRows = @($mechanismExamples.Values | ForEach-Object { $_ } | Sort-Object category, name, @{ Expression = { [int]$_.project_count }; Descending = $true }, project_path)
     $mechanismExampleRows | Export-Csv -LiteralPath $mechanismExamplesCsvPath -NoTypeInformation -Encoding UTF8
+    $studyTaskRank = 1
+    $studyTaskRows = @($mechanismExampleRows |
+        Sort-Object @{ Expression = { [int]$_.project_count }; Descending = $true }, @{ Expression = { [int]$_.study_score }; Descending = $true }, category, name, project_path |
+        Select-Object -First 200 |
+        ForEach-Object {
+            $focus = "$($_.category):$($_.name)"
+            $reasonParts = @("project count: $($_.project_count)")
+            if ($_.patterns) {
+                $reasonParts += "patterns: $($_.patterns)"
+            }
+            $row = [pscustomobject]@{
+                rank          = $studyTaskRank
+                project_path  = [string]$_.project_path
+                focus         = $focus
+                category      = [string]$_.category
+                name          = [string]$_.name
+                project_count = [int]$_.project_count
+                readiness     = [string]$_.readiness
+                patterns      = [string]$_.patterns
+                study_score   = [int]$_.study_score
+                action        = [string]$_.action
+                reason        = ($reasonParts -join "; ")
+            }
+            $studyTaskRank++
+            $row
+        })
+    $studyTaskRows | Export-Csv -LiteralPath $studyTasksCsvPath -NoTypeInformation -Encoding UTF8
     $mechanismExampleIndex = @{}
     foreach ($example in $mechanismExampleRows) {
         $key = "$($example.category)`u{1f}$($example.name)"
@@ -836,7 +864,7 @@ try {
     [void]$h.AppendLine("</head><body><main>")
     [void]$h.AppendLine("<h1>Technique Corpus Report</h1>")
     [void]$h.AppendLine("<p class=""muted"">input <code>$(Escape-Html $InputPath)</code></p>")
-    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""manifest.json"">manifest.json</a> · <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""study_queue.csv"">study_queue.csv</a> · <a href=""learning_actions.csv"">learning_actions.csv</a> · <a href=""mechanisms.csv"">mechanisms.csv</a> · <a href=""mechanism_examples.csv"">mechanism_examples.csv</a> · <a href=""errors.csv"">errors.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
+    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""manifest.json"">manifest.json</a> · <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""study_queue.csv"">study_queue.csv</a> · <a href=""study_tasks.csv"">study_tasks.csv</a> · <a href=""learning_actions.csv"">learning_actions.csv</a> · <a href=""mechanisms.csv"">mechanisms.csv</a> · <a href=""mechanism_examples.csv"">mechanism_examples.csv</a> · <a href=""errors.csv"">errors.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
     [void]$h.AppendLine("<div class=""grid"">")
     foreach ($metric in @(
         @{ Label = "Projects"; Value = $summary.project_count },
@@ -876,6 +904,14 @@ try {
         $representativeText = ($representatives -join "; ")
         $searchText = ((@($mechanism.category, $mechanism.name, $mechanism.risk, $mechanism.action, $representativeText) | Where-Object { $_ }) -join " ").ToLowerInvariant()
         [void]$h.AppendLine("<tr class=""mechanism-row"" data-search=""$(Escape-Html $searchText)""><td>$(Escape-Html $mechanism.category)</td><td>$(Escape-Html $mechanism.name)</td><td>$(Escape-Html $mechanism.risk)</td><td>$(Escape-Html $mechanism.action)</td><td class=""mechanism-representatives"">$(Escape-Html $representativeText)</td><td>$($mechanism.count)</td></tr>")
+    }
+    [void]$h.AppendLine("</tbody></table></section>")
+    [void]$h.AppendLine("<h2 style=""margin-top:28px"">Study Task Queue</h2>")
+    [void]$h.AppendLine("<div class=""toolbar""><input id=""studyTaskFilter"" type=""search"" aria-label=""Filter study tasks"" placeholder=""Filter by project, focus, readiness, pattern, or action""><span id=""studyTaskCount"" class=""muted""></span></div>")
+    [void]$h.AppendLine("<section class=""panel"" style=""margin-top:14px""><table><thead><tr><th>Rank</th><th>Project</th><th>Focus</th><th>Action</th><th>Reason</th></tr></thead><tbody>")
+    foreach ($task in @($studyTaskRows | Select-Object -First 80)) {
+        $searchText = ((@($task.project_path, $task.focus, $task.readiness, $task.patterns, $task.action, $task.reason) | Where-Object { $_ }) -join " ").ToLowerInvariant()
+        [void]$h.AppendLine("<tr class=""study-task"" data-search=""$(Escape-Html $searchText)""><td>$($task.rank)</td><td>$(Escape-Html $task.project_path)</td><td>$(Escape-Html $task.focus)</td><td>$(Escape-Html $task.action)</td><td>$(Escape-Html $task.reason)</td></tr>")
     }
     [void]$h.AppendLine("</tbody></table></section>")
     [void]$h.AppendLine("<h2 style=""margin-top:28px"">Study Queue</h2>")
@@ -1068,6 +1104,7 @@ try {
     }
     [void]$h.AppendLine("</div>")
     [void]$h.AppendLine("<script>(function(){const input=document.getElementById('mechanismFilter');const count=document.getElementById('mechanismCount');const rows=[...document.querySelectorAll('.mechanism-row')];function apply(){const q=(input.value||'').trim().toLowerCase();let shown=0;for(const row of rows){const ok=!q||row.dataset.search.includes(q);row.hidden=!ok;if(ok)shown++;}count.textContent=shown+' / '+rows.length+' mechanisms';}input.addEventListener('input',apply);apply();})();</script>")
+    [void]$h.AppendLine("<script>(function(){const input=document.getElementById('studyTaskFilter');const count=document.getElementById('studyTaskCount');const rows=[...document.querySelectorAll('.study-task')];function apply(){const q=(input.value||'').trim().toLowerCase();let shown=0;for(const row of rows){const ok=!q||row.dataset.search.includes(q);row.hidden=!ok;if(ok)shown++;}count.textContent=shown+' / '+rows.length+' tasks';}input.addEventListener('input',apply);apply();})();</script>")
     [void]$h.AppendLine("<script>(function(){const input=document.getElementById('projectFilter');const count=document.getElementById('projectCount');const cards=[...document.querySelectorAll('.project')];function apply(){const q=(input.value||'').trim().toLowerCase();let shown=0;for(const card of cards){const ok=!q||card.dataset.search.includes(q);card.hidden=!ok;if(ok)shown++;}count.textContent=shown+' / '+cards.length+' projects';}input.addEventListener('input',apply);apply();})();</script>")
     [void]$h.AppendLine("</main></body></html>")
     $h.ToString() | Set-Content -Path $htmlPath -Encoding UTF8
@@ -1080,6 +1117,7 @@ try {
         $projectsCsvPath,
         $patternsCsvPath,
         $studyQueueCsvPath,
+        $studyTasksCsvPath,
         $learningActionsCsvPath,
         $mechanismsCsvPath,
         $mechanismExamplesCsvPath,
@@ -1138,6 +1176,7 @@ try {
     Write-Host "projects csv: $projectsCsvPath"
     Write-Host "patterns csv: $patternsCsvPath"
     Write-Host "study queue csv: $studyQueueCsvPath"
+    Write-Host "study tasks csv: $studyTasksCsvPath"
     Write-Host "learning actions csv: $learningActionsCsvPath"
     Write-Host "mechanisms csv: $mechanismsCsvPath"
     Write-Host "mechanism examples csv: $mechanismExamplesCsvPath"
