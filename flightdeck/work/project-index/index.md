@@ -242,20 +242,76 @@ Corpus-level indexing means extracting reusable evidence/pattern facts from many
 projects for search, statistics, clustering, and technique discovery. It is not
 an ML training plan by itself.
 
+The corpus layer should not keep `[]*Index` as the primary representation. A
+single-project `Index` is useful while one project is being analyzed; corpus
+search needs durable facts that can survive after the project graph is released.
+
 ```go
 type Corpus struct {
-	Projects []*Index
+	Projects []CorpusProject
+	Facts    []CorpusFact
+}
+
+type CorpusProject struct {
+	ID          string
+	Path        string
+	Fingerprint string
+	CompCount   int
+	LayerCount  int
+	EffectCount int
+}
+
+type CorpusFactKind string
+
+const (
+	FactLayerSource CorpusFactKind = "layer_source"
+	FactEffectUsage CorpusFactKind = "effect_usage"
+	FactExpression  CorpusFactKind = "expression"
+	FactTextStyle   CorpusFactKind = "text_style"
+	FactShapeUsage  CorpusFactKind = "shape_usage"
+)
+
+type CorpusFact struct {
+	ProjectID string
+	Kind      CorpusFactKind
+	Location  Location
+	Match     Match
+	Summary   string
+}
+
+type CorpusBuilder interface {
+	AddProject(path string, project *aep.Project) error
+	Build() (*Corpus, error)
 }
 ```
 
+Build lifecycle:
+
+1. Open one project.
+2. Build a single-project `Index`.
+3. Extract facts and aggregate counts/pattern summaries.
+4. Release the project and index unless the caller explicitly asks to keep them.
+5. Repeat for the next project.
+
 Corpus queries should return project path + comp/layer/effect/property evidence,
 not raw pointers alone. This is the likely foundation for learning from 1000+
-projects.
+projects because it can answer questions like:
 
-The first corpus design must account for memory pressure. It may stream projects,
-shard indexes, keep only summarized facts, or lazily load per-project indexes.
-Do not assume 1000 full `Project` graphs plus 1000 full `Index` snapshots should
-stay resident at once.
+- which effects and parameter combinations appear together
+- which layer/source/precomp structures are common
+- which expressions and fonts recur across projects
+- which shape/text/matte techniques are common in a category
+
+Memory rules:
+
+- Do not assume 1000 full `Project` graphs plus 1000 full `Index` snapshots
+  should stay resident at once.
+- Prefer streaming extraction into facts, summarized counters, or persisted
+  shards.
+- A corpus hit must be reloadable by `Project.Path + Location`, but it must not
+  require the original pointer to still be alive.
+- If an interactive browser needs live pointers, load one project on demand and
+  rebuild its single-project `Index`.
 
 ## Non-Goals
 
@@ -300,7 +356,7 @@ stay resident at once.
   - [x] Profile layer `source_ref` resolution now goes through
         `projectindex.AVItemByID` instead of ad hoc comp/footage maps.
 - [x] Design single-project search result schema.
-- [ ] Design corpus-level learning/search index.
+- [x] Design corpus-level learning/search index.
 
 ## Verification
 
