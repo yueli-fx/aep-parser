@@ -362,6 +362,19 @@ var fieldValidation = map[string]FieldMeta{
 	"comps[].layers[].matte": {
 		Validation: "Requires project.target_version AE2025, a non-none track_matte mode, and a same-comp source layer name.",
 	},
+	"comps[].layers[].light": {
+		Validation: "Light options require a layer with type light.",
+	},
+	"comps[].layers[].light.kind": {
+		Validation: "Light kind must use a supported recipe light type.",
+		Enum:       []string{"parallel", "spot", "point", "ambient"},
+	},
+	"comps[].layers[].light.source_layer": {
+		Validation: "Light source_layer must name a layer in the same comp.",
+	},
+	"comps[].layers[].light.color": {
+		Validation: "Light color must contain RGB or RGBA channels in the 0..255 range.",
+	},
 	"comps[].layers[].effects[].match_name": {
 		Validation: "Must be a supported effect match name for recipe compilation.",
 	},

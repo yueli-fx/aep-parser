@@ -288,6 +288,26 @@ func TestBuildDocumentIncludesMaskValidationMetadata(t *testing.T) {
 	}
 }
 
+func TestBuildDocumentIncludesLightValidationMetadata(t *testing.T) {
+	doc, err := BuildDocument()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []string{
+		"comps[].layers[].light",
+		"comps[].layers[].light.kind",
+		"comps[].layers[].light.source_layer",
+		"comps[].layers[].light.color",
+	}
+	for _, path := range tests {
+		field := requireField(t, doc, path)
+		if field.Validation == "" && len(field.Enum) == 0 {
+			t.Fatalf("%s has no validation metadata: %+v", path, field)
+		}
+	}
+}
+
 func TestBuildDocumentIncludesExpectedProfileValidationMetadata(t *testing.T) {
 	doc, err := BuildDocument()
 	if err != nil {

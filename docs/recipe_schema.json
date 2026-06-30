@@ -3946,6 +3946,7 @@
       "go_type": "*recipe.LightSpec",
       "object_type": "LightSpec",
       "description": "Light layer options.",
+      "x-aep-validation": "Light options require a layer with type light.",
       "x-aep-example": "examples/recipes/minimal-light-casts-shadows.json"
     },
     {
@@ -3956,6 +3957,13 @@
       "type": "string",
       "go_type": "string",
       "description": "Light type.",
+      "x-aep-validation": "Light kind must use a supported recipe light type.",
+      "enum": [
+        "parallel",
+        "spot",
+        "point",
+        "ambient"
+      ],
       "x-aep-capabilities": [
         {
           "key": "light.set_kind",
@@ -3982,6 +3990,7 @@
       "type": "string",
       "go_type": "string",
       "description": "Source layer for environment light data.",
+      "x-aep-validation": "Light source_layer must name a layer in the same comp.",
       "x-aep-capabilities": [
         {
           "key": "light.set_source_layer",
@@ -4030,6 +4039,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Light color as RGB channels.",
+      "x-aep-validation": "Light color must contain RGB or RGBA channels in the 0..255 range.",
       "x-aep-capabilities": [
         {
           "key": "light.set_color",

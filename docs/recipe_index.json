@@ -1381,6 +1381,7 @@
       "type": "object\u003cLightSpec\u003e",
       "go_type": "*recipe.LightSpec",
       "summary": "Light layer options.",
+      "validation": "Light options require a layer with type light.",
       "example": "examples/recipes/minimal-light-casts-shadows.json"
     },
     "comps[].layers[].light.casts_shadows": {
@@ -1404,6 +1405,7 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Light color as RGB channels.",
+      "validation": "Light color must contain RGB or RGBA channels in the 0..255 range.",
       "capability_keys": [
         "light.set_color"
       ],
@@ -1495,6 +1497,13 @@
       "type": "string",
       "go_type": "string",
       "summary": "Light type.",
+      "validation": "Light kind must use a supported recipe light type.",
+      "enum": [
+        "parallel",
+        "spot",
+        "point",
+        "ambient"
+      ],
       "capability_keys": [
         "light.set_kind"
       ],
@@ -1534,6 +1543,7 @@
       "type": "string",
       "go_type": "string",
       "summary": "Source layer for environment light data.",
+      "validation": "Light source_layer must name a layer in the same comp.",
       "capability_keys": [
         "light.set_source_layer"
       ],
