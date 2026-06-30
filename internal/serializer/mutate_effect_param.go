@@ -40,14 +40,14 @@ var effectParamTemplateFS embed.FS
 // SetEffectParam always overwrites it with the caller's value before
 // returning, so the stale bytes never surface.
 var effectParamTemplateFiles = map[string]string{
-	"ADBE Gaussian Blur 2-0001":     "templates/effects/effectparam_adbe_gaussian_blur_2_0001.bin",     // Blurriness (scalar)
-	"ADBE Gaussian Blur 2-0002":     "templates/effects/effectparam_adbe_gaussian_blur_2_0002.bin",     // Blur Dimensions (enum)
-	"ADBE Gaussian Blur 2-0003":     "templates/effects/effectparam_adbe_gaussian_blur_2_0003.bin",     // Repeat Edge Pixels (bool)
-	"ADBE Angle Control-0001":       "templates/effects/effectparam_adbe_angle_control_0001.bin",       // Angle (angle)
-	"ADBE Color Control-0001":       "templates/effects/effectparam_adbe_color_control_0001.bin",       // Color (color)
-	"ADBE Point Control-0001":       "templates/effects/effectparam_adbe_point_control_0001.bin",       // Point (2D point)
-	"ADBE Point3D Control-0001":     "templates/effects/effectparam_adbe_point3d_control_0001.bin",     // 3D Point (3D point)
-	"ADBE Slider Control-0001":      "templates/effects/effectparam_adbe_slider_control_0001.bin",      // Slider (slider)
+	"ADBE Gaussian Blur 2-0001": "templates/effects/effectparam_adbe_gaussian_blur_2_0001.bin", // Blurriness (scalar)
+	"ADBE Gaussian Blur 2-0002": "templates/effects/effectparam_adbe_gaussian_blur_2_0002.bin", // Blur Dimensions (enum)
+	"ADBE Gaussian Blur 2-0003": "templates/effects/effectparam_adbe_gaussian_blur_2_0003.bin", // Repeat Edge Pixels (bool)
+	"ADBE Angle Control-0001":   "templates/effects/effectparam_adbe_angle_control_0001.bin",   // Angle (angle)
+	"ADBE Color Control-0001":   "templates/effects/effectparam_adbe_color_control_0001.bin",   // Color (color)
+	"ADBE Point Control-0001":   "templates/effects/effectparam_adbe_point_control_0001.bin",   // Point (2D point)
+	"ADBE Point3D Control-0001": "templates/effects/effectparam_adbe_point3d_control_0001.bin", // 3D Point (3D point)
+	"ADBE Slider Control-0001":  "templates/effects/effectparam_adbe_slider_control_0001.bin",  // Slider (slider)
 }
 
 // genericEffectParamTemplates maps a pard control type to a template usable
@@ -413,6 +413,12 @@ func SetEffectLayerParam(layer *Layer, fx *Effect, paramMatchName string, target
 		for _, t := range tdbs.Children {
 			if t.ID == rifx.IDTdpi && len(t.Data) >= 4 {
 				binary.BigEndian.PutUint32(t.Data[0:4], target.ID)
+				for _, p := range fx.Parameters {
+					if p.MatchName == paramMatchName {
+						p.LayerRefID = target.ID
+						break
+					}
+				}
 				return nil
 			}
 		}

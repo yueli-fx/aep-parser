@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "project": {"name": "minimal-effect-layer-param"},
+  "comps": [{
+    "name": "Effect Layer Param",
+    "width": 640,
+    "height": 360,
+    "frame_rate": 24,
+    "duration": 3,
+    "layers": [{
+      "type": "solid",
+      "name": "Matte",
+      "shape": {"fill_color": [255, 255, 255]}
+    }, {
+      "type": "solid",
+      "name": "FX",
+      "shape": {"fill_color": [255, 0, 0]},
+      "effects": [{
+        "match_name": "ADBE Set Matte3",
+        "params": [{
+          "match_name": "ADBE Set Matte3-0001",
+          "target_layer": "Matte"
+        }]
+      }]
+    }]
+  }],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 2,
+    "layers": [
+      {"name": "Matte", "type": "av"},
+      {"name": "FX", "type": "av"}
+    ],
+    "effects": [{
+      "layer_name": "FX",
+      "match_name": "ADBE Set Matte3",
+      "params": [{
+        "match_name": "ADBE Set Matte3-0001",
+        "target_layer": "Matte"
+      }]
+    }]
+  }
+}

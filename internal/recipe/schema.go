@@ -149,6 +149,13 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 			if layer.Light != nil && layer.Light.SourceLayer != "" && !layerNames[layer.Light.SourceLayer] {
 				addRefusal("unknown_light_source", layerPath+".light.source_layer", fmt.Sprintf("source layer %q was not found in the comp", layer.Light.SourceLayer))
 			}
+			for ei, effect := range layer.Effects {
+				for pi, param := range effect.Params {
+					if param.TargetLayer != "" && !layerNames[param.TargetLayer] {
+						addRefusal("unknown_effect_target_layer", fmt.Sprintf("%s.effects[%d].params[%d].target_layer", layerPath, ei, pi), fmt.Sprintf("target layer %q was not found in the comp", param.TargetLayer))
+					}
+				}
+			}
 		}
 	}
 	return report
@@ -239,8 +246,8 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 			if param.MatchName == "" {
 				addRefusal("invalid_expected_profile", paramPath+".match_name", "param match_name is required")
 			}
-			if param.Expression == "" && param.ExpressionEnabled == nil && param.Value == nil {
-				addRefusal("invalid_expected_profile", paramPath, "expected param value, expression, or expression_enabled is required")
+			if param.Expression == "" && param.ExpressionEnabled == nil && param.Value == nil && param.TargetLayer == "" {
+				addRefusal("invalid_expected_profile", paramPath, "expected param value, target_layer, expression, or expression_enabled is required")
 			}
 			if param.Value != nil && !validEffectParamValue(param.Value) {
 				addRefusal("invalid_expected_profile", paramPath+".value", "expected param value must be a number, boolean, or numeric array")

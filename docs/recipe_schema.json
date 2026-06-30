@@ -3097,7 +3097,7 @@
       "go_type": "*recipe.ShapeSpec",
       "object_type": "ShapeSpec",
       "description": "Shape layer primitive and operators.",
-      "x-aep-example": "examples/recipes/minimal-layer-explicit-matte.json"
+      "x-aep-example": "examples/recipes/minimal-effect-layer-param.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.kind",
@@ -3433,7 +3433,7 @@
           ]
         }
       ],
-      "x-aep-example": "examples/recipes/minimal-layer-explicit-matte.json"
+      "x-aep-example": "examples/recipes/minimal-effect-layer-param.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.fill_opacity",
@@ -7372,6 +7372,41 @@
       "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
+      "x-aep-path": "comps[].layers[].effects[].params[].target_layer",
+      "json_name": "target_layer",
+      "source_type": "EffectParam",
+      "source_field": "TargetLayer",
+      "type": "string",
+      "go_type": "string",
+      "description": "Effect parameter target layer name.",
+      "x-aep-validation": "For layer-reference effect parameters, must name a layer in the same comp. Cannot be combined with value, keyframes, or expression.",
+      "x-aep-capabilities": [
+        {
+          "key": "effect.set_layer_param",
+          "query": "SetEffectLayerParam",
+          "status": "supported",
+          "symbol": "SetEffectLayerParam",
+          "domain": "effect",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "boundary": "the parameter must already be materialized (shipped with the template): Set Matte / Displacement Map / Compound Blur / CC Vector Blur and the later layer-reference effects are gated for AE acceptance + read-back (some render-pixel deferred); materializing other default-elided layer-reference params is not done",
+          "gate": [
+            "TestSetMatte_AEShipGate_AE2020",
+            "TestSetMatte_AEShipGate_AE2025",
+            "TestLayerRefDispMap_AEShipGate_AE2020",
+            "TestLayerRefDispMap_AEShipGate_AE2025",
+            "TestLayerRefCompoundBlur_AEShipGate_AE2020",
+            "TestLayerRefCompoundBlur_AEShipGate_AE2025",
+            "TestAddEffectWave11_AEShipGate_AE2020",
+            "TestAddEffectWave11_AEShipGate_AE2025",
+            "TestAddEffectWave12_AEShipGate_AE2020",
+            "TestAddEffectWave12_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-effect-layer-param.json"
+    },
+    {
       "x-aep-path": "comps[].layers[].effects[].params[].keyframes[]",
       "json_name": "keyframes",
       "source_type": "EffectParam",
@@ -8349,7 +8384,7 @@
       "element": "recipe.ExpectedEffectParam",
       "object_type": "ExpectedEffectParam",
       "description": "Expected effect parameter checks.",
-      "x-aep-validation": "Each expected effect parameter needs at least one of value, expression, or expression_enabled.",
+      "x-aep-validation": "Each expected effect parameter needs at least one of value, target_layer, expression, or expression_enabled.",
       "x-aep-example": "examples/recipes/minimal-effect-param-expression.json"
     },
     {
@@ -8374,6 +8409,17 @@
       "description": "Expected effect parameter value.",
       "x-aep-validation": "Expected parameter value must be a number, boolean, or numeric array.",
       "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
+    },
+    {
+      "x-aep-path": "expected_profile.effects[].params[].target_layer",
+      "json_name": "target_layer",
+      "source_type": "ExpectedEffectParam",
+      "source_field": "TargetLayer",
+      "type": "string",
+      "go_type": "string",
+      "description": "Expected effect parameter target layer name.",
+      "x-aep-validation": "Expected target layer checks compare against the profiled effect parameter layer reference name.",
+      "x-aep-example": "examples/recipes/minimal-effect-layer-param.json"
     },
     {
       "x-aep-path": "expected_profile.effects[].params[].expression",

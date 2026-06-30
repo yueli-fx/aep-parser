@@ -68,6 +68,16 @@ StaticValue any
 
 read-write
 
+### Property.LayerRefID
+
+```go
+LayerRefID uint32
+```
+
+tdpi-bound layer reference for layer-picker effect params
+
+read-only
+
 ### Property.Expression
 
 ```go

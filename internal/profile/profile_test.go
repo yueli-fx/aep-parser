@@ -146,6 +146,74 @@ func TestBuildEffectsFixtureIncludesEffectUsageAndTunedParams(t *testing.T) {
 	}
 }
 
+func TestBuildSyntheticProjectIncludesEffectParamLayerRefs(t *testing.T) {
+	project := aep.NewProject(aep.TargetAE2020)
+	comp, err := aep.NewComposition(project, "Layer Ref", 640, 360, 24, 3)
+	if err != nil {
+		t.Fatalf("NewComposition: %v", err)
+	}
+	if _, err := aep.NewSolidLayer(comp, "Matte", 640, 360, [3]float64{1, 1, 1}); err != nil {
+		t.Fatalf("NewSolidLayer Matte: %v", err)
+	}
+	if _, err := aep.NewSolidLayer(comp, "FX", 640, 360, [3]float64{1, 0, 0}); err != nil {
+		t.Fatalf("NewSolidLayer FX: %v", err)
+	}
+	project, err = aep.Reopen(project)
+	if err != nil {
+		t.Fatalf("Reopen: %v", err)
+	}
+	comp = project.Compositions[0]
+	matte := comp.LayerByName("Matte")
+	fxLayer := comp.LayerByName("FX")
+	if matte == nil || fxLayer == nil {
+		t.Fatal("Matte/FX layers missing after reopen")
+	}
+	fx, err := aep.AddEffect(fxLayer, "ADBE Set Matte3")
+	if err != nil {
+		t.Fatalf("AddEffect: %v", err)
+	}
+	if err := aep.SetEffectLayerParam(fxLayer, fx, "ADBE Set Matte3-0001", matte); err != nil {
+		t.Fatalf("SetEffectLayerParam: %v", err)
+	}
+
+	prof, err := profile.Build(project, profile.Options{})
+	if err != nil {
+		t.Fatalf("Build: %v", err)
+	}
+
+	var fxEffect *profile.Effect
+	var param *profile.Property
+	for li := range prof.Comps[0].Layers {
+		layer := &prof.Comps[0].Layers[li]
+		if layer.Name != "FX" {
+			continue
+		}
+		for ei := range layer.Effects {
+			effect := &layer.Effects[ei]
+			if effect.MatchName == "ADBE Set Matte3" {
+				fxEffect = effect
+			}
+			for pi := range effect.Params {
+				if effect.Params[pi].MatchName == "ADBE Set Matte3-0001" {
+					param = &effect.Params[pi]
+				}
+			}
+		}
+	}
+	if fxEffect == nil {
+		t.Fatal("Set Matte effect not found")
+	}
+	if param == nil {
+		t.Fatal("Set Matte layer param not found")
+	}
+	if param.LayerRef == nil || param.LayerRef.Name != "Matte" {
+		t.Fatalf("LayerRef = %+v, want Matte", param.LayerRef)
+	}
+	if !containsString(fxEffect.TunedParams, "ADBE Set Matte3-0001") {
+		t.Fatalf("TunedParams = %v, want ADBE Set Matte3-0001", fxEffect.TunedParams)
+	}
+}
+
 func TestBuildMarkerFixtureIncludesCompMarkers(t *testing.T) {
 	path := repoPath(t, "test_data", "fixtures", "re_compmarker.aep")
 	project, err := aep.Open(path)

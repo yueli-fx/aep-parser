@@ -186,6 +186,11 @@ Done:
   scalar-or-vector keyframe list, and
   `minimal-effect-param-vector-keyframes.json` asserts Point Control keyframes
   through `expected_profile.keyframes[]`.
+- Recipe effect params now support layer-reference parameters through
+  `target_layer` and `SetEffectLayerParam`. Profile output exposes
+  `properties[].layer_ref`, and `expected_profile.effects[].params[]` can
+  assert the target layer name. `minimal-effect-layer-param.json` covers the
+  Set Matte layer picker.
 - Recipe comp settings now support `draft_3d`. Profile composition output now
   exposes `draft_3d` from the cdta flag, and `expected_profile.draft_3d` can
   assert it. This remains a roundtrip/profile contract because AE 2025 DOM

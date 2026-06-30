@@ -101,7 +101,7 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].text_animators[]` | `array<recipe.TextAnimatorSpec>` | - | Text animator definitions. | - | `text_animator.add_opacity` (`AddTextOpacityAnimator`)<br>`text_animator.add_position` (`AddTextPositionAnimator`)<br>`text_animator.add_scale` (`AddTextScaleAnimator`)<br>`text_animator.add_rotation` (`AddTextRotationAnimator`)<br>`text_animator.add_color` (`AddTextColorAnimator`)<br>`text_animator.add_tracking` (`AddTextTrackingAnimator`)<br>`text_animator.add_character_offset` (`AddTextCharacterOffsetAnimator`)<br>`text_animator.add_fill_opacity` (`AddTextFillOpacityAnimator`)<br>`text_animator.add_stroke_opacity` (`AddTextStrokeOpacityAnimator`)<br>`text_animator.add_stroke_width` (`AddTextStrokeWidthAnimator`)<br>`text_animator.add_skew` (`AddTextSkewAnimator`)<br>`text_animator.add_rotation_x` (`AddTextRotationXAnimator`)<br>`text_animator.add_rotation_y` (`AddTextRotationYAnimator`)<br>`text_animator.add_stroke_color` (`AddTextStrokeColorAnimator`) | examples/recipes/minimal-text-animator-character-offset-value-keyframes.json |
 | `comps[].layers[].camera` | `object<CameraSpec>` | - | Camera layer options. | - | - | examples/recipes/minimal-camera-aperture.json |
 | `comps[].layers[].light` | `object<LightSpec>` | - | Light layer options. | - | - | examples/recipes/minimal-light-casts-shadows.json |
-| `comps[].layers[].shape` | `object<ShapeSpec>` | - | Shape layer primitive and operators. | - | - | examples/recipes/minimal-layer-explicit-matte.json |
+| `comps[].layers[].shape` | `object<ShapeSpec>` | - | Shape layer primitive and operators. | - | - | examples/recipes/minimal-effect-layer-param.json |
 | `comps[].layers[].masks[]` | `array<recipe.MaskSpec>` | - | Layer masks. | - | `mask.add` (`AddMask`) | examples/recipes/minimal-layer-mask.json |
 | `comps[].layers[].transform` | `object<Transform>` | - | Layer transform block. | - | `layer.set_transform` (`SetLayerTransform`) | examples/recipes/minimal-adjustment-layer.json |
 | `comps[].layers[].effects[]` | `array<recipe.Effect>` | - | Built-in effect instance to add to the layer. | - | `effect.add_builtin` (`AddEffect`) | examples/recipes/minimal-text-effect.json |
@@ -250,7 +250,7 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].shape.outer_radius` | `number` | - | Star or polygon outer radius. | - | `shape.star.set_outer_radius` (`StarNode.SetOuterRadius`) | examples/recipes/minimal-shape-polystar.json |
 | `comps[].layers[].shape.inner_roundness` | `number` | - | Star inner roundness. | - | `shape.star.set_inner_roundness` (`StarNode.SetInnerRoundness`) | examples/recipes/minimal-shape-polystar.json |
 | `comps[].layers[].shape.outer_roundness` | `number` | - | Star or polygon outer roundness. | - | `shape.star.set_outer_roundness` (`StarNode.SetOuterRoundness`) | examples/recipes/minimal-shape-polystar.json |
-| `comps[].layers[].shape.fill_color` | `array<float64>` | - | Solid fill color as RGB channels. | - | `shape.fill.set_color` (`FillNode.SetColor`) | examples/recipes/minimal-layer-explicit-matte.json |
+| `comps[].layers[].shape.fill_color` | `array<float64>` | - | Solid fill color as RGB channels. | - | `shape.fill.set_color` (`FillNode.SetColor`) | examples/recipes/minimal-effect-layer-param.json |
 | `comps[].layers[].shape.fill_opacity` | `number` | - | Solid fill opacity. | - | `shape.fill.set_opacity` (`FillNode.SetOpacity`) | examples/recipes/minimal-text-shape.json |
 | `comps[].layers[].shape.fill_blend_mode` | `number` | - | Solid fill blend mode. | - | `shape.fill.set_blend_mode` (`FillNode.SetBlendMode`) | examples/recipes/minimal-shape-fill-blend-mode.json |
 | `comps[].layers[].shape.fill_composite_order` | `string` | - | Solid fill composite order. | - | `shape.fill.set_composite_order` (`FillNode.SetCompositeOrder`) | examples/recipes/minimal-shape-fill-composite-order.json |
@@ -550,6 +550,7 @@ This reference is generated from the canonical recipe field model.
 | --- | --- | --- | --- | --- | --- | --- |
 | `comps[].layers[].effects[].params[].match_name` | `string` | structural | Effect parameter match name. | Must match a parameter exposed by the chosen effect. | - | examples/recipes/minimal-adjustment-layer.json |
 | `comps[].layers[].effects[].params[].value` | `any` | - | Effect parameter value. | Supported values are numbers, booleans, or numeric arrays. Optional when keyframes are present. | - | examples/recipes/minimal-adjustment-layer.json |
+| `comps[].layers[].effects[].params[].target_layer` | `string` | - | Effect parameter target layer name. | For layer-reference effect parameters, must name a layer in the same comp. Cannot be combined with value, keyframes, or expression. | `effect.set_layer_param` (`SetEffectLayerParam`) | examples/recipes/minimal-effect-layer-param.json |
 | `comps[].layers[].effects[].params[].keyframes[]` | `array<recipe.ValueKeyframe>` | - | Effect parameter keyframe list. | When present, requires at least 2 keyframes sorted by non-negative time. Values must be all scalar numbers or all 2-, 3-, or 4-number arrays. | `effect.animate_param` (`AnimateEffectParam`)<br>`effect.animate_param_vec` (`AnimateEffectParamVec`) | examples/recipes/minimal-effect-param-vector-keyframes.json |
 | `comps[].layers[].effects[].params[].expression` | `object<ExpressionSpec>` | - | Effect parameter expression settings. | - | - | examples/recipes/minimal-effect-param-expression.json |
 
@@ -663,7 +664,7 @@ This reference is generated from the canonical recipe field model.
 | --- | --- | --- | --- | --- | --- | --- |
 | `expected_profile.effects[].layer_name` | `string` | structural | Layer name to inspect for the expected effect. | Effect profile checks require a target layer name. | - | examples/recipes/minimal-adjustment-layer.json |
 | `expected_profile.effects[].match_name` | `string` | structural | Expected effect match name. | Effect profile checks require an effect match name. | - | examples/recipes/minimal-adjustment-layer.json |
-| `expected_profile.effects[].params[]` | `array<recipe.ExpectedEffectParam>` | - | Expected effect parameter checks. | Each expected effect parameter needs at least one of value, expression, or expression_enabled. | - | examples/recipes/minimal-effect-param-expression.json |
+| `expected_profile.effects[].params[]` | `array<recipe.ExpectedEffectParam>` | - | Expected effect parameter checks. | Each expected effect parameter needs at least one of value, target_layer, expression, or expression_enabled. | - | examples/recipes/minimal-effect-param-expression.json |
 
 ## ExpectedEffectParam
 
@@ -671,6 +672,7 @@ This reference is generated from the canonical recipe field model.
 | --- | --- | --- | --- | --- | --- | --- |
 | `expected_profile.effects[].params[].match_name` | `string` | structural | Expected effect parameter match name. | Expected effect parameter checks require a parameter match name. | - | examples/recipes/minimal-adjustment-layer.json |
 | `expected_profile.effects[].params[].value` | `any` | - | Expected effect parameter value. | Expected parameter value must be a number, boolean, or numeric array. | - | examples/recipes/minimal-adjustment-layer.json |
+| `expected_profile.effects[].params[].target_layer` | `string` | - | Expected effect parameter target layer name. | Expected target layer checks compare against the profiled effect parameter layer reference name. | - | examples/recipes/minimal-effect-layer-param.json |
 | `expected_profile.effects[].params[].expression` | `string` | - | Expected effect parameter expression source. | - | - | examples/recipes/minimal-effect-param-expression.json |
 | `expected_profile.effects[].params[].expression_enabled` | `boolean` | - | Expected effect parameter expression enable switch. | - | - | examples/recipes/minimal-effect-param-expression.json |
 

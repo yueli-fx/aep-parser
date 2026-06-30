@@ -55,6 +55,9 @@ var fieldValidation = map[string]FieldMeta{
 	"comps[].layers[].effects[].params[].value": {
 		Validation: "Supported values are numbers, booleans, or numeric arrays. Optional when keyframes are present.",
 	},
+	"comps[].layers[].effects[].params[].target_layer": {
+		Validation: "For layer-reference effect parameters, must name a layer in the same comp. Cannot be combined with value, keyframes, or expression.",
+	},
 	"comps[].layers[].effects[].params[].keyframes[]": {
 		Validation: "When present, requires at least 2 keyframes sorted by non-negative time. Values must be all scalar numbers or all 2-, 3-, or 4-number arrays.",
 	},
@@ -125,13 +128,16 @@ var fieldValidation = map[string]FieldMeta{
 		Validation: "Effect profile checks require an effect match name.",
 	},
 	"expected_profile.effects[].params[]": {
-		Validation: "Each expected effect parameter needs at least one of value, expression, or expression_enabled.",
+		Validation: "Each expected effect parameter needs at least one of value, target_layer, expression, or expression_enabled.",
 	},
 	"expected_profile.effects[].params[].match_name": {
 		Validation: "Expected effect parameter checks require a parameter match name.",
 	},
 	"expected_profile.effects[].params[].value": {
 		Validation: "Expected parameter value must be a number, boolean, or numeric array.",
+	},
+	"expected_profile.effects[].params[].target_layer": {
+		Validation: "Expected target layer checks compare against the profiled effect parameter layer reference name.",
 	},
 	"expected_profile.properties[].layer_name": {
 		Validation: "Property profile checks require a target layer name.",

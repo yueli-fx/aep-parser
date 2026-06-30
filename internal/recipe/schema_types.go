@@ -346,10 +346,11 @@ type Effect struct {
 }
 
 type EffectParam struct {
-	MatchName  string          `json:"match_name"`
-	Value      any             `json:"value,omitempty"`
-	Keyframes  []ValueKeyframe `json:"keyframes,omitempty"`
-	Expression *ExpressionSpec `json:"expression,omitempty"`
+	MatchName   string          `json:"match_name"`
+	Value       any             `json:"value,omitempty"`
+	TargetLayer string          `json:"target_layer,omitempty"`
+	Keyframes   []ValueKeyframe `json:"keyframes,omitempty"`
+	Expression  *ExpressionSpec `json:"expression,omitempty"`
 }
 
 type Transform struct {
@@ -562,6 +563,7 @@ type ExpectedEffect struct {
 type ExpectedEffectParam struct {
 	MatchName         string `json:"match_name"`
 	Value             any    `json:"value,omitempty"`
+	TargetLayer       string `json:"target_layer,omitempty"`
 	Expression        string `json:"expression,omitempty"`
 	ExpressionEnabled *bool  `json:"expression_enabled,omitempty"`
 }

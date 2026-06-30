@@ -22,6 +22,7 @@ type Property struct {
 	Components        int    // 1 for scalar, 2 for 2D point, 3 for 3D point, etc.
 	Keyframes         []*Keyframe
 	StaticValue       any
+	LayerRefID        uint32 // tdpi-bound layer reference for layer-picker effect params
 	Expression        string // JS expression source, "" when no expression set
 	ExpressionEnabled bool   // tdb4 @0x77 disabled byte (0 = AE evaluates; @0x78 is the has-expression marker). Always true for properties without an expression (AE's default state)
 

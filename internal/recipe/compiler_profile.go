@@ -217,6 +217,15 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 				passed := profileValueEqual(expectedParam.Value, param.StaticValue)
 				add(paramPath, expectedParam.Value, param.StaticValue, passed)
 			}
+			if expectedParam.TargetLayer != "" {
+				var actual any
+				passed := false
+				if param.LayerRef != nil {
+					actual = param.LayerRef.Name
+					passed = param.LayerRef.Name == expectedParam.TargetLayer
+				}
+				add(paramPath+".target_layer", expectedParam.TargetLayer, actual, passed)
+			}
 			if expectedParam.Expression != "" {
 				add(paramPath+".expression", expectedParam.Expression, param.Expression, param.Expression == expectedParam.Expression)
 			}

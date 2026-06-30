@@ -1,6 +1,8 @@
 package serializer
 
 import (
+	"encoding/binary"
+
 	"github.com/yueli-fx/aep-parser/internal/codec"
 	"github.com/yueli-fx/aep-parser/internal/rifx"
 	"github.com/yueli-fx/aep-parser/internal/scene"
@@ -293,6 +295,12 @@ func parseLeafProperty(matchName string, tdbs *rifx.Chunk, ctx *parseCtx) *Prope
 	}
 	if tduM := tdbs.FindFirst(rifx.IDtduM); tduM != nil {
 		pb.tduM = tduM
+	}
+	for _, ch := range tdbs.Children {
+		if ch.ID == rifx.IDTdpi && len(ch.Data) >= 4 {
+			prop.LayerRefID = binary.BigEndian.Uint32(ch.Data[:4])
+			break
+		}
 	}
 
 	cdat := tdbs.FindFirst(rifx.IDCdat)

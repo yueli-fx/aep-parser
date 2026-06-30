@@ -188,11 +188,26 @@ func materializeEffects(project *aep.Project, compSpec CompSpec) (*aep.Project, 
 				return nil, fmt.Errorf("recipe: layer %q add effect %q: %w", layerSpec.Name, effect.MatchName, err)
 			}
 			for _, param := range effect.Params {
-				property, err := applyEffectParam(layer, fx, param)
-				if err != nil {
-					return nil, fmt.Errorf("recipe: layer %q effect %q param %q: %w", layerSpec.Name, effect.MatchName, param.MatchName, err)
+				var property *aep.Property
+				if param.TargetLayer != "" {
+					target := comp.LayerByName(param.TargetLayer)
+					if target == nil {
+						return nil, fmt.Errorf("recipe: layer %q effect %q param %q target layer %q not found", layerSpec.Name, effect.MatchName, param.MatchName, param.TargetLayer)
+					}
+					if err := aep.SetEffectLayerParam(layer, fx, param.MatchName, target); err != nil {
+						return nil, fmt.Errorf("recipe: layer %q effect %q param %q target layer: %w", layerSpec.Name, effect.MatchName, param.MatchName, err)
+					}
+				} else {
+					var err error
+					property, err = applyEffectParam(layer, fx, param)
+					if err != nil {
+						return nil, fmt.Errorf("recipe: layer %q effect %q param %q: %w", layerSpec.Name, effect.MatchName, param.MatchName, err)
+					}
 				}
 				if param.Expression != nil {
+					if property == nil {
+						return nil, fmt.Errorf("recipe: layer %q effect %q param %q expression requires a value/keyframes param", layerSpec.Name, effect.MatchName, param.MatchName)
+					}
 					if err := applyPropertyExpression(property, *param.Expression); err != nil {
 						return nil, fmt.Errorf("recipe: layer %q effect %q param %q expression: %w", layerSpec.Name, effect.MatchName, param.MatchName, err)
 					}

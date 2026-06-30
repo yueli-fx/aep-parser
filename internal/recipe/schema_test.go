@@ -3085,6 +3085,44 @@ func TestValidateRejectsMixedEffectParamKeyframeValues(t *testing.T) {
 	assertRefusal(t, report, "invalid_effect_param_keyframe_value")
 }
 
+func TestValidateReportsEffectLayerParamCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers = append(rec.Comps[0].Layers, recipe.Layer{
+		Type: "solid",
+		Name: "Matte",
+	})
+	rec.Comps[0].Layers[0].Effects = []recipe.Effect{{
+		MatchName: "ADBE Set Matte3",
+		Params: []recipe.EffectParam{
+			{MatchName: "ADBE Set Matte3-0001", TargetLayer: "Matte"},
+		},
+	}}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "SetEffectLayerParam")
+}
+
+func TestValidateRejectsUnknownEffectTargetLayer(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Effects = []recipe.Effect{{
+		MatchName: "ADBE Set Matte3",
+		Params: []recipe.EffectParam{
+			{MatchName: "ADBE Set Matte3-0001", TargetLayer: "Missing"},
+		},
+	}}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "unknown_effect_target_layer")
+}
+
 func TestValidateRejectsUnsupportedEffectParamValue(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].Effects = []recipe.Effect{{

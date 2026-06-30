@@ -883,14 +883,22 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 		}
 		for pi, param := range effect.Params {
 			paramPath := fmt.Sprintf("%s.params[%d]", effectPath, pi)
-			recordCapability("SetEffectParam", paramPath)
 			if param.MatchName == "" {
 				addRefusal("missing_effect_param_match_name", paramPath+".match_name", "effect param match_name is required")
 			}
-			if len(param.Keyframes) > 0 {
+			if param.TargetLayer != "" {
+				recordCapability("SetEffectLayerParam", paramPath+".target_layer")
+				if param.Value != nil || len(param.Keyframes) > 0 || param.Expression != nil {
+					addRefusal("invalid_effect_layer_param_combo", paramPath, "target_layer effect params cannot also set value, keyframes, or expression")
+				}
+			} else if len(param.Keyframes) > 0 {
+				recordCapability("SetEffectParam", paramPath)
 				validateEffectParamKeyframes(param.Keyframes, paramPath+".keyframes", recordCapability, addRefusal)
 			} else if !validEffectParamValue(param.Value) {
+				recordCapability("SetEffectParam", paramPath)
 				addRefusal("unsupported_effect_param_value", paramPath+".value", "effect param value must be a number, boolean, or numeric array")
+			} else {
+				recordCapability("SetEffectParam", paramPath)
 			}
 			if param.Expression != nil {
 				recordCapability("Property.SetExpression", paramPath+".expression.source")

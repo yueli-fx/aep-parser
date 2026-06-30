@@ -476,12 +476,13 @@ func addExpressionSummaries(out map[string]string, prefix, label string) {
 
 func addEffectSummaries(out map[string]string, prefix, label string) {
 	addSummaries(out, prefix, map[string]string{
-		"match_name":           label + " match name.",
-		"params[]":             label + " parameter assignments.",
-		"params[].match_name":  "Effect parameter match name.",
-		"params[].value":       "Effect parameter value.",
-		"params[].keyframes[]": "Effect parameter scalar or vector keyframes.",
-		"params[].expression":  "Effect parameter expression settings.",
+		"match_name":            label + " match name.",
+		"params[]":              label + " parameter assignments.",
+		"params[].match_name":   "Effect parameter match name.",
+		"params[].value":        "Effect parameter value.",
+		"params[].target_layer": "Effect parameter target layer name.",
+		"params[].keyframes[]":  "Effect parameter scalar or vector keyframes.",
+		"params[].expression":   "Effect parameter expression settings.",
 	})
 	addKeyframeSummaries(out, prefix+".params[].keyframes[]", "Effect parameter keyframe", "scalar/vector")
 	addExpressionSummaries(out, prefix+".params[].expression", "effect parameter expression")
@@ -564,6 +565,7 @@ func addExpectedEffectSummaries(out map[string]string, prefix string) {
 		"params[]":                    "Expected effect parameter checks.",
 		"params[].match_name":         "Expected effect parameter match name.",
 		"params[].value":              "Expected effect parameter value.",
+		"params[].target_layer":       "Expected effect parameter target layer name.",
 		"params[].expression":         "Expected effect parameter expression source.",
 		"params[].expression_enabled": "Expected effect parameter expression enable switch.",
 	})

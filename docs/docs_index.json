@@ -4706,6 +4706,14 @@
       "rw": "read-only",
       "summary": "LastValue is the property's last-set value from the pard chunk (effect parameters only). nil for non-effect properties."
     },
+    "Property.LayerRefID": {
+      "kind": "field",
+      "file": "property.md",
+      "anchor": "#propertylayerrefid",
+      "signature": "LayerRefID uint32",
+      "rw": "read-only",
+      "summary": "tdpi-bound layer reference for layer-picker effect params"
+    },
     "Property.LockedRatio": {
       "kind": "getter",
       "file": "property.md",

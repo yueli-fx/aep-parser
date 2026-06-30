@@ -337,6 +337,7 @@
     "comps[].layers[].effects[].params[]",
     "comps[].layers[].effects[].params[].match_name",
     "comps[].layers[].effects[].params[].value",
+    "comps[].layers[].effects[].params[].target_layer",
     "comps[].layers[].effects[].params[].keyframes[]",
     "comps[].layers[].effects[].params[].keyframes[].time",
     "comps[].layers[].effects[].params[].keyframes[].value",
@@ -425,6 +426,7 @@
     "expected_profile.effects[].params[]",
     "expected_profile.effects[].params[].match_name",
     "expected_profile.effects[].params[].value",
+    "expected_profile.effects[].params[].target_layer",
     "expected_profile.effects[].params[].expression",
     "expected_profile.effects[].params[].expression_enabled",
     "expected_profile.properties[]",
@@ -1067,6 +1069,20 @@
       "summary": "Effect parameter match name.",
       "validation": "Must match a parameter exposed by the chosen effect.",
       "example": "examples/recipes/minimal-adjustment-layer.json"
+    },
+    "comps[].layers[].effects[].params[].target_layer": {
+      "path": "comps[].layers[].effects[].params[].target_layer",
+      "json_name": "target_layer",
+      "source_type": "EffectParam",
+      "source_field": "TargetLayer",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Effect parameter target layer name.",
+      "validation": "For layer-reference effect parameters, must name a layer in the same comp. Cannot be combined with value, keyframes, or expression.",
+      "capability_keys": [
+        "effect.set_layer_param"
+      ],
+      "example": "examples/recipes/minimal-effect-layer-param.json"
     },
     "comps[].layers[].effects[].params[].value": {
       "path": "comps[].layers[].effects[].params[].value",
@@ -1718,7 +1734,7 @@
       "type": "object\u003cShapeSpec\u003e",
       "go_type": "*recipe.ShapeSpec",
       "summary": "Shape layer primitive and operators.",
-      "example": "examples/recipes/minimal-layer-explicit-matte.json"
+      "example": "examples/recipes/minimal-effect-layer-param.json"
     },
     "comps[].layers[].shape.fill_blend_mode": {
       "path": "comps[].layers[].shape.fill_blend_mode",
@@ -1744,7 +1760,7 @@
       "capability_keys": [
         "shape.fill.set_color"
       ],
-      "example": "examples/recipes/minimal-layer-explicit-matte.json"
+      "example": "examples/recipes/minimal-effect-layer-param.json"
     },
     "comps[].layers[].shape.fill_composite_order": {
       "path": "comps[].layers[].shape.fill_composite_order",
@@ -4904,7 +4920,7 @@
       "type": "array\u003crecipe.ExpectedEffectParam\u003e",
       "go_type": "[]recipe.ExpectedEffectParam",
       "summary": "Expected effect parameter checks.",
-      "validation": "Each expected effect parameter needs at least one of value, expression, or expression_enabled.",
+      "validation": "Each expected effect parameter needs at least one of value, target_layer, expression, or expression_enabled.",
       "example": "examples/recipes/minimal-effect-param-expression.json"
     },
     "expected_profile.effects[].params[].expression": {
@@ -4940,6 +4956,17 @@
       "summary": "Expected effect parameter match name.",
       "validation": "Expected effect parameter checks require a parameter match name.",
       "example": "examples/recipes/minimal-adjustment-layer.json"
+    },
+    "expected_profile.effects[].params[].target_layer": {
+      "path": "expected_profile.effects[].params[].target_layer",
+      "json_name": "target_layer",
+      "source_type": "ExpectedEffectParam",
+      "source_field": "TargetLayer",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Expected effect parameter target layer name.",
+      "validation": "Expected target layer checks compare against the profiled effect parameter layer reference name.",
+      "example": "examples/recipes/minimal-effect-layer-param.json"
     },
     "expected_profile.effects[].params[].value": {
       "path": "expected_profile.effects[].params[].value",
@@ -6224,6 +6251,7 @@
     "EffectParam": [
       "comps[].layers[].effects[].params[].match_name",
       "comps[].layers[].effects[].params[].value",
+      "comps[].layers[].effects[].params[].target_layer",
       "comps[].layers[].effects[].params[].keyframes[]",
       "comps[].layers[].effects[].params[].expression"
     ],
@@ -6235,6 +6263,7 @@
     "ExpectedEffectParam": [
       "expected_profile.effects[].params[].match_name",
       "expected_profile.effects[].params[].value",
+      "expected_profile.effects[].params[].target_layer",
       "expected_profile.effects[].params[].expression",
       "expected_profile.effects[].params[].expression_enabled"
     ],

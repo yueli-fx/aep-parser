@@ -200,6 +200,7 @@ type Property struct {
 	MatchName         string     `json:"match_name,omitempty"`
 	Occurrence        int        `json:"occurrence,omitempty"`
 	StaticValue       any        `json:"static_value,omitempty"`
+	LayerRef          *LayerRef  `json:"layer_ref,omitempty"`
 	Default           any        `json:"default,omitempty"`
 	Changed           bool       `json:"changed,omitempty"`
 	Expression        string     `json:"expression,omitempty"`
@@ -603,7 +604,10 @@ func buildLayer(
 		for _, p := range fx.Parameters {
 			occ := paramSeen[p.MatchName]
 			paramSeen[p.MatchName] = occ + 1
-			pp := buildProperty(p, paramPath(ep.Path.Path, ep.Path.DisplayPath, p.MatchName, occ, p.Name), occ)
+			pp := buildProperty(p, paramPath(ep.Path.Path, ep.Path.DisplayPath, p.MatchName, occ, p.Name), occ, layerByID)
+			if pp.LayerRef != nil && pp.LayerRef.ID != l.ID {
+				pp.Changed = true
+			}
 			if haveDictEffect {
 				if dp, ok := dictEffect.Params[p.MatchName]; ok {
 					if pp.Name == "" {
@@ -626,7 +630,7 @@ func buildLayer(
 	for _, p := range l.Properties {
 		occ := propSeen[p.MatchName]
 		propSeen[p.MatchName] = occ + 1
-		lp.Properties = append(lp.Properties, buildProperty(p, propertyPath(lp.Path.Path, lp.Path.DisplayPath, p.MatchName, occ, p.Name), occ))
+		lp.Properties = append(lp.Properties, buildProperty(p, propertyPath(lp.Path.Path, lp.Path.DisplayPath, p.MatchName, occ, p.Name), occ, layerByID))
 	}
 	for i, marker := range l.Markers {
 		lp.Markers = append(lp.Markers, buildMarker(marker, markerPath(lp.Path.Path, lp.Path.DisplayPath, i)))
@@ -645,7 +649,7 @@ func buildLayer(
 		})
 	}
 	for i, prim := range l.ShapePrimitives {
-		lp.Shapes = append(lp.Shapes, buildShapePrimitive(c, l, prim, i))
+		lp.Shapes = append(lp.Shapes, buildShapePrimitive(c, l, prim, i, layerByID))
 	}
 	if l.TextSource != nil {
 		lp.Text = buildText(c, l, l.TextSource)
@@ -653,7 +657,7 @@ func buildLayer(
 	return lp
 }
 
-func buildProperty(p *aep.JSONProperty, path PathRef, occurrence int) Property {
+func buildProperty(p *aep.JSONProperty, path PathRef, occurrence int, layerByID map[uint32]*aep.JSONLayer) Property {
 	pp := Property{
 		Name:        p.Name,
 		MatchName:   p.MatchName,
@@ -662,6 +666,9 @@ func buildProperty(p *aep.JSONProperty, path PathRef, occurrence int) Property {
 		Expression:  p.Expression,
 		Path:        path,
 		Evidence:    parsedEvidence(),
+	}
+	if p.LayerRefID != 0 {
+		pp.LayerRef = layerRef(p.LayerRefID, layerByID)
 	}
 	if p.ExpressionEnabled != nil {
 		enabled := *p.ExpressionEnabled
@@ -810,7 +817,7 @@ func maskColor(value string) []float64 {
 	return []float64{float64(r), float64(g), float64(b)}
 }
 
-func buildShapePrimitive(c *aep.JSONComposition, l *aep.JSONLayer, prim *aep.JSONShapePrimitive, occurrence int) Shape {
+func buildShapePrimitive(c *aep.JSONComposition, l *aep.JSONLayer, prim *aep.JSONShapePrimitive, occurrence int, layerByID map[uint32]*aep.JSONLayer) Shape {
 	sp := Shape{
 		Kind:     prim.Kind,
 		Name:     prim.GroupName,
@@ -829,7 +836,7 @@ func buildShapePrimitive(c *aep.JSONComposition, l *aep.JSONLayer, prim *aep.JSO
 		}
 		occ := seen[p.MatchName]
 		seen[p.MatchName] = occ + 1
-		sp.Properties = append(sp.Properties, buildProperty(p, propertyPath(sp.Path.Path, sp.Path.DisplayPath, p.MatchName, occ, p.Name), occ))
+		sp.Properties = append(sp.Properties, buildProperty(p, propertyPath(sp.Path.Path, sp.Path.DisplayPath, p.MatchName, occ, p.Name), occ, layerByID))
 	}
 	return sp
 }
