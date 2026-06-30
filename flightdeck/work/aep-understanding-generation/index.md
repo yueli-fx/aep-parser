@@ -621,6 +621,9 @@ Done:
   `-in <dir-or-file> -mode portrait -corpus -recursive [-limit N]` emits
   deterministic JSONL records, one per `.aep`, and continues across per-file
   build failures. `-summary` emits aggregate counts instead of JSONL.
+  `-summary-out <path>` can now write the same aggregate summary while JSONL
+  records are written to `-out`, so large explain-mode report runs parse each
+  project only once.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven
@@ -632,18 +635,20 @@ Current:
 - `cmd/aeptechnique -mode portrait -in <file.aep>` now provides a compact
   corpus-facing project image suitable for comparing many projects without
   retaining the full fact dump.
-- `cmd/aeptechnique -in flightdeck\showcase -mode portrait -corpus -recursive
-  -limit 3` produces JSONL portraits; the Booyah showcase record currently
-  surfaces 12 comps, 61 layers, 41 effects, 109 dependency edges, and
-  `kinetic_text` / `precomp_assembly` / `effect_driven_layer` /
-  `shape_operator_stack` / `controller_rig` hints.
-- `cmd/aeptechnique -in flightdeck\showcase -mode portrait -corpus -recursive
-  -limit 3 -summary` produces an aggregate report with 3 projects, 14 comps,
-  69 layers, 41 effects, 207 shape operators, and hint counts across the
-  sample batch.
-- `scripts\technique_showcase_report.ps1 -Limit 3` now produces the same
-  self-hosted demo as files under `tmp\technique_showcase_report`: `summary.json`,
-  `corpus.jsonl`, `report.md`, and a self-contained `report.html`.
+- `cmd/aeptechnique -mode explain` now adds deterministic project explanations
+  with recreation readiness, archetypes, repeated pattern catalog entries,
+  representative projects, mechanism profiles, and plugin-effect blockers.
+- `scripts\technique_showcase_report.ps1` is the self-hosted corpus dashboard.
+  It runs explain-mode corpus analysis once with `-summary-out`, then writes
+  `summary.json`, `corpus.jsonl`, `digest.json`, `learning.md`, `report.md`,
+  and self-contained `report.html` under the selected output directory.
+- `tmp\technique_samples_report` currently demonstrates the 90-project
+  `data\samples` corpus: 90 parsed projects, 0 errors, 4 repeated pattern
+  families, and a compact `learning.md` for selecting high-signal reference
+  projects before reading the full JSONL.
+- `report.html` now links all generated artifacts, shows scan timing, supports
+  path/readiness/pattern/effect/plugin filtering, and displays per-project top
+  effects, plugin effects, shape families, and text animator mechanisms.
 - Recipe IR coverage for the current comp and layer strategy matrices is
   complete: comp settings have object-level and field-level profile checks,
   authored-layer examples carry `expected_profile.layers[]`, camera/light
