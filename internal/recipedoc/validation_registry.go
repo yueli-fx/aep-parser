@@ -218,6 +218,9 @@ var fieldValidation = map[string]FieldMeta{
 		Validation: "Expected auto-orient mode must use a supported recipe auto-orient value.",
 		Enum:       []string{"none", "along_path", "camera_or_point_of_interest", "characters_toward_camera"},
 	},
+	"expected_profile.layers[].timing.stretch": {
+		Validation: "Expected layer stretch must be greater than 0.",
+	},
 	"expected_profile.effects[].layer_name": {
 		Validation: "Effect profile checks require a target layer name.",
 	},

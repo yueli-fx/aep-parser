@@ -6453,6 +6453,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected layer stretch ratio.",
+      "validation": "Expected layer stretch must be greater than 0.",
       "example": "examples/recipes/minimal-layer-object-profile.json"
     },
     "expected_profile.layers[].track_matte": {

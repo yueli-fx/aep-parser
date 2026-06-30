@@ -1147,6 +1147,25 @@ func TestValidateRejectsInvalidLayerStretch(t *testing.T) {
 	assertRefusal(t, report, "invalid_layer_stretch")
 }
 
+func TestValidateRejectsInvalidExpectedLayerStretch(t *testing.T) {
+	rec := minimalRecipe()
+	rec.ExpectedProfile = recipe.ExpectedProfile{
+		Layers: []recipe.ExpectedLayer{{
+			Name: "Title",
+			Timing: &recipe.ExpectedLayerTiming{
+				Stretch: ptr(0),
+			},
+		}},
+	}
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_expected_profile")
+}
+
 func TestValidateReportsLayerParentCapability(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers = append([]recipe.Layer{

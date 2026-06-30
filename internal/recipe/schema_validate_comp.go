@@ -20,6 +20,9 @@ func validateExpectedLayerTiming(timing *ExpectedLayerTiming, path string, addRe
 	if timing.Duration != nil && *timing.Duration < 0 {
 		addRefusal("invalid_expected_profile", path+".duration", "duration must be non-negative")
 	}
+	if timing.Stretch != nil && *timing.Stretch <= 0 {
+		addRefusal("invalid_expected_profile", path+".stretch", "stretch must be greater than 0")
+	}
 }
 
 func validateCompMotionBlur(spec *CompMotionBlurSpec, path string, recordCapability func(string, string) CapabilityLookup, addRefusal func(string, string, string)) {

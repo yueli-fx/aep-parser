@@ -736,7 +736,7 @@ This reference is generated from the canonical recipe field model.
 | `expected_profile.layers[].timing.in_point` | `number` | - | Expected layer in point in seconds. | - | - | examples/recipes/minimal-layer-object-profile.json |
 | `expected_profile.layers[].timing.out_point` | `number` | - | Expected layer out point in seconds. | - | - | examples/recipes/minimal-layer-object-profile.json |
 | `expected_profile.layers[].timing.duration` | `number` | - | Expected layer duration in seconds. | - | - | examples/recipes/minimal-layer-object-profile.json |
-| `expected_profile.layers[].timing.stretch` | `number` | - | Expected layer stretch ratio. | - | - | examples/recipes/minimal-layer-object-profile.json |
+| `expected_profile.layers[].timing.stretch` | `number` | - | Expected layer stretch ratio. | Expected layer stretch must be greater than 0. | - | examples/recipes/minimal-layer-object-profile.json |
 
 ## ExpectedLayerFlags
 
