@@ -678,6 +678,43 @@ try {
         [void]$o.AppendLine("- reason: $reason")
     }
     [void]$o.AppendLine("")
+    [void]$o.AppendLine("## Effectiveness Headline")
+    [void]$o.AppendLine("")
+    [void]$o.AppendLine($outcomeHeadline)
+    [void]$o.AppendLine("")
+    [void]$o.AppendLine("## Next Actions")
+    [void]$o.AppendLine("")
+    foreach ($row in @($nextActionRows | Select-Object -First 3)) {
+        [void]$o.AppendLine("- P$($row.priority): $($row.title) - $($row.detail)")
+    }
+    if ($nextActionRows.Count -eq 0) {
+        [void]$o.AppendLine("- No immediate actions reported.")
+    }
+    [void]$o.AppendLine("")
+    [void]$o.AppendLine("## Reconstruction Readiness")
+    [void]$o.AppendLine("")
+    foreach ($row in $readinessSummaryRows) {
+        [void]$o.AppendLine("- $($row.readiness): $($row.count)")
+    }
+    [void]$o.AppendLine("")
+    [void]$o.AppendLine("## Recreation Blockers")
+    [void]$o.AppendLine("")
+    foreach ($row in @($recreationBlockerRows | Select-Object -First 3)) {
+        [void]$o.AppendLine("- $($row.project_path): $($row.blocker_type) - $($row.blocker)")
+    }
+    if ($recreationBlockerRows.Count -eq 0) {
+        [void]$o.AppendLine("- No blockers reported.")
+    }
+    [void]$o.AppendLine("")
+    [void]$o.AppendLine("## Top Plugin Blockers")
+    [void]$o.AppendLine("")
+    foreach ($row in @($pluginBlockerTopRows | Select-Object -First 5)) {
+        [void]$o.AppendLine("- $($row.effect): $($row.count)")
+    }
+    if ($pluginBlockerTopRows.Count -eq 0) {
+        [void]$o.AppendLine("- No plugin blockers reported.")
+    }
+    [void]$o.AppendLine("")
     [void]$o.AppendLine("## Numbers")
     [void]$o.AppendLine("")
     [void]$o.AppendLine("- projects: $($fullManifest.project_count)")
@@ -1157,6 +1194,18 @@ try {
     }
     if (-not (Select-String -LiteralPath $latestOutcomePath -Pattern "Outcome Status" -Quiet)) {
         throw "latest outcome missing Outcome Status"
+    }
+    if (-not (Select-String -LiteralPath $latestOutcomePath -Pattern "Effectiveness Headline" -Quiet)) {
+        throw "latest outcome missing Effectiveness Headline"
+    }
+    if (-not (Select-String -LiteralPath $latestOutcomePath -Pattern "Next Actions" -Quiet)) {
+        throw "latest outcome missing Next Actions"
+    }
+    if (-not (Select-String -LiteralPath $latestOutcomePath -Pattern "Reconstruction Readiness" -Quiet)) {
+        throw "latest outcome missing Reconstruction Readiness"
+    }
+    if (-not (Select-String -LiteralPath $latestOutcomePath -Pattern "Top Plugin Blockers" -Quiet)) {
+        throw "latest outcome missing Top Plugin Blockers"
     }
     Require-LatestIndexLink -Label "latest outcome" -RelativePath "latest_outcome.md"
     if (-not (Test-Path -LiteralPath $latestOutcomeHtmlPath)) {
