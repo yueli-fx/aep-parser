@@ -75,7 +75,17 @@ read-only
 Warnings []string
 ```
 
-Warnings collects non-fatal parsing anomalies — chunks whose header looked sane enough to attempt decoding but whose payload did not match the expected layout (length mismatch, impossible counts, etc). Each entry is a human-readable string; the parser keeps going and produces a best-effort Project. Empty (nil) on a clean parse.
+Warnings collects non-fatal parsing anomalies — chunks whose header looked sane enough to attempt decoding but whose payload did not match the expected layout (length mismatch, impossible counts, etc). Each entry is a human-readable string kept for compatibility and mutation rollback checks; ParseWarnings carries the structured form. Empty (nil) on a clean parse.
+
+read-only
+
+### Project.ParseWarnings
+
+```go
+ParseWarnings []ParseWarning
+```
+
+ParseWarnings is the structured companion to Warnings. New code should use this when it needs machine-readable warning context; Warnings remains the stable human-readable view and transaction signal.
 
 read-only
 

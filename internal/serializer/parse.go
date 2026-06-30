@@ -237,7 +237,7 @@ func parseItem(item *rifx.Chunk, proj *Project) error {
 
 	switch itemType {
 	case ItemTypeComposition:
-		comp, err := parseComposition(item, itemID, name, &proj.Warnings)
+		comp, err := parseCompositionIntoProject(item, itemID, name, proj)
 		if err != nil {
 			return fmt.Errorf("aep: parse comp %q: %w", name, err)
 		}

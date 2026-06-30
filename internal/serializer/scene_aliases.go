@@ -96,6 +96,7 @@ type (
 	OutputModuleWriter              = scene.OutputModuleWriter
 	PathNode                        = scene.PathNode
 	PlaceholderSource               = scene.PlaceholderSource
+	ParseWarning                    = scene.ParseWarning
 	Project                         = scene.Project
 	ProjectWriter                   = scene.ProjectWriter
 	Property                        = scene.Property

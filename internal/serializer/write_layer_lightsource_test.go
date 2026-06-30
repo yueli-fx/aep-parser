@@ -158,6 +158,12 @@ func TestReplaceSource_RoundtripAndWarning(t *testing.T) {
 	if !strings.Contains(proj.Warnings[0], "fixExpressions=true not implemented") {
 		t.Errorf("warning = %q, want substring 'fixExpressions=true not implemented'", proj.Warnings[0])
 	}
+	if len(proj.ParseWarnings) != 1 {
+		t.Fatalf("expected 1 structured warning, got %d", len(proj.ParseWarnings))
+	}
+	if !strings.Contains(proj.ParseWarnings[0].Message, "fixExpressions=true not implemented") {
+		t.Errorf("structured warning = %+v, want fixExpressions warning", proj.ParseWarnings[0])
+	}
 
 	// Test ReplaceSource with nil target
 	err := layer.ReplaceSource(nil, false)

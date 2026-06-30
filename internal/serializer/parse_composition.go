@@ -40,13 +40,17 @@ type parseCtx struct {
 	// warnings, when non-nil, is appended to via warn() whenever a
 	// sub-decoder hits a non-fatal anomaly. Shared across all comps of
 	// one Project so Project.Warnings sees every comp's findings.
-	warnings *[]string
+	warnings *parseWarningSink
 }
 
 // newParseCtx returns a context with tickRate falling back to the legacy
 // constant when 0 is passed (e.g. cdta missing). warnings may be nil — the
 // returned ctx's warn() is a no-op in that case.
 func newParseCtx(tickRate float64, compName string, warnings *[]string) *parseCtx {
+	return newParseCtxWithWarningSink(tickRate, compName, stringWarningSink(warnings))
+}
+
+func newParseCtxWithWarningSink(tickRate float64, compName string, warnings *parseWarningSink) *parseCtx {
 	if tickRate == 0 {
 		tickRate = aeLegacyTimeBase
 	}
@@ -74,7 +78,7 @@ func (c *parseCtx) warn(format string, args ...any) {
 	if c.compName != "" {
 		msg = "comp " + strconv.Quote(c.compName) + ": " + msg
 	}
-	*c.warnings = append(*c.warnings, msg)
+	c.warnings.record(scene.ParseWarning{Message: msg})
 }
 
 // parseComposition reads a composition from an Item list.
@@ -105,6 +109,14 @@ func (c *parseCtx) warn(format string, args ...any) {
 //	0xC4–0xC7 : motion_blur_adaptive_sample_limit (int32; AE default 128)                              [ref + fixture]
 //	0xC8–0xCB : motion_blur_samples_per_frame (int32; AE default 16)                                   [ref + fixture]
 func parseComposition(item *rifx.Chunk, id uint32, name string, warnings *[]string) (*Composition, error) {
+	return parseCompositionWithWarningSink(item, id, name, stringWarningSink(warnings))
+}
+
+func parseCompositionIntoProject(item *rifx.Chunk, id uint32, name string, p *Project) (*Composition, error) {
+	return parseCompositionWithWarningSink(item, id, name, projectWarningSink(p))
+}
+
+func parseCompositionWithWarningSink(item *rifx.Chunk, id uint32, name string, warnings *parseWarningSink) (*Composition, error) {
 	cb := &compositionBackrefs{compName: name, itemList: item}
 	comp := &Composition{ID: id, Name: name}
 	scene.SetCompositionBack(comp, cb)
@@ -229,7 +241,8 @@ func parseComposition(item *rifx.Chunk, id uint32, name string, warnings *[]stri
 		cb.prdaChunk = prinList.FindFirst(rifx.IDPrda)
 	}
 
-	ctx := newParseCtxFPS(comp.TickRate, comp.FrameRate, comp.Name, warnings)
+	ctx := newParseCtxWithWarningSink(comp.TickRate, comp.Name, warnings)
+	ctx.compFps = comp.FrameRate
 
 	for i, layrList := range item.FindAllList(rifx.IDLayr) {
 		layer, err := parseLayer(layrList, i, ctx)

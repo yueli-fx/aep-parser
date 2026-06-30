@@ -53,6 +53,12 @@ func TestProjectSettings_CmsMalformedJsonWarns(t *testing.T) {
 	if !strings.Contains(p.Warnings[0], "CMS JSON parse failed") {
 		t.Errorf("warning = %q, want substring 'CMS JSON parse failed'", p.Warnings[0])
 	}
+	if len(p.ParseWarnings) != 1 {
+		t.Fatalf("expected 1 structured warning, got %d", len(p.ParseWarnings))
+	}
+	if !strings.Contains(p.ParseWarnings[0].Message, "CMS JSON parse failed") {
+		t.Errorf("structured warning = %+v, want CMS parse failure message", p.ParseWarnings[0])
+	}
 }
 
 // TestProject_XmpPacket_RoundtripFromFixture verifies XmpPacket reads

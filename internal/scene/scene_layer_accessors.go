@@ -532,7 +532,7 @@ func (l *Layer) ReplaceSource(target AVItem, fixExpressions bool) error {
 		return fmt.Errorf("layer %q: target is nil", l.Name)
 	}
 	if fixExpressions && l.runtime.comp != nil && l.runtime.comp.proj != nil {
-		l.runtime.comp.proj.Warnings = append(l.runtime.comp.proj.Warnings,
+		l.runtime.comp.proj.recordWarning(
 			fmt.Sprintf("layer %q: fixExpressions=true not implemented (expressions not auto-updated)", l.Name))
 	}
 	return l.SetSource(target.ItemID())

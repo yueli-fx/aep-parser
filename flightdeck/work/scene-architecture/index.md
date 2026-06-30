@@ -48,10 +48,20 @@ ongoing state inconsistency, but also do not break callers for cosmetic moves.
 - [x] Split shape graph / shape lowering files.
   - [x] Split scene shape graph by node family.
   - [x] Split serializer shape lowering by node family.
-- [ ] Design structured warning migration.
+- [x] Design structured warning migration.
+  - [x] Add `Project.ParseWarnings` as an additive structured companion to
+        `Warnings []string`.
+  - [x] Keep mutator-local warning rollback on the existing string signal.
+  - [x] Copy structured warnings into project profiles.
 
 ## Verification
 
-Current first slice:
+Current scene-architecture cleanup:
 
 - `go test ./internal/scene -count=1`
+- `go test ./internal/serializer -count=1`
+- `go test ./internal/profile -count=1`
+- `go test ./cmd/docgen -count=1`
+- `go test ./...`
+- `go vet ./...`
+- `git diff --check` (CRLF warnings only)

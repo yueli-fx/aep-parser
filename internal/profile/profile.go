@@ -39,9 +39,10 @@ type Profile struct {
 }
 
 type Meta struct {
-	Path           string   `json:"path,omitempty"`
-	ParseWarnings  []string `json:"parse_warnings,omitempty"`
-	BitsPerChannel string   `json:"bits_per_channel,omitempty"`
+	Path                    string             `json:"path,omitempty"`
+	ParseWarnings           []string           `json:"parse_warnings,omitempty"`
+	StructuredParseWarnings []aep.ParseWarning `json:"structured_parse_warnings,omitempty"`
+	BitsPerChannel          string             `json:"bits_per_channel,omitempty"`
 }
 
 type Fingerprint struct {
@@ -378,9 +379,10 @@ func Build(project *aep.Project, opts Options) (*Profile, error) {
 	prof := &Profile{
 		SchemaVersion: SchemaVersion,
 		Meta: Meta{
-			Path:           opts.Path,
-			ParseWarnings:  append([]string(nil), project.Warnings...),
-			BitsPerChannel: project.BitsPerChannel.String(),
+			Path:                    opts.Path,
+			ParseWarnings:           append([]string(nil), project.Warnings...),
+			StructuredParseWarnings: append([]aep.ParseWarning(nil), project.ParseWarnings...),
+			BitsPerChannel:          project.BitsPerChannel.String(),
 		},
 		Fingerprint: Fingerprint{
 			CompCount:    len(project.Compositions),

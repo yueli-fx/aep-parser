@@ -70,6 +70,28 @@ func TestBuildTextFixtureIncludesSchemaPathsEvidenceAndText(t *testing.T) {
 	}
 }
 
+func TestBuildCopiesStructuredParseWarnings(t *testing.T) {
+	project := &aep.Project{
+		Warnings: []string{"short keyframe stream"},
+		ParseWarnings: []aep.ParseWarning{{
+			Chunk:   "lhd3",
+			Offset:  12,
+			Message: "short keyframe stream",
+		}},
+	}
+
+	prof, err := profile.Build(project, profile.Options{})
+	if err != nil {
+		t.Fatalf("build profile: %v", err)
+	}
+	if got, want := prof.Meta.ParseWarnings, []string{"short keyframe stream"}; len(got) != len(want) || got[0] != want[0] {
+		t.Fatalf("ParseWarnings = %v, want %v", got, want)
+	}
+	if got, want := prof.Meta.StructuredParseWarnings, []aep.ParseWarning{{Chunk: "lhd3", Offset: 12, Message: "short keyframe stream"}}; len(got) != len(want) || got[0] != want[0] {
+		t.Fatalf("StructuredParseWarnings = %+v, want %+v", got, want)
+	}
+}
+
 func TestBuildEffectsFixtureIncludesEffectUsageAndTunedParams(t *testing.T) {
 	path := repoPath(t, "flightdeck", "showcase", "effects", "effects.aep")
 	project, err := aep.Open(path)

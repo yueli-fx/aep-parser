@@ -504,7 +504,7 @@ func (p *Project) cmsSettings() map[string]interface{} {
 	}
 	var settings map[string]interface{}
 	if err := json.Unmarshal(data, &settings); err != nil {
-		p.Warnings = append(p.Warnings, fmt.Sprintf("project: CMS JSON parse failed: %v", err))
+		p.recordWarning(fmt.Sprintf("project: CMS JSON parse failed: %v", err))
 		return nil
 	}
 	return settings
