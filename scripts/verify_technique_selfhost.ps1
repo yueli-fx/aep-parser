@@ -1,7 +1,9 @@
+[CmdletBinding()]
 param(
     [string]$InputPath = "data\samples",
     [string]$OutRoot = "tmp\technique_selfhost_gate",
-    [int]$Limit = 0
+    [int]$Limit = 0,
+    [switch]$Open
 )
 
 $ErrorActionPreference = "Stop"
@@ -236,6 +238,9 @@ try {
     Write-Host "latest index:    $latestIndexPath"
     Write-Host "full report:     $fullReportDir"
     Write-Host "partial report:  $partialReportDir"
+    if ($Open) {
+        Invoke-Item $latestIndexPath
+    }
 }
 finally {
     Pop-Location

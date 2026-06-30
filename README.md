@@ -34,7 +34,7 @@ pwsh -NoProfile -File scripts\compare_technique_reports.ps1 -BaseDir tmp\old_rep
 pwsh -NoProfile -File scripts\verify_technique_selfhost.ps1 -OutRoot tmp\technique_selfhost_gate
 ```
 
-验收完成后可直接打开 `tmp\technique_selfhost_gate\latest_index.html` 或 `tmp\technique_selfhost_gate\latest_acceptance.md` 查看最近一次结果；HTML 入口会直接显示 Study Queue 和 Pattern Playbook 预览。
+想跑完后立刻查看浏览器入口，可以加 `-Open`。验收完成后也可直接打开 `tmp\technique_selfhost_gate\latest_index.html` 或 `tmp\technique_selfhost_gate\latest_acceptance.md` 查看最近一次结果；HTML 入口会直接显示 Study Queue 和 Pattern Playbook 预览。
 
 ## 原理与分层
 

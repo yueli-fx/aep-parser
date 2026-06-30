@@ -1,3 +1,4 @@
+[CmdletBinding()]
 param(
     [string]$InputPath = "flightdeck\showcase",
     [string]$OutDir = "tmp\technique_showcase_report",
@@ -129,11 +130,14 @@ try {
 
     function Get-GitValue {
         param([string[]]$GitArgs)
-        $value = & git @GitArgs 2>$null
+        $value = @(& git @GitArgs 2>$null)
         if ($LASTEXITCODE -ne 0) {
             return ""
         }
-        return ([string]$value).Trim()
+        if ($value.Count -eq 0) {
+            return ""
+        }
+        return (($value -join "`n").Trim())
     }
 
     function Get-ArtifactRows {
