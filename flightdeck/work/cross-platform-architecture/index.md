@@ -742,7 +742,8 @@ Capability response should include:
 - [x] Move technique report validation into Go.
 - [x] Add Go selfhost run finalizer entrypoint.
 - [x] Move `aepselfhost verify` orchestration into Go and reduce PS selfhost verify to a wrapper.
-- [ ] Move selfhost verification gate from PowerShell to Go.
+- [x] Move selfhost verification gate from PowerShell to Go.
+- [x] Move technique report rendering into Go and reduce report PS script to a wrapper.
 - [ ] Define AE host adapter.
 - [ ] Add cross-platform build gate.
 - [ ] Start pure parser service.

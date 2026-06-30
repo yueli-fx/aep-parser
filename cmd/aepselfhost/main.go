@@ -34,6 +34,8 @@ func run(args []string, stdout, stderr io.Writer, platform host.Platform) int {
 		return runRecipeSmoke(args[1:], stdout, stderr, platform)
 	case "verify-report":
 		return runVerifyReport(args[1:], stdout, stderr)
+	case "technique-report":
+		return runTechniqueReport(args[1:], stdout, stderr, platform)
 	case "finalize-run":
 		return runFinalizeRun(args[1:], stdout, stderr)
 	case "outcome":
@@ -81,6 +83,27 @@ func runCompareReports(args []string, stdout, stderr io.Writer) int {
 	_ = result
 	fmt.Fprintf(stdout, "compare json: %s\n", filepath.Join(reportOutDir, "compare.json"))
 	fmt.Fprintf(stdout, "compare md:   %s\n", filepath.Join(reportOutDir, "compare.md"))
+	return 0
+}
+
+func runTechniqueReport(args []string, stdout, stderr io.Writer, platform host.Platform) int {
+	fs := flag.NewFlagSet("aepselfhost technique-report", flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	inputPath := fs.String("input", filepath.Join("data", "samples"), "input project file or corpus directory")
+	outDir := fs.String("out", filepath.Join("tmp", "technique_showcase_report"), "report output directory")
+	limit := fs.Int("limit", 0, "optional corpus limit")
+	verify := fs.Bool("verify", false, "verify generated report artifacts")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	if err := generateTechniqueReport(context.Background(), platform.Runner, *inputPath, *outDir, *limit, *verify, stdout, stderr); err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	fmt.Fprintf(stdout, "summary: %s\n", filepath.Join(*outDir, "summary.json"))
+	fmt.Fprintf(stdout, "corpus:  %s\n", filepath.Join(*outDir, "corpus.jsonl"))
+	fmt.Fprintf(stdout, "manifest: %s\n", filepath.Join(*outDir, "manifest.json"))
+	fmt.Fprintf(stdout, "html:    %s\n", filepath.Join(*outDir, "report.html"))
 	return 0
 }
 
@@ -311,12 +334,9 @@ func verifySelfhost(opts verifyOptions, stdout, stderr io.Writer, platform host.
 		return 1
 	}
 	inputPath := resolveRepoPath(opts.InputPath)
-	reportScript := resolveRepoPath(filepath.Join("scripts", "technique_showcase_report.ps1"))
-	reportArgs := []string{"-NoProfile", "-File", reportScript, "-InputPath", inputPath, "-OutDir", fullReportDir, "-Verify"}
-	if opts.Limit > 0 {
-		reportArgs = append(reportArgs, "-Limit", strconv.Itoa(opts.Limit))
-	}
-	if !runExternal("full technique report", append([]string{"pwsh"}, reportArgs...)...) {
+	if !runStep("full technique report", func() error {
+		return generateTechniqueReport(context.Background(), platform.Runner, inputPath, fullReportDir, opts.Limit, true, stdout, stderr)
+	}) {
 		return 1
 	}
 	if err := os.MkdirAll(partialInputDir, 0o755); err != nil {
@@ -331,7 +351,9 @@ func verifySelfhost(opts verifyOptions, stdout, stderr io.Writer, platform host.
 		fmt.Fprintln(stderr, err)
 		return 1
 	}
-	if !runExternal("partial-error technique report", "pwsh", "-NoProfile", "-File", reportScript, "-InputPath", partialInputDir, "-OutDir", partialReportDir, "-Verify") {
+	if !runStep("partial-error technique report", func() error {
+		return generateTechniqueReport(context.Background(), platform.Runner, partialInputDir, partialReportDir, 0, true, stdout, stderr)
+	}) {
 		return 1
 	}
 	if !runStep("self compare", func() error {
@@ -681,6 +703,52 @@ func resolveRepoPath(path string) string {
 	return path
 }
 
+func generateTechniqueReport(ctx context.Context, runner host.Runner, inputPath, outDir string, limit int, verify bool, stdout, stderr io.Writer) error {
+	if err := os.MkdirAll(outDir, 0o755); err != nil {
+		return err
+	}
+	corpusPath := filepath.Join(outDir, "corpus.jsonl")
+	summaryPath := filepath.Join(outDir, "summary.json")
+	args := []string{
+		"run", "./cmd/aeptechnique",
+		"-in", inputPath,
+		"-mode", "explain",
+		"-corpus",
+		"-recursive",
+		"-out", corpusPath,
+		"-summary-out", summaryPath,
+	}
+	if limit > 0 {
+		args = append(args, "-limit", strconv.Itoa(limit))
+	}
+	result := runner.Run(ctx, host.Command{
+		Name:   "go",
+		Args:   args,
+		Stdout: stdout,
+		Stderr: stderr,
+	})
+	if result.ExitCode != 0 {
+		var summary struct {
+			ErrorCount int `json:"error_count"`
+		}
+		if err := readJSON(summaryPath, &summary); err != nil || result.ExitCode != 1 || summary.ErrorCount == 0 {
+			return fmt.Errorf("aeptechnique corpus failed with exit code %d", result.ExitCode)
+		}
+	}
+	if err := selfhost.RenderTechniqueReportArtifacts(selfhost.TechniqueReportRenderOptions{
+		OutDir:    outDir,
+		InputPath: inputPath,
+		Limit:     limit,
+	}); err != nil {
+		return err
+	}
+	if verify {
+		_, err := selfhost.VerifyTechniqueReport(selfhost.ReportVerifyOptions{OutDir: outDir, MinProjects: 1})
+		return err
+	}
+	return nil
+}
+
 type outcomeFile struct {
 	OutcomeStatus struct {
 		Status string `json:"status"`
@@ -899,5 +967,5 @@ func ptrIntValue(v *int) string {
 }
 
 func usage(stderr io.Writer) {
-	fmt.Fprintln(stderr, "usage: aepselfhost <verify|compare-reports|verify-report|recipe-smoke|finalize-run|outcome|status|watch|start-watch> -out-root tmp\\technique_selfhost_gate")
+	fmt.Fprintln(stderr, "usage: aepselfhost <verify|compare-reports|verify-report|technique-report|recipe-smoke|finalize-run|outcome|status|watch|start-watch> -out-root tmp\\technique_selfhost_gate")
 }

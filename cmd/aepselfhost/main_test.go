@@ -349,6 +349,31 @@ func TestRunRecipeSmokeWritesArtifacts(t *testing.T) {
 	}
 }
 
+func TestRunTechniqueReportWritesArtifacts(t *testing.T) {
+	root := t.TempDir()
+	outDir := filepath.Join(root, "report")
+	platform := testPlatform()
+	platform.Runner = fakeTechniqueReportRunner{t: t}
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"technique-report", "-input", "demo", "-out", outDir, "-limit", "1", "-verify"}, &stdout, &stderr, platform)
+
+	if code != 0 {
+		t.Fatalf("run technique-report = %d, stderr=%s stdout=%s", code, stderr.String(), stdout.String())
+	}
+	for _, path := range []string{
+		filepath.Join(outDir, "summary.json"),
+		filepath.Join(outDir, "corpus.jsonl"),
+		filepath.Join(outDir, "manifest.json"),
+		filepath.Join(outDir, "report.html"),
+		filepath.Join(outDir, "recipe_drafts.jsonl"),
+	} {
+		if _, err := os.Stat(path); err != nil {
+			t.Fatalf("expected artifact %s: %v", path, err)
+		}
+	}
+}
+
 func TestRunVerifyReportReturnsValidationError(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 
@@ -432,8 +457,14 @@ func (r fakeRecipeSmokeRunner) Run(_ context.Context, cmd host.Command) host.Res
 		writeFile(r.t, outPath, "fake aep")
 	case strings.Contains(joined, "./cmd/aeptechnique"):
 		outPath := argAfter(cmd.Args, "-out")
+		summaryPath := argAfter(cmd.Args, "-summary-out")
 		if outPath == "" {
 			r.t.Fatalf("technique command missing -out: %+v", cmd.Args)
+		}
+		if summaryPath != "" {
+			writeFile(r.t, summaryPath, `{"schema_version":1,"mode":"explain","project_count":1,"error_count":0,"totals":{"comp_count":1,"layer_count":1,"effect_count":1,"shape_operator_count":1,"text_animator_count":0,"dependency_count":1},"pattern_counts":{"shape_system":1}}`+"\n")
+			writeFile(r.t, outPath, `{"path":"demo.aep","explanation":{"recreation_steps":[{"id":"structure","priority":10,"title":"Build","summary":"Build structure"}]}}`+"\n")
+			break
 		}
 		writeFile(r.t, outPath, `{"summary":{"comp_count":1,"layer_count":0}}`+"\n")
 	default:
@@ -474,8 +505,14 @@ func (r *fakeVerifyRunner) Run(_ context.Context, cmd host.Command) host.Result 
 		writeFile(r.t, outPath, "fake aep")
 	case strings.Contains(joined, "./cmd/aeptechnique"):
 		outPath := argAfter(cmd.Args, "-out")
+		summaryPath := argAfter(cmd.Args, "-summary-out")
 		if outPath == "" {
 			r.t.Fatalf("technique command missing -out: %+v", cmd.Args)
+		}
+		if summaryPath != "" {
+			writeFile(r.t, summaryPath, `{"schema_version":1,"mode":"explain","project_count":1,"error_count":0,"totals":{"comp_count":1,"layer_count":1,"effect_count":1,"shape_operator_count":1,"text_animator_count":0,"dependency_count":1},"pattern_counts":{"shape_system":1}}`+"\n")
+			writeFile(r.t, outPath, `{"path":"demo.aep","explanation":{"recreation_steps":[{"id":"structure","priority":10,"title":"Build","summary":"Build structure"}]}}`+"\n")
+			break
 		}
 		writeFile(r.t, outPath, `{"summary":{"comp_count":1,"layer_count":0}}`+"\n")
 	default:
@@ -485,6 +522,30 @@ func (r *fakeVerifyRunner) Run(_ context.Context, cmd host.Command) host.Result 
 }
 
 func (r *fakeVerifyRunner) Start(context.Context, host.Command) (host.Process, error) {
+	r.t.Fatalf("Start should not be called")
+	return nil, nil
+}
+
+type fakeTechniqueReportRunner struct {
+	t *testing.T
+}
+
+func (r fakeTechniqueReportRunner) Run(_ context.Context, cmd host.Command) host.Result {
+	joined := strings.Join(append([]string{cmd.Name}, cmd.Args...), " ")
+	if !strings.Contains(joined, "./cmd/aeptechnique") {
+		r.t.Fatalf("unexpected command: %s", joined)
+	}
+	outPath := argAfter(cmd.Args, "-out")
+	summaryPath := argAfter(cmd.Args, "-summary-out")
+	if outPath == "" || summaryPath == "" {
+		r.t.Fatalf("missing output args: %+v", cmd.Args)
+	}
+	writeFile(r.t, summaryPath, `{"schema_version":1,"mode":"explain","project_count":1,"error_count":0,"totals":{"comp_count":1,"layer_count":1,"effect_count":1,"shape_operator_count":1,"text_animator_count":0,"dependency_count":1},"pattern_counts":{"shape_system":1}}`+"\n")
+	writeFile(r.t, outPath, `{"path":"demo.aep","explanation":{"recreation_steps":[{"id":"structure","priority":10,"title":"Build","summary":"Build structure"}]}}`+"\n")
+	return host.Result{ExitCode: 0}
+}
+
+func (r fakeTechniqueReportRunner) Start(context.Context, host.Command) (host.Process, error) {
 	r.t.Fatalf("Start should not be called")
 	return nil, nil
 }
