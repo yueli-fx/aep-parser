@@ -93,6 +93,7 @@ try {
     $studyRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "study_queue.csv") | Select-Object -First 5)
     $patternRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "patterns.csv") | Select-Object -First 5)
     $learningActionRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "learning_actions.csv") | Select-Object -First 5)
+    $mechanismRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "mechanisms.csv") | Select-Object -First 8)
 
     $selfCountDiffs = @($compareSelf.count_diffs).Count
     $partialCountDiffs = @($comparePartial.count_diffs).Count
@@ -202,6 +203,11 @@ try {
         [void]$index.AppendLine("<tr><td>$(Escape-Html $row.pattern)</td><td>$(Escape-Html $row.action)</td><td>$(Escape-Html $row.risk)</td></tr>")
     }
     [void]$index.AppendLine("</tbody></table></section>")
+    [void]$index.AppendLine("<section class=""panel"" style=""margin-top:16px""><h2>Mechanism Catalog Preview</h2><table><thead><tr><th>Category</th><th>Name</th><th>Count</th></tr></thead><tbody>")
+    foreach ($row in $mechanismRows) {
+        [void]$index.AppendLine("<tr><td>$(Escape-Html $row.category)</td><td>$(Escape-Html $row.name)</td><td>$(Escape-Html $row.count)</td></tr>")
+    }
+    [void]$index.AppendLine("</tbody></table></section>")
     [void]$index.AppendLine("<section class=""panel""><h2>Artifacts</h2><div class=""links"">")
     [void]$index.AppendLine("<a href=""$runRel/full_report/report.html"">Full report HTML</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/learning.md"">Learning index</a>")
@@ -232,6 +238,9 @@ try {
     }
     if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Learning Actions Preview" -Quiet)) {
         throw "latest index missing Learning Actions Preview"
+    }
+    if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Mechanism Catalog Preview" -Quiet)) {
+        throw "latest index missing Mechanism Catalog Preview"
     }
     Require-LatestIndexLink -Label "full report" -RelativePath "$runRel/full_report/report.html"
     Require-LatestIndexLink -Label "learning index" -RelativePath "$runRel/full_report/learning.md"
