@@ -32,6 +32,7 @@ mode the embedded portrait is used for aggregate counts:
 - `project_count`
 - `error_count`
 - aggregate fingerprint totals
+- archetype counts for explain mode
 - hint counts
 - effect match counts
 - shape family counts
@@ -66,7 +67,8 @@ It defaults to `flightdeck\showcase` and writes generated output under
 Passing `-Open` opens the generated HTML report after writing all files.
 
 The report script now uses `-mode explain`, so per-project cards include
-deterministic technique notes in addition to raw portrait counts.
+deterministic archetype labels and technique notes in addition to raw portrait
+counts.
 
 ## Non-Goals
 

@@ -177,10 +177,19 @@ type Explanation struct {
 	SourcePath           string                 `json:"source_path,omitempty"`
 	Portrait             Portrait               `json:"portrait"`
 	Overview             []string               `json:"overview,omitempty"`
+	Archetypes           []ProjectArchetype     `json:"archetypes,omitempty"`
 	Techniques           []TechniqueExplanation `json:"techniques,omitempty"`
 	TopSignalLayers      []SignalLayer          `json:"top_signal_layers,omitempty"`
 	ReproducibilityNotes []string               `json:"reproducibility_notes,omitempty"`
 	UnknownNotes         []string               `json:"unknown_notes,omitempty"`
+}
+
+type ProjectArchetype struct {
+	ID      string   `json:"id"`
+	Label   string   `json:"label"`
+	Score   int      `json:"score"`
+	Summary string   `json:"summary"`
+	Signals []string `json:"signals,omitempty"`
 }
 
 type TechniqueExplanation struct {

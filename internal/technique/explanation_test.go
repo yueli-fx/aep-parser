@@ -63,6 +63,10 @@ func TestBuildExplanationTurnsPortraitIntoDeterministicTechniqueNotes(t *testing
 	assertTechniqueNote(t, explanation, "controller_rig", "controller/null")
 	assertTechniqueNote(t, explanation, "plugin_dependent", "Third-party")
 	assertTechniqueNote(t, explanation, "shape_operator_stack", "trim")
+	assertArchetype(t, explanation, "shape_system")
+	assertArchetype(t, explanation, "effect_stack")
+	assertArchetype(t, explanation, "controller_rig")
+	assertArchetype(t, explanation, "plugin_dependent")
 	if len(explanation.TopSignalLayers) != 3 || explanation.TopSignalLayers[0].LayerName != "Burst" {
 		t.Fatalf("top signal layers = %+v", explanation.TopSignalLayers)
 	}
@@ -96,6 +100,9 @@ func TestBuildExplanationAllowsEmptyPortrait(t *testing.T) {
 	if len(explanation.Overview) == 0 || len(explanation.Techniques) != 0 || len(explanation.TopSignalLayers) != 0 {
 		t.Fatalf("empty explanation = %+v", explanation)
 	}
+	if len(explanation.Archetypes) != 0 {
+		t.Fatalf("empty archetypes = %+v", explanation.Archetypes)
+	}
 	if !containsText(explanation.UnknownNotes, "No unknown") {
 		t.Fatalf("unknown notes = %+v", explanation.UnknownNotes)
 	}
@@ -121,4 +128,17 @@ func containsText(values []string, want string) bool {
 		}
 	}
 	return false
+}
+
+func assertArchetype(t *testing.T, explanation *technique.Explanation, id string) {
+	t.Helper()
+	for _, archetype := range explanation.Archetypes {
+		if archetype.ID == id {
+			if archetype.Score <= 0 || archetype.Summary == "" {
+				t.Fatalf("archetype %s = %+v", id, archetype)
+			}
+			return
+		}
+	}
+	t.Fatalf("archetype %s not found in %+v", id, explanation.Archetypes)
 }

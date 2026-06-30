@@ -129,6 +129,7 @@ try {
     [void]$b.AppendLine("- shape operators: $($summary.totals.shape_operator_count)")
     [void]$b.AppendLine("- dependency edges: $($summary.totals.dependency_count)")
     [void]$b.AppendLine("")
+    Write-CountTable -Builder $b -Title "Archetypes" -Counts $summary.archetype_counts
     Write-CountTable -Builder $b -Title "Technique Hints" -Counts $summary.hint_counts
     Write-CountTable -Builder $b -Title "Effects" -Counts $summary.effect_counts
     Write-CountTable -Builder $b -Title "Shape Families" -Counts $summary.shape_families
@@ -154,6 +155,9 @@ try {
         [void]$b.AppendLine("")
         foreach ($line in @($explanation.overview | Select-Object -First 2)) {
             [void]$b.AppendLine("- $line")
+        }
+        foreach ($archetype in @($explanation.archetypes | Select-Object -First 4)) {
+            [void]$b.AppendLine("- Archetype: **$($archetype.label)** - $($archetype.summary)")
         }
         foreach ($tech in @($explanation.techniques | Select-Object -First 4)) {
             [void]$b.AppendLine("- **$($tech.title)**: $($tech.summary)")
@@ -191,6 +195,7 @@ try {
     [void]$h.AppendLine("</div>")
     [void]$h.AppendLine("<div class=""tables"">")
     Write-HtmlCountTable -Builder $h -Title "Technique Hints" -Counts $summary.hint_counts
+    Write-HtmlCountTable -Builder $h -Title "Archetypes" -Counts $summary.archetype_counts
     Write-HtmlCountTable -Builder $h -Title "Effects" -Counts $summary.effect_counts
     Write-HtmlCountTable -Builder $h -Title "Shape Families" -Counts $summary.shape_families
     Write-HtmlCountTable -Builder $h -Title "Text Animators" -Counts $summary.text_animators
@@ -217,6 +222,11 @@ try {
                 }
             }
             [void]$h.AppendLine("<div class=""chips"">")
+            if (($null -ne $explanation) -and ($null -ne $explanation.archetypes)) {
+                foreach ($archetype in @($explanation.archetypes | Select-Object -First 8)) {
+                    [void]$h.AppendLine("<span class=""chip"">$(Escape-Html $archetype.label)</span>")
+                }
+            }
             foreach ($hint in @($portrait.technique_hints | Select-Object -First 12)) {
                 [void]$h.AppendLine("<span class=""chip"">$(Escape-Html $hint.id)</span>")
             }

@@ -15,6 +15,7 @@ func BuildExplanation(portrait *Portrait) (*Explanation, error) {
 		SourcePath:           portrait.SourcePath,
 		Portrait:             *portrait,
 		Overview:             buildOverview(portrait),
+		Archetypes:           buildArchetypes(portrait),
 		Techniques:           buildTechniqueExplanations(portrait),
 		TopSignalLayers:      topSignalLayers(portrait.SignalLayers, 3),
 		ReproducibilityNotes: buildReproducibilityNotes(portrait),
@@ -44,6 +45,96 @@ func buildOverview(portrait *Portrait) []string {
 		overview = append(overview, "Most-used shape mechanisms: "+shapes+".")
 	}
 	return overview
+}
+
+func buildArchetypes(portrait *Portrait) []ProjectArchetype {
+	var out []ProjectArchetype
+	fp := portrait.Fingerprint
+	roles := fp.LayerRoleCounts
+	graph := portrait.Graph.RelationCounts
+	repro := portrait.Mechanisms.ReproducibilityCounts
+	hints := map[string]bool{}
+	for _, hint := range portrait.TechniqueHints {
+		hints[hint.ID] = true
+	}
+
+	if fp.ShapeOperatorCount >= 10 || roles["shape"] >= 3 || hints["shape_operator_stack"] {
+		out = append(out, ProjectArchetype{
+			ID:      "shape_system",
+			Label:   "Shape system",
+			Score:   fp.ShapeOperatorCount + roles["shape"]*2,
+			Summary: "The project relies heavily on shape layers and vector operators.",
+			Signals: []string{
+				fmt.Sprintf("shape operators: %d", fp.ShapeOperatorCount),
+				fmt.Sprintf("shape layers: %d", roles["shape"]),
+			},
+		})
+	}
+	if fp.EffectCount >= 3 || hints["effect_driven_layer"] {
+		out = append(out, ProjectArchetype{
+			ID:      "effect_stack",
+			Label:   "Effect stack",
+			Score:   fp.EffectCount*3 + len(portrait.Mechanisms.EffectMatchCounts),
+			Summary: "The look is built from effect stacks and tuned effect parameters.",
+			Signals: []string{
+				fmt.Sprintf("effects: %d", fp.EffectCount),
+				"top effects: " + fallbackText(formatTopCounts(portrait.Mechanisms.EffectMatchCounts, 3), "none"),
+			},
+		})
+	}
+	if fp.TextAnimatorCount > 0 || fp.TextLayerCount > 0 || hints["kinetic_text"] {
+		out = append(out, ProjectArchetype{
+			ID:      "text_animation",
+			Label:   "Text animation",
+			Score:   fp.TextAnimatorCount*4 + fp.TextLayerCount*2,
+			Summary: "The project contains text layers or text animator mechanisms.",
+			Signals: []string{
+				fmt.Sprintf("text animators: %d", fp.TextAnimatorCount),
+				"text animator kinds: " + fallbackText(formatTopCounts(portrait.Mechanisms.TextAnimatorKindCounts, 3), "none"),
+			},
+		})
+	}
+	if graph["source"] > 0 || roles["precomp"] > 0 || hints["precomp_assembly"] {
+		out = append(out, ProjectArchetype{
+			ID:      "precomp_system",
+			Label:   "Precomp system",
+			Score:   graph["source"]*3 + roles["precomp"]*2,
+			Summary: "Composition nesting is part of the project structure.",
+			Signals: []string{
+				fmt.Sprintf("precomp layers: %d", roles["precomp"]),
+				fmt.Sprintf("source edges: %d", graph["source"]),
+			},
+		})
+	}
+	if hints["controller_rig"] || roles["controller"] > 0 || graph["effect_param_layer"] > 0 {
+		out = append(out, ProjectArchetype{
+			ID:      "controller_rig",
+			Label:   "Controller rig",
+			Score:   roles["controller"]*5 + graph["effect_param_layer"]*2,
+			Summary: "Controller layers or layer-reference parameters coordinate other layers.",
+			Signals: []string{
+				fmt.Sprintf("controller layers: %d", roles["controller"]),
+				fmt.Sprintf("effect layer-reference edges: %d", graph["effect_param_layer"]),
+			},
+		})
+	}
+	if repro["third_party"] > 0 || hints["plugin_dependent"] {
+		out = append(out, ProjectArchetype{
+			ID:      "plugin_dependent",
+			Label:   "Plugin dependent",
+			Score:   repro["third_party"] * 5,
+			Summary: "The project uses third-party effects that affect exact recreation.",
+			Signals: []string{fmt.Sprintf("third-party effects: %d", repro["third_party"])},
+		})
+	}
+
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].Score != out[j].Score {
+			return out[i].Score > out[j].Score
+		}
+		return out[i].ID < out[j].ID
+	})
+	return out
 }
 
 func buildTechniqueExplanations(portrait *Portrait) []TechniqueExplanation {
@@ -194,6 +285,13 @@ func formatTopCounts(counts map[string]int, max int) string {
 		parts = append(parts, fmt.Sprintf("%s (%d)", row.name, row.count))
 	}
 	return strings.Join(parts, ", ")
+}
+
+func fallbackText(value, fallback string) string {
+	if value == "" {
+		return fallback
+	}
+	return value
 }
 
 func topCounts(counts map[string]int, max int) []countRow {

@@ -78,17 +78,18 @@ type corpusRecord struct {
 }
 
 type corpusSummary struct {
-	SchemaVersion int                          `json:"schema_version"`
-	Mode          string                       `json:"mode"`
-	ProjectCount  int                          `json:"project_count"`
-	ErrorCount    int                          `json:"error_count,omitempty"`
-	Totals        technique.FingerprintSummary `json:"totals"`
-	HintCounts    map[string]int               `json:"hint_counts"`
-	EffectCounts  map[string]int               `json:"effect_counts"`
-	ShapeFamilies map[string]int               `json:"shape_families"`
-	TextAnimators map[string]int               `json:"text_animators"`
-	LayerRoles    map[string]int               `json:"layer_roles"`
-	GraphEdges    map[string]int               `json:"graph_edges"`
+	SchemaVersion   int                          `json:"schema_version"`
+	Mode            string                       `json:"mode"`
+	ProjectCount    int                          `json:"project_count"`
+	ErrorCount      int                          `json:"error_count,omitempty"`
+	Totals          technique.FingerprintSummary `json:"totals"`
+	HintCounts      map[string]int               `json:"hint_counts"`
+	ArchetypeCounts map[string]int               `json:"archetype_counts,omitempty"`
+	EffectCounts    map[string]int               `json:"effect_counts"`
+	ShapeFamilies   map[string]int               `json:"shape_families"`
+	TextAnimators   map[string]int               `json:"text_animators"`
+	LayerRoles      map[string]int               `json:"layer_roles"`
+	GraphEdges      map[string]int               `json:"graph_edges"`
 }
 
 func newCorpusSummary(mode string) *corpusSummary {
@@ -98,12 +99,13 @@ func newCorpusSummary(mode string) *corpusSummary {
 		Totals: technique.FingerprintSummary{
 			LayerRoleCounts: map[string]int{},
 		},
-		HintCounts:    map[string]int{},
-		EffectCounts:  map[string]int{},
-		ShapeFamilies: map[string]int{},
-		TextAnimators: map[string]int{},
-		LayerRoles:    map[string]int{},
-		GraphEdges:    map[string]int{},
+		HintCounts:      map[string]int{},
+		ArchetypeCounts: map[string]int{},
+		EffectCounts:    map[string]int{},
+		ShapeFamilies:   map[string]int{},
+		TextAnimators:   map[string]int{},
+		LayerRoles:      map[string]int{},
+		GraphEdges:      map[string]int{},
 	}
 }
 
@@ -187,6 +189,9 @@ func runCorpus(input, mode string, recursive bool, limit int, summaryMode bool, 
 			case *technique.Explanation:
 				record.Explanation = value
 				addPortraitToSummary(summary, &value.Portrait)
+				for _, archetype := range value.Archetypes {
+					summary.ArchetypeCounts[archetype.ID]++
+				}
 			}
 		}
 		if !summaryMode {

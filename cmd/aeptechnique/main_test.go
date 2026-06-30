@@ -202,6 +202,9 @@ func TestRunEmitsCorpusExplanationSummary(t *testing.T) {
 	if summary.Mode != "explain" || summary.ProjectCount != 1 || summary.Totals.LayerCount == 0 {
 		t.Fatalf("summary = %+v", summary)
 	}
+	if len(summary.ArchetypeCounts) == 0 {
+		t.Fatalf("archetype counts = %+v", summary.ArchetypeCounts)
+	}
 }
 
 func TestRunWritesOutputFile(t *testing.T) {
