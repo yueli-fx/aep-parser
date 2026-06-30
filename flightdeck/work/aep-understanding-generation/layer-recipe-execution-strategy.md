@@ -1,6 +1,6 @@
 # Layer Recipe/Profile Execution Strategy Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps are template bullets for future slices.
 
 **Goal:** Move layer-level recipe/profile work from scattered field examples to
 an object-level execution strategy with reusable `expected_profile.layers[]`
@@ -97,7 +97,7 @@ flags, and refs.
 - Modify: `flightdeck/work/aep-understanding-generation/index.md`
 - Modify: `flightdeck/work/aep-understanding-generation/layer-recipe-execution-strategy.md`
 
-- [ ] **Step 1: Write the failing layer-object profile test**
+- **Step 1: Write the failing layer-object profile test**
 
 Use `internal/recipe/compiler_test.go` and assert stable paths under
 `expected_profile.layers[]`, for example:
@@ -106,32 +106,32 @@ Use `internal/recipe/compiler_test.go` and assert stable paths under
 assertProfileCheck(t, report, "expected_profile.layers[0].flags.visible", true)
 ```
 
-- [ ] **Step 2: Run the focused failing test**
+- **Step 2: Run the focused failing test**
 
 ```powershell
 go test ./internal/recipe -run TestCompileToFileChecksLayerObjectProfileExample -count=1
 ```
 
-- [ ] **Step 3: Implement the minimal profile/schema/compiler contract**
+- **Step 3: Implement the minimal profile/schema/compiler contract**
 
 Add only fields already backed by writer/parser evidence. If `profile.Layer`
 does not expose the value, add it there first and populate it from parsed
 `JSONLayer` / scene data.
 
-- [ ] **Step 4: Add or update a readable object-level recipe**
+- **Step 4: Add or update a readable object-level recipe**
 
 Prefer `examples/recipes/minimal-layer-object-profile.json` for same-evidence
 identity/metadata/timing/flag fields. Keep separate recipes for parent/matte or
 type-specific content.
 
-- [ ] **Step 5: Run focused verification**
+- **Step 5: Run focused verification**
 
 ```powershell
 go test ./internal/recipe -run TestCompileToFileChecksLayerObjectProfileExample -count=1
 pwsh -NoProfile -File scripts\verify_recipe_profiles.ps1 -Recipe examples\recipes\minimal-layer-object-profile.json
 ```
 
-- [ ] **Step 6: Run branch verification**
+- **Step 6: Run branch verification**
 
 ```powershell
 go test ./internal/recipe ./internal/profile
@@ -142,7 +142,7 @@ git diff --check
 Run `go test ./...` and `go vet ./...` when shared parser/writer behavior
 changes beyond expected-profile plumbing.
 
-- [ ] **Step 7: Update flightdeck and commit**
+- **Step 7: Update flightdeck and commit**
 
 Commit each completed field group locally. Do not push.
 
@@ -161,11 +161,10 @@ as an object-level contract:
   `frame_blend_pixel_motion`, `collapse_transform`, `sampling_bicubic`,
   `is_3d`, `is_adjustment`, `is_guide`, and `preserve_transparency`
 
-## Next Concrete Slice
+## Current Completion State
 
-Add parent-ref object checks using `expected_profile.layers[].parent`, because
-recipe writer support and `profile.Layer.parent_ref` already exist. Completed
-in `minimal-layer-parent.json`.
+Parent-ref object checks are covered by `minimal-layer-parent.json` using
+`expected_profile.layers[].parent`.
 
 Classic `track_matte` mode is now recipe-owned and covered by
 `minimal-layer-track-matte.json`: the fill layer asserts both
@@ -326,8 +325,12 @@ Explicit AE2025 source mattes now have a target-version-gated recipe slice:
 uses `layers[].matte` to name the source layer, and keeps the channel mode in
 `layers[].track_matte`. The recipe asserts both
 `expected_profile.layers[].track_matte` and `expected_profile.layers[].matte`.
-Continue with the next recipe-owned family; do not add more AE2025-only fields
-without the same explicit target-version boundary.
+Future recipe-owned families can extend this strategy; do not add more
+AE2025-only fields without the same explicit target-version boundary.
+
+There is no pending layer object-level slice in this strategy. New layer recipe
+work should start only when a new writer/profile contract exists or a nested
+family explicitly expands its supported property set.
 
 ## Self-Review
 

@@ -1,6 +1,6 @@
 # Comp Recipe/Profile Execution Strategy Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps are template bullets for future slices.
 
 **Goal:** Move comp-level recipe work from field-by-field ad hoc slices to an object-level execution strategy with a fixed field order, stable evidence requirements, and small commits.
 
@@ -79,7 +79,7 @@
 - Modify: `flightdeck/work/aep-understanding-generation/index.md`
 - Modify: `flightdeck/work/aep-understanding-generation/comp-recipe-execution-strategy.md`
 
-- [ ] **Step 1: Write the failing profile/expected-profile test**
+- **Step 1: Write the failing profile/expected-profile test**
 
 Use `internal/recipe/compiler_test.go` when the field is recipe-owned. The failure should name the exact expected path, for example:
 
@@ -89,7 +89,7 @@ assertProfileCheck(t, report, "expected_profile.background_color", true)
 
 Expected failure before implementation: missing profile field, missing expected-profile check, or mismatch at the exact path.
 
-- [ ] **Step 2: Run the focused failing test**
+- **Step 2: Run the focused failing test**
 
 Run:
 
@@ -99,7 +99,7 @@ go test ./internal/recipe -run TestCompileToFileSetsCompObjectProfile
 
 Expected: FAIL for the field path under implementation.
 
-- [ ] **Step 3: Implement the minimal profile contract**
+- **Step 3: Implement the minimal profile contract**
 
 Add the field to `profile.Composition` or a focused nested struct. Populate it from `scene.Composition` or cdta raw bytes only when the scene model does not already expose it.
 
@@ -111,7 +111,7 @@ type Composition struct {
 
 If `omitempty` would hide a meaningful default such as black `[0,0,0]`, use a representation that preserves the contract intentionally.
 
-- [ ] **Step 4: Implement `expected_profile` checking**
+- **Step 4: Implement `expected_profile` checking**
 
 Add the matching field to `ExpectedProfile` or a nested expected struct, include it in `hasExpectedProfile`, and report a stable path such as:
 
@@ -119,7 +119,7 @@ Add the matching field to `ExpectedProfile` or a nested expected struct, include
 add("expected_profile.background_color", expected.BackgroundColor, actual, equalFloatSlices(expected.BackgroundColor, actual))
 ```
 
-- [ ] **Step 5: Confirm schema capability reporting**
+- **Step 5: Confirm schema capability reporting**
 
 If the recipe field already exists, keep the capability name unchanged. If adding a new recipe field, record the existing capability from `docs/capabilities.json`, for example `SetBGColor`, `SetResolutionFactor`, or `SetPixelAspect`.
 
@@ -131,7 +131,7 @@ go test ./internal/recipe -run TestValidateReportsComp
 
 Expected: PASS, with the capability asserted by name.
 
-- [ ] **Step 6: Add or update the example recipe**
+- **Step 6: Add or update the example recipe**
 
 Prefer one readable object-level recipe:
 
@@ -157,7 +157,7 @@ Prefer one readable object-level recipe:
 
 Keep a dedicated recipe when a field needs its own render acceptance or evidence note.
 
-- [ ] **Step 7: Run focused verification**
+- **Step 7: Run focused verification**
 
 Run:
 
@@ -170,7 +170,7 @@ Remove-Item -LiteralPath $env:TEMP\aep-parser-comp-object-profile.aep -Force
 
 Expected: tests pass, validate reports `valid: true`, compile reports passing `profile_checks`.
 
-- [ ] **Step 8: Run branch verification**
+- **Step 8: Run branch verification**
 
 Run:
 
@@ -183,7 +183,7 @@ git diff --check
 
 Expected: all pass. Existing fixture check may still report the known manual-only `re_template.jsx` entry; do not treat that as a new failure.
 
-- [ ] **Step 9: Update flightdeck and commit**
+- **Step 9: Update flightdeck and commit**
 
 Update the work index with one concise bullet, then commit:
 
@@ -194,7 +194,7 @@ git commit -m "feat: add recipe comp object profile field"
 
 Use a more specific commit message when the slice is a named group, for example `feat: add recipe comp display profile checks`.
 
-## Next Concrete Slice
+## Current Completion State
 
 The completed display slice added profile/expected-profile coverage for
 `background_color`, `resolution_factor`, `pixel_aspect`, and
@@ -203,8 +203,6 @@ The completed display slice added profile/expected-profile coverage for
 The completed flag slice added profile/expected-profile coverage for
 `frame_blending`, `hide_shy_layers`, `preserve_nested_frame_rate`,
 `preserve_nested_resolution`, and `motion_blur.enabled`.
-
-The next slice should be **comp item metadata profile checks**:
 
 The completed metadata slice added profile/expected-profile coverage for comp
 `label` and `comment`. Decision: expose these directly on
@@ -224,9 +222,9 @@ preserve nested frame rate, preserve nested resolution, and motion blur enabled
 now also assert their own field-level `expected_profile` contracts instead of
 remaining count-only smoke tests.
 
-The next object-level planning slice should create the same kind of execution
-strategy for layer-level recipe/profile work, so layer fields stop advancing as
-unconnected single-field slices.
+There is no pending comp-field slice in this strategy. New comp recipe work
+should start only when a new writer/profile contract exists or when a new
+field is deliberately added to the comp matrix.
 
 ## Self-Review
 

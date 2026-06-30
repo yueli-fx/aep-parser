@@ -603,25 +603,18 @@ Done:
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven
   with AE 2025 render gates.
-- Next: broaden recipe coverage in narrow, evidence-gated slices. Strong
-  candidates are remaining comp settings or the next recipe-owned family with
-  an existing parser/profile contract. Transform keyframe coverage now has a
-  complete five-channel baseline in `minimal-transform-keyframes.json`, plus
-  the existing ease baseline. Text style coverage now has a dedicated
+- Recipe IR coverage for the current comp and layer strategy matrices is
+  complete: comp settings have object-level and field-level profile checks,
+  authored-layer examples carry `expected_profile.layers[]`, camera/light
+  options have consolidated baselines, transform keyframes have a five-channel
+  baseline plus the dedicated ease baseline, and text style has a dedicated
   `minimal-text-style.json` baseline instead of relying only on the larger
   text/shape recipe. Use
   `scripts/verify_recipe_profiles.ps1` for whole-recipe
-  validation/compile/profile-check coverage instead of manual per-field
-  spot-checking. For comp work, follow `comp-recipe-execution-strategy.md`
-  instead of asking for per-field direction; standalone comp examples now carry
-  field-level profile checks. For layer work, follow
-  `layer-recipe-execution-strategy.md`; explicit AE2025 source mattes now have
-  a target-version-gated recipe slice, while the consolidated layer object
-  baseline includes render/sampling flags, base null/adjustment and standalone
-  layer recipes assert object-level layer contracts, every authored-layer
-  recipe now has `expected_profile.layers[]`, and camera/light options now have
-  consolidated baselines for profile-visible properties. Do not start automated
-  correction loops.
+- validation/compile/profile-check coverage instead of manual per-field
+  spot-checking. For any new comp or layer work, first update the relevant
+  execution strategy with the new writer/profile evidence boundary. Do not
+  start automated correction loops.
 
 ## Open questions
 
@@ -629,6 +622,5 @@ Current:
   before a richer path-to-capability index exists.
 - What the smallest Phase 5 replication slice should be, so it exercises both
   structural and render gaps without forcing a full-project rebuild first.
-- Which recipe field family should enter next: a new recipe-owned family with
-  a proven parser/profile surface, or a comp setting still missing a dedicated
-  recipe/profile slice.
+- Which new recipe-owned family should enter next once there is a proven
+  parser/profile surface and a bounded writer contract.
