@@ -82,6 +82,7 @@ It defaults to `flightdeck\showcase` and writes generated output under
 - `projects.csv`
 - `patterns.csv`
 - `study_queue.csv`
+- `learning_actions.csv`
 - `errors.csv`
 - `manifest.json`
 - `report.md`
@@ -112,10 +113,11 @@ and repeated technique patterns outside the HTML report. `projects.csv` includes
 the stable recreation step IDs for each project; `patterns.csv` includes the
 step distribution for each repeated pattern. `study_queue.csv` ranks parsed
 projects by readiness and signal density so large corpora have an immediate
-review order. `errors.csv` lists failed corpus records for retry or manual
-inspection. `manifest.json` records the input path, git revision, scan timing,
-project/error counts, and generated artifact inventory for repeatable self-hosted
-runs.
+review order. `learning_actions.csv` turns each repeated pattern into a review
+action with representative project, common steps, top mechanisms, and risk.
+`errors.csv` lists failed corpus records for retry or manual inspection.
+`manifest.json` records the input path, git revision, scan timing, project/error
+counts, and generated artifact inventory for repeatable self-hosted runs.
 
 `scripts/compare_technique_reports.ps1` compares two generated report
 directories and writes `compare.json` plus `compare.md`. It reports scalar

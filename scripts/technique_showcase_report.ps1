@@ -20,6 +20,7 @@ try {
     $projectsCsvPath = Join-Path $OutDir "projects.csv"
     $patternsCsvPath = Join-Path $OutDir "patterns.csv"
     $studyQueueCsvPath = Join-Path $OutDir "study_queue.csv"
+    $learningActionsCsvPath = Join-Path $OutDir "learning_actions.csv"
     $errorsCsvPath = Join-Path $OutDir "errors.csv"
     $manifestPath = Join-Path $OutDir "manifest.json"
     $reportPath = Join-Path $OutDir "report.md"
@@ -252,6 +253,32 @@ try {
         return $items -join ", "
     }
 
+    function Get-LearningAction {
+        param([string]$PatternID)
+        switch ($PatternID) {
+            "effect_controlled_shape_system" { return "Study controller references first, then rebuild the shape stack and tuned effect chain." }
+            "plugin_dependent_effect_stack" { return "Inventory required plugins, then compare native fallback options against the representative project." }
+            "precomp_effect_pipeline" { return "Map the comp nesting order before studying the effect stack on each assembly stage." }
+            "kinetic_text_system" { return "Inspect text animator properties and timing before copying layer-level transforms or effects." }
+            default { return "Study the representative project and extract the repeated recreation steps for this pattern." }
+        }
+    }
+
+    function Get-LearningRisk {
+        param([object]$Pattern)
+        if ((Format-CountList -Rows $Pattern.plugin_effects) -ne "") {
+            return "plugins"
+        }
+        $readiness = Format-CountList -Rows $Pattern.readiness
+        if ($readiness -match "needs_reverse_engineering") {
+            return "unknowns"
+        }
+        if ($readiness -match "needs_plugins") {
+            return "plugins"
+        }
+        return "low"
+    }
+
     function Get-ReadinessProjects {
         param(
             [array]$Records,
@@ -398,6 +425,30 @@ try {
     })
     $patternRowsForCsv | Export-Csv -LiteralPath $patternsCsvPath -NoTypeInformation -Encoding UTF8
 
+    $learningActionRows = @($digest.patterns | ForEach-Object {
+        $representativeProject = ""
+        $representativeReadiness = ""
+        if (@($_.representatives).Count -gt 0) {
+            $representativeProject = [string]$_.representatives[0].path
+            $representativeReadiness = [string]$_.representatives[0].readiness
+        }
+        [pscustomobject]@{
+            priority               = [int]$_.count
+            pattern                = [string]$_.id
+            count                  = [int]$_.count
+            action                 = Get-LearningAction -PatternID $_.id
+            representative_project = $representativeProject
+            representative_readiness = $representativeReadiness
+            recreation_steps       = Format-CountList -Rows $_.recreation_steps
+            top_effects            = Format-CountList -Rows $_.effects
+            top_plugin_effects     = Format-CountList -Rows $_.plugin_effects
+            top_shape_families     = Format-CountList -Rows $_.shape_families
+            top_text_animators     = Format-CountList -Rows $_.text_animators
+            risk                   = Get-LearningRisk -Pattern $_
+        }
+    } | Sort-Object @{ Expression = { [int]$_.priority }; Descending = $true }, pattern)
+    $learningActionRows | Export-Csv -LiteralPath $learningActionsCsvPath -NoTypeInformation -Encoding UTF8
+
     $projectRowsForCsv = @()
     foreach ($record in $records) {
         $explanation = $record.explanation
@@ -495,6 +546,19 @@ try {
         }
         if ($project.readiness_blockers) {
             [void]$learn.AppendLine("  blockers: $($project.readiness_blockers)")
+        }
+    }
+    [void]$learn.AppendLine("")
+    [void]$learn.AppendLine("## Learning Actions")
+    [void]$learn.AppendLine("")
+    foreach ($action in @($learningActionRows | Select-Object -First 12)) {
+        [void]$learn.AppendLine("- [$($action.pattern)] $($action.action)")
+        [void]$learn.AppendLine("  representative: ``$($action.representative_project)``")
+        if ($action.recreation_steps) {
+            [void]$learn.AppendLine("  recreation steps: $($action.recreation_steps)")
+        }
+        if ($action.risk -ne "low") {
+            [void]$learn.AppendLine("  risk: $($action.risk)")
         }
     }
     [void]$learn.AppendLine("")
@@ -657,7 +721,7 @@ try {
     [void]$h.AppendLine("</head><body><main>")
     [void]$h.AppendLine("<h1>Technique Corpus Report</h1>")
     [void]$h.AppendLine("<p class=""muted"">input <code>$(Escape-Html $InputPath)</code></p>")
-    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""manifest.json"">manifest.json</a> · <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""study_queue.csv"">study_queue.csv</a> · <a href=""errors.csv"">errors.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
+    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""manifest.json"">manifest.json</a> · <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""study_queue.csv"">study_queue.csv</a> · <a href=""learning_actions.csv"">learning_actions.csv</a> · <a href=""errors.csv"">errors.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
     [void]$h.AppendLine("<div class=""grid"">")
     foreach ($metric in @(
         @{ Label = "Projects"; Value = $summary.project_count },
@@ -886,6 +950,7 @@ try {
         $projectsCsvPath,
         $patternsCsvPath,
         $studyQueueCsvPath,
+        $learningActionsCsvPath,
         $errorsCsvPath,
         $reportPath,
         $htmlPath
@@ -941,6 +1006,7 @@ try {
     Write-Host "projects csv: $projectsCsvPath"
     Write-Host "patterns csv: $patternsCsvPath"
     Write-Host "study queue csv: $studyQueueCsvPath"
+    Write-Host "learning actions csv: $learningActionsCsvPath"
     Write-Host "errors csv: $errorsCsvPath"
     Write-Host "manifest: $manifestPath"
     Write-Host "report:  $reportPath"

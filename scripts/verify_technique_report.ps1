@@ -29,12 +29,13 @@ $learningPath = Join-Path $OutDir "learning.md"
 $projectsCsvPath = Join-Path $OutDir "projects.csv"
 $patternsCsvPath = Join-Path $OutDir "patterns.csv"
 $studyQueueCsvPath = Join-Path $OutDir "study_queue.csv"
+$learningActionsCsvPath = Join-Path $OutDir "learning_actions.csv"
 $errorsCsvPath = Join-Path $OutDir "errors.csv"
 $manifestPath = Join-Path $OutDir "manifest.json"
 $reportPath = Join-Path $OutDir "report.md"
 $htmlPath = Join-Path $OutDir "report.html"
 
-foreach ($path in @($summaryPath, $corpusPath, $digestPath, $learningPath, $projectsCsvPath, $patternsCsvPath, $studyQueueCsvPath, $errorsCsvPath, $manifestPath, $reportPath, $htmlPath)) {
+foreach ($path in @($summaryPath, $corpusPath, $digestPath, $learningPath, $projectsCsvPath, $patternsCsvPath, $studyQueueCsvPath, $learningActionsCsvPath, $errorsCsvPath, $manifestPath, $reportPath, $htmlPath)) {
     Require-File -Path $path
 }
 
@@ -46,6 +47,7 @@ $corpusRecords = @($corpusLines | ForEach-Object { $_ | ConvertFrom-Json })
 $projectRows = @(Import-Csv -LiteralPath $projectsCsvPath)
 $patternRows = @(Import-Csv -LiteralPath $patternsCsvPath)
 $studyQueueRows = @(Import-Csv -LiteralPath $studyQueueCsvPath)
+$learningActionRows = @(Import-Csv -LiteralPath $learningActionsCsvPath)
 $errorRows = @(Import-Csv -LiteralPath $errorsCsvPath)
 
 if ([int]$summary.project_count -lt $MinProjects) {
@@ -88,6 +90,14 @@ if ($errorRows.Count -ne [int]$summary.error_count) {
 if ($patternRows.Count -ne @($digest.patterns).Count) {
     throw "patterns.csv row count $($patternRows.Count) does not match digest pattern count $(@($digest.patterns).Count)"
 }
+if ($learningActionRows.Count -ne @($digest.patterns).Count) {
+    throw "learning_actions.csv row count $($learningActionRows.Count) does not match digest pattern count $(@($digest.patterns).Count)"
+}
+foreach ($row in $learningActionRows) {
+    if ([string]$row.pattern -eq "" -or [string]$row.action -eq "" -or [string]$row.representative_project -eq "") {
+        throw "learning_actions.csv contains incomplete row: $($row | ConvertTo-Json -Compress)"
+    }
+}
 $recordsWithSteps = @($corpusRecords | Where-Object {
     $null -ne $_.explanation -and
     $null -ne $_.explanation.recreation_steps -and
@@ -118,6 +128,7 @@ Require-Text -Path $htmlPath -Pattern "manifest\.json"
 Require-Text -Path $htmlPath -Pattern "learning\.md"
 Require-Text -Path $htmlPath -Pattern "projects\.csv"
 Require-Text -Path $htmlPath -Pattern "study_queue\.csv"
+Require-Text -Path $htmlPath -Pattern "learning_actions\.csv"
 Require-Text -Path $htmlPath -Pattern "errors\.csv"
 
 Write-Host "ok: $OutDir"

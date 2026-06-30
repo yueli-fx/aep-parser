@@ -20,7 +20,7 @@
 pwsh -NoProfile -File scripts\technique_showcase_report.ps1 -InputPath data\samples -OutDir tmp\technique_samples_report -Verify
 ```
 
-输出包括 `manifest.json`、`learning.md`、`report.html`、`projects.csv`、`patterns.csv`、`study_queue.csv`、`errors.csv`、`digest.json`、`summary.json`、`corpus.jsonl` 和 `report.md`。`report.html` 是自包含入口，支持按路径、readiness、pattern、effect、plugin 搜索，并展示每个项目的确定性复刻步骤；`manifest.json` 记录输入、git 版本、耗时和 artifact 清单；`learning.md` 是更短的人工学习索引；CSV 文件适合直接用表格筛项目、技法模式、学习顺序、错误项目和 pattern 级复刻步骤分布。
+输出包括 `manifest.json`、`learning.md`、`report.html`、`projects.csv`、`patterns.csv`、`study_queue.csv`、`learning_actions.csv`、`errors.csv`、`digest.json`、`summary.json`、`corpus.jsonl` 和 `report.md`。`report.html` 是自包含入口，支持按路径、readiness、pattern、effect、plugin 搜索，并展示每个项目的确定性复刻步骤；`manifest.json` 记录输入、git 版本、耗时和 artifact 清单；`learning.md` 是更短的人工学习索引；CSV 文件适合直接用表格筛项目、技法模式、学习顺序、学习动作、错误项目和 pattern 级复刻步骤分布。
 
 对比两次报告：
 
