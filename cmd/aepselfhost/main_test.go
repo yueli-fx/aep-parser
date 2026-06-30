@@ -171,7 +171,7 @@ func TestRunVerifyUsesGoOrchestration(t *testing.T) {
 	}
 	for _, cmd := range verifyRunner.commands {
 		joined := strings.Join(append([]string{cmd.Name}, cmd.Args...), " ")
-		if strings.Contains(joined, "verify_technique_selfhost.ps1") {
+		if strings.Contains(joined, ".ps1") {
 			t.Fatalf("verify should not call selfhost PS script: %s", joined)
 		}
 	}
@@ -488,12 +488,6 @@ func (r *fakeVerifyRunner) Run(_ context.Context, cmd host.Command) host.Result 
 	joined := strings.Join(append([]string{cmd.Name}, cmd.Args...), " ")
 	switch {
 	case strings.Contains(joined, "go test"):
-	case strings.Contains(joined, "technique_showcase_report.ps1"):
-		outDir := argAfter(cmd.Args, "-OutDir")
-		if outDir == "" {
-			r.t.Fatalf("technique report command missing -OutDir: %+v", cmd.Args)
-		}
-		writeVerifyReportFixture(r.t, outDir, strings.Contains(outDir, "partial_report"))
 	case strings.Contains(joined, "./cmd/aeprecipe validate"):
 		writeCommandOutput(r.t, cmd.Stdout, `{"valid":true}`+"\n")
 	case strings.Contains(joined, "./cmd/aeprecipe compile"):

@@ -95,13 +95,7 @@ go test ./internal/aep -run TestManualFile -aep "C:/path/to/your.aep" -v
 
 ## 重构脚本
 
-`scripts/` 下：
-
-- `split_tests.py` — 按 test name 映射拆 `aep_test.go`（Phase 1）
-- `split_parse_text.py` — 按行号 slice 拆 `parse_text.go`（Phase 2）
-- `split_write.go` — 按 func name + append 模式拆 `write.go`（Phase 3）
-
-教训：纯机械批量移动写脚本（比手动 ~10× 省 token）。import 检测 regex 用 `\bpkg\.\w` 避免注释里 "ldat bytes. Used" 误中。
+一次性拆分脚本不保留在 `scripts/`。如果以后需要大规模机械迁移，优先写临时 Go 工具放 `_tmp_debug/<name>/`，跑完删除；只有可重复使用的维护入口才进入 `cmd/` 或 `scripts/`。历史教训：机械批量移动比手动省大量 review 成本，import 检测 regex 用 `\bpkg\.\w` 避免注释里 "ldat bytes. Used" 误中。
 
 ## 测试惯例
 

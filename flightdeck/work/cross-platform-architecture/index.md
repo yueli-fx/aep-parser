@@ -87,10 +87,10 @@ Current entrypoint:
 Target:
 
 - outcome/status/watch/start-watch/verify are Go commands.
-- PowerShell scripts are compatibility wrappers only.
-- report generation and comparison orchestration should move from
-  `scripts/verify_technique_selfhost.ps1` into Go.
-- PowerShell remains usable while migrating but is not the architectural layer.
+- report generation, comparison, status/watch, and outcome orchestration are Go
+  commands.
+- PowerShell is limited to Windows AE worker internals and AE fixture/gate
+  maintenance scripts.
 
 ### Tier 4: AE Worker
 
@@ -119,17 +119,11 @@ be directly exposed as arbitrary public code execution surfaces.
 Known platform-sensitive areas:
 
 - `cmd/aepselfhost/main.go`
-  - `verifySelfhost` shells out to `pwsh`.
-  - `processRunning` uses Windows `tasklist`.
-  - `startWatch` starts the current executable directly and should remain
-    portable after process inspection is split.
-- `scripts/verify_technique_selfhost.ps1`
-  - still owns the main selfhost gate engine.
-  - calls `technique_showcase_report.ps1`, `compare_technique_reports.ps1`,
-    and the PS compatibility wrappers.
+  - selfhost verification is Go-owned and uses `internal/host` for process
+    work.
 - `cmd/aeoracle/main.go`
-  - `render` shells out to `pwsh scripts/ae_run.ps1`.
-  - usage text currently says `AfterFX.exe`, which is Windows-specific wording.
+  - `render` routes through `internal/aehost`; Windows may use the PowerShell
+    AE runner internally.
 - `scripts/ae_run.ps1` and `scripts/AeRun.Lib.ps1`
   - Windows AE launch, dialog handling, OCR, crash-state handling.
 - `internal/aep_test/*_shipgate_test.go`
@@ -485,7 +479,7 @@ git commit -m "refactor: route selfhost host operations through platform"
 - Modify: `cmd/aepselfhost/main.go`
 - Modify: `cmd/aepselfhost/main_test.go`
 - Create or modify: `internal/selfhost/*`
-- Keep as wrapper: `scripts/verify_technique_selfhost.ps1`
+- Delete the old PowerShell wrapper after the Go command is verified.
 
 - [ ] **Step 1: Extract a Go selfhost package**
 
@@ -533,26 +527,11 @@ only exists as a PS script, call the eventual Go equivalent from the new
 package only after adding that equivalent. Do not call PS from the new
 `internal/selfhost` package.
 
-- [ ] **Step 4: Convert `scripts/verify_technique_selfhost.ps1` to wrapper**
+- [x] **Step 4: Remove `scripts/verify_technique_selfhost.ps1` wrapper**
 
-After the Go gate produces the same `latest_outcome.*`,
+After the Go gate produced the same `latest_outcome.*`,
 `latest_effectiveness.*`, `latest_index.html`, `history.jsonl`, and
-`history.csv`, reduce the script to:
-
-```powershell
-param(
-    [string]$OutRoot = "tmp\technique_selfhost_gate",
-    [int]$Limit = 0,
-    [switch]$Open
-)
-
-$argsList = @("run", "./cmd/aepselfhost", "verify", "-out-root", $OutRoot)
-if ($Limit -gt 0) { $argsList += @("-limit", [string]$Limit) }
-if ($Open) { $argsList += "-open" }
-
-& go @argsList
-exit $LASTEXITCODE
-```
+`history.csv`, the wrapper was removed. Use `go run ./cmd/aepselfhost verify`.
 
 - [ ] **Step 5: Verify and commit**
 
@@ -561,14 +540,13 @@ Run:
 ```powershell
 go test ./cmd/aepselfhost ./internal/selfhost ./cmd/aeptechnique ./internal/technique -count=1
 go run ./cmd/aepselfhost verify -out-root tmp\technique_selfhost_gate
-pwsh -NoProfile -File scripts\verify_technique_selfhost.ps1 -OutRoot tmp\technique_selfhost_gate
 git diff --check
 ```
 
 Commit:
 
 ```powershell
-git add cmd/aepselfhost internal/selfhost scripts/verify_technique_selfhost.ps1
+git add cmd/aepselfhost internal/selfhost
 git commit -m "feat: move selfhost verification gate to Go"
 ```
 
@@ -624,47 +602,20 @@ Commit after Task 5 with the full cross-platform slice.
 
 **Files:**
 
-- Create: `scripts/verify_cross_platform.ps1`
+- Create: `cmd/aepverify`
 - Modify: `README.md`
 
-- [x] **Step 1: Add build script**
+- [x] **Step 1: Add Go build gate**
 
-Create `scripts/verify_cross_platform.ps1`:
-
-```powershell
-$ErrorActionPreference = "Stop"
-
-$targets = @(
-    @{ GOOS = "windows"; GOARCH = "amd64" },
-    @{ GOOS = "darwin"; GOARCH = "arm64" },
-    @{ GOOS = "linux"; GOARCH = "amd64" }
-)
-
-$packages = @(
-    "./cmd/aepsearch",
-    "./cmd/aeprecipe",
-    "./cmd/aeptechnique",
-    "./cmd/aepselfhost",
-    "./internal/host"
-)
-
-foreach ($target in $targets) {
-    Write-Host "building GOOS=$($target.GOOS) GOARCH=$($target.GOARCH)"
-    $env:GOOS = $target.GOOS
-    $env:GOARCH = $target.GOARCH
-    go build $packages
-}
-
-Remove-Item Env:\GOOS -ErrorAction SilentlyContinue
-Remove-Item Env:\GOARCH -ErrorAction SilentlyContinue
-```
+Create `go run ./cmd/aepverify cross-platform`, which builds Tier 1 packages
+for Windows, macOS, and Linux.
 
 - [x] **Step 2: Add README command**
 
 Add:
 
 ```powershell
-pwsh -NoProfile -File scripts\verify_cross_platform.ps1
+go run ./cmd/aepverify cross-platform
 ```
 
 - [x] **Step 3: Verify**
@@ -672,7 +623,7 @@ pwsh -NoProfile -File scripts\verify_cross_platform.ps1
 Run:
 
 ```powershell
-pwsh -NoProfile -File scripts\verify_cross_platform.ps1
+go run ./cmd/aepverify cross-platform
 go test ./cmd/aepselfhost ./internal/host -count=1
 git diff --check
 ```
@@ -680,7 +631,7 @@ git diff --check
 Commit:
 
 ```powershell
-git add internal/aehost cmd/aeoracle scripts/verify_cross_platform.ps1 README.md flightdeck/work/cross-platform-architecture/index.md
+git add internal/aehost cmd/aeoracle cmd/aepverify README.md flightdeck/work/cross-platform-architecture/index.md
 git commit -m "refactor: add cross-platform AE host gate"
 ```
 
