@@ -518,6 +518,7 @@
       "go_type": "string",
       "x-aep-structural-required": true,
       "description": "Composition display name.",
+      "x-aep-validation": "Composition name is required and must be unique within comps[].",
       "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
@@ -529,7 +530,7 @@
       "go_type": "int",
       "x-aep-structural-required": true,
       "description": "Composition width in pixels.",
-      "x-aep-validation": "Pixel width must fit the composition writer's uint16 range.",
+      "x-aep-validation": "Composition width must be positive.",
       "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
@@ -541,7 +542,7 @@
       "go_type": "int",
       "x-aep-structural-required": true,
       "description": "Composition height in pixels.",
-      "x-aep-validation": "Pixel height must fit the composition writer's uint16 range.",
+      "x-aep-validation": "Composition height must be positive.",
       "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
@@ -553,6 +554,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Composition frame rate in frames per second.",
+      "x-aep-validation": "Composition frame rate must be positive.",
       "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
@@ -564,6 +566,7 @@
       "go_type": "float64",
       "x-aep-structural-required": true,
       "description": "Composition duration in seconds.",
+      "x-aep-validation": "Composition duration must be positive.",
       "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
     },
     {
@@ -602,6 +605,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Composition label color index.",
+      "x-aep-validation": "Composition label must be a valid AE label index.",
       "x-aep-capabilities": [
         {
           "key": "comp.set_label",
@@ -708,6 +712,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Composition preview resolution factor.",
+      "x-aep-validation": "Resolution factor must contain two positive integer factors.",
       "x-aep-capabilities": [
         {
           "key": "comp.set_resolution_factor",
@@ -734,6 +739,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Composition pixel aspect ratio.",
+      "x-aep-validation": "Pixel aspect ratio must be positive.",
       "x-aep-capabilities": [
         {
           "key": "comp.set_pixel_aspect",
@@ -760,6 +766,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Composition display start time in seconds.",
+      "x-aep-validation": "Display start time must be non-negative.",
       "x-aep-capabilities": [
         {
           "key": "comp.set_display_start_time",
@@ -949,6 +956,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Composition motion blur shutter angle.",
+      "x-aep-validation": "Motion blur shutter angle must be an integer between 0 and 720.",
       "x-aep-capabilities": [
         {
           "key": "comp.set_motion_blur_shutter_angle",
@@ -975,6 +983,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Composition motion blur shutter phase.",
+      "x-aep-validation": "Motion blur shutter phase must be an integer.",
       "x-aep-capabilities": [
         {
           "key": "comp.set_motion_blur_shutter_phase",
@@ -1001,6 +1010,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Composition motion blur adaptive sample limit.",
+      "x-aep-validation": "Motion blur adaptive sample limit must be a non-negative integer.",
       "x-aep-capabilities": [
         {
           "key": "comp.set_motion_blur_adaptive_sample_limit",
@@ -1027,6 +1037,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Composition motion blur samples per frame.",
+      "x-aep-validation": "Motion blur samples per frame must be a non-negative integer.",
       "x-aep-capabilities": [
         {
           "key": "comp.set_motion_blur_samples_per_frame",
@@ -1054,6 +1065,7 @@
       "go_type": "*recipe.CompWorkAreaSpec",
       "object_type": "CompWorkAreaSpec",
       "description": "Composition work area range.",
+      "x-aep-validation": "Work area start and end are required when work_area is present.",
       "x-aep-capabilities": [
         {
           "key": "comp.set_work_area",
@@ -1080,6 +1092,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Composition work area start time in seconds.",
+      "x-aep-validation": "Work area start must be non-negative.",
       "x-aep-capabilities": [
         {
           "key": "comp.set_work_area",
@@ -1106,6 +1119,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Composition work area end time in seconds.",
+      "x-aep-validation": "Work area end must satisfy start \u003c= end \u003c= comp duration.",
       "x-aep-capabilities": [
         {
           "key": "comp.set_work_area",

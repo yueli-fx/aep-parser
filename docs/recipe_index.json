@@ -633,6 +633,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Composition display start time in seconds.",
+      "validation": "Display start time must be non-negative.",
       "capability_keys": [
         "comp.set_display_start_time"
       ],
@@ -662,6 +663,7 @@
         "structural"
       ],
       "summary": "Composition duration in seconds.",
+      "validation": "Composition duration must be positive.",
       "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "comps[].frame_blending": {
@@ -688,6 +690,7 @@
         "structural"
       ],
       "summary": "Composition frame rate in frames per second.",
+      "validation": "Composition frame rate must be positive.",
       "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "comps[].height": {
@@ -701,7 +704,7 @@
         "structural"
       ],
       "summary": "Composition height in pixels.",
-      "validation": "Pixel height must fit the composition writer's uint16 range.",
+      "validation": "Composition height must be positive.",
       "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "comps[].hide_shy_layers": {
@@ -725,6 +728,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Composition label color index.",
+      "validation": "Composition label must be a valid AE label index.",
       "capability_keys": [
         "comp.set_label"
       ],
@@ -5169,6 +5173,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Composition motion blur adaptive sample limit.",
+      "validation": "Motion blur adaptive sample limit must be a non-negative integer.",
       "capability_keys": [
         "comp.set_motion_blur_adaptive_sample_limit"
       ],
@@ -5195,6 +5200,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Composition motion blur samples per frame.",
+      "validation": "Motion blur samples per frame must be a non-negative integer.",
       "capability_keys": [
         "comp.set_motion_blur_samples_per_frame"
       ],
@@ -5208,6 +5214,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Composition motion blur shutter angle.",
+      "validation": "Motion blur shutter angle must be an integer between 0 and 720.",
       "capability_keys": [
         "comp.set_motion_blur_shutter_angle"
       ],
@@ -5221,6 +5228,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Composition motion blur shutter phase.",
+      "validation": "Motion blur shutter phase must be an integer.",
       "capability_keys": [
         "comp.set_motion_blur_shutter_phase"
       ],
@@ -5251,6 +5259,7 @@
         "structural"
       ],
       "summary": "Composition display name.",
+      "validation": "Composition name is required and must be unique within comps[].",
       "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "comps[].pixel_aspect": {
@@ -5261,6 +5270,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Composition pixel aspect ratio.",
+      "validation": "Pixel aspect ratio must be positive.",
       "capability_keys": [
         "comp.set_pixel_aspect"
       ],
@@ -5313,6 +5323,7 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Composition preview resolution factor.",
+      "validation": "Resolution factor must contain two positive integer factors.",
       "capability_keys": [
         "comp.set_resolution_factor"
       ],
@@ -5329,7 +5340,7 @@
         "structural"
       ],
       "summary": "Composition width in pixels.",
-      "validation": "Pixel width must fit the composition writer's uint16 range.",
+      "validation": "Composition width must be positive.",
       "example": "examples/recipes/minimal-adjustment-layer.json"
     },
     "comps[].work_area": {
@@ -5340,6 +5351,7 @@
       "type": "object\u003cCompWorkAreaSpec\u003e",
       "go_type": "*recipe.CompWorkAreaSpec",
       "summary": "Composition work area range.",
+      "validation": "Work area start and end are required when work_area is present.",
       "capability_keys": [
         "comp.set_work_area"
       ],
@@ -5353,6 +5365,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Composition work area end time in seconds.",
+      "validation": "Work area end must satisfy start \u003c= end \u003c= comp duration.",
       "capability_keys": [
         "comp.set_work_area"
       ],
@@ -5366,6 +5379,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Composition work area start time in seconds.",
+      "validation": "Work area start must be non-negative.",
       "capability_keys": [
         "comp.set_work_area"
       ],

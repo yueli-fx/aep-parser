@@ -38,26 +38,26 @@ This reference is generated from the canonical recipe field model.
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `comps[].name` | `string` | structural | Composition display name. | - | - | examples/recipes/minimal-adjustment-layer.json |
-| `comps[].width` | `number` | structural | Composition width in pixels. | Pixel width must fit the composition writer's uint16 range. | - | examples/recipes/minimal-adjustment-layer.json |
-| `comps[].height` | `number` | structural | Composition height in pixels. | Pixel height must fit the composition writer's uint16 range. | - | examples/recipes/minimal-adjustment-layer.json |
-| `comps[].frame_rate` | `number` | structural | Composition frame rate in frames per second. | - | - | examples/recipes/minimal-adjustment-layer.json |
-| `comps[].duration` | `number` | structural | Composition duration in seconds. | - | - | examples/recipes/minimal-adjustment-layer.json |
+| `comps[].name` | `string` | structural | Composition display name. | Composition name is required and must be unique within comps[]. | - | examples/recipes/minimal-adjustment-layer.json |
+| `comps[].width` | `number` | structural | Composition width in pixels. | Composition width must be positive. | - | examples/recipes/minimal-adjustment-layer.json |
+| `comps[].height` | `number` | structural | Composition height in pixels. | Composition height must be positive. | - | examples/recipes/minimal-adjustment-layer.json |
+| `comps[].frame_rate` | `number` | structural | Composition frame rate in frames per second. | Composition frame rate must be positive. | - | examples/recipes/minimal-adjustment-layer.json |
+| `comps[].duration` | `number` | structural | Composition duration in seconds. | Composition duration must be positive. | - | examples/recipes/minimal-adjustment-layer.json |
 | `comps[].background_color` | `array<float64>` | - | Composition background color as RGB channels. | RGB color must contain exactly three channels in the 0..255 range. | `comp.set_background_color` (`Composition.SetBGColor`) | examples/recipes/minimal-comp-background-color.json |
-| `comps[].label` | `number` | - | Composition label color index. | - | `comp.set_label` (`Composition.SetLabel`) | examples/recipes/minimal-comp-label.json |
+| `comps[].label` | `number` | - | Composition label color index. | Composition label must be a valid AE label index. | `comp.set_label` (`Composition.SetLabel`) | examples/recipes/minimal-comp-label.json |
 | `comps[].comment` | `string` | - | Composition comment text. | - | `comp.set_comment` (`Composition.SetComment`) | examples/recipes/minimal-comp-comment.json |
 | `comps[].motion_graphics_template_name` | `string` | - | Composition Motion Graphics template name. | When present, must be non-empty. Empty strings are treated as omitted. | `comp.set_motion_graphics_template_name` (`Composition.SetMotionGraphicsTemplateName`) | examples/recipes/minimal-motion-graphics-template-name.json |
 | `comps[].renderer` | `string` | - | Composition renderer identifier. | - | `comp.set_renderer` (`SetRenderer`) | examples/recipes/minimal-comp-renderer.json |
-| `comps[].resolution_factor` | `array<float64>` | - | Composition preview resolution factor. | - | `comp.set_resolution_factor` (`Composition.SetResolutionFactor`) | examples/recipes/minimal-comp-object-profile.json |
-| `comps[].pixel_aspect` | `number` | - | Composition pixel aspect ratio. | - | `comp.set_pixel_aspect` (`Composition.SetPixelAspect`) | examples/recipes/minimal-comp-object-profile.json |
-| `comps[].display_start_time` | `number` | - | Composition display start time in seconds. | - | `comp.set_display_start_time` (`Composition.SetDisplayStartTime`) | examples/recipes/minimal-comp-display-start-time.json |
+| `comps[].resolution_factor` | `array<float64>` | - | Composition preview resolution factor. | Resolution factor must contain two positive integer factors. | `comp.set_resolution_factor` (`Composition.SetResolutionFactor`) | examples/recipes/minimal-comp-object-profile.json |
+| `comps[].pixel_aspect` | `number` | - | Composition pixel aspect ratio. | Pixel aspect ratio must be positive. | `comp.set_pixel_aspect` (`Composition.SetPixelAspect`) | examples/recipes/minimal-comp-object-profile.json |
+| `comps[].display_start_time` | `number` | - | Composition display start time in seconds. | Display start time must be non-negative. | `comp.set_display_start_time` (`Composition.SetDisplayStartTime`) | examples/recipes/minimal-comp-display-start-time.json |
 | `comps[].frame_blending` | `boolean` | - | Composition frame blending switch. | - | `comp.set_frame_blending` (`Composition.SetFrameBlending`) | examples/recipes/minimal-comp-flag-profile.json |
 | `comps[].draft_3d` | `boolean` | - | Composition draft 3D switch. | - | `comp.set_draft_3d` (`Composition.SetDraft3D`) | examples/recipes/minimal-comp-draft-3d.json |
 | `comps[].hide_shy_layers` | `boolean` | - | Composition shy layer visibility switch. | - | `comp.set_hide_shy_layers` (`Composition.SetHideShyLayers`) | examples/recipes/minimal-comp-flag-profile.json |
 | `comps[].preserve_nested_frame_rate` | `boolean` | - | Composition nested frame-rate preservation switch. | - | `comp.set_preserve_nested_frame_rate` (`Composition.SetPreserveNestedFrameRate`) | examples/recipes/minimal-comp-flag-profile.json |
 | `comps[].preserve_nested_resolution` | `boolean` | - | Composition nested resolution preservation switch. | - | `comp.set_preserve_nested_resolution` (`Composition.SetPreserveNestedResolution`) | examples/recipes/minimal-comp-flag-profile.json |
 | `comps[].motion_blur` | `object<CompMotionBlurSpec>` | - | Composition motion blur settings. | - | - | examples/recipes/minimal-comp-flag-profile.json |
-| `comps[].work_area` | `object<CompWorkAreaSpec>` | - | Composition work area range. | - | `comp.set_work_area` (`Composition.SetWorkArea`) | examples/recipes/minimal-comp-work-area.json |
+| `comps[].work_area` | `object<CompWorkAreaSpec>` | - | Composition work area range. | Work area start and end are required when work_area is present. | `comp.set_work_area` (`Composition.SetWorkArea`) | examples/recipes/minimal-comp-work-area.json |
 | `comps[].layers[]` | `array<recipe.Layer>` | - | Composition layer definitions. | - | - | examples/recipes/minimal-adjustment-layer.json |
 
 ## CompMotionBlurSpec
@@ -65,17 +65,17 @@ This reference is generated from the canonical recipe field model.
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
 | `comps[].motion_blur.enabled` | `boolean` | - | Composition motion blur enable switch. | - | `comp.set_motion_blur` (`Composition.SetCompMotionBlur`) | examples/recipes/minimal-comp-flag-profile.json |
-| `comps[].motion_blur.shutter_angle` | `number` | - | Composition motion blur shutter angle. | - | `comp.set_motion_blur_shutter_angle` (`Composition.SetShutterAngle`) | examples/recipes/minimal-comp-motion-blur.json |
-| `comps[].motion_blur.shutter_phase` | `number` | - | Composition motion blur shutter phase. | - | `comp.set_motion_blur_shutter_phase` (`Composition.SetShutterPhase`) | examples/recipes/minimal-comp-motion-blur.json |
-| `comps[].motion_blur.adaptive_sample_limit` | `number` | - | Composition motion blur adaptive sample limit. | - | `comp.set_motion_blur_adaptive_sample_limit` (`Composition.SetMotionBlurAdaptiveSampleLimit`) | examples/recipes/minimal-comp-motion-blur.json |
-| `comps[].motion_blur.samples_per_frame` | `number` | - | Composition motion blur samples per frame. | - | `comp.set_motion_blur_samples_per_frame` (`Composition.SetMotionBlurSamplesPerFrame`) | examples/recipes/minimal-comp-motion-blur.json |
+| `comps[].motion_blur.shutter_angle` | `number` | - | Composition motion blur shutter angle. | Motion blur shutter angle must be an integer between 0 and 720. | `comp.set_motion_blur_shutter_angle` (`Composition.SetShutterAngle`) | examples/recipes/minimal-comp-motion-blur.json |
+| `comps[].motion_blur.shutter_phase` | `number` | - | Composition motion blur shutter phase. | Motion blur shutter phase must be an integer. | `comp.set_motion_blur_shutter_phase` (`Composition.SetShutterPhase`) | examples/recipes/minimal-comp-motion-blur.json |
+| `comps[].motion_blur.adaptive_sample_limit` | `number` | - | Composition motion blur adaptive sample limit. | Motion blur adaptive sample limit must be a non-negative integer. | `comp.set_motion_blur_adaptive_sample_limit` (`Composition.SetMotionBlurAdaptiveSampleLimit`) | examples/recipes/minimal-comp-motion-blur.json |
+| `comps[].motion_blur.samples_per_frame` | `number` | - | Composition motion blur samples per frame. | Motion blur samples per frame must be a non-negative integer. | `comp.set_motion_blur_samples_per_frame` (`Composition.SetMotionBlurSamplesPerFrame`) | examples/recipes/minimal-comp-motion-blur.json |
 
 ## CompWorkAreaSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `comps[].work_area.start` | `number` | - | Composition work area start time in seconds. | - | `comp.set_work_area` (`Composition.SetWorkArea`) | examples/recipes/minimal-comp-object-profile.json |
-| `comps[].work_area.end` | `number` | - | Composition work area end time in seconds. | - | `comp.set_work_area` (`Composition.SetWorkArea`) | examples/recipes/minimal-comp-object-profile.json |
+| `comps[].work_area.start` | `number` | - | Composition work area start time in seconds. | Work area start must be non-negative. | `comp.set_work_area` (`Composition.SetWorkArea`) | examples/recipes/minimal-comp-object-profile.json |
+| `comps[].work_area.end` | `number` | - | Composition work area end time in seconds. | Work area end must satisfy start <= end <= comp duration. | `comp.set_work_area` (`Composition.SetWorkArea`) | examples/recipes/minimal-comp-object-profile.json |
 
 ## Layer
 

@@ -43,17 +43,59 @@ var fieldValidation = map[string]FieldMeta{
 	"project.timecode_default_base": {
 		Validation: "Must be an integer between 1 and 999.",
 	},
+	"comps[].name": {
+		Validation: "Composition name is required and must be unique within comps[].",
+	},
 	"comps[].width": {
-		Validation: "Pixel width must fit the composition writer's uint16 range.",
+		Validation: "Composition width must be positive.",
 	},
 	"comps[].height": {
-		Validation: "Pixel height must fit the composition writer's uint16 range.",
+		Validation: "Composition height must be positive.",
+	},
+	"comps[].frame_rate": {
+		Validation: "Composition frame rate must be positive.",
+	},
+	"comps[].duration": {
+		Validation: "Composition duration must be positive.",
 	},
 	"comps[].background_color": {
 		Validation: "RGB color must contain exactly three channels in the 0..255 range.",
 	},
+	"comps[].label": {
+		Validation: "Composition label must be a valid AE label index.",
+	},
 	"comps[].motion_graphics_template_name": {
 		Validation: "When present, must be non-empty. Empty strings are treated as omitted.",
+	},
+	"comps[].resolution_factor": {
+		Validation: "Resolution factor must contain two positive integer factors.",
+	},
+	"comps[].pixel_aspect": {
+		Validation: "Pixel aspect ratio must be positive.",
+	},
+	"comps[].display_start_time": {
+		Validation: "Display start time must be non-negative.",
+	},
+	"comps[].motion_blur.shutter_angle": {
+		Validation: "Motion blur shutter angle must be an integer between 0 and 720.",
+	},
+	"comps[].motion_blur.shutter_phase": {
+		Validation: "Motion blur shutter phase must be an integer.",
+	},
+	"comps[].motion_blur.adaptive_sample_limit": {
+		Validation: "Motion blur adaptive sample limit must be a non-negative integer.",
+	},
+	"comps[].motion_blur.samples_per_frame": {
+		Validation: "Motion blur samples per frame must be a non-negative integer.",
+	},
+	"comps[].work_area": {
+		Validation: "Work area start and end are required when work_area is present.",
+	},
+	"comps[].work_area.start": {
+		Validation: "Work area start must be non-negative.",
+	},
+	"comps[].work_area.end": {
+		Validation: "Work area end must satisfy start <= end <= comp duration.",
 	},
 	"comps[].layers[].type": {
 		Validation: "Supported values create the corresponding layer type.",
