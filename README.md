@@ -12,6 +12,16 @@
 - **API 参考**：[docs/](docs/) —— 每个核心类型一个 markdown，由 `cmd/docgen` 从导出符号的 doc comment **自动生成**（`go generate ./cmd/docgen`）。
 - **能力覆盖矩阵 / 暂搁 / 不可达 / negative findings**：[docs/capabilities.md](docs/capabilities.md)。
 
+## 自托管技法报告
+
+对本地 `.aep` 语料生成可浏览的 technique learning report：
+
+```powershell
+pwsh -NoProfile -File scripts\technique_showcase_report.ps1 -InputPath data\samples -OutDir tmp\technique_samples_report -Verify
+```
+
+输出包括 `learning.md`、`report.html`、`digest.json`、`summary.json`、`corpus.jsonl` 和 `report.md`。`report.html` 是自包含入口，支持按路径、readiness、pattern、effect、plugin 搜索；`learning.md` 是更短的人工学习索引。
+
 ## 原理与分层
 
 `.aep` 是 **RIFX**（Big-Endian RIFF）格式（魔数 `RIFX` + `Egg!`），内部为嵌套 Chunk 树；本库通过逆向工程已知偏移量提取数据。代码按单向 DAG 分层（M8 物理分包）：
