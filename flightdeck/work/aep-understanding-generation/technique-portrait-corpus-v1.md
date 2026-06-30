@@ -193,14 +193,15 @@ those compiled `.aep` files with `aeptechnique`, and writes `acceptance.json` pl
 `latest_acceptance.md`, `latest_index.html`, `history.jsonl`, and `history.csv`
 at the selected output root so the most recent result and trend history have
 stable paths. `latest_outcome.html` is the shortest browser-readable outcome
-with status, headline counters, next actions, reconstruction readiness, active blockers,
-top plugin blockers, trend delta, recent run history, and next learning signals,
+with status, a one-line effectiveness headline, headline counters, next actions,
+reconstruction readiness, active blockers, top plugin blockers, trend delta,
+recent run history, and next learning signals,
 `latest_outcome.md` is the shortest human-readable outcome,
 `latest_effectiveness.md` is the fuller human-readable outcome summary, while
 `latest_effectiveness.json` is the script/frontend-friendly version of the same effectiveness snapshot,
 including corpus counters, closed-loop reconstruction smoke results, reconstruction
-readiness/blocker summaries, primary artifact paths, an outcome status, action
-plan rows, recent history rows, top plugin blocker counts, and top learning signals from the study
+readiness/blocker summaries, primary artifact paths, an outcome status, outcome
+headline, action plan rows, recent history rows, top plugin blocker counts, and top learning signals from the study
 queue, learning actions, and coverage scorecard. The history files append one compact metrics row per
 gate run for trend checks across repeated self-hosted validation, and the latest
 HTML index renders the outcome, current run delta, and recent rows in Outcome

@@ -358,6 +358,15 @@ try {
             detail = $row.action
         })
     }
+    $analysisReadyProjects = 0
+    $pluginBlockedProjects = 0
+    foreach ($row in $readinessSummaryRows) {
+        if ([string]$row.readiness -eq "analysis_ready") {
+            $analysisReadyProjects = [int]$row.count
+        } elseif ([string]$row.readiness -eq "needs_plugins") {
+            $pluginBlockedProjects = [int]$row.count
+        }
+    }
 
     $selfCountDiffs = @($compareSelf.count_diffs).Count
     $partialCountDiffs = @($comparePartial.count_diffs).Count
@@ -502,6 +511,7 @@ try {
         has_regression = ($outcomeStatus -ne "pass")
         reasons = @($outcomeReasons)
     }
+    $outcomeHeadline = "$outcomeStatus · $($fullManifest.project_count) projects · $analysisReadyProjects analysis-ready · $pluginBlockedProjects plugin-blocked · recipe smoke $($recipeDraftBatchSummary.passed)/$($recipeDraftBatchSummary.attempted)"
     $historyPreviewRows = @($existingHistoryRows)
     $historyPreviewRows += $historyEntryObject
     $historyPreviewRows = @($historyPreviewRows | Select-Object -Last 5)
@@ -614,6 +624,12 @@ try {
             }
         })
         outcome_status = $outcomeStatusInfo
+        outcome_summary = [ordered]@{
+            headline = $outcomeHeadline
+            analysis_ready_projects = [int]$analysisReadyProjects
+            plugin_blocked_projects = [int]$pluginBlockedProjects
+            recipe_smoke = "$($recipeDraftBatchSummary.passed)/$($recipeDraftBatchSummary.attempted)"
+        }
         steps = @($steps)
     }
     $effectiveness | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $effectivenessJsonPath -Encoding UTF8
@@ -690,6 +706,7 @@ try {
     [void]$outcomeHtml.AppendLine("<style>body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#f6f8fb;color:#1f2937}main{max-width:760px;margin:0 auto;padding:32px}.hero,.panel{background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:18px;margin-bottom:16px}h1{font-size:28px;margin:0 0 8px}.status{display:inline-block;border-radius:6px;padding:6px 10px;font-weight:700;text-transform:uppercase}.ok{background:#dcfce7;color:#166534}.watch{background:#fef3c7;color:#92400e}.fail{background:#fee2e2;color:#991b1b}.muted{color:#667085}table{width:100%;border-collapse:collapse;font-size:14px}td,th{border-bottom:1px solid #e5e7eb;padding:8px;text-align:left}td:last-child,th:last-child{text-align:right}.links{display:grid;gap:10px}.links a{display:block;border:1px solid #d8dee8;border-radius:8px;padding:10px 12px;color:#1d4ed8;text-decoration:none;background:#fff}</style>")
     [void]$outcomeHtml.AppendLine("</head><body><main>")
     [void]$outcomeHtml.AppendLine("<section class=""hero""><h1>Self-Hosted Outcome</h1><p class=""muted"">run <code>$runID</code> · input <code>$InputPath</code></p><h2>Outcome Status</h2><p><span class=""status $statusClass"">$(Escape-Html $outcomeStatusInfo.status)</span></p><p>$(Escape-Html ((@($outcomeStatusInfo.reasons)) -join "; "))</p></section>")
+    [void]$outcomeHtml.AppendLine("<section class=""panel""><h2>Effectiveness Headline</h2><p>$(Escape-Html $outcomeHeadline)</p></section>")
     [void]$outcomeHtml.AppendLine("<section class=""panel""><h2>Numbers</h2><table><tbody>")
     [void]$outcomeHtml.AppendLine("<tr><td>Projects</td><td>$($fullManifest.project_count)</td></tr>")
     [void]$outcomeHtml.AppendLine("<tr><td>Patterns</td><td>$($fullManifest.pattern_count)</td></tr>")
@@ -1151,6 +1168,9 @@ try {
     if (-not (Select-String -LiteralPath $latestOutcomeHtmlPath -Pattern "Outcome Status" -Quiet)) {
         throw "latest outcome html missing Outcome Status"
     }
+    if (-not (Select-String -LiteralPath $latestOutcomeHtmlPath -Pattern "Effectiveness Headline" -Quiet)) {
+        throw "latest outcome html missing Effectiveness Headline"
+    }
     if (-not (Select-String -LiteralPath $latestOutcomeHtmlPath -Pattern "Learning Signals" -Quiet)) {
         throw "latest outcome html missing Learning Signals"
     }
@@ -1235,6 +1255,12 @@ try {
     }
     if ($null -eq $latestEffectivenessJson.outcome_status) {
         throw "latest effectiveness json missing outcome_status"
+    }
+    if ($null -eq $latestEffectivenessJson.outcome_summary) {
+        throw "latest effectiveness json missing outcome_summary"
+    }
+    if ($null -eq $latestEffectivenessJson.outcome_summary.headline) {
+        throw "latest effectiveness json missing outcome_summary.headline"
     }
     if ($null -eq $latestEffectivenessJson.outcome_status.status) {
         throw "latest effectiveness json missing outcome_status.status"
