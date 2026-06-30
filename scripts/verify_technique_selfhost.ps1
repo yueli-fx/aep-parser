@@ -355,9 +355,10 @@ try {
     }
     $acceptance | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $acceptanceJsonPath -Encoding UTF8
 
+    $generatedAtUtc = [DateTime]::UtcNow.ToString("o")
     $effectiveness = [ordered]@{
         schema_version = 1
-        generated_at_utc = [DateTime]::UtcNow.ToString("o")
+        generated_at_utc = $generatedAtUtc
         input_path = $InputPath
         run_id = $runID
         run_root = $runRoot
@@ -443,6 +444,34 @@ try {
         steps = @($steps)
     }
     $effectiveness | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $effectivenessJsonPath -Encoding UTF8
+
+    $historyEntry = [ordered]@{
+        schema_version = 1
+        generated_at_utc = $generatedAtUtc
+        run_id = $runID
+        run_root = $runRoot
+        input_path = $InputPath
+        parsed_projects = [int]$fullManifest.project_count
+        parse_errors = [int]$fullManifest.error_count
+        technique_patterns = [int]$fullManifest.pattern_count
+        partial_error_gate_errors = [int]$partialManifest.error_count
+        partial_to_full_count_diffs = [int]$partialCountDiffs
+        recipe_draft_compile_valid = [bool]$recipeDraftCompileJson.valid
+        compiled_draft_reparse_passed = [bool]$recipeDraftReparseSummary.passed
+        batch_requested = [int]$recipeDraftBatchSummary.requested
+        batch_attempted = [int]$recipeDraftBatchSummary.attempted
+        batch_passed = [int]$recipeDraftBatchSummary.passed
+        study_queue_top = [int]$studyRows.Count
+        learning_actions_top = [int]$learningActionRows.Count
+        coverage_summary = [int]$coverageScorecardRows.Count
+    }
+    $historyEntryObject = [pscustomobject]$historyEntry
+    $historyPreviewRows = @()
+    if (Test-Path -LiteralPath $historyCsvPath) {
+        $historyPreviewRows += @(Import-Csv -LiteralPath $historyCsvPath)
+    }
+    $historyPreviewRows += $historyEntryObject
+    $historyPreviewRows = @($historyPreviewRows | Select-Object -Last 5)
 
     $b = [System.Text.StringBuilder]::new()
     [void]$b.AppendLine("# Technique Self-Hosted Acceptance")
@@ -554,6 +583,11 @@ try {
     [void]$index.AppendLine("<tr><td>Compiled draft reparse</td><td>$(Escape-Html $recipeDraftReparseSummary.passed)</td></tr>")
     [void]$index.AppendLine("<tr><td>Reparse comps</td><td>$($recipeDraftReparseSummary.actual_comp_count) / $($recipeDraftReparseSummary.expected_comp_count)</td></tr>")
     [void]$index.AppendLine("<tr><td>Reparse layers</td><td>$($recipeDraftReparseSummary.actual_layer_count) / $($recipeDraftReparseSummary.expected_layer_count)</td></tr>")
+    [void]$index.AppendLine("</tbody></table></section>")
+    [void]$index.AppendLine("<section class=""panel"" style=""margin-top:16px""><h2>Effectiveness History Preview</h2><table><thead><tr><th>Run</th><th>Projects</th><th>Patterns</th><th>Batch</th></tr></thead><tbody>")
+    foreach ($row in $historyPreviewRows) {
+        [void]$index.AppendLine("<tr><td>$(Escape-Html $row.run_id)</td><td>$(Escape-Html $row.parsed_projects)</td><td>$(Escape-Html $row.technique_patterns)</td><td>$(Escape-Html $row.batch_passed) / $(Escape-Html $row.batch_attempted)</td></tr>")
+    }
     [void]$index.AppendLine("</tbody></table></section>")
     [void]$index.AppendLine("<section class=""panel""><h2>Study Queue Preview</h2><table><thead><tr><th>Rank</th><th>Project</th><th>Score</th></tr></thead><tbody>")
     foreach ($row in $studyRows) {
@@ -715,6 +749,9 @@ try {
     if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Effectiveness Snapshot" -Quiet)) {
         throw "latest index missing Effectiveness Snapshot"
     }
+    if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Effectiveness History Preview" -Quiet)) {
+        throw "latest index missing Effectiveness History Preview"
+    }
     if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Project Playbooks Preview" -Quiet)) {
         throw "latest index missing Project Playbooks Preview"
     }
@@ -828,29 +865,8 @@ try {
     if ($null -eq $latestEffectivenessJson.learning_signals.coverage_summary) {
         throw "latest effectiveness json missing learning_signals.coverage_summary"
     }
-    $historyEntry = [ordered]@{
-        schema_version = 1
-        generated_at_utc = [string]$effectiveness.generated_at_utc
-        run_id = $runID
-        run_root = $runRoot
-        input_path = $InputPath
-        parsed_projects = [int]$latestEffectivenessJson.corpus.parsed_projects
-        parse_errors = [int]$latestEffectivenessJson.corpus.parse_errors
-        technique_patterns = [int]$latestEffectivenessJson.corpus.technique_patterns
-        partial_error_gate_errors = [int]$latestEffectivenessJson.corpus.partial_error_gate_errors
-        partial_to_full_count_diffs = [int]$latestEffectivenessJson.corpus.partial_to_full_count_diffs
-        recipe_draft_compile_valid = [bool]$latestEffectivenessJson.closed_loop.recipe_draft_compile_valid
-        compiled_draft_reparse_passed = [bool]$latestEffectivenessJson.closed_loop.compiled_draft_reparse_passed
-        batch_requested = [int]$latestEffectivenessJson.closed_loop.batch_requested
-        batch_attempted = [int]$latestEffectivenessJson.closed_loop.batch_attempted
-        batch_passed = [int]$latestEffectivenessJson.closed_loop.batch_passed
-        study_queue_top = [int](@($latestEffectivenessJson.learning_signals.study_queue_top).Count)
-        learning_actions_top = [int](@($latestEffectivenessJson.learning_signals.learning_actions_top).Count)
-        coverage_summary = [int](@($latestEffectivenessJson.learning_signals.coverage_summary).Count)
-    }
     $historyEntryJson = $historyEntry | ConvertTo-Json -Depth 6 -Compress
     Add-Content -LiteralPath $historyJsonlPath -Value $historyEntryJson -Encoding UTF8
-    $historyEntryObject = [pscustomobject]$historyEntry
     if (Test-Path -LiteralPath $historyCsvPath) {
         $historyEntryObject | Export-Csv -LiteralPath $historyCsvPath -NoTypeInformation -Append -Encoding UTF8
     } else {

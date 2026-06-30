@@ -198,7 +198,8 @@ version of the same effectiveness snapshot,
 including corpus counters, closed-loop reconstruction smoke results, primary
 artifact paths, and top learning signals from the study queue, learning actions,
 and coverage scorecard. The history files append one compact metrics row per
-gate run for trend checks across repeated self-hosted validation.
+gate run for trend checks across repeated self-hosted validation, and the latest
+HTML index renders recent rows in an Effectiveness History Preview panel.
 Passing `-Open` opens the latest HTML index after the gate finishes.
 
 ## Non-Goals
