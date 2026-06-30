@@ -686,9 +686,9 @@ Current:
   to AE2020/AE2022/AE2025, preserving comp name/size/frame-rate/duration through
   target-version writers. It now also preserves stable profile-visible comp
   settings for no-layer comps: background color, resolution factor, pixel
-  aspect, display start time, work area, comp flags, and motion-blur settings.
-  Source projects with layers are intentionally blocked before output so
-  conversion cannot silently drop layer content.
+  aspect, display start time, work area, comp flags, motion-blur settings,
+  label, and comment. Source projects with layers are intentionally blocked
+  before output so conversion cannot silently drop layer content.
 - Recipe IR coverage for the current comp and layer strategy matrices is
   complete: comp settings have object-level and field-level profile checks,
   authored-layer examples carry `expected_profile.layers[]`, camera/light

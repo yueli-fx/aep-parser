@@ -107,6 +107,38 @@ func TestConvertPreservesNoLayerCompSettings(t *testing.T) {
 	}
 }
 
+func TestConvertPreservesNoLayerCompMetadata(t *testing.T) {
+	source := writeTempProjectWithMetadataNoLayerComp(t)
+	outPath := filepath.Join(t.TempDir(), "converted.aep")
+
+	report, err := Convert(ConvertOptions{
+		InputPath:  source,
+		OutputPath: outPath,
+		Target:     VersionAE2025,
+	})
+	if err != nil {
+		t.Fatalf("Convert: %v", err)
+	}
+	if report.Summary.Status != StatusPass {
+		t.Fatalf("status = %q, entries=%+v", report.Summary.Status, report.Entries)
+	}
+	converted, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open converted: %v", err)
+	}
+	prof, err := profile.Build(converted, profile.Options{Path: outPath})
+	if err != nil {
+		t.Fatalf("profile.Build converted: %v", err)
+	}
+	if len(prof.Comps) != 1 {
+		t.Fatalf("converted comps = %d, want 1", len(prof.Comps))
+	}
+	comp := prof.Comps[0]
+	if comp.Label != 11 || comp.Comment != "migration note\nsecond line" {
+		t.Fatalf("metadata label=%d comment=%q, want label=11 comment preserved", comp.Label, comp.Comment)
+	}
+}
+
 func TestConvertRefusesLayerProjects(t *testing.T) {
 	source := writeTempProjectWithOneSolidLayer(t)
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
@@ -125,6 +157,32 @@ func TestConvertRefusesLayerProjects(t *testing.T) {
 	if _, err := os.Stat(outPath); !os.IsNotExist(err) {
 		t.Fatalf("output exists or stat failed unexpectedly: %v", err)
 	}
+}
+
+func writeTempProjectWithMetadataNoLayerComp(t *testing.T) string {
+	t.Helper()
+	dir := t.TempDir()
+	basePath := filepath.Join(dir, "metadata-base.aep")
+	project := aep.NewProject(aep.TargetAE2020)
+	if _, err := aep.NewComposition(project, "Metadata", 800, 450, 24, 5); err != nil {
+		t.Fatalf("NewComposition: %v", err)
+	}
+	writeProjectFile(t, project, basePath)
+
+	reopened, err := aep.Open(basePath)
+	if err != nil {
+		t.Fatalf("Open base: %v", err)
+	}
+	comp := reopened.CompositionByName("Metadata")
+	if comp == nil {
+		t.Fatal("comp Metadata not found")
+	}
+	mustSetCompSetting(t, "SetLabel", comp.SetLabel(11))
+	mustSetCompSetting(t, "SetComment", comp.SetComment("migration note\nsecond line"))
+
+	path := filepath.Join(dir, "metadata-source.aep")
+	writeProjectFile(t, reopened, path)
+	return path
 }
 
 func writeTempProjectWithConfiguredNoLayerComp(t *testing.T) string {
@@ -149,6 +207,12 @@ func writeTempProjectWithConfiguredNoLayerComp(t *testing.T) string {
 	mustSetCompSetting(t, "SetMotionBlurSamplesPerFrame", comp.SetMotionBlurSamplesPerFrame(24))
 	mustSetCompSetting(t, "SetWorkArea", comp.SetWorkArea(0.5, 4.5))
 	path := filepath.Join(t.TempDir(), "configured-comp.aep")
+	writeProjectFile(t, project, path)
+	return path
+}
+
+func writeProjectFile(t *testing.T, project *aep.Project, path string) {
+	t.Helper()
 	out, err := os.Create(path)
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -157,7 +221,6 @@ func writeTempProjectWithConfiguredNoLayerComp(t *testing.T) string {
 	if err := project.WriteAEP(out); err != nil {
 		t.Fatalf("WriteAEP: %v", err)
 	}
-	return path
 }
 
 func mustSetCompSetting(t *testing.T, name string, err error) {

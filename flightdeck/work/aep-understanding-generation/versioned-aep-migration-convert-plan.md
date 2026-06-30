@@ -21,7 +21,7 @@ This slice supports:
 - stable profile-visible composition settings are recreated through target-version
   writers: background color, resolution factor, pixel aspect, display start
   time, work area, frame blending, draft 3D, hide-shy, preserve-nested flags,
-  and motion-blur settings;
+  motion-blur settings, label, and comment;
 - output project skeleton uses the requested target version.
 
 This slice refuses:
@@ -100,6 +100,12 @@ go test ./internal/aepmigrate -run TestConvert -count=1
   - Assert background color, resolution factor, pixel aspect, display start
     time, work area, comp flags, and motion-blur settings match.
 
+- [x] Add `TestConvertPreservesNoLayerCompMetadata`.
+  - Build an AE2020 no-layer source with comp label/comment after reopen.
+  - Convert to `AE2025`.
+  - Reopen and profile the output.
+  - Assert item-level comp label and comment match.
+
 ## Task 2: CLI Convert
 
 - [x] Write a failing CLI success test:
@@ -141,6 +147,7 @@ git diff --check
   - `assess` is available;
   - `convert` first slice is available only for no-layer comp skeleton projects;
   - stable no-layer comp settings are preserved through target-version writers;
+  - item-level comp metadata is preserved through the reopen-backed item writer;
   - layer-bearing projects are intentionally blocked until layer reconstruction enters the migration surface.
 
 ## Self-Review
