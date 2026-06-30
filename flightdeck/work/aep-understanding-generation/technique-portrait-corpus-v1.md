@@ -12,6 +12,7 @@ Extend `cmd/aeptechnique` with corpus JSONL mode:
 ```powershell
 go run ./cmd/aeptechnique -in <dir-or-file> -mode portrait -corpus -recursive
 go run ./cmd/aeptechnique -in <dir-or-file> -mode portrait -corpus -recursive -summary
+go run ./cmd/aeptechnique -in <dir-or-file> -mode explain -corpus -recursive
 pwsh -NoProfile -File scripts\technique_showcase_report.ps1 -Limit 3
 pwsh -NoProfile -File scripts\technique_showcase_report.ps1 -Open
 ```
@@ -22,9 +23,11 @@ For every discovered `.aep`, emit one JSON object per line:
 - `mode`
 - `portrait` for `-mode portrait`
 - `facts` for `-mode facts`
+- `explanation` for `-mode explain`
 - `error` when a project cannot be opened or profiled
 
-With `-summary`, emit one aggregate JSON object instead of JSONL:
+With `-summary`, emit one aggregate JSON object instead of JSONL. In explain
+mode the embedded portrait is used for aggregate counts:
 
 - `project_count`
 - `error_count`
@@ -61,6 +64,9 @@ It defaults to `flightdeck\showcase` and writes generated output under
 - `report.html`
 
 Passing `-Open` opens the generated HTML report after writing all files.
+
+The report script now uses `-mode explain`, so per-project cards include
+deterministic technique notes in addition to raw portrait counts.
 
 ## Non-Goals
 

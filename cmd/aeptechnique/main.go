@@ -24,7 +24,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 	fs.SetOutput(stderr)
 	input := fs.String("in", "", "input .aep file")
 	_ = fs.Bool("json", true, "emit technique facts as JSON")
-	mode := fs.String("mode", "facts", "output mode: facts or portrait")
+	mode := fs.String("mode", "facts", "output mode: facts, portrait, or explain")
 	portraitMode := fs.Bool("portrait", false, "emit project portrait JSON")
 	corpusMode := fs.Bool("corpus", false, "emit one JSONL record per discovered project")
 	recursive := fs.Bool("recursive", false, "discover .aep files recursively when -in is a directory")
@@ -41,8 +41,8 @@ func run(args []string, stdout, stderr io.Writer) int {
 	if *portraitMode {
 		*mode = "portrait"
 	}
-	if *mode != "facts" && *mode != "portrait" {
-		fmt.Fprintf(stderr, "invalid -mode %q; want facts or portrait\n", *mode)
+	if *mode != "facts" && *mode != "portrait" && *mode != "explain" {
+		fmt.Fprintf(stderr, "invalid -mode %q; want facts, portrait, or explain\n", *mode)
 		return 2
 	}
 	if *corpusMode {
@@ -69,11 +69,12 @@ func run(args []string, stdout, stderr io.Writer) int {
 }
 
 type corpusRecord struct {
-	Path     string              `json:"path"`
-	Mode     string              `json:"mode"`
-	Facts    *technique.FactSet  `json:"facts,omitempty"`
-	Portrait *technique.Portrait `json:"portrait,omitempty"`
-	Error    string              `json:"error,omitempty"`
+	Path        string                 `json:"path"`
+	Mode        string                 `json:"mode"`
+	Facts       *technique.FactSet     `json:"facts,omitempty"`
+	Portrait    *technique.Portrait    `json:"portrait,omitempty"`
+	Explanation *technique.Explanation `json:"explanation,omitempty"`
+	Error       string                 `json:"error,omitempty"`
 }
 
 type corpusSummary struct {
@@ -132,8 +133,20 @@ func buildOutput(input, mode string, stderr io.Writer) (any, int) {
 			return nil, 1
 		}
 		return portrait, 0
+	case "explain":
+		portrait, err := technique.BuildPortrait(facts)
+		if err != nil {
+			fmt.Fprintf(stderr, "portrait %q: %v\n", input, err)
+			return nil, 1
+		}
+		explanation, err := technique.BuildExplanation(portrait)
+		if err != nil {
+			fmt.Fprintf(stderr, "explain %q: %v\n", input, err)
+			return nil, 1
+		}
+		return explanation, 0
 	default:
-		fmt.Fprintf(stderr, "invalid -mode %q; want facts or portrait\n", mode)
+		fmt.Fprintf(stderr, "invalid -mode %q; want facts, portrait, or explain\n", mode)
 		return nil, 2
 	}
 }
@@ -171,6 +184,9 @@ func runCorpus(input, mode string, recursive bool, limit int, summaryMode bool, 
 			case *technique.Portrait:
 				record.Portrait = value
 				addPortraitToSummary(summary, value)
+			case *technique.Explanation:
+				record.Explanation = value
+				addPortraitToSummary(summary, &value.Portrait)
 			}
 		}
 		if !summaryMode {

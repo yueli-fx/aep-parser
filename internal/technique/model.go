@@ -171,3 +171,22 @@ type TechniqueHint struct {
 type UnknownSummary struct {
 	Count int `json:"count"`
 }
+
+type Explanation struct {
+	SchemaVersion        int                    `json:"schema_version"`
+	SourcePath           string                 `json:"source_path,omitempty"`
+	Portrait             Portrait               `json:"portrait"`
+	Overview             []string               `json:"overview,omitempty"`
+	Techniques           []TechniqueExplanation `json:"techniques,omitempty"`
+	TopSignalLayers      []SignalLayer          `json:"top_signal_layers,omitempty"`
+	ReproducibilityNotes []string               `json:"reproducibility_notes,omitempty"`
+	UnknownNotes         []string               `json:"unknown_notes,omitempty"`
+}
+
+type TechniqueExplanation struct {
+	ID         string   `json:"id"`
+	Title      string   `json:"title"`
+	Confidence string   `json:"confidence,omitempty"`
+	Summary    string   `json:"summary"`
+	Evidence   []string `json:"evidence,omitempty"`
+}

@@ -19,7 +19,7 @@ try {
     $baseArgs = @(
         "run", "./cmd/aeptechnique",
         "-in", $InputPath,
-        "-mode", "portrait",
+        "-mode", "explain",
         "-corpus",
         "-recursive"
     )
@@ -136,14 +136,32 @@ try {
     Write-CountTable -Builder $b -Title "Layer Roles" -Counts $summary.layer_roles
     Write-CountTable -Builder $b -Title "Graph Edges" -Counts $summary.graph_edges
 
-    $b.ToString() | Set-Content -Path $reportPath -Encoding UTF8
-
     $records = @()
     if (Test-Path $corpusPath) {
         $records = @(Get-Content -Path $corpusPath | Where-Object { $_.Trim() -ne "" } | ForEach-Object {
             $_ | ConvertFrom-Json
         })
     }
+
+    [void]$b.AppendLine("## Project Explanations")
+    [void]$b.AppendLine("")
+    foreach ($record in $records) {
+        $explanation = $record.explanation
+        if ($null -eq $explanation) {
+            continue
+        }
+        [void]$b.AppendLine("### ``$($record.path)``")
+        [void]$b.AppendLine("")
+        foreach ($line in @($explanation.overview | Select-Object -First 2)) {
+            [void]$b.AppendLine("- $line")
+        }
+        foreach ($tech in @($explanation.techniques | Select-Object -First 4)) {
+            [void]$b.AppendLine("- **$($tech.title)**: $($tech.summary)")
+        }
+        [void]$b.AppendLine("")
+    }
+
+    $b.ToString() | Set-Content -Path $reportPath -Encoding UTF8
 
     $h = [System.Text.StringBuilder]::new()
     [void]$h.AppendLine("<!doctype html>")
@@ -153,7 +171,7 @@ try {
     [void]$h.AppendLine("<meta name=""viewport"" content=""width=device-width, initial-scale=1"">")
     [void]$h.AppendLine("<title>Technique Showcase Report</title>")
     [void]$h.AppendLine("<style>")
-    [void]$h.AppendLine("body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#f5f7fa;color:#1f2937}main{max-width:1180px;margin:0 auto;padding:32px}h1{font-size:28px;margin:0 0 8px}h2{font-size:16px;margin:0 0 12px}.muted{color:#667085}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:22px 0}.metric,.panel,.project{background:white;border:1px solid #d8dee8;border-radius:8px;padding:16px}.metric .value{font-size:28px;font-weight:700;margin-top:6px}.tables{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}.projects{display:grid;gap:14px;margin-top:18px}.project h3{margin:0 0 10px;font-size:17px}.chips{display:flex;flex-wrap:wrap;gap:6px}.chip{background:#eef2ff;color:#3730a3;border-radius:999px;padding:4px 9px;font-size:12px}.chip.warn{background:#fff7ed;color:#9a3412}table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px solid #e5e7eb;padding:7px 4px;text-align:left}th:last-child,td:last-child{text-align:right}.empty{color:#98a2b3}code{background:#eef2f7;padding:2px 5px;border-radius:4px}</style>")
+    [void]$h.AppendLine("body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#f5f7fa;color:#1f2937}main{max-width:1180px;margin:0 auto;padding:32px}h1{font-size:28px;margin:0 0 8px}h2{font-size:16px;margin:0 0 12px}.muted{color:#667085}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:22px 0}.metric,.panel,.project{background:white;border:1px solid #d8dee8;border-radius:8px;padding:16px}.metric .value{font-size:28px;font-weight:700;margin-top:6px}.tables{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}.projects{display:grid;gap:14px;margin-top:18px}.project h3{margin:0 0 10px;font-size:17px}.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.chip{background:#eef2ff;color:#3730a3;border-radius:999px;padding:4px 9px;font-size:12px}.chip.warn{background:#fff7ed;color:#9a3412}.notes{display:grid;gap:8px;margin-top:10px}.note{border-left:3px solid #4f46e5;background:#f8fafc;padding:8px 10px}.note strong{display:block;margin-bottom:3px}.layers{font-size:12px;color:#475467;margin-top:8px}table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px solid #e5e7eb;padding:7px 4px;text-align:left}th:last-child,td:last-child{text-align:right}.empty{color:#98a2b3}code{background:#eef2f7;padding:2px 5px;border-radius:4px}</style>")
     [void]$h.AppendLine("</head><body><main>")
     [void]$h.AppendLine("<h1>Technique Showcase Report</h1>")
     [void]$h.AppendLine("<p class=""muted"">input <code>$(Escape-Html $InputPath)</code></p>")
@@ -182,18 +200,40 @@ try {
     [void]$h.AppendLine("<h2 style=""margin-top:28px"">Projects</h2>")
     [void]$h.AppendLine("<div class=""projects"">")
     foreach ($record in $records) {
+        $explanation = $record.explanation
         $portrait = $record.portrait
+        if (($null -eq $portrait) -and ($null -ne $explanation)) {
+            $portrait = $explanation.portrait
+        }
         [void]$h.AppendLine("<article class=""project"">")
         [void]$h.AppendLine("<h3>$(Escape-Html $record.path)</h3>")
         if ($record.error) {
             [void]$h.AppendLine("<div class=""chips""><span class=""chip warn"">$(Escape-Html $record.error)</span></div>")
         } elseif ($null -ne $portrait) {
             [void]$h.AppendLine("<p class=""muted"">$($portrait.fingerprint.comp_count) comps · $($portrait.fingerprint.layer_count) layers · $($portrait.fingerprint.effect_count) effects · $($portrait.graph.edge_count) edges</p>")
+            if (($null -ne $explanation) -and ($null -ne $explanation.overview)) {
+                foreach ($line in @($explanation.overview | Select-Object -First 2)) {
+                    [void]$h.AppendLine("<p>$(Escape-Html $line)</p>")
+                }
+            }
             [void]$h.AppendLine("<div class=""chips"">")
             foreach ($hint in @($portrait.technique_hints | Select-Object -First 12)) {
                 [void]$h.AppendLine("<span class=""chip"">$(Escape-Html $hint.id)</span>")
             }
             [void]$h.AppendLine("</div>")
+            if (($null -ne $explanation) -and ($null -ne $explanation.techniques)) {
+                [void]$h.AppendLine("<div class=""notes"">")
+                foreach ($tech in @($explanation.techniques | Select-Object -First 4)) {
+                    [void]$h.AppendLine("<div class=""note""><strong>$(Escape-Html $tech.title)</strong><span>$(Escape-Html $tech.summary)</span></div>")
+                }
+                [void]$h.AppendLine("</div>")
+            }
+            if (($null -ne $explanation) -and ($null -ne $explanation.top_signal_layers)) {
+                $layers = @($explanation.top_signal_layers | Select-Object -First 3 | ForEach-Object { "$($_.layer_name) [$($_.role)] score=$($_.score)" })
+                if ($layers.Count -gt 0) {
+                    [void]$h.AppendLine("<div class=""layers"">Top signal layers: $(Escape-Html ($layers -join '; '))</div>")
+                }
+            }
         }
         [void]$h.AppendLine("</article>")
     }

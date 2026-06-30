@@ -72,6 +72,27 @@ func TestRunEmitsPortraitJSONWithMode(t *testing.T) {
 	}
 }
 
+func TestRunEmitsExplanationJSONWithMode(t *testing.T) {
+	input := filepath.Join("..", "..", "flightdeck", "showcase", "text", "text.aep")
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"-in", input, "-mode", "explain"}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("run exit = %d, stderr=%s", code, stderr.String())
+	}
+
+	var explanation technique.Explanation
+	if err := json.Unmarshal(stdout.Bytes(), &explanation); err != nil {
+		t.Fatalf("json.Unmarshal: %v\nstdout=%s", err, stdout.String())
+	}
+	if explanation.SchemaVersion != technique.SchemaVersion || explanation.SourcePath != input {
+		t.Fatalf("explanation identity = %+v", explanation)
+	}
+	if explanation.Portrait.Fingerprint.LayerCount == 0 || len(explanation.Overview) == 0 {
+		t.Fatalf("explanation = %+v", explanation)
+	}
+}
+
 func TestRunAcceptsPortraitFlag(t *testing.T) {
 	input := filepath.Join("..", "..", "flightdeck", "showcase", "text", "text.aep")
 	var stdout, stderr bytes.Buffer
@@ -160,6 +181,26 @@ func TestRunEmitsCorpusSummary(t *testing.T) {
 	}
 	if summary.HintCounts["shape_operator_stack"] != 2 {
 		t.Fatalf("hint counts = %+v", summary.HintCounts)
+	}
+}
+
+func TestRunEmitsCorpusExplanationSummary(t *testing.T) {
+	fixture := filepath.Join("..", "..", "flightdeck", "showcase", "text", "text.aep")
+	root := t.TempDir()
+	writeFixtureCopy(t, fixture, filepath.Join(root, "one.aep"))
+
+	var stdout, stderr bytes.Buffer
+	code := run([]string{"-in", root, "-mode", "explain", "-corpus", "-recursive", "-summary"}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("run exit = %d, stderr=%s", code, stderr.String())
+	}
+
+	var summary corpusSummary
+	if err := json.Unmarshal(stdout.Bytes(), &summary); err != nil {
+		t.Fatalf("json.Unmarshal: %v\nstdout=%s", err, stdout.String())
+	}
+	if summary.Mode != "explain" || summary.ProjectCount != 1 || summary.Totals.LayerCount == 0 {
+		t.Fatalf("summary = %+v", summary)
 	}
 }
 
