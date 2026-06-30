@@ -126,7 +126,9 @@ layer roles, and graph edges.
 acceptance gate. It runs the technique Go tests, generates and verifies the full
 sample report, generates and verifies an intentional partial-error report,
 compares a report to itself, compares the partial report to the full report, and
-writes `acceptance.json` plus `acceptance.md`.
+writes `acceptance.json` plus `acceptance.md`. It also writes
+`latest_run.txt` and `latest_acceptance.md` at the selected output root so the
+most recent result has a stable path.
 
 ## Non-Goals
 

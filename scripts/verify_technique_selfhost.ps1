@@ -20,6 +20,8 @@ try {
     $comparePartialDir = Join-Path $runRoot "compare_partial_to_full"
     $acceptanceJsonPath = Join-Path $runRoot "acceptance.json"
     $acceptanceMdPath = Join-Path $runRoot "acceptance.md"
+    $latestRunPath = Join-Path $OutRoot "latest_run.txt"
+    $latestAcceptancePath = Join-Path $OutRoot "latest_acceptance.md"
     New-Item -ItemType Directory -Force -Path $runRoot | Out-Null
 
     $steps = [System.Collections.ArrayList]::new()
@@ -144,9 +146,13 @@ try {
         [void]$b.AppendLine("| $($step.name) | $($step.exit) | $($step.seconds) |")
     }
     $b.ToString() | Set-Content -LiteralPath $acceptanceMdPath -Encoding UTF8
+    $runRoot | Set-Content -LiteralPath $latestRunPath -Encoding UTF8
+    Copy-Item -LiteralPath $acceptanceMdPath -Destination $latestAcceptancePath -Force
 
     Write-Host "acceptance json: $acceptanceJsonPath"
     Write-Host "acceptance md:   $acceptanceMdPath"
+    Write-Host "latest run:      $latestRunPath"
+    Write-Host "latest summary:  $latestAcceptancePath"
     Write-Host "full report:     $fullReportDir"
     Write-Host "partial report:  $partialReportDir"
 }
