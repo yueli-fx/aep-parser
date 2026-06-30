@@ -1286,6 +1286,16 @@ try {
     if ($null -eq $latestOutcomeJson.stable_outputs.open_target) {
         throw "latest outcome json missing stable_outputs.open_target"
     }
+    $outcomeCliOutput = & pwsh -NoProfile -File scripts\show_technique_outcome.ps1 -OutRoot $OutRoot 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        throw "show technique outcome failed: $outcomeCliOutput"
+    }
+    if (($outcomeCliOutput -join "`n") -notmatch [regex]::Escape([string]$latestOutcomeJson.outcome_summary.headline)) {
+        throw "show technique outcome missing headline"
+    }
+    if (($outcomeCliOutput -join "`n") -notmatch "Next Actions") {
+        throw "show technique outcome missing Next Actions"
+    }
     if (-not (Test-Path -LiteralPath $latestOutcomeHtmlPath)) {
         throw "latest outcome html missing: $latestOutcomeHtmlPath"
     }
