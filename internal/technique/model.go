@@ -179,6 +179,7 @@ type Explanation struct {
 	Portrait             Portrait               `json:"portrait"`
 	Overview             []string               `json:"overview,omitempty"`
 	Archetypes           []ProjectArchetype     `json:"archetypes,omitempty"`
+	Patterns             []ProjectPattern       `json:"patterns,omitempty"`
 	RecreationReadiness  RecreationReadiness    `json:"recreation_readiness"`
 	Techniques           []TechniqueExplanation `json:"techniques,omitempty"`
 	TopSignalLayers      []SignalLayer          `json:"top_signal_layers,omitempty"`
@@ -192,6 +193,15 @@ type ProjectArchetype struct {
 	Score   int      `json:"score"`
 	Summary string   `json:"summary"`
 	Signals []string `json:"signals,omitempty"`
+}
+
+type ProjectPattern struct {
+	ID         string   `json:"id"`
+	Label      string   `json:"label"`
+	Score      int      `json:"score"`
+	Summary    string   `json:"summary"`
+	Archetypes []string `json:"archetypes,omitempty"`
+	Signals    []string `json:"signals,omitempty"`
 }
 
 type RecreationReadiness struct {

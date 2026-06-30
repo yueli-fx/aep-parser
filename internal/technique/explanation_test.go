@@ -68,6 +68,9 @@ func TestBuildExplanationTurnsPortraitIntoDeterministicTechniqueNotes(t *testing
 	assertArchetype(t, explanation, "effect_stack")
 	assertArchetype(t, explanation, "controller_rig")
 	assertArchetype(t, explanation, "plugin_dependent")
+	assertPattern(t, explanation, "effect_controlled_shape_system")
+	assertPattern(t, explanation, "plugin_dependent_effect_stack")
+	assertPattern(t, explanation, "kinetic_text_system")
 	if len(explanation.TopSignalLayers) != 3 || explanation.TopSignalLayers[0].LayerName != "Burst" {
 		t.Fatalf("top signal layers = %+v", explanation.TopSignalLayers)
 	}
@@ -110,6 +113,9 @@ func TestBuildExplanationAllowsEmptyPortrait(t *testing.T) {
 	if len(explanation.Archetypes) != 0 {
 		t.Fatalf("empty archetypes = %+v", explanation.Archetypes)
 	}
+	if len(explanation.Patterns) != 0 {
+		t.Fatalf("empty patterns = %+v", explanation.Patterns)
+	}
 	if explanation.RecreationReadiness.Status != "analysis_ready" {
 		t.Fatalf("empty readiness = %+v", explanation.RecreationReadiness)
 	}
@@ -151,4 +157,17 @@ func assertArchetype(t *testing.T, explanation *technique.Explanation, id string
 		}
 	}
 	t.Fatalf("archetype %s not found in %+v", id, explanation.Archetypes)
+}
+
+func assertPattern(t *testing.T, explanation *technique.Explanation, id string) {
+	t.Helper()
+	for _, pattern := range explanation.Patterns {
+		if pattern.ID == id {
+			if pattern.Score <= 0 || pattern.Summary == "" || len(pattern.Archetypes) == 0 {
+				t.Fatalf("pattern %s = %+v", id, pattern)
+			}
+			return
+		}
+	}
+	t.Fatalf("pattern %s not found in %+v", id, explanation.Patterns)
 }

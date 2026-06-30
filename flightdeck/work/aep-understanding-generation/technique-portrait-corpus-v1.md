@@ -34,6 +34,7 @@ mode the embedded portrait is used for aggregate counts:
 - aggregate fingerprint totals
 - recreation readiness counts for explain mode
 - archetype counts for explain mode
+- pattern counts for repeated technique combinations in explain mode
 - third-party plugin effect counts for explain mode
 - hint counts
 - effect match counts

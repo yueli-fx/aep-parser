@@ -205,6 +205,9 @@ func TestRunEmitsCorpusExplanationSummary(t *testing.T) {
 	if len(summary.ArchetypeCounts) == 0 {
 		t.Fatalf("archetype counts = %+v", summary.ArchetypeCounts)
 	}
+	if len(summary.PatternCounts) == 0 {
+		t.Fatalf("pattern counts = %+v", summary.PatternCounts)
+	}
 	if len(summary.ReadinessCounts) == 0 {
 		t.Fatalf("readiness counts = %+v", summary.ReadinessCounts)
 	}

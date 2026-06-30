@@ -22,6 +22,7 @@ func BuildExplanation(portrait *Portrait) (*Explanation, error) {
 		ReproducibilityNotes: buildReproducibilityNotes(portrait),
 		UnknownNotes:         buildUnknownNotes(portrait),
 	}
+	explanation.Patterns = buildPatterns(explanation.Archetypes, portrait)
 	return explanation, nil
 }
 
@@ -161,6 +162,72 @@ func buildArchetypes(portrait *Portrait) []ProjectArchetype {
 		})
 	}
 
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].Score != out[j].Score {
+			return out[i].Score > out[j].Score
+		}
+		return out[i].ID < out[j].ID
+	})
+	return out
+}
+
+func buildPatterns(archetypes []ProjectArchetype, portrait *Portrait) []ProjectPattern {
+	scores := map[string]int{}
+	for _, archetype := range archetypes {
+		scores[archetype.ID] = archetype.Score
+	}
+	has := func(id string) bool { return scores[id] > 0 }
+	var out []ProjectPattern
+	if has("shape_system") && has("effect_stack") && has("controller_rig") {
+		out = append(out, ProjectPattern{
+			ID:         "effect_controlled_shape_system",
+			Label:      "Effect-controlled shape system",
+			Score:      scores["shape_system"] + scores["effect_stack"] + scores["controller_rig"],
+			Summary:    "Shape construction, tuned effects, and controller references are combined into one procedural system.",
+			Archetypes: []string{"shape_system", "effect_stack", "controller_rig"},
+			Signals: []string{
+				"shape mechanisms: " + fallbackText(formatTopCounts(portrait.Mechanisms.ShapeFamilyCounts, 3), "none"),
+				"effects: " + fallbackText(formatTopCounts(portrait.Mechanisms.EffectMatchCounts, 3), "none"),
+			},
+		})
+	}
+	if has("precomp_system") && has("effect_stack") {
+		out = append(out, ProjectPattern{
+			ID:         "precomp_effect_pipeline",
+			Label:      "Precomp effect pipeline",
+			Score:      scores["precomp_system"] + scores["effect_stack"],
+			Summary:    "Nested compositions are combined with effect stacks to build the final look in stages.",
+			Archetypes: []string{"precomp_system", "effect_stack"},
+			Signals: []string{
+				fmt.Sprintf("source edges: %d", portrait.Graph.RelationCounts["source"]),
+				"effects: " + fallbackText(formatTopCounts(portrait.Mechanisms.EffectMatchCounts, 3), "none"),
+			},
+		})
+	}
+	if has("text_animation") {
+		out = append(out, ProjectPattern{
+			ID:         "kinetic_text_system",
+			Label:      "Kinetic text system",
+			Score:      scores["text_animation"],
+			Summary:    "Text layers and text animator properties are central enough to treat as a repeatable text-motion pattern.",
+			Archetypes: []string{"text_animation"},
+			Signals: []string{
+				"text animators: " + fallbackText(formatTopCounts(portrait.Mechanisms.TextAnimatorKindCounts, 3), "none"),
+			},
+		})
+	}
+	if has("plugin_dependent") && has("effect_stack") {
+		out = append(out, ProjectPattern{
+			ID:         "plugin_dependent_effect_stack",
+			Label:      "Plugin-dependent effect stack",
+			Score:      scores["plugin_dependent"] + scores["effect_stack"],
+			Summary:    "Third-party effects are part of the effect stack, so learning or recreating the look depends on plugin availability.",
+			Archetypes: []string{"plugin_dependent", "effect_stack"},
+			Signals: []string{
+				"plugin effects: " + fallbackText(formatTopCounts(portrait.Mechanisms.ThirdPartyEffectMatchCounts, 3), "unknown"),
+			},
+		})
+	}
 	sort.Slice(out, func(i, j int) bool {
 		if out[i].Score != out[j].Score {
 			return out[i].Score > out[j].Score

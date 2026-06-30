@@ -198,6 +198,7 @@ try {
     [void]$b.AppendLine("")
     Write-CountTable -Builder $b -Title "Recreation Readiness" -Counts $summary.readiness_counts
     Write-CountTable -Builder $b -Title "Archetypes" -Counts $summary.archetype_counts
+    Write-CountTable -Builder $b -Title "Pattern Catalog" -Counts $summary.pattern_counts
     Write-CountTable -Builder $b -Title "Technique Hints" -Counts $summary.hint_counts
     Write-CountTable -Builder $b -Title "Plugin Effects" -Counts $summary.plugin_effect_counts
     Write-CountTable -Builder $b -Title "Effects" -Counts $summary.effect_counts
@@ -214,6 +215,7 @@ try {
     }
 
     $archetypeRows = Get-CountRows -Counts $summary.archetype_counts -Max 12
+    $patternRows = Get-CountRows -Counts $summary.pattern_counts -Max 12
     $readinessRows = Get-CountRows -Counts $summary.readiness_counts -Max 12
     $digestArchetypes = @()
     foreach ($row in $archetypeRows) {
@@ -236,6 +238,12 @@ try {
         project_count = [int]$summary.project_count
         error_count   = [int]$errorCount
         archetypes    = $digestArchetypes
+        patterns      = @($patternRows | ForEach-Object {
+            [ordered]@{
+                id    = [string]$_.Name
+                count = [int]$_.Value
+            }
+        })
         readiness     = $digestReadiness
     }
     $digest | ConvertTo-Json -Depth 10 | Set-Content -Path $digestPath -Encoding UTF8
@@ -286,6 +294,9 @@ try {
         foreach ($archetype in @($explanation.archetypes | Select-Object -First 4)) {
             [void]$b.AppendLine("- Archetype: **$($archetype.label)** - $($archetype.summary)")
         }
+        foreach ($pattern in @($explanation.patterns | Select-Object -First 3)) {
+            [void]$b.AppendLine("- Pattern: **$($pattern.label)** - $($pattern.summary)")
+        }
         foreach ($tech in @($explanation.techniques | Select-Object -First 4)) {
             [void]$b.AppendLine("- **$($tech.title)**: $($tech.summary)")
         }
@@ -324,6 +335,7 @@ try {
     Write-HtmlCountTable -Builder $h -Title "Technique Hints" -Counts $summary.hint_counts
     Write-HtmlCountTable -Builder $h -Title "Recreation Readiness" -Counts $summary.readiness_counts
     Write-HtmlCountTable -Builder $h -Title "Archetypes" -Counts $summary.archetype_counts
+    Write-HtmlCountTable -Builder $h -Title "Pattern Catalog" -Counts $summary.pattern_counts
     Write-HtmlCountTable -Builder $h -Title "Plugin Effects" -Counts $summary.plugin_effect_counts
     Write-HtmlCountTable -Builder $h -Title "Effects" -Counts $summary.effect_counts
     Write-HtmlCountTable -Builder $h -Title "Shape Families" -Counts $summary.shape_families
@@ -382,6 +394,12 @@ try {
                 $searchTerms += [string]$archetype.label
             }
         }
+        if (($null -ne $explanation) -and ($null -ne $explanation.patterns)) {
+            foreach ($pattern in @($explanation.patterns)) {
+                $searchTerms += [string]$pattern.id
+                $searchTerms += [string]$pattern.label
+            }
+        }
         if (($null -ne $portrait) -and ($null -ne $portrait.technique_hints)) {
             foreach ($hint in @($portrait.technique_hints)) {
                 $searchTerms += [string]$hint.id
@@ -410,6 +428,11 @@ try {
             if (($null -ne $explanation) -and ($null -ne $explanation.archetypes)) {
                 foreach ($archetype in @($explanation.archetypes | Select-Object -First 8)) {
                     [void]$h.AppendLine("<span class=""chip"">$(Escape-Html $archetype.label)</span>")
+                }
+            }
+            if (($null -ne $explanation) -and ($null -ne $explanation.patterns)) {
+                foreach ($pattern in @($explanation.patterns | Select-Object -First 6)) {
+                    [void]$h.AppendLine("<span class=""chip"">$(Escape-Html $pattern.label)</span>")
                 }
             }
             foreach ($hint in @($portrait.technique_hints | Select-Object -First 12)) {

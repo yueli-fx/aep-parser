@@ -85,6 +85,7 @@ type corpusSummary struct {
 	Totals             technique.FingerprintSummary `json:"totals"`
 	HintCounts         map[string]int               `json:"hint_counts"`
 	ArchetypeCounts    map[string]int               `json:"archetype_counts,omitempty"`
+	PatternCounts      map[string]int               `json:"pattern_counts,omitempty"`
 	ReadinessCounts    map[string]int               `json:"readiness_counts,omitempty"`
 	PluginEffectCounts map[string]int               `json:"plugin_effect_counts"`
 	EffectCounts       map[string]int               `json:"effect_counts"`
@@ -103,6 +104,7 @@ func newCorpusSummary(mode string) *corpusSummary {
 		},
 		HintCounts:         map[string]int{},
 		ArchetypeCounts:    map[string]int{},
+		PatternCounts:      map[string]int{},
 		ReadinessCounts:    map[string]int{},
 		PluginEffectCounts: map[string]int{},
 		EffectCounts:       map[string]int{},
@@ -195,6 +197,9 @@ func runCorpus(input, mode string, recursive bool, limit int, summaryMode bool, 
 				addPortraitToSummary(summary, &value.Portrait)
 				for _, archetype := range value.Archetypes {
 					summary.ArchetypeCounts[archetype.ID]++
+				}
+				for _, pattern := range value.Patterns {
+					summary.PatternCounts[pattern.ID]++
 				}
 				if value.RecreationReadiness.Status != "" {
 					summary.ReadinessCounts[value.RecreationReadiness.Status]++
