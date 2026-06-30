@@ -22,11 +22,11 @@ var fieldValidation = map[string]FieldMeta{
 		Enum:       []string{"solid", "text", "shape", "camera", "light", "null", "adjustment"},
 	},
 	"comps[].layers[].text_animators[].property": {
-		Validation: "The first recipe slice supports opacity text animators only.",
-		Enum:       []string{"opacity"},
+		Validation: "Supported values create the corresponding text animator property.",
+		Enum:       []string{"opacity", "position"},
 	},
 	"comps[].layers[].text_animators[].value": {
-		Validation: "Opacity animator value must be a number.",
+		Validation: "Opacity value must be a number; position value must be a 3-number array.",
 	},
 	"comps[].layers[].text_animators[].range_start": {
 		Validation: "Range selector start is required.",

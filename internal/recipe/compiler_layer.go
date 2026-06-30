@@ -488,25 +488,44 @@ func applyTextAnimators(layer *aep.Layer, animators []TextAnimatorSpec) error {
 			if _, err := aep.AddTextOpacityAnimator(layer, value, *animator.RangeStart, *animator.RangeEnd, *animator.RangeOffset); err != nil {
 				return err
 			}
-			if len(animator.RangeOffsetKeyframes) > 0 {
-				keyframes := make([]aep.ScalarKeyframe, 0, len(animator.RangeOffsetKeyframes))
-				for _, kf := range animator.RangeOffsetKeyframes {
-					keyframes = append(keyframes, aep.ScalarKeyframe{
-						Time:    kf.Time,
-						Value:   kf.Value,
-						InEase:  temporalEase(kf.InEase),
-						OutEase: temporalEase(kf.OutEase),
-					})
-				}
-				if err := aep.AnimateTextRangeOffset(layer, 0, keyframes); err != nil {
-					return err
-				}
+			if err := applyTextRangeOffsetKeyframes(layer, animator); err != nil {
+				return err
+			}
+		case "position":
+			value, ok := numericSliceValue(animator.Value)
+			if !ok || len(value) != 3 {
+				return fmt.Errorf("text_animators[%d].value must be a 3-number array", i)
+			}
+			if animator.RangeStart == nil || animator.RangeEnd == nil || animator.RangeOffset == nil {
+				return fmt.Errorf("text_animators[%d] range_start, range_end, and range_offset are required", i)
+			}
+			if _, err := aep.AddTextPositionAnimator(layer, value[0], value[1], value[2], *animator.RangeStart, *animator.RangeEnd, *animator.RangeOffset); err != nil {
+				return err
+			}
+			if err := applyTextRangeOffsetKeyframes(layer, animator); err != nil {
+				return err
 			}
 		default:
 			return fmt.Errorf("text_animators[%d].property %q is not supported", i, animator.Property)
 		}
 	}
 	return nil
+}
+
+func applyTextRangeOffsetKeyframes(layer *aep.Layer, animator TextAnimatorSpec) error {
+	if len(animator.RangeOffsetKeyframes) == 0 {
+		return nil
+	}
+	keyframes := make([]aep.ScalarKeyframe, 0, len(animator.RangeOffsetKeyframes))
+	for _, kf := range animator.RangeOffsetKeyframes {
+		keyframes = append(keyframes, aep.ScalarKeyframe{
+			Time:    kf.Time,
+			Value:   kf.Value,
+			InEase:  temporalEase(kf.InEase),
+			OutEase: temporalEase(kf.OutEase),
+		})
+	}
+	return aep.AnimateTextRangeOffset(layer, 0, keyframes)
 }
 
 func textJustification(value string) (aep.TextJustification, error) {

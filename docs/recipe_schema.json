@@ -1885,6 +1885,20 @@
             "TestTextAnimator_AEShipGate_AE2020",
             "TestTextAnimator_AEShipGate_AE2025"
           ]
+        },
+        {
+          "key": "text_animator.add_position",
+          "query": "AddTextPositionAnimator",
+          "status": "supported",
+          "symbol": "AddTextPositionAnimator",
+          "domain": "text",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "boundary": "typed parameter accessors are not yet wired (tune via Reopen); un-Reopened fresh layers are refused",
+          "gate": [
+            "TestTextPosAnimator_AEShipGate_AE2020",
+            "TestTextPosAnimator_AEShipGate_AE2025"
+          ]
         }
       ],
       "x-aep-example": "examples/recipes/minimal-text-animator-opacity.json"
@@ -1898,9 +1912,10 @@
       "go_type": "string",
       "x-aep-structural-required": true,
       "description": "Text animator property to add.",
-      "x-aep-validation": "The first recipe slice supports opacity text animators only.",
+      "x-aep-validation": "Supported values create the corresponding text animator property.",
       "enum": [
-        "opacity"
+        "opacity",
+        "position"
       ],
       "x-aep-example": "examples/recipes/minimal-text-animator-opacity.json"
     },
@@ -1912,7 +1927,7 @@
       "type": "object",
       "go_type": "interface {}",
       "description": "Text animator property value.",
-      "x-aep-validation": "Opacity animator value must be a number.",
+      "x-aep-validation": "Opacity value must be a number; position value must be a 3-number array.",
       "x-aep-example": "examples/recipes/minimal-text-animator-opacity.json"
     },
     {

@@ -3212,7 +3212,8 @@
       "go_type": "[]recipe.TextAnimatorSpec",
       "summary": "Text animator definitions.",
       "capability_keys": [
-        "text_animator.add_opacity"
+        "text_animator.add_opacity",
+        "text_animator.add_position"
       ],
       "example": "examples/recipes/minimal-text-animator-opacity.json"
     },
@@ -3227,9 +3228,10 @@
         "structural"
       ],
       "summary": "Text animator property to add.",
-      "validation": "The first recipe slice supports opacity text animators only.",
+      "validation": "Supported values create the corresponding text animator property.",
       "enum": [
-        "opacity"
+        "opacity",
+        "position"
       ],
       "example": "examples/recipes/minimal-text-animator-opacity.json"
     },
@@ -3374,7 +3376,7 @@
       "type": "any",
       "go_type": "interface {}",
       "summary": "Text animator property value.",
-      "validation": "Opacity animator value must be a number.",
+      "validation": "Opacity value must be a number; position value must be a 3-number array.",
       "example": "examples/recipes/minimal-text-animator-opacity.json"
     },
     "comps[].layers[].text_style": {

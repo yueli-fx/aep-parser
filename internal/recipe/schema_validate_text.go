@@ -254,13 +254,25 @@ func validateTextAnimator(animator TextAnimatorSpec, path string, recordCapabili
 	switch animator.Property {
 	case "opacity":
 		recordCapability("AddTextOpacityAnimator", path)
+	case "position":
+		recordCapability("AddTextPositionAnimator", path)
 	default:
-		addRefusal("unsupported_text_animator_property", path+".property", "text animator property must be opacity")
+		addRefusal("unsupported_text_animator_property", path+".property", "text animator property must be opacity or position")
 	}
 	if animator.Value == nil {
 		addRefusal("missing_text_animator_value", path+".value", "text animator value is required")
-	} else if _, ok := animator.Value.(float64); !ok {
-		addRefusal("invalid_text_animator_value", path+".value", "text animator opacity value must be a number")
+	} else {
+		switch animator.Property {
+		case "opacity":
+			if _, ok := animator.Value.(float64); !ok {
+				addRefusal("invalid_text_animator_value", path+".value", "text animator opacity value must be a number")
+			}
+		case "position":
+			values, ok := numericSliceValue(animator.Value)
+			if !ok || len(values) != 3 {
+				addRefusal("invalid_text_animator_value", path+".value", "text animator position value must be a 3-number array")
+			}
+		}
 	}
 	if animator.RangeStart == nil {
 		addRefusal("missing_text_animator_range_start", path+".range_start", "range_start is required")
@@ -287,6 +299,25 @@ func validateTextAnimator(animator TextAnimatorSpec, path string, recordCapabili
 			validateKeyframeEase(kf.InEase, kfPath+".in_ease", addRefusal)
 			validateKeyframeEase(kf.OutEase, kfPath+".out_ease", addRefusal)
 		}
+	}
+}
+
+func numericSliceValue(value any) ([]float64, bool) {
+	switch v := value.(type) {
+	case []float64:
+		return v, true
+	case []any:
+		out := make([]float64, 0, len(v))
+		for _, item := range v {
+			n, ok := item.(float64)
+			if !ok {
+				return nil, false
+			}
+			out = append(out, n)
+		}
+		return out, true
+	default:
+		return nil, false
 	}
 }
 
