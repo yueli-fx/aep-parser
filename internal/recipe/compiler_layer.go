@@ -467,6 +467,51 @@ func applyTextStyle(layer *aep.Layer, spec TextStyleSpec) error {
 			return err
 		}
 	}
+	if spec.CapsOption != "" {
+		value, err := textCapsOption(spec.CapsOption)
+		if err != nil {
+			return err
+		}
+		if err := layer.SetRunCapsOption(spec.RunIndex, value); err != nil {
+			return err
+		}
+	}
+	if spec.BaselineOption != "" {
+		value, err := textBaselineOption(spec.BaselineOption)
+		if err != nil {
+			return err
+		}
+		if err := layer.SetRunBaselineOption(spec.RunIndex, value); err != nil {
+			return err
+		}
+	}
+	if spec.AutoKernType != "" {
+		value, err := textAutoKernType(spec.AutoKernType)
+		if err != nil {
+			return err
+		}
+		if err := layer.SetRunAutoKernType(spec.RunIndex, value); err != nil {
+			return err
+		}
+	}
+	if spec.LineJoinType != "" {
+		value, err := textLineJoinType(spec.LineJoinType)
+		if err != nil {
+			return err
+		}
+		if err := layer.SetRunLineJoinType(spec.RunIndex, value); err != nil {
+			return err
+		}
+	}
+	if spec.DigitSet != "" {
+		value, err := textDigitSet(spec.DigitSet)
+		if err != nil {
+			return err
+		}
+		if err := layer.SetRunDigitSet(spec.RunIndex, value); err != nil {
+			return err
+		}
+	}
 	if spec.NoBreak != nil {
 		if err := layer.SetRunNoBreak(spec.RunIndex, *spec.NoBreak); err != nil {
 			return err
@@ -874,6 +919,82 @@ func textJustification(value string) (aep.TextJustification, error) {
 	default:
 		return 0, fmt.Errorf("unsupported justification %q", value)
 	}
+}
+
+func textCapsOption(value string) (aep.TextCapsOption, error) {
+	switch normalizeEnum(value) {
+	case "normal":
+		return aep.TextCapsNormal, nil
+	case "small_caps":
+		return aep.TextCapsSmall, nil
+	case "all_caps":
+		return aep.TextCapsAll, nil
+	case "all_small_caps":
+		return aep.TextCapsAllSmall, nil
+	default:
+		return 0, fmt.Errorf("unsupported caps_option %q", value)
+	}
+}
+
+func textBaselineOption(value string) (aep.TextBaselineOption, error) {
+	switch normalizeEnum(value) {
+	case "normal":
+		return aep.TextBaselineNormal, nil
+	case "superscript":
+		return aep.TextBaselineSuperscript, nil
+	case "subscript":
+		return aep.TextBaselineSubscript, nil
+	default:
+		return 0, fmt.Errorf("unsupported baseline_option %q", value)
+	}
+}
+
+func textAutoKernType(value string) (aep.TextAutoKernType, error) {
+	switch normalizeEnum(value) {
+	case "no_auto":
+		return aep.TextAutoKernNoAuto, nil
+	case "metric":
+		return aep.TextAutoKernMetric, nil
+	case "optical":
+		return aep.TextAutoKernOptical, nil
+	default:
+		return 0, fmt.Errorf("unsupported auto_kern_type %q", value)
+	}
+}
+
+func textLineJoinType(value string) (aep.TextLineJoinType, error) {
+	switch normalizeEnum(value) {
+	case "miter":
+		return aep.TextLineJoinMiter, nil
+	case "round":
+		return aep.TextLineJoinRound, nil
+	case "bevel":
+		return aep.TextLineJoinBevel, nil
+	default:
+		return 0, fmt.Errorf("unsupported line_join_type %q", value)
+	}
+}
+
+func textDigitSet(value string) (aep.TextDigitSet, error) {
+	switch normalizeEnum(value) {
+	case "default":
+		return aep.TextDigitSetDefault, nil
+	case "arabic":
+		return aep.TextDigitSetArabic, nil
+	case "hindi":
+		return aep.TextDigitSetHindi, nil
+	case "farsi":
+		return aep.TextDigitSetFarsi, nil
+	case "arabic_rtl":
+		return aep.TextDigitSetArabicRTL, nil
+	default:
+		return 0, fmt.Errorf("unsupported digit_set %q", value)
+	}
+}
+
+func normalizeEnum(value string) string {
+	value = strings.ToLower(strings.TrimSpace(value))
+	return strings.ReplaceAll(value, "-", "_")
 }
 
 func layerQuality(value string) (aep.LayerQuality, error) {

@@ -77,6 +77,11 @@
     "comps[].layers[].text_style.horizontal_scale",
     "comps[].layers[].text_style.vertical_scale",
     "comps[].layers[].text_style.tsume",
+    "comps[].layers[].text_style.caps_option",
+    "comps[].layers[].text_style.baseline_option",
+    "comps[].layers[].text_style.auto_kern_type",
+    "comps[].layers[].text_style.line_join_type",
+    "comps[].layers[].text_style.digit_set",
     "comps[].layers[].text_style.faux_bold",
     "comps[].layers[].text_style.faux_italic",
     "comps[].layers[].text_style.apply_stroke",
@@ -463,6 +468,11 @@
     "expected_profile.text_styles[].horizontal_scale",
     "expected_profile.text_styles[].vertical_scale",
     "expected_profile.text_styles[].tsume",
+    "expected_profile.text_styles[].caps_option",
+    "expected_profile.text_styles[].baseline_option",
+    "expected_profile.text_styles[].auto_kern_type",
+    "expected_profile.text_styles[].line_join_type",
+    "expected_profile.text_styles[].digit_set",
     "expected_profile.text_styles[].faux_bold",
     "expected_profile.text_styles[].faux_italic",
     "expected_profile.text_styles[].apply_stroke",
@@ -3718,6 +3728,25 @@
       ],
       "example": "examples/recipes/minimal-text-shape.json"
     },
+    "comps[].layers[].text_style.auto_kern_type": {
+      "path": "comps[].layers[].text_style.auto_kern_type",
+      "json_name": "auto_kern_type",
+      "source_type": "TextStyleSpec",
+      "source_field": "AutoKernType",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Layer text style auto-kerning type.",
+      "validation": "Text auto-kerning type must use a supported value.",
+      "enum": [
+        "no_auto",
+        "metric",
+        "optical"
+      ],
+      "capability_keys": [
+        "text.set_run_auto_kern_type"
+      ],
+      "example": "examples/recipes/minimal-text-style.json"
+    },
     "comps[].layers[].text_style.auto_leading": {
       "path": "comps[].layers[].text_style.auto_leading",
       "json_name": "auto_leading",
@@ -3731,6 +3760,25 @@
       ],
       "example": "examples/recipes/minimal-text-style.json"
     },
+    "comps[].layers[].text_style.baseline_option": {
+      "path": "comps[].layers[].text_style.baseline_option",
+      "json_name": "baseline_option",
+      "source_type": "TextStyleSpec",
+      "source_field": "BaselineOption",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Layer text style baseline option.",
+      "validation": "Text baseline option must use a supported value.",
+      "enum": [
+        "normal",
+        "superscript",
+        "subscript"
+      ],
+      "capability_keys": [
+        "text.set_run_baseline_option"
+      ],
+      "example": "examples/recipes/minimal-text-style.json"
+    },
     "comps[].layers[].text_style.baseline_shift": {
       "path": "comps[].layers[].text_style.baseline_shift",
       "json_name": "baseline_shift",
@@ -3741,6 +3789,47 @@
       "summary": "Layer text style baseline shift amount.",
       "capability_keys": [
         "text.set_run_baseline_shift"
+      ],
+      "example": "examples/recipes/minimal-text-style.json"
+    },
+    "comps[].layers[].text_style.caps_option": {
+      "path": "comps[].layers[].text_style.caps_option",
+      "json_name": "caps_option",
+      "source_type": "TextStyleSpec",
+      "source_field": "CapsOption",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Layer text style caps option.",
+      "validation": "Text caps option must use a supported value.",
+      "enum": [
+        "normal",
+        "small_caps",
+        "all_caps",
+        "all_small_caps"
+      ],
+      "capability_keys": [
+        "text.set_run_caps_option"
+      ],
+      "example": "examples/recipes/minimal-text-style.json"
+    },
+    "comps[].layers[].text_style.digit_set": {
+      "path": "comps[].layers[].text_style.digit_set",
+      "json_name": "digit_set",
+      "source_type": "TextStyleSpec",
+      "source_field": "DigitSet",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Layer text style digit set.",
+      "validation": "Text digit set must use a supported value.",
+      "enum": [
+        "default",
+        "arabic",
+        "hindi",
+        "farsi",
+        "arabic_rtl"
+      ],
+      "capability_keys": [
+        "text.set_run_digit_set"
       ],
       "example": "examples/recipes/minimal-text-style.json"
     },
@@ -3840,6 +3929,25 @@
       "summary": "Layer text style explicit leading value.",
       "capability_keys": [
         "text.set_run_leading"
+      ],
+      "example": "examples/recipes/minimal-text-style.json"
+    },
+    "comps[].layers[].text_style.line_join_type": {
+      "path": "comps[].layers[].text_style.line_join_type",
+      "json_name": "line_join_type",
+      "source_type": "TextStyleSpec",
+      "source_field": "LineJoinType",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Layer text style stroke line-join type.",
+      "validation": "Text line-join type must use a supported value.",
+      "enum": [
+        "miter",
+        "round",
+        "bevel"
+      ],
+      "capability_keys": [
+        "text.set_run_line_join_type"
       ],
       "example": "examples/recipes/minimal-text-style.json"
     },
@@ -6211,6 +6319,22 @@
       "summary": "Expected text style stroke enable switch.",
       "example": "examples/recipes/minimal-text-shape.json"
     },
+    "expected_profile.text_styles[].auto_kern_type": {
+      "path": "expected_profile.text_styles[].auto_kern_type",
+      "json_name": "auto_kern_type",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "AutoKernType",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Expected text style auto-kerning type.",
+      "validation": "Expected auto-kerning type must use a supported value.",
+      "enum": [
+        "no_auto",
+        "metric",
+        "optical"
+      ],
+      "example": "examples/recipes/minimal-text-style.json"
+    },
     "expected_profile.text_styles[].auto_leading": {
       "path": "expected_profile.text_styles[].auto_leading",
       "json_name": "auto_leading",
@@ -6221,6 +6345,22 @@
       "summary": "Expected text style auto-leading switch.",
       "example": "examples/recipes/minimal-text-style.json"
     },
+    "expected_profile.text_styles[].baseline_option": {
+      "path": "expected_profile.text_styles[].baseline_option",
+      "json_name": "baseline_option",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "BaselineOption",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Expected text style baseline option.",
+      "validation": "Expected baseline option must use a supported value.",
+      "enum": [
+        "normal",
+        "superscript",
+        "subscript"
+      ],
+      "example": "examples/recipes/minimal-text-style.json"
+    },
     "expected_profile.text_styles[].baseline_shift": {
       "path": "expected_profile.text_styles[].baseline_shift",
       "json_name": "baseline_shift",
@@ -6229,6 +6369,41 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected text style baseline shift amount.",
+      "example": "examples/recipes/minimal-text-style.json"
+    },
+    "expected_profile.text_styles[].caps_option": {
+      "path": "expected_profile.text_styles[].caps_option",
+      "json_name": "caps_option",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "CapsOption",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Expected text style caps option.",
+      "validation": "Expected caps option must use a supported value.",
+      "enum": [
+        "normal",
+        "small_caps",
+        "all_caps",
+        "all_small_caps"
+      ],
+      "example": "examples/recipes/minimal-text-style.json"
+    },
+    "expected_profile.text_styles[].digit_set": {
+      "path": "expected_profile.text_styles[].digit_set",
+      "json_name": "digit_set",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "DigitSet",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Expected text style digit set.",
+      "validation": "Expected digit set must use a supported value.",
+      "enum": [
+        "default",
+        "arabic",
+        "hindi",
+        "farsi",
+        "arabic_rtl"
+      ],
       "example": "examples/recipes/minimal-text-style.json"
     },
     "expected_profile.text_styles[].faux_bold": {
@@ -6321,6 +6496,22 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected text style explicit leading value.",
+      "example": "examples/recipes/minimal-text-style.json"
+    },
+    "expected_profile.text_styles[].line_join_type": {
+      "path": "expected_profile.text_styles[].line_join_type",
+      "json_name": "line_join_type",
+      "source_type": "ExpectedTextStyle",
+      "source_field": "LineJoinType",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Expected text style stroke line-join type.",
+      "validation": "Expected line-join type must use a supported value.",
+      "enum": [
+        "miter",
+        "round",
+        "bevel"
+      ],
       "example": "examples/recipes/minimal-text-style.json"
     },
     "expected_profile.text_styles[].no_break": {
@@ -6728,6 +6919,11 @@
       "expected_profile.text_styles[].horizontal_scale",
       "expected_profile.text_styles[].vertical_scale",
       "expected_profile.text_styles[].tsume",
+      "expected_profile.text_styles[].caps_option",
+      "expected_profile.text_styles[].baseline_option",
+      "expected_profile.text_styles[].auto_kern_type",
+      "expected_profile.text_styles[].line_join_type",
+      "expected_profile.text_styles[].digit_set",
       "expected_profile.text_styles[].faux_bold",
       "expected_profile.text_styles[].faux_italic",
       "expected_profile.text_styles[].apply_stroke",
@@ -7032,6 +7228,11 @@
       "comps[].layers[].text_style.horizontal_scale",
       "comps[].layers[].text_style.vertical_scale",
       "comps[].layers[].text_style.tsume",
+      "comps[].layers[].text_style.caps_option",
+      "comps[].layers[].text_style.baseline_option",
+      "comps[].layers[].text_style.auto_kern_type",
+      "comps[].layers[].text_style.line_join_type",
+      "comps[].layers[].text_style.digit_set",
       "comps[].layers[].text_style.faux_bold",
       "comps[].layers[].text_style.faux_italic",
       "comps[].layers[].text_style.apply_stroke",

@@ -147,6 +147,12 @@ Done:
   parsed flags, `minimal-text-style.json` asserts them through
   `expected_profile.text_styles[]`, and whole-recipe profile verification
   passes with 127 recipes and 163 covered profile paths.
+- Text-style recipe/profile coverage now also includes run enum options:
+  `caps_option`, `baseline_option`, `auto_kern_type`, `line_join_type`, and
+  `digit_set`. Recipe/profile use stable snake_case values, scene JSON exports
+  the same contract, `minimal-text-style.json` asserts all five fields, and
+  whole-recipe profile verification passes with 127 recipes and 168 covered
+  profile paths.
 - Recipe embedded profile contracts now support `expected_profile.keyframes[]`
   for property keyframe count/time/value checks. The updated shape/text example
   animates the title Position across three keyframes, passed `go test ./...`,

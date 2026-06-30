@@ -351,6 +351,11 @@ type TextStyleRun struct {
 	HorizontalScale float64    `json:"horizontal_scale,omitempty"`
 	VerticalScale   float64    `json:"vertical_scale,omitempty"`
 	Tsume           float64    `json:"tsume,omitempty"`
+	CapsOption      string     `json:"caps_option,omitempty"`
+	BaselineOption  string     `json:"baseline_option,omitempty"`
+	AutoKernType    string     `json:"auto_kern_type,omitempty"`
+	LineJoinType    string     `json:"line_join_type,omitempty"`
+	DigitSet        string     `json:"digit_set,omitempty"`
 	ApplyStroke     bool       `json:"apply_stroke,omitempty"`
 	StrokeColor     [4]float64 `json:"stroke_color,omitempty"`
 	StrokeWidth     float64    `json:"stroke_width,omitempty"`
@@ -866,8 +871,10 @@ func buildText(c *aep.JSONComposition, l *aep.JSONLayer, ts *aep.JSONTextSource)
 			AutoLeading: r.AutoLeading, Leading: r.Leading, Tracking: r.Tracking,
 			BaselineShift: r.BaselineShift, HorizontalScale: r.HorizontalScale,
 			VerticalScale: r.VerticalScale, Tsume: r.Tsume, ApplyStroke: r.ApplyStroke,
-			StrokeColor: r.StrokeColor, StrokeWidth: r.StrokeWidth,
-			StrokeOverFill: r.StrokeOverFill, NoBreak: r.NoBreak,
+			CapsOption: r.CapsOption, BaselineOption: r.BaselineOption,
+			AutoKernType: r.AutoKernType, LineJoinType: r.LineJoinType, DigitSet: r.DigitSet,
+			StrokeColor: r.StrokeColor, StrokeWidth: r.StrokeWidth, StrokeOverFill: r.StrokeOverFill,
+			NoBreak: r.NoBreak,
 		})
 	}
 	for _, p := range ts.Paragraphs {

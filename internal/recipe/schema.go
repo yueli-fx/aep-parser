@@ -305,6 +305,31 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 		if style.Tsume != nil && (*style.Tsume < 0 || *style.Tsume > 100) {
 			addRefusal("invalid_expected_profile", stylePath+".tsume", "tsume must be between 0 and 100")
 		}
+		if style.CapsOption != "" {
+			if _, err := textCapsOption(style.CapsOption); err != nil {
+				addRefusal("invalid_expected_profile", stylePath+".caps_option", "caps_option must be normal, small_caps, all_caps, or all_small_caps")
+			}
+		}
+		if style.BaselineOption != "" {
+			if _, err := textBaselineOption(style.BaselineOption); err != nil {
+				addRefusal("invalid_expected_profile", stylePath+".baseline_option", "baseline_option must be normal, superscript, or subscript")
+			}
+		}
+		if style.AutoKernType != "" {
+			if _, err := textAutoKernType(style.AutoKernType); err != nil {
+				addRefusal("invalid_expected_profile", stylePath+".auto_kern_type", "auto_kern_type must be no_auto, metric, or optical")
+			}
+		}
+		if style.LineJoinType != "" {
+			if _, err := textLineJoinType(style.LineJoinType); err != nil {
+				addRefusal("invalid_expected_profile", stylePath+".line_join_type", "line_join_type must be miter, round, or bevel")
+			}
+		}
+		if style.DigitSet != "" {
+			if _, err := textDigitSet(style.DigitSet); err != nil {
+				addRefusal("invalid_expected_profile", stylePath+".digit_set", "digit_set must be default, arabic, hindi, farsi, or arabic_rtl")
+			}
+		}
 		if len(style.StrokeColor) > 0 {
 			validateColor(style.StrokeColor, stylePath+".stroke_color", "invalid_expected_profile", addRefusal)
 		}

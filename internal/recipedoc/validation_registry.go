@@ -55,6 +55,26 @@ var fieldValidation = map[string]FieldMeta{
 	"comps[].layers[].text_style.tsume": {
 		Validation: "Text tsume must be between 0 and 100.",
 	},
+	"comps[].layers[].text_style.caps_option": {
+		Validation: "Text caps option must use a supported value.",
+		Enum:       []string{"normal", "small_caps", "all_caps", "all_small_caps"},
+	},
+	"comps[].layers[].text_style.baseline_option": {
+		Validation: "Text baseline option must use a supported value.",
+		Enum:       []string{"normal", "superscript", "subscript"},
+	},
+	"comps[].layers[].text_style.auto_kern_type": {
+		Validation: "Text auto-kerning type must use a supported value.",
+		Enum:       []string{"no_auto", "metric", "optical"},
+	},
+	"comps[].layers[].text_style.line_join_type": {
+		Validation: "Text line-join type must use a supported value.",
+		Enum:       []string{"miter", "round", "bevel"},
+	},
+	"comps[].layers[].text_style.digit_set": {
+		Validation: "Text digit set must use a supported value.",
+		Enum:       []string{"default", "arabic", "hindi", "farsi", "arabic_rtl"},
+	},
 	"comps[].layers[].text_style.stroke_color": {
 		Validation: "Text stroke color must contain RGB or RGBA channels in the 0..255 range.",
 	},
@@ -203,6 +223,26 @@ var fieldValidation = map[string]FieldMeta{
 	},
 	"expected_profile.text_styles[].tsume": {
 		Validation: "Expected tsume must be between 0 and 100.",
+	},
+	"expected_profile.text_styles[].caps_option": {
+		Validation: "Expected caps option must use a supported value.",
+		Enum:       []string{"normal", "small_caps", "all_caps", "all_small_caps"},
+	},
+	"expected_profile.text_styles[].baseline_option": {
+		Validation: "Expected baseline option must use a supported value.",
+		Enum:       []string{"normal", "superscript", "subscript"},
+	},
+	"expected_profile.text_styles[].auto_kern_type": {
+		Validation: "Expected auto-kerning type must use a supported value.",
+		Enum:       []string{"no_auto", "metric", "optical"},
+	},
+	"expected_profile.text_styles[].line_join_type": {
+		Validation: "Expected line-join type must use a supported value.",
+		Enum:       []string{"miter", "round", "bevel"},
+	},
+	"expected_profile.text_styles[].digit_set": {
+		Validation: "Expected digit set must use a supported value.",
+		Enum:       []string{"default", "arabic", "hindi", "farsi", "arabic_rtl"},
 	},
 	"expected_profile.text_styles[].stroke_color": {
 		Validation: "Expected stroke color must contain RGB or RGBA channels in the 0..1 range.",

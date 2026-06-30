@@ -2179,6 +2179,11 @@ func TestValidateReportsTextStyleCapabilities(t *testing.T) {
 		HorizontalScale: ptr(80),
 		VerticalScale:   ptr(120),
 		Tsume:           ptr(50),
+		CapsOption:      "all_caps",
+		BaselineOption:  "superscript",
+		AutoKernType:    "optical",
+		LineJoinType:    "round",
+		DigitSet:        "hindi",
 		StrokeOverFill:  boolPtr(false),
 		NoBreak:         boolPtr(true),
 		FauxBold:        boolPtr(true),
@@ -2203,6 +2208,11 @@ func TestValidateReportsTextStyleCapabilities(t *testing.T) {
 	assertCapability(t, report, "Layer.SetRunHorizontalScale")
 	assertCapability(t, report, "Layer.SetRunVerticalScale")
 	assertCapability(t, report, "Layer.SetRunTsume")
+	assertCapability(t, report, "Layer.SetRunCapsOption")
+	assertCapability(t, report, "Layer.SetRunBaselineOption")
+	assertCapability(t, report, "Layer.SetRunAutoKernType")
+	assertCapability(t, report, "Layer.SetRunLineJoinType")
+	assertCapability(t, report, "Layer.SetRunDigitSet")
 	assertCapability(t, report, "Layer.SetRunStrokeOverFill")
 	assertCapability(t, report, "Layer.SetRunNoBreak")
 	assertCapability(t, report, "Layer.SetRunFauxBold")
@@ -2712,6 +2722,11 @@ func TestValidateRejectsInvalidTextStyle(t *testing.T) {
 		FontSize:       ptr(0),
 		FillColor:      []float64{255, 0},
 		Tsume:          ptr(101),
+		CapsOption:     "loud",
+		BaselineOption: "middle",
+		AutoKernType:   "manual",
+		LineJoinType:   "square",
+		DigitSet:       "roman",
 		StrokeColor:    []float64{255, 0, 300},
 		StrokeWidth:    ptr(-1),
 		Justification:  "middle",
@@ -2727,6 +2742,11 @@ func TestValidateRejectsInvalidTextStyle(t *testing.T) {
 	assertRefusal(t, report, "invalid_text_font_size")
 	assertRefusal(t, report, "invalid_text_fill_color")
 	assertRefusal(t, report, "invalid_text_tsume")
+	assertRefusal(t, report, "invalid_text_caps_option")
+	assertRefusal(t, report, "invalid_text_baseline_option")
+	assertRefusal(t, report, "invalid_text_auto_kern_type")
+	assertRefusal(t, report, "invalid_text_line_join_type")
+	assertRefusal(t, report, "invalid_text_digit_set")
 	assertRefusal(t, report, "invalid_text_stroke_color")
 	assertRefusal(t, report, "invalid_text_stroke_width")
 	assertRefusal(t, report, "invalid_text_justification")

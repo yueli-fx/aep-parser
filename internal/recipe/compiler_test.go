@@ -4678,6 +4678,11 @@ func TestCompileToFileChecksExpectedTextStyleProfile(t *testing.T) {
 		HorizontalScale: ptr(80),
 		VerticalScale:   ptr(120),
 		Tsume:           ptr(50),
+		CapsOption:      "all_caps",
+		BaselineOption:  "superscript",
+		AutoKernType:    "optical",
+		LineJoinType:    "round",
+		DigitSet:        "hindi",
 		StrokeOverFill:  boolPtr(false),
 		NoBreak:         boolPtr(true),
 		FauxBold:        boolPtr(true),
@@ -4701,6 +4706,11 @@ func TestCompileToFileChecksExpectedTextStyleProfile(t *testing.T) {
 			HorizontalScale: ptr(80),
 			VerticalScale:   ptr(120),
 			Tsume:           ptr(50),
+			CapsOption:      "all_caps",
+			BaselineOption:  "superscript",
+			AutoKernType:    "optical",
+			LineJoinType:    "round",
+			DigitSet:        "hindi",
 			StrokeOverFill:  boolPtr(false),
 			NoBreak:         boolPtr(true),
 			FauxBold:        boolPtr(true),
@@ -4729,6 +4739,11 @@ func TestCompileToFileChecksExpectedTextStyleProfile(t *testing.T) {
 	assertProfileCheck(t, report, "expected_profile.text_styles[0].horizontal_scale", true)
 	assertProfileCheck(t, report, "expected_profile.text_styles[0].vertical_scale", true)
 	assertProfileCheck(t, report, "expected_profile.text_styles[0].tsume", true)
+	assertProfileCheck(t, report, "expected_profile.text_styles[0].caps_option", true)
+	assertProfileCheck(t, report, "expected_profile.text_styles[0].baseline_option", true)
+	assertProfileCheck(t, report, "expected_profile.text_styles[0].auto_kern_type", true)
+	assertProfileCheck(t, report, "expected_profile.text_styles[0].line_join_type", true)
+	assertProfileCheck(t, report, "expected_profile.text_styles[0].digit_set", true)
 	assertProfileCheck(t, report, "expected_profile.text_styles[0].stroke_over_fill", true)
 	assertProfileCheck(t, report, "expected_profile.text_styles[0].no_break", true)
 	assertProfileCheck(t, report, "expected_profile.text_styles[0].faux_bold", true)

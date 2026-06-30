@@ -47,6 +47,36 @@ func validateTextStyle(style TextStyleSpec, stylePath string, recordCapability f
 			addRefusal("invalid_text_tsume", stylePath+".tsume", "tsume must be between 0 and 100")
 		}
 	}
+	if style.CapsOption != "" {
+		recordCapability("Layer.SetRunCapsOption", stylePath+".caps_option")
+		if _, err := textCapsOption(style.CapsOption); err != nil {
+			addRefusal("invalid_text_caps_option", stylePath+".caps_option", "caps_option must be normal, small_caps, all_caps, or all_small_caps")
+		}
+	}
+	if style.BaselineOption != "" {
+		recordCapability("Layer.SetRunBaselineOption", stylePath+".baseline_option")
+		if _, err := textBaselineOption(style.BaselineOption); err != nil {
+			addRefusal("invalid_text_baseline_option", stylePath+".baseline_option", "baseline_option must be normal, superscript, or subscript")
+		}
+	}
+	if style.AutoKernType != "" {
+		recordCapability("Layer.SetRunAutoKernType", stylePath+".auto_kern_type")
+		if _, err := textAutoKernType(style.AutoKernType); err != nil {
+			addRefusal("invalid_text_auto_kern_type", stylePath+".auto_kern_type", "auto_kern_type must be no_auto, metric, or optical")
+		}
+	}
+	if style.LineJoinType != "" {
+		recordCapability("Layer.SetRunLineJoinType", stylePath+".line_join_type")
+		if _, err := textLineJoinType(style.LineJoinType); err != nil {
+			addRefusal("invalid_text_line_join_type", stylePath+".line_join_type", "line_join_type must be miter, round, or bevel")
+		}
+	}
+	if style.DigitSet != "" {
+		recordCapability("Layer.SetRunDigitSet", stylePath+".digit_set")
+		if _, err := textDigitSet(style.DigitSet); err != nil {
+			addRefusal("invalid_text_digit_set", stylePath+".digit_set", "digit_set must be default, arabic, hindi, farsi, or arabic_rtl")
+		}
+	}
 	if style.NoBreak != nil {
 		recordCapability("Layer.SetRunNoBreak", stylePath+".no_break")
 	}

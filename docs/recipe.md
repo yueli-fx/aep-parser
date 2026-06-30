@@ -122,6 +122,11 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].text_style.horizontal_scale` | `number` | - | Layer text style horizontal text scale. | - | `text.set_run_horizontal_scale` (`Layer.SetRunHorizontalScale`) | examples/recipes/minimal-text-style.json |
 | `comps[].layers[].text_style.vertical_scale` | `number` | - | Layer text style vertical text scale. | - | `text.set_run_vertical_scale` (`Layer.SetRunVerticalScale`) | examples/recipes/minimal-text-style.json |
 | `comps[].layers[].text_style.tsume` | `number` | - | Layer text style CJK tsume spacing adjustment. | Text tsume must be between 0 and 100. | `text.set_run_tsume` (`Layer.SetRunTsume`) | examples/recipes/minimal-text-style.json |
+| `comps[].layers[].text_style.caps_option` | `string` | - | Layer text style caps option. | Text caps option must use a supported value. | `text.set_run_caps_option` (`Layer.SetRunCapsOption`) | examples/recipes/minimal-text-style.json |
+| `comps[].layers[].text_style.baseline_option` | `string` | - | Layer text style baseline option. | Text baseline option must use a supported value. | `text.set_run_baseline_option` (`Layer.SetRunBaselineOption`) | examples/recipes/minimal-text-style.json |
+| `comps[].layers[].text_style.auto_kern_type` | `string` | - | Layer text style auto-kerning type. | Text auto-kerning type must use a supported value. | `text.set_run_auto_kern_type` (`Layer.SetRunAutoKernType`) | examples/recipes/minimal-text-style.json |
+| `comps[].layers[].text_style.line_join_type` | `string` | - | Layer text style stroke line-join type. | Text line-join type must use a supported value. | `text.set_run_line_join_type` (`Layer.SetRunLineJoinType`) | examples/recipes/minimal-text-style.json |
+| `comps[].layers[].text_style.digit_set` | `string` | - | Layer text style digit set. | Text digit set must use a supported value. | `text.set_run_digit_set` (`Layer.SetRunDigitSet`) | examples/recipes/minimal-text-style.json |
 | `comps[].layers[].text_style.faux_bold` | `boolean` | - | Layer text style faux bold switch. | - | `text.set_run_faux_bold` (`Layer.SetRunFauxBold`) | examples/recipes/minimal-text-shape.json |
 | `comps[].layers[].text_style.faux_italic` | `boolean` | - | Layer text style faux italic switch. | - | `text.set_run_faux_italic` (`Layer.SetRunFauxItalic`) | examples/recipes/minimal-text-shape.json |
 | `comps[].layers[].text_style.apply_stroke` | `boolean` | - | Layer text style stroke enable switch. | - | `text.set_run_apply_stroke` (`Layer.SetRunApplyStroke`) | examples/recipes/minimal-text-shape.json |
@@ -727,6 +732,11 @@ This reference is generated from the canonical recipe field model.
 | `expected_profile.text_styles[].horizontal_scale` | `number` | - | Expected text style horizontal text scale. | - | - | examples/recipes/minimal-text-style.json |
 | `expected_profile.text_styles[].vertical_scale` | `number` | - | Expected text style vertical text scale. | - | - | examples/recipes/minimal-text-style.json |
 | `expected_profile.text_styles[].tsume` | `number` | - | Expected text style CJK tsume spacing adjustment. | Expected tsume must be between 0 and 100. | - | examples/recipes/minimal-text-style.json |
+| `expected_profile.text_styles[].caps_option` | `string` | - | Expected text style caps option. | Expected caps option must use a supported value. | - | examples/recipes/minimal-text-style.json |
+| `expected_profile.text_styles[].baseline_option` | `string` | - | Expected text style baseline option. | Expected baseline option must use a supported value. | - | examples/recipes/minimal-text-style.json |
+| `expected_profile.text_styles[].auto_kern_type` | `string` | - | Expected text style auto-kerning type. | Expected auto-kerning type must use a supported value. | - | examples/recipes/minimal-text-style.json |
+| `expected_profile.text_styles[].line_join_type` | `string` | - | Expected text style stroke line-join type. | Expected line-join type must use a supported value. | - | examples/recipes/minimal-text-style.json |
+| `expected_profile.text_styles[].digit_set` | `string` | - | Expected text style digit set. | Expected digit set must use a supported value. | - | examples/recipes/minimal-text-style.json |
 | `expected_profile.text_styles[].faux_bold` | `boolean` | - | Expected text style faux bold switch. | - | - | examples/recipes/minimal-text-shape.json |
 | `expected_profile.text_styles[].faux_italic` | `boolean` | - | Expected text style faux italic switch. | - | - | examples/recipes/minimal-text-shape.json |
 | `expected_profile.text_styles[].apply_stroke` | `boolean` | - | Expected text style stroke enable switch. | - | - | examples/recipes/minimal-text-shape.json |

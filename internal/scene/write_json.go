@@ -240,6 +240,11 @@ type JSONTextStyleRun struct {
 	HorizontalScale float64    `json:"horizontal_scale,omitempty"`
 	VerticalScale   float64    `json:"vertical_scale,omitempty"`
 	Tsume           float64    `json:"tsume,omitempty"`
+	CapsOption      string     `json:"caps_option,omitempty"`
+	BaselineOption  string     `json:"baseline_option,omitempty"`
+	AutoKernType    string     `json:"auto_kern_type,omitempty"`
+	LineJoinType    string     `json:"line_join_type,omitempty"`
+	DigitSet        string     `json:"digit_set,omitempty"`
 	ApplyStroke     bool       `json:"apply_stroke,omitempty"`
 	StrokeColor     [4]float64 `json:"stroke_color,omitempty"`
 	StrokeWidth     float64    `json:"stroke_width,omitempty"`
@@ -637,6 +642,11 @@ func layerToJSON(l *Layer) *JSONLayer {
 				HorizontalScale: r.HorizontalScale,
 				VerticalScale:   r.VerticalScale,
 				Tsume:           r.Tsume,
+				CapsOption:      textCapsOptionJSON(r.CapsOption),
+				BaselineOption:  textBaselineOptionJSON(r.BaselineOption),
+				AutoKernType:    textAutoKernTypeJSON(r.AutoKernType),
+				LineJoinType:    textLineJoinTypeJSON(r.LineJoinType),
+				DigitSet:        textDigitSetJSON(r.DigitSet),
 				ApplyStroke:     r.ApplyStroke,
 				StrokeColor:     r.StrokeColor,
 				StrokeWidth:     r.StrokeWidth,
@@ -792,6 +802,67 @@ func maskFeatherFalloffName(value MaskFeatherFalloff) string {
 		return "linear"
 	default:
 		return "smooth"
+	}
+}
+
+func textCapsOptionJSON(value TextCapsOption) string {
+	switch value {
+	case TextCapsSmall:
+		return "small_caps"
+	case TextCapsAll:
+		return "all_caps"
+	case TextCapsAllSmall:
+		return "all_small_caps"
+	default:
+		return "normal"
+	}
+}
+
+func textBaselineOptionJSON(value TextBaselineOption) string {
+	switch value {
+	case TextBaselineSuperscript:
+		return "superscript"
+	case TextBaselineSubscript:
+		return "subscript"
+	default:
+		return "normal"
+	}
+}
+
+func textAutoKernTypeJSON(value TextAutoKernType) string {
+	switch value {
+	case TextAutoKernNoAuto:
+		return "no_auto"
+	case TextAutoKernOptical:
+		return "optical"
+	default:
+		return "metric"
+	}
+}
+
+func textLineJoinTypeJSON(value TextLineJoinType) string {
+	switch value {
+	case TextLineJoinRound:
+		return "round"
+	case TextLineJoinBevel:
+		return "bevel"
+	default:
+		return "miter"
+	}
+}
+
+func textDigitSetJSON(value TextDigitSet) string {
+	switch value {
+	case TextDigitSetArabic:
+		return "arabic"
+	case TextDigitSetHindi:
+		return "hindi"
+	case TextDigitSetFarsi:
+		return "farsi"
+	case TextDigitSetArabicRTL:
+		return "arabic_rtl"
+	default:
+		return "default"
 	}
 }
 

@@ -356,6 +356,41 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 			})
 			add(path, *expectedStyle.Tsume, actual, ok && math.Abs(actual-*expectedStyle.Tsume) < 1e-9)
 		}
+		if expectedStyle.CapsOption != "" {
+			path := stylePath + ".caps_option"
+			actual, ok := profileRunString(layer.Text.Runs, expectedStyle.RunIndex, func(run profile.TextStyleRun) string {
+				return run.CapsOption
+			})
+			add(path, expectedStyle.CapsOption, actual, ok && actual == normalizeEnum(expectedStyle.CapsOption))
+		}
+		if expectedStyle.BaselineOption != "" {
+			path := stylePath + ".baseline_option"
+			actual, ok := profileRunString(layer.Text.Runs, expectedStyle.RunIndex, func(run profile.TextStyleRun) string {
+				return run.BaselineOption
+			})
+			add(path, expectedStyle.BaselineOption, actual, ok && actual == normalizeEnum(expectedStyle.BaselineOption))
+		}
+		if expectedStyle.AutoKernType != "" {
+			path := stylePath + ".auto_kern_type"
+			actual, ok := profileRunString(layer.Text.Runs, expectedStyle.RunIndex, func(run profile.TextStyleRun) string {
+				return run.AutoKernType
+			})
+			add(path, expectedStyle.AutoKernType, actual, ok && actual == normalizeEnum(expectedStyle.AutoKernType))
+		}
+		if expectedStyle.LineJoinType != "" {
+			path := stylePath + ".line_join_type"
+			actual, ok := profileRunString(layer.Text.Runs, expectedStyle.RunIndex, func(run profile.TextStyleRun) string {
+				return run.LineJoinType
+			})
+			add(path, expectedStyle.LineJoinType, actual, ok && actual == normalizeEnum(expectedStyle.LineJoinType))
+		}
+		if expectedStyle.DigitSet != "" {
+			path := stylePath + ".digit_set"
+			actual, ok := profileRunString(layer.Text.Runs, expectedStyle.RunIndex, func(run profile.TextStyleRun) string {
+				return run.DigitSet
+			})
+			add(path, expectedStyle.DigitSet, actual, ok && actual == normalizeEnum(expectedStyle.DigitSet))
+		}
 		if expectedStyle.NoBreak != nil {
 			path := stylePath + ".no_break"
 			actual, ok := profileRunBool(layer.Text.Runs, expectedStyle.RunIndex, func(run profile.TextStyleRun) bool {
@@ -792,6 +827,13 @@ func profileRunFloat(runs []profile.TextStyleRun, index int, value func(profile.
 func profileRunBool(runs []profile.TextStyleRun, index int, value func(profile.TextStyleRun) bool) (bool, bool) {
 	if index < 0 || index >= len(runs) {
 		return false, false
+	}
+	return value(runs[index]), true
+}
+
+func profileRunString(runs []profile.TextStyleRun, index int, value func(profile.TextStyleRun) string) (string, bool) {
+	if index < 0 || index >= len(runs) {
+		return "", false
 	}
 	return value(runs[index]), true
 }
