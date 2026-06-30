@@ -215,7 +215,9 @@ stay resident at once.
   - [x] Parent/light source layer-name resolution now goes through
         `projectindex`, while preserving recipe's old duplicate-name
         last-match behavior.
-- [ ] Integrate one profile/diff lookup hotspot.
+- [x] Integrate one profile/diff lookup hotspot.
+  - [x] Profile layer `source_ref` resolution now goes through
+        `projectindex.AVItemByID` instead of ad hoc comp/footage maps.
 - [ ] Design single-project search result schema.
 - [ ] Design corpus-level learning/search index.
 
@@ -225,4 +227,6 @@ Current first implementation slice:
 
 - `go test ./internal/projectindex -count=1`
 - `go test ./internal/recipe -run 'TestCompileToFile(Set|LayerParent|ChecksLayerParent|LightSource)' -count=1`
+- `go test ./internal/profile -run TestBuildSyntheticProjectIncludesLayerSourceRefs -count=1`
+- `go test ./internal/projectindex ./internal/profile -count=1`
 - `git diff --check` (CRLF warnings only)

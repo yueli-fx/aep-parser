@@ -8,6 +8,7 @@ import (
 
 	"github.com/yueli-fx/aep-parser/internal/aep"
 	"github.com/yueli-fx/aep-parser/internal/codec"
+	"github.com/yueli-fx/aep-parser/internal/projectindex"
 )
 
 const SchemaVersion = 1
@@ -376,6 +377,7 @@ func Build(project *aep.Project, opts Options) (*Profile, error) {
 		return nil, fmt.Errorf("profile: nil project")
 	}
 	jp := project.ToJSON()
+	idx := projectindex.Build(project)
 	prof := &Profile{
 		SchemaVersion: SchemaVersion,
 		Meta: Meta{
@@ -391,10 +393,7 @@ func Build(project *aep.Project, opts Options) (*Profile, error) {
 		},
 	}
 
-	compItems := map[uint32]string{}
-	footageItems := map[uint32]string{}
 	for _, c := range jp.Compositions {
-		compItems[c.ID] = c.Name
 		prof.Items.Comps = append(prof.Items.Comps, Item{
 			ID: c.ID, Name: c.Name, Type: "composition",
 			Path:     itemPath("comp", c.ID, c.Name),
@@ -402,7 +401,6 @@ func Build(project *aep.Project, opts Options) (*Profile, error) {
 		})
 	}
 	for _, f := range jp.Footage {
-		footageItems[f.ID] = f.Name
 		prof.Items.Footage = append(prof.Items.Footage, Item{
 			ID: f.ID, Name: f.Name, Type: "footage",
 			Path:     itemPath("footage", f.ID, f.Name),
@@ -487,7 +485,7 @@ func Build(project *aep.Project, opts Options) (*Profile, error) {
 		sceneLayerByID, sceneLayerByIndex := indexSceneLayers(sceneComp)
 		for li, l := range c.Layers {
 			sceneLayer := sceneLayerFor(l, li, sceneLayerByID, sceneLayerByIndex)
-			lp := buildLayer(c, l, sceneLayer, layerByID, layerByIndex, compItems, footageItems, prof.Fingerprint.EffectUsage, pluginSeen, opts.Dict)
+			lp := buildLayer(c, l, sceneLayer, layerByID, layerByIndex, idx, prof.Fingerprint.EffectUsage, pluginSeen, opts.Dict)
 			prof.Fingerprint.LayerCount++
 			cp.Layers = append(cp.Layers, lp)
 		}
@@ -521,8 +519,7 @@ func buildLayer(
 	sceneLayer *aep.Layer,
 	layerByID map[uint32]*aep.JSONLayer,
 	layerByIndex map[int]*aep.JSONLayer,
-	compItems map[uint32]string,
-	footageItems map[uint32]string,
+	idx *projectindex.Index,
 	effectUsage map[string]int,
 	pluginSeen map[string]bool,
 	dict *EffectDictionary,
@@ -572,7 +569,7 @@ func buildLayer(
 		Evidence: parsedEvidence(),
 	}
 	if l.SourceID != 0 && l.Type != "light" {
-		lp.SourceRef = sourceRef(l.SourceID, compItems, footageItems)
+		lp.SourceRef = sourceRef(l.SourceID, idx)
 	}
 	if sceneLayer != nil {
 		lp.LightSourceRef = sceneLayerRef(sceneLayer.LightSource())
@@ -876,12 +873,12 @@ func classifyEffect(matchName string) string {
 	}
 }
 
-func sourceRef(id uint32, comps, footage map[uint32]string) *ItemRef {
-	if name, ok := comps[id]; ok {
-		return &ItemRef{ID: id, Kind: "composition", Name: name}
-	}
-	if name, ok := footage[id]; ok {
-		return &ItemRef{ID: id, Kind: "footage", Name: name}
+func sourceRef(id uint32, idx *projectindex.Index) *ItemRef {
+	switch item := idx.AVItemByID(id).(type) {
+	case *aep.Composition:
+		return &ItemRef{ID: id, Kind: "composition", Name: item.Name}
+	case *aep.Footage:
+		return &ItemRef{ID: id, Kind: "footage", Name: item.Name}
 	}
 	return &ItemRef{ID: id, Kind: "unknown"}
 }

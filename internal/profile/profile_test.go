@@ -319,6 +319,51 @@ func TestBuildRenderQueueFixtureIncludesQueueSummary(t *testing.T) {
 	}
 }
 
+func TestBuildSyntheticProjectIncludesLayerSourceRefs(t *testing.T) {
+	project := aep.NewProject(aep.TargetAE2020)
+	sourceComp, err := aep.NewComposition(project, "Source Comp", 640, 360, 30, 2)
+	if err != nil {
+		t.Fatalf("NewComposition source: %v", err)
+	}
+	mainComp, err := aep.NewComposition(project, "Main Comp", 1920, 1080, 30, 3)
+	if err != nil {
+		t.Fatalf("NewComposition main: %v", err)
+	}
+	precomp, err := aep.NewPrecompLayer(mainComp, sourceComp, "Nested Source")
+	if err != nil {
+		t.Fatalf("NewPrecompLayer: %v", err)
+	}
+	solid, err := aep.NewSolidLayer(mainComp, "Solid Source", 1920, 1080, [3]float64{0.2, 0.4, 0.8})
+	if err != nil {
+		t.Fatalf("NewSolidLayer: %v", err)
+	}
+	solidFootage := solid.SourceFootage()
+	if solidFootage == nil {
+		t.Fatal("solid source footage is nil")
+	}
+
+	prof, err := profile.Build(project, profile.Options{})
+	if err != nil {
+		t.Fatalf("build profile: %v", err)
+	}
+
+	precompProfile := findProfileLayer(t, prof, "Nested Source")
+	if precompProfile.SourceRef == nil {
+		t.Fatal("precomp SourceRef = nil")
+	}
+	if got := *precompProfile.SourceRef; got.ID != precomp.SourceID || got.Kind != "composition" || got.Name != "Source Comp" {
+		t.Fatalf("precomp SourceRef = %+v, want ID=%d Kind=composition Name=%q", got, precomp.SourceID, "Source Comp")
+	}
+
+	solidProfile := findProfileLayer(t, prof, "Solid Source")
+	if solidProfile.SourceRef == nil {
+		t.Fatal("solid SourceRef = nil")
+	}
+	if got := *solidProfile.SourceRef; got.ID != solid.SourceID || got.Kind != "footage" || got.Name != solidFootage.Name {
+		t.Fatalf("solid SourceRef = %+v, want ID=%d Kind=footage Name=%q", got, solid.SourceID, solidFootage.Name)
+	}
+}
+
 func TestBuildSyntheticProjectIncludesTrackMatteRef(t *testing.T) {
 	project := aep.NewProject(aep.TargetAE2020)
 	comp, err := aep.NewComposition(project, "Matte Comp", 1920, 1080, 30, 3)
