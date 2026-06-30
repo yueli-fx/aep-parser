@@ -119,7 +119,7 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].camera` | `object<CameraSpec>` | - | Camera layer options. | - | - | examples/recipes/minimal-camera-aperture.json |
 | `comps[].layers[].light` | `object<LightSpec>` | - | Light layer options. | - | - | examples/recipes/minimal-light-casts-shadows.json |
 | `comps[].layers[].shape` | `object<ShapeSpec>` | - | Shape layer primitive and operators. | - | - | examples/recipes/minimal-effect-layer-param.json |
-| `comps[].layers[].masks[]` | `array<recipe.MaskSpec>` | - | Layer masks. | - | `mask.add` (`AddMask`) | examples/recipes/minimal-layer-mask.json |
+| `comps[].layers[].masks[]` | `array<recipe.MaskSpec>` | - | Layer masks. | Masks are supported on AV, text, shape, solid, null, adjustment, and precomp layers; camera and light layers reject masks. | `mask.add` (`AddMask`) | examples/recipes/minimal-layer-mask.json |
 | `comps[].layers[].transform` | `object<Transform>` | - | Layer transform block. | - | `layer.set_transform` (`SetLayerTransform`) | examples/recipes/minimal-adjustment-layer.json |
 | `comps[].layers[].effects[]` | `array<recipe.Effect>` | - | Built-in effect instance to add to the layer. | - | `effect.add_builtin` (`AddEffect`) | examples/recipes/minimal-text-effect.json |
 
@@ -496,17 +496,17 @@ This reference is generated from the canonical recipe field model.
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
 | `comps[].layers[].masks[].name` | `string` | - | Layer mask name. | - | `mask.add` (`AddMask`) | examples/recipes/minimal-layer-mask.json |
-| `comps[].layers[].masks[].mode` | `string` | - | Layer mask mode. | - | `mask.set_mode` (`Mask.SetMode`) | examples/recipes/minimal-layer-mask.json |
+| `comps[].layers[].masks[].mode` | `string` | - | Layer mask mode. | Mask mode must use a supported AE mask mode value. | `mask.set_mode` (`Mask.SetMode`) | examples/recipes/minimal-layer-mask.json |
 | `comps[].layers[].masks[].inverted` | `boolean` | - | Layer mask inverted switch. | - | `mask.set_inverted` (`Mask.SetInverted`) | examples/recipes/minimal-layer-mask.json |
 | `comps[].layers[].masks[].locked` | `boolean` | - | Layer mask lock switch. | - | `mask.set_locked` (`Mask.SetLocked`) | examples/recipes/minimal-layer-mask.json |
-| `comps[].layers[].masks[].color` | `array<float64>` | - | Layer mask UI color as RGB channels. | - | `mask.set_color` (`Mask.SetColor`) | examples/recipes/minimal-layer-mask.json |
-| `comps[].layers[].masks[].motion_blur` | `string` | - | Layer mask motion blur mode. | - | `mask.set_motion_blur` (`Mask.SetMaskMotionBlur`) | examples/recipes/minimal-layer-mask.json |
-| `comps[].layers[].masks[].feather_falloff` | `string` | - | Layer mask feather falloff mode. | - | `mask.set_feather_falloff` (`Mask.SetFeatherFalloff`) | examples/recipes/minimal-layer-mask.json |
-| `comps[].layers[].masks[].opacity` | `number` | - | Layer mask opacity. | - | `mask.set_opacity` (`Mask.SetOpacity`) | examples/recipes/minimal-layer-mask.json |
-| `comps[].layers[].masks[].feather` | `array<float64>` | - | Layer mask feather vector. | - | `mask.set_feather` (`Mask.SetFeather`) | examples/recipes/minimal-layer-mask.json |
+| `comps[].layers[].masks[].color` | `array<float64>` | - | Layer mask UI color as RGB channels. | Mask color must contain exactly three channels in the 0..255 range. | `mask.set_color` (`Mask.SetColor`) | examples/recipes/minimal-layer-mask.json |
+| `comps[].layers[].masks[].motion_blur` | `string` | - | Layer mask motion blur mode. | Mask motion blur must use a supported value. | `mask.set_motion_blur` (`Mask.SetMaskMotionBlur`) | examples/recipes/minimal-layer-mask.json |
+| `comps[].layers[].masks[].feather_falloff` | `string` | - | Layer mask feather falloff mode. | Mask feather falloff must use a supported value. | `mask.set_feather_falloff` (`Mask.SetFeatherFalloff`) | examples/recipes/minimal-layer-mask.json |
+| `comps[].layers[].masks[].opacity` | `number` | - | Layer mask opacity. | Mask opacity must be between 0 and 1. | `mask.set_opacity` (`Mask.SetOpacity`) | examples/recipes/minimal-layer-mask.json |
+| `comps[].layers[].masks[].feather` | `array<float64>` | - | Layer mask feather vector. | Mask feather must contain two non-negative numeric values. | `mask.set_feather` (`Mask.SetFeather`) | examples/recipes/minimal-layer-mask.json |
 | `comps[].layers[].masks[].expansion` | `number` | - | Layer mask expansion. | - | `mask.set_expansion` (`Mask.SetExpansion`) | examples/recipes/minimal-layer-mask.json |
 | `comps[].layers[].masks[].closed` | `boolean` | - | Layer mask closed path switch. | - | `mask.add` (`AddMask`) | examples/recipes/minimal-layer-mask.json |
-| `comps[].layers[].masks[].vertices` | `array<[]float64>` | structural | Layer mask path vertices. | - | `mask.add` (`AddMask`) | examples/recipes/minimal-layer-mask.json |
+| `comps[].layers[].masks[].vertices` | `array<[]float64>` | structural | Layer mask path vertices. | Mask vertices must include at least 3 two-number points. | `mask.add` (`AddMask`) | examples/recipes/minimal-layer-mask.json |
 | `comps[].layers[].masks[].path_keyframes[]` | `array<recipe.MaskPathKeyframeSpec>` | - | Layer mask path keyframes. | When present, requires at least 2 keyframes sorted by time within comp duration. | `mask.set_path_keyframes` (`SetMaskPathKeyframes`) | examples/recipes/minimal-layer-mask.json |
 
 ## MaskPathKeyframeSpec

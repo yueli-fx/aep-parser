@@ -7152,6 +7152,7 @@
       "element": "recipe.MaskSpec",
       "object_type": "MaskSpec",
       "description": "Layer masks.",
+      "x-aep-validation": "Masks are supported on AV, text, shape, solid, null, adjustment, and precomp layers; camera and light layers reject masks.",
       "x-aep-capabilities": [
         {
           "key": "mask.add",
@@ -7204,6 +7205,16 @@
       "type": "string",
       "go_type": "string",
       "description": "Layer mask mode.",
+      "x-aep-validation": "Mask mode must use a supported AE mask mode value.",
+      "enum": [
+        "add",
+        "subtract",
+        "intersect",
+        "lighten",
+        "darken",
+        "difference",
+        "none"
+      ],
       "x-aep-capabilities": [
         {
           "key": "mask.set_mode",
@@ -7283,6 +7294,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Layer mask UI color as RGB channels.",
+      "x-aep-validation": "Mask color must contain exactly three channels in the 0..255 range.",
       "x-aep-capabilities": [
         {
           "key": "mask.set_color",
@@ -7309,6 +7321,12 @@
       "type": "string",
       "go_type": "string",
       "description": "Layer mask motion blur mode.",
+      "x-aep-validation": "Mask motion blur must use a supported value.",
+      "enum": [
+        "same_as_layer",
+        "on",
+        "off"
+      ],
       "x-aep-capabilities": [
         {
           "key": "mask.set_motion_blur",
@@ -7335,6 +7353,11 @@
       "type": "string",
       "go_type": "string",
       "description": "Layer mask feather falloff mode.",
+      "x-aep-validation": "Mask feather falloff must use a supported value.",
+      "enum": [
+        "smooth",
+        "linear"
+      ],
       "x-aep-capabilities": [
         {
           "key": "mask.set_feather_falloff",
@@ -7361,6 +7384,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Layer mask opacity.",
+      "x-aep-validation": "Mask opacity must be between 0 and 1.",
       "x-aep-capabilities": [
         {
           "key": "mask.set_opacity",
@@ -7388,6 +7412,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Layer mask feather vector.",
+      "x-aep-validation": "Mask feather must contain two non-negative numeric values.",
       "x-aep-capabilities": [
         {
           "key": "mask.set_feather",
@@ -7468,6 +7493,7 @@
       "element": "[]float64",
       "x-aep-structural-required": true,
       "description": "Layer mask path vertices.",
+      "x-aep-validation": "Mask vertices must include at least 3 two-number points.",
       "x-aep-capabilities": [
         {
           "key": "mask.add",

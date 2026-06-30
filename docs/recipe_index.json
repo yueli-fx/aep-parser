@@ -1573,6 +1573,7 @@
       "type": "array\u003crecipe.MaskSpec\u003e",
       "go_type": "[]recipe.MaskSpec",
       "summary": "Layer masks.",
+      "validation": "Masks are supported on AV, text, shape, solid, null, adjustment, and precomp layers; camera and light layers reject masks.",
       "capability_keys": [
         "mask.add"
       ],
@@ -1599,6 +1600,7 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Layer mask UI color as RGB channels.",
+      "validation": "Mask color must contain exactly three channels in the 0..255 range.",
       "capability_keys": [
         "mask.set_color"
       ],
@@ -1625,6 +1627,7 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Layer mask feather vector.",
+      "validation": "Mask feather must contain two non-negative numeric values.",
       "capability_keys": [
         "mask.set_feather"
       ],
@@ -1638,6 +1641,11 @@
       "type": "string",
       "go_type": "string",
       "summary": "Layer mask feather falloff mode.",
+      "validation": "Mask feather falloff must use a supported value.",
+      "enum": [
+        "smooth",
+        "linear"
+      ],
       "capability_keys": [
         "mask.set_feather_falloff"
       ],
@@ -1677,6 +1685,16 @@
       "type": "string",
       "go_type": "string",
       "summary": "Layer mask mode.",
+      "validation": "Mask mode must use a supported AE mask mode value.",
+      "enum": [
+        "add",
+        "subtract",
+        "intersect",
+        "lighten",
+        "darken",
+        "difference",
+        "none"
+      ],
       "capability_keys": [
         "mask.set_mode"
       ],
@@ -1690,6 +1708,12 @@
       "type": "string",
       "go_type": "string",
       "summary": "Layer mask motion blur mode.",
+      "validation": "Mask motion blur must use a supported value.",
+      "enum": [
+        "same_as_layer",
+        "on",
+        "off"
+      ],
       "capability_keys": [
         "mask.set_motion_blur"
       ],
@@ -1716,6 +1740,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Layer mask opacity.",
+      "validation": "Mask opacity must be between 0 and 1.",
       "capability_keys": [
         "mask.set_opacity"
       ],
@@ -1780,6 +1805,7 @@
         "structural"
       ],
       "summary": "Layer mask path vertices.",
+      "validation": "Mask vertices must include at least 3 two-number points.",
       "capability_keys": [
         "mask.add"
       ],

@@ -323,6 +323,33 @@ var fieldValidation = map[string]FieldMeta{
 		Validation: "Text paragraph direction must use a supported value.",
 		Enum:       []string{"ltr", "rtl"},
 	},
+	"comps[].layers[].masks[]": {
+		Validation: "Masks are supported on AV, text, shape, solid, null, adjustment, and precomp layers; camera and light layers reject masks.",
+	},
+	"comps[].layers[].masks[].mode": {
+		Validation: "Mask mode must use a supported AE mask mode value.",
+		Enum:       []string{"add", "subtract", "intersect", "lighten", "darken", "difference", "none"},
+	},
+	"comps[].layers[].masks[].color": {
+		Validation: "Mask color must contain exactly three channels in the 0..255 range.",
+	},
+	"comps[].layers[].masks[].motion_blur": {
+		Validation: "Mask motion blur must use a supported value.",
+		Enum:       []string{"same_as_layer", "on", "off"},
+	},
+	"comps[].layers[].masks[].feather_falloff": {
+		Validation: "Mask feather falloff must use a supported value.",
+		Enum:       []string{"smooth", "linear"},
+	},
+	"comps[].layers[].masks[].opacity": {
+		Validation: "Mask opacity must be between 0 and 1.",
+	},
+	"comps[].layers[].masks[].feather": {
+		Validation: "Mask feather must contain two non-negative numeric values.",
+	},
+	"comps[].layers[].masks[].vertices": {
+		Validation: "Mask vertices must include at least 3 two-number points.",
+	},
 	"comps[].layers[].masks[].path_keyframes[]": {
 		Validation: "When present, requires at least 2 keyframes sorted by time within comp duration.",
 	},
