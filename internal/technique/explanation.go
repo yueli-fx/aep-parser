@@ -16,6 +16,7 @@ func BuildExplanation(portrait *Portrait) (*Explanation, error) {
 		Portrait:             *portrait,
 		Overview:             buildOverview(portrait),
 		Archetypes:           buildArchetypes(portrait),
+		RecreationReadiness:  buildRecreationReadiness(portrait),
 		Techniques:           buildTechniqueExplanations(portrait),
 		TopSignalLayers:      topSignalLayers(portrait.SignalLayers, 3),
 		ReproducibilityNotes: buildReproducibilityNotes(portrait),
@@ -45,6 +46,30 @@ func buildOverview(portrait *Portrait) []string {
 		overview = append(overview, "Most-used shape mechanisms: "+shapes+".")
 	}
 	return overview
+}
+
+func buildRecreationReadiness(portrait *Portrait) RecreationReadiness {
+	unknowns := portrait.Unknowns.Count
+	thirdParty := portrait.Mechanisms.ReproducibilityCounts["third_party"]
+	cycore := portrait.Mechanisms.ReproducibilityCounts["cycore"]
+	readiness := RecreationReadiness{
+		Status:  "analysis_ready",
+		Summary: "No parser unknowns or third-party effects were detected in the current portrait.",
+	}
+	if cycore > 0 {
+		readiness.Notes = append(readiness.Notes, fmt.Sprintf("cycore bundled effects: %d", cycore))
+	}
+	if thirdParty > 0 {
+		readiness.Status = "needs_plugins"
+		readiness.Summary = "Third-party effects must be available before exact recreation can be evaluated."
+		readiness.Blockers = append(readiness.Blockers, fmt.Sprintf("third-party effects: %d", thirdParty))
+	}
+	if unknowns > 0 {
+		readiness.Status = "needs_reverse_engineering"
+		readiness.Summary = "Unknown parsed fields must be explained before exact recreation can be claimed."
+		readiness.Blockers = append([]string{fmt.Sprintf("unknown parsed items: %d", unknowns)}, readiness.Blockers...)
+	}
+	return readiness
 }
 
 func buildArchetypes(portrait *Portrait) []ProjectArchetype {

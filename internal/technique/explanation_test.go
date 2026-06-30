@@ -73,6 +73,11 @@ func TestBuildExplanationTurnsPortraitIntoDeterministicTechniqueNotes(t *testing
 	if !containsText(explanation.ReproducibilityNotes, "third-party effects: 1") {
 		t.Fatalf("reproducibility notes = %+v", explanation.ReproducibilityNotes)
 	}
+	if explanation.RecreationReadiness.Status != "needs_reverse_engineering" ||
+		!containsText(explanation.RecreationReadiness.Blockers, "unknown parsed items: 1") ||
+		!containsText(explanation.RecreationReadiness.Blockers, "third-party effects: 1") {
+		t.Fatalf("readiness = %+v", explanation.RecreationReadiness)
+	}
 	if !containsText(explanation.UnknownNotes, "1 unknown") {
 		t.Fatalf("unknown notes = %+v", explanation.UnknownNotes)
 	}
@@ -102,6 +107,9 @@ func TestBuildExplanationAllowsEmptyPortrait(t *testing.T) {
 	}
 	if len(explanation.Archetypes) != 0 {
 		t.Fatalf("empty archetypes = %+v", explanation.Archetypes)
+	}
+	if explanation.RecreationReadiness.Status != "analysis_ready" {
+		t.Fatalf("empty readiness = %+v", explanation.RecreationReadiness)
 	}
 	if !containsText(explanation.UnknownNotes, "No unknown") {
 		t.Fatalf("unknown notes = %+v", explanation.UnknownNotes)

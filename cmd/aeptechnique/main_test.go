@@ -205,6 +205,9 @@ func TestRunEmitsCorpusExplanationSummary(t *testing.T) {
 	if len(summary.ArchetypeCounts) == 0 {
 		t.Fatalf("archetype counts = %+v", summary.ArchetypeCounts)
 	}
+	if len(summary.ReadinessCounts) == 0 {
+		t.Fatalf("readiness counts = %+v", summary.ReadinessCounts)
+	}
 }
 
 func TestRunWritesOutputFile(t *testing.T) {

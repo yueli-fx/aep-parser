@@ -129,6 +129,7 @@ try {
     [void]$b.AppendLine("- shape operators: $($summary.totals.shape_operator_count)")
     [void]$b.AppendLine("- dependency edges: $($summary.totals.dependency_count)")
     [void]$b.AppendLine("")
+    Write-CountTable -Builder $b -Title "Recreation Readiness" -Counts $summary.readiness_counts
     Write-CountTable -Builder $b -Title "Archetypes" -Counts $summary.archetype_counts
     Write-CountTable -Builder $b -Title "Technique Hints" -Counts $summary.hint_counts
     Write-CountTable -Builder $b -Title "Effects" -Counts $summary.effect_counts
@@ -155,6 +156,9 @@ try {
         [void]$b.AppendLine("")
         foreach ($line in @($explanation.overview | Select-Object -First 2)) {
             [void]$b.AppendLine("- $line")
+        }
+        if ($null -ne $explanation.recreation_readiness) {
+            [void]$b.AppendLine("- Readiness: **$($explanation.recreation_readiness.status)** - $($explanation.recreation_readiness.summary)")
         }
         foreach ($archetype in @($explanation.archetypes | Select-Object -First 4)) {
             [void]$b.AppendLine("- Archetype: **$($archetype.label)** - $($archetype.summary)")
@@ -195,6 +199,7 @@ try {
     [void]$h.AppendLine("</div>")
     [void]$h.AppendLine("<div class=""tables"">")
     Write-HtmlCountTable -Builder $h -Title "Technique Hints" -Counts $summary.hint_counts
+    Write-HtmlCountTable -Builder $h -Title "Recreation Readiness" -Counts $summary.readiness_counts
     Write-HtmlCountTable -Builder $h -Title "Archetypes" -Counts $summary.archetype_counts
     Write-HtmlCountTable -Builder $h -Title "Effects" -Counts $summary.effect_counts
     Write-HtmlCountTable -Builder $h -Title "Shape Families" -Counts $summary.shape_families
@@ -222,6 +227,13 @@ try {
                 }
             }
             [void]$h.AppendLine("<div class=""chips"">")
+            if (($null -ne $explanation) -and ($null -ne $explanation.recreation_readiness)) {
+                $readinessClass = "chip"
+                if ($explanation.recreation_readiness.status -ne "analysis_ready") {
+                    $readinessClass = "chip warn"
+                }
+                [void]$h.AppendLine("<span class=""$readinessClass"">$(Escape-Html $explanation.recreation_readiness.status)</span>")
+            }
             if (($null -ne $explanation) -and ($null -ne $explanation.archetypes)) {
                 foreach ($archetype in @($explanation.archetypes | Select-Object -First 8)) {
                     [void]$h.AppendLine("<span class=""chip"">$(Escape-Html $archetype.label)</span>")
