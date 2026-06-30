@@ -301,7 +301,7 @@ try {
     [void]$h.AppendLine("<meta name=""viewport"" content=""width=device-width, initial-scale=1"">")
     [void]$h.AppendLine("<title>Technique Corpus Report</title>")
     [void]$h.AppendLine("<style>")
-    [void]$h.AppendLine("body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#f5f7fa;color:#1f2937}main{max-width:1180px;margin:0 auto;padding:32px}h1{font-size:28px;margin:0 0 8px}h2{font-size:16px;margin:0 0 12px}.muted{color:#667085}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:22px 0}.metric,.panel,.project,.representative{background:white;border:1px solid #d8dee8;border-radius:8px;padding:16px}.metric .value{font-size:28px;font-weight:700;margin-top:6px}.tables{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}.projects,.representatives{display:grid;gap:14px;margin-top:18px}.representatives{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}.project h3,.representative h3{margin:0 0 10px;font-size:17px}.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.chip{background:#eef2ff;color:#3730a3;border-radius:999px;padding:4px 9px;font-size:12px}.chip.warn{background:#fff7ed;color:#9a3412}.notes{display:grid;gap:8px;margin-top:10px}.note{border-left:3px solid #4f46e5;background:#f8fafc;padding:8px 10px}.note strong{display:block;margin-bottom:3px}.layers,.small{font-size:12px;color:#475467;margin-top:8px}ul.compact{margin:8px 0 0;padding-left:18px}ul.compact li{margin:5px 0}table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px solid #e5e7eb;padding:7px 4px;text-align:left}th:last-child,td:last-child{text-align:right}.empty{color:#98a2b3}code{background:#eef2f7;padding:2px 5px;border-radius:4px}</style>")
+    [void]$h.AppendLine("body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#f5f7fa;color:#1f2937}main{max-width:1180px;margin:0 auto;padding:32px}h1{font-size:28px;margin:0 0 8px}h2{font-size:16px;margin:0 0 12px}.muted{color:#667085}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:22px 0}.metric,.panel,.project,.representative{background:white;border:1px solid #d8dee8;border-radius:8px;padding:16px}.metric .value{font-size:28px;font-weight:700;margin-top:6px}.tables{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}.projects,.representatives{display:grid;gap:14px;margin-top:18px}.representatives{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}.project h3,.representative h3{margin:0 0 10px;font-size:17px}.toolbar{display:flex;gap:12px;align-items:center;margin-top:10px}.toolbar input{width:min(520px,100%);border:1px solid #cfd7e3;border-radius:6px;padding:9px 11px;font:inherit}.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.chip{background:#eef2ff;color:#3730a3;border-radius:999px;padding:4px 9px;font-size:12px}.chip.warn{background:#fff7ed;color:#9a3412}.notes{display:grid;gap:8px;margin-top:10px}.note{border-left:3px solid #4f46e5;background:#f8fafc;padding:8px 10px}.note strong{display:block;margin-bottom:3px}.layers,.small{font-size:12px;color:#475467;margin-top:8px}ul.compact{margin:8px 0 0;padding-left:18px}ul.compact li{margin:5px 0}table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px solid #e5e7eb;padding:7px 4px;text-align:left}th:last-child,td:last-child{text-align:right}.empty{color:#98a2b3}code{background:#eef2f7;padding:2px 5px;border-radius:4px}</style>")
     [void]$h.AppendLine("</head><body><main>")
     [void]$h.AppendLine("<h1>Technique Corpus Report</h1>")
     [void]$h.AppendLine("<p class=""muted"">input <code>$(Escape-Html $InputPath)</code></p>")
@@ -362,6 +362,7 @@ try {
     }
     [void]$h.AppendLine("</div>")
     [void]$h.AppendLine("<h2 style=""margin-top:28px"">Projects</h2>")
+    [void]$h.AppendLine("<div class=""toolbar""><input id=""projectFilter"" type=""search"" aria-label=""Filter projects"" placeholder=""Filter by path, readiness, archetype, hint""><span id=""projectCount"" class=""muted""></span></div>")
     [void]$h.AppendLine("<div class=""projects"">")
     foreach ($record in $records) {
         $explanation = $record.explanation
@@ -369,7 +370,23 @@ try {
         if (($null -eq $portrait) -and ($null -ne $explanation)) {
             $portrait = $explanation.portrait
         }
-        [void]$h.AppendLine("<article class=""project"">")
+        $searchTerms = @([string]$record.path)
+        if (($null -ne $explanation) -and ($null -ne $explanation.recreation_readiness)) {
+            $searchTerms += [string]$explanation.recreation_readiness.status
+        }
+        if (($null -ne $explanation) -and ($null -ne $explanation.archetypes)) {
+            foreach ($archetype in @($explanation.archetypes)) {
+                $searchTerms += [string]$archetype.id
+                $searchTerms += [string]$archetype.label
+            }
+        }
+        if (($null -ne $portrait) -and ($null -ne $portrait.technique_hints)) {
+            foreach ($hint in @($portrait.technique_hints)) {
+                $searchTerms += [string]$hint.id
+            }
+        }
+        $searchText = (($searchTerms | Where-Object { $_ }) -join " ").ToLowerInvariant()
+        [void]$h.AppendLine("<article class=""project"" data-search=""$(Escape-Html $searchText)"">")
         [void]$h.AppendLine("<h3>$(Escape-Html $record.path)</h3>")
         if ($record.error) {
             [void]$h.AppendLine("<div class=""chips""><span class=""chip warn"">$(Escape-Html $record.error)</span></div>")
@@ -414,6 +431,7 @@ try {
         [void]$h.AppendLine("</article>")
     }
     [void]$h.AppendLine("</div>")
+    [void]$h.AppendLine("<script>(function(){const input=document.getElementById('projectFilter');const count=document.getElementById('projectCount');const cards=[...document.querySelectorAll('.project')];function apply(){const q=(input.value||'').trim().toLowerCase();let shown=0;for(const card of cards){const ok=!q||card.dataset.search.includes(q);card.hidden=!ok;if(ok)shown++;}count.textContent=shown+' / '+cards.length+' projects';}input.addEventListener('input',apply);apply();})();</script>")
     [void]$h.AppendLine("</main></body></html>")
     $h.ToString() | Set-Content -Path $htmlPath -Encoding UTF8
 
