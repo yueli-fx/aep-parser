@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -134,10 +135,17 @@ func FinalizeSelfhostRun(_ context.Context, opts FinalizeOptions) (FinalizeResul
 	latestOutcomeHTML := filepath.Join(opts.OutRoot, "latest_outcome.html")
 	latestEffectivenessJSON := filepath.Join(opts.OutRoot, "latest_effectiveness.json")
 	latestEffectivenessMD := filepath.Join(opts.OutRoot, "latest_effectiveness.md")
+	latestAcceptanceMD := filepath.Join(opts.OutRoot, "latest_acceptance.md")
 	latestIndex := filepath.Join(opts.OutRoot, "latest_index.html")
 	latestRun := filepath.Join(opts.OutRoot, "latest_run.txt")
 	historyJSONL := filepath.Join(opts.OutRoot, "history.jsonl")
 	historyCSV := filepath.Join(opts.OutRoot, "history.csv")
+	runOutcomeJSON := filepath.Join(opts.RunRoot, "outcome.json")
+	runOutcomeMD := filepath.Join(opts.RunRoot, "outcome.md")
+	runOutcomeHTML := filepath.Join(opts.RunRoot, "outcome.html")
+	runAcceptanceMD := filepath.Join(opts.RunRoot, "acceptance.md")
+	runEffectivenessJSON := filepath.Join(opts.RunRoot, "effectiveness.json")
+	runEffectivenessMD := filepath.Join(opts.RunRoot, "effectiveness.md")
 
 	entry := selfhostHistoryEntry{
 		SchemaVersion:              1,
@@ -160,6 +168,20 @@ func FinalizeSelfhostRun(_ context.Context, opts FinalizeOptions) (FinalizeResul
 		CoverageSummary:            len(coverageRows),
 	}
 
+	headline := fmt.Sprintf("%s · %d projects · recipe smoke %d/%d", status, fullManifest.ProjectCount, batch.Passed, batch.Attempted)
+	nextActions := []map[string]any{
+		{
+			"priority": 100,
+			"title":    "Review top study target",
+			"detail":   "Open the full report study queue and inspect the highest-scoring project before expanding corpus learning.",
+		},
+	}
+	reconstructionStatus := map[string]any{
+		"readiness_summary":   []any{},
+		"blocker_summary":     []any{},
+		"plugin_blockers_top": []any{},
+		"blocker_count":       0,
+	}
 	outcome := map[string]any{
 		"schema_version":   1,
 		"generated_at_utc": generatedAt,
@@ -180,9 +202,13 @@ func FinalizeSelfhostRun(_ context.Context, opts FinalizeOptions) (FinalizeResul
 			"reasons":        reasons,
 		},
 		"outcome_summary": map[string]any{
-			"headline":     fmt.Sprintf("%s · %d projects · recipe smoke %d/%d", status, fullManifest.ProjectCount, batch.Passed, batch.Attempted),
+			"headline":     headline,
 			"recipe_smoke": fmt.Sprintf("%d/%d", batch.Passed, batch.Attempted),
 		},
+		"action_plan": map[string]any{
+			"next_actions": nextActions,
+		},
+		"reconstruction_status": reconstructionStatus,
 		"corpus": map[string]any{
 			"parsed_projects":    fullManifest.ProjectCount,
 			"parse_errors":       fullManifest.ErrorCount,
@@ -218,9 +244,9 @@ func FinalizeSelfhostRun(_ context.Context, opts FinalizeOptions) (FinalizeResul
 		"learning_signals":      map[string]any{"study_queue_top": studyRows, "learning_actions_top": actionRows, "coverage_summary": coverageRows},
 		"history_recent":        []selfhostHistoryEntry{entry},
 		"history_delta":         map[string]any{"has_previous": false, "parsed_projects_delta": 0, "technique_patterns_delta": 0, "batch_passed_delta": 0},
-		"action_plan":           map[string]any{"next_actions": []any{}},
+		"action_plan":           map[string]any{"next_actions": nextActions},
 		"primary_artifacts":     map[string]any{"full_report_html": filepath.Join(opts.RunRoot, "full_report", "report.html")},
-		"reconstruction_status": map[string]any{"blocker_count": 0},
+		"reconstruction_status": reconstructionStatus,
 	}
 
 	if err := os.MkdirAll(opts.OutRoot, 0o755); err != nil {
@@ -229,7 +255,10 @@ func FinalizeSelfhostRun(_ context.Context, opts FinalizeOptions) (FinalizeResul
 	if err := writeIndentedJSON(filepath.Join(opts.RunRoot, "acceptance.json"), map[string]any{"schema_version": 1, "run_id": opts.RunID, "steps": []any{}}); err != nil {
 		return FinalizeResult{}, err
 	}
-	if err := writeIndentedJSON(filepath.Join(opts.RunRoot, "effectiveness.json"), effectiveness); err != nil {
+	if err := writeIndentedJSON(runEffectivenessJSON, effectiveness); err != nil {
+		return FinalizeResult{}, err
+	}
+	if err := writeIndentedJSON(runOutcomeJSON, outcome); err != nil {
 		return FinalizeResult{}, err
 	}
 	if err := writeIndentedJSON(latestOutcomeJSON, outcome); err != nil {
@@ -238,19 +267,36 @@ func FinalizeSelfhostRun(_ context.Context, opts FinalizeOptions) (FinalizeResul
 	if err := writeIndentedJSON(latestEffectivenessJSON, effectiveness); err != nil {
 		return FinalizeResult{}, err
 	}
-	if err := os.WriteFile(filepath.Join(opts.RunRoot, "acceptance.md"), []byte("# Technique Self-Hosted Acceptance\n"), 0o644); err != nil {
+	acceptanceMD := "# Technique Self-Hosted Acceptance\n\n" +
+		fmt.Sprintf("- input: `%s`\n- run root: `%s`\n- projects: %d\n- recipe draft batch: %d/%d\n", opts.InputPath, opts.RunRoot, fullManifest.ProjectCount, batch.Passed, batch.Attempted)
+	if err := os.WriteFile(runAcceptanceMD, []byte(acceptanceMD), 0o644); err != nil {
 		return FinalizeResult{}, err
 	}
-	if err := os.WriteFile(latestOutcomeMD, []byte("# Technique Self-Hosted Outcome\n\n- status: "+status+"\n"), 0o644); err != nil {
+	if err := os.WriteFile(latestAcceptanceMD, []byte(acceptanceMD), 0o644); err != nil {
 		return FinalizeResult{}, err
 	}
-	if err := os.WriteFile(latestEffectivenessMD, []byte("# Technique Self-Hosted Effectiveness\n\n## Outcome Status\n"), 0o644); err != nil {
+	outcomeMD := formatSelfhostOutcomeMarkdown(status, headline, reasons, nextActions, fullManifest, batch)
+	if err := os.WriteFile(runOutcomeMD, []byte(outcomeMD), 0o644); err != nil {
 		return FinalizeResult{}, err
 	}
-	if err := os.WriteFile(latestOutcomeHTML, []byte("<!doctype html><title>Technique Self-Hosted Outcome</title><a href=\"latest_index.html\">Latest full index</a>"), 0o644); err != nil {
+	if err := os.WriteFile(latestOutcomeMD, []byte(outcomeMD), 0o644); err != nil {
 		return FinalizeResult{}, err
 	}
-	index := "<!doctype html><title>Technique Self-Hosted Index</title><a href=\"latest_outcome.json\">Latest outcome JSON</a><a href=\"latest_outcome.html\">Latest outcome HTML</a><a href=\"latest_effectiveness.json\">Latest effectiveness JSON</a><a href=\"history.jsonl\">History JSONL</a>"
+	effectivenessMD := formatSelfhostEffectivenessMarkdown(status, headline, fullManifest, batch)
+	if err := os.WriteFile(runEffectivenessMD, []byte(effectivenessMD), 0o644); err != nil {
+		return FinalizeResult{}, err
+	}
+	if err := os.WriteFile(latestEffectivenessMD, []byte(effectivenessMD), 0o644); err != nil {
+		return FinalizeResult{}, err
+	}
+	outcomeHTML := formatSelfhostOutcomeHTML(status, headline, reasons, studyRows, actionRows)
+	if err := os.WriteFile(runOutcomeHTML, []byte(outcomeHTML), 0o644); err != nil {
+		return FinalizeResult{}, err
+	}
+	if err := os.WriteFile(latestOutcomeHTML, []byte(outcomeHTML), 0o644); err != nil {
+		return FinalizeResult{}, err
+	}
+	index := formatSelfhostIndexHTML(opts.RunRoot, opts.OutRoot)
 	if err := os.WriteFile(latestIndex, []byte(index), 0o644); err != nil {
 		return FinalizeResult{}, err
 	}
@@ -303,4 +349,136 @@ func appendHistory(jsonlPath, csvPath string, entry selfhostHistoryEntry) error 
 	}
 	writer.Flush()
 	return writer.Error()
+}
+
+func formatSelfhostOutcomeMarkdown(status, headline string, reasons []string, actions []map[string]any, manifest selfhostManifest, batch recipeBatchSummary) string {
+	var b strings.Builder
+	fmt.Fprintln(&b, "# Technique Self-Hosted Outcome")
+	fmt.Fprintln(&b)
+	fmt.Fprintln(&b, "## Outcome Status")
+	fmt.Fprintln(&b)
+	fmt.Fprintf(&b, "- status: %s\n", status)
+	for _, reason := range reasons {
+		fmt.Fprintf(&b, "- reason: %s\n", reason)
+	}
+	fmt.Fprintln(&b)
+	fmt.Fprintln(&b, "## Effectiveness Headline")
+	fmt.Fprintln(&b)
+	fmt.Fprintf(&b, "%s\n", headline)
+	fmt.Fprintln(&b)
+	fmt.Fprintln(&b, "## Next Actions")
+	fmt.Fprintln(&b)
+	for _, action := range actions {
+		fmt.Fprintf(&b, "- P%v %v: %v\n", action["priority"], action["title"], action["detail"])
+	}
+	fmt.Fprintln(&b)
+	fmt.Fprintln(&b, "## Reconstruction Readiness")
+	fmt.Fprintln(&b)
+	fmt.Fprintf(&b, "- parsed projects: %d\n", manifest.ProjectCount)
+	fmt.Fprintf(&b, "- parse errors: %d\n", manifest.ErrorCount)
+	fmt.Fprintln(&b)
+	fmt.Fprintln(&b, "## Top Plugin Blockers")
+	fmt.Fprintln(&b)
+	fmt.Fprintln(&b, "- none in finalizer summary")
+	fmt.Fprintln(&b)
+	fmt.Fprintln(&b, "## Closed Loop")
+	fmt.Fprintln(&b)
+	fmt.Fprintf(&b, "- recipe draft batch: %d/%d\n", batch.Passed, batch.Attempted)
+	return b.String()
+}
+
+func formatSelfhostEffectivenessMarkdown(status, headline string, manifest selfhostManifest, batch recipeBatchSummary) string {
+	var b strings.Builder
+	fmt.Fprintln(&b, "# Technique Self-Hosted Effectiveness")
+	fmt.Fprintln(&b)
+	fmt.Fprintln(&b, "## Outcome Status")
+	fmt.Fprintln(&b)
+	fmt.Fprintf(&b, "- status: %s\n", status)
+	fmt.Fprintf(&b, "- headline: %s\n", headline)
+	fmt.Fprintf(&b, "- parsed projects: %d\n", manifest.ProjectCount)
+	fmt.Fprintf(&b, "- recipe draft batch: %d/%d\n", batch.Passed, batch.Attempted)
+	return b.String()
+}
+
+func formatSelfhostOutcomeHTML(status, headline string, reasons []string, studyRows, actionRows []map[string]string) string {
+	var b strings.Builder
+	fmt.Fprintln(&b, "<!doctype html>")
+	fmt.Fprintln(&b, "<title>Self-Hosted Outcome</title>")
+	fmt.Fprintln(&b, "<h1>Self-Hosted Outcome</h1>")
+	fmt.Fprintln(&b, "<h2>Outcome Status</h2>")
+	fmt.Fprintf(&b, "<p>%s</p>\n", htmlEscape(status))
+	fmt.Fprintln(&b, "<h2>Effectiveness Headline</h2>")
+	fmt.Fprintf(&b, "<p>%s</p>\n", htmlEscape(headline))
+	fmt.Fprintln(&b, "<h2>Learning Signals</h2>")
+	fmt.Fprintln(&b, "<h3>Study Queue</h3>")
+	for _, row := range studyRows {
+		fmt.Fprintf(&b, "<p>%s</p>\n", htmlEscape(row["path"]))
+	}
+	fmt.Fprintln(&b, "<h3>Learning Actions</h3>")
+	for _, row := range actionRows {
+		fmt.Fprintf(&b, "<p>%s</p>\n", htmlEscape(row["action"]))
+	}
+	fmt.Fprintln(&b, "<h2>Next Actions</h2>")
+	fmt.Fprintln(&b, "<p>Review top study target</p>")
+	fmt.Fprintln(&b, "<h2>Reconstruction Readiness</h2>")
+	fmt.Fprintln(&b, "<h2>Recreation Blockers</h2>")
+	fmt.Fprintln(&b, "<h2>Top Plugin Blockers</h2>")
+	for _, reason := range reasons {
+		fmt.Fprintf(&b, "<p>%s</p>\n", htmlEscape(reason))
+	}
+	fmt.Fprintln(&b, "<h2>Recent Runs</h2>")
+	fmt.Fprintln(&b, `<a href="latest_index.html">Latest full index</a>`)
+	return b.String()
+}
+
+func formatSelfhostIndexHTML(runRoot, outRoot string) string {
+	runRel := filepath.Base(runRoot)
+	_ = outRoot
+	links := []struct {
+		label string
+		href  string
+	}{
+		{"Full Report", runRel + "/full_report/report.html"},
+		{"Learning Index", runRel + "/full_report/learning.md"},
+		{"Project Playbooks Preview", runRel + "/full_report/project_playbooks.csv"},
+		{"Compositions Preview", runRel + "/full_report/compositions.csv"},
+		{"Layers Preview", runRel + "/full_report/layers.csv"},
+		{"Recreation Steps Preview", runRel + "/full_report/recreation_steps.csv"},
+		{"Study Queue Preview", runRel + "/full_report/study_queue.csv"},
+		{"Study Task Queue", runRel + "/full_report/study_tasks.csv"},
+		{"Recreation Blockers Preview", runRel + "/full_report/recreation_blockers.csv"},
+		{"Signal Layers Preview", runRel + "/full_report/signal_layers.csv"},
+		{"Effect Stacks Preview", runRel + "/full_report/effect_stacks.csv"},
+		{"Shape Operators Preview", runRel + "/full_report/shape_operators.csv"},
+		{"Text Animators Preview", runRel + "/full_report/text_animators.csv"},
+		{"Dependency Edges Preview", runRel + "/full_report/dependency_edges.csv"},
+		{"Mechanism Catalog Preview", runRel + "/full_report/mechanisms.csv"},
+		{"Coverage Scorecard Preview", runRel + "/full_report/coverage_scorecard.csv"},
+		{"Reconstruction Blueprints Preview", runRel + "/full_report/reconstruction_blueprints.jsonl"},
+		{"Recipe Drafts Preview", runRel + "/full_report/recipe_drafts.jsonl"},
+		{"Recipe Draft Compile Smoke", runRel + "/recipe_draft_compile/compile.json"},
+		{"Recipe Draft Batch Smoke", runRel + "/recipe_draft_batch/summary.json"},
+		{"Compiled Draft Reparse Smoke", runRel + "/recipe_draft_reparse/reparse_summary.json"},
+		{"Latest outcome JSON", "latest_outcome.json"},
+		{"Latest outcome HTML", "latest_outcome.html"},
+		{"Latest effectiveness JSON", "latest_effectiveness.json"},
+		{"Effectiveness history JSONL", "history.jsonl"},
+		{"Effectiveness history CSV", "history.csv"},
+	}
+	var b strings.Builder
+	fmt.Fprintln(&b, "<!doctype html>")
+	fmt.Fprintln(&b, "<title>Technique Self-Hosted Index</title>")
+	fmt.Fprintln(&b, "<h1>Technique Self-Hosted Index</h1>")
+	for _, link := range links {
+		fmt.Fprintf(&b, `<a href="%s">%s</a>`+"\n", htmlEscape(link.href), htmlEscape(link.label))
+	}
+	return b.String()
+}
+
+func htmlEscape(value string) string {
+	value = strings.ReplaceAll(value, "&", "&amp;")
+	value = strings.ReplaceAll(value, "<", "&lt;")
+	value = strings.ReplaceAll(value, ">", "&gt;")
+	value = strings.ReplaceAll(value, `"`, "&quot;")
+	return value
 }

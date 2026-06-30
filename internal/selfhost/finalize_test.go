@@ -48,6 +48,53 @@ func TestFinalizeSelfhostRunWritesLatestOutcomeAndHistory(t *testing.T) {
 	if !strings.Contains(string(index), "latest_outcome.json") || !strings.Contains(string(index), "history.jsonl") {
 		t.Fatalf("latest_index missing stable links:\n%s", string(index))
 	}
+	for _, want := range []string{
+		"Full Report",
+		"Project Playbooks Preview",
+		"Recipe Draft Compile Smoke",
+		"Recipe Draft Batch Smoke",
+		"Compiled Draft Reparse Smoke",
+		"latest_effectiveness.json",
+	} {
+		if !strings.Contains(string(index), want) {
+			t.Fatalf("latest_index missing %q:\n%s", want, string(index))
+		}
+	}
+	outcomeMD, err := os.ReadFile(filepath.Join(root, "latest_outcome.md"))
+	if err != nil {
+		t.Fatalf("ReadFile latest_outcome.md: %v", err)
+	}
+	for _, want := range []string{"Outcome Status", "Effectiveness Headline", "Next Actions", "Reconstruction Readiness", "Top Plugin Blockers"} {
+		if !strings.Contains(string(outcomeMD), want) {
+			t.Fatalf("latest_outcome.md missing %q:\n%s", want, string(outcomeMD))
+		}
+	}
+	outcomeHTML, err := os.ReadFile(filepath.Join(root, "latest_outcome.html"))
+	if err != nil {
+		t.Fatalf("ReadFile latest_outcome.html: %v", err)
+	}
+	for _, want := range []string{"Self-Hosted Outcome", "Learning Signals", "Study Queue", "Learning Actions", "Recent Runs"} {
+		if !strings.Contains(string(outcomeHTML), want) {
+			t.Fatalf("latest_outcome.html missing %q:\n%s", want, string(outcomeHTML))
+		}
+	}
+	var effectiveness struct {
+		ReconstructionStatus struct {
+			ReadinessSummary  []any `json:"readiness_summary"`
+			BlockerSummary    []any `json:"blocker_summary"`
+			PluginBlockersTop []any `json:"plugin_blockers_top"`
+		} `json:"reconstruction_status"`
+		ActionPlan struct {
+			NextActions []any `json:"next_actions"`
+		} `json:"action_plan"`
+	}
+	readIndentedJSON(filepath.Join(root, "latest_effectiveness.json"), &effectiveness)
+	if effectiveness.ReconstructionStatus.ReadinessSummary == nil || effectiveness.ReconstructionStatus.BlockerSummary == nil || effectiveness.ReconstructionStatus.PluginBlockersTop == nil {
+		t.Fatalf("latest_effectiveness.json missing reconstruction status arrays")
+	}
+	if effectiveness.ActionPlan.NextActions == nil {
+		t.Fatalf("latest_effectiveness.json missing next actions")
+	}
 }
 
 func writeFinalizeRunFixture(t *testing.T, runRoot string) {
