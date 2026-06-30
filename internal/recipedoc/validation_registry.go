@@ -40,6 +40,9 @@ var fieldValidation = map[string]FieldMeta{
 		Validation: "Must be 2.2 or 2.4.",
 		Enum:       []string{"2.2", "2.4"},
 	},
+	"project.timecode_default_base": {
+		Validation: "Must be an integer between 1 and 999.",
+	},
 	"comps[].width": {
 		Validation: "Pixel width must fit the composition writer's uint16 range.",
 	},
@@ -333,6 +336,9 @@ var fieldValidation = map[string]FieldMeta{
 	"expected_profile.working_gamma": {
 		Validation: "Expected project working gamma must be 2.2 or 2.4.",
 		Enum:       []string{"2.2", "2.4"},
+	},
+	"expected_profile.timecode_default_base": {
+		Validation: "Expected project timecode default base must be an integer between 1 and 999.",
 	},
 	"expected_profile.keyframes[].layer_name": {
 		Validation: "Keyframe profile checks require a target layer name.",

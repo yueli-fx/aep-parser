@@ -31,6 +31,8 @@ This reference is generated from the canonical recipe field model.
 | `project.audio_sample_rate` | `number` | - | Project audio sample rate. | Must be one of AE's supported audio sample rates. | `project.set_audio_sample_rate` (`Project.SetAudioSampleRate`) | examples/recipes/minimal-project-preferences.json |
 | `project.working_gamma` | `number` | - | Project working gamma. | Must be 2.2 or 2.4. | `project.set_working_gamma` (`Project.SetWorkingGamma`) | examples/recipes/minimal-project-preferences.json |
 | `project.compensate_for_scene_referred_profiles` | `boolean` | - | Project scene-referred profile compensation switch. | - | `project.set_compensate_for_scene_referred_profiles` (`Project.SetCompensateForSceneReferredProfiles`) | examples/recipes/minimal-project-preferences.json |
+| `project.timecode_default_base` | `number` | - | Project timecode default base. | Must be an integer between 1 and 999. | `project.set_timecode_default_base` (`Project.SetTimecodeDefaultBase`) | examples/recipes/minimal-project-display-settings.json |
+| `project.transparency_grid_thumbnails` | `boolean` | - | Project transparency grid thumbnail switch. | - | `project.set_transparency_grid_thumbnails` (`Project.SetTransparencyGridThumbnails`) | examples/recipes/minimal-project-display-settings.json |
 
 ## CompSpec
 
@@ -616,6 +618,8 @@ This reference is generated from the canonical recipe field model.
 | `expected_profile.audio_sample_rate` | `number` | - | Expected project audio sample rate. | Expected project audio sample rate must be one of AE's supported rates. | - | examples/recipes/minimal-project-preferences.json |
 | `expected_profile.working_gamma` | `number` | - | Expected project working gamma. | Expected project working gamma must be 2.2 or 2.4. | - | examples/recipes/minimal-project-preferences.json |
 | `expected_profile.compensate_for_scene_referred_profiles` | `boolean` | - | Expected project scene-referred profile compensation switch. | - | - | examples/recipes/minimal-project-preferences.json |
+| `expected_profile.timecode_default_base` | `number` | - | Expected project timecode default base. | Expected project timecode default base must be an integer between 1 and 999. | - | examples/recipes/minimal-project-display-settings.json |
+| `expected_profile.transparency_grid_thumbnails` | `boolean` | - | Expected project transparency grid thumbnail switch. | - | - | examples/recipes/minimal-project-display-settings.json |
 | `expected_profile.name` | `string` | - | Expected composition display name. | - | - | examples/recipes/minimal-comp-object-profile.json |
 | `expected_profile.width` | `number` | - | Expected composition width in pixels. | Expected width must be a positive integer. | - | examples/recipes/minimal-comp-object-profile.json |
 | `expected_profile.height` | `number` | - | Expected composition height in pixels. | Expected height must be a positive integer. | - | examples/recipes/minimal-comp-object-profile.json |

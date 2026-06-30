@@ -25,6 +25,8 @@ func hasExpectedProfile(expected ExpectedProfile) bool {
 		expected.AudioSampleRate != nil ||
 		expected.WorkingGamma != nil ||
 		expected.CompensateForSceneReferredProfiles != nil ||
+		expected.TimecodeDefaultBase != nil ||
+		expected.TransparencyGridThumbnails != nil ||
 		expected.Name != "" ||
 		expected.Width != nil ||
 		expected.Height != nil ||
@@ -150,6 +152,12 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 	}
 	if expected.CompensateForSceneReferredProfiles != nil {
 		add("expected_profile.compensate_for_scene_referred_profiles", *expected.CompensateForSceneReferredProfiles, prof.Meta.CompensateSceneProfiles, prof.Meta.CompensateSceneProfiles == *expected.CompensateForSceneReferredProfiles)
+	}
+	if expected.TimecodeDefaultBase != nil {
+		add("expected_profile.timecode_default_base", *expected.TimecodeDefaultBase, prof.Meta.TimecodeDefaultBase, prof.Meta.TimecodeDefaultBase == *expected.TimecodeDefaultBase)
+	}
+	if expected.TransparencyGridThumbnails != nil {
+		add("expected_profile.transparency_grid_thumbnails", *expected.TransparencyGridThumbnails, prof.Meta.TransparencyGridThumbs, prof.Meta.TransparencyGridThumbs == *expected.TransparencyGridThumbnails)
 	}
 	if expected.Name != "" {
 		actual := ""

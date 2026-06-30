@@ -116,6 +116,15 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 	if rec.Project.CompensateForSceneReferredProfiles != nil {
 		recordCapability("Project.SetCompensateForSceneReferredProfiles", "project.compensate_for_scene_referred_profiles")
 	}
+	if rec.Project.TimecodeDefaultBase != nil {
+		recordCapability("Project.SetTimecodeDefaultBase", "project.timecode_default_base")
+		if err := projectTimecodeDefaultBase(*rec.Project.TimecodeDefaultBase); err != nil {
+			addRefusal("invalid_project_timecode_default_base", "project.timecode_default_base", err.Error())
+		}
+	}
+	if rec.Project.TransparencyGridThumbnails != nil {
+		recordCapability("Project.SetTransparencyGridThumbnails", "project.transparency_grid_thumbnails")
+	}
 	if len(rec.Comps) > 1 {
 		addRefusal("too_many_comps", "comps", "first recipe slice supports exactly one comp")
 	}
@@ -275,6 +284,11 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 	if expected.WorkingGamma != nil {
 		if err := projectWorkingGamma(*expected.WorkingGamma); err != nil {
 			addRefusal("invalid_expected_profile", "expected_profile.working_gamma", err.Error())
+		}
+	}
+	if expected.TimecodeDefaultBase != nil {
+		if err := projectTimecodeDefaultBase(*expected.TimecodeDefaultBase); err != nil {
+			addRefusal("invalid_expected_profile", "expected_profile.timecode_default_base", err.Error())
 		}
 	}
 	if expected.Label != nil {

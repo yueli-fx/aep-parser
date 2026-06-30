@@ -245,6 +245,9 @@ Done:
   `footage_timecode_display_start_type`. Profile metadata exposes stable
   snake-case values for the same settings, `expected_profile` asserts them,
   and `examples/recipes/minimal-project-display-settings.json` covers the group.
+- Recipe project display scalar settings now also support
+  `timecode_default_base` and `transparency_grid_thumbnails`; the existing
+  display settings recipe asserts both through profile metadata.
 - Recipe project preferences now support `expression_engine`,
   `audio_sample_rate`, `working_gamma`, and
   `compensate_for_scene_referred_profiles`. Profile metadata exposes the same

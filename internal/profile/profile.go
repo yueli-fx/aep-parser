@@ -55,6 +55,8 @@ type Meta struct {
 	AudioSampleRate         float64            `json:"audio_sample_rate"`
 	WorkingGamma            float64            `json:"working_gamma"`
 	CompensateSceneProfiles bool               `json:"compensate_for_scene_referred_profiles"`
+	TimecodeDefaultBase     int                `json:"timecode_default_base"`
+	TransparencyGridThumbs  bool               `json:"transparency_grid_thumbnails"`
 }
 
 type Fingerprint struct {
@@ -430,6 +432,8 @@ func Build(project *aep.Project, opts Options) (*Profile, error) {
 			AudioSampleRate:         project.AudioSampleRate(),
 			WorkingGamma:            project.WorkingGamma(),
 			CompensateSceneProfiles: project.CompensateForSceneReferredProfiles(),
+			TimecodeDefaultBase:     project.TimecodeDefaultBase(),
+			TransparencyGridThumbs:  project.TransparencyGridThumbnails(),
 		},
 		Fingerprint: Fingerprint{
 			CompCount:    len(project.Compositions),

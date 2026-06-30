@@ -6,7 +6,9 @@
     "frames_count_type": "start_1",
     "frames_use_feet_frames": true,
     "feet_frames_film_type": "16mm",
-    "footage_timecode_display_start_type": "source_media"
+    "footage_timecode_display_start_type": "source_media",
+    "timecode_default_base": 24,
+    "transparency_grid_thumbnails": true
   },
   "comps": [
     {
@@ -24,6 +26,8 @@
     "frames_count_type": "start_1",
     "frames_use_feet_frames": true,
     "feet_frames_film_type": "16mm",
-    "footage_timecode_display_start_type": "source_media"
+    "footage_timecode_display_start_type": "source_media",
+    "timecode_default_base": 24,
+    "transparency_grid_thumbnails": true
   }
 }

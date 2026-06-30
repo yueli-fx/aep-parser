@@ -112,6 +112,16 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 			return report, fmt.Errorf("recipe: project compensate_for_scene_referred_profiles: %w", err)
 		}
 	}
+	if rec.Project.TimecodeDefaultBase != nil {
+		if err := project.SetTimecodeDefaultBase(*rec.Project.TimecodeDefaultBase); err != nil {
+			return report, fmt.Errorf("recipe: project timecode_default_base: %w", err)
+		}
+	}
+	if rec.Project.TransparencyGridThumbnails != nil {
+		if err := project.SetTransparencyGridThumbnails(*rec.Project.TransparencyGridThumbnails); err != nil {
+			return report, fmt.Errorf("recipe: project transparency_grid_thumbnails: %w", err)
+		}
+	}
 	compSpec := rec.Comps[0]
 	comp, err := aep.NewComposition(project, compSpec.Name, uint16(compSpec.Width), uint16(compSpec.Height), compSpec.FrameRate, compSpec.Duration)
 	if err != nil {

@@ -436,6 +436,51 @@
       "x-aep-example": "examples/recipes/minimal-project-preferences.json"
     },
     {
+      "x-aep-path": "project.timecode_default_base",
+      "json_name": "timecode_default_base",
+      "source_type": "ProjectSpec",
+      "source_field": "TimecodeDefaultBase",
+      "type": "number",
+      "go_type": "*int",
+      "description": "Project timecode default base.",
+      "x-aep-validation": "Must be an integer between 1 and 999.",
+      "x-aep-capabilities": [
+        {
+          "key": "project.set_timecode_default_base",
+          "query": "Project.SetTimecodeDefaultBase",
+          "status": "supported",
+          "symbol": "Project.SetTimecodeDefaultBase",
+          "domain": "project",
+          "verify": "roundtrip",
+          "minver": "2020",
+          "boundary": "length-preserving, low risk; writes a uint16 BE value at nnhd\nbytes 14-15"
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-project-display-settings.json"
+    },
+    {
+      "x-aep-path": "project.transparency_grid_thumbnails",
+      "json_name": "transparency_grid_thumbnails",
+      "source_type": "ProjectSpec",
+      "source_field": "TransparencyGridThumbnails",
+      "type": "boolean",
+      "go_type": "*bool",
+      "description": "Project transparency grid thumbnail switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "project.set_transparency_grid_thumbnails",
+          "query": "Project.SetTransparencyGridThumbnails",
+          "status": "supported",
+          "symbol": "Project.SetTransparencyGridThumbnails",
+          "domain": "project",
+          "verify": "roundtrip",
+          "minver": "2020",
+          "boundary": "length-preserving, low risk; writes nnhd byte 25"
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-project-display-settings.json"
+    },
+    {
       "x-aep-path": "comps[]",
       "json_name": "comps",
       "source_type": "Recipe",
@@ -8866,6 +8911,27 @@
       "go_type": "*bool",
       "description": "Expected project scene-referred profile compensation switch.",
       "x-aep-example": "examples/recipes/minimal-project-preferences.json"
+    },
+    {
+      "x-aep-path": "expected_profile.timecode_default_base",
+      "json_name": "timecode_default_base",
+      "source_type": "ExpectedProfile",
+      "source_field": "TimecodeDefaultBase",
+      "type": "number",
+      "go_type": "*int",
+      "description": "Expected project timecode default base.",
+      "x-aep-validation": "Expected project timecode default base must be an integer between 1 and 999.",
+      "x-aep-example": "examples/recipes/minimal-project-display-settings.json"
+    },
+    {
+      "x-aep-path": "expected_profile.transparency_grid_thumbnails",
+      "json_name": "transparency_grid_thumbnails",
+      "source_type": "ExpectedProfile",
+      "source_field": "TransparencyGridThumbnails",
+      "type": "boolean",
+      "go_type": "*bool",
+      "description": "Expected project transparency grid thumbnail switch.",
+      "x-aep-example": "examples/recipes/minimal-project-display-settings.json"
     },
     {
       "x-aep-path": "expected_profile.name",

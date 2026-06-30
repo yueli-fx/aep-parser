@@ -176,6 +176,13 @@ func projectWorkingGamma(value float64) error {
 	}
 }
 
+func projectTimecodeDefaultBase(value int) error {
+	if value < 1 || value > 999 {
+		return fmt.Errorf("timecode_default_base must be between 1 and 999")
+	}
+	return nil
+}
+
 func (target recipeProjectTarget) aepTarget() aep.AETarget {
 	switch target {
 	case aepTargetAE2022:

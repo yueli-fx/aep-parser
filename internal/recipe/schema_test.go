@@ -88,6 +88,21 @@ func TestValidateReportsProjectPreferenceCapabilities(t *testing.T) {
 	assertCapability(t, report, "Project.SetCompensateForSceneReferredProfiles")
 }
 
+func TestValidateReportsProjectDisplayScalarCapabilities(t *testing.T) {
+	rec := minimalRecipe()
+	enabled := true
+	rec.Project.TimecodeDefaultBase = intPtr(24)
+	rec.Project.TransparencyGridThumbnails = &enabled
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "Project.SetTimecodeDefaultBase")
+	assertCapability(t, report, "Project.SetTransparencyGridThumbnails")
+}
+
 func TestValidateRejectsInvalidProjectBitsPerChannel(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Project.BitsPerChannel = "12"
@@ -132,6 +147,18 @@ func TestValidateRejectsInvalidProjectPreferences(t *testing.T) {
 	assertRefusal(t, report, "invalid_project_expression_engine")
 	assertRefusal(t, report, "invalid_project_audio_sample_rate")
 	assertRefusal(t, report, "invalid_project_working_gamma")
+}
+
+func TestValidateRejectsInvalidProjectDisplayScalars(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Project.TimecodeDefaultBase = intPtr(1000)
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_project_timecode_default_base")
 }
 
 func TestValidateRejectsUnsupportedLayerType(t *testing.T) {

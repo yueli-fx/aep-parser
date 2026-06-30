@@ -17,6 +17,8 @@
     "project.audio_sample_rate",
     "project.working_gamma",
     "project.compensate_for_scene_referred_profiles",
+    "project.timecode_default_base",
+    "project.transparency_grid_thumbnails",
     "comps[]",
     "comps[].name",
     "comps[].width",
@@ -404,6 +406,8 @@
     "expected_profile.audio_sample_rate",
     "expected_profile.working_gamma",
     "expected_profile.compensate_for_scene_referred_profiles",
+    "expected_profile.timecode_default_base",
+    "expected_profile.transparency_grid_thumbnails",
     "expected_profile.name",
     "expected_profile.width",
     "expected_profile.height",
@@ -7029,6 +7033,27 @@
       ],
       "example": "examples/recipes/minimal-project-display-settings.json"
     },
+    "expected_profile.timecode_default_base": {
+      "path": "expected_profile.timecode_default_base",
+      "json_name": "timecode_default_base",
+      "source_type": "ExpectedProfile",
+      "source_field": "TimecodeDefaultBase",
+      "type": "number",
+      "go_type": "*int",
+      "summary": "Expected project timecode default base.",
+      "validation": "Expected project timecode default base must be an integer between 1 and 999.",
+      "example": "examples/recipes/minimal-project-display-settings.json"
+    },
+    "expected_profile.transparency_grid_thumbnails": {
+      "path": "expected_profile.transparency_grid_thumbnails",
+      "json_name": "transparency_grid_thumbnails",
+      "source_type": "ExpectedProfile",
+      "source_field": "TransparencyGridThumbnails",
+      "type": "boolean",
+      "go_type": "*bool",
+      "summary": "Expected project transparency grid thumbnail switch.",
+      "example": "examples/recipes/minimal-project-display-settings.json"
+    },
     "expected_profile.width": {
       "path": "expected_profile.width",
       "json_name": "width",
@@ -7313,6 +7338,33 @@
       ],
       "example": "examples/recipes/minimal-project-display-settings.json"
     },
+    "project.timecode_default_base": {
+      "path": "project.timecode_default_base",
+      "json_name": "timecode_default_base",
+      "source_type": "ProjectSpec",
+      "source_field": "TimecodeDefaultBase",
+      "type": "number",
+      "go_type": "*int",
+      "summary": "Project timecode default base.",
+      "validation": "Must be an integer between 1 and 999.",
+      "capability_keys": [
+        "project.set_timecode_default_base"
+      ],
+      "example": "examples/recipes/minimal-project-display-settings.json"
+    },
+    "project.transparency_grid_thumbnails": {
+      "path": "project.transparency_grid_thumbnails",
+      "json_name": "transparency_grid_thumbnails",
+      "source_type": "ProjectSpec",
+      "source_field": "TransparencyGridThumbnails",
+      "type": "boolean",
+      "go_type": "*bool",
+      "summary": "Project transparency grid thumbnail switch.",
+      "capability_keys": [
+        "project.set_transparency_grid_thumbnails"
+      ],
+      "example": "examples/recipes/minimal-project-display-settings.json"
+    },
     "project.working_gamma": {
       "path": "project.working_gamma",
       "json_name": "working_gamma",
@@ -7524,6 +7576,8 @@
       "expected_profile.audio_sample_rate",
       "expected_profile.working_gamma",
       "expected_profile.compensate_for_scene_referred_profiles",
+      "expected_profile.timecode_default_base",
+      "expected_profile.transparency_grid_thumbnails",
       "expected_profile.name",
       "expected_profile.width",
       "expected_profile.height",
@@ -7749,7 +7803,9 @@
       "project.expression_engine",
       "project.audio_sample_rate",
       "project.working_gamma",
-      "project.compensate_for_scene_referred_profiles"
+      "project.compensate_for_scene_referred_profiles",
+      "project.timecode_default_base",
+      "project.transparency_grid_thumbnails"
     ],
     "PuckerBloatSpec": [
       "comps[].layers[].shape.pucker_bloat.amount"

@@ -24,8 +24,10 @@ func buildFieldSummaries() map[string]string {
 		"project.audio_sample_rate":                      "Project audio sample rate.",
 		"project.working_gamma":                          "Project working gamma.",
 		"project.compensate_for_scene_referred_profiles": "Project scene-referred profile compensation switch.",
-		"comps[]":          "Composition definitions to create or validate.",
-		"expected_profile": "Optional assertions used to compare the generated project against expected structure.",
+		"project.timecode_default_base":                  "Project timecode default base.",
+		"project.transparency_grid_thumbnails":           "Project transparency grid thumbnail switch.",
+		"comps[]":                                        "Composition definitions to create or validate.",
+		"expected_profile":                               "Optional assertions used to compare the generated project against expected structure.",
 	}
 
 	addCompSummaries(out, "comps[]", "Composition")
@@ -543,6 +545,8 @@ func addExpectedProfileSummaries(out map[string]string) {
 		"audio_sample_rate":                      "Expected project audio sample rate.",
 		"working_gamma":                          "Expected project working gamma.",
 		"compensate_for_scene_referred_profiles": "Expected project scene-referred profile compensation switch.",
+		"timecode_default_base":                  "Expected project timecode default base.",
+		"transparency_grid_thumbnails":           "Expected project transparency grid thumbnail switch.",
 		"effects[]":                              "Expected effect checks.",
 		"properties[]":                           "Expected property checks.",
 		"essential_graphics[]":                   "Expected Essential Graphics controller checks.",

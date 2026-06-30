@@ -4641,6 +4641,29 @@ func TestCompileToFileChecksProjectPreferenceProfile(t *testing.T) {
 	assertProfileCheck(t, report, "expected_profile.compensate_for_scene_referred_profiles", true)
 }
 
+func TestCompileToFileChecksProjectDisplayScalarProfile(t *testing.T) {
+	rec := minimalRecipe()
+	enabled := true
+	rec.Project.TimecodeDefaultBase = intPtr(24)
+	rec.Project.TransparencyGridThumbnails = &enabled
+	rec.ExpectedProfile = recipe.ExpectedProfile{
+		CompCount:                  intPtr(1),
+		TimecodeDefaultBase:        intPtr(24),
+		TransparencyGridThumbnails: &enabled,
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	assertProfileCheck(t, report, "expected_profile.timecode_default_base", true)
+	assertProfileCheck(t, report, "expected_profile.transparency_grid_thumbnails", true)
+}
+
 func TestCompileToFileRefusesExpectedProfileMismatch(t *testing.T) {
 	rec := minimalRecipe()
 	rec.ExpectedProfile = recipe.ExpectedProfile{

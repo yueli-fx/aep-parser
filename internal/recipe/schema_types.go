@@ -24,6 +24,8 @@ type ProjectSpec struct {
 	AudioSampleRate                    *float64 `json:"audio_sample_rate,omitempty"`
 	WorkingGamma                       *float64 `json:"working_gamma,omitempty"`
 	CompensateForSceneReferredProfiles *bool    `json:"compensate_for_scene_referred_profiles,omitempty"`
+	TimecodeDefaultBase                *int     `json:"timecode_default_base,omitempty"`
+	TransparencyGridThumbnails         *bool    `json:"transparency_grid_thumbnails,omitempty"`
 }
 
 type CompSpec struct {
@@ -463,6 +465,8 @@ type ExpectedProfile struct {
 	AudioSampleRate                    *float64                    `json:"audio_sample_rate,omitempty"`
 	WorkingGamma                       *float64                    `json:"working_gamma,omitempty"`
 	CompensateForSceneReferredProfiles *bool                       `json:"compensate_for_scene_referred_profiles,omitempty"`
+	TimecodeDefaultBase                *int                        `json:"timecode_default_base,omitempty"`
+	TransparencyGridThumbnails         *bool                       `json:"transparency_grid_thumbnails,omitempty"`
 	Name                               string                      `json:"name,omitempty"`
 	Width                              *float64                    `json:"width,omitempty"`
 	Height                             *float64                    `json:"height,omitempty"`
