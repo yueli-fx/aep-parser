@@ -31,6 +31,8 @@ try {
     $latestAcceptancePath = Join-Path $OutRoot "latest_acceptance.md"
     $latestEffectivenessPath = Join-Path $OutRoot "latest_effectiveness.md"
     $latestEffectivenessJsonPath = Join-Path $OutRoot "latest_effectiveness.json"
+    $historyJsonlPath = Join-Path $OutRoot "history.jsonl"
+    $historyCsvPath = Join-Path $OutRoot "history.csv"
     $latestIndexPath = Join-Path $OutRoot "latest_index.html"
     New-Item -ItemType Directory -Force -Path $runRoot | Out-Null
 
@@ -365,6 +367,8 @@ try {
             latest_acceptance = $latestAcceptancePath
             latest_effectiveness = $latestEffectivenessPath
             latest_effectiveness_json = $latestEffectivenessJsonPath
+            history_jsonl = $historyJsonlPath
+            history_csv = $historyCsvPath
             latest_index = $latestIndexPath
         }
         corpus = [ordered]@{
@@ -687,6 +691,8 @@ try {
     [void]$index.AppendLine("<a href=""$runRel/effectiveness.json"">Effectiveness JSON</a>")
     [void]$index.AppendLine("<a href=""latest_effectiveness.md"">Latest effectiveness snapshot</a>")
     [void]$index.AppendLine("<a href=""latest_effectiveness.json"">Latest effectiveness JSON</a>")
+    [void]$index.AppendLine("<a href=""history.jsonl"">Effectiveness history JSONL</a>")
+    [void]$index.AppendLine("<a href=""history.csv"">Effectiveness history CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/projects.csv"">Projects CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/patterns.csv"">Patterns CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/errors.csv"">Errors CSV</a>")
@@ -822,6 +828,46 @@ try {
     if ($null -eq $latestEffectivenessJson.learning_signals.coverage_summary) {
         throw "latest effectiveness json missing learning_signals.coverage_summary"
     }
+    $historyEntry = [ordered]@{
+        schema_version = 1
+        generated_at_utc = [string]$effectiveness.generated_at_utc
+        run_id = $runID
+        run_root = $runRoot
+        input_path = $InputPath
+        parsed_projects = [int]$latestEffectivenessJson.corpus.parsed_projects
+        parse_errors = [int]$latestEffectivenessJson.corpus.parse_errors
+        technique_patterns = [int]$latestEffectivenessJson.corpus.technique_patterns
+        partial_error_gate_errors = [int]$latestEffectivenessJson.corpus.partial_error_gate_errors
+        partial_to_full_count_diffs = [int]$latestEffectivenessJson.corpus.partial_to_full_count_diffs
+        recipe_draft_compile_valid = [bool]$latestEffectivenessJson.closed_loop.recipe_draft_compile_valid
+        compiled_draft_reparse_passed = [bool]$latestEffectivenessJson.closed_loop.compiled_draft_reparse_passed
+        batch_requested = [int]$latestEffectivenessJson.closed_loop.batch_requested
+        batch_attempted = [int]$latestEffectivenessJson.closed_loop.batch_attempted
+        batch_passed = [int]$latestEffectivenessJson.closed_loop.batch_passed
+        study_queue_top = [int](@($latestEffectivenessJson.learning_signals.study_queue_top).Count)
+        learning_actions_top = [int](@($latestEffectivenessJson.learning_signals.learning_actions_top).Count)
+        coverage_summary = [int](@($latestEffectivenessJson.learning_signals.coverage_summary).Count)
+    }
+    $historyEntryJson = $historyEntry | ConvertTo-Json -Depth 6 -Compress
+    Add-Content -LiteralPath $historyJsonlPath -Value $historyEntryJson -Encoding UTF8
+    $historyEntryObject = [pscustomobject]$historyEntry
+    if (Test-Path -LiteralPath $historyCsvPath) {
+        $historyEntryObject | Export-Csv -LiteralPath $historyCsvPath -NoTypeInformation -Append -Encoding UTF8
+    } else {
+        $historyEntryObject | Export-Csv -LiteralPath $historyCsvPath -NoTypeInformation -Encoding UTF8
+    }
+    $latestHistoryLine = Get-Content -LiteralPath $historyJsonlPath | Select-Object -Last 1
+    if ($latestHistoryLine -notmatch '"generated_at_utc":"\d{4}-\d{2}-\d{2}T') {
+        throw "effectiveness history generated_at_utc is not ISO-8601: $latestHistoryLine"
+    }
+    if (-not (Test-Path -LiteralPath $historyJsonlPath)) {
+        throw "effectiveness history jsonl missing: $historyJsonlPath"
+    }
+    if (-not (Test-Path -LiteralPath $historyCsvPath)) {
+        throw "effectiveness history csv missing: $historyCsvPath"
+    }
+    Require-LatestIndexLink -Label "effectiveness history jsonl" -RelativePath "history.jsonl"
+    Require-LatestIndexLink -Label "effectiveness history csv" -RelativePath "history.csv"
 
     Write-Host "acceptance json: $acceptanceJsonPath"
     Write-Host "acceptance md:   $acceptanceMdPath"
