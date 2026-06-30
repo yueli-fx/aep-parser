@@ -61,6 +61,12 @@ Phase 0 export-surface audit and contract lock before extracting
   record for portrait generation and CLI mode support.
 - `technique-portrait-corpus-v1.md` — JSONL batch mode for generating facts or
   portraits across many `.aep` files.
+- `versioned-aep-migration-spec.md` — product and architecture spec for
+  explicit AE-version upgrade/downgrade assessment, conversion, diff, and loss
+  reporting.
+- `versioned-aep-migration-assess-plan.md` — first implementation plan for
+  read-only version migration assessment via `internal/aepmigrate` and
+  `cmd/aepmigrate assess`.
 - `flightdeck/knowledge/techniques/understand-a-project.md` — existing
   reference-project internalization workflow.
 - `flightdeck/knowledge/techniques/fx-techniques.md` — current technique
@@ -664,6 +670,14 @@ Current:
   acceptance gate. It runs the technique Go tests, full sample report, partial
   error report, self-compare, partial-to-full compare, and writes
   `acceptance.json` / `acceptance.md`.
+- Versioned AEP migration is now scoped as a separate product line from normal
+  recipe generation. `versioned-aep-migration-spec.md` defines assess/convert/
+  verify modes, version capability ledger semantics, and preservation/loss
+  reporting for AE2020/AE2022/AE2025 targets.
+- Versioned AEP migration assess slice is implemented as `internal/aepmigrate`
+  and `cmd/aepmigrate assess`. It detects/normalizes source and target version
+  labels, builds a stable profile, reports first-slice compatibility entries,
+  and blocks AE2025 explicit matte downgrades to AE2020/AE2022.
 - Recipe IR coverage for the current comp and layer strategy matrices is
   complete: comp settings have object-level and field-level profile checks,
   authored-layer examples carry `expected_profile.layers[]`, camera/light
