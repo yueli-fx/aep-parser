@@ -2,6 +2,7 @@ param(
     [string]$InputPath = "flightdeck\showcase",
     [string]$OutDir = "tmp\technique_showcase_report",
     [int]$Limit = 0,
+    [switch]$Verify,
     [switch]$Open
 )
 
@@ -663,6 +664,12 @@ try {
     Write-Host "learn:   $learningPath"
     Write-Host "report:  $reportPath"
     Write-Host "html:    $htmlPath"
+    if ($Verify) {
+        & pwsh -NoProfile -File (Join-Path $PSScriptRoot "verify_technique_report.ps1") -OutDir $OutDir
+        if ($LASTEXITCODE -ne 0) {
+            throw "technique report verification failed with exit code $LASTEXITCODE"
+        }
+    }
     if ($Open) {
         Invoke-Item $htmlPath
     }

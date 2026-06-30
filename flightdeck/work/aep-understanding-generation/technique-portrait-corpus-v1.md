@@ -15,6 +15,7 @@ go run ./cmd/aeptechnique -in <dir-or-file> -mode portrait -corpus -recursive -s
 go run ./cmd/aeptechnique -in <dir-or-file> -mode explain -corpus -recursive -out corpus.jsonl -summary-out summary.json
 go run ./cmd/aeptechnique -in <dir-or-file> -mode explain -corpus -recursive
 pwsh -NoProfile -File scripts\technique_showcase_report.ps1 -Limit 3
+pwsh -NoProfile -File scripts\technique_showcase_report.ps1 -Limit 3 -Verify
 pwsh -NoProfile -File scripts\technique_showcase_report.ps1 -Open
 pwsh -NoProfile -File scripts\verify_technique_report.ps1 -OutDir tmp\technique_showcase_report
 ```
@@ -78,6 +79,7 @@ It defaults to `flightdeck\showcase` and writes generated output under
 - `report.html`
 
 Passing `-Open` opens the generated HTML report after writing all files.
+Passing `-Verify` runs the artifact verifier after report generation.
 `scripts/verify_technique_report.ps1` validates that all generated artifacts
 exist, that `summary.json`, `corpus.jsonl`, and `digest.json` agree on project
 counts, and that the human reports contain the expected learning sections.
