@@ -95,6 +95,13 @@ func (b *Builder) AddProject(path string, project *aep.Project) error {
 			}
 		}
 	}
+	idx.walkProperties(func(comp *aep.Composition, layer *aep.Layer, effect *aep.Effect, effectOccurrence int, property *aep.Property, propertyOccurrence int, propertyPath string) {
+		if property.Expression == "" {
+			return
+		}
+		hit := propertyHit(HitExpression, Match{Field: "property.expression", Value: property.Expression}, comp, layer, effect, effectOccurrence, property, propertyPath)
+		b.facts = append(b.facts, expressionFact(meta.ID, hit))
+	})
 	return nil
 }
 
@@ -190,6 +197,16 @@ func effectUsageFact(projectID string, comp *aep.Composition, layer *aep.Layer, 
 		},
 		Match:   Match{Field: "effect.match_name", Value: effect.MatchName},
 		Summary: fmt.Sprintf("layer %q uses effect %q", layer.Name, effect.MatchName),
+	}
+}
+
+func expressionFact(projectID string, hit Hit) CorpusFact {
+	return CorpusFact{
+		ProjectID: projectID,
+		Kind:      FactExpression,
+		Location:  hit.Location,
+		Match:     hit.Match,
+		Summary:   fmt.Sprintf("layer %q uses expression on %q", hit.Location.LayerName, hit.Location.PropertyMatchName),
 	}
 }
 

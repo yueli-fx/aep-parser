@@ -54,6 +54,57 @@ func TestCorpusBuilderExtractsDurableLayerSourceAndEffectFacts(t *testing.T) {
 	}
 }
 
+func TestCorpusBuilderExtractsExpressionFacts(t *testing.T) {
+	position := &aep.Property{
+		MatchName:  "ADBE Position",
+		Name:       "Position",
+		Expression: "wiggle(2, 20)",
+	}
+	blurAmount := &aep.Property{
+		MatchName:  "ADBE Gaussian Blur 2-0001",
+		Name:       "Blurriness",
+		Expression: "time * 12",
+	}
+	project := &aep.Project{
+		Compositions: []*aep.Composition{
+			{ID: 7, Name: "Main", Layers: []*aep.Layer{
+				{
+					ID:         11,
+					Index:      0,
+					Name:       "Title",
+					Properties: []*aep.Property{position},
+					Effects: []*aep.Effect{
+						{MatchName: "ADBE Gaussian Blur 2", Name: "Gaussian Blur", Parameters: []*aep.Property{blurAmount}},
+					},
+				},
+			}},
+		},
+	}
+	builder := NewCorpusBuilder()
+
+	if err := builder.AddProject("samples/expressions.aep", project); err != nil {
+		t.Fatalf("AddProject: %v", err)
+	}
+	corpus, err := builder.Build()
+	if err != nil {
+		t.Fatalf("Build: %v", err)
+	}
+
+	projectID := corpus.Projects[0].ID
+	expressionFacts := factsByKind(corpus.Facts, FactExpression)
+	if len(expressionFacts) != 2 {
+		t.Fatalf("len(expressionFacts) = %d, want 2; facts=%+v", len(expressionFacts), corpus.Facts)
+	}
+	assertCorpusFact(t, expressionFacts[0], projectID, FactExpression, "property.expression", "wiggle(2, 20)", "Title")
+	if expressionFacts[0].Location.PropertyMatchName != "ADBE Position" || expressionFacts[0].Location.PropertyPath != "layers[].properties[1]" {
+		t.Fatalf("first expression location = %+v, want layer position property", expressionFacts[0].Location)
+	}
+	assertCorpusFact(t, expressionFacts[1], projectID, FactExpression, "property.expression", "time * 12", "Title")
+	if expressionFacts[1].Location.EffectMatchName != "ADBE Gaussian Blur 2" || expressionFacts[1].Location.PropertyMatchName != "ADBE Gaussian Blur 2-0001" || expressionFacts[1].Location.PropertyPath != "layers[].effects[1].params[1]" {
+		t.Fatalf("second expression location = %+v, want effect param property", expressionFacts[1].Location)
+	}
+}
+
 func TestCorpusJSONDoesNotExposeProjectPointers(t *testing.T) {
 	builder := NewCorpusBuilder()
 	if err := builder.AddProject("", &aep.Project{
@@ -111,6 +162,16 @@ func TestCorpusBuilderAllowsNilProjects(t *testing.T) {
 	if len(corpus.Facts) != 0 {
 		t.Fatalf("len(Facts) = %d, want 0", len(corpus.Facts))
 	}
+}
+
+func factsByKind(facts []CorpusFact, kind CorpusFactKind) []CorpusFact {
+	out := []CorpusFact{}
+	for _, fact := range facts {
+		if fact.Kind == kind {
+			out = append(out, fact)
+		}
+	}
+	return out
 }
 
 func assertCorpusFact(t *testing.T, got CorpusFact, projectID string, kind CorpusFactKind, field, value, layerName string) {
