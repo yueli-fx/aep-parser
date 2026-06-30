@@ -469,6 +469,7 @@ type ExpectedProfile struct {
 	CompensateForSceneReferredProfiles *bool                       `json:"compensate_for_scene_referred_profiles,omitempty"`
 	TimecodeDefaultBase                *int                        `json:"timecode_default_base,omitempty"`
 	TransparencyGridThumbnails         *bool                       `json:"transparency_grid_thumbnails,omitempty"`
+	Comps                              []ExpectedComp              `json:"comps,omitempty"`
 	Name                               string                      `json:"name,omitempty"`
 	Width                              *float64                    `json:"width,omitempty"`
 	Height                             *float64                    `json:"height,omitempty"`
@@ -496,6 +497,29 @@ type ExpectedProfile struct {
 	TextStyles                         []ExpectedTextStyle         `json:"text_styles,omitempty"`
 	Keyframes                          []ExpectedKeyframedProperty `json:"keyframes,omitempty"`
 	Masks                              []ExpectedMask              `json:"masks,omitempty"`
+}
+
+type ExpectedComp struct {
+	Name                       string                  `json:"name"`
+	Width                      *float64                `json:"width,omitempty"`
+	Height                     *float64                `json:"height,omitempty"`
+	FrameRate                  *float64                `json:"frame_rate,omitempty"`
+	Duration                   *float64                `json:"duration,omitempty"`
+	Label                      *float64                `json:"label,omitempty"`
+	Comment                    string                  `json:"comment,omitempty"`
+	MotionGraphicsTemplateName string                  `json:"motion_graphics_template_name,omitempty"`
+	BackgroundColor            []float64               `json:"background_color,omitempty"`
+	ResolutionFactor           []float64               `json:"resolution_factor,omitempty"`
+	PixelAspect                *float64                `json:"pixel_aspect,omitempty"`
+	DisplayStartTime           *float64                `json:"display_start_time,omitempty"`
+	Renderer                   string                  `json:"renderer,omitempty"`
+	Draft3D                    *bool                   `json:"draft_3d,omitempty"`
+	FrameBlending              *bool                   `json:"frame_blending,omitempty"`
+	HideShyLayers              *bool                   `json:"hide_shy_layers,omitempty"`
+	PreserveNestedFrameRate    *bool                   `json:"preserve_nested_frame_rate,omitempty"`
+	PreserveNestedResolution   *bool                   `json:"preserve_nested_resolution,omitempty"`
+	MotionBlur                 *ExpectedMotionBlurSpec `json:"motion_blur,omitempty"`
+	WorkArea                   *ExpectedWorkAreaSpec   `json:"work_area,omitempty"`
 }
 
 type ExpectedLayer struct {

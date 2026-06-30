@@ -42,6 +42,22 @@
   "expected_profile": {
     "comp_count": 2,
     "layer_count": 2,
+    "comps": [
+      {
+        "name": "Source",
+        "width": 640,
+        "height": 360,
+        "frame_rate": 24,
+        "duration": 2
+      },
+      {
+        "name": "Main",
+        "width": 1280,
+        "height": 720,
+        "frame_rate": 24,
+        "duration": 3
+      }
+    ],
     "layers": [
       {
         "name": "Source Title",

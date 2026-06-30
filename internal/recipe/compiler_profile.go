@@ -27,6 +27,7 @@ func hasExpectedProfile(expected ExpectedProfile) bool {
 		expected.CompensateForSceneReferredProfiles != nil ||
 		expected.TimecodeDefaultBase != nil ||
 		expected.TransparencyGridThumbnails != nil ||
+		len(expected.Comps) > 0 ||
 		expected.Name != "" ||
 		expected.Width != nil ||
 		expected.Height != nil ||
@@ -158,6 +159,9 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 	}
 	if expected.TransparencyGridThumbnails != nil {
 		add("expected_profile.transparency_grid_thumbnails", *expected.TransparencyGridThumbnails, prof.Meta.TransparencyGridThumbs, prof.Meta.TransparencyGridThumbs == *expected.TransparencyGridThumbnails)
+	}
+	for i, expectedComp := range expected.Comps {
+		checkExpectedComp(i, expectedComp, prof, add)
 	}
 	if expected.Name != "" {
 		actual := ""
@@ -729,6 +733,108 @@ func checkExpectedWorkArea(expected *ExpectedWorkAreaSpec, prof *profile.Profile
 	}
 }
 
+func checkExpectedComp(index int, expected ExpectedComp, prof *profile.Profile, add func(string, any, any, bool)) {
+	compPath := fmt.Sprintf("expected_profile.comps[%d]", index)
+	comp := findProfileComp(prof, expected.Name)
+	add(compPath, expected.Name, profileCompName(comp), comp != nil)
+	if comp == nil {
+		return
+	}
+	if expected.Name != "" {
+		add(compPath+".name", expected.Name, comp.Name, comp.Name == expected.Name)
+	}
+	if expected.Width != nil {
+		add(compPath+".width", *expected.Width, float64(comp.Width), float64(comp.Width) == *expected.Width)
+	}
+	if expected.Height != nil {
+		add(compPath+".height", *expected.Height, float64(comp.Height), float64(comp.Height) == *expected.Height)
+	}
+	if expected.FrameRate != nil {
+		add(compPath+".frame_rate", *expected.FrameRate, comp.FrameRate, math.Abs(comp.FrameRate-*expected.FrameRate) < 1e-6)
+	}
+	if expected.Duration != nil {
+		add(compPath+".duration", *expected.Duration, comp.Duration, math.Abs(comp.Duration-*expected.Duration) < 1e-6)
+	}
+	if expected.Label != nil {
+		add(compPath+".label", *expected.Label, float64(comp.Label), float64(comp.Label) == *expected.Label)
+	}
+	if expected.Comment != "" {
+		add(compPath+".comment", expected.Comment, comp.Comment, comp.Comment == expected.Comment)
+	}
+	if expected.MotionGraphicsTemplateName != "" {
+		add(compPath+".motion_graphics_template_name", expected.MotionGraphicsTemplateName, comp.MotionGraphicsTemplateName, comp.MotionGraphicsTemplateName == expected.MotionGraphicsTemplateName)
+	}
+	if len(expected.BackgroundColor) > 0 {
+		actual := rgbToFloatSlice(comp.BackgroundColor)
+		add(compPath+".background_color", expected.BackgroundColor, actual, profileValueEqual(expected.BackgroundColor, actual))
+	}
+	if len(expected.ResolutionFactor) > 0 {
+		actual := uint16PairToFloatSlice(comp.ResolutionFactor)
+		add(compPath+".resolution_factor", expected.ResolutionFactor, actual, profileValueEqual(expected.ResolutionFactor, actual))
+	}
+	if expected.PixelAspect != nil {
+		add(compPath+".pixel_aspect", *expected.PixelAspect, comp.PixelAspect, math.Abs(comp.PixelAspect-*expected.PixelAspect) < 1e-6)
+	}
+	if expected.DisplayStartTime != nil {
+		add(compPath+".display_start_time", *expected.DisplayStartTime, comp.DisplayStartTime, math.Abs(comp.DisplayStartTime-*expected.DisplayStartTime) < 1e-6)
+	}
+	if expected.Renderer != "" {
+		add(compPath+".renderer", expected.Renderer, comp.Renderer, comp.Renderer == expected.Renderer)
+	}
+	if expected.Draft3D != nil {
+		add(compPath+".draft_3d", *expected.Draft3D, comp.Draft3D, comp.Draft3D == *expected.Draft3D)
+	}
+	if expected.FrameBlending != nil {
+		add(compPath+".frame_blending", *expected.FrameBlending, comp.FrameBlending, comp.FrameBlending == *expected.FrameBlending)
+	}
+	if expected.HideShyLayers != nil {
+		add(compPath+".hide_shy_layers", *expected.HideShyLayers, comp.HideShyLayers, comp.HideShyLayers == *expected.HideShyLayers)
+	}
+	if expected.PreserveNestedFrameRate != nil {
+		add(compPath+".preserve_nested_frame_rate", *expected.PreserveNestedFrameRate, comp.PreserveNestedFrameRate, comp.PreserveNestedFrameRate == *expected.PreserveNestedFrameRate)
+	}
+	if expected.PreserveNestedResolution != nil {
+		add(compPath+".preserve_nested_resolution", *expected.PreserveNestedResolution, comp.PreserveNestedResolution, comp.PreserveNestedResolution == *expected.PreserveNestedResolution)
+	}
+	if expected.MotionBlur != nil {
+		checkExpectedCompMotionBlur(compPath+".motion_blur", expected.MotionBlur, comp.MotionBlur, add)
+	}
+	if expected.WorkArea != nil {
+		checkExpectedCompWorkArea(compPath+".work_area", expected.WorkArea, comp.WorkArea, add)
+	}
+}
+
+func checkExpectedCompMotionBlur(path string, expected *ExpectedMotionBlurSpec, actual profile.MotionBlurSettings, add func(string, any, any, bool)) {
+	if expected.Enabled != nil {
+		add(path+".enabled", *expected.Enabled, actual.Enabled, actual.Enabled == *expected.Enabled)
+	}
+	if expected.ShutterAngle != nil {
+		got := float64(actual.ShutterAngle)
+		add(path+".shutter_angle", *expected.ShutterAngle, got, got == *expected.ShutterAngle)
+	}
+	if expected.ShutterPhase != nil {
+		got := float64(actual.ShutterPhase)
+		add(path+".shutter_phase", *expected.ShutterPhase, got, got == *expected.ShutterPhase)
+	}
+	if expected.AdaptiveSampleLimit != nil {
+		got := float64(actual.AdaptiveSampleLimit)
+		add(path+".adaptive_sample_limit", *expected.AdaptiveSampleLimit, got, got == *expected.AdaptiveSampleLimit)
+	}
+	if expected.SamplesPerFrame != nil {
+		got := float64(actual.SamplesPerFrame)
+		add(path+".samples_per_frame", *expected.SamplesPerFrame, got, got == *expected.SamplesPerFrame)
+	}
+}
+
+func checkExpectedCompWorkArea(path string, expected *ExpectedWorkAreaSpec, actual profile.WorkArea, add func(string, any, any, bool)) {
+	if expected.Start != nil {
+		add(path+".start", *expected.Start, actual.Start, math.Abs(actual.Start-*expected.Start) < 1e-6)
+	}
+	if expected.End != nil {
+		add(path+".end", *expected.End, actual.End, math.Abs(actual.End-*expected.End) < 1e-6)
+	}
+}
+
 func countProfileLayers(prof *profile.Profile, include func(profile.Layer) bool) int {
 	var count int
 	for _, comp := range prof.Comps {
@@ -739,6 +845,15 @@ func countProfileLayers(prof *profile.Profile, include func(profile.Layer) bool)
 		}
 	}
 	return count
+}
+
+func findProfileComp(prof *profile.Profile, compName string) *profile.Composition {
+	for i := range prof.Comps {
+		if prof.Comps[i].Name == compName {
+			return &prof.Comps[i]
+		}
+	}
+	return nil
 }
 
 func findProfileEffect(prof *profile.Profile, layerName, matchName string) *profile.Effect {
@@ -912,6 +1027,13 @@ func profileLayerName(layer *profile.Layer) any {
 		return nil
 	}
 	return layer.Name
+}
+
+func profileCompName(comp *profile.Composition) any {
+	if comp == nil {
+		return nil
+	}
+	return comp.Name
 }
 
 func profileMaskName(mask *profile.Mask) any {

@@ -83,6 +83,19 @@ func TestCompileToFileSupportsMultipleCompsAndPrecompLayer(t *testing.T) {
 	rec.ExpectedProfile = recipe.ExpectedProfile{
 		CompCount:  intPtr(2),
 		LayerCount: intPtr(2),
+		Comps: []recipe.ExpectedComp{{
+			Name:      "Source",
+			Width:     ptr(640),
+			Height:    ptr(360),
+			FrameRate: ptr(24),
+			Duration:  ptr(2),
+		}, {
+			Name:      "Main",
+			Width:     ptr(1280),
+			Height:    ptr(720),
+			FrameRate: ptr(24),
+			Duration:  ptr(3),
+		}},
 		Layers: []recipe.ExpectedLayer{{
 			Name:       "Nested",
 			Type:       "av",
@@ -111,6 +124,8 @@ func TestCompileToFileSupportsMultipleCompsAndPrecompLayer(t *testing.T) {
 	if prof.Fingerprint.CompCount != 2 {
 		t.Fatalf("CompCount = %d, want 2", prof.Fingerprint.CompCount)
 	}
+	assertProfileCheck(t, report, "expected_profile.comps[0].width", true)
+	assertProfileCheck(t, report, "expected_profile.comps[1].duration", true)
 	layer := findProfileLayer(t, prof, "Nested")
 	if layer.SourceRef == nil || layer.SourceRef.Name != "Source" || layer.SourceRef.Kind != "composition" {
 		t.Fatalf("SourceRef = %+v, want Source composition", layer.SourceRef)

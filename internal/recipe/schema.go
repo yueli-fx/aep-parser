@@ -307,6 +307,9 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 			addRefusal("invalid_expected_profile", "expected_profile.timecode_default_base", err.Error())
 		}
 	}
+	for i, comp := range expected.Comps {
+		validateExpectedComp(comp, fmt.Sprintf("expected_profile.comps[%d]", i), addRefusal)
+	}
 	if expected.Label != nil {
 		validateCompLabel(*expected.Label, "expected_profile.label", addRefusal)
 	}
@@ -540,5 +543,71 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 				addRefusal("invalid_expected_profile", kfPath+".vertex_count", "vertex_count must be non-negative")
 			}
 		}
+	}
+}
+
+func validateExpectedComp(comp ExpectedComp, path string, addRefusal func(string, string, string)) {
+	if comp.Name == "" {
+		addRefusal("invalid_expected_profile", path+".name", "comp name is required")
+	}
+	if comp.Width != nil && (*comp.Width <= 0 || !isWholeNumber(*comp.Width)) {
+		addRefusal("invalid_expected_profile", path+".width", "width must be a positive integer")
+	}
+	if comp.Height != nil && (*comp.Height <= 0 || !isWholeNumber(*comp.Height)) {
+		addRefusal("invalid_expected_profile", path+".height", "height must be a positive integer")
+	}
+	if comp.FrameRate != nil && *comp.FrameRate <= 0 {
+		addRefusal("invalid_expected_profile", path+".frame_rate", "frame_rate must be positive")
+	}
+	if comp.Duration != nil && *comp.Duration <= 0 {
+		addRefusal("invalid_expected_profile", path+".duration", "duration must be positive")
+	}
+	if comp.Label != nil {
+		validateCompLabel(*comp.Label, path+".label", addRefusal)
+	}
+	if len(comp.BackgroundColor) > 0 {
+		validateRGBColor(comp.BackgroundColor, path+".background_color", "invalid_expected_profile", addRefusal)
+	}
+	if len(comp.ResolutionFactor) > 0 {
+		validateResolutionFactor(comp.ResolutionFactor, path+".resolution_factor", addRefusal)
+	}
+	if comp.PixelAspect != nil {
+		validatePixelAspect(*comp.PixelAspect, path+".pixel_aspect", addRefusal)
+	}
+	if comp.DisplayStartTime != nil {
+		validateDisplayStartTime(*comp.DisplayStartTime, path+".display_start_time", addRefusal)
+	}
+	if comp.MotionBlur != nil {
+		validateExpectedMotionBlur(comp.MotionBlur, path+".motion_blur", addRefusal)
+	}
+	if comp.WorkArea != nil {
+		validateExpectedWorkArea(comp.WorkArea, path+".work_area", addRefusal)
+	}
+}
+
+func validateExpectedMotionBlur(spec *ExpectedMotionBlurSpec, path string, addRefusal func(string, string, string)) {
+	if spec.ShutterAngle != nil && (*spec.ShutterAngle < 0 || *spec.ShutterAngle > 720 || !isWholeNumber(*spec.ShutterAngle)) {
+		addRefusal("invalid_expected_profile", path+".shutter_angle", "motion_blur shutter_angle must be an integer between 0 and 720")
+	}
+	if spec.ShutterPhase != nil && !isWholeNumber(*spec.ShutterPhase) {
+		addRefusal("invalid_expected_profile", path+".shutter_phase", "motion_blur shutter_phase must be an integer")
+	}
+	if spec.AdaptiveSampleLimit != nil && (*spec.AdaptiveSampleLimit < 0 || !isWholeNumber(*spec.AdaptiveSampleLimit)) {
+		addRefusal("invalid_expected_profile", path+".adaptive_sample_limit", "motion_blur adaptive_sample_limit must be a non-negative integer")
+	}
+	if spec.SamplesPerFrame != nil && (*spec.SamplesPerFrame < 0 || !isWholeNumber(*spec.SamplesPerFrame)) {
+		addRefusal("invalid_expected_profile", path+".samples_per_frame", "motion_blur samples_per_frame must be a non-negative integer")
+	}
+}
+
+func validateExpectedWorkArea(spec *ExpectedWorkAreaSpec, path string, addRefusal func(string, string, string)) {
+	if spec.Start != nil && *spec.Start < 0 {
+		addRefusal("invalid_expected_profile", path+".start", "work_area start must be non-negative")
+	}
+	if spec.End != nil && *spec.End < 0 {
+		addRefusal("invalid_expected_profile", path+".end", "work_area end must be non-negative")
+	}
+	if spec.Start != nil && spec.End != nil && *spec.End < *spec.Start {
+		addRefusal("invalid_expected_profile", path+".end", "work_area end must be greater than or equal to start")
 	}
 }

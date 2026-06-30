@@ -69,6 +69,23 @@ func TestValidateRejectsUnknownPrecompSource(t *testing.T) {
 	assertRefusal(t, report, "unknown_precomp_source")
 }
 
+func TestValidateRejectsInvalidExpectedComp(t *testing.T) {
+	rec := minimalRecipe()
+	rec.ExpectedProfile = recipe.ExpectedProfile{
+		Comps: []recipe.ExpectedComp{{
+			Name:  "Main",
+			Width: ptr(0),
+		}},
+	}
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_expected_profile")
+}
+
 func TestValidateReportsProjectBitsPerChannelCapability(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Project.BitsPerChannel = "16"

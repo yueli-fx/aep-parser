@@ -622,6 +622,7 @@ This reference is generated from the canonical recipe field model.
 | `expected_profile.compensate_for_scene_referred_profiles` | `boolean` | - | Expected project scene-referred profile compensation switch. | - | - | examples/recipes/minimal-project-preferences.json |
 | `expected_profile.timecode_default_base` | `number` | - | Expected project timecode default base. | Expected project timecode default base must be an integer between 1 and 999. | - | examples/recipes/minimal-project-display-settings.json |
 | `expected_profile.transparency_grid_thumbnails` | `boolean` | - | Expected project transparency grid thumbnail switch. | - | - | examples/recipes/minimal-project-display-settings.json |
+| `expected_profile.comps[]` | `array<recipe.ExpectedComp>` | - | Expected composition object checks. | - | - | examples/recipes/minimal-precomp-layer.json |
 | `expected_profile.name` | `string` | - | Expected composition display name. | - | - | examples/recipes/minimal-comp-object-profile.json |
 | `expected_profile.width` | `number` | - | Expected composition width in pixels. | Expected width must be a positive integer. | - | examples/recipes/minimal-comp-object-profile.json |
 | `expected_profile.height` | `number` | - | Expected composition height in pixels. | Expected height must be a positive integer. | - | examples/recipes/minimal-comp-object-profile.json |
@@ -650,10 +651,40 @@ This reference is generated from the canonical recipe field model.
 | `expected_profile.keyframes[]` | `array<recipe.ExpectedKeyframedProperty>` | - | Expected keyframes for a layer property. | - | - | examples/recipes/minimal-transform-keyframes.json |
 | `expected_profile.masks[]` | `array<recipe.ExpectedMask>` | - | Expected mask checks. | - | - | examples/recipes/minimal-layer-mask.json |
 
+## ExpectedComp
+
+| Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
+| --- | --- | --- | --- | --- | --- | --- |
+| `expected_profile.comps[].name` | `string` | structural | Expected composition display name. | - | - | examples/recipes/minimal-precomp-layer.json |
+| `expected_profile.comps[].width` | `number` | - | Expected composition width in pixels. | - | - | examples/recipes/minimal-precomp-layer.json |
+| `expected_profile.comps[].height` | `number` | - | Expected composition height in pixels. | - | - | examples/recipes/minimal-precomp-layer.json |
+| `expected_profile.comps[].frame_rate` | `number` | - | Expected composition frame rate in frames per second. | - | - | examples/recipes/minimal-precomp-layer.json |
+| `expected_profile.comps[].duration` | `number` | - | Expected composition duration in seconds. | - | - | examples/recipes/minimal-precomp-layer.json |
+| `expected_profile.comps[].label` | `number` | - | Expected composition label color index. | - | - | - |
+| `expected_profile.comps[].comment` | `string` | - | Expected composition comment text. | - | - | - |
+| `expected_profile.comps[].motion_graphics_template_name` | `string` | - | Expected composition Motion Graphics template name. | - | - | - |
+| `expected_profile.comps[].background_color` | `array<float64>` | - | Expected composition background color as RGB channels. | - | - | - |
+| `expected_profile.comps[].resolution_factor` | `array<float64>` | - | Expected composition preview resolution factor. | - | - | - |
+| `expected_profile.comps[].pixel_aspect` | `number` | - | Expected composition pixel aspect ratio. | - | - | - |
+| `expected_profile.comps[].display_start_time` | `number` | - | Expected composition display start time in seconds. | - | - | - |
+| `expected_profile.comps[].renderer` | `string` | - | Expected composition renderer identifier. | - | - | - |
+| `expected_profile.comps[].draft_3d` | `boolean` | - | Expected composition draft 3D switch. | - | - | - |
+| `expected_profile.comps[].frame_blending` | `boolean` | - | Expected composition frame blending switch. | - | - | - |
+| `expected_profile.comps[].hide_shy_layers` | `boolean` | - | Expected composition shy layer visibility switch. | - | - | - |
+| `expected_profile.comps[].preserve_nested_frame_rate` | `boolean` | - | Expected composition nested frame-rate preservation switch. | - | - | - |
+| `expected_profile.comps[].preserve_nested_resolution` | `boolean` | - | Expected composition nested resolution preservation switch. | - | - | - |
+| `expected_profile.comps[].motion_blur` | `object<ExpectedMotionBlurSpec>` | - | Expected composition motion blur settings. | - | - | - |
+| `expected_profile.comps[].work_area` | `object<ExpectedWorkAreaSpec>` | - | Expected composition work area range. | - | - | - |
+
 ## ExpectedMotionBlurSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
+| `expected_profile.comps[].motion_blur.enabled` | `boolean` | - | Expected composition motion blur enable switch. | - | - | - |
+| `expected_profile.comps[].motion_blur.shutter_angle` | `number` | - | Expected composition motion blur shutter angle. | - | - | - |
+| `expected_profile.comps[].motion_blur.shutter_phase` | `number` | - | Expected composition motion blur shutter phase. | - | - | - |
+| `expected_profile.comps[].motion_blur.adaptive_sample_limit` | `number` | - | Expected composition motion blur adaptive sample limit. | - | - | - |
+| `expected_profile.comps[].motion_blur.samples_per_frame` | `number` | - | Expected composition motion blur samples per frame. | - | - | - |
 | `expected_profile.motion_blur.enabled` | `boolean` | - | Expected composition motion blur enable switch. | - | - | examples/recipes/minimal-comp-flag-profile.json |
 | `expected_profile.motion_blur.shutter_angle` | `number` | - | Expected composition motion blur shutter angle. | - | - | examples/recipes/minimal-comp-motion-blur.json |
 | `expected_profile.motion_blur.shutter_phase` | `number` | - | Expected composition motion blur shutter phase. | - | - | examples/recipes/minimal-comp-motion-blur.json |
@@ -664,6 +695,8 @@ This reference is generated from the canonical recipe field model.
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
+| `expected_profile.comps[].work_area.start` | `number` | - | Expected composition work area start time in seconds. | - | - | - |
+| `expected_profile.comps[].work_area.end` | `number` | - | Expected composition work area end time in seconds. | - | - | - |
 | `expected_profile.work_area.start` | `number` | - | Expected composition work area start time in seconds. | - | - | examples/recipes/minimal-comp-object-profile.json |
 | `expected_profile.work_area.end` | `number` | - | Expected composition work area end time in seconds. | - | - | examples/recipes/minimal-comp-object-profile.json |
 

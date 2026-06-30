@@ -410,6 +410,34 @@
     "expected_profile.compensate_for_scene_referred_profiles",
     "expected_profile.timecode_default_base",
     "expected_profile.transparency_grid_thumbnails",
+    "expected_profile.comps[]",
+    "expected_profile.comps[].name",
+    "expected_profile.comps[].width",
+    "expected_profile.comps[].height",
+    "expected_profile.comps[].frame_rate",
+    "expected_profile.comps[].duration",
+    "expected_profile.comps[].label",
+    "expected_profile.comps[].comment",
+    "expected_profile.comps[].motion_graphics_template_name",
+    "expected_profile.comps[].background_color",
+    "expected_profile.comps[].resolution_factor",
+    "expected_profile.comps[].pixel_aspect",
+    "expected_profile.comps[].display_start_time",
+    "expected_profile.comps[].renderer",
+    "expected_profile.comps[].draft_3d",
+    "expected_profile.comps[].frame_blending",
+    "expected_profile.comps[].hide_shy_layers",
+    "expected_profile.comps[].preserve_nested_frame_rate",
+    "expected_profile.comps[].preserve_nested_resolution",
+    "expected_profile.comps[].motion_blur",
+    "expected_profile.comps[].motion_blur.enabled",
+    "expected_profile.comps[].motion_blur.shutter_angle",
+    "expected_profile.comps[].motion_blur.shutter_phase",
+    "expected_profile.comps[].motion_blur.adaptive_sample_limit",
+    "expected_profile.comps[].motion_blur.samples_per_frame",
+    "expected_profile.comps[].work_area",
+    "expected_profile.comps[].work_area.start",
+    "expected_profile.comps[].work_area.end",
     "expected_profile.name",
     "expected_profile.width",
     "expected_profile.height",
@@ -5382,6 +5410,267 @@
       "summary": "Expected project scene-referred profile compensation switch.",
       "example": "examples/recipes/minimal-project-preferences.json"
     },
+    "expected_profile.comps[]": {
+      "path": "expected_profile.comps[]",
+      "json_name": "comps",
+      "source_type": "ExpectedProfile",
+      "source_field": "Comps",
+      "type": "array\u003crecipe.ExpectedComp\u003e",
+      "go_type": "[]recipe.ExpectedComp",
+      "summary": "Expected composition object checks.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
+    },
+    "expected_profile.comps[].background_color": {
+      "path": "expected_profile.comps[].background_color",
+      "json_name": "background_color",
+      "source_type": "ExpectedComp",
+      "source_field": "BackgroundColor",
+      "type": "array\u003cfloat64\u003e",
+      "go_type": "[]float64",
+      "summary": "Expected composition background color as RGB channels."
+    },
+    "expected_profile.comps[].comment": {
+      "path": "expected_profile.comps[].comment",
+      "json_name": "comment",
+      "source_type": "ExpectedComp",
+      "source_field": "Comment",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Expected composition comment text."
+    },
+    "expected_profile.comps[].display_start_time": {
+      "path": "expected_profile.comps[].display_start_time",
+      "json_name": "display_start_time",
+      "source_type": "ExpectedComp",
+      "source_field": "DisplayStartTime",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Expected composition display start time in seconds."
+    },
+    "expected_profile.comps[].draft_3d": {
+      "path": "expected_profile.comps[].draft_3d",
+      "json_name": "draft_3d",
+      "source_type": "ExpectedComp",
+      "source_field": "Draft3D",
+      "type": "boolean",
+      "go_type": "*bool",
+      "summary": "Expected composition draft 3D switch."
+    },
+    "expected_profile.comps[].duration": {
+      "path": "expected_profile.comps[].duration",
+      "json_name": "duration",
+      "source_type": "ExpectedComp",
+      "source_field": "Duration",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Expected composition duration in seconds.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
+    },
+    "expected_profile.comps[].frame_blending": {
+      "path": "expected_profile.comps[].frame_blending",
+      "json_name": "frame_blending",
+      "source_type": "ExpectedComp",
+      "source_field": "FrameBlending",
+      "type": "boolean",
+      "go_type": "*bool",
+      "summary": "Expected composition frame blending switch."
+    },
+    "expected_profile.comps[].frame_rate": {
+      "path": "expected_profile.comps[].frame_rate",
+      "json_name": "frame_rate",
+      "source_type": "ExpectedComp",
+      "source_field": "FrameRate",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Expected composition frame rate in frames per second.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
+    },
+    "expected_profile.comps[].height": {
+      "path": "expected_profile.comps[].height",
+      "json_name": "height",
+      "source_type": "ExpectedComp",
+      "source_field": "Height",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Expected composition height in pixels.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
+    },
+    "expected_profile.comps[].hide_shy_layers": {
+      "path": "expected_profile.comps[].hide_shy_layers",
+      "json_name": "hide_shy_layers",
+      "source_type": "ExpectedComp",
+      "source_field": "HideShyLayers",
+      "type": "boolean",
+      "go_type": "*bool",
+      "summary": "Expected composition shy layer visibility switch."
+    },
+    "expected_profile.comps[].label": {
+      "path": "expected_profile.comps[].label",
+      "json_name": "label",
+      "source_type": "ExpectedComp",
+      "source_field": "Label",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Expected composition label color index."
+    },
+    "expected_profile.comps[].motion_blur": {
+      "path": "expected_profile.comps[].motion_blur",
+      "json_name": "motion_blur",
+      "source_type": "ExpectedComp",
+      "source_field": "MotionBlur",
+      "type": "object\u003cExpectedMotionBlurSpec\u003e",
+      "go_type": "*recipe.ExpectedMotionBlurSpec",
+      "summary": "Expected composition motion blur settings."
+    },
+    "expected_profile.comps[].motion_blur.adaptive_sample_limit": {
+      "path": "expected_profile.comps[].motion_blur.adaptive_sample_limit",
+      "json_name": "adaptive_sample_limit",
+      "source_type": "ExpectedMotionBlurSpec",
+      "source_field": "AdaptiveSampleLimit",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Expected composition motion blur adaptive sample limit."
+    },
+    "expected_profile.comps[].motion_blur.enabled": {
+      "path": "expected_profile.comps[].motion_blur.enabled",
+      "json_name": "enabled",
+      "source_type": "ExpectedMotionBlurSpec",
+      "source_field": "Enabled",
+      "type": "boolean",
+      "go_type": "*bool",
+      "summary": "Expected composition motion blur enable switch."
+    },
+    "expected_profile.comps[].motion_blur.samples_per_frame": {
+      "path": "expected_profile.comps[].motion_blur.samples_per_frame",
+      "json_name": "samples_per_frame",
+      "source_type": "ExpectedMotionBlurSpec",
+      "source_field": "SamplesPerFrame",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Expected composition motion blur samples per frame."
+    },
+    "expected_profile.comps[].motion_blur.shutter_angle": {
+      "path": "expected_profile.comps[].motion_blur.shutter_angle",
+      "json_name": "shutter_angle",
+      "source_type": "ExpectedMotionBlurSpec",
+      "source_field": "ShutterAngle",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Expected composition motion blur shutter angle."
+    },
+    "expected_profile.comps[].motion_blur.shutter_phase": {
+      "path": "expected_profile.comps[].motion_blur.shutter_phase",
+      "json_name": "shutter_phase",
+      "source_type": "ExpectedMotionBlurSpec",
+      "source_field": "ShutterPhase",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Expected composition motion blur shutter phase."
+    },
+    "expected_profile.comps[].motion_graphics_template_name": {
+      "path": "expected_profile.comps[].motion_graphics_template_name",
+      "json_name": "motion_graphics_template_name",
+      "source_type": "ExpectedComp",
+      "source_field": "MotionGraphicsTemplateName",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Expected composition Motion Graphics template name."
+    },
+    "expected_profile.comps[].name": {
+      "path": "expected_profile.comps[].name",
+      "json_name": "name",
+      "source_type": "ExpectedComp",
+      "source_field": "Name",
+      "type": "string",
+      "go_type": "string",
+      "requiredness": [
+        "structural"
+      ],
+      "summary": "Expected composition display name.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
+    },
+    "expected_profile.comps[].pixel_aspect": {
+      "path": "expected_profile.comps[].pixel_aspect",
+      "json_name": "pixel_aspect",
+      "source_type": "ExpectedComp",
+      "source_field": "PixelAspect",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Expected composition pixel aspect ratio."
+    },
+    "expected_profile.comps[].preserve_nested_frame_rate": {
+      "path": "expected_profile.comps[].preserve_nested_frame_rate",
+      "json_name": "preserve_nested_frame_rate",
+      "source_type": "ExpectedComp",
+      "source_field": "PreserveNestedFrameRate",
+      "type": "boolean",
+      "go_type": "*bool",
+      "summary": "Expected composition nested frame-rate preservation switch."
+    },
+    "expected_profile.comps[].preserve_nested_resolution": {
+      "path": "expected_profile.comps[].preserve_nested_resolution",
+      "json_name": "preserve_nested_resolution",
+      "source_type": "ExpectedComp",
+      "source_field": "PreserveNestedResolution",
+      "type": "boolean",
+      "go_type": "*bool",
+      "summary": "Expected composition nested resolution preservation switch."
+    },
+    "expected_profile.comps[].renderer": {
+      "path": "expected_profile.comps[].renderer",
+      "json_name": "renderer",
+      "source_type": "ExpectedComp",
+      "source_field": "Renderer",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Expected composition renderer identifier."
+    },
+    "expected_profile.comps[].resolution_factor": {
+      "path": "expected_profile.comps[].resolution_factor",
+      "json_name": "resolution_factor",
+      "source_type": "ExpectedComp",
+      "source_field": "ResolutionFactor",
+      "type": "array\u003cfloat64\u003e",
+      "go_type": "[]float64",
+      "summary": "Expected composition preview resolution factor."
+    },
+    "expected_profile.comps[].width": {
+      "path": "expected_profile.comps[].width",
+      "json_name": "width",
+      "source_type": "ExpectedComp",
+      "source_field": "Width",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Expected composition width in pixels.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
+    },
+    "expected_profile.comps[].work_area": {
+      "path": "expected_profile.comps[].work_area",
+      "json_name": "work_area",
+      "source_type": "ExpectedComp",
+      "source_field": "WorkArea",
+      "type": "object\u003cExpectedWorkAreaSpec\u003e",
+      "go_type": "*recipe.ExpectedWorkAreaSpec",
+      "summary": "Expected composition work area range."
+    },
+    "expected_profile.comps[].work_area.end": {
+      "path": "expected_profile.comps[].work_area.end",
+      "json_name": "end",
+      "source_type": "ExpectedWorkAreaSpec",
+      "source_field": "End",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Expected composition work area end time in seconds."
+    },
+    "expected_profile.comps[].work_area.start": {
+      "path": "expected_profile.comps[].work_area.start",
+      "json_name": "start",
+      "source_type": "ExpectedWorkAreaSpec",
+      "source_field": "Start",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Expected composition work area start time in seconds."
+    },
     "expected_profile.display_start_time": {
       "path": "expected_profile.display_start_time",
       "json_name": "display_start_time",
@@ -7494,6 +7783,28 @@
     "EssentialGraphicsSpec": [
       "comps[].layers[].effects[].params[].essential_graphics.name"
     ],
+    "ExpectedComp": [
+      "expected_profile.comps[].name",
+      "expected_profile.comps[].width",
+      "expected_profile.comps[].height",
+      "expected_profile.comps[].frame_rate",
+      "expected_profile.comps[].duration",
+      "expected_profile.comps[].label",
+      "expected_profile.comps[].comment",
+      "expected_profile.comps[].motion_graphics_template_name",
+      "expected_profile.comps[].background_color",
+      "expected_profile.comps[].resolution_factor",
+      "expected_profile.comps[].pixel_aspect",
+      "expected_profile.comps[].display_start_time",
+      "expected_profile.comps[].renderer",
+      "expected_profile.comps[].draft_3d",
+      "expected_profile.comps[].frame_blending",
+      "expected_profile.comps[].hide_shy_layers",
+      "expected_profile.comps[].preserve_nested_frame_rate",
+      "expected_profile.comps[].preserve_nested_resolution",
+      "expected_profile.comps[].motion_blur",
+      "expected_profile.comps[].work_area"
+    ],
     "ExpectedEGController": [
       "expected_profile.essential_graphics[].name",
       "expected_profile.essential_graphics[].type"
@@ -7584,6 +7895,11 @@
       "expected_profile.masks[].path_keyframes[].vertex_count"
     ],
     "ExpectedMotionBlurSpec": [
+      "expected_profile.comps[].motion_blur.enabled",
+      "expected_profile.comps[].motion_blur.shutter_angle",
+      "expected_profile.comps[].motion_blur.shutter_phase",
+      "expected_profile.comps[].motion_blur.adaptive_sample_limit",
+      "expected_profile.comps[].motion_blur.samples_per_frame",
       "expected_profile.motion_blur.enabled",
       "expected_profile.motion_blur.shutter_angle",
       "expected_profile.motion_blur.shutter_phase",
@@ -7609,6 +7925,7 @@
       "expected_profile.compensate_for_scene_referred_profiles",
       "expected_profile.timecode_default_base",
       "expected_profile.transparency_grid_thumbnails",
+      "expected_profile.comps[]",
       "expected_profile.name",
       "expected_profile.width",
       "expected_profile.height",
@@ -7681,6 +7998,8 @@
       "expected_profile.text_styles[].paragraph_direction"
     ],
     "ExpectedWorkAreaSpec": [
+      "expected_profile.comps[].work_area.start",
+      "expected_profile.comps[].work_area.end",
       "expected_profile.work_area.start",
       "expected_profile.work_area.end"
     ],
