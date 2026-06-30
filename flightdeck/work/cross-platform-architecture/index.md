@@ -741,6 +741,7 @@ Capability response should include:
 - [x] Move report compare and recipe draft smoke orchestration into Go.
 - [x] Move technique report validation into Go.
 - [x] Add Go selfhost run finalizer entrypoint.
+- [x] Move `aepselfhost verify` orchestration into Go and reduce PS selfhost verify to a wrapper.
 - [ ] Move selfhost verification gate from PowerShell to Go.
 - [ ] Define AE host adapter.
 - [ ] Add cross-platform build gate.

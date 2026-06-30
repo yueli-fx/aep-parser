@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -149,6 +150,29 @@ func TestRunVerifyDryRunUsesGoGate(t *testing.T) {
 	} {
 		if !strings.Contains(out, want) {
 			t.Fatalf("stdout missing %q:\n%s", want, out)
+		}
+	}
+}
+
+func TestRunVerifyUsesGoOrchestration(t *testing.T) {
+	root := t.TempDir()
+	platform := testPlatform()
+	verifyRunner := &fakeVerifyRunner{t: t}
+	platform.Runner = verifyRunner
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"verify", "-out-root", root, "-limit", "1"}, &stdout, &stderr, platform)
+
+	if code != 0 {
+		t.Fatalf("run verify = %d, stderr=%s stdout=%s", code, stderr.String(), stdout.String())
+	}
+	if _, err := os.Stat(filepath.Join(root, "latest_outcome.json")); err != nil {
+		t.Fatalf("latest_outcome.json missing: %v", err)
+	}
+	for _, cmd := range verifyRunner.commands {
+		joined := strings.Join(append([]string{cmd.Name}, cmd.Args...), " ")
+		if strings.Contains(joined, "verify_technique_selfhost.ps1") {
+			t.Fatalf("verify should not call selfhost PS script: %s", joined)
 		}
 	}
 }
@@ -423,6 +447,48 @@ func (r fakeRecipeSmokeRunner) Start(context.Context, host.Command) (host.Proces
 	return nil, nil
 }
 
+type fakeVerifyRunner struct {
+	t        *testing.T
+	commands []host.Command
+}
+
+func (r *fakeVerifyRunner) Run(_ context.Context, cmd host.Command) host.Result {
+	r.commands = append(r.commands, cmd)
+	joined := strings.Join(append([]string{cmd.Name}, cmd.Args...), " ")
+	switch {
+	case strings.Contains(joined, "go test"):
+	case strings.Contains(joined, "technique_showcase_report.ps1"):
+		outDir := argAfter(cmd.Args, "-OutDir")
+		if outDir == "" {
+			r.t.Fatalf("technique report command missing -OutDir: %+v", cmd.Args)
+		}
+		writeVerifyReportFixture(r.t, outDir, strings.Contains(outDir, "partial_report"))
+	case strings.Contains(joined, "./cmd/aeprecipe validate"):
+		writeCommandOutput(r.t, cmd.Stdout, `{"valid":true}`+"\n")
+	case strings.Contains(joined, "./cmd/aeprecipe compile"):
+		writeCommandOutput(r.t, cmd.Stdout, `{"valid":true}`+"\n")
+		outPath := argAfter(cmd.Args, "-out")
+		if outPath == "" {
+			r.t.Fatalf("compile command missing -out: %+v", cmd.Args)
+		}
+		writeFile(r.t, outPath, "fake aep")
+	case strings.Contains(joined, "./cmd/aeptechnique"):
+		outPath := argAfter(cmd.Args, "-out")
+		if outPath == "" {
+			r.t.Fatalf("technique command missing -out: %+v", cmd.Args)
+		}
+		writeFile(r.t, outPath, `{"summary":{"comp_count":1,"layer_count":0}}`+"\n")
+	default:
+		r.t.Fatalf("unexpected verify command: %s", joined)
+	}
+	return host.Result{ExitCode: 0}
+}
+
+func (r *fakeVerifyRunner) Start(context.Context, host.Command) (host.Process, error) {
+	r.t.Fatalf("Start should not be called")
+	return nil, nil
+}
+
 type fakeProcess struct {
 	pid int
 }
@@ -455,4 +521,33 @@ func argAfter(args []string, name string) string {
 		}
 	}
 	return ""
+}
+
+func writeVerifyReportFixture(t *testing.T, outDir string, partial bool) {
+	t.Helper()
+	errorCount := 0
+	patternCount := 1
+	if partial {
+		errorCount = 1
+		patternCount = 1
+	}
+	writeFile(t, filepath.Join(outDir, "summary.json"), fmt.Sprintf(`{"project_count":1,"error_count":%d,"totals":{"comp_count":1,"layer_count":1,"effect_count":1,"shape_operator_count":1,"text_animator_count":0,"dependency_count":1}}`, errorCount))
+	writeFile(t, filepath.Join(outDir, "digest.json"), fmt.Sprintf(`{"project_count":1,"patterns":[{"id":"shape","recreation_steps":[{"id":"structure"}]}],"pattern_count":%d}`, patternCount))
+	writeFile(t, filepath.Join(outDir, "manifest.json"), fmt.Sprintf(`{"project_count":1,"error_count":%d,"pattern_count":%d,"git":{"commit":"abc"},"artifacts":["summary.json","digest.json","manifest.json","projects.csv","recipe_drafts.jsonl","report.html","report.md","learning.md"]}`, errorCount, patternCount))
+	writeFile(t, filepath.Join(outDir, "corpus.jsonl"), `{"path":"demo.aep","explanation":{"recreation_steps":[{"id":"structure"}]}}`+"\n")
+	writeFile(t, filepath.Join(outDir, "recipe_drafts.jsonl"), `{"project_path":"demo.aep","readiness":"analysis_ready","counts":{},"recipe":{"schema_version":1,"project":{},"comps":[{"name":"Main"}],"expected_profile":{"comp_count":1}},"gaps":[{"id":"layers"}]}`+"\n")
+	writeFile(t, filepath.Join(outDir, "reconstruction_blueprints.jsonl"), `{"project_path":"demo.aep","readiness":"analysis_ready","counts":{},"phases":[{"id":"create_compositions"},{"id":"create_layers"},{"id":"apply_mechanisms"},{"id":"wire_dependencies"},{"id":"verify_recreation"}]}`+"\n")
+	writeFile(t, filepath.Join(outDir, "learning.md"), "## Pattern Playbook\n## Study Queue\nrecreation steps\n## Plugin Risk Queue\n## Readiness Queue\n")
+	writeFile(t, filepath.Join(outDir, "report.md"), "## Pattern Representatives\n## Study Queue\nStep 1:\n")
+	writeFile(t, filepath.Join(outDir, "report.html"), "Technique Corpus Report Step 1: manifest.json learning.md projects.csv")
+	writeCSVFile(t, filepath.Join(outDir, "projects.csv"), "project_path,readiness,readiness_blockers\n"+"demo.aep,analysis_ready,\n")
+	writeCSVFile(t, filepath.Join(outDir, "study_queue.csv"), "rank,path,readiness,study_score\n1,demo.aep,analysis_ready,10\n")
+	writeCSVFile(t, filepath.Join(outDir, "learning_actions.csv"), "priority,pattern,count,action,representative_project\n100,shape,1,study,demo.aep\n")
+	writeCSVFile(t, filepath.Join(outDir, "coverage_scorecard.csv"), "artifact,metric,expected_count,actual_count,status,notes\nprojects.csv,rows,1,1,ok,\n")
+	writeCSVFile(t, filepath.Join(outDir, "recreation_blockers.csv"), "project_path,readiness,blocker_type,blocker,action\n")
+}
+
+func writeCSVFile(t *testing.T, path, text string) {
+	t.Helper()
+	writeFile(t, path, text)
 }

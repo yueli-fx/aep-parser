@@ -237,16 +237,18 @@ func runStartWatch(args []string, stdout, stderr io.Writer, platform host.Platfo
 }
 
 type verifyOptions struct {
-	OutRoot string
-	Limit   int
-	Open    bool
-	DryRun  bool
+	InputPath string
+	OutRoot   string
+	Limit     int
+	Open      bool
+	DryRun    bool
 }
 
 func parseVerifyOptions(name string, args []string, stderr io.Writer) (verifyOptions, bool) {
 	fs := flag.NewFlagSet(name, flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	opts := verifyOptions{}
+	fs.StringVar(&opts.InputPath, "input", filepath.Join("data", "samples"), "input corpus path")
 	fs.StringVar(&opts.OutRoot, "out-root", filepath.Join("tmp", "technique_selfhost_gate"), "selfhost output root")
 	fs.IntVar(&opts.Limit, "limit", 0, "optional sample limit")
 	fs.BoolVar(&opts.Open, "open", false, "open the generated outcome page")
@@ -258,16 +260,125 @@ func parseVerifyOptions(name string, args []string, stderr io.Writer) (verifyOpt
 }
 
 func verifySelfhost(opts verifyOptions, stdout, stderr io.Writer, platform host.Platform) int {
-	args := psVerifyArgs(opts)
 	if opts.DryRun {
 		fmt.Fprint(stdout, selfhost.FormatVerifyDryRun(selfhost.VerifyOptions{
-			OutRoot: opts.OutRoot,
-			Limit:   opts.Limit,
-			Open:    opts.Open,
+			OutRoot:   opts.OutRoot,
+			InputPath: opts.InputPath,
+			Limit:     opts.Limit,
+			Open:      opts.Open,
 		}))
 		return 0
 	}
-	return runCommand(stdout, stderr, platform, "pwsh", args...)
+	runID := time.Now().UTC().Format("20060102T150405Z")
+	runRoot := filepath.Join(opts.OutRoot, runID)
+	fullReportDir := filepath.Join(runRoot, "full_report")
+	partialInputDir := filepath.Join(runRoot, "partial_input")
+	partialReportDir := filepath.Join(runRoot, "partial_report")
+	compareSelfDir := filepath.Join(runRoot, "compare_self")
+	comparePartialDir := filepath.Join(runRoot, "compare_partial_to_full")
+	if err := os.MkdirAll(runRoot, 0o755); err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+
+	runStep := func(name string, fn func() error) bool {
+		start := time.Now()
+		err := fn()
+		seconds := time.Since(start).Seconds()
+		if err != nil {
+			fmt.Fprintf(stderr, "%s failed after %.2fs: %v\n", name, seconds, err)
+			return false
+		}
+		fmt.Fprintf(stdout, "%s: exit=0 seconds=%.2f\n", name, seconds)
+		return true
+	}
+	runExternal := func(name string, args ...string) bool {
+		return runStep(name, func() error {
+			result := platform.Runner.Run(context.Background(), host.Command{
+				Name:   args[0],
+				Args:   args[1:],
+				Stdout: stdout,
+				Stderr: stderr,
+			})
+			if result.ExitCode != 0 {
+				return fmt.Errorf("exit code %d", result.ExitCode)
+			}
+			return nil
+		})
+	}
+
+	if !runExternal("go technique tests", "go", "test", "./cmd/aeptechnique", "./internal/technique", "-count=1") {
+		return 1
+	}
+	inputPath := resolveRepoPath(opts.InputPath)
+	reportScript := resolveRepoPath(filepath.Join("scripts", "technique_showcase_report.ps1"))
+	reportArgs := []string{"-NoProfile", "-File", reportScript, "-InputPath", inputPath, "-OutDir", fullReportDir, "-Verify"}
+	if opts.Limit > 0 {
+		reportArgs = append(reportArgs, "-Limit", strconv.Itoa(opts.Limit))
+	}
+	if !runExternal("full technique report", append([]string{"pwsh"}, reportArgs...)...) {
+		return 1
+	}
+	if err := os.MkdirAll(partialInputDir, 0o755); err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	if err := copyFile(resolveRepoPath(filepath.Join("flightdeck", "showcase", "text", "text.aep")), filepath.Join(partialInputDir, "good.aep")); err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	if err := os.WriteFile(filepath.Join(partialInputDir, "bad.aep"), []byte("not an aep"), 0o644); err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	if !runExternal("partial-error technique report", "pwsh", "-NoProfile", "-File", reportScript, "-InputPath", partialInputDir, "-OutDir", partialReportDir, "-Verify") {
+		return 1
+	}
+	if !runStep("self compare", func() error {
+		_, err := selfhost.CompareReports(selfhost.CompareOptions{BaseDir: fullReportDir, NewDir: fullReportDir, OutDir: compareSelfDir})
+		return err
+	}) {
+		return 1
+	}
+	if !runStep("partial-to-full compare", func() error {
+		_, err := selfhost.CompareReports(selfhost.CompareOptions{BaseDir: partialReportDir, NewDir: fullReportDir, OutDir: comparePartialDir, Top: 5})
+		return err
+	}) {
+		return 1
+	}
+	if !runStep("recipe draft smoke", func() error {
+		_, err := selfhost.RunRecipeDraftSmoke(context.Background(), selfhost.RecipeDraftSmokeOptions{
+			DraftsPath: filepath.Join(fullReportDir, "recipe_drafts.jsonl"),
+			CompileDir: filepath.Join(runRoot, "recipe_draft_compile"),
+			ReparseDir: filepath.Join(runRoot, "recipe_draft_reparse"),
+			BatchDir:   filepath.Join(runRoot, "recipe_draft_batch"),
+			BatchLimit: 3,
+			Runner:     platform.Runner,
+			WorkingDir: ".",
+		})
+		return err
+	}) {
+		return 1
+	}
+	if !runStep("finalize selfhost run", func() error {
+		_, err := selfhost.FinalizeSelfhostRun(context.Background(), selfhost.FinalizeOptions{
+			OutRoot:   opts.OutRoot,
+			RunRoot:   runRoot,
+			RunID:     runID,
+			InputPath: inputPath,
+		})
+		return err
+	}) {
+		return 1
+	}
+	fmt.Fprintf(stdout, "latest index:    %s\n", filepath.Join(opts.OutRoot, "latest_index.html"))
+	fmt.Fprintf(stdout, "latest outcome:  %s\n", filepath.Join(opts.OutRoot, "latest_outcome.md"))
+	if opts.Open {
+		if err := platform.BrowserOpener.Open(context.Background(), filepath.Join(opts.OutRoot, "latest_outcome.html")); err != nil {
+			fmt.Fprintf(stderr, "open outcome: %v\n", err)
+		}
+	}
+	return 0
 }
 
 type watchOptions struct {
@@ -472,17 +583,6 @@ func startWatch(opts watchOptions, stdout, stderr io.Writer, platform host.Platf
 	return 0
 }
 
-func psVerifyArgs(opts verifyOptions) []string {
-	args := []string{"-NoProfile", "-File", filepath.Join("scripts", "verify_technique_selfhost.ps1"), "-OutRoot", opts.OutRoot}
-	if opts.Limit > 0 {
-		args = append(args, "-Limit", strconv.Itoa(opts.Limit))
-	}
-	if opts.Open {
-		args = append(args, "-Open")
-	}
-	return args
-}
-
 func verifyCLIArgs(opts watchOptions, open bool) []string {
 	args := []string{"verify", "-out-root", opts.OutRoot}
 	if opts.Limit > 0 {
@@ -557,6 +657,28 @@ func mustGetwd() string {
 		return "."
 	}
 	return wd
+}
+
+func copyFile(src, dst string) error {
+	data, err := os.ReadFile(src)
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
+		return err
+	}
+	return os.WriteFile(dst, data, 0o644)
+}
+
+func resolveRepoPath(path string) string {
+	if _, err := os.Stat(path); err == nil {
+		return path
+	}
+	parentPath := filepath.Join("..", "..", path)
+	if _, err := os.Stat(parentPath); err == nil {
+		return parentPath
+	}
+	return path
 }
 
 type outcomeFile struct {
