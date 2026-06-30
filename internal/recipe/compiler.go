@@ -8,6 +8,7 @@ import (
 
 	"github.com/yueli-fx/aep-parser/internal/aep"
 	"github.com/yueli-fx/aep-parser/internal/profile"
+	"github.com/yueli-fx/aep-parser/internal/projectindex"
 )
 
 func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, error) {
@@ -88,20 +89,16 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 			return report, fmt.Errorf("recipe: comp %q work_area: %w", compSpec.Name, err)
 		}
 	}
-	layersByName := map[string]*aep.Layer{}
 	for _, layerSpec := range compSpec.Layers {
-		layer, err := compileLayer(comp, layerSpec, compSpec)
-		if err != nil {
+		if _, err := compileLayer(comp, layerSpec, compSpec); err != nil {
 			return report, err
 		}
-		if layerSpec.Name != "" {
-			layersByName[layerSpec.Name] = layer
-		}
 	}
-	if err := applyLayerParents(compSpec, layersByName); err != nil {
+	idx := projectindex.Build(project)
+	if err := applyLayerParents(compSpec, idx); err != nil {
 		return report, err
 	}
-	if err := applyLightSources(compSpec, layersByName); err != nil {
+	if err := applyLightSources(compSpec, idx); err != nil {
 		return report, err
 	}
 	if hasMasks(compSpec) {

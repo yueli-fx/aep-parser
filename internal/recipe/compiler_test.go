@@ -1581,6 +1581,59 @@ func TestCompileToFileSetsLayerParent(t *testing.T) {
 	}
 }
 
+func TestCompileToFileLayerParentDuplicateNamesKeepsLastMatchSemantics(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers = []recipe.Layer{
+		{
+			Type: "text",
+			Name: "Parent",
+			Text: "First",
+			Transform: recipe.Transform{
+				Position: []float64{960, 480},
+			},
+		},
+		{
+			Type: "text",
+			Name: "Parent",
+			Text: "Second",
+			Transform: recipe.Transform{
+				Position: []float64{960, 520},
+			},
+		},
+		{
+			Type:   "text",
+			Name:   "Child",
+			Text:   "Child",
+			Parent: "Parent",
+			Transform: recipe.Transform{
+				Position: []float64{960, 560},
+			},
+		},
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	gotFirstParent := project.Compositions[0].Layers[0]
+	gotSecondParent := project.Compositions[0].Layers[1]
+	gotChild := project.Compositions[0].Layers[2]
+	if gotChild.ParentID == gotFirstParent.ID {
+		t.Fatalf("child ParentID = first duplicate parent ID %d, want last duplicate parent ID %d", gotFirstParent.ID, gotSecondParent.ID)
+	}
+	if gotChild.ParentID != gotSecondParent.ID {
+		t.Fatalf("child ParentID = %d, want last duplicate parent ID %d", gotChild.ParentID, gotSecondParent.ID)
+	}
+}
+
 func TestCompileToFileChecksLayerParentProfileExample(t *testing.T) {
 	raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "recipes", "minimal-layer-parent.json"))
 	if err != nil {

@@ -206,14 +206,23 @@ stay resident at once.
 - [x] Promoted indexing/search into a dedicated work package.
 - [x] Decided the index is external and snapshot-based, not persistent inside
       `Project`.
-- [ ] Implement `internal/projectindex` first slice.
-- [ ] Integrate one recipe lookup hotspot.
+- [x] Implement `internal/projectindex` first slice.
+  - [x] Project item ID lookup with deterministic first-match semantics.
+  - [x] Layer inverted lookups by layer ID, name, source ID, and effect match
+        name.
+  - [x] Build/query benchmarks for the first slice.
+- [x] Integrate one recipe lookup hotspot.
+  - [x] Parent/light source layer-name resolution now goes through
+        `projectindex`, while preserving recipe's old duplicate-name
+        last-match behavior.
 - [ ] Integrate one profile/diff lookup hotspot.
 - [ ] Design single-project search result schema.
 - [ ] Design corpus-level learning/search index.
 
 ## Verification
 
-Current planning slice:
+Current first implementation slice:
 
+- `go test ./internal/projectindex -count=1`
+- `go test ./internal/recipe -run 'TestCompileToFile(Set|LayerParent|ChecksLayerParent|LightSource)' -count=1`
 - `git diff --check` (CRLF warnings only)

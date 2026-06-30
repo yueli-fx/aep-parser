@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/yueli-fx/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/projectindex"
 )
 
 func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) (*aep.Layer, error) {
@@ -352,13 +353,13 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) (*aep.La
 	return layer, nil
 }
 
-func applyLayerParents(compSpec CompSpec, layersByName map[string]*aep.Layer) error {
+func applyLayerParents(compSpec CompSpec, idx *projectindex.Index) error {
 	for _, layerSpec := range compSpec.Layers {
 		if layerSpec.Parent == "" {
 			continue
 		}
-		layer := layersByName[layerSpec.Name]
-		parent := layersByName[layerSpec.Parent]
+		layer := recipeLayerByName(idx, layerSpec.Name)
+		parent := recipeLayerByName(idx, layerSpec.Parent)
 		if layer == nil || parent == nil {
 			return fmt.Errorf("recipe: layer %q parent %q not found", layerSpec.Name, layerSpec.Parent)
 		}
@@ -369,13 +370,13 @@ func applyLayerParents(compSpec CompSpec, layersByName map[string]*aep.Layer) er
 	return nil
 }
 
-func applyLightSources(compSpec CompSpec, layersByName map[string]*aep.Layer) error {
+func applyLightSources(compSpec CompSpec, idx *projectindex.Index) error {
 	for _, layerSpec := range compSpec.Layers {
 		if layerSpec.Light == nil || layerSpec.Light.SourceLayer == "" {
 			continue
 		}
-		layer := layersByName[layerSpec.Name]
-		target := layersByName[layerSpec.Light.SourceLayer]
+		layer := recipeLayerByName(idx, layerSpec.Name)
+		target := recipeLayerByName(idx, layerSpec.Light.SourceLayer)
 		if layer == nil || target == nil {
 			return fmt.Errorf("recipe: layer %q light.source_layer %q not found", layerSpec.Name, layerSpec.Light.SourceLayer)
 		}
@@ -384,6 +385,14 @@ func applyLightSources(compSpec CompSpec, layersByName map[string]*aep.Layer) er
 		}
 	}
 	return nil
+}
+
+func recipeLayerByName(idx *projectindex.Index, name string) *aep.Layer {
+	layers := idx.LayersByName(name)
+	if len(layers) == 0 {
+		return nil
+	}
+	return layers[len(layers)-1]
 }
 
 func applyTextStyle(layer *aep.Layer, spec TextStyleSpec) error {
