@@ -93,7 +93,7 @@ type ConvertOptions struct {
   - Write `opts.OutputPath`.
   - Set `report.Target.Path`.
 
-- [ ] Run:
+- [x] Run:
 
 ```powershell
 go test ./internal/aepmigrate -run TestConvert -count=1
