@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "rules": [
+    {
+      "id": "layer-explicit-matte-source",
+      "path": "comps[].layers[].matte_ref",
+      "kind": "source_contract_boundary",
+      "capability_key": "layer.set_track_matte_source",
+      "source_versions": [
+        "AE2025"
+      ],
+      "target_support": {
+        "AE2020": "blocked",
+        "AE2021": "blocked",
+        "AE2022": "blocked",
+        "AE2023": "blocked",
+        "AE2024": "blocked",
+        "AE2025": "preserved"
+      },
+      "blocked_reason": "Explicit matte source requires AE2025 in the current writer contract.",
+      "preserved_reason": "Explicit matte source is preserved for AE2025 targets."
+    }
+  ]
+}

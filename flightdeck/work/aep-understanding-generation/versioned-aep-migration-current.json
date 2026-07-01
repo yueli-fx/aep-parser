@@ -5,7 +5,8 @@
   "goal": "Continue versioned AEP migration validation using JSON truth sources and batched matrix runs.",
   "truth_sources": {
     "current": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json",
-    "coverage": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json"
+    "coverage": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json",
+    "capability_ledger": "internal/aepmigrate/version_capability_ledger.json"
   },
   "frozen_markdown": [
     {

@@ -7,5 +7,6 @@ func isExplicitMatteRef(layer profile.Layer) bool {
 }
 
 func supportsExplicitMatteTarget(target VersionLabel) bool {
-	return target == VersionAE2025
+	rule, ok := DefaultCapabilityLedger().RuleByID("layer-explicit-matte-source")
+	return ok && rule.TargetSupport[target] == CapabilityPreserved
 }

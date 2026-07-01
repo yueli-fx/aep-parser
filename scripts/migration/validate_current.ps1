@@ -34,6 +34,9 @@ $current = Get-Content -Raw $CurrentPath | ConvertFrom-Json
 
 Assert-PathExists "truth_sources.current" $current.truth_sources.current
 Assert-PathExists "truth_sources.coverage" $current.truth_sources.coverage
+if ($current.truth_sources.capability_ledger) {
+  Assert-PathExists "truth_sources.capability_ledger" $current.truth_sources.capability_ledger
+}
 
 $coverage = Get-Content -Raw $current.truth_sources.coverage | ConvertFrom-Json
 $coverageIds = @($coverage.coverage | ForEach-Object { $_.id })
