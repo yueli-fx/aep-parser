@@ -1990,3 +1990,72 @@ Commit:
 ```text
 docs(aepmigrate): record camera six-writer evidence
 ```
+
+---
+
+## Task 45: Light PD-6x6 Writer Matrix Evidence
+
+**Goal:** Upgrade current recipe-owned light layer, light option, and light
+source writer coverage from latest full `PD-1x6` boundary evidence to focused
+W2020-W2025 source-and-target evidence.
+
+**Architecture:** Reuse the matrix runner without AE-open. Run every current
+`minimal-light-*.json` recipe across `-sources all -targets all`. Record the
+result as light `PD-6x6` evidence inside the camera-light domain; do not
+broaden AE host-open claims beyond the existing `minimal-light-object-profile`
+representative.
+
+**Files:**
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/aep-understanding-generation/index.md`
+- Modify: `flightdeck/work/aep-understanding-generation/history.md`
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+- Modify: `flightdeck/cockpit.md`
+
+- [x] **Step 1: Run the light all-writer matrix**
+
+Run:
+
+```powershell
+$recipes = Get-ChildItem examples\recipes\minimal-light-*.json | ForEach-Object { @('-recipe', $_.FullName) }
+go run ./cmd/aepmigrate matrix @recipes `
+  -sources all `
+  -targets all `
+  -out tmp\migration_matrix_light_all_6x6 `
+  -ledger-out tmp\migration_matrix_light_all_6x6\ledger.md
+```
+
+Expected: 504 total, 504 pass, 0 blocked, 0 failed, 0 skipped. This is
+14 recipes x 6 source writers x 6 target writers.
+
+- [x] **Step 2: Update reviewed validation summary**
+
+If Step 1 passes, update the Other Domains camera-light row to cite focused
+light `PD-6x6` evidence alongside focused camera evidence and the existing
+host-open representatives. Add `tmp/migration_matrix_light_all_6x6/matrix.json`
+and its ledger to raw artifacts. Update `index.md`, `cockpit.md`, and append
+`history.md`.
+
+- [x] **Step 3: Verification and commit**
+
+Run:
+
+```powershell
+pwsh -File scripts\migration\verify_matrix.ps1
+go test ./...
+go vet ./...
+git diff --check
+```
+
+Read:
+
+```powershell
+Get-Content C:\Users\yl\.flightdeck\knowledge\git\commits.md -Raw
+Get-Content flightdeck\knowledge\workflow\verify.md -Raw
+```
+
+Commit:
+
+```text
+docs(aepmigrate): record light six-writer evidence
+```

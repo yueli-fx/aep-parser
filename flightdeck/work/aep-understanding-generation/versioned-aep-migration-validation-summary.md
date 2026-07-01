@@ -34,6 +34,7 @@ which AE versions are validated." The current reviewed answer is:
 - Shape gradient stroke migration has `PD-6x6` and `OPEN-ALL-HOSTS` evidence for the current recipe-owned gradient stroke surface: base gradient stroke, alpha stops, radial highlight, and stroke style.
 - Structural representatives for project, comp, camera, light, and precomp have `PD-6x6` plus `OPEN-ALL-HOSTS` evidence.
 - Camera migration has `PD-6x6` evidence for every current recipe-owned camera layer and camera option fixture.
+- Light migration has `PD-6x6` evidence for every current recipe-owned light layer, option, and light-source fixture.
 - Native writer targets now exist for W2020-W2025. The narrow writer-target matrix for `minimal-comp-object-profile` is 6 total, 6 pass.
 - Latest full no-AE matrix boundary is 846 total, 840 pass, 0 blocked, 0 failed, 6 source-contract skipped. It covers W2020 source into W2020-W2025 targets.
 - There are no remaining blocked or failed cases in the current W2020-source full no-AE matrix. The only skipped family is AE2025 explicit matte outside the AE2025 source contract. Other migrated domains are covered by the latest full no-AE matrix boundary, but many do not yet have per-capability host-version ledgers.
@@ -98,7 +99,7 @@ which AE versions are validated." The current reviewed answer is:
 | comp | Implemented for stable comp settings, work area, renderer, metadata | representative `PD-6x6` for `minimal-comp-object-profile` | `OPEN-ALL-HOSTS` for `minimal-comp-object-profile` |
 | layer | Implemented for default layer creation, switches, refs, timing, parent/source refs, supported matte slices, and supported mask slices | latest full `PD-1x6` boundary plus focused matte/mask matrices | representative checks only |
 | shape | Implemented for supported parametric graphic/filter shape slices, gradient fill slices, and gradient stroke slices | latest full `PD-1x6` boundary plus focused gradient-stroke matrix | representative checks only |
-| camera-light | Implemented for supported camera/light options and light source refs | camera `PD-6x6` for all 15 current `minimal-camera-*` recipes; light representative `PD-6x6` for `minimal-light-object-profile` | `OPEN-ALL-HOSTS` for `minimal-camera-object-profile` and `minimal-light-object-profile` |
+| camera-light | Implemented for supported camera/light options and light source refs | camera `PD-6x6` for all 15 current `minimal-camera-*` recipes; light `PD-6x6` for all 14 current `minimal-light-*` recipes | `OPEN-ALL-HOSTS` for `minimal-camera-object-profile` and `minimal-light-object-profile` |
 | precomp | Implemented for precomp refs/layers | representative `PD-6x6` for `minimal-precomp-layer` | `OPEN-ALL-HOSTS` for `minimal-precomp-layer` |
 
 ## Current Remaining Source-Contract Skips
@@ -134,6 +135,7 @@ Reviewed raw artifacts currently known:
 - `tmp/migration_matrix_structural_all_hosts/matrix.json`: 30 total, 30 pass, 0 blocked, 0 failed, 0 skipped. This is W2020 source into W2020 target with AE-open on H2020-H2025 for `minimal-project-display-settings`, `minimal-comp-object-profile`, `minimal-camera-object-profile`, `minimal-light-object-profile`, and `minimal-precomp-layer`.
 - `tmp/migration_matrix_structural_representatives_all_6x6/matrix.json`: 180 total, 180 pass, 0 blocked, 0 failed, 0 skipped. This is W2020-W2025 source writers into W2020-W2025 target writers for structural representatives `minimal-project-display-settings`, `minimal-comp-object-profile`, `minimal-camera-object-profile`, `minimal-light-object-profile`, and `minimal-precomp-layer`.
 - `tmp/migration_matrix_camera_all_6x6/matrix.json`: 540 total, 540 pass, 0 blocked, 0 failed, 0 skipped. This is W2020-W2025 source writers into W2020-W2025 target writers for all 15 current `minimal-camera-*` recipes.
+- `tmp/migration_matrix_light_all_6x6/matrix.json`: 504 total, 504 pass, 0 blocked, 0 failed, 0 skipped. This is W2020-W2025 source writers into W2020-W2025 target writers for all 14 current `minimal-light-*` recipes.
 - `tmp/migration_matrix_layer_matte/matrix.json`: 6 total, 4 pass, 2 intentionally blocked, 0 failed, 0 skipped. This is recipe-source focused matte coverage: classic track matte passes W2020/W2022/W2025 targets; AE2025 explicit matte passes W2025 and is intentionally blocked for W2020/W2022 targets.
 - `tmp/migration_matrix_layer_track_matte_all_6x6/matrix.json`: 36 total, 31 pass, 5 blocked, 0 failed, 0 skipped. This is the current all-writer boundary for `minimal-layer-track-matte`; only AE2025 source into W2020-W2024 targets is blocked by the explicit matte source contract.
 - `tmp/migration_matrix_layer_mask/matrix.json`: 3 total, 3 pass, 0 blocked, 0 failed, 0 skipped. This is W2020 source into W2020/W2022/W2025 targets for the current recipe-owned layer mask surface.
@@ -165,6 +167,7 @@ Reviewed raw artifacts currently known:
   - `tmp/migration_matrix_structural_all_hosts/ledger.md`: generated from the structural all-host representative matrix; 5 recipe rows, each with H2020-H2025 evidence.
   - `tmp/migration_matrix_structural_representatives_all_6x6/ledger.md`: generated from the structural representative 6x6 writer matrix; 5 recipe rows, each with W2020-W2025 source and target evidence.
   - `tmp/migration_matrix_camera_all_6x6/ledger.md`: generated from the camera 6x6 writer matrix; 15 recipe rows, each with W2020-W2025 source and target evidence.
+  - `tmp/migration_matrix_light_all_6x6/ledger.md`: generated from the light 6x6 writer matrix; 14 recipe rows, each with W2020-W2025 source and target evidence.
   - `tmp/migration_matrix_shape_gradient_stroke_all_hosts/ledger.md`: generated from the all-host gradient-stroke matrix; 4 recipe rows, each with H2020-H2025 evidence.
 
 ## Immediate Missing Evidence
