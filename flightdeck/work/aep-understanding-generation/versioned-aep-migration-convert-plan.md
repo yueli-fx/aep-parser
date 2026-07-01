@@ -339,6 +339,12 @@ git diff --check
     `minimal-camera-object-profile.json`, `minimal-light-object-profile.json`,
     and `minimal-light-source.json` pass AE2025 open gate with
     `ae_open_status: "pass"` / `ae_open_exit_code: 0`.
+  - Text layer object-profile reconstruction now applies markers-locked and
+    auto-orient in the switch surface. `minimal-layer-object-profile.json`
+    passes AE2020/AE2022/AE2025 matrix conversion with
+    `profile_diff_status: "pass"` and `profile_diff_count: 0`; the fixture
+    passes AE2025 open gate with `ae_open_status: "pass"` /
+    `ae_open_exit_code: 0`.
 
 - [x] Update `flightdeck/work/aep-understanding-generation/index.md` and `flightdeck/cockpit.md` to state:
   - `assess` is available;

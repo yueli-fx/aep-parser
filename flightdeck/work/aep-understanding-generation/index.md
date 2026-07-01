@@ -103,6 +103,9 @@ Current:
   open smokes passing. Light source refs are resolved after same-comp layer
   reconstruction, and solid transform materialization now preserves source
   profile Position when present.
+- Text layer object-profile reconstruction now includes markers-locked and
+  auto-orient in the switch surface; `minimal-layer-object-profile.json` passes
+  AE2020/AE2022/AE2025 matrix conversion and AE2025 open smoke.
 - Continue versioned migration by expanding supported conversion surface or
   deciding whether native AE2021/AE2023/AE2024 writer templates are worth
   adding.

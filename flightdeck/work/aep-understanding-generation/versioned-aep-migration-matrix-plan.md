@@ -76,7 +76,7 @@
 - `go run ./cmd/aepmigrate matrix -recipes examples\recipes -sources AE2020 -targets AE2020,AE2022,AE2025 -out tmp\migration_matrix_smoke_all`
   - Result after layer metadata, text-layer switch, text-layer advanced
     switch, text-parent, solid-backed null-controller, and camera/light static
-    option/light-source convert slices: 423 total, 288 pass, 135 blocked, 0 failed,
+    option/light-source/layer-object convert slices: 423 total, 291 pass, 132 blocked, 0 failed,
     0 skipped; command exits 1 because intentional blocked cases remain.
 - `go run ./cmd/aepmigrate matrix -recipes examples\recipes -sources AE2020 -targets AE2020,AE2022,AE2025 -out tmp\migration_matrix_guard_all_ae -ae-root E:\adobe -ae-open`
   - Result: refused before launching AE: `AE open matrix would run 423 cases, above limit 25`.
