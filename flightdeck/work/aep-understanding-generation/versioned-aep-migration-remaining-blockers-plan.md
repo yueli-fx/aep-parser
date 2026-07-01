@@ -683,3 +683,83 @@ Use:
 ```text
 docs(aepmigrate): define host-open validation policy
 ```
+
+---
+
+## Task 24: Matrix Ledger-Out Flag TDD
+
+- [x] **Step 1: Add failing CLI test for `matrix -ledger-out`**
+
+Add a focused test in `cmd/aepmigrate/main_test.go` that runs:
+
+```powershell
+aepmigrate matrix -recipe minimal.json -sources AE2020 -targets AE2020 -out matrix -ledger-out matrix\ledger.md
+```
+
+and asserts:
+
+- `matrix.json` exists,
+- `ledger.md` exists,
+- stdout contains both `migration matrix:` and `migration ledger:`,
+- the ledger contains the recipe row.
+
+- [x] **Step 2: Run the red test**
+
+```powershell
+go test ./cmd/aepmigrate -run TestRunMatrixWritesLedgerOut -count=1
+```
+
+Expected: fail because `-ledger-out` is not defined.
+
+## Task 25: Matrix Ledger-Out Implementation
+
+- [x] **Step 1: Implement `-ledger-out` on `aepmigrate matrix`**
+
+Add an optional `-ledger-out` flag to `runMatrix`. After `RunMatrix` returns,
+build a ledger from the returned report, set its source to the matrix JSON path,
+write the Markdown file, and print `migration ledger: <path>`.
+
+- [x] **Step 2: Run focused green tests**
+
+```powershell
+go test ./cmd/aepmigrate -run "TestRun(MatrixWritesLedgerOut|LedgerWritesMarkdown)" -count=1
+go test ./internal/aepmigrate -run "Test(Build|Render)MatrixLedger" -count=1
+```
+
+## Task 26: Recurring Matrix Command Ledger and Commit Gate
+
+- [x] **Step 1: Run recurring full no-AE matrix command with ledger output**
+
+```powershell
+go run ./cmd/aepmigrate matrix -recipes examples\recipes -sources AE2020 -targets AE2020,AE2022,AE2025 -out tmp\migration_matrix_smoke_all -ledger-out tmp\migration_matrix_smoke_all\ledger.md
+```
+
+Actual result: command exited 1 because intentional blockers remain, and wrote
+both `matrix.json` and `ledger.md`. Summary: 423 total, 420 pass, 3 blocked, 0
+failed, 0 skipped.
+
+- [x] **Step 2: Update validation plan, summary, index, and history**
+
+Record the recurring command form and keep the reviewed summary as the source
+of truth.
+
+- [x] **Step 3: Run full verification**
+
+```powershell
+go test ./...
+go vet ./...
+git diff --check
+```
+
+- [x] **Step 4: Read commit/verify knowledge and commit**
+
+```powershell
+Get-Content C:\Users\yl\.flightdeck\knowledge\git\commits.md -Raw
+Get-Content flightdeck\knowledge\workflow\verify.md -Raw
+```
+
+Use:
+
+```text
+feat(aepmigrate): write matrix ledgers during runs
+```

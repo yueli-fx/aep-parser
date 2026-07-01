@@ -121,6 +121,7 @@ func runMatrix(args []string, stdout, stderr io.Writer, host aehost.Host) int {
 	sourcesRaw := fs.String("sources", "", "comma-separated source writer versions, or recipe")
 	targetsRaw := fs.String("targets", "", "comma-separated target writer versions")
 	outRoot := fs.String("out", "", "matrix output root")
+	ledgerOut := fs.String("ledger-out", "", "optional Markdown coverage ledger output path")
 	aeRoot := fs.String("ae-root", "", "After Effects install root for host discovery")
 	var aeHosts aeHostFlag
 	fs.Var(&aeHosts, "ae", "AE host mapping like AE2025=E:\\adobe\\Adobe After Effects 2025\\Support Files\\AfterFX.exe; may be repeated")
@@ -156,6 +157,16 @@ func runMatrix(args []string, stdout, stderr io.Writer, host aehost.Host) int {
 	}
 	reportPath := filepath.Join(*outRoot, "matrix.json")
 	fmt.Fprintf(stdout, "migration matrix: %s\n", reportPath)
+	if *ledgerOut != "" {
+		ledger := aepmigrate.BuildMatrixLedger(report)
+		ledger.Source = reportPath
+		markdown := aepmigrate.RenderMatrixLedgerMarkdown(ledger)
+		if err := os.WriteFile(*ledgerOut, []byte(markdown), 0o644); err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		fmt.Fprintf(stdout, "migration ledger: %s\n", *ledgerOut)
+	}
 	fmt.Fprintf(stdout, "matrix summary: total=%d pass=%d blocked=%d failed=%d skipped=%d\n",
 		report.Summary.Total,
 		report.Summary.Passed,

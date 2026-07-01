@@ -85,10 +85,10 @@ go run ./cmd/aepmigrate matrix `
   -max-ae-open-cases 6
 ```
 
-Full no-AE migration boundary:
+Full no-AE migration boundary with generated coverage ledger:
 
 ```powershell
-go run ./cmd/aepmigrate matrix -recipes examples\recipes -sources AE2020 -targets AE2020,AE2022,AE2025 -out tmp\migration_matrix_smoke_all
+go run ./cmd/aepmigrate matrix -recipes examples\recipes -sources AE2020 -targets AE2020,AE2022,AE2025 -out tmp\migration_matrix_smoke_all -ledger-out tmp\migration_matrix_smoke_all\ledger.md
 ```
 
 Do not run a broad AE-open matrix without an explicit case count decision.

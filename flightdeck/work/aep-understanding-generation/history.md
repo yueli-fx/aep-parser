@@ -820,3 +820,8 @@ Current:
   full variant evidence: `tmp/migration_matrix_shape_gradient_stroke_all_hosts`
   is 24 total, 24 pass, 0 blocked, 0 failed, 0 skipped for the four current
   gradient-stroke recipes opened on H2020-H2025.
+- `aepmigrate matrix` now accepts `-ledger-out`, so the recurring full no-AE
+  boundary command writes both `matrix.json` and `ledger.md` in one run:
+  `tmp/migration_matrix_smoke_all` remains 423 total, 420 pass, 3 intentionally
+  blocked, 0 failed, 0 skipped, and the generated ledger contains 141 recipe
+  rows grouped by inferred domain.

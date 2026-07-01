@@ -162,6 +162,44 @@ func TestRunMatrixWritesAggregateReport(t *testing.T) {
 	}
 }
 
+func TestRunMatrixWritesLedgerOut(t *testing.T) {
+	root := t.TempDir()
+	recipePath := filepath.Join(root, "minimal.json")
+	writeMinimalMatrixRecipe(t, recipePath)
+	outRoot := filepath.Join(root, "matrix")
+	ledgerPath := filepath.Join(outRoot, "ledger.md")
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{
+		"matrix",
+		"-recipe", recipePath,
+		"-sources", "AE2020",
+		"-targets", "AE2020",
+		"-out", outRoot,
+		"-ledger-out", ledgerPath,
+	}, &stdout, &stderr)
+
+	if code != 0 {
+		t.Fatalf("run matrix = %d, stderr=%s", code, stderr.String())
+	}
+	if _, err := os.Stat(filepath.Join(outRoot, "matrix.json")); err != nil {
+		t.Fatalf("matrix.json missing: %v", err)
+	}
+	data, err := os.ReadFile(ledgerPath)
+	if err != nil {
+		t.Fatalf("ReadFile ledger: %v", err)
+	}
+	if !bytes.Contains(data, []byte("| other | `minimal` | pass | 1 | 0 | 0 | 0 | AE2020 | AE2020 | - |")) {
+		t.Fatalf("ledger missing recipe row:\n%s", string(data))
+	}
+	if !bytes.Contains(stdout.Bytes(), []byte("migration matrix:")) {
+		t.Fatalf("stdout missing matrix path: %s", stdout.String())
+	}
+	if !bytes.Contains(stdout.Bytes(), []byte("migration ledger:")) {
+		t.Fatalf("stdout missing ledger path: %s", stdout.String())
+	}
+}
+
 func TestRunMatrixAEOpenRejectsLargeCaseCountByDefault(t *testing.T) {
 	root := t.TempDir()
 	recipeDir := filepath.Join(root, "recipes")
