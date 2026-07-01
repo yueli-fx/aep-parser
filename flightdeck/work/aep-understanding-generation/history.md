@@ -914,3 +914,10 @@ Current:
   72 pass, 0 blocked, 0 failed, 0 skipped for `minimal-default-text-layer` and
   `minimal-default-text-static-transform` across 6 source writers and 6 target
   writers.
+- Structural representative writer coverage was upgraded from the latest full
+  `PD-1x6` boundary to focused W2020-W2025 source-and-target coverage. The
+  matrix `tmp/migration_matrix_structural_representatives_all_6x6/matrix.json`
+  is 180 total, 180 pass, 0 blocked, 0 failed, 0 skipped for
+  `minimal-project-display-settings`, `minimal-comp-object-profile`,
+  `minimal-camera-object-profile`, `minimal-light-object-profile`, and
+  `minimal-precomp-layer` across 6 source writers and 6 target writers.

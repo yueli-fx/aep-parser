@@ -111,6 +111,9 @@ Current:
   explicit matte source contract.
 - Shape gradient stroke migration now has a 4-recipe `PD-6x6` writer matrix
   across AE2020-AE2025 sources and targets.
+- Structural representatives for project, comp, camera, light, and precomp now
+  have a 5-recipe `PD-6x6` writer matrix across AE2020-AE2025 sources and
+  targets.
 - Native writer targets now cover AE2020, AE2021, AE2022, AE2023, AE2024, and
   AE2025 project skeletons. The narrow writer-target matrix is 6 total, 6 pass
   for `minimal-comp-object-profile`.

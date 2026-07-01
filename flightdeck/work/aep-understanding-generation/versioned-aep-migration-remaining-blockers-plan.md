@@ -1847,3 +1847,78 @@ Commit:
 ```text
 docs(aepmigrate): record text baseline six-writer evidence
 ```
+
+---
+
+## Task 43: Structural Representative PD-6x6 Writer Matrix Evidence
+
+**Goal:** Upgrade the structural representative writer coverage from latest
+full `PD-1x6` boundary evidence to focused W2020-W2025 source-and-target
+evidence for the same representatives that already have all-host open evidence.
+
+**Architecture:** Reuse the matrix runner without AE-open. Run the five
+structural representatives from the all-host matrix across `-sources all
+-targets all`: project display settings, comp object profile, camera object
+profile, light object profile, and precomp layer. Record the result as
+representative `PD-6x6` evidence, not as exhaustive project/comp/camera/light
+coverage.
+
+**Files:**
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/aep-understanding-generation/index.md`
+- Modify: `flightdeck/work/aep-understanding-generation/history.md`
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+- Modify: `flightdeck/cockpit.md`
+
+- [x] **Step 1: Run the structural representative all-writer matrix**
+
+Run:
+
+```powershell
+go run ./cmd/aepmigrate matrix `
+  -recipe examples\recipes\minimal-project-display-settings.json `
+  -recipe examples\recipes\minimal-comp-object-profile.json `
+  -recipe examples\recipes\minimal-camera-object-profile.json `
+  -recipe examples\recipes\minimal-light-object-profile.json `
+  -recipe examples\recipes\minimal-precomp-layer.json `
+  -sources all `
+  -targets all `
+  -out tmp\migration_matrix_structural_representatives_all_6x6 `
+  -ledger-out tmp\migration_matrix_structural_representatives_all_6x6\ledger.md
+```
+
+Expected: 180 total, 180 pass, 0 blocked, 0 failed, 0 skipped. This is
+5 recipes x 6 source writers x 6 target writers.
+
+- [x] **Step 2: Update reviewed validation summary**
+
+If Step 1 passes, update the Other Domains rows for project, comp,
+camera-light, and precomp to cite focused representative `PD-6x6` evidence
+alongside their existing `OPEN-ALL-HOSTS` evidence. Add
+`tmp/migration_matrix_structural_representatives_all_6x6/matrix.json` and its
+ledger to raw artifacts. Update `index.md`, `cockpit.md`, and append
+`history.md`.
+
+- [x] **Step 3: Verification and commit**
+
+Run:
+
+```powershell
+pwsh -File scripts\migration\verify_matrix.ps1
+go test ./...
+go vet ./...
+git diff --check
+```
+
+Read:
+
+```powershell
+Get-Content C:\Users\yl\.flightdeck\knowledge\git\commits.md -Raw
+Get-Content flightdeck\knowledge\workflow\verify.md -Raw
+```
+
+Commit:
+
+```text
+docs(aepmigrate): record structural representative writer evidence
+```
