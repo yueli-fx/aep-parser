@@ -575,6 +575,18 @@ func materializeRectGraphicShapeLayer(comp *aep.Composition, source profile.Laye
 			return nil, err
 		}
 	}
+	if hasProperty(source, "ADBE Vector Roughen Size") ||
+		hasProperty(source, "ADBE Vector Roughen Detail") ||
+		hasProperty(source, "ADBE Vector Temporal Freq") ||
+		hasProperty(source, "ADBE Vector Random Seed") ||
+		hasProperty(source, "ADBE Vector Roughen Points") ||
+		hasProperty(source, "ADBE Vector Correlation") ||
+		hasProperty(source, "ADBE Vector Temporal Phase") ||
+		hasProperty(source, "ADBE Vector Spatial Phase") {
+		if err := materializeShapeWigglePaths(shapeLayer, source); err != nil {
+			return nil, err
+		}
+	}
 	if hasProperty(source, "ADBE Vector Fill Color") {
 		if err := materializeShapeFill(shapeLayer, source); err != nil {
 			return nil, err
@@ -772,6 +784,54 @@ func materializeShapeTwist(shapeLayer *aep.ShapeLayer, source profile.Layer) err
 	}
 	if value, ok := propertyVector(source.Properties, "ADBE Vector Twist Center", 2); ok {
 		if err := twist.SetCenter([2]float64{value[0], value[1]}); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func materializeShapeWigglePaths(shapeLayer *aep.ShapeLayer, source profile.Layer) error {
+	wigglePaths, err := shapeLayer.RootGroup().AddWigglePaths()
+	if err != nil {
+		return err
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Roughen Size"); ok {
+		if err := wigglePaths.SetSize(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Roughen Detail"); ok {
+		if err := wigglePaths.SetDetail(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Temporal Freq"); ok {
+		if err := wigglePaths.SetWigglesPerSecond(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Random Seed"); ok {
+		if err := wigglePaths.SetRandomSeed(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Roughen Points"); ok {
+		if err := wigglePaths.SetPoints(aep.RoughenPoints(int(value))); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Correlation"); ok {
+		if err := wigglePaths.SetCorrelation(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Temporal Phase"); ok {
+		if err := wigglePaths.SetTemporalPhase(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Spatial Phase"); ok {
+		if err := wigglePaths.SetSpatialPhase(value); err != nil {
 			return err
 		}
 	}
@@ -1394,7 +1454,15 @@ func hasSupportedShapeFilter(layer profile.Layer) bool {
 		hasProperty(layer, "ADBE Vector Zigzag Points") ||
 		hasProperty(layer, "ADBE Vector PuckerBloat Amount") ||
 		hasProperty(layer, "ADBE Vector Twist Angle") ||
-		hasProperty(layer, "ADBE Vector Twist Center")
+		hasProperty(layer, "ADBE Vector Twist Center") ||
+		hasProperty(layer, "ADBE Vector Roughen Size") ||
+		hasProperty(layer, "ADBE Vector Roughen Detail") ||
+		hasProperty(layer, "ADBE Vector Temporal Freq") ||
+		hasProperty(layer, "ADBE Vector Random Seed") ||
+		hasProperty(layer, "ADBE Vector Roughen Points") ||
+		hasProperty(layer, "ADBE Vector Correlation") ||
+		hasProperty(layer, "ADBE Vector Temporal Phase") ||
+		hasProperty(layer, "ADBE Vector Spatial Phase")
 }
 
 func isSupportedParametricGraphicShape(shape profile.Shape) bool {

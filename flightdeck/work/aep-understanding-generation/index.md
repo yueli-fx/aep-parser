@@ -702,8 +702,9 @@ Current:
   document/style fidelity; default empty shape conversion uses `aep.NewShapeLayer`;
   single rect/ellipse graphic/filter shape conversion rebuilds the parametric
   primitive, Trim Paths, Round Corners radius, Offset Paths fields, ZigZag
-  fields, Pucker & Bloat amount, Twist angle/center, fill, stroke, one Dash
-  1/Gap 1 pair, percent-mode stroke taper, and wavelength-mode stroke wave from
+  fields, Pucker & Bloat amount, Twist angle/center, Wiggle Paths fields, fill,
+  stroke, one Dash 1/Gap 1 pair, percent-mode stroke taper, and
+  wavelength-mode stroke wave from
   stable profile properties while still excluding stroke offset, additional
   dash/gap pairs, wave units/cycles, gradient, and other filter shape content;
   static layer transform reconstruction now preserves
@@ -712,8 +713,8 @@ Current:
   reconstruction now preserves start_time/in_point/out_point/stretch for all
   supported layer paths; default precomp conversion rebuilds all target comps
   before resolving composition source refs into recreated target comps. Go-writer
-  and recipe fixtures for all nine slices plus the static-transform text and
-  layer-timing fixtures now pass profile diff.
+  and recipe fixtures for the supported migration slices plus the
+  static-transform text and layer-timing fixtures now pass profile diff.
   Successful convert reopens the target and
   runs source-vs-target `profilediff`; unexpected profile diffs are recorded in
   the migration report and block success. AE2025 open smoke has passed for the
@@ -722,7 +723,7 @@ Current:
   shape, rect+fill shape, rect+stroke shape, rect+dashed-stroke shape,
   ellipse+tapered-stroke shape, ellipse+waved-stroke shape, trim-paths shape,
   round-corners shape, offset-paths shape, zigzag shape, pucker-bloat shape,
-  twist shape, and precomp outputs.
+  twist shape, wiggle-paths shape, and precomp outputs.
   `cmd/aepmigrate convert -ae-open -ae <AfterFX.exe>` writes AE open gate status
   into the migration report.
 - `profilediff` now compares profile-visible layer metadata, quality/blending/
