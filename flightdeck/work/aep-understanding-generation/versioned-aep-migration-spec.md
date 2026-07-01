@@ -258,6 +258,11 @@ considered successful. If source-vs-target profile diff finds unexpected
 differences, record them under `verification.profile_diffs`, set
 `profile_diff_status: "fail"`, and block success.
 
+The profile diff gate is intentionally profile-field based. It must cover
+profile-visible comp settings, layer metadata, layer flags, stable layer refs,
+layer properties, expression status, layer-ref params, and keyframe interpolation
+/ tangent / ease details before those surfaces are opened for migration.
+
 When `-ae-open` is supplied, `convert` also runs the target AEP through the
 generic AE open verifier. `ae_open_status` must be `pass`; otherwise the report
 is blocked even if profile diff passed.

@@ -200,10 +200,18 @@ func compareLayer(
 	compareValue func(string, any, any, Severity, ActionType),
 ) {
 	base := expected.Path.Path
+	compareValue(base+".name", expected.Name, actual.Name, SeverityPolish, ActionSemantics)
 	compareValue(base+".type", expected.Type, actual.Type, SeverityFidelity, ActionWrite)
+	compareValue(base+".label", expected.Label, actual.Label, SeverityPolish, ActionWrite)
+	compareValue(base+".comment", expected.Comment, actual.Comment, SeverityPolish, ActionWrite)
+	compareValue(base+".quality", expected.Quality, actual.Quality, SeverityFidelity, ActionWrite)
+	compareValue(base+".blending_mode", expected.BlendingMode, actual.BlendingMode, SeverityFidelity, ActionWrite)
+	compareValue(base+".auto_orient", expected.AutoOrient, actual.AutoOrient, SeverityFidelity, ActionWrite)
+	compareValue(base+".light_kind", expected.LightKind, actual.LightKind, SeverityFidelity, ActionWrite)
 	compareRefValue(base+".source_ref", expected.SourceRef, actual.SourceRef, SeverityFidelity, ActionWrite, compareValue)
-	compareValue(base+".parent_ref", expected.ParentRef, actual.ParentRef, SeverityFidelity, ActionWrite)
-	compareValue(base+".matte_ref", expected.MatteRef, actual.MatteRef, SeverityFidelity, ActionWrite)
+	compareLayerRefValue(base+".light_source_ref", expected.LightSourceRef, actual.LightSourceRef, SeverityFidelity, ActionWrite, compareValue)
+	compareLayerRefValue(base+".parent_ref", expected.ParentRef, actual.ParentRef, SeverityFidelity, ActionWrite, compareValue)
+	compareLayerRefValue(base+".matte_ref", expected.MatteRef, actual.MatteRef, SeverityFidelity, ActionWrite, compareValue)
 	compareValue(base+".timing.start_time_seconds", expected.Timing.StartTime, actual.Timing.StartTime, SeverityFidelity, ActionWrite)
 	compareValue(base+".timing.duration_seconds", expected.Timing.Duration, actual.Timing.Duration, SeverityFidelity, ActionWrite)
 	compareValue(base+".timing.in_point_seconds", expected.Timing.InPoint, actual.Timing.InPoint, SeverityFidelity, ActionWrite)
@@ -211,12 +219,25 @@ func compareLayer(
 	compareValue(base+".timing.stretch", expected.Timing.Stretch, actual.Timing.Stretch, SeverityFidelity, ActionWrite)
 	compareValue(base+".flags.visible", expected.Flags.Visible, actual.Flags.Visible, SeverityFidelity, ActionWrite)
 	compareValue(base+".flags.blend", expected.Flags.Blend, actual.Flags.Blend, SeverityFidelity, ActionWrite)
+	compareValue(base+".flags.blend_name", expected.Flags.BlendName, actual.Flags.BlendName, SeverityFidelity, ActionWrite)
 	compareValue(base+".flags.track_matte", expected.Flags.TrackMatte, actual.Flags.TrackMatte, SeverityFidelity, ActionWrite)
+	compareValue(base+".flags.track_matte_name", expected.Flags.TrackMatteName, actual.Flags.TrackMatteName, SeverityFidelity, ActionWrite)
 	compareValue(base+".flags.is_3d", expected.Flags.Is3D, actual.Flags.Is3D, SeverityFidelity, ActionWrite)
 	compareValue(base+".flags.solo", expected.Flags.Solo, actual.Flags.Solo, SeverityFidelity, ActionWrite)
 	compareValue(base+".flags.shy", expected.Flags.Shy, actual.Flags.Shy, SeverityFidelity, ActionWrite)
 	compareValue(base+".flags.locked", expected.Flags.Locked, actual.Flags.Locked, SeverityFidelity, ActionWrite)
+	compareValue(base+".flags.is_adjustment", expected.Flags.IsAdjustment, actual.Flags.IsAdjustment, SeverityFidelity, ActionWrite)
+	compareValue(base+".flags.is_null", expected.Flags.IsNull, actual.Flags.IsNull, SeverityFidelity, ActionWrite)
+	compareValue(base+".flags.is_guide", expected.Flags.IsGuide, actual.Flags.IsGuide, SeverityFidelity, ActionWrite)
 	compareValue(base+".flags.motion_blur", expected.Flags.MotionBlur, actual.Flags.MotionBlur, SeverityFidelity, ActionWrite)
+	compareValue(base+".flags.effects_enabled", expected.Flags.EffectsEnabled, actual.Flags.EffectsEnabled, SeverityFidelity, ActionWrite)
+	compareValue(base+".flags.audio_enabled", expected.Flags.AudioEnabled, actual.Flags.AudioEnabled, SeverityFidelity, ActionWrite)
+	compareValue(base+".flags.frame_blend_enabled", expected.Flags.FrameBlendEnabled, actual.Flags.FrameBlendEnabled, SeverityFidelity, ActionWrite)
+	compareValue(base+".flags.markers_locked", expected.Flags.MarkersLocked, actual.Flags.MarkersLocked, SeverityFidelity, ActionWrite)
+	compareValue(base+".flags.frame_blend_pixel_motion", expected.Flags.FrameBlendPixelMotion, actual.Flags.FrameBlendPixelMotion, SeverityFidelity, ActionWrite)
+	compareValue(base+".flags.collapse_transform", expected.Flags.CollapseTransform, actual.Flags.CollapseTransform, SeverityFidelity, ActionWrite)
+	compareValue(base+".flags.sampling_bicubic", expected.Flags.SamplingBicubic, actual.Flags.SamplingBicubic, SeverityFidelity, ActionWrite)
+	compareValue(base+".flags.preserve_transparency", expected.Flags.PreserveTransparency, actual.Flags.PreserveTransparency, SeverityFidelity, ActionWrite)
 
 	actualEffects := effectKeyMap(actual.Effects)
 	usedEffects := map[int]bool{}
@@ -233,6 +254,24 @@ func compareLayer(
 	for i, ae := range actual.Effects {
 		if !usedEffects[i] {
 			add(effectObjectPath(ae), KindExtraObject, SeverityUnknown, ActionInvestigate, nil, ae.MatchName)
+		}
+	}
+
+	actualProperties := propertyKeyMap(actual.Properties)
+	usedProperties := map[int]bool{}
+	for _, ep := range expected.Properties {
+		ap, ai, ok := matchProperty(ep, actual.Properties, actualProperties, usedProperties)
+		path := propertyObjectPath(ep)
+		if !ok {
+			add(path, KindMissingObject, SeverityFidelity, ActionWrite, ep.MatchName, nil)
+			continue
+		}
+		usedProperties[ai] = true
+		compareProperty(ep, ap, compareValue)
+	}
+	for i, ap := range actual.Properties {
+		if !usedProperties[i] {
+			add(propertyObjectPath(ap), KindExtraObject, SeverityUnknown, ActionInvestigate, nil, ap.MatchName)
 		}
 	}
 
@@ -255,12 +294,39 @@ func compareRefValue(
 	compareValue(path, expected, actual, severity, action)
 }
 
+func compareLayerRefValue(
+	path string,
+	expected *profile.LayerRef,
+	actual *profile.LayerRef,
+	severity Severity,
+	action ActionType,
+	compareValue func(string, any, any, Severity, ActionType),
+) {
+	if layerRefsEqual(expected, actual) {
+		return
+	}
+	compareValue(path, expected, actual, severity, action)
+}
+
 func itemRefsEqual(expected, actual *profile.ItemRef) bool {
 	if expected == nil || actual == nil {
 		return expected == actual
 	}
 	if expected.Kind == actual.Kind && expected.Name != "" && actual.Name != "" {
 		return expected.Name == actual.Name
+	}
+	return reflect.DeepEqual(expected, actual)
+}
+
+func layerRefsEqual(expected, actual *profile.LayerRef) bool {
+	if expected == nil || actual == nil {
+		return expected == actual
+	}
+	if expected.Name != "" && actual.Name != "" {
+		return expected.Name == actual.Name
+	}
+	if expected.Index != 0 && actual.Index != 0 {
+		return expected.Index == actual.Index
 	}
 	return reflect.DeepEqual(expected, actual)
 }
@@ -298,8 +364,15 @@ func compareProperty(
 	compareValue func(string, any, any, Severity, ActionType),
 ) {
 	base := expected.Path.Path
+	compareValue(base+".name", expected.Name, actual.Name, SeverityPolish, ActionSemantics)
+	compareValue(base+".match_name", expected.MatchName, actual.MatchName, SeverityFidelity, ActionWrite)
+	compareValue(base+".occurrence", expected.Occurrence, actual.Occurrence, SeverityUnknown, ActionInvestigate)
 	compareValue(base+".static_value", expected.StaticValue, actual.StaticValue, SeverityFidelity, ActionWrite)
+	compareLayerRefValue(base+".layer_ref", expected.LayerRef, actual.LayerRef, SeverityFidelity, ActionWrite, compareValue)
+	compareValue(base+".default", expected.Default, actual.Default, SeverityFidelity, ActionWrite)
+	compareValue(base+".changed", expected.Changed, actual.Changed, SeverityFidelity, ActionWrite)
 	compareValue(base+".expression", expected.Expression, actual.Expression, SeverityFidelity, ActionWrite)
+	compareValue(base+".expression_enabled", expected.ExpressionEnabled, actual.ExpressionEnabled, SeverityFidelity, ActionWrite)
 	if len(expected.Keyframes) != len(actual.Keyframes) {
 		compareValue(base+".keyframes", len(expected.Keyframes), len(actual.Keyframes), SeverityFidelity, ActionWrite)
 		return
@@ -308,6 +381,12 @@ func compareProperty(
 		kpath := fmt.Sprintf("%s.keyframes[%d]", base, i)
 		compareValue(kpath+".time_seconds", expected.Keyframes[i].Time, actual.Keyframes[i].Time, SeverityFidelity, ActionWrite)
 		compareValue(kpath+".value", expected.Keyframes[i].Value, actual.Keyframes[i].Value, SeverityFidelity, ActionWrite)
+		compareValue(kpath+".in_interp", expected.Keyframes[i].InInterp, actual.Keyframes[i].InInterp, SeverityFidelity, ActionWrite)
+		compareValue(kpath+".out_interp", expected.Keyframes[i].OutInterp, actual.Keyframes[i].OutInterp, SeverityFidelity, ActionWrite)
+		compareValue(kpath+".in_spatial_tangent", expected.Keyframes[i].InSpatialTangent, actual.Keyframes[i].InSpatialTangent, SeverityFidelity, ActionWrite)
+		compareValue(kpath+".out_spatial_tangent", expected.Keyframes[i].OutSpatialTangent, actual.Keyframes[i].OutSpatialTangent, SeverityFidelity, ActionWrite)
+		compareValue(kpath+".in_temporal_ease", expected.Keyframes[i].InTemporalEase, actual.Keyframes[i].InTemporalEase, SeverityFidelity, ActionWrite)
+		compareValue(kpath+".out_temporal_ease", expected.Keyframes[i].OutTemporalEase, actual.Keyframes[i].OutTemporalEase, SeverityFidelity, ActionWrite)
 	}
 }
 

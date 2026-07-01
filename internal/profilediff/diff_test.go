@@ -40,6 +40,99 @@ func TestCompareReportsLayerPresenceAndScalarDiffs(t *testing.T) {
 	assertDiff(t, report, "comps.by_id[1].layers.by_id[10].timing.in_point_seconds", profilediff.KindWrongValue)
 }
 
+func TestCompareReportsLayerMetadataAndFlagDiffs(t *testing.T) {
+	expected := testProfile(testLayer(10, "Hero", func(l *profile.Layer) {
+		l.Label = 9
+		l.Comment = "layer note"
+		l.Quality = "draft"
+		l.BlendingMode = "multiply"
+		l.AutoOrient = "along_path"
+		l.LightKind = "spot"
+		l.Flags = profile.LayerFlags{
+			Visible:               true,
+			Blend:                 5,
+			BlendName:             "multiply",
+			TrackMatte:            1,
+			TrackMatteName:        "alpha",
+			Is3D:                  true,
+			Solo:                  true,
+			Shy:                   true,
+			Locked:                true,
+			IsAdjustment:          true,
+			IsNull:                true,
+			IsGuide:               true,
+			MotionBlur:            true,
+			EffectsEnabled:        true,
+			AudioEnabled:          true,
+			FrameBlendEnabled:     true,
+			MarkersLocked:         true,
+			FrameBlendPixelMotion: true,
+			CollapseTransform:     true,
+			SamplingBicubic:       true,
+			PreserveTransparency:  true,
+		}
+	}))
+	actual := testProfile(testLayer(10, "Hero Changed", nil))
+
+	report, err := profilediff.Compare(expected, actual, profilediff.Options{})
+	if err != nil {
+		t.Fatalf("Compare: %v", err)
+	}
+	base := "comps.by_id[1].layers.by_id[10]"
+	for _, path := range []string{
+		base + ".name",
+		base + ".label",
+		base + ".comment",
+		base + ".quality",
+		base + ".blending_mode",
+		base + ".auto_orient",
+		base + ".light_kind",
+		base + ".flags.blend",
+		base + ".flags.blend_name",
+		base + ".flags.track_matte",
+		base + ".flags.track_matte_name",
+		base + ".flags.is_3d",
+		base + ".flags.solo",
+		base + ".flags.shy",
+		base + ".flags.locked",
+		base + ".flags.is_adjustment",
+		base + ".flags.is_null",
+		base + ".flags.is_guide",
+		base + ".flags.motion_blur",
+		base + ".flags.effects_enabled",
+		base + ".flags.audio_enabled",
+		base + ".flags.frame_blend_enabled",
+		base + ".flags.markers_locked",
+		base + ".flags.frame_blend_pixel_motion",
+		base + ".flags.collapse_transform",
+		base + ".flags.sampling_bicubic",
+		base + ".flags.preserve_transparency",
+	} {
+		assertDiff(t, report, path, profilediff.KindWrongValue)
+	}
+}
+
+func TestCompareLayerRefsByStableNameOrIndexWhenIDsDiffer(t *testing.T) {
+	expected := testProfile(testLayer(10, "Hero", func(l *profile.Layer) {
+		l.ParentRef = &profile.LayerRef{ID: 11, Index: 1, Name: "Controller"}
+		l.MatteRef = &profile.LayerRef{ID: 12, Index: 2, Name: "Matte"}
+		l.LightSourceRef = &profile.LayerRef{ID: 13, Index: 3}
+	}))
+	actual := testProfile(testLayer(10, "Hero", func(l *profile.Layer) {
+		l.ParentRef = &profile.LayerRef{ID: 88, Index: 7, Name: "Controller"}
+		l.MatteRef = &profile.LayerRef{ID: 89, Index: 8, Name: "Matte"}
+		l.LightSourceRef = &profile.LayerRef{ID: 90, Index: 3}
+	}))
+
+	report, err := profilediff.Compare(expected, actual, profilediff.Options{})
+	if err != nil {
+		t.Fatalf("Compare: %v", err)
+	}
+	assertNoDiff(t, report, "comps.by_id[1].layers.by_id[10].parent_ref", profilediff.KindWrongValue)
+	assertNoDiff(t, report, "comps.by_id[1].layers.by_id[10].matte_ref", profilediff.KindWrongValue)
+	assertNoDiff(t, report, "comps.by_id[1].layers.by_id[10].light_source_ref", profilediff.KindWrongValue)
+}
+
 func TestCompareReportsEffectParamAndKeyframeDiffs(t *testing.T) {
 	expected := testProfile(testLayer(10, "Hero", func(l *profile.Layer) {
 		l.Effects = []profile.Effect{testEffect(0, "ADBE Fill", []profile.Property{
@@ -63,6 +156,79 @@ func TestCompareReportsEffectParamAndKeyframeDiffs(t *testing.T) {
 	}
 	assertDiff(t, report, `comps.by_id[1].layers.by_id[10].effects.by_match_name["ADBE Fill"]#0.params.by_match_name["ADBE Fill-0002"]#0.static_value`, profilediff.KindWrongValue)
 	assertDiff(t, report, `comps.by_id[1].layers.by_id[10].effects.by_match_name["ADBE Fill"]#0.params.by_match_name["ADBE Fill-0002"]#0.keyframes`, profilediff.KindWrongValue)
+}
+
+func TestCompareReportsPropertyMetadataAndKeyframeDetailDiffs(t *testing.T) {
+	expected := testProfile(testLayer(10, "Hero", func(l *profile.Layer) {
+		enabled := true
+		l.Properties = []profile.Property{{
+			Name:              "Position",
+			MatchName:         "ADBE Position",
+			Occurrence:        0,
+			LayerRef:          &profile.LayerRef{ID: 11, Name: "Matte"},
+			Default:           []float64{0, 0},
+			Changed:           true,
+			Expression:        "value + [10, 0]",
+			ExpressionEnabled: &enabled,
+			Keyframes: []profile.Keyframe{{
+				Time:              0,
+				Value:             []float64{10, 20},
+				InInterp:          "bezier",
+				OutInterp:         "bezier",
+				InSpatialTangent:  []float64{-1, 0},
+				OutSpatialTangent: []float64{1, 0},
+				InTemporalEase:    []profile.TemporalEase{{Speed: 10, Influence: 33}},
+				OutTemporalEase:   []profile.TemporalEase{{Speed: 20, Influence: 66}},
+			}},
+			Path: profile.PathRef{Path: `comps.by_id[1].layers.by_id[10].properties.by_match_name["ADBE Position"]#0`},
+		}}
+	}))
+	actual := testProfile(testLayer(10, "Hero", func(l *profile.Layer) {
+		enabled := false
+		l.Properties = []profile.Property{{
+			Name:              "Position 2",
+			MatchName:         "ADBE Position",
+			Occurrence:        0,
+			LayerRef:          &profile.LayerRef{ID: 99, Name: "Matte"},
+			Default:           []float64{5, 5},
+			Changed:           false,
+			Expression:        "value",
+			ExpressionEnabled: &enabled,
+			Keyframes: []profile.Keyframe{{
+				Time:              0,
+				Value:             []float64{10, 20},
+				InInterp:          "linear",
+				OutInterp:         "linear",
+				InSpatialTangent:  []float64{0, 0},
+				OutSpatialTangent: []float64{0, 0},
+				InTemporalEase:    []profile.TemporalEase{{Speed: 1, Influence: 1}},
+				OutTemporalEase:   []profile.TemporalEase{{Speed: 2, Influence: 2}},
+			}},
+			Path: profile.PathRef{Path: `comps.by_id[1].layers.by_id[10].properties.by_match_name["ADBE Position"]#0`},
+		}}
+	}))
+
+	report, err := profilediff.Compare(expected, actual, profilediff.Options{})
+	if err != nil {
+		t.Fatalf("Compare: %v", err)
+	}
+	base := `comps.by_id[1].layers.by_id[10].properties.by_match_name["ADBE Position"]#0`
+	for _, path := range []string{
+		base + ".name",
+		base + ".default",
+		base + ".changed",
+		base + ".expression",
+		base + ".expression_enabled",
+		base + ".keyframes[0].in_interp",
+		base + ".keyframes[0].out_interp",
+		base + ".keyframes[0].in_spatial_tangent",
+		base + ".keyframes[0].out_spatial_tangent",
+		base + ".keyframes[0].in_temporal_ease",
+		base + ".keyframes[0].out_temporal_ease",
+	} {
+		assertDiff(t, report, path, profilediff.KindWrongValue)
+	}
+	assertNoDiff(t, report, base+".layer_ref", profilediff.KindWrongValue)
 }
 
 func TestCompareReportsCompSettingsDiffs(t *testing.T) {

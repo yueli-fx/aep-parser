@@ -695,6 +695,12 @@ Current:
   the converted no-layer comp object profile output, and `cmd/aepmigrate
   convert -ae-open -ae <AfterFX.exe>` now writes AE open gate status into the
   migration report.
+- `profilediff` now compares profile-visible layer metadata, quality/blending/
+  auto-orient/light kind, all current layer flags, stable layer refs by
+  name/index, layer properties, expression status, layer-ref params, and
+  keyframe interpolation/tangent/ease details. This is a validation prerequisite
+  for opening layer-bearing migration slices; it does not by itself claim layer
+  conversion support.
 - Recipe IR coverage for the current comp and layer strategy matrices is
   complete: comp settings have object-level and field-level profile checks,
   authored-layer examples carry `expected_profile.layers[]`, camera/light
