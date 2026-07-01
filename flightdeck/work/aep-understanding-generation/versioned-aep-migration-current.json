@@ -397,6 +397,13 @@
       "script": "scripts/migration/validate_current.ps1"
     },
     {
+      "id": "migration-checkpoint-validator",
+      "status": "available_verified",
+      "purpose": "Run the JSON-first migration checkpoint: current JSON, coverage JSON, rendered summary JSON, summary validation, host-open gap audit, and diff check; optional flags include recurring matrix and Go checks.",
+      "script": "scripts/migration/validate_checkpoint.ps1",
+      "command": "pwsh -File scripts/migration/validate_checkpoint.ps1 [-IncludeMatrix] [-IncludeGo]"
+    },
+    {
       "id": "coverage-batch-runner",
       "status": "available_verified",
       "purpose": "Run or skip-run a coverage batch from current JSON, sync coverage JSON, then validate artifact totals.",
@@ -457,7 +464,12 @@
       {
         "command": "pwsh -File scripts/migration/validate_current.ps1",
         "status": "pass",
-        "evidence": "current ok: checked 2 coverage batches and 9 tooling entries"
+        "evidence": "current ok: checked 2 coverage batches and 10 tooling entries"
+      },
+      {
+        "command": "pwsh -File scripts/migration/validate_checkpoint.ps1",
+        "status": "pass",
+        "evidence": "checkpoint ok: current JSON, coverage JSON, summary render/validate, host-open gap audit, and diff check passed"
       },
       {
         "command": "pwsh -File scripts/migration/validate_coverage.ps1",
