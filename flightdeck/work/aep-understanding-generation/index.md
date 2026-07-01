@@ -118,6 +118,12 @@ Current:
   AE2020-AE2025 sources and targets.
 - Comp migration now has an 18-recipe `PD-6x6` writer matrix across
   AE2020-AE2025 sources and targets.
+- Precomp migration now has a 1-recipe `PD-6x6` writer matrix across
+  AE2020-AE2025 sources and targets.
+- Shape migration now has a 27-recipe `PD-6x6` writer matrix across
+  AE2020-AE2025 sources and targets. Layer migration now has a 16-recipe
+  all-writer boundary matrix with known matte contract non-pass cases only:
+  576 total, 536 pass, 10 blocked, 0 failed, 30 skipped.
 - Camera migration now has a 15-recipe `PD-6x6` writer matrix across
   AE2020-AE2025 sources and targets.
 - Light migration now has a 14-recipe `PD-6x6` writer matrix across

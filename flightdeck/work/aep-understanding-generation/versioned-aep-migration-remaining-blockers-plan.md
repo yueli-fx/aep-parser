@@ -2196,3 +2196,24 @@ Commit:
 ```text
 docs(aepmigrate): record comp six-writer evidence
 ```
+
+---
+
+## Task 48: Layer / Shape / Precomp Batch Matrix Evidence
+
+**Goal:** Batch the remaining structural/layer/shape writer evidence updates
+into one validation pass and one commit.
+
+| Domain | Scope | Artifact | Result |
+| --- | --- | --- | --- |
+| precomp | all 1 current `minimal-precomp-*` recipe | `tmp/migration_matrix_precomp_all_6x6/matrix.json` | 36 total, 36 pass, 0 blocked, 0 failed, 0 skipped |
+| layer | all 16 current `minimal-layer-*` recipes | `tmp/migration_matrix_layer_all_6x6/matrix.json` | 576 total, 536 pass, 10 blocked, 0 failed, 30 skipped |
+| shape | all 27 current `minimal-shape-*` recipes | `tmp/migration_matrix_shape_all_6x6/matrix.json` | 972 total, 972 pass, 0 blocked, 0 failed, 0 skipped |
+
+Layer non-pass cases are the known matte contract boundary: `minimal-layer-explicit-matte`
+has 30 source-contract skips and 5 AE2025-source downgrade blocks; `minimal-layer-track-matte`
+has 5 AE2025-source downgrade blocks. No layer matrix case failed.
+
+- [x] Run batch matrices.
+- [x] Update validation summary, index, history, and cockpit once for the batch.
+- [x] Run recurring verification and commit once.

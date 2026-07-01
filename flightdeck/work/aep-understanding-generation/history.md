@@ -941,3 +941,15 @@ Current:
   `tmp/migration_matrix_comp_all_6x6/matrix.json` is 648 total, 648 pass,
   0 blocked, 0 failed, 0 skipped for all 18 current `minimal-comp-*` recipes
   across 6 source writers and 6 target writers.
+- Precomp writer coverage was split out from the structural representative
+  matrix into focused W2020-W2025 source-and-target coverage. The matrix
+  `tmp/migration_matrix_precomp_all_6x6/matrix.json` is 36 total, 36 pass,
+  0 blocked, 0 failed, 0 skipped for the current `minimal-precomp-layer`
+  recipe across 6 source writers and 6 target writers.
+- Layer and shape writer coverage were batched instead of committed one domain
+  at a time. `tmp/migration_matrix_shape_all_6x6/matrix.json` is 972 total,
+  972 pass, 0 blocked, 0 failed, 0 skipped for all 27 current
+  `minimal-shape-*` recipes. `tmp/migration_matrix_layer_all_6x6/matrix.json`
+  is 576 total, 536 pass, 10 blocked, 0 failed, 30 skipped for all 16 current
+  `minimal-layer-*` recipes; every non-pass case is an explicit/track matte
+  source-contract boundary, not a profile diff failure.
