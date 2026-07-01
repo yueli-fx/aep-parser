@@ -1301,3 +1301,71 @@ Commit:
 ```text
 docs(aepmigrate): record transform six-writer evidence
 ```
+
+---
+
+## Task 35: Dynamic Effect PD-6x6 Writer Matrix Evidence
+
+**Goal:** Upgrade dynamic effect parameter writer coverage from `PD-1x3` to a
+full W2020-W2025 source-and-target matrix for the current recipe-owned dynamic
+effect surface.
+
+**Architecture:** Reuse the matrix runner without AE-open. Run the four dynamic
+effect recipes across `-sources all -targets all` and record the reviewed result
+as `PD-6x6` evidence. Keep host-open coverage separate: the vector-keyframe
+representative already has `OPEN-ALL-HOSTS`.
+
+**Files:**
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/aep-understanding-generation/index.md`
+- Modify: `flightdeck/work/aep-understanding-generation/history.md`
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+
+- [x] **Step 1: Run the dynamic effect all-writer matrix**
+
+Run:
+
+```powershell
+go run ./cmd/aepmigrate matrix `
+  -recipe examples\recipes\minimal-effect-layer-param.json `
+  -recipe examples\recipes\minimal-effect-param-expression.json `
+  -recipe examples\recipes\minimal-effect-param-keyframes.json `
+  -recipe examples\recipes\minimal-effect-param-vector-keyframes.json `
+  -sources all `
+  -targets all `
+  -out tmp\migration_matrix_effect_params_all_6x6 `
+  -ledger-out tmp\migration_matrix_effect_params_all_6x6\ledger.md
+```
+
+Expected: 144 total, 144 pass, 0 blocked, 0 failed, 0 skipped. This is
+4 recipes x 6 source writers x 6 target writers.
+
+- [x] **Step 2: Update reviewed validation summary**
+
+If Step 1 passes, update the Effect Domain dynamic rows from `PD-1x3` to
+`PD-6x6`. Add `tmp/migration_matrix_effect_params_all_6x6/matrix.json` and its
+ledger to raw artifacts. Update `index.md` and append `history.md`.
+
+- [x] **Step 3: Verification and commit**
+
+Run:
+
+```powershell
+pwsh -File scripts\migration\verify_matrix.ps1
+go test ./...
+go vet ./...
+git diff --check
+```
+
+Read:
+
+```powershell
+Get-Content C:\Users\yl\.flightdeck\knowledge\git\commits.md -Raw
+Get-Content flightdeck\knowledge\workflow\verify.md -Raw
+```
+
+Commit:
+
+```text
+docs(aepmigrate): record effect six-writer evidence
+```

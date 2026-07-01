@@ -86,6 +86,8 @@ Current:
   matte/mask slices, and supported built-in effects.
 - Effect reconstruction now covers supported static params, same-comp layer-ref
   params, parameter expressions, scalar keyframes, and vector keyframes.
+  Dynamic effect-param migration now has a 4-recipe `PD-6x6` writer matrix
+  across AE2020-AE2025 sources and targets.
 - Dynamic transform migration now has a 3-recipe `PD-6x6` writer matrix across
   AE2020-AE2025 sources and targets.
 - Text animator reconstruction now covers the current recipe-owned animator

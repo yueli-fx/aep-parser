@@ -870,3 +870,9 @@ Current:
   `tmp/migration_matrix_transform_all_6x6/matrix.json` is 108 total, 108 pass,
   0 blocked, 0 failed, 0 skipped for transform keyframes, keyframe ease, and
   transform expression fixtures across 6 source writers and 6 target writers.
+- Dynamic effect-param writer coverage was upgraded from `PD-1x3` to full
+  W2020-W2025 source-and-target coverage. The matrix
+  `tmp/migration_matrix_effect_params_all_6x6/matrix.json` is 144 total,
+  144 pass, 0 blocked, 0 failed, 0 skipped for layer-ref, expression,
+  scalar-keyframe, and vector-keyframe effect param fixtures across 6 source
+  writers and 6 target writers.
