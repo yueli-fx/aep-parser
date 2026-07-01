@@ -30,6 +30,7 @@ type MatrixOptions struct {
 	AEInstallRoot    string
 	AEHosts          map[string]string
 	AEOpen           bool
+	AEOpenLabels     []string
 	AEOpenJSXPath    string
 	AEOpenTimeoutSec int
 	MaxAEOpenCases   int
@@ -58,6 +59,8 @@ type MatrixCase struct {
 	RecipeName        string       `json:"recipe_name"`
 	SourceVersion     string       `json:"source_version"`
 	TargetVersion     string       `json:"target_version"`
+	AEOpenVersion     string       `json:"ae_open_version,omitempty"`
+	AEOpenPath        string       `json:"ae_open_path,omitempty"`
 	Status            MatrixStatus `json:"status"`
 	Reason            string       `json:"reason,omitempty"`
 	CaseDir           string       `json:"case_dir,omitempty"`
@@ -101,7 +104,11 @@ func RunMatrix(opts MatrixOptions) (MatrixReport, error) {
 	if len(targetLabels) == 0 {
 		targetLabels = []string{string(VersionAE2025)}
 	}
+	aeOpenLabels := matrixAEOpenLabels(opts.AEOpenLabels)
 	caseCount := len(recipePaths) * len(sourceLabels) * len(targetLabels)
+	if opts.AEOpen && len(aeOpenLabels) > 0 {
+		caseCount *= len(aeOpenLabels)
+	}
 	if opts.AEOpen && opts.MaxAEOpenCases > 0 && caseCount > opts.MaxAEOpenCases {
 		return MatrixReport{}, fmt.Errorf("AE open matrix would run %d cases, above limit %d; narrow recipes/targets or set a higher -max-ae-open-cases", caseCount, opts.MaxAEOpenCases)
 	}
@@ -114,7 +121,14 @@ func RunMatrix(opts MatrixOptions) (MatrixReport, error) {
 	for _, recipePath := range recipePaths {
 		for _, sourceLabel := range sourceLabels {
 			for _, targetLabel := range targetLabels {
-				c := runMatrixCase(opts, hosts, recipePath, sourceLabel, targetLabel)
+				if opts.AEOpen && len(aeOpenLabels) > 0 {
+					for _, aeOpenLabel := range aeOpenLabels {
+						c := runMatrixCase(opts, hosts, recipePath, sourceLabel, targetLabel, aeOpenLabel, true)
+						report.Cases = append(report.Cases, c)
+					}
+					continue
+				}
+				c := runMatrixCase(opts, hosts, recipePath, sourceLabel, targetLabel, "", false)
 				report.Cases = append(report.Cases, c)
 			}
 		}
@@ -152,14 +166,25 @@ func matrixRecipePaths(opts MatrixOptions) ([]string, error) {
 	return paths, nil
 }
 
-func runMatrixCase(opts MatrixOptions, hosts map[string]string, recipePath, sourceLabel, targetLabel string) MatrixCase {
+func runMatrixCase(opts MatrixOptions, hosts map[string]string, recipePath, sourceLabel, targetLabel, aeOpenLabel string, explicitAEOpenLabel bool) MatrixCase {
 	recipeName := strings.TrimSuffix(filepath.Base(recipePath), filepath.Ext(recipePath))
-	caseDir := filepath.Join(opts.OutRoot, sanitizeMatrixName(recipeName), sanitizeMatrixName(sourceLabel+"_to_"+targetLabel))
+	caseName := sourceLabel + "_to_" + targetLabel
+	aeOpenVersion := ""
+	if opts.AEOpen {
+		if explicitAEOpenLabel {
+			aeOpenVersion = normalizeAEHostLabel(aeOpenLabel)
+			caseName += "_open_" + aeOpenVersion
+		} else {
+			aeOpenVersion = normalizeAEHostLabel(targetLabel)
+		}
+	}
+	caseDir := filepath.Join(opts.OutRoot, sanitizeMatrixName(recipeName), sanitizeMatrixName(caseName))
 	c := MatrixCase{
 		RecipePath:    recipePath,
 		RecipeName:    recipeName,
 		SourceVersion: sourceLabel,
 		TargetVersion: targetLabel,
+		AEOpenVersion: aeOpenVersion,
 		CaseDir:       caseDir,
 	}
 	sourceWriterLabel, sourceWriterOK := matrixSourceWriterLabel(sourceLabel)
@@ -175,11 +200,13 @@ func runMatrixCase(opts MatrixOptions, hosts map[string]string, recipePath, sour
 		return c
 	}
 	if opts.AEOpen {
-		if hosts[targetLabel] == "" {
+		aePath := hosts[aeOpenVersion]
+		if aePath == "" {
 			c.Status = MatrixStatusSkipped
 			c.Reason = "missing_ae_host"
 			return c
 		}
+		c.AEOpenPath = aePath
 		if opts.Host == nil {
 			c.Status = MatrixStatusSkipped
 			c.Reason = "missing_ae_host_runner"
@@ -252,7 +279,7 @@ func runMatrixCase(opts MatrixOptions, hosts map[string]string, recipePath, sour
 		}
 		convertOpts.AEOpen = &AEOpenOptions{
 			Host:       opts.Host,
-			AEPath:     hosts[targetLabel],
+			AEPath:     c.AEOpenPath,
 			JSXPath:    jsPath,
 			ArgsPath:   argsPath,
 			DonePath:   donePath,
@@ -282,6 +309,39 @@ func runMatrixCase(opts MatrixOptions, hosts map[string]string, recipePath, sour
 		c.Reason = "convert_status_" + string(convertReport.Summary.Status)
 	}
 	return c
+}
+
+func matrixAEOpenLabels(labels []string) []string {
+	seen := map[string]bool{}
+	var out []string
+	for _, label := range labels {
+		normalized := normalizeAEHostLabel(label)
+		if normalized == "" || seen[normalized] {
+			continue
+		}
+		seen[normalized] = true
+		out = append(out, normalized)
+	}
+	return out
+}
+
+func normalizeAEHostLabel(label string) string {
+	label = strings.ToUpper(strings.TrimSpace(label))
+	if label == "" {
+		return ""
+	}
+	if strings.HasPrefix(label, "AE") {
+		return label
+	}
+	if len(label) == 4 {
+		for _, r := range label {
+			if r < '0' || r > '9' {
+				return label
+			}
+		}
+		return "AE" + label
+	}
+	return label
 }
 
 func matrixSourceWriterLabel(label string) (string, bool) {

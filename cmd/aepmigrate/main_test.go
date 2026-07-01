@@ -192,6 +192,34 @@ func TestRunMatrixAEOpenRejectsLargeCaseCountByDefault(t *testing.T) {
 	}
 }
 
+func TestRunMatrixAEOpenVersionsExpandCaseLimit(t *testing.T) {
+	root := t.TempDir()
+	recipePath := filepath.Join(root, "minimal.json")
+	writeMinimalMatrixRecipe(t, recipePath)
+	outRoot := filepath.Join(root, "matrix")
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{
+		"matrix",
+		"-recipe", recipePath,
+		"-sources", "AE2020",
+		"-targets", "AE2020",
+		"-out", outRoot,
+		"-ae-open",
+		"-ae-versions", "AE2020,AE2021,AE2025",
+		"-max-ae-open-cases", "2",
+	}, &stdout, &stderr)
+	if code != 1 {
+		t.Fatalf("run matrix = %d, want 1; stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stderr.String(), "AE open matrix would run 3 cases") {
+		t.Fatalf("stderr missing AE-open version case limit: %s", stderr.String())
+	}
+	if _, err := os.Stat(filepath.Join(outRoot, "matrix.json")); !os.IsNotExist(err) {
+		t.Fatalf("matrix.json exists or stat failed unexpectedly: %v", err)
+	}
+}
+
 func TestRunConvertWritesDefaultNullLayerOutput(t *testing.T) {
 	input := writeTempProjectWithOneNullLayer(t)
 	outPath := filepath.Join(t.TempDir(), "converted.aep")

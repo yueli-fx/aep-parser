@@ -93,6 +93,7 @@ func runMatrix(args []string, stdout, stderr io.Writer, host aehost.Host) int {
 	var aeHosts aeHostFlag
 	fs.Var(&aeHosts, "ae", "AE host mapping like AE2025=E:\\adobe\\Adobe After Effects 2025\\Support Files\\AfterFX.exe; may be repeated")
 	aeOpen := fs.Bool("ae-open", false, "run AE open verification for each converted target")
+	aeOpenVersionsRaw := fs.String("ae-versions", "", "comma-separated AE host versions for -ae-open; defaults to each target version")
 	aeTimeout := fs.Int("ae-timeout-sec", 180, "AE open verification timeout in seconds")
 	maxAEOpenCases := fs.Int("max-ae-open-cases", 25, "maximum AE-open cases allowed in one matrix run; set 0 to disable")
 	if err := fs.Parse(args); err != nil {
@@ -111,6 +112,7 @@ func runMatrix(args []string, stdout, stderr io.Writer, host aehost.Host) int {
 		AEInstallRoot:    *aeRoot,
 		AEHosts:          map[string]string(aeHosts),
 		AEOpen:           *aeOpen,
+		AEOpenLabels:     splitCSV(*aeOpenVersionsRaw),
 		AEOpenTimeoutSec: *aeTimeout,
 		MaxAEOpenCases:   *maxAEOpenCases,
 		Host:             host,

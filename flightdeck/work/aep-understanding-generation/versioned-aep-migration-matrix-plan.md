@@ -16,7 +16,11 @@
 - Input can be a recipe directory or one explicit recipe path.
 - Target labels are parsed from CLI values; unsupported writer targets are refused during argument parsing rather than silently remapped.
 - `-ae-root E:\adobe` discovers `Adobe After Effects 2020` through `Adobe After Effects 2025` executable paths.
-- If `-ae-open` is set, each converted target uses the matching discovered or explicitly mapped AE executable.
+- If `-ae-open` is set without `-ae-versions`, each converted target uses the
+  matching discovered or explicitly mapped AE executable.
+- If `-ae-open -ae-versions AE2020,...` is set, the matrix opens the same
+  converted output through each requested AE host version. This verifies host
+  compatibility separately from writer target support.
 - Output root contains:
   - `matrix.json` aggregate summary.
   - One directory per case with source `.aep`, target `.aep`, and convert report JSON.
@@ -50,10 +54,12 @@
 - [x] Write failing CLI test.
 - [x] Implement `cmd/aepmigrate matrix`.
 - [x] Add AE-open case-count guard so broad recipe matrices cannot accidentally launch hundreds of AE open gates in one run.
+- [x] Add explicit AE-open host-version fanout with `-ae-versions`.
 - [x] Run focused tests.
-- [ ] Run full Go verification.
+- [x] Run full Go verification.
 - [x] Run one real matrix smoke without AE open.
 - [x] Run one real matrix smoke with AE2025 open gate if available.
+- [x] Run one real matrix smoke across AE2020-AE2025 open hosts.
 
 ## Notes
 
@@ -73,3 +79,7 @@
   - Result: refused before launching AE: `AE open matrix would run 423 cases, above limit 25`.
 - `go run ./cmd/aepmigrate matrix -recipe examples\recipes\minimal-comp-object-profile.json -sources AE2020 -targets AE2025 -out tmp\migration_matrix_smoke_ae2025 -ae-root E:\adobe -ae-open -max-ae-open-cases 1`
   - Result: 1 total, 1 pass, AE2025 open gate passed after clearing AE crash-state.
+- `go run ./cmd/aepmigrate matrix -recipe examples\recipes\minimal-comp-object-profile.json -sources AE2020 -targets AE2020 -out tmp\migration_matrix_aehost_2020_2025 -ae-root E:\adobe -ae-open -ae-versions AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 -ae-timeout-sec 240 -max-ae-open-cases 6`
+  - Result: 6 total, 6 pass, 0 blocked, 0 failed, 0 skipped after clearing
+    AE2020-AE2025 crash-state. This validates all installed AE2020-AE2025
+    hosts against one AE2020 writer output.

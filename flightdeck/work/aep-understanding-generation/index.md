@@ -9,7 +9,8 @@ recipe generation, corpus learning, and versioned AEP migration.
 
 Current focus: versioned AEP migration. The implemented surface now includes
 `cmd/aepmigrate assess`, conservative `convert`, and `matrix` gates for
-AE2020/AE2022/AE2025 writer targets.
+AE2020/AE2022/AE2025 writer targets. Matrix AE-open validation can now use a
+separate AE host-version dimension across installed AE2020-AE2025 hosts.
 
 History lives in `history.md`; keep this index short enough to recover from.
 
@@ -72,7 +73,8 @@ Done at a high level:
 Current:
 - `cmd/aepmigrate matrix` is the latest completed slice. It batches recipe
   fixtures across source/target writer labels, writes aggregate/per-case
-  reports, discovers AE hosts, and protects broad `-ae-open` runs with
+  reports, discovers AE hosts, supports explicit `-ae-versions` host-version
+  fanout for `-ae-open`, and protects broad AE-open runs with
   `-max-ae-open-cases`.
 - Continue versioned migration by expanding supported conversion surface or
   deciding whether native AE2021/AE2023/AE2024 writer templates are worth
