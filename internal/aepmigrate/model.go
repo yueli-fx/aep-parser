@@ -68,6 +68,8 @@ type Verification struct {
 	ProfileDiffIgnoredCount int                `json:"profile_diff_ignored_count,omitempty"`
 	ProfileDiffs            []VerificationDiff `json:"profile_diffs,omitempty"`
 	AEOpenStatus            string             `json:"ae_open_status"`
+	AEOpenExitCode          *int               `json:"ae_open_exit_code,omitempty"`
+	AEOpenLog               string             `json:"ae_open_log,omitempty"`
 	RenderStatus            string             `json:"render_status"`
 }
 

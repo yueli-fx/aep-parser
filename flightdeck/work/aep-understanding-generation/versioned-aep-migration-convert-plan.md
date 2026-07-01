@@ -181,6 +181,8 @@ git diff --check
   - AE 2025 open gate passed via `test_data/generators/verify_open.jsx` and
     `scripts/ae-worker/ae_run.ps1`; readback saw 1 composition named `Main`
     and 0 layers.
+  - `cmd/aepmigrate convert -ae-open -ae <AfterFX.exe>` now runs the same gate
+    directly and writes `ae_open_status: "pass"` into the migration report.
 
 - [x] Update `flightdeck/work/aep-understanding-generation/index.md` and `flightdeck/cockpit.md` to state:
   - `assess` is available;

@@ -85,6 +85,7 @@ Expected command shape:
 ```powershell
 go run ./cmd/aepmigrate convert -in source.aep -target AE2025 -out migrated.aep -report report.json
 go run ./cmd/aepmigrate convert -in source.aep -target AE2020 -out downgraded.aep -report report.json
+go run ./cmd/aepmigrate convert -in source.aep -target AE2025 -out migrated.aep -report report.json -ae-open -ae "E:\adobe\Adobe After Effects 2025\Support Files\AfterFX.exe"
 ```
 
 Convert mode must never silently drop unsupported constructs. If a target cannot
@@ -256,6 +257,10 @@ For `convert`, `profile_diff_status` should be `pass` before a report can be
 considered successful. If source-vs-target profile diff finds unexpected
 differences, record them under `verification.profile_diffs`, set
 `profile_diff_status: "fail"`, and block success.
+
+When `-ae-open` is supplied, `convert` also runs the target AEP through the
+generic AE open verifier. `ae_open_status` must be `pass`; otherwise the report
+is blocked even if profile diff passed.
 
 ## Upgrade Policy
 

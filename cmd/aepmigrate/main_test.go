@@ -2,11 +2,13 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/yueli-fx/aep-parser/internal/aehost"
 	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
@@ -77,6 +79,44 @@ func TestRunConvertWritesOutputAndReport(t *testing.T) {
 	}
 	if !bytes.Contains(stdout.Bytes(), []byte("migration convert:")) {
 		t.Fatalf("stdout missing output path: %s", stdout.String())
+	}
+}
+
+func TestRunConvertCanRunAEOpenGate(t *testing.T) {
+	input := writeTempProjectWithOneComp(t, aep.TargetAE2020)
+	outPath := filepath.Join(t.TempDir(), "converted.aep")
+	reportPath := filepath.Join(t.TempDir(), "convert.json")
+	host := &fakeCLIHost{doneBody: "PASS\nproject items.length=1\ncomp=Main layers.length=0\n"}
+	var stdout, stderr bytes.Buffer
+
+	code := runWithHost([]string{
+		"convert",
+		"-in", input,
+		"-target", "AE2025",
+		"-out", outPath,
+		"-report", reportPath,
+		"-ae-open",
+		"-ae", "AfterFX.exe",
+	}, &stdout, &stderr, host)
+	if code != 0 {
+		t.Fatalf("run convert = %d, stderr=%s", code, stderr.String())
+	}
+	report := readReportSummary(t, reportPath)
+	if report.Verification.AEOpenStatus != "pass" {
+		t.Fatalf("AE open verification = %+v, want pass", report.Verification)
+	}
+	if !host.called {
+		t.Fatal("fake AE host was not called")
+	}
+	if !filepath.IsAbs(host.request.JSXPath) || !filepath.IsAbs(host.request.DonePath) {
+		t.Fatalf("AE open request paths must be absolute: %+v", host.request)
+	}
+	argsPath := host.request.Env["AE_OPEN_ARGS"]
+	if argsPath == "" || !filepath.IsAbs(filepath.FromSlash(argsPath)) {
+		t.Fatalf("AE open args path must be absolute in env: %+v", host.request.Env)
+	}
+	if filepath.Dir(filepath.FromSlash(argsPath)) != filepath.Dir(outPath) {
+		t.Fatalf("AE open args path should live beside output: %q", argsPath)
 	}
 }
 
@@ -157,6 +197,7 @@ func readReportSummary(t *testing.T, path string) struct {
 	Verification struct {
 		ProfileDiffStatus string `json:"profile_diff_status"`
 		ProfileDiffCount  int    `json:"profile_diff_count"`
+		AEOpenStatus      string `json:"ae_open_status"`
 	} `json:"verification"`
 } {
 	t.Helper()
@@ -171,10 +212,33 @@ func readReportSummary(t *testing.T, path string) struct {
 		Verification struct {
 			ProfileDiffStatus string `json:"profile_diff_status"`
 			ProfileDiffCount  int    `json:"profile_diff_count"`
+			AEOpenStatus      string `json:"ae_open_status"`
 		} `json:"verification"`
 	}
 	if err := json.Unmarshal(data, &report); err != nil {
 		t.Fatalf("Unmarshal report: %v", err)
 	}
 	return report
+}
+
+type fakeCLIHost struct {
+	called   bool
+	request  aehost.ScriptRequest
+	doneBody string
+}
+
+func (h *fakeCLIHost) Available(context.Context) aehost.Availability {
+	return aehost.Availability{Status: aehost.CapabilityAvailable}
+}
+
+func (h *fakeCLIHost) RunScript(_ context.Context, req aehost.ScriptRequest) (aehost.ScriptResult, error) {
+	h.called = true
+	h.request = req
+	if err := os.MkdirAll(filepath.Dir(req.DonePath), 0o755); err != nil {
+		return aehost.ScriptResult{ExitCode: 1, DonePath: req.DonePath}, err
+	}
+	if err := os.WriteFile(req.DonePath, []byte(h.doneBody), 0o644); err != nil {
+		return aehost.ScriptResult{ExitCode: 1, DonePath: req.DonePath}, err
+	}
+	return aehost.ScriptResult{ExitCode: 0, DonePath: req.DonePath}, nil
 }

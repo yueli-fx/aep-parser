@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
+	"github.com/yueli-fx/aep-parser/internal/aehost"
 	"github.com/yueli-fx/aep-parser/internal/aepmigrate"
 )
 
@@ -15,6 +17,10 @@ func main() {
 }
 
 func run(args []string, stdout, stderr io.Writer) int {
+	return runWithHost(args, stdout, stderr, aehost.DefaultHost())
+}
+
+func runWithHost(args []string, stdout, stderr io.Writer, host aehost.Host) int {
 	if len(args) == 0 {
 		fmt.Fprintln(stderr, "usage: aepmigrate assess -in source.aep -target AE2020 [-out assess.json]")
 		return 2
@@ -23,7 +29,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 	case "assess":
 		return runAssess(args[1:], stdout, stderr)
 	case "convert":
-		return runConvert(args[1:], stdout, stderr)
+		return runConvert(args[1:], stdout, stderr, host)
 	default:
 		fmt.Fprintf(stderr, "unknown command %q\n", args[0])
 		return 2
@@ -71,13 +77,16 @@ func runAssess(args []string, stdout, stderr io.Writer) int {
 	return statusCode(report.Summary.Status)
 }
 
-func runConvert(args []string, stdout, stderr io.Writer) int {
+func runConvert(args []string, stdout, stderr io.Writer, host aehost.Host) int {
 	fs := flag.NewFlagSet("aepmigrate convert", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	input := fs.String("in", "", "source .aep path")
 	targetRaw := fs.String("target", "", "target AE version: AE2020, AE2022, or AE2025")
 	outPath := fs.String("out", "", "target .aep output path")
 	reportPath := fs.String("report", "", "JSON migration report output path")
+	aeOpen := fs.Bool("ae-open", false, "run AE open verification after profile diff")
+	aePath := fs.String("ae", "", "After Effects executable path for -ae-open")
+	aeTimeout := fs.Int("ae-timeout-sec", 180, "AE open verification timeout in seconds")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
@@ -90,7 +99,37 @@ func runConvert(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintln(stderr, err)
 		return 2
 	}
-	report, err := aepmigrate.Convert(aepmigrate.ConvertOptions{InputPath: *input, OutputPath: *outPath, Target: target})
+	opts := aepmigrate.ConvertOptions{InputPath: *input, OutputPath: *outPath, Target: target}
+	if *aeOpen {
+		if *aePath == "" {
+			fmt.Fprintln(stderr, "-ae-open requires -ae <AfterFX.exe>")
+			return 2
+		}
+		jsxPath, err := filepath.Abs(filepath.Join("test_data", "generators", "verify_open.jsx"))
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		argsPath, err := filepath.Abs(*outPath + ".ae_open.args.json")
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		donePath, err := filepath.Abs(*outPath + ".ae_open.done")
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		opts.AEOpen = &aepmigrate.AEOpenOptions{
+			Host:       host,
+			AEPath:     *aePath,
+			JSXPath:    jsxPath,
+			ArgsPath:   argsPath,
+			DonePath:   donePath,
+			TimeoutSec: *aeTimeout,
+		}
+	}
+	report, err := aepmigrate.Convert(opts)
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return 1

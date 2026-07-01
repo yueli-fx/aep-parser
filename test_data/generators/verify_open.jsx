@@ -7,7 +7,8 @@
 //   {"input":"<abs>","done":"<abs>"}
 
 (function () {
-    var argsFile = new File("e:/projects/tools/aep-parser/test_data/generated/args/verify_open_args.json");
+    var argsPath = $.getenv("AE_OPEN_ARGS");
+    var argsFile = new File(argsPath && argsPath.length > 0 ? argsPath : "e:/projects/tools/aep-parser/test_data/generated/args/verify_open_args.json");
     var args = {};
     var doneFile = null;
     var log = [];
