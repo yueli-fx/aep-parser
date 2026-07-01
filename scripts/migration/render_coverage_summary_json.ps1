@@ -15,6 +15,26 @@ function New-EmptyTotals {
   }
 }
 
+function New-HostOpenEvidenceCounts {
+  return [ordered]@{
+    direct_endpoint_hosts = 0
+    representative = 0
+    excluded_known_boundary = 0
+    recorded_status_only = 0
+  }
+}
+
+function Add-HostOpenEvidenceLevel {
+  param(
+    $Counts,
+    [string]$EvidenceLevel
+  )
+
+  if ($Counts.Contains($EvidenceLevel)) {
+    $Counts[$EvidenceLevel]++
+  }
+}
+
 function Add-Totals {
   param(
     $Accumulator,
@@ -214,6 +234,7 @@ function Get-RecipeHostOpenEvidence {
 $coverage = Get-Content -Raw $CoveragePath | ConvertFrom-Json
 $writerTotals = New-EmptyTotals
 $endpointHostTotals = New-EmptyTotals
+$hostOpenEvidenceTotals = New-HostOpenEvidenceCounts
 $domainMap = [ordered]@{}
 $records = @()
 $recipeIndex = @()
@@ -238,6 +259,7 @@ foreach ($record in @($coverage.coverage)) {
       writer_totals = New-EmptyTotals
       writer_statuses = @()
       host_open_statuses = @()
+      host_open_evidence_levels = New-HostOpenEvidenceCounts
       boundary_ids = @()
     }
   }
@@ -284,6 +306,10 @@ foreach ($record in @($coverage.coverage)) {
       $boundaryStatus = $record.boundary.status
     }
 
+    $hostOpenEvidence = Get-RecipeHostOpenEvidence $record $recipe @($hostOpenCasesByRecipe[$recipe])
+    Add-HostOpenEvidenceLevel $hostOpenEvidenceTotals $hostOpenEvidence.evidence_level
+    Add-HostOpenEvidenceLevel $domain.host_open_evidence_levels $hostOpenEvidence.evidence_level
+
     $recipeIndex += [pscustomobject][ordered]@{
       recipe = $recipe
       coverage_id = $record.id
@@ -293,7 +319,7 @@ foreach ($record in @($coverage.coverage)) {
       writer_targets = @($coverage.writer_axes.target_writers)
       writer_matrix = Get-RecipeWriterMatrix $record.artifact @($matrixCasesByRecipe[$recipe])
       host_open_status = $record.host_open_status
-      host_open_evidence = Get-RecipeHostOpenEvidence $record $recipe @($hostOpenCasesByRecipe[$recipe])
+      host_open_evidence = $hostOpenEvidence
       boundary_status = $boundaryStatus
     }
   }
@@ -326,6 +352,7 @@ $summary = [ordered]@{
     recipes = $allRecipes.Count
     writer_cases = $writerTotals
     endpoint_host_open_cases = $endpointHostTotals
+    host_open_evidence_levels = $hostOpenEvidenceTotals
     known_boundaries = @($boundaryRecords).Count
     open_items = @($coverage.open_items).Count
   }

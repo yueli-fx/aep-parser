@@ -41,6 +41,26 @@ function New-EmptyTotals {
   }
 }
 
+function New-HostOpenEvidenceCounts {
+  return [pscustomobject]@{
+    direct_endpoint_hosts = 0
+    representative = 0
+    excluded_known_boundary = 0
+    recorded_status_only = 0
+  }
+}
+
+function Add-HostOpenEvidenceLevel {
+  param(
+    $Counts,
+    [string]$EvidenceLevel
+  )
+
+  if ($Counts.PSObject.Properties.Name -contains $EvidenceLevel) {
+    $Counts.$EvidenceLevel++
+  }
+}
+
 function Add-Totals {
   param(
     $Accumulator,
@@ -187,6 +207,40 @@ function Get-HostOpenMatrix {
   }
 }
 
+function Get-ExpectedHostOpenEvidenceLevel {
+  param(
+    $Record,
+    [string]$Recipe
+  )
+
+  if (($Record.PSObject.Properties.Name -contains "host_open_representatives") -and @($Record.host_open_representatives) -contains $Recipe) {
+    return "representative"
+  }
+
+  if ($Record.PSObject.Properties.Name -contains "host_open_endpoint_evidence") {
+    $evidence = $Record.host_open_endpoint_evidence
+    if (($evidence.PSObject.Properties.Name -contains "excluded_known_boundary_recipes") -and @($evidence.excluded_known_boundary_recipes) -contains $Recipe) {
+      return "excluded_known_boundary"
+    }
+    return "direct_endpoint_hosts"
+  }
+
+  return "recorded_status_only"
+}
+
+function Assert-HostOpenEvidenceCounts {
+  param(
+    [string]$Label,
+    $Expected,
+    $Actual
+  )
+
+  Assert-Equal "$Label.direct_endpoint_hosts" ([int]$Expected.direct_endpoint_hosts) ([int]$Actual.direct_endpoint_hosts)
+  Assert-Equal "$Label.representative" ([int]$Expected.representative) ([int]$Actual.representative)
+  Assert-Equal "$Label.excluded_known_boundary" ([int]$Expected.excluded_known_boundary) ([int]$Actual.excluded_known_boundary)
+  Assert-Equal "$Label.recorded_status_only" ([int]$Expected.recorded_status_only) ([int]$Actual.recorded_status_only)
+}
+
 if (-not (Test-Path -LiteralPath $CoveragePath)) {
   throw "coverage not found: $CoveragePath"
 }
@@ -205,6 +259,7 @@ Assert-SameStringSet "axes.host_open_hosts" $coverage.host_open_axis.hosts $summ
 
 $writerTotals = New-EmptyTotals
 $endpointHostTotals = New-EmptyTotals
+$hostOpenEvidenceTotals = New-HostOpenEvidenceCounts
 $allRecipes = [System.Collections.Generic.HashSet[string]]::new()
 $domainMap = @{}
 $boundaryCount = 0
@@ -224,6 +279,7 @@ foreach ($record in @($coverage.coverage)) {
       writer_totals = New-EmptyTotals
       writer_statuses = @()
       host_open_statuses = @()
+      host_open_evidence_levels = New-HostOpenEvidenceCounts
       boundary_ids = @()
     }
   }
@@ -234,6 +290,11 @@ foreach ($record in @($coverage.coverage)) {
   Add-Totals $domain.writer_totals $record.totals
   $domain.writer_statuses = @($domain.writer_statuses + $record.writer_status | Sort-Object -Unique)
   $domain.host_open_statuses = @($domain.host_open_statuses + $record.host_open_status | Sort-Object -Unique)
+  foreach ($recipe in $recipes) {
+    $evidenceLevel = Get-ExpectedHostOpenEvidenceLevel $record $recipe
+    Add-HostOpenEvidenceLevel $hostOpenEvidenceTotals $evidenceLevel
+    Add-HostOpenEvidenceLevel $domain.host_open_evidence_levels $evidenceLevel
+  }
 
   if ($record.PSObject.Properties.Name -contains "boundary") {
     $boundaryCount++
@@ -250,6 +311,7 @@ Assert-Equal "totals.domains" $domainMap.Keys.Count $summary.totals.domains
 Assert-Equal "totals.recipes" $allRecipes.Count $summary.totals.recipes
 Assert-Totals "totals.writer_cases" $writerTotals $summary.totals.writer_cases
 Assert-Totals "totals.endpoint_host_open_cases" $endpointHostTotals $summary.totals.endpoint_host_open_cases
+Assert-HostOpenEvidenceCounts "totals.host_open_evidence_levels" $hostOpenEvidenceTotals $summary.totals.host_open_evidence_levels
 Assert-Equal "totals.known_boundaries" $boundaryCount $summary.totals.known_boundaries
 Assert-Equal "totals.open_items" @($coverage.open_items).Count $summary.totals.open_items
 Assert-SameStringSet "domain_rollup.domains" $domainMap.Keys @($summary.domain_rollup | ForEach-Object { $_.domain })
@@ -264,6 +326,7 @@ foreach ($domainName in $domainMap.Keys) {
   Assert-Totals "domain_rollup.$domainName.writer_totals" $expected.writer_totals $actual[0].writer_totals
   Assert-SameStringSet "domain_rollup.$domainName.writer_statuses" $expected.writer_statuses $actual[0].writer_statuses
   Assert-SameStringSet "domain_rollup.$domainName.host_open_statuses" $expected.host_open_statuses $actual[0].host_open_statuses
+  Assert-HostOpenEvidenceCounts "domain_rollup.$domainName.host_open_evidence_levels" $expected.host_open_evidence_levels $actual[0].host_open_evidence_levels
   Assert-SameStringSet "domain_rollup.$domainName.boundary_ids" $expected.boundary_ids $actual[0].boundary_ids
 }
 
