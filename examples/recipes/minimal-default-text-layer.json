@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "project": {
+    "target_version": "AE2020",
+    "name": "Minimal default text layer"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 640,
+      "height": 360,
+      "frame_rate": 24,
+      "duration": 2,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "text",
+          "name": "Title",
+          "text": "Hello"
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 1,
+    "text_layer_count": 1,
+    "layers": [
+      {
+        "name": "Title",
+        "type": "text"
+      }
+    ]
+  }
+}
