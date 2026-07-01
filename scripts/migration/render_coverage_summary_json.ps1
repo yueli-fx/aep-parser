@@ -73,6 +73,55 @@ function Get-HostOpenSummary {
   return $summary
 }
 
+function Get-MatrixCasesByRecipe {
+  param($Record)
+
+  $casesByRecipe = @{}
+  if (-not $Record.artifact -or -not (Test-Path -LiteralPath $Record.artifact)) {
+    return $casesByRecipe
+  }
+
+  $matrix = Get-Content -Raw $Record.artifact | ConvertFrom-Json
+  foreach ($case in @($matrix.cases)) {
+    if (-not $casesByRecipe.ContainsKey($case.recipe_name)) {
+      $casesByRecipe[$case.recipe_name] = @()
+    }
+    $casesByRecipe[$case.recipe_name] = @($casesByRecipe[$case.recipe_name] + $case)
+  }
+  return $casesByRecipe
+}
+
+function Get-RecipeWriterMatrix {
+  param(
+    [string]$Artifact,
+    $Cases
+  )
+
+  $totals = New-EmptyTotals
+  $statusSets = [ordered]@{
+    pass = @()
+    blocked = @()
+    failed = @()
+    skipped = @()
+  }
+
+  foreach ($case in @($Cases | Sort-Object source_version, target_version)) {
+    $status = [string]$case.status
+    $pair = "$($case.source_version)->$($case.target_version)"
+    $totals.total++
+    if ($statusSets.Contains($status)) {
+      $totals[$status]++
+      $statusSets[$status] = @($statusSets[$status] + $pair)
+    }
+  }
+
+  return [ordered]@{
+    artifact = $Artifact
+    totals = $totals
+    status_sets = $statusSets
+  }
+}
+
 $coverage = Get-Content -Raw $CoveragePath | ConvertFrom-Json
 $writerTotals = New-EmptyTotals
 $endpointHostTotals = New-EmptyTotals
@@ -84,6 +133,7 @@ $boundaryRecords = @()
 
 foreach ($record in @($coverage.coverage)) {
   $recipes = @(Get-RecipeNames $record)
+  $matrixCasesByRecipe = Get-MatrixCasesByRecipe $record
   foreach ($recipe in $recipes) {
     [void]$allRecipes.Add($recipe)
   }
@@ -151,6 +201,7 @@ foreach ($record in @($coverage.coverage)) {
       writer_status = $record.writer_status
       writer_sources = @($coverage.writer_axes.source_writers)
       writer_targets = @($coverage.writer_axes.target_writers)
+      writer_matrix = Get-RecipeWriterMatrix $record.artifact @($matrixCasesByRecipe[$recipe])
       host_open_status = $record.host_open_status
       boundary_status = $boundaryStatus
     }
