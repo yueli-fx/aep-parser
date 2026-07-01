@@ -410,6 +410,13 @@
       "output": "tmp/migration_coverage.md"
     },
     {
+      "id": "coverage-summary-json-renderer",
+      "status": "available_verified",
+      "purpose": "Generate a machine-readable total/split/total coverage summary from coverage JSON by domain, recipe, writer totals, host-open evidence, and known boundaries.",
+      "script": "scripts/migration/render_coverage_summary_json.ps1",
+      "output": "tmp/migration_coverage_summary.json"
+    },
+    {
       "id": "standalone-verify-cli",
       "status": "available_verified",
       "purpose": "Run a source/target AEP verification report with profile diff, migration-report allowed differences, capability-ledger boundaries, and optional AE-open verification.",
@@ -443,12 +450,17 @@
       {
         "command": "pwsh -File scripts/migration/validate_current.ps1",
         "status": "pass",
-        "evidence": "current ok: checked 2 coverage batches and 7 tooling entries"
+        "evidence": "current ok: checked 2 coverage batches and 8 tooling entries"
       },
       {
         "command": "pwsh -File scripts/migration/validate_coverage.ps1",
         "status": "pass",
         "evidence": "coverage ok: checked 14 matrix artifacts, 2 recurring gates, host-open policy, and 141 recipes"
+      },
+      {
+        "command": "pwsh -File scripts/migration/render_coverage_summary_json.ps1",
+        "status": "pass",
+        "evidence": "rendered coverage summary json: tmp/migration_coverage_summary.json; totals: 14 records, 11 domains, 141 recipes"
       },
       {
         "command": "pwsh -File scripts/migration/plan_host_open_gaps.ps1 -AERoot E:/adobe",
