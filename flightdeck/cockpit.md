@@ -4,14 +4,14 @@ Focus: 当前主线是 `work/aep-understanding-generation/index.md` 下的 AEP �
 
 ## In flight
 
-- **aep-understanding-generation** (`work/aep-understanding-generation/index.md`) — 长期流水线：profile → diff → render oracle → gap ledger → slice workflow → recipe IR → technique facts/portrait/report → versioned AEP migration。当前恢复点是 versioned AEP migration：`cmd/aepmigrate assess/convert` 已有保守转换路径，当前分支有 matrix 批量门禁相关未提交改动，继续前先读 topic index 和当前 diff。
+- **aep-understanding-generation** (`work/aep-understanding-generation/index.md`) — 长期流水线：profile → diff → render oracle → gap ledger → slice workflow → recipe IR → technique facts/portrait/report → versioned AEP migration。当前恢复点是 versioned AEP migration：`cmd/aepmigrate assess/convert` 已有保守转换路径，`cmd/aepmigrate matrix` 批量门禁已实现并带 AE-open case 上限保护；继续前先读 topic index 和当前 diff。
 - **booyah-glitch-replication** (`work/booyah-glitch-replication/index.md`) — 12-comp from-scratch 复刻已建成并通过 agent AE gate；按 showcase review-gate，只有用户真机确认后才算 complete。①②③⑧ 已 complete；④⑤⑥⑦⑨⑩⑪⑫ 仍待用户 review，下一批优先 ⑩⑪⑫。
 - **fx-technique-internalization** (`work/fx-technique-internalization/index.md`) — parked research arc：参考 `.aep` → 拆角色/技法/机制 → 技法库/现象配方。火焰样本已验证；下次恢复需要先选新的参考现象。
 - **technique-ontology** (`work/technique-ontology/index.md`) — parked research companion：角色/技法/机制三轴 ontology + schema v2。火焰/闪电/控制器样本已压测；大规模词表稳定性未验证。
 
 ## Next
 
-- **versioned AEP migration matrix**：继续当前未提交 `aepmigrate matrix` slice。先查看 `cmd/aepmigrate/*`、`internal/aepmigrate/matrix*`、`work/aep-understanding-generation/versioned-aep-migration-matrix-plan.md` 和 topic index，再验证/提交。
+- **versioned AEP migration**：matrix slice 完成后，下一刀继续扩 supported convert surface 或补 AE2021/AE2023/AE2024 native writer template 决策；不要默认跑全量 `-ae-open`，除非显式扩大/关闭 `-max-ae-open-cases`。
 - **Booyah 用户真机验收 ⑩⑪⑫**：用户确认后更新 `flightdeck/showcase/booyah-clone/INDEX.md`，再按 review-gate 翻 complete；未确认前不要关闭 Booyah topic。
 - **Technique research**：只有用户明确要继续学习/内化参考工程时才恢复；先选样本，不在主线自动推进。
 

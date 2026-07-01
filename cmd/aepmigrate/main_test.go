@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/yueli-fx/aep-parser/internal/aehost"
@@ -117,6 +118,77 @@ func TestRunConvertCanRunAEOpenGate(t *testing.T) {
 	}
 	if filepath.Dir(filepath.FromSlash(argsPath)) != filepath.Dir(outPath) {
 		t.Fatalf("AE open args path should live beside output: %q", argsPath)
+	}
+}
+
+func TestRunMatrixWritesAggregateReport(t *testing.T) {
+	root := t.TempDir()
+	recipePath := filepath.Join(root, "minimal.json")
+	writeMinimalMatrixRecipe(t, recipePath)
+	outRoot := filepath.Join(root, "matrix")
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{
+		"matrix",
+		"-recipe", recipePath,
+		"-sources", "AE2020",
+		"-targets", "AE2020,AE2021,AE2025",
+		"-out", outRoot,
+	}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("run matrix = %d, stderr=%s", code, stderr.String())
+	}
+	reportPath := filepath.Join(outRoot, "matrix.json")
+	data, err := os.ReadFile(reportPath)
+	if err != nil {
+		t.Fatalf("ReadFile matrix report: %v", err)
+	}
+	var report struct {
+		Summary struct {
+			Total   int `json:"total"`
+			Passed  int `json:"passed"`
+			Skipped int `json:"skipped"`
+		} `json:"summary"`
+	}
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatalf("Unmarshal matrix report: %v", err)
+	}
+	if report.Summary.Total != 3 || report.Summary.Passed != 2 || report.Summary.Skipped != 1 {
+		t.Fatalf("matrix summary = %+v", report.Summary)
+	}
+	if !bytes.Contains(stdout.Bytes(), []byte("migration matrix:")) {
+		t.Fatalf("stdout missing matrix report path: %s", stdout.String())
+	}
+}
+
+func TestRunMatrixAEOpenRejectsLargeCaseCountByDefault(t *testing.T) {
+	root := t.TempDir()
+	recipeDir := filepath.Join(root, "recipes")
+	if err := os.MkdirAll(recipeDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	writeMinimalMatrixRecipe(t, filepath.Join(recipeDir, "minimal-a.json"))
+	writeMinimalMatrixRecipe(t, filepath.Join(recipeDir, "minimal-b.json"))
+	outRoot := filepath.Join(root, "matrix")
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{
+		"matrix",
+		"-recipes", recipeDir,
+		"-sources", "AE2020",
+		"-targets", "AE2020,AE2022,AE2025",
+		"-out", outRoot,
+		"-ae-open",
+		"-max-ae-open-cases", "5",
+	}, &stdout, &stderr)
+	if code != 1 {
+		t.Fatalf("run matrix = %d, want 1; stdout=%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stderr.String(), "AE open matrix would run 6 cases") {
+		t.Fatalf("stderr missing AE-open case limit: %s", stderr.String())
+	}
+	if _, err := os.Stat(filepath.Join(outRoot, "matrix.json")); !os.IsNotExist(err) {
+		t.Fatalf("matrix.json exists or stat failed unexpectedly: %v", err)
 	}
 }
 
@@ -556,6 +628,29 @@ func writeProject(t *testing.T, project *aep.Project, name string) string {
 		t.Fatalf("WriteAEP: %v", err)
 	}
 	return path
+}
+
+func writeMinimalMatrixRecipe(t *testing.T, path string) {
+	t.Helper()
+	data := []byte(`{
+  "schema_version": 1,
+  "project": {
+    "name": "Matrix fixture",
+    "target_version": "AE2020"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 640,
+      "height": 360,
+      "frame_rate": 24,
+      "duration": 2.5
+    }
+  ]
+}`)
+	if err := os.WriteFile(path, data, 0o644); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func readReportSummary(t *testing.T, path string) struct {

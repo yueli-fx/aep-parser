@@ -730,6 +730,18 @@ Current:
   and precomp outputs.
   `cmd/aepmigrate convert -ae-open -ae <AfterFX.exe>` writes AE open gate status
   into the migration report.
+- Versioned AEP migration matrix gate is implemented as
+  `cmd/aepmigrate matrix`. It batches recipe fixtures across source writer
+  labels and target writer labels, writes `matrix.json` plus per-case source,
+  target, compile report, and convert report files, and can auto-discover
+  After Effects 2020 through 2025 hosts under an install root such as
+  `E:\adobe`. Current writer targets remain AE2020/AE2022/AE2025; AE2021,
+  AE2023, and AE2024 host installs are recorded for visibility but requested
+  source/target writer cases are marked `skipped` until native writer templates
+  exist. The CLI now defaults `-ae-open` to `-max-ae-open-cases 25` so broad
+  recipe matrices cannot accidentally launch hundreds of AE open gates; set the
+  cap higher or `0` only for an intentional long run. This replaces manual
+  one-fixture-at-a-time migration smoke runs for supported slices.
 - `profilediff` now compares profile-visible layer metadata, quality/blending/
   auto-orient/light kind, all current layer flags, stable layer refs by
   name/index, layer properties, expression status, layer-ref params, keyframe
