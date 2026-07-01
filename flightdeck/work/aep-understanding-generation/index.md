@@ -96,6 +96,11 @@ Current:
   color, visibility, and null flag while rebuilding as null layers;
   `minimal-layer-null-flag.json` passes AE2020/AE2022/AE2025 matrix conversion
   and AE2025 open smoke.
+- Camera and light static option reconstruction now preserves profile-visible
+  camera options and light kind/color/intensity/cone/falloff/shadow options;
+  camera option fixtures plus light option fixtures except `minimal-light-source.json`
+  pass AE2020/AE2022/AE2025 matrix conversion, with camera/light object-profile
+  AE2025 open smokes passing.
 - Continue versioned migration by expanding supported conversion surface or
   deciding whether native AE2021/AE2023/AE2024 writer templates are worth
   adding.
