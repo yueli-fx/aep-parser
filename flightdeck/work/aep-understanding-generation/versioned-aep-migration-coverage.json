@@ -451,10 +451,88 @@
       "recipe_count": 18,
       "writer_status": "PD-6x6",
       "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
-      "host_open_status": "OPEN-ALL-HOSTS representative",
+      "host_open_status": "OPEN-ALL-HOSTS representative plus direct_endpoint_hosts_pass for non-representative recipes; AE2021-AE2024 inferred_by_endpoint",
       "host_open_representatives": [
         "minimal-comp-object-profile"
       ],
+      "host_open_endpoint_evidence": {
+        "open_mode": "target_bound",
+        "scope": "non_representative_recipes",
+        "direct_hosts": [
+          "AE2020",
+          "AE2025"
+        ],
+        "inferred_hosts": [
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024"
+        ],
+        "recipes": [
+          "minimal-comp-background-color",
+          "minimal-comp-comment",
+          "minimal-comp-display-start-time",
+          "minimal-comp-draft-3d",
+          "minimal-comp-flag-profile",
+          "minimal-comp-frame-blending",
+          "minimal-comp-hide-shy-layers",
+          "minimal-comp-label",
+          "minimal-comp-metadata-profile",
+          "minimal-comp-motion-blur",
+          "minimal-comp-motion-blur-enabled",
+          "minimal-comp-pixel-aspect",
+          "minimal-comp-preserve-nested-frame-rate",
+          "minimal-comp-preserve-nested-resolution",
+          "minimal-comp-renderer",
+          "minimal-comp-resolution-factor",
+          "minimal-comp-work-area"
+        ],
+        "chunks": [
+          {
+            "id": "chunk-1",
+            "artifact": "tmp/host_open_gaps/comp/non-representative-endpoint/chunk-1/matrix.json",
+            "ledger": "tmp/host_open_gaps/comp/non-representative-endpoint/chunk-1/ledger.md",
+            "totals": {
+              "total": 24,
+              "pass": 24,
+              "blocked": 0,
+              "failed": 0,
+              "skipped": 0
+            }
+          },
+          {
+            "id": "chunk-2",
+            "artifact": "tmp/host_open_gaps/comp/non-representative-endpoint/chunk-2/matrix.json",
+            "ledger": "tmp/host_open_gaps/comp/non-representative-endpoint/chunk-2/ledger.md",
+            "totals": {
+              "total": 24,
+              "pass": 24,
+              "blocked": 0,
+              "failed": 0,
+              "skipped": 0
+            }
+          },
+          {
+            "id": "chunk-3",
+            "artifact": "tmp/host_open_gaps/comp/non-representative-endpoint/chunk-3/matrix.json",
+            "ledger": "tmp/host_open_gaps/comp/non-representative-endpoint/chunk-3/ledger.md",
+            "totals": {
+              "total": 20,
+              "pass": 20,
+              "blocked": 0,
+              "failed": 0,
+              "skipped": 0
+            }
+          }
+        ],
+        "totals": {
+          "total": 68,
+          "pass": 68,
+          "blocked": 0,
+          "failed": 0,
+          "skipped": 0
+        }
+      },
       "artifact": "tmp/migration_matrix_comp_all_6x6/matrix.json",
       "ledger": "tmp/migration_matrix_comp_all_6x6/ledger.md",
       "totals": {
