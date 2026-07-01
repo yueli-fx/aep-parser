@@ -57,6 +57,9 @@ func Verify(opts VerifyOptions) (Report, error) {
 		return Report{}, err
 	}
 	if migrationReport != nil {
+		if migrationReport.Target.Version != opts.TargetVersion {
+			return Report{}, fmt.Errorf("verify migration report: target version mismatch: report=%s verify=%s", migrationReport.Target.Version, opts.TargetVersion)
+		}
 		report.Entries = append(report.Entries, migrationReport.Entries...)
 	}
 

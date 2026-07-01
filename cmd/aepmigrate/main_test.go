@@ -211,6 +211,51 @@ func TestRunVerifyAcceptsMigrationReportForAllowedDiffs(t *testing.T) {
 	}
 }
 
+func TestRunVerifyRejectsMigrationReportTargetMismatch(t *testing.T) {
+	source := writeTempProjectWithNamedComp(t, "Source")
+	target := writeTempProjectWithNamedComp(t, "Target")
+	migrationReportPath := filepath.Join(t.TempDir(), "migration-report.json")
+	if err := os.WriteFile(migrationReportPath, []byte(`{
+  "schema_version": 1,
+  "target": {
+    "version_label": "AE2025"
+  },
+  "summary": {
+    "status": "pass"
+  },
+  "entries": [
+    {
+      "path": "comps.by_id[1].name",
+      "class": "translated",
+      "target_version": "AE2025",
+      "reason": "Comp rename is an intentional migration mapping."
+    }
+  ]
+}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	outPath := filepath.Join(t.TempDir(), "verify.json")
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{
+		"verify",
+		"-source", source,
+		"-target", target,
+		"-target-version", "AE2020",
+		"-report", migrationReportPath,
+		"-out", outPath,
+	}, &stdout, &stderr)
+	if code != 1 {
+		t.Fatalf("run verify = %d, want 1; stderr=%s", code, stderr.String())
+	}
+	if !strings.Contains(stderr.String(), "target version mismatch") {
+		t.Fatalf("stderr missing target version mismatch: %s", stderr.String())
+	}
+	if _, err := os.Stat(outPath); !os.IsNotExist(err) {
+		t.Fatalf("verify output exists or stat failed unexpectedly: %v", err)
+	}
+}
+
 func TestRunMatrixWritesAggregateReport(t *testing.T) {
 	root := t.TempDir()
 	recipePath := filepath.Join(root, "minimal.json")
