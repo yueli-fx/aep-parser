@@ -174,7 +174,7 @@ func isSupportedDefaultSolidLayer(layer profile.Layer, footage convertFootageInd
 	if layer.ParentRef != nil || layer.LightSourceRef != nil {
 		return false
 	}
-	if layer.Text != nil || len(layer.Masks) != 0 || len(layer.Shapes) != 0 || len(layer.Markers) != 0 {
+	if layer.Text != nil || !isSupportedMaskSurface(layer.Masks) || len(layer.Shapes) != 0 || len(layer.Markers) != 0 {
 		return false
 	}
 	if !isSupportedStaticEffectSurface(layer) {

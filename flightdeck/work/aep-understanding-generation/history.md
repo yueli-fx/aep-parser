@@ -774,3 +774,12 @@ Current:
   and AE2022 targets remain blocked by the current explicit-matte writer
   contract. Latest full no-AE migration matrix: 423 total, 405 pass, 18
   intentionally blocked, 0 failed, 0 skipped.
+- Layer mask migration now preserves the current recipe-owned mask surface on
+  supported solid layers. Conversion reopens the rebuilt project, appends masks
+  with `AddMask`, and replays profile-visible mask mode, inverted/locked/color,
+  motion blur, feather falloff, opacity, feather, expansion, closed state, and
+  path keyframes through existing writer APIs. Focused mask matrix evidence:
+  `tmp/migration_matrix_layer_mask/matrix.json` is 3 total, 3 pass, 0 blocked,
+  0 failed, 0 skipped for AE2020 source into AE2020/AE2022/AE2025 writer
+  targets. Latest full no-AE migration matrix: 423 total, 408 pass, 15
+  intentionally blocked, 0 failed, 0 skipped.

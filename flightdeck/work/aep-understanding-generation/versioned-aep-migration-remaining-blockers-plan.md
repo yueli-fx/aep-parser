@@ -192,3 +192,97 @@ docs(aepmigrate): record remaining migration blockers
 - It does not conflate writer targets with AE host versions.
 - It keeps mask and gradient stroke out of the matte slice unless the refreshed matrix proves a different smallest next target.
 - It requires TDD for behavior changes and a separate matrix/ledger update before commit.
+
+---
+
+## Task 6: Layer Mask Slice, Red Test
+
+- [x] **Step 1: Add a focused failing convert test**
+
+Add:
+
+```go
+func TestConvertWritesRecipeLayerMaskProject(t *testing.T)
+```
+
+The test should compile `examples/recipes/minimal-layer-mask.json`, run
+`Convert` to `VersionAE2025`, and assert status pass with profile diff pass and
+zero diffs.
+
+- [x] **Step 2: Run the red test**
+
+```powershell
+go test ./internal/aepmigrate -run TestConvertWritesRecipeLayerMaskProject -count=1
+```
+
+Expected: fail because mask migration is not implemented or still blocked by
+the current convert scope.
+
+## Task 7: Layer Mask Implementation
+
+- [x] **Step 1: Inspect writer/profile support**
+
+Use narrow searches around `AddMask`, mask writer setters, profile mask fields,
+and recipe mask materialization.
+
+- [x] **Step 2: Implement the smallest supported mask path**
+
+Support the existing `minimal-layer-mask` fixture only if all visible profile
+fields can be reconstructed through existing writer APIs. Do not silently drop
+mask path keyframes or mask options.
+
+- [x] **Step 3: Run the green test**
+
+```powershell
+go test ./internal/aepmigrate -run TestConvertWritesRecipeLayerMaskProject -count=1
+```
+
+Expected: supported mask fixture passes profile diff verification.
+
+## Task 8: Mask Matrix and Ledger
+
+- [x] **Step 1: Run focused mask matrix**
+
+```powershell
+go run ./cmd/aepmigrate matrix -recipe examples\recipes\minimal-layer-mask.json -sources AE2020 -targets AE2020,AE2022,AE2025 -out tmp\migration_matrix_layer_mask
+```
+
+Actual result: 3 total, 3 pass, 0 blocked, 0 failed, 0 skipped.
+
+- [x] **Step 2: Refresh full no-AE matrix**
+
+```powershell
+go run ./cmd/aepmigrate matrix -recipes examples\recipes -sources AE2020 -targets AE2020,AE2022,AE2025 -out tmp\migration_matrix_smoke_all
+```
+
+Actual result: 423 total, 408 pass, 15 blocked, 0 failed, 0 skipped.
+
+- [x] **Step 3: Update validation summary, index, and history**
+
+Record the focused mask matrix, refreshed full boundary, remaining blockers,
+and any explicit unsupported scope.
+
+## Task 9: Mask Commit Gate
+
+- [x] **Step 1: Run full verification**
+
+```powershell
+go test ./...
+go vet ./...
+git diff --check
+```
+
+- [x] **Step 2: Read commit/verify knowledge**
+
+```powershell
+Get-Content C:\Users\yl\.flightdeck\knowledge\git\commits.md -Raw
+Get-Content flightdeck\knowledge\workflow\verify.md -Raw
+```
+
+- [x] **Step 3: Commit**
+
+Use:
+
+```text
+feat(aepmigrate): preserve layer masks
+```

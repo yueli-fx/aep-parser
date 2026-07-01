@@ -412,7 +412,7 @@ func TestRunConvertWritesRectFillShapeLayerOutput(t *testing.T) {
 }
 
 func TestRunConvertWritesBlockedReportWithoutOutput(t *testing.T) {
-	input := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-layer-mask.json"))
+	input := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-shape-gradient-stroke.json"))
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
 	reportPath := filepath.Join(t.TempDir(), "convert.json")
 	var stdout, stderr bytes.Buffer

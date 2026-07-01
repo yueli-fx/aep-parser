@@ -78,6 +78,10 @@ func Convert(opts ConvertOptions) (Report, error) {
 	if err != nil {
 		return Report{}, err
 	}
+	targetProject, err = materializeProjectMasks(targetProject, prof)
+	if err != nil {
+		return Report{}, err
+	}
 	targetProject, err = materializeProjectEffects(targetProject, prof)
 	if err != nil {
 		return Report{}, err
