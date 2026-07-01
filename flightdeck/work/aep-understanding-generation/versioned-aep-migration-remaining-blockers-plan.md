@@ -1502,3 +1502,73 @@ Commit:
 ```text
 docs(aepmigrate): record layer mask six-writer evidence
 ```
+
+---
+
+## Task 38: Classic Track Matte Writer Matrix Boundary Evidence
+
+**Goal:** Review classic track matte writer coverage across W2020-W2025
+sources and targets, and record the exact downgrade boundary instead of
+inferring full `PD-6x6` support.
+
+**Architecture:** Reuse the matrix runner without AE-open. Run the current
+`minimal-layer-track-matte` recipe across `-sources all -targets all` and
+record the reviewed result. AE2025-authored classic track matte can surface as
+an explicit matte source in the profile; lower targets must remain blocked if
+the conversion cannot preserve that source binding.
+
+**Files:**
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/aep-understanding-generation/index.md`
+- Modify: `flightdeck/work/aep-understanding-generation/history.md`
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+- Modify: `flightdeck/cockpit.md`
+
+- [x] **Step 1: Run the classic track matte all-writer matrix**
+
+Run:
+
+```powershell
+go run ./cmd/aepmigrate matrix `
+  -recipe examples\recipes\minimal-layer-track-matte.json `
+  -sources all `
+  -targets all `
+  -out tmp\migration_matrix_layer_track_matte_all_6x6 `
+  -ledger-out tmp\migration_matrix_layer_track_matte_all_6x6\ledger.md
+```
+
+Actual: 36 total, 31 pass, 5 blocked, 0 failed, 0 skipped. The blocked cases
+are AE2025 source into W2020-W2024 targets; `convert_report.json` records
+`comps["Main"].layers["Fill"].matte_ref` blocked because explicit matte source
+requires AE2025 in the current writer contract.
+
+- [x] **Step 2: Update reviewed validation summary**
+
+Update the Layer Domain classic track matte row from `PD-1x3` to the reviewed
+31/36 writer boundary. Add
+`tmp/migration_matrix_layer_track_matte_all_6x6/matrix.json` and its ledger to
+raw artifacts. Update `index.md`, `cockpit.md`, and append `history.md`.
+
+- [x] **Step 3: Verification and commit**
+
+Run:
+
+```powershell
+pwsh -File scripts\migration\verify_matrix.ps1
+go test ./...
+go vet ./...
+git diff --check
+```
+
+Read:
+
+```powershell
+Get-Content C:\Users\yl\.flightdeck\knowledge\git\commits.md -Raw
+Get-Content flightdeck\knowledge\workflow\verify.md -Raw
+```
+
+Commit:
+
+```text
+docs(aepmigrate): record track matte writer boundary
+```

@@ -100,6 +100,9 @@ Current:
   AE2020-AE2025 sources and targets.
 - Layer mask migration now has a 1-recipe `PD-6x6` writer matrix across
   AE2020-AE2025 sources and targets.
+- Classic track matte migration now has a reviewed all-writer boundary: 31/36
+  cases pass; AE2025 source downgrades to AE2020-AE2024 remain blocked by the
+  explicit matte source contract.
 - Native writer targets now cover AE2020, AE2021, AE2022, AE2023, AE2024, and
   AE2025 project skeletons. The narrow writer-target matrix is 6 total, 6 pass
   for `minimal-comp-object-profile`.

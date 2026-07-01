@@ -886,3 +886,10 @@ Current:
   `tmp/migration_matrix_layer_mask_all_6x6/matrix.json` is 36 total, 36 pass,
   0 blocked, 0 failed, 0 skipped for `minimal-layer-mask` across 6 source
   writers and 6 target writers.
+- Classic track matte all-writer coverage was reviewed as a boundary, not full
+  `PD-6x6`. The matrix
+  `tmp/migration_matrix_layer_track_matte_all_6x6/matrix.json` is 36 total,
+  31 pass, 5 blocked, 0 failed, 0 skipped for `minimal-layer-track-matte`.
+  The blocked cases are AE2025 source downgrades to W2020-W2024; their convert
+  reports block `comps["Main"].layers["Fill"].matte_ref` because explicit
+  matte source requires AE2025 in the current writer contract.
