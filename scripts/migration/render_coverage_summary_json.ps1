@@ -122,6 +122,95 @@ function Get-RecipeWriterMatrix {
   }
 }
 
+function Get-HostOpenCasesByRecipe {
+  param($Record)
+
+  $casesByRecipe = @{}
+  if (-not ($Record.PSObject.Properties.Name -contains "host_open_endpoint_evidence")) {
+    return $casesByRecipe
+  }
+
+  $evidence = $Record.host_open_endpoint_evidence
+  $chunks = @()
+  if ($evidence.PSObject.Properties.Name -contains "chunks") {
+    $chunks = @($evidence.chunks)
+  } elseif ($evidence.artifact) {
+    $chunks = @([pscustomobject]@{ artifact = $evidence.artifact })
+  }
+
+  foreach ($chunk in $chunks) {
+    if (-not $chunk.artifact -or -not (Test-Path -LiteralPath $chunk.artifact)) {
+      continue
+    }
+    $matrix = Get-Content -Raw $chunk.artifact | ConvertFrom-Json
+    foreach ($case in @($matrix.cases)) {
+      if (-not $casesByRecipe.ContainsKey($case.recipe_name)) {
+        $casesByRecipe[$case.recipe_name] = @()
+      }
+      $casesByRecipe[$case.recipe_name] = @($casesByRecipe[$case.recipe_name] + $case)
+    }
+  }
+
+  return $casesByRecipe
+}
+
+function Get-RecipeHostOpenEvidence {
+  param(
+    $Record,
+    [string]$Recipe,
+    $Cases
+  )
+
+  $summary = [ordered]@{
+    status = $Record.host_open_status
+    evidence_level = "recorded_status_only"
+  }
+
+  if (($Record.PSObject.Properties.Name -contains "host_open_representatives") -and @($Record.host_open_representatives) -contains $Recipe) {
+    $summary.evidence_level = "representative"
+    return $summary
+  }
+
+  if (-not ($Record.PSObject.Properties.Name -contains "host_open_endpoint_evidence")) {
+    return $summary
+  }
+
+  $evidence = $Record.host_open_endpoint_evidence
+  $summary.evidence_level = "direct_endpoint_hosts"
+  $summary.open_mode = $evidence.open_mode
+  $summary.direct_hosts = @($evidence.direct_hosts)
+  $summary.inferred_hosts = @($evidence.inferred_hosts)
+
+  if (($evidence.PSObject.Properties.Name -contains "excluded_known_boundary_recipes") -and @($evidence.excluded_known_boundary_recipes) -contains $Recipe) {
+    $summary.evidence_level = "excluded_known_boundary"
+    return $summary
+  }
+
+  $totals = New-EmptyTotals
+  $statusSets = [ordered]@{
+    pass = @()
+    blocked = @()
+    failed = @()
+    skipped = @()
+  }
+
+  foreach ($case in @($Cases | Sort-Object source_version, target_version, ae_open_version)) {
+    $status = [string]$case.status
+    $pair = "$($case.source_version)->$($case.target_version)@$($case.ae_open_version)"
+    $totals.total++
+    if ($statusSets.Contains($status)) {
+      $totals[$status]++
+      $statusSets[$status] = @($statusSets[$status] + $pair)
+    }
+  }
+
+  $summary.matrix = [ordered]@{
+    totals = $totals
+    status_sets = $statusSets
+  }
+  return $summary
+}
+
 $coverage = Get-Content -Raw $CoveragePath | ConvertFrom-Json
 $writerTotals = New-EmptyTotals
 $endpointHostTotals = New-EmptyTotals
@@ -134,6 +223,7 @@ $boundaryRecords = @()
 foreach ($record in @($coverage.coverage)) {
   $recipes = @(Get-RecipeNames $record)
   $matrixCasesByRecipe = Get-MatrixCasesByRecipe $record
+  $hostOpenCasesByRecipe = Get-HostOpenCasesByRecipe $record
   foreach ($recipe in $recipes) {
     [void]$allRecipes.Add($recipe)
   }
@@ -203,6 +293,7 @@ foreach ($record in @($coverage.coverage)) {
       writer_targets = @($coverage.writer_axes.target_writers)
       writer_matrix = Get-RecipeWriterMatrix $record.artifact @($matrixCasesByRecipe[$recipe])
       host_open_status = $record.host_open_status
+      host_open_evidence = Get-RecipeHostOpenEvidence $record $recipe @($hostOpenCasesByRecipe[$recipe])
       boundary_status = $boundaryStatus
     }
   }

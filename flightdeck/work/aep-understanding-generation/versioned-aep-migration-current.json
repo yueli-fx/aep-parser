@@ -419,14 +419,14 @@
     {
       "id": "coverage-summary-json-renderer",
       "status": "available_verified",
-      "purpose": "Generate a machine-readable total/split/total coverage summary from coverage JSON by domain, recipe, writer totals, recipe version-pair outcomes, host-open evidence, and known boundaries.",
+      "purpose": "Generate a machine-readable total/split/total coverage summary from coverage JSON by domain, recipe, writer totals, recipe version-pair outcomes, per-recipe host-open evidence, and known boundaries.",
       "script": "scripts/migration/render_coverage_summary_json.ps1",
       "output": "tmp/migration_coverage_summary.json"
     },
     {
       "id": "coverage-summary-json-validator",
       "status": "available_verified",
-      "purpose": "Validate generated coverage summary JSON totals, domain rollups, recipe index entries, and recipe version-pair outcomes against coverage JSON and matrix artifacts.",
+      "purpose": "Validate generated coverage summary JSON totals, domain rollups, recipe index entries, recipe version-pair outcomes, and per-recipe host-open evidence against coverage JSON and matrix artifacts.",
       "script": "scripts/migration/validate_coverage_summary_json.ps1",
       "input": "tmp/migration_coverage_summary.json"
     },

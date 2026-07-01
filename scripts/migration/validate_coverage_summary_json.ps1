@@ -128,6 +128,65 @@ function Get-RecipeWriterMatrix {
   }
 }
 
+function Get-HostOpenCasesByRecipe {
+  param($Record)
+
+  $casesByRecipe = @{}
+  if (-not ($Record.PSObject.Properties.Name -contains "host_open_endpoint_evidence")) {
+    return $casesByRecipe
+  }
+
+  $evidence = $Record.host_open_endpoint_evidence
+  $chunks = @()
+  if ($evidence.PSObject.Properties.Name -contains "chunks") {
+    $chunks = @($evidence.chunks)
+  } elseif ($evidence.artifact) {
+    $chunks = @([pscustomobject]@{ artifact = $evidence.artifact })
+  }
+
+  foreach ($chunk in $chunks) {
+    if (-not $chunk.artifact -or -not (Test-Path -LiteralPath $chunk.artifact)) {
+      continue
+    }
+    $matrix = Get-Content -Raw $chunk.artifact | ConvertFrom-Json
+    foreach ($case in @($matrix.cases)) {
+      if (-not $casesByRecipe.ContainsKey($case.recipe_name)) {
+        $casesByRecipe[$case.recipe_name] = @()
+      }
+      $casesByRecipe[$case.recipe_name] = @($casesByRecipe[$case.recipe_name] + $case)
+    }
+  }
+
+  return $casesByRecipe
+}
+
+function Get-HostOpenMatrix {
+  param($Cases)
+
+  $totals = New-EmptyTotals
+  $statusSets = [ordered]@{
+    pass = @()
+    blocked = @()
+    failed = @()
+    skipped = @()
+  }
+
+  foreach ($case in @($Cases | Sort-Object source_version, target_version, ae_open_version)) {
+    $status = [string]$case.status
+    $pair = "$($case.source_version)->$($case.target_version)@$($case.ae_open_version)"
+    $totals.total++
+    if ($statusSets.Contains($status)) {
+      $totals.$status++
+      $statusSets[$status] = @($statusSets[$status] + $pair)
+    }
+  }
+
+  return [pscustomobject]@{
+    totals = $totals
+    status_sets = $statusSets
+  }
+}
+
 if (-not (Test-Path -LiteralPath $CoveragePath)) {
   throw "coverage not found: $CoveragePath"
 }
@@ -211,6 +270,7 @@ foreach ($domainName in $domainMap.Keys) {
 foreach ($record in @($coverage.coverage)) {
   $recipes = @(Get-RecipeNames $record)
   $matrixCasesByRecipe = Get-MatrixCasesByRecipe $record
+  $hostOpenCasesByRecipe = Get-HostOpenCasesByRecipe $record
   foreach ($recipe in $recipes) {
     $actual = @($summary.recipe_index | Where-Object { $_.recipe -eq $recipe })
     Assert-Equal "recipe_index.$recipe.count" 1 $actual.Count
@@ -227,12 +287,42 @@ foreach ($record in @($coverage.coverage)) {
     Assert-SameStringSet "recipe_index.$recipe.writer_matrix.status_sets.failed" $expectedMatrix.status_sets.failed $actual[0].writer_matrix.status_sets.failed
     Assert-SameStringSet "recipe_index.$recipe.writer_matrix.status_sets.skipped" $expectedMatrix.status_sets.skipped $actual[0].writer_matrix.status_sets.skipped
     Assert-Equal "recipe_index.$recipe.host_open_status" $record.host_open_status $actual[0].host_open_status
+    Assert-Equal "recipe_index.$recipe.host_open_evidence.status" $record.host_open_status $actual[0].host_open_evidence.status
 
     $expectedBoundaryStatus = "none"
     if ($record.PSObject.Properties.Name -contains "boundary" -and @($record.boundary.blocked_recipe_ids) -contains $recipe) {
       $expectedBoundaryStatus = $record.boundary.status
     }
     Assert-Equal "recipe_index.$recipe.boundary_status" $expectedBoundaryStatus $actual[0].boundary_status
+
+    if (($record.PSObject.Properties.Name -contains "host_open_representatives") -and @($record.host_open_representatives) -contains $recipe) {
+      Assert-Equal "recipe_index.$recipe.host_open_evidence.evidence_level" "representative" $actual[0].host_open_evidence.evidence_level
+      continue
+    }
+
+    if ($record.PSObject.Properties.Name -contains "host_open_endpoint_evidence") {
+      $evidence = $record.host_open_endpoint_evidence
+      $expectedLevel = "direct_endpoint_hosts"
+      if (($evidence.PSObject.Properties.Name -contains "excluded_known_boundary_recipes") -and @($evidence.excluded_known_boundary_recipes) -contains $recipe) {
+        $expectedLevel = "excluded_known_boundary"
+      }
+      Assert-Equal "recipe_index.$recipe.host_open_evidence.evidence_level" $expectedLevel $actual[0].host_open_evidence.evidence_level
+      Assert-Equal "recipe_index.$recipe.host_open_evidence.open_mode" $evidence.open_mode $actual[0].host_open_evidence.open_mode
+      Assert-SameStringSet "recipe_index.$recipe.host_open_evidence.direct_hosts" $evidence.direct_hosts $actual[0].host_open_evidence.direct_hosts
+      Assert-SameStringSet "recipe_index.$recipe.host_open_evidence.inferred_hosts" $evidence.inferred_hosts $actual[0].host_open_evidence.inferred_hosts
+
+      if ($expectedLevel -eq "direct_endpoint_hosts") {
+        $expectedHostOpen = Get-HostOpenMatrix @($hostOpenCasesByRecipe[$recipe])
+        Assert-Totals "recipe_index.$recipe.host_open_evidence.matrix.totals" $expectedHostOpen.totals $actual[0].host_open_evidence.matrix.totals
+        Assert-SameStringSet "recipe_index.$recipe.host_open_evidence.matrix.status_sets.pass" $expectedHostOpen.status_sets.pass $actual[0].host_open_evidence.matrix.status_sets.pass
+        Assert-SameStringSet "recipe_index.$recipe.host_open_evidence.matrix.status_sets.blocked" $expectedHostOpen.status_sets.blocked $actual[0].host_open_evidence.matrix.status_sets.blocked
+        Assert-SameStringSet "recipe_index.$recipe.host_open_evidence.matrix.status_sets.failed" $expectedHostOpen.status_sets.failed $actual[0].host_open_evidence.matrix.status_sets.failed
+        Assert-SameStringSet "recipe_index.$recipe.host_open_evidence.matrix.status_sets.skipped" $expectedHostOpen.status_sets.skipped $actual[0].host_open_evidence.matrix.status_sets.skipped
+      }
+      continue
+    }
+
+    Assert-Equal "recipe_index.$recipe.host_open_evidence.evidence_level" "recorded_status_only" $actual[0].host_open_evidence.evidence_level
   }
 }
 
