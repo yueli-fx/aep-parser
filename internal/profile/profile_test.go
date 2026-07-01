@@ -485,6 +485,9 @@ func TestBuildSyntheticProjectIncludesTrackMatteRef(t *testing.T) {
 	if layer.MatteRef.ID != matte.ID || layer.MatteRef.Name != matte.Name {
 		t.Fatalf("MatteRef = %+v, want ID=%d Name=%q", layer.MatteRef, matte.ID, matte.Name)
 	}
+	if layer.MatteRefKind != "positional" {
+		t.Fatalf("MatteRefKind = %q, want positional", layer.MatteRefKind)
+	}
 }
 
 func TestBuildSyntheticProjectIncludesExplicitTrackMatteRef(t *testing.T) {
@@ -519,6 +522,9 @@ func TestBuildSyntheticProjectIncludesExplicitTrackMatteRef(t *testing.T) {
 	}
 	if layer.MatteRef.ID != matte.ID || layer.MatteRef.Name != matte.Name {
 		t.Fatalf("MatteRef = %+v, want ID=%d Name=%q", layer.MatteRef, matte.ID, matte.Name)
+	}
+	if layer.MatteRefKind != "explicit" {
+		t.Fatalf("MatteRefKind = %q, want explicit", layer.MatteRefKind)
 	}
 }
 

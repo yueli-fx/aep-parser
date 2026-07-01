@@ -33,17 +33,43 @@
     "Use markdown rendering only when a human-readable view is needed."
   ],
   "current_state": {
-    "writer_targets": ["AE2020", "AE2021", "AE2022", "AE2023", "AE2024", "AE2025"],
-    "installed_host_axis": ["AE2020", "AE2021", "AE2022", "AE2023", "AE2024", "AE2025"],
+    "writer_targets": [
+      "AE2020",
+      "AE2021",
+      "AE2022",
+      "AE2023",
+      "AE2024",
+      "AE2025"
+    ],
+    "installed_host_axis": [
+      "AE2020",
+      "AE2021",
+      "AE2022",
+      "AE2023",
+      "AE2024",
+      "AE2025"
+    ],
     "ae_install_root": "E:/adobe",
     "latest_recurring_gate": {
       "artifact": "tmp/migration_matrix_verify/smoke_all/matrix.json",
-      "totals": { "total": 846, "pass": 840, "blocked": 0, "failed": 0, "skipped": 6 },
+      "totals": {
+        "total": 846,
+        "pass": 840,
+        "blocked": 0,
+        "failed": 0,
+        "skipped": 6
+      },
       "status": "pass_with_source_contract_skips"
     },
     "latest_explicit_matte_gate": {
       "artifact": "tmp/migration_matrix_verify/explicit_matte_ae2025/matrix.json",
-      "totals": { "total": 1, "pass": 1, "blocked": 0, "failed": 0, "skipped": 0 },
+      "totals": {
+        "total": 1,
+        "pass": 1,
+        "blocked": 0,
+        "failed": 0,
+        "skipped": 0
+      },
       "status": "pass"
     }
   },
@@ -56,9 +82,30 @@
       "tmp/migration_matrix_shape_all_6x6/matrix.json"
     ],
     "summary": [
-      { "domain": "precomp", "total": 36, "pass": 36, "blocked": 0, "failed": 0, "skipped": 0 },
-      { "domain": "layer", "total": 576, "pass": 536, "blocked": 10, "failed": 0, "skipped": 30 },
-      { "domain": "shape", "total": 972, "pass": 972, "blocked": 0, "failed": 0, "skipped": 0 }
+      {
+        "domain": "precomp",
+        "total": 36,
+        "pass": 36,
+        "blocked": 0,
+        "failed": 0,
+        "skipped": 0
+      },
+      {
+        "domain": "layer",
+        "total": 576,
+        "pass": 541,
+        "blocked": 5,
+        "failed": 0,
+        "skipped": 30
+      },
+      {
+        "domain": "shape",
+        "total": 972,
+        "pass": 972,
+        "blocked": 0,
+        "failed": 0,
+        "skipped": 0
+      }
     ]
   },
   "coverage_batches": [
@@ -79,7 +126,9 @@
           "out": "tmp/migration_matrix_layer_all_6x6",
           "matrix": "tmp/migration_matrix_layer_all_6x6/matrix.json",
           "ledger": "tmp/migration_matrix_layer_all_6x6/ledger.md",
-          "allow_matrix_exit": [1],
+          "allow_matrix_exit": [
+            1
+          ],
           "allowed_nonpass_reason": "known matte contract boundary"
         },
         {
@@ -196,7 +245,9 @@
           "out": "tmp/migration_matrix_layer_all_6x6",
           "matrix": "tmp/migration_matrix_layer_all_6x6/matrix.json",
           "ledger": "tmp/migration_matrix_layer_all_6x6/ledger.md",
-          "allow_matrix_exit": [1],
+          "allow_matrix_exit": [
+            1
+          ],
           "allowed_nonpass_reason": "known matte contract boundary"
         },
         {
@@ -250,23 +301,47 @@
       "chunks": 0,
       "max_ae_open_cases_per_chunk": 24,
       "ae_open_mode": "target_bound",
-      "endpoint_direct_hosts": ["AE2020", "AE2025"],
-      "inferred_hosts_after_endpoint_pass": ["AE2021", "AE2022", "AE2023", "AE2024"]
+      "endpoint_direct_hosts": [
+        "AE2020",
+        "AE2025"
+      ],
+      "inferred_hosts_after_endpoint_pass": [
+        "AE2021",
+        "AE2022",
+        "AE2023",
+        "AE2024"
+      ]
     },
     "completed_groups": [
-      { "coverage_id": "text-baseline", "gap_recipes": 2, "chunks": 1, "priority": "small_direct_endpoint_batch", "status": "pass", "artifact": "tmp/host_open_gaps/text-baseline/chunk-1/matrix.json" },
-      { "coverage_id": "effects-static", "gap_recipes": 2, "chunks": 1, "priority": "small_direct_endpoint_batch", "status": "pass", "artifact": "tmp/host_open_gaps/effects-static/chunk-1/matrix.json" },
+      {
+        "coverage_id": "text-baseline",
+        "gap_recipes": 2,
+        "chunks": 1,
+        "priority": "small_direct_endpoint_batch",
+        "status": "pass",
+        "artifact": "tmp/host_open_gaps/text-baseline/chunk-1/matrix.json"
+      },
+      {
+        "coverage_id": "effects-static",
+        "gap_recipes": 2,
+        "chunks": 1,
+        "priority": "small_direct_endpoint_batch",
+        "status": "pass",
+        "artifact": "tmp/host_open_gaps/effects-static/chunk-1/matrix.json"
+      },
       {
         "coverage_id": "layer-all-family",
-        "gap_recipes": 14,
-        "chunks": 3,
+        "gap_recipes": 15,
+        "chunks": 4,
         "priority": "chunked_non_boundary_batch",
         "status": "pass",
         "artifacts": [
           "tmp/host_open_gaps/layer-all-family/chunk-1/matrix.json",
           "tmp/host_open_gaps/layer-all-family/chunk-2/matrix.json",
-          "tmp/host_open_gaps/layer-all-family/chunk-3/matrix.json"
-        ]
+          "tmp/host_open_gaps/layer-all-family/chunk-3/matrix.json",
+          "tmp/host_open_gaps/layer-all-family/chunk-4/matrix.json"
+        ],
+        "result": "non-boundary layer chunks passed 60/60, including classic track matte endpoint host-open."
       },
       {
         "coverage_id": "shape-all-family",
@@ -336,8 +411,8 @@
       "id": "host-open-endpoint-direct-layer-shape",
       "status": "completed",
       "scope": "Run remaining chunked endpoint direct AE-open gaps for non-representative shape recipes.",
-      "expected_chunks": 4,
-      "result": "non-boundary layer chunks passed 56/56; non-representative shape chunks passed 92/92."
+      "expected_chunks": 8,
+      "result": "non-boundary layer chunks passed 60/60, including classic track matte; non-representative shape chunks passed 92/92."
     }
   ],
   "acceptance_audit": {
@@ -387,8 +462,10 @@
     {
       "id": "layer-matte-source-contract",
       "status": "known_boundary",
-      "affected_recipes": ["minimal-layer-explicit-matte", "minimal-layer-track-matte"],
-      "summary": "AE2025 explicit matte source data cannot be safely downgraded to AE2020-AE2024 in the current writer contract; lower explicit-matte sources are source-contract skips."
+      "affected_recipes": [
+        "minimal-layer-explicit-matte"
+      ],
+      "summary": "AE2025 explicit matte source data cannot be safely downgraded to AE2020-AE2024 in the current writer contract; lower explicit-matte sources are source-contract skips. Classic positional track matte now migrates across AE2020-AE2025."
     }
   ]
 }

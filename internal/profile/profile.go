@@ -148,6 +148,7 @@ type Layer struct {
 	LightSourceRef *LayerRef   `json:"light_source_ref,omitempty"`
 	ParentRef      *LayerRef   `json:"parent_ref,omitempty"`
 	MatteRef       *LayerRef   `json:"matte_ref,omitempty"`
+	MatteRefKind   string      `json:"matte_ref_kind,omitempty"`
 	Timing         LayerTiming `json:"timing"`
 	Flags          LayerFlags  `json:"flags"`
 	Effects        []Effect    `json:"effects,omitempty"`
@@ -641,7 +642,7 @@ func buildLayer(
 		lp.ParentRef = layerRef(l.ParentID, layerByID)
 	}
 	if l.TrackMatte != 0 {
-		lp.MatteRef = matteRef(l, sceneLayer, layerByID, layerByIndex)
+		lp.MatteRef, lp.MatteRefKind = matteRef(l, sceneLayer, layerByID, layerByIndex)
 	}
 	for i, fx := range l.Effects {
 		effectUsage[fx.MatchName]++
@@ -1077,14 +1078,14 @@ func matteRef(
 	sceneLayer *aep.Layer,
 	layerByID map[uint32]*aep.JSONLayer,
 	layerByIndex map[int]*aep.JSONLayer,
-) *LayerRef {
+) (*LayerRef, string) {
 	if sceneLayer != nil && sceneLayer.TrackMatteLayerID != 0 {
-		return layerRef(sceneLayer.TrackMatteLayerID, layerByID)
+		return layerRef(sceneLayer.TrackMatteLayerID, layerByID), "explicit"
 	}
 	if l == nil || l.TrackMatte == 0 {
-		return nil
+		return nil, ""
 	}
-	return jsonLayerRef(layerByIndex[l.Index-1])
+	return jsonLayerRef(layerByIndex[l.Index-1]), "positional"
 }
 
 func layerInPoint(l *aep.JSONLayer, sceneLayer *aep.Layer) float64 {

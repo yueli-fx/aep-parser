@@ -18,7 +18,7 @@ func classifyProfile(source, target VersionLabel, prof *profile.Profile) []Entry
 	}
 	for _, comp := range prof.Comps {
 		for _, layer := range comp.Layers {
-			if source == VersionAE2025 && layer.MatteRef != nil && target != VersionAE2025 {
+			if source == VersionAE2025 && layer.MatteRef != nil && layer.MatteRefKind == "explicit" && target != VersionAE2025 {
 				entries = append(entries, Entry{
 					Path:          fmt.Sprintf("comps[%q].layers[%q].matte_ref", comp.Name, layer.Name),
 					Class:         ClassBlocked,

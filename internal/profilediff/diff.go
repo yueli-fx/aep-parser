@@ -256,6 +256,7 @@ func compareLayer(
 	compareLayerRefValue(base+".light_source_ref", expected.LightSourceRef, actual.LightSourceRef, SeverityFidelity, ActionWrite, compareValue)
 	compareLayerRefValue(base+".parent_ref", expected.ParentRef, actual.ParentRef, SeverityFidelity, ActionWrite, compareValue)
 	compareLayerRefValue(base+".matte_ref", expected.MatteRef, actual.MatteRef, SeverityFidelity, ActionWrite, compareValue)
+	compareValue(base+".matte_ref_kind", expected.MatteRefKind, actual.MatteRefKind, SeverityFidelity, ActionWrite)
 	compareValue(base+".timing.start_time_seconds", expected.Timing.StartTime, actual.Timing.StartTime, SeverityFidelity, ActionWrite)
 	compareValue(base+".timing.duration_seconds", expected.Timing.Duration, actual.Timing.Duration, SeverityFidelity, ActionWrite)
 	compareValue(base+".timing.in_point_seconds", expected.Timing.InPoint, actual.Timing.InPoint, SeverityFidelity, ActionWrite)
