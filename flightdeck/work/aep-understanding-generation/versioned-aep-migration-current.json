@@ -431,6 +431,13 @@
       "input": "tmp/migration_coverage_summary.json"
     },
     {
+      "id": "coverage-summary-json-query",
+      "status": "available_verified",
+      "purpose": "Query generated coverage summary JSON as machine-readable totals, domain rollups, coverage records, recipe records, or host-open evidence-level groups.",
+      "script": "scripts/migration/query_coverage_summary.ps1",
+      "command": "pwsh -File scripts/migration/query_coverage_summary.ps1 [-Refresh] [-Totals] [-Domain name] [-CoverageId id] [-Recipe name] [-EvidenceLevel level]"
+    },
+    {
       "id": "standalone-verify-cli",
       "status": "available_verified",
       "purpose": "Run a source/target AEP verification report with profile diff, migration-report allowed differences, capability-ledger boundaries, and optional AE-open verification.",
@@ -464,7 +471,7 @@
       {
         "command": "pwsh -File scripts/migration/validate_current.ps1",
         "status": "pass",
-        "evidence": "current ok: checked 2 coverage batches and 10 tooling entries"
+        "evidence": "current ok: checked 2 coverage batches and 11 tooling entries"
       },
       {
         "command": "pwsh -File scripts/migration/validate_checkpoint.ps1",
@@ -490,6 +497,11 @@
         "command": "pwsh -File scripts/migration/validate_coverage_summary_json.ps1",
         "status": "pass",
         "evidence": "coverage summary ok: checked 14 records, 11 domains, and 141 recipes"
+      },
+      {
+        "command": "pwsh -File scripts/migration/query_coverage_summary.ps1 -Recipe minimal-layer-explicit-matte",
+        "status": "pass",
+        "evidence": "query returned layer-all-family writer matrix totals 1 pass, 5 blocked, 30 skipped and host-open evidence_level excluded_known_boundary"
       },
       {
         "command": "pwsh -File scripts/migration/plan_host_open_gaps.ps1 -AERoot E:/adobe",
