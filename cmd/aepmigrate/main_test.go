@@ -168,6 +168,49 @@ func TestRunVerifyReturnsOneForProfileDiffs(t *testing.T) {
 	}
 }
 
+func TestRunVerifyAcceptsMigrationReportForAllowedDiffs(t *testing.T) {
+	source := writeTempProjectWithNamedComp(t, "Source")
+	target := writeTempProjectWithNamedComp(t, "Target")
+	migrationReportPath := filepath.Join(t.TempDir(), "migration-report.json")
+	if err := os.WriteFile(migrationReportPath, []byte(`{
+  "schema_version": 1,
+  "target": {
+    "version_label": "AE2020"
+  },
+  "summary": {
+    "status": "pass"
+  },
+  "entries": [
+    {
+      "path": "comps.by_id[1].name",
+      "class": "translated",
+      "target_version": "AE2020",
+      "reason": "Comp rename is an intentional migration mapping."
+    }
+  ]
+}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	outPath := filepath.Join(t.TempDir(), "verify.json")
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{
+		"verify",
+		"-source", source,
+		"-target", target,
+		"-target-version", "AE2020",
+		"-report", migrationReportPath,
+		"-out", outPath,
+	}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("run verify = %d, stderr=%s", code, stderr.String())
+	}
+	report := readReportSummary(t, outPath)
+	if report.Summary.Status != "pass" || report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 || report.Verification.ProfileDiffIgnoredCount != 1 {
+		t.Fatalf("verify report = %+v", report)
+	}
+}
+
 func TestRunMatrixWritesAggregateReport(t *testing.T) {
 	root := t.TempDir()
 	recipePath := filepath.Join(root, "minimal.json")
@@ -884,9 +927,10 @@ func readReportSummary(t *testing.T, path string) struct {
 		Status string `json:"status"`
 	} `json:"summary"`
 	Verification struct {
-		ProfileDiffStatus string `json:"profile_diff_status"`
-		ProfileDiffCount  int    `json:"profile_diff_count"`
-		AEOpenStatus      string `json:"ae_open_status"`
+		ProfileDiffStatus       string `json:"profile_diff_status"`
+		ProfileDiffCount        int    `json:"profile_diff_count"`
+		ProfileDiffIgnoredCount int    `json:"profile_diff_ignored_count"`
+		AEOpenStatus            string `json:"ae_open_status"`
 	} `json:"verification"`
 } {
 	t.Helper()
@@ -899,9 +943,10 @@ func readReportSummary(t *testing.T, path string) struct {
 			Status string `json:"status"`
 		} `json:"summary"`
 		Verification struct {
-			ProfileDiffStatus string `json:"profile_diff_status"`
-			ProfileDiffCount  int    `json:"profile_diff_count"`
-			AEOpenStatus      string `json:"ae_open_status"`
+			ProfileDiffStatus       string `json:"profile_diff_status"`
+			ProfileDiffCount        int    `json:"profile_diff_count"`
+			ProfileDiffIgnoredCount int    `json:"profile_diff_ignored_count"`
+			AEOpenStatus            string `json:"ae_open_status"`
 		} `json:"verification"`
 	}
 	if err := json.Unmarshal(data, &report); err != nil {

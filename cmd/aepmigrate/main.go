@@ -90,6 +90,7 @@ func runVerify(args []string, stdout, stderr io.Writer) int {
 	sourcePath := fs.String("source", "", "source .aep path")
 	targetPath := fs.String("target", "", "target .aep path")
 	targetVersionRaw := fs.String("target-version", "", "target AE version: AE2020 through AE2025")
+	migrationReportPath := fs.String("report", "", "optional migration report JSON path for allowed profile diffs")
 	outPath := fs.String("out", "", "JSON verification report output path")
 	if err := fs.Parse(args); err != nil {
 		return 2
@@ -104,9 +105,10 @@ func runVerify(args []string, stdout, stderr io.Writer) int {
 		return 2
 	}
 	report, err := aepmigrate.Verify(aepmigrate.VerifyOptions{
-		SourcePath:    *sourcePath,
-		TargetPath:    *targetPath,
-		TargetVersion: targetVersion,
+		SourcePath:          *sourcePath,
+		TargetPath:          *targetPath,
+		TargetVersion:       targetVersion,
+		MigrationReportPath: *migrationReportPath,
 	})
 	if err != nil {
 		fmt.Fprintln(stderr, err)
