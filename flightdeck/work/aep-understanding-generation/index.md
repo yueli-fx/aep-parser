@@ -689,7 +689,9 @@ Current:
   aspect, display start time, work area, comp flags, motion-blur settings,
   renderer, Motion Graphics template name, label, and comment. Source projects
   with layers are intentionally blocked before output so conversion cannot
-  silently drop layer content.
+  silently drop layer content. Successful convert now reopens the target and
+  runs source-vs-target `profilediff`; unexpected profile diffs are recorded in
+  the migration report and block success.
 - Recipe IR coverage for the current comp and layer strategy matrices is
   complete: comp settings have object-level and field-level profile checks,
   authored-layer examples carry `expected_profile.layers[]`, camera/light

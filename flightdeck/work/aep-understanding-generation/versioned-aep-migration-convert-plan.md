@@ -4,7 +4,7 @@
 
 **Goal:** Add the first conservative `aepmigrate convert` slice: convert only no-layer composition skeleton projects to a requested AE target version, and refuse projects that would require layer reconstruction.
 
-**Architecture:** Extend `internal/aepmigrate` with a `Convert` function that opens the source, builds a profile, runs existing assess checks, adds convert-scope blockers, and writes a new target-version project only when the source is inside the first supported surface. Add `cmd/aepmigrate convert` as a CLI wrapper. Do not copy raw chunks across AE versions.
+**Architecture:** Extend `internal/aepmigrate` with a `Convert` function that opens the source, builds a profile, runs existing assess checks, adds convert-scope blockers, and writes a new target-version project only when the source is inside the first supported surface. After writing, reopen the target, build its profile, and run `profilediff.Compare` before reporting success. Add `cmd/aepmigrate convert` as a CLI wrapper. Do not copy raw chunks across AE versions.
 
 **Tech Stack:** Go standard library, `internal/aep`, `internal/profile`, existing `aepmigrate.Report`, table-driven tests.
 
@@ -24,6 +24,9 @@ This slice supports:
   motion-blur settings, renderer, Motion Graphics template name, label, and
   comment;
 - output project skeleton uses the requested target version.
+- every successful output is reopened and profile-diffed against the source;
+  unexpected profile diffs are recorded in `verification.profile_diffs` and
+  block success.
 
 This slice refuses:
 
@@ -50,6 +53,8 @@ file in this first slice because that would silently drop content.
   - Add `convert` subcommand.
 - Modify: `cmd/aepmigrate/main_test.go`
   - Add command tests for success and blocked source.
+- Modify: `internal/profilediff/diff.go`
+  - Compare profile-visible comp settings that migration claims to preserve.
 - Modify: `flightdeck/work/aep-understanding-generation/index.md`
 - Modify: `flightdeck/cockpit.md`
 
@@ -114,6 +119,25 @@ go test ./internal/aepmigrate -run TestConvert -count=1
   - Reopen and profile the output.
   - Assert renderer match name and template name match.
 
+## Task 1.5: Profile Diff Gate
+
+- [x] Add `profilediff.TestCompareReportsCompSettingsDiffs`.
+  - Prove profile diff reports background color, resolution factor, pixel
+    aspect, display start time, work area, comp flags, motion blur, renderer,
+    Motion Graphics template name, label, and comment differences.
+
+- [x] Extend `profilediff.compareComp`.
+  - Compare all profile-visible comp fields that the no-layer convert slice
+    claims to preserve.
+
+- [x] Add `TestConvertRunsProfileDiffVerification`.
+  - Convert a no-layer comp with non-default settings.
+  - Assert `report.verification.profile_diff_status == "pass"`.
+  - Assert `report.verification.profile_diff_count == 0`.
+
+- [x] Add CLI report coverage.
+  - `cmd/aepmigrate convert` report JSON must expose profile diff status/count.
+
 ## Task 2: CLI Convert
 
 - [x] Write a failing CLI success test:
@@ -158,6 +182,8 @@ git diff --check
   - renderer and Motion Graphics template name are preserved through their comp
     writers;
   - item-level comp metadata is preserved through the reopen-backed item writer;
+  - successful convert runs source-vs-target profile diff and blocks success on
+    unexpected differences;
   - layer-bearing projects are intentionally blocked until layer reconstruction enters the migration surface.
 
 ## Self-Review
@@ -166,3 +192,5 @@ git diff --check
 - No raw chunk copying across target versions.
 - No claim of full-project migration.
 - Target version is proven by reopening the output and reading the version string.
+- Successful convert is now also proven by source-vs-target profile diff status
+  `pass`; AE open/render gates remain a separate, stronger validation layer.

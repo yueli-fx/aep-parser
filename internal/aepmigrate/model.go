@@ -63,9 +63,21 @@ type Entry struct {
 }
 
 type Verification struct {
-	ProfileDiffStatus string `json:"profile_diff_status"`
-	AEOpenStatus      string `json:"ae_open_status"`
-	RenderStatus      string `json:"render_status"`
+	ProfileDiffStatus       string             `json:"profile_diff_status"`
+	ProfileDiffCount        int                `json:"profile_diff_count"`
+	ProfileDiffIgnoredCount int                `json:"profile_diff_ignored_count,omitempty"`
+	ProfileDiffs            []VerificationDiff `json:"profile_diffs,omitempty"`
+	AEOpenStatus            string             `json:"ae_open_status"`
+	RenderStatus            string             `json:"render_status"`
+}
+
+type VerificationDiff struct {
+	Path       string `json:"path"`
+	Kind       string `json:"kind"`
+	Severity   string `json:"severity"`
+	ActionType string `json:"action_type"`
+	Expected   any    `json:"expected,omitempty"`
+	Actual     any    `json:"actual,omitempty"`
 }
 
 type Report struct {

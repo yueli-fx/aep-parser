@@ -7,6 +7,7 @@ import (
 
 	"github.com/yueli-fx/aep-parser/internal/aep"
 	"github.com/yueli-fx/aep-parser/internal/profile"
+	"github.com/yueli-fx/aep-parser/internal/profilediff"
 )
 
 type ConvertOptions struct {
@@ -64,12 +65,64 @@ func Convert(opts ConvertOptions) (Report, error) {
 	if err != nil {
 		return Report{}, err
 	}
-	defer out.Close()
 	if err := targetProject.WriteAEP(out); err != nil {
+		out.Close()
+		return Report{}, err
+	}
+	if err := out.Close(); err != nil {
 		return Report{}, err
 	}
 	report.Target.Path = opts.OutputPath
+	if err := verifyConvertedProfile(&report, prof, opts.OutputPath); err != nil {
+		return Report{}, err
+	}
 	return report, nil
+}
+
+func verifyConvertedProfile(report *Report, source *profile.Profile, targetPath string) error {
+	targetProject, err := aep.Open(targetPath)
+	if err != nil {
+		return fmt.Errorf("profile diff target open: %w", err)
+	}
+	target, err := profile.Build(targetProject, profile.Options{Path: targetPath})
+	if err != nil {
+		return fmt.Errorf("profile diff target profile: %w", err)
+	}
+	diffReport, err := profilediff.Compare(source, target, profilediff.Options{})
+	if err != nil {
+		return fmt.Errorf("profile diff compare: %w", err)
+	}
+	report.Verification.ProfileDiffCount = diffReport.DiffCount
+	report.Verification.ProfileDiffIgnoredCount = diffReport.IgnoredCount
+	report.Verification.ProfileDiffs = verificationDiffs(diffReport.Diffs)
+	if diffReport.DiffCount == 0 {
+		report.Verification.ProfileDiffStatus = "pass"
+		return nil
+	}
+	report.Verification.ProfileDiffStatus = "fail"
+	report.Entries = append(report.Entries, Entry{
+		Path:          "verification.profile_diff",
+		Class:         ClassBlocked,
+		TargetVersion: report.Target.Version,
+		Reason:        fmt.Sprintf("Profile diff verification found %d unexpected migrated output difference(s).", diffReport.DiffCount),
+	})
+	report.Summary = summarize(report.Entries)
+	return nil
+}
+
+func verificationDiffs(diffs []profilediff.Diff) []VerificationDiff {
+	out := make([]VerificationDiff, 0, len(diffs))
+	for _, diff := range diffs {
+		out = append(out, VerificationDiff{
+			Path:       diff.Path,
+			Kind:       string(diff.Kind),
+			Severity:   string(diff.Severity),
+			ActionType: string(diff.ActionType),
+			Expected:   diff.Expected,
+			Actual:     diff.Actual,
+		})
+	}
+	return out
 }
 
 func convertAssessEntries(entries []Entry) []Entry {

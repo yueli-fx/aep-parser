@@ -65,6 +65,49 @@ func TestCompareReportsEffectParamAndKeyframeDiffs(t *testing.T) {
 	assertDiff(t, report, `comps.by_id[1].layers.by_id[10].effects.by_match_name["ADBE Fill"]#0.params.by_match_name["ADBE Fill-0002"]#0.keyframes`, profilediff.KindWrongValue)
 }
 
+func TestCompareReportsCompSettingsDiffs(t *testing.T) {
+	expected := testProfile()
+	expected.Comps[0].BackgroundColor = [3]uint8{12, 34, 56}
+	expected.Comps[0].ResolutionFactor = [2]uint16{3, 2}
+	expected.Comps[0].PixelAspect = 1.5
+	expected.Comps[0].DisplayStartTime = 1.25
+	expected.Comps[0].FrameBlending = true
+	expected.Comps[0].HideShyLayers = true
+	expected.Comps[0].PreserveNestedFrameRate = true
+	expected.Comps[0].PreserveNestedResolution = true
+	expected.Comps[0].MotionBlur = profile.MotionBlurSettings{
+		Enabled:             true,
+		ShutterAngle:        270,
+		ShutterPhase:        -45,
+		AdaptiveSampleLimit: 192,
+		SamplesPerFrame:     24,
+	}
+	expected.Comps[0].WorkArea = profile.WorkArea{Start: 0.5, End: 4.5}
+	expected.Comps[0].MotionGraphicsTemplateName = "Migration Template"
+	expected.Comps[0].Label = 11
+	expected.Comps[0].Comment = "migration note"
+
+	actual := testProfile()
+
+	report, err := profilediff.Compare(expected, actual, profilediff.Options{})
+	if err != nil {
+		t.Fatalf("Compare: %v", err)
+	}
+	assertDiff(t, report, "comps.by_id[1].background_color", profilediff.KindWrongValue)
+	assertDiff(t, report, "comps.by_id[1].resolution_factor", profilediff.KindWrongValue)
+	assertDiff(t, report, "comps.by_id[1].pixel_aspect", profilediff.KindWrongValue)
+	assertDiff(t, report, "comps.by_id[1].display_start_time", profilediff.KindWrongValue)
+	assertDiff(t, report, "comps.by_id[1].frame_blending", profilediff.KindWrongValue)
+	assertDiff(t, report, "comps.by_id[1].hide_shy_layers", profilediff.KindWrongValue)
+	assertDiff(t, report, "comps.by_id[1].preserve_nested_frame_rate", profilediff.KindWrongValue)
+	assertDiff(t, report, "comps.by_id[1].preserve_nested_resolution", profilediff.KindWrongValue)
+	assertDiff(t, report, "comps.by_id[1].motion_blur", profilediff.KindWrongValue)
+	assertDiff(t, report, "comps.by_id[1].work_area", profilediff.KindWrongValue)
+	assertDiff(t, report, "comps.by_id[1].motion_graphics_template_name", profilediff.KindWrongValue)
+	assertDiff(t, report, "comps.by_id[1].label", profilediff.KindWrongValue)
+	assertDiff(t, report, "comps.by_id[1].comment", profilediff.KindWrongValue)
+}
+
 func TestCompareMatchesCloneObjectsByNameAndIndexWhenIDsDiffer(t *testing.T) {
 	expected := testProfile(testLayer(10, "Hero", func(l *profile.Layer) {
 		l.Timing.OutPoint = 3

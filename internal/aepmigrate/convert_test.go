@@ -171,6 +171,26 @@ func TestConvertPreservesNoLayerCompRendererAndTemplateName(t *testing.T) {
 	}
 }
 
+func TestConvertRunsProfileDiffVerification(t *testing.T) {
+	source := writeTempProjectWithConfiguredNoLayerComp(t)
+	outPath := filepath.Join(t.TempDir(), "converted.aep")
+
+	report, err := Convert(ConvertOptions{
+		InputPath:  source,
+		OutputPath: outPath,
+		Target:     VersionAE2025,
+	})
+	if err != nil {
+		t.Fatalf("Convert: %v", err)
+	}
+	if report.Verification.ProfileDiffStatus != "pass" {
+		t.Fatalf("profile diff status = %q, want pass; verification=%+v", report.Verification.ProfileDiffStatus, report.Verification)
+	}
+	if report.Verification.ProfileDiffCount != 0 {
+		t.Fatalf("profile diff count = %d, want 0; verification=%+v", report.Verification.ProfileDiffCount, report.Verification)
+	}
+}
+
 func TestConvertRefusesLayerProjects(t *testing.T) {
 	source := writeTempProjectWithOneSolidLayer(t)
 	outPath := filepath.Join(t.TempDir(), "converted.aep")

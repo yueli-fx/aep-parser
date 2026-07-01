@@ -61,9 +61,19 @@ func TestRunConvertWritesOutputAndReport(t *testing.T) {
 	if _, err := os.Stat(outPath); err != nil {
 		t.Fatalf("converted output missing: %v", err)
 	}
+	data, err := os.ReadFile(reportPath)
+	if err != nil {
+		t.Fatalf("ReadFile report: %v", err)
+	}
+	if !bytes.Contains(data, []byte(`"profile_diff_count": 0`)) {
+		t.Fatalf("report missing explicit profile_diff_count: %s", string(data))
+	}
 	report := readReportSummary(t, reportPath)
 	if report.Summary.Status != "pass" {
 		t.Fatalf("report status = %q, want pass", report.Summary.Status)
+	}
+	if report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 {
+		t.Fatalf("profile diff verification = %+v, want pass with 0 diffs", report.Verification)
 	}
 	if !bytes.Contains(stdout.Bytes(), []byte("migration convert:")) {
 		t.Fatalf("stdout missing output path: %s", stdout.String())
@@ -144,6 +154,10 @@ func readReportSummary(t *testing.T, path string) struct {
 	Summary struct {
 		Status string `json:"status"`
 	} `json:"summary"`
+	Verification struct {
+		ProfileDiffStatus string `json:"profile_diff_status"`
+		ProfileDiffCount  int    `json:"profile_diff_count"`
+	} `json:"verification"`
 } {
 	t.Helper()
 	data, err := os.ReadFile(path)
@@ -154,6 +168,10 @@ func readReportSummary(t *testing.T, path string) struct {
 		Summary struct {
 			Status string `json:"status"`
 		} `json:"summary"`
+		Verification struct {
+			ProfileDiffStatus string `json:"profile_diff_status"`
+			ProfileDiffCount  int    `json:"profile_diff_count"`
+		} `json:"verification"`
 	}
 	if err := json.Unmarshal(data, &report); err != nil {
 		t.Fatalf("Unmarshal report: %v", err)

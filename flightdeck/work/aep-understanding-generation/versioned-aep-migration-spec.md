@@ -237,7 +237,8 @@ Minimum JSON fields:
     }
   ],
   "verification": {
-    "profile_diff_status": "not_run",
+    "profile_diff_status": "pass",
+    "profile_diff_count": 0,
     "ae_open_status": "not_run",
     "render_status": "not_run"
   }
@@ -250,6 +251,11 @@ Status rules:
 - `warn`: approximations or drops exist, but the user allowed lossy output.
 - `blocked`: at least one required construct cannot be safely migrated.
 - `error`: parsing, writing, or verification failed unexpectedly.
+
+For `convert`, `profile_diff_status` should be `pass` before a report can be
+considered successful. If source-vs-target profile diff finds unexpected
+differences, record them under `verification.profile_diffs`, set
+`profile_diff_status: "fail"`, and block success.
 
 ## Upgrade Policy
 
