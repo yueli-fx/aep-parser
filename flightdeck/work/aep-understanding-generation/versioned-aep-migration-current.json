@@ -435,7 +435,7 @@
       "status": "available_verified",
       "purpose": "Query generated coverage summary JSON as machine-readable totals, domain rollups, coverage records, recipe records, or host-open evidence-level groups.",
       "script": "scripts/migration/query_coverage_summary.ps1",
-      "command": "pwsh -File scripts/migration/query_coverage_summary.ps1 [-Refresh] [-Totals] [-Domain name] [-CoverageId id] [-Recipe name] [-EvidenceLevel level]"
+      "command": "pwsh -File scripts/migration/query_coverage_summary.ps1 [-Refresh] [-SkipValidate] [-Totals] [-Domain name] [-CoverageId id] [-Recipe name] [-EvidenceLevel level]"
     },
     {
       "id": "standalone-verify-cli",

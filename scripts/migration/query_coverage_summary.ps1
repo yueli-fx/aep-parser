@@ -6,7 +6,8 @@ param(
   [string]$Recipe = "",
   [string]$EvidenceLevel = "",
   [switch]$Totals,
-  [switch]$Refresh
+  [switch]$Refresh,
+  [switch]$SkipValidate
 )
 
 $ErrorActionPreference = "Stop"
@@ -16,6 +17,14 @@ if ($Refresh -or -not (Test-Path -LiteralPath $SummaryPath)) {
   pwsh -File $renderer -CoveragePath $CoveragePath -Out $SummaryPath | Out-Null
   if ($LASTEXITCODE -ne 0) {
     throw "coverage summary render failed with exit code $LASTEXITCODE"
+  }
+}
+
+if (-not $SkipValidate) {
+  $validator = Join-Path (Resolve-Path ".").Path "scripts/migration/validate_coverage_summary_json.ps1"
+  pwsh -File $validator -CoveragePath $CoveragePath -SummaryPath $SummaryPath | Out-Null
+  if ($LASTEXITCODE -ne 0) {
+    throw "coverage summary validation failed with exit code $LASTEXITCODE"
   }
 }
 
