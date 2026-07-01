@@ -41,6 +41,22 @@ function Assert-ContainsString {
   }
 }
 
+function Assert-SameStringSet {
+  param(
+    [string]$Label,
+    $Expected,
+    $Actual
+  )
+
+  $expectedValues = @($Expected | Sort-Object -Unique)
+  $actualValues = @($Actual | Sort-Object -Unique)
+  $expectedText = $expectedValues -join ","
+  $actualText = $actualValues -join ","
+  if ($expectedText -ne $actualText) {
+    throw "$Label mismatch: expected=[$expectedText] actual=[$actualText]"
+  }
+}
+
 $coverage = Get-Content -Raw $CoveragePath | ConvertFrom-Json
 $checked = 0
 $checkedGates = 0
@@ -143,6 +159,24 @@ foreach ($record in $coverage.coverage) {
     }
   }
 
+  if ($record.PSObject.Properties.Name -contains "boundary") {
+    $blockedRecipes = @($matrix.cases |
+      Where-Object { $_.status -eq "blocked" } |
+      ForEach-Object { $_.recipe_name } |
+      Sort-Object -Unique)
+    $boundaryRecipes = @($record.boundary.blocked_recipe_ids | Sort-Object -Unique)
+    Assert-SameStringSet "$($record.id).boundary.blocked_recipe_ids" $blockedRecipes $boundaryRecipes
+
+    if ($record.boundary.PSObject.Properties.Name -contains "passing_recipe_count") {
+      Assert-Equal "$($record.id).boundary.passing_recipe_count" ($matrixRecipes.Count - $blockedRecipes.Count) ([int]$record.boundary.passing_recipe_count)
+    }
+
+    if ($record.boundary.PSObject.Properties.Name -contains "details") {
+      $detailRecipes = @($record.boundary.details | ForEach-Object { $_.recipe } | Sort-Object -Unique)
+      Assert-SameStringSet "$($record.id).boundary.details.recipes" $blockedRecipes $detailRecipes
+    }
+  }
+
   if ($record.PSObject.Properties.Name -contains "host_open_endpoint_evidence") {
     $evidence = $record.host_open_endpoint_evidence
     if ($evidence.open_mode -ne "target_bound") {
@@ -197,6 +231,18 @@ foreach ($record in $coverage.coverage) {
 
     if (($evidenceRecipes -join ",") -ne ($hostRecipes -join ",")) {
       throw "$($record.id).host_open_endpoint_evidence.recipes mismatch: evidence=$($evidenceRecipes -join ',') matrix=$($hostRecipes -join ',')"
+    }
+
+    if ($evidence.PSObject.Properties.Name -contains "excluded_known_boundary_recipes") {
+      $excludedRecipes = @($evidence.excluded_known_boundary_recipes | Sort-Object -Unique)
+      if ($record.PSObject.Properties.Name -contains "boundary") {
+        Assert-SameStringSet "$($record.id).host_open_endpoint_evidence.excluded_known_boundary_recipes" $record.boundary.blocked_recipe_ids $excludedRecipes
+      }
+      foreach ($excludedRecipe in $excludedRecipes) {
+        if ($evidenceRecipes -contains $excludedRecipe) {
+          throw "$($record.id).host_open_endpoint_evidence.recipes includes excluded boundary recipe '$excludedRecipe'"
+        }
+      }
     }
   }
 

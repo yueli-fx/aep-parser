@@ -63,7 +63,7 @@ func materializeLayerRefs(target VersionLabel, layers []convertLayerPair) error 
 		if mode == aep.TrackMatteNone {
 			continue
 		}
-		if pair.source.MatteRef != nil && pair.source.MatteRefKind == "explicit" && target == VersionAE2025 {
+		if isExplicitMatteRef(pair.source) && supportsExplicitMatteTarget(target) {
 			matte := bySourceID[pair.source.MatteRef.ID]
 			if matte == nil && pair.source.MatteRef.Name != "" {
 				matte = byName[pair.source.MatteRef.Name]
