@@ -703,8 +703,8 @@ Current:
   single rect/ellipse graphic/filter shape conversion rebuilds the parametric
   primitive, Trim Paths, Round Corners radius, Offset Paths fields, ZigZag
   fields, Pucker & Bloat amount, Twist angle/center, Wiggle Paths fields,
-  Wiggle Transform fields, fill, stroke, one Dash 1/Gap 1 pair, percent-mode
-  stroke taper, and
+  Wiggle Transform fields, Repeater fields, fill, stroke, one Dash 1/Gap 1
+  pair, percent-mode stroke taper, and
   wavelength-mode stroke wave from
   stable profile properties while still excluding stroke offset, additional
   dash/gap pairs, wave units/cycles, gradient, and other filter shape content;
@@ -724,7 +724,8 @@ Current:
   shape, rect+fill shape, rect+stroke shape, rect+dashed-stroke shape,
   ellipse+tapered-stroke shape, ellipse+waved-stroke shape, trim-paths shape,
   round-corners shape, offset-paths shape, zigzag shape, pucker-bloat shape,
-  twist shape, wiggle-paths shape, wiggle-transform shape, and precomp outputs.
+  twist shape, wiggle-paths shape, wiggle-transform shape, repeater shape, and
+  precomp outputs.
   `cmd/aepmigrate convert -ae-open -ae <AfterFX.exe>` writes AE open gate status
   into the migration report.
 - `profilediff` now compares profile-visible layer metadata, quality/blending/

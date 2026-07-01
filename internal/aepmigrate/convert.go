@@ -585,6 +585,11 @@ func materializeRectGraphicShapeLayer(comp *aep.Composition, source profile.Laye
 			return nil, err
 		}
 	}
+	if hasRepeaterFilter(source) {
+		if err := materializeShapeRepeater(shapeLayer, source); err != nil {
+			return nil, err
+		}
+	}
 	if hasProperty(source, "ADBE Vector Fill Color") {
 		if err := materializeShapeFill(shapeLayer, source); err != nil {
 			return nil, err
@@ -884,6 +889,60 @@ func materializeShapeWiggleTransform(shapeLayer *aep.ShapeLayer, source profile.
 	}
 	if value, ok := propertyFloat(source.Properties, "ADBE Vector Spatial Phase"); ok {
 		if err := wiggleTransform.SetSpatialPhase(value); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func materializeShapeRepeater(shapeLayer *aep.ShapeLayer, source profile.Layer) error {
+	repeater, err := shapeLayer.RootGroup().AddRepeater()
+	if err != nil {
+		return err
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Repeater Copies"); ok {
+		if err := repeater.SetCopies(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Repeater Offset"); ok {
+		if err := repeater.SetOffset(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Repeater Order"); ok {
+		if err := repeater.SetOrder(aep.RepeaterOrder(int(value))); err != nil {
+			return err
+		}
+	}
+	transform := repeater.Transform()
+	if value, ok := propertyVector(source.Properties, "ADBE Vector Repeater Anchor", 2); ok {
+		if err := transform.SetAnchor([2]float64{value[0], value[1]}); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyVector(source.Properties, "ADBE Vector Repeater Position", 2); ok {
+		if err := transform.SetPosition([2]float64{value[0], value[1]}); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyVector(source.Properties, "ADBE Vector Repeater Scale", 2); ok {
+		if err := transform.SetScale([2]float64{value[0], value[1]}); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Repeater Rotation"); ok {
+		if err := transform.SetRotation(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Repeater Opacity 1"); ok {
+		if err := transform.SetStartOpacity(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Repeater Opacity 2"); ok {
+		if err := transform.SetEndOpacity(value); err != nil {
 			return err
 		}
 	}
@@ -1508,7 +1567,8 @@ func hasSupportedShapeFilter(layer profile.Layer) bool {
 		hasProperty(layer, "ADBE Vector Twist Angle") ||
 		hasProperty(layer, "ADBE Vector Twist Center") ||
 		hasWigglePathsFilter(layer) ||
-		hasWiggleTransformFilter(layer)
+		hasWiggleTransformFilter(layer) ||
+		hasRepeaterFilter(layer)
 }
 
 func hasWigglePathsFilter(layer profile.Layer) bool {
@@ -1524,6 +1584,18 @@ func hasWiggleTransformFilter(layer profile.Layer) bool {
 		hasProperty(layer, "ADBE Vector Wiggler Scale") ||
 		hasProperty(layer, "ADBE Vector Wiggler Rotation") ||
 		hasProperty(layer, "ADBE Vector Xform Temporal Freq")
+}
+
+func hasRepeaterFilter(layer profile.Layer) bool {
+	return hasProperty(layer, "ADBE Vector Repeater Copies") ||
+		hasProperty(layer, "ADBE Vector Repeater Offset") ||
+		hasProperty(layer, "ADBE Vector Repeater Order") ||
+		hasProperty(layer, "ADBE Vector Repeater Anchor") ||
+		hasProperty(layer, "ADBE Vector Repeater Position") ||
+		hasProperty(layer, "ADBE Vector Repeater Scale") ||
+		hasProperty(layer, "ADBE Vector Repeater Rotation") ||
+		hasProperty(layer, "ADBE Vector Repeater Opacity 1") ||
+		hasProperty(layer, "ADBE Vector Repeater Opacity 2")
 }
 
 func isSupportedParametricGraphicShape(shape profile.Shape) bool {
