@@ -921,3 +921,8 @@ Current:
   `minimal-project-display-settings`, `minimal-comp-object-profile`,
   `minimal-camera-object-profile`, `minimal-light-object-profile`, and
   `minimal-precomp-layer` across 6 source writers and 6 target writers.
+- Camera writer coverage was upgraded from the latest full `PD-1x6` boundary
+  to focused W2020-W2025 source-and-target coverage. The matrix
+  `tmp/migration_matrix_camera_all_6x6/matrix.json` is 540 total, 540 pass,
+  0 blocked, 0 failed, 0 skipped for all 15 current `minimal-camera-*` recipes
+  across 6 source writers and 6 target writers.
