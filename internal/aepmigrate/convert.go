@@ -550,6 +550,13 @@ func materializeRectGraphicShapeLayer(comp *aep.Composition, source profile.Laye
 			return nil, err
 		}
 	}
+	if hasProperty(source, "ADBE Vector Trim Start") ||
+		hasProperty(source, "ADBE Vector Trim End") ||
+		hasProperty(source, "ADBE Vector Trim Offset") {
+		if err := materializeShapeTrim(shapeLayer, source); err != nil {
+			return nil, err
+		}
+	}
 	if hasProperty(source, "ADBE Vector Fill Color") {
 		if err := materializeShapeFill(shapeLayer, source); err != nil {
 			return nil, err
@@ -665,6 +672,34 @@ func materializeShapeOffsetPaths(shapeLayer *aep.ShapeLayer, source profile.Laye
 	}
 	if value, ok := propertyFloat(source.Properties, "ADBE Vector Offset Copy Offset"); ok {
 		if err := offsetPaths.SetCopyOffset(value); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func materializeShapeTrim(shapeLayer *aep.ShapeLayer, source profile.Layer) error {
+	trim, err := shapeLayer.RootGroup().AddTrim()
+	if err != nil {
+		return err
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Trim Start"); ok {
+		if err := trim.SetStart(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Trim End"); ok {
+		if err := trim.SetEnd(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Trim Offset"); ok {
+		if err := trim.SetOffset(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Trim Type"); ok {
+		if err := trim.SetType(aep.TrimType(int(value))); err != nil {
 			return err
 		}
 	}
@@ -1262,11 +1297,10 @@ func isSupportedRectGraphicShapeLayer(layer profile.Layer) bool {
 	}
 	hasFill := hasProperty(layer, "ADBE Vector Fill Color")
 	hasStroke := hasProperty(layer, "ADBE Vector Stroke Color")
-	if !hasFill && !hasStroke {
+	if !hasFill && !hasStroke && !hasSupportedShapeFilter(layer) {
 		return false
 	}
 	if hasProperty(layer, "ADBE Vector Grad Colors") ||
-		hasProperty(layer, "ADBE Vector Filter - Trim") ||
 		hasProperty(layer, "ADBE Vector Stroke Dash 2") ||
 		hasProperty(layer, "ADBE Vector Stroke Gap 2") ||
 		hasProperty(layer, "ADBE Vector Stroke Offset") ||
@@ -1275,6 +1309,14 @@ func isSupportedRectGraphicShapeLayer(layer profile.Layer) bool {
 		return false
 	}
 	return true
+}
+
+func hasSupportedShapeFilter(layer profile.Layer) bool {
+	return hasProperty(layer, "ADBE Vector RoundCorner Radius") ||
+		hasProperty(layer, "ADBE Vector Offset Amount") ||
+		hasProperty(layer, "ADBE Vector Trim Start") ||
+		hasProperty(layer, "ADBE Vector Trim End") ||
+		hasProperty(layer, "ADBE Vector Trim Offset")
 }
 
 func isSupportedParametricGraphicShape(shape profile.Shape) bool {
