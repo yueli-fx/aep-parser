@@ -2,6 +2,9 @@ param(
   [string]$CurrentPath = "flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json",
   [string]$CoveragePath = "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json",
   [string]$SummaryPath = "tmp/migration_coverage_summary.json",
+  [string]$CoverageBatchId = "",
+  [switch]$IncludeCoverageBatch,
+  [switch]$RunCoverageBatchMatrices,
   [switch]$IncludeMatrix,
   [switch]$IncludeGo
 )
@@ -24,6 +27,9 @@ function Invoke-Step {
 $repoRoot = (Resolve-Path ".").Path
 $current = Get-Content -Raw $CurrentPath | ConvertFrom-Json
 $aeRoot = $current.current_state.ae_install_root
+if (-not $CoverageBatchId) {
+  $CoverageBatchId = $current.canonical_coverage_batch
+}
 
 Invoke-Step "validate current JSON" {
   pwsh -File (Join-Path $repoRoot "scripts/migration/validate_current.ps1") -CurrentPath $CurrentPath
@@ -44,6 +50,33 @@ Invoke-Step "validate coverage summary JSON" {
 if ($aeRoot) {
   Invoke-Step "plan host-open gaps" {
     pwsh -File (Join-Path $repoRoot "scripts/migration/plan_host_open_gaps.ps1") -AERoot $aeRoot
+  }
+}
+
+if ($IncludeCoverageBatch) {
+  if (-not $CoverageBatchId) {
+    throw "CoverageBatchId is required because current JSON has no canonical_coverage_batch."
+  }
+
+  $tempCoverage = Join-Path $env:TEMP ("aep-coverage-candidate-" + [guid]::NewGuid() + ".json")
+  try {
+    $batchArgs = @(
+      "-File", (Join-Path $repoRoot "scripts/migration/run_coverage_batch.ps1"),
+      "-BatchId", $CoverageBatchId,
+      "-CurrentPath", $CurrentPath,
+      "-CoveragePath", $tempCoverage
+    )
+    if (-not $RunCoverageBatchMatrices) {
+      $batchArgs += "-SkipRun"
+    }
+
+    Invoke-Step "replay coverage batch $CoverageBatchId" {
+      pwsh @batchArgs
+    }
+  } finally {
+    if (Test-Path -LiteralPath $tempCoverage) {
+      Remove-Item -LiteralPath $tempCoverage -Force
+    }
   }
 }
 

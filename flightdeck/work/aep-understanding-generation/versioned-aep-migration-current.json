@@ -399,9 +399,9 @@
     {
       "id": "migration-checkpoint-validator",
       "status": "available_verified",
-      "purpose": "Run the JSON-first migration checkpoint: current JSON, coverage JSON, rendered summary JSON, summary validation, host-open gap audit, and diff check; optional flags include recurring matrix and Go checks.",
+      "purpose": "Run the JSON-first migration checkpoint: current JSON, coverage JSON, rendered summary JSON, summary validation, host-open gap audit, and diff check; optional flags replay coverage batches, recurring matrix gates, and Go checks.",
       "script": "scripts/migration/validate_checkpoint.ps1",
-      "command": "pwsh -File scripts/migration/validate_checkpoint.ps1 [-IncludeMatrix] [-IncludeGo]"
+      "command": "pwsh -File scripts/migration/validate_checkpoint.ps1 [-IncludeCoverageBatch] [-CoverageBatchId id] [-RunCoverageBatchMatrices] [-IncludeMatrix] [-IncludeGo]"
     },
     {
       "id": "coverage-batch-runner",
@@ -470,6 +470,11 @@
         "command": "pwsh -File scripts/migration/validate_checkpoint.ps1",
         "status": "pass",
         "evidence": "checkpoint ok: current JSON, coverage JSON, summary render/validate, host-open gap audit, and diff check passed"
+      },
+      {
+        "command": "pwsh -File scripts/migration/validate_checkpoint.ps1 -IncludeCoverageBatch",
+        "status": "pass",
+        "evidence": "checkpoint ok: canonical all-current-writer-coverage replayed into a temporary coverage file from 14 matrix artifacts and validated 141 recipes"
       },
       {
         "command": "pwsh -File scripts/migration/validate_coverage.ps1",
