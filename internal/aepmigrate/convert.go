@@ -540,6 +540,11 @@ func materializeRectGraphicShapeLayer(comp *aep.Composition, source profile.Laye
 	if err := materializeShapePrimitive(shapeLayer, source.Shapes[0]); err != nil {
 		return nil, err
 	}
+	if hasProperty(source, "ADBE Vector RoundCorner Radius") {
+		if err := materializeShapeRoundCorners(shapeLayer, source); err != nil {
+			return nil, err
+		}
+	}
 	if hasProperty(source, "ADBE Vector Fill Color") {
 		if err := materializeShapeFill(shapeLayer, source); err != nil {
 			return nil, err
@@ -609,6 +614,19 @@ func materializeEllipsePrimitive(shapeLayer *aep.ShapeLayer, shape profile.Shape
 	}
 	if value, ok := propertyFloat(shape.Properties, "ADBE Vector Shape Direction"); ok {
 		if err := ellipse.SetDirection(aep.ShapeDirection(int(value))); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func materializeShapeRoundCorners(shapeLayer *aep.ShapeLayer, source profile.Layer) error {
+	roundCorners, err := shapeLayer.RootGroup().AddRoundCorners()
+	if err != nil {
+		return err
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector RoundCorner Radius"); ok {
+		if err := roundCorners.SetRadius(value); err != nil {
 			return err
 		}
 	}
