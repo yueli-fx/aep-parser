@@ -1572,3 +1572,75 @@ Commit:
 ```text
 docs(aepmigrate): record track matte writer boundary
 ```
+
+---
+
+## Task 39: Shape Gradient Stroke PD-6x6 Writer Matrix Evidence
+
+**Goal:** Upgrade shape gradient stroke writer coverage from `PD-1x3` to a
+full W2020-W2025 source-and-target matrix for all current recipe-owned
+gradient stroke variants.
+
+**Architecture:** Reuse the matrix runner without AE-open. Run the four
+current gradient stroke recipes across `-sources all -targets all` and record
+the reviewed result as `PD-6x6` evidence. Keep host-open coverage separate:
+the existing all-host matrix already opens every current W2020 gradient-stroke
+variant in H2020-H2025.
+
+**Files:**
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/aep-understanding-generation/index.md`
+- Modify: `flightdeck/work/aep-understanding-generation/history.md`
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+- Modify: `flightdeck/cockpit.md`
+
+- [x] **Step 1: Run the gradient stroke all-writer matrix**
+
+Run:
+
+```powershell
+go run ./cmd/aepmigrate matrix `
+  -recipe examples\recipes\minimal-shape-gradient-stroke.json `
+  -recipe examples\recipes\minimal-shape-gradient-stroke-alpha-stops.json `
+  -recipe examples\recipes\minimal-shape-gradient-stroke-highlight.json `
+  -recipe examples\recipes\minimal-shape-gradient-stroke-style.json `
+  -sources all `
+  -targets all `
+  -out tmp\migration_matrix_shape_gradient_stroke_all_6x6 `
+  -ledger-out tmp\migration_matrix_shape_gradient_stroke_all_6x6\ledger.md
+```
+
+Expected: 144 total, 144 pass, 0 blocked, 0 failed, 0 skipped. This is
+4 recipes x 6 source writers x 6 target writers.
+
+- [x] **Step 2: Update reviewed validation summary**
+
+If Step 1 passes, update the Shape Domain gradient stroke row from `PD-1x3` to
+`PD-6x6`. Add
+`tmp/migration_matrix_shape_gradient_stroke_all_6x6/matrix.json` and its
+ledger to raw artifacts. Update `index.md`, `cockpit.md`, and append
+`history.md`.
+
+- [x] **Step 3: Verification and commit**
+
+Run:
+
+```powershell
+pwsh -File scripts\migration\verify_matrix.ps1
+go test ./...
+go vet ./...
+git diff --check
+```
+
+Read:
+
+```powershell
+Get-Content C:\Users\yl\.flightdeck\knowledge\git\commits.md -Raw
+Get-Content flightdeck\knowledge\workflow\verify.md -Raw
+```
+
+Commit:
+
+```text
+docs(aepmigrate): record gradient stroke six-writer evidence
+```

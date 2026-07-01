@@ -893,3 +893,8 @@ Current:
   The blocked cases are AE2025 source downgrades to W2020-W2024; their convert
   reports block `comps["Main"].layers["Fill"].matte_ref` because explicit
   matte source requires AE2025 in the current writer contract.
+- Shape gradient stroke writer coverage was upgraded from `PD-1x3` to full
+  W2020-W2025 source-and-target coverage. The matrix
+  `tmp/migration_matrix_shape_gradient_stroke_all_6x6/matrix.json` is 144
+  total, 144 pass, 0 blocked, 0 failed, 0 skipped for all four current
+  gradient-stroke variants across 6 source writers and 6 target writers.
