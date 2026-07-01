@@ -569,6 +569,12 @@ func materializeRectGraphicShapeLayer(comp *aep.Composition, source profile.Laye
 			return nil, err
 		}
 	}
+	if hasProperty(source, "ADBE Vector Twist Angle") ||
+		hasProperty(source, "ADBE Vector Twist Center") {
+		if err := materializeShapeTwist(shapeLayer, source); err != nil {
+			return nil, err
+		}
+	}
 	if hasProperty(source, "ADBE Vector Fill Color") {
 		if err := materializeShapeFill(shapeLayer, source); err != nil {
 			return nil, err
@@ -748,6 +754,24 @@ func materializeShapePuckerBloat(shapeLayer *aep.ShapeLayer, source profile.Laye
 	}
 	if value, ok := propertyFloat(source.Properties, "ADBE Vector PuckerBloat Amount"); ok {
 		if err := puckerBloat.SetAmount(value); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func materializeShapeTwist(shapeLayer *aep.ShapeLayer, source profile.Layer) error {
+	twist, err := shapeLayer.RootGroup().AddTwist()
+	if err != nil {
+		return err
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Twist Angle"); ok {
+		if err := twist.SetAngle(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyVector(source.Properties, "ADBE Vector Twist Center", 2); ok {
+		if err := twist.SetCenter([2]float64{value[0], value[1]}); err != nil {
 			return err
 		}
 	}
@@ -1368,7 +1392,9 @@ func hasSupportedShapeFilter(layer profile.Layer) bool {
 		hasProperty(layer, "ADBE Vector Zigzag Size") ||
 		hasProperty(layer, "ADBE Vector Zigzag Detail") ||
 		hasProperty(layer, "ADBE Vector Zigzag Points") ||
-		hasProperty(layer, "ADBE Vector PuckerBloat Amount")
+		hasProperty(layer, "ADBE Vector PuckerBloat Amount") ||
+		hasProperty(layer, "ADBE Vector Twist Angle") ||
+		hasProperty(layer, "ADBE Vector Twist Center")
 }
 
 func isSupportedParametricGraphicShape(shape profile.Shape) bool {
