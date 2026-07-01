@@ -412,6 +412,7 @@ func compareProperty(
 	compareValue(base+".match_name", expected.MatchName, actual.MatchName, SeverityFidelity, ActionWrite)
 	compareValue(base+".occurrence", expected.Occurrence, actual.Occurrence, SeverityUnknown, ActionInvestigate)
 	compareValue(base+".static_value", expected.StaticValue, actual.StaticValue, SeverityFidelity, ActionWrite)
+	compareValue(base+".gradient", expected.Gradient, actual.Gradient, SeverityFidelity, ActionWrite)
 	compareLayerRefValue(base+".layer_ref", expected.LayerRef, actual.LayerRef, SeverityFidelity, ActionWrite, compareValue)
 	compareValue(base+".default", expected.Default, actual.Default, SeverityFidelity, ActionWrite)
 	compareValue(base+".changed", expected.Changed, actual.Changed, SeverityFidelity, ActionWrite)

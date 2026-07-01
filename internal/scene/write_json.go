@@ -272,6 +272,7 @@ type JSONProperty struct {
 	MatchName         string          `json:"match_name,omitempty"`
 	Keyframes         []*JSONKeyframe `json:"keyframes,omitempty"`
 	StaticValue       interface{}     `json:"static_value,omitempty"`
+	Gradient          *Gradient       `json:"gradient,omitempty"`
 	LayerRefID        uint32          `json:"layer_ref_id,omitempty"`
 	Expression        string          `json:"expression,omitempty"`
 	ExpressionEnabled *bool           `json:"expression_enabled,omitempty"`
@@ -776,6 +777,7 @@ func propertyToJSON(prop *Property) *JSONProperty {
 		Name:        prop.Name,
 		MatchName:   prop.MatchName,
 		StaticValue: prop.StaticValue,
+		Gradient:    prop.Gradient,
 		LayerRefID:  prop.LayerRefID,
 		Expression:  prop.Expression,
 	}

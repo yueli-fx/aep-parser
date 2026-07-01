@@ -12,6 +12,7 @@ import (
 
 	"github.com/yueli-fx/aep-parser/internal/aehost"
 	"github.com/yueli-fx/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/codec"
 	"github.com/yueli-fx/aep-parser/internal/profile"
 	"github.com/yueli-fx/aep-parser/internal/profilediff"
 )
@@ -595,6 +596,11 @@ func materializeRectGraphicShapeLayer(comp *aep.Composition, source profile.Laye
 			return nil, err
 		}
 	}
+	if hasGradientFillGraphic(source) {
+		if err := materializeShapeGradientFill(shapeLayer, source); err != nil {
+			return nil, err
+		}
+	}
 	if hasProperty(source, "ADBE Vector Fill Color") {
 		if err := materializeShapeFill(shapeLayer, source); err != nil {
 			return nil, err
@@ -1017,6 +1023,51 @@ func materializeShapeMergePaths(shapeLayer *aep.ShapeLayer, source profile.Layer
 	return nil
 }
 
+func materializeShapeGradientFill(shapeLayer *aep.ShapeLayer, source profile.Layer) error {
+	fill, err := shapeLayer.RootGroup().AddGradientFill()
+	if err != nil {
+		return err
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Grad Type"); ok {
+		if err := fill.SetGradientType(aep.GradientType(int(value))); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyVector(source.Properties, "ADBE Vector Grad Start Pt", 2); ok {
+		if err := fill.SetStartPoint([2]float64{value[0], value[1]}); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyVector(source.Properties, "ADBE Vector Grad End Pt", 2); ok {
+		if err := fill.SetEndPoint([2]float64{value[0], value[1]}); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Grad HiLite Length"); ok {
+		if err := fill.SetHighlightLength(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Grad HiLite Angle"); ok {
+		if err := fill.SetHighlightAngle(value); err != nil {
+			return err
+		}
+	}
+	if gradient, ok := propertyGradient(source.Properties, "ADBE Vector Grad Colors"); ok {
+		if len(gradient.ColorStops) > 0 {
+			if err := fill.SetColorStops(gradient.ColorStops); err != nil {
+				return err
+			}
+		}
+		if len(gradient.AlphaStops) > 0 {
+			if err := fill.SetAlphaStops(gradient.AlphaStops); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 func materializeShapeFill(shapeLayer *aep.ShapeLayer, source profile.Layer) error {
 	fill, err := shapeLayer.RootGroup().AddFill()
 	if err != nil {
@@ -1205,6 +1256,27 @@ func propertyFloat(properties []profile.Property, matchName string) (float64, bo
 		return 0, false
 	}
 	return 0, false
+}
+
+func propertyGradient(properties []profile.Property, matchName string) (*codec.Gradient, bool) {
+	for _, property := range properties {
+		if property.MatchName != matchName || property.Gradient == nil {
+			continue
+		}
+		return cloneCodecGradient(property.Gradient), true
+	}
+	return nil, false
+}
+
+func cloneCodecGradient(g *codec.Gradient) *codec.Gradient {
+	if g == nil {
+		return nil
+	}
+	return &codec.Gradient{
+		Version:    g.Version,
+		ColorStops: append([]codec.GradientColorStop(nil), g.ColorStops...),
+		AlphaStops: append([]codec.GradientAlphaStop(nil), g.AlphaStops...),
+	}
 }
 
 func staticVector(value any, length int) ([]float64, bool) {
@@ -1608,10 +1680,11 @@ func isSupportedRectGraphicShapeLayer(layer profile.Layer) bool {
 	}
 	hasFill := hasProperty(layer, "ADBE Vector Fill Color")
 	hasStroke := hasProperty(layer, "ADBE Vector Stroke Color")
-	if !hasFill && !hasStroke && !hasSupportedShapeFilter(layer) {
+	hasGradientFill := hasGradientFillGraphic(layer)
+	if !hasFill && !hasStroke && !hasGradientFill && !hasSupportedShapeFilter(layer) {
 		return false
 	}
-	if hasProperty(layer, "ADBE Vector Grad Colors") ||
+	if (hasProperty(layer, "ADBE Vector Grad Colors") && !hasGradientFill) ||
 		hasProperty(layer, "ADBE Vector Stroke Dash 2") ||
 		hasProperty(layer, "ADBE Vector Stroke Gap 2") ||
 		hasProperty(layer, "ADBE Vector Stroke Offset") ||
@@ -1620,6 +1693,12 @@ func isSupportedRectGraphicShapeLayer(layer profile.Layer) bool {
 		return false
 	}
 	return true
+}
+
+func hasGradientFillGraphic(layer profile.Layer) bool {
+	return hasProperty(layer, "ADBE Vector Grad Colors") &&
+		hasProperty(layer, "ADBE Vector Grad Type") &&
+		!hasProperty(layer, "ADBE Vector Stroke Width")
 }
 
 func hasSupportedShapeFilter(layer profile.Layer) bool {

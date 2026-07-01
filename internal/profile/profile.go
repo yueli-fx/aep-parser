@@ -217,18 +217,19 @@ type Effect struct {
 }
 
 type Property struct {
-	Name              string     `json:"name,omitempty"`
-	MatchName         string     `json:"match_name,omitempty"`
-	Occurrence        int        `json:"occurrence,omitempty"`
-	StaticValue       any        `json:"static_value,omitempty"`
-	LayerRef          *LayerRef  `json:"layer_ref,omitempty"`
-	Default           any        `json:"default,omitempty"`
-	Changed           bool       `json:"changed,omitempty"`
-	Expression        string     `json:"expression,omitempty"`
-	ExpressionEnabled *bool      `json:"expression_enabled,omitempty"`
-	Keyframes         []Keyframe `json:"keyframes,omitempty"`
-	Path              PathRef    `json:"path"`
-	Evidence          Evidence   `json:"evidence"`
+	Name              string          `json:"name,omitempty"`
+	MatchName         string          `json:"match_name,omitempty"`
+	Occurrence        int             `json:"occurrence,omitempty"`
+	StaticValue       any             `json:"static_value,omitempty"`
+	Gradient          *codec.Gradient `json:"gradient,omitempty"`
+	LayerRef          *LayerRef       `json:"layer_ref,omitempty"`
+	Default           any             `json:"default,omitempty"`
+	Changed           bool            `json:"changed,omitempty"`
+	Expression        string          `json:"expression,omitempty"`
+	ExpressionEnabled *bool           `json:"expression_enabled,omitempty"`
+	Keyframes         []Keyframe      `json:"keyframes,omitempty"`
+	Path              PathRef         `json:"path"`
+	Evidence          Evidence        `json:"evidence"`
 }
 
 type Keyframe struct {
@@ -724,6 +725,7 @@ func buildProperty(p *aep.JSONProperty, path PathRef, occurrence int, layerByID 
 		MatchName:   p.MatchName,
 		Occurrence:  occurrence,
 		StaticValue: p.StaticValue,
+		Gradient:    cloneGradient(p.Gradient),
 		Expression:  p.Expression,
 		Path:        path,
 		Evidence:    parsedEvidence(),
@@ -748,6 +750,18 @@ func buildProperty(p *aep.JSONProperty, path PathRef, occurrence int, layerByID 
 		})
 	}
 	return pp
+}
+
+func cloneGradient(g *codec.Gradient) *codec.Gradient {
+	if g == nil {
+		return nil
+	}
+	out := &codec.Gradient{
+		Version:    g.Version,
+		ColorStops: append([]codec.GradientColorStop(nil), g.ColorStops...),
+		AlphaStops: append([]codec.GradientAlphaStop(nil), g.AlphaStops...),
+	}
+	return out
 }
 
 func buildMarker(m *aep.JSONMarker, path PathRef) Marker {

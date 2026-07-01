@@ -704,11 +704,11 @@ Current:
   primitive, including rect, ellipse, and polystar fields, plus Trim Paths, Round
   Corners radius, Offset Paths fields, ZigZag
   fields, Pucker & Bloat amount, Twist angle/center, Wiggle Paths fields,
-  Wiggle Transform fields, Repeater fields, Merge Paths type, fill, stroke, one
-  Dash 1/Gap 1 pair, percent-mode stroke taper, and
+  Wiggle Transform fields, Repeater fields, Merge Paths type, Gradient Fill
+  stops/type/ramp, fill, stroke, one Dash 1/Gap 1 pair, percent-mode stroke taper, and
   wavelength-mode stroke wave from
   stable profile properties while still excluding stroke offset, additional
-  dash/gap pairs, wave units/cycles, gradient, and other filter shape content;
+  dash/gap pairs, wave units/cycles, gradient stroke, and other filter shape content;
   static layer transform reconstruction now preserves
   profile-visible Anchor/Position/Scale/Rotation/Opacity values while converting
   profile scale/opacity unit values back to writer percent units; layer timing
@@ -723,10 +723,11 @@ Current:
   converted no-layer comp object profile output and recipe default null, solid,
   adjustment, camera, light, text, static-transform text, layer timing, empty
   shape, rect+fill shape, rect+stroke shape, rect+dashed-stroke shape,
-  ellipse+tapered-stroke shape, ellipse+waved-stroke shape, trim-paths shape,
-  round-corners shape, offset-paths shape, zigzag shape, pucker-bloat shape,
-  twist shape, wiggle-paths shape, wiggle-transform shape, repeater shape,
-  merge-paths shape, polystar shape, and precomp outputs.
+  ellipse+tapered-stroke shape, ellipse+waved-stroke shape, gradient-fill
+  shape, trim-paths shape, round-corners shape, offset-paths shape, zigzag
+  shape, pucker-bloat shape, twist shape, wiggle-paths shape,
+  wiggle-transform shape, repeater shape, merge-paths shape, polystar shape,
+  and precomp outputs.
   `cmd/aepmigrate convert -ae-open -ae <AfterFX.exe>` writes AE open gate status
   into the migration report.
 - `profilediff` now compares profile-visible layer metadata, quality/blending/

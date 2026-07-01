@@ -8,25 +8,25 @@ import (
 
 // GradientColorStop represents a single color stop in a gradient.
 type GradientColorStop struct {
-	Offset   float64    // position along gradient (0.0 to 1.0)
-	Midpoint float64    // interpolation midpoint to next stop (0.0 to 1.0)
-	Color    [3]float64 // RGB color in 0..1 range
+	Offset   float64    `json:"offset"`   // position along gradient (0.0 to 1.0)
+	Midpoint float64    `json:"midpoint"` // interpolation midpoint to next stop (0.0 to 1.0)
+	Color    [3]float64 `json:"color"`    // RGB color in 0..1 range
 }
 
 // GradientAlphaStop represents a single alpha (opacity) stop in a gradient.
 type GradientAlphaStop struct {
-	Offset   float64 // position along gradient (0.0 to 1.0)
-	Midpoint float64 // interpolation midpoint to next stop (0.0 to 1.0)
-	Alpha    float64 // opacity value (0.0 to 1.0)
+	Offset   float64 `json:"offset"`   // position along gradient (0.0 to 1.0)
+	Midpoint float64 `json:"midpoint"` // interpolation midpoint to next stop (0.0 to 1.0)
+	Alpha    float64 `json:"alpha"`    // opacity value (0.0 to 1.0)
 }
 
 // Gradient holds parsed gradient color data from a gradient fill/stroke
 // property ("ADBE Vector Grad Colors"). The XML is stored in the cdat
 // chunk as a prop.map/prop.list/prop.pair structure.
 type Gradient struct {
-	ColorStops []GradientColorStop
-	AlphaStops []GradientAlphaStop
-	Version    string
+	ColorStops []GradientColorStop `json:"color_stops,omitempty"`
+	AlphaStops []GradientAlphaStop `json:"alpha_stops,omitempty"`
+	Version    string              `json:"version,omitempty"`
 }
 
 // ParseGradientXML parses AE gradient XML (prop.map format) into a

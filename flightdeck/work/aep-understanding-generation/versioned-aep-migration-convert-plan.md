@@ -253,12 +253,13 @@ git diff --check
     `minimal-shape-wiggle-transform.json`,
     `minimal-shape-repeater.json`,
     `minimal-shape-merge-paths.json`, and
-    `minimal-shape-polystar.json` pass
+    `minimal-shape-polystar.json`, and
+    `minimal-shape-gradient-fill.json` pass
     AE2025 open gate with
     `ae_open_status: "pass"` / `ae_open_exit_code: 0`. This slice reconstructs
     rect size/position/roundness, ellipse size/position, polystar
     type/points/position/rotation/inner-radius/outer-radius/inner-roundness/
-    outer-roundness, fill
+    outer-roundness, gradient fill type/start/end/color-stops/alpha-stops, fill
     color/opacity/blend/composite/fill-rule, and stroke
     color/opacity/width/cap/join/miter/composite/blend plus a single Dash 1/Gap
     1 pair, percent-mode stroke taper controls, wavelength-mode stroke wave
@@ -272,7 +273,7 @@ git diff --check
     position/scale/rotation/start-opacity/end-opacity, and Merge Paths type
     from stable profile
     properties while still excluding stroke offset, additional dash/gap pairs,
-    wave units/cycles, gradient, and other filter shape content.
+    wave units/cycles, gradient stroke, and other filter shape content.
   - Static layer transform reconstruction now maps profile-visible
     `ADBE Anchor Point`, `ADBE Position`, `ADBE Scale`, `ADBE Rotate Z`, and
     `ADBE Opacity` back into `LayerTransform`, converting profile scale/opacity
