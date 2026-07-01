@@ -545,6 +545,11 @@ func materializeRectGraphicShapeLayer(comp *aep.Composition, source profile.Laye
 			return nil, err
 		}
 	}
+	if hasProperty(source, "ADBE Vector Offset Amount") {
+		if err := materializeShapeOffsetPaths(shapeLayer, source); err != nil {
+			return nil, err
+		}
+	}
 	if hasProperty(source, "ADBE Vector Fill Color") {
 		if err := materializeShapeFill(shapeLayer, source); err != nil {
 			return nil, err
@@ -627,6 +632,39 @@ func materializeShapeRoundCorners(shapeLayer *aep.ShapeLayer, source profile.Lay
 	}
 	if value, ok := propertyFloat(source.Properties, "ADBE Vector RoundCorner Radius"); ok {
 		if err := roundCorners.SetRadius(value); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func materializeShapeOffsetPaths(shapeLayer *aep.ShapeLayer, source profile.Layer) error {
+	offsetPaths, err := shapeLayer.RootGroup().AddOffsetPaths()
+	if err != nil {
+		return err
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Offset Amount"); ok {
+		if err := offsetPaths.SetAmount(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Offset Line Join"); ok {
+		if err := offsetPaths.SetLineJoin(aep.StrokeLineJoin(int(value))); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Offset Miter Limit"); ok {
+		if err := offsetPaths.SetMiterLimit(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Offset Copies"); ok {
+		if err := offsetPaths.SetCopies(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Offset Copy Offset"); ok {
+		if err := offsetPaths.SetCopyOffset(value); err != nil {
 			return err
 		}
 	}
