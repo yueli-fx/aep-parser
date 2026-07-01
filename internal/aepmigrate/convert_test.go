@@ -252,6 +252,64 @@ func TestConvertWritesRecipeDefaultNullLayerProject(t *testing.T) {
 	}
 }
 
+func TestConvertWritesDefaultSolidLayerProject(t *testing.T) {
+	source := writeTempProjectWithOneSolidLayer(t)
+	outPath := filepath.Join(t.TempDir(), "converted.aep")
+
+	report, err := Convert(ConvertOptions{
+		InputPath:  source,
+		OutputPath: outPath,
+		Target:     VersionAE2025,
+	})
+	if err != nil {
+		t.Fatalf("Convert: %v", err)
+	}
+	if report.Summary.Status != StatusPass {
+		t.Fatalf("status = %q, entries=%+v, diffs=%+v", report.Summary.Status, report.Entries, report.Verification.ProfileDiffs)
+	}
+	if report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 {
+		t.Fatalf("profile diff verification = %+v, want pass with 0 diffs", report.Verification)
+	}
+	outProject, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open converted: %v", err)
+	}
+	prof, err := profile.Build(outProject, profile.Options{Path: outPath})
+	if err != nil {
+		t.Fatalf("profile converted: %v", err)
+	}
+	if len(prof.Comps) != 1 || len(prof.Comps[0].Layers) != 1 {
+		t.Fatalf("converted profile layers = %+v", prof.Comps)
+	}
+	layer := prof.Comps[0].Layers[0]
+	if layer.Type != "av" || layer.SourceRef == nil || layer.SourceRef.Kind != "footage" {
+		t.Fatalf("converted layer source = %+v, want av footage layer", layer)
+	}
+}
+
+func TestConvertWritesRecipeDefaultSolidLayerProject(t *testing.T) {
+	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-layer-source-ref.json"))
+	outPath := filepath.Join(t.TempDir(), "converted.aep")
+
+	report, err := Convert(ConvertOptions{
+		InputPath:  source,
+		OutputPath: outPath,
+		Target:     VersionAE2025,
+	})
+	if err != nil {
+		t.Fatalf("Convert: %v", err)
+	}
+	if report.Summary.Status != StatusPass {
+		t.Fatalf("status = %q, entries=%+v, diffs=%+v", report.Summary.Status, report.Entries, report.Verification.ProfileDiffs)
+	}
+	if report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 {
+		t.Fatalf("profile diff verification = %+v, want pass with 0 diffs", report.Verification)
+	}
+	if _, err := os.Stat(outPath); err != nil {
+		t.Fatalf("converted output missing: %v", err)
+	}
+}
+
 func TestConvertBlocksChangedNullLayerBeforeWritingOutput(t *testing.T) {
 	source := writeTempProjectWithMovedNullLayer(t)
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
@@ -368,7 +426,7 @@ func TestWriteAEOpenArgsUsesAbsolutePaths(t *testing.T) {
 }
 
 func TestConvertRefusesLayerProjects(t *testing.T) {
-	source := writeTempProjectWithOneSolidLayer(t)
+	source := writeTempProjectWithOneTextLayer(t)
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
 
 	report, err := Convert(ConvertOptions{
@@ -535,6 +593,21 @@ func writeTempProjectWithOneSolidLayer(t *testing.T) string {
 	return path
 }
 
+func writeTempProjectWithOneTextLayer(t *testing.T) string {
+	t.Helper()
+	project := aep.NewProject(aep.TargetAE2020)
+	comp, err := aep.NewComposition(project, "Main", 640, 360, 24, 2)
+	if err != nil {
+		t.Fatalf("NewComposition: %v", err)
+	}
+	if _, err := aep.NewTextLayer(comp, "Title"); err != nil {
+		t.Fatalf("NewTextLayer: %v", err)
+	}
+	path := filepath.Join(t.TempDir(), "one-text-layer.aep")
+	writeProjectFile(t, project, path)
+	return path
+}
+
 func writeTempProjectWithDefaultNullLayer(t *testing.T) string {
 	t.Helper()
 	project := aep.NewProject(aep.TargetAE2020)
@@ -591,6 +664,27 @@ func writeTempRecipeDefaultNullLayer(t *testing.T) string {
 		}},
 	}
 	path := filepath.Join(t.TempDir(), "recipe-default-null.aep")
+	report, err := recipe.CompileToFile(rec, path, recipe.StaticCapabilities{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report.Valid = false, refusals=%+v", report.Refusals)
+	}
+	return path
+}
+
+func writeTempRecipe(t *testing.T, recipePath string) string {
+	t.Helper()
+	raw, err := os.ReadFile(recipePath)
+	if err != nil {
+		t.Fatalf("ReadFile recipe: %v", err)
+	}
+	var rec recipe.Recipe
+	if err := json.Unmarshal(raw, &rec); err != nil {
+		t.Fatalf("Unmarshal recipe: %v", err)
+	}
+	path := filepath.Join(t.TempDir(), "recipe-source.aep")
 	report, err := recipe.CompileToFile(rec, path, recipe.StaticCapabilities{})
 	if err != nil {
 		t.Fatalf("CompileToFile: %v", err)

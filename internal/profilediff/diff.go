@@ -108,6 +108,8 @@ func Compare(expected, actual *profile.Profile, opts Options) (*Report, error) {
 	compareValue("fingerprint.layer_count", expected.Fingerprint.LayerCount, actual.Fingerprint.LayerCount, SeverityUnknown, ActionInvestigate)
 	compareValue("fingerprint.footage_count", expected.Fingerprint.FootageCount, actual.Fingerprint.FootageCount, SeverityUnknown, ActionInvestigate)
 
+	compareItems("items.footage", expected.Items.Footage, actual.Items.Footage, add, compareValue)
+
 	actualCompPaths := compPathMap(actual.Comps)
 	actualCompNames := compNameMap(actual.Comps)
 	usedComps := map[int]bool{}
@@ -192,6 +194,48 @@ func compareComp(
 			add(layerObjectPath(al), KindExtraObject, SeverityUnknown, ActionInvestigate, nil, al.Name)
 		}
 	}
+}
+
+func compareItems(
+	base string,
+	expected, actual []profile.Item,
+	add func(string, Kind, Severity, ActionType, any, any),
+	compareValue func(string, any, any, Severity, ActionType),
+) {
+	actualKeys := itemKeyMap(actual)
+	used := map[int]bool{}
+	for _, ei := range expected {
+		ai, ok := matchItem(ei, actual, actualKeys, used)
+		path := itemObjectPath(base, ei)
+		if !ok {
+			add(path, KindMissingObject, SeverityFidelity, ActionWrite, ei.Name, nil)
+			continue
+		}
+		used[ai] = true
+		compareItem(path, ei, actual[ai], compareValue)
+	}
+	for i, ai := range actual {
+		if !used[i] {
+			add(itemObjectPath(base, ai), KindExtraObject, SeverityUnknown, ActionInvestigate, nil, ai.Name)
+		}
+	}
+}
+
+func compareItem(
+	base string,
+	expected, actual profile.Item,
+	compareValue func(string, any, any, Severity, ActionType),
+) {
+	compareValue(base+".name", expected.Name, actual.Name, SeverityPolish, ActionSemantics)
+	compareValue(base+".type", expected.Type, actual.Type, SeverityFidelity, ActionWrite)
+	if expected.Footage == nil || actual.Footage == nil {
+		compareValue(base+".footage", expected.Footage, actual.Footage, SeverityFidelity, ActionWrite)
+		return
+	}
+	compareValue(base+".footage.asset_type", expected.Footage.AssetType, actual.Footage.AssetType, SeverityFidelity, ActionWrite)
+	compareValue(base+".footage.width", expected.Footage.Width, actual.Footage.Width, SeverityFidelity, ActionWrite)
+	compareValue(base+".footage.height", expected.Footage.Height, actual.Footage.Height, SeverityFidelity, ActionWrite)
+	compareValue(base+".footage.solid_color", expected.Footage.SolidColor, actual.Footage.SolidColor, SeverityFidelity, ActionWrite)
 }
 
 func compareLayer(
@@ -413,6 +457,16 @@ func propertyObjectPath(prop profile.Property) string {
 	return objectPath(prop.Path.Path, fmt.Sprintf(`properties.by_match_name[%q]#%d`, prop.MatchName, prop.Occurrence))
 }
 
+func itemObjectPath(base string, item profile.Item) string {
+	return objectPath(item.Path.Path, fmt.Sprintf(`%s.by_name[%q]`, base, item.Name))
+}
+
+func itemKeyMap(items []profile.Item) map[string]int {
+	return uniqueIndexMap(len(items), func(i int) string {
+		return fmt.Sprintf("%s:%s", items[i].Type, items[i].Name)
+	})
+}
+
 func compPathMap(comps []profile.Composition) map[string]int {
 	out := map[string]int{}
 	for i, comp := range comps {
@@ -485,6 +539,13 @@ func uniqueIndexMap(n int, key func(int) string) map[string]int {
 		delete(out, k)
 	}
 	return out
+}
+
+func matchItem(expected profile.Item, actual []profile.Item, actualKeys map[string]int, used map[int]bool) (int, bool) {
+	if i, ok := actualKeys[fmt.Sprintf("%s:%s", expected.Type, expected.Name)]; ok && !used[i] {
+		return i, true
+	}
+	return 0, false
 }
 
 func matchComp(

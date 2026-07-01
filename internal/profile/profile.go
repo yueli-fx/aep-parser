@@ -74,11 +74,19 @@ type Items struct {
 }
 
 type Item struct {
-	ID       uint32   `json:"id"`
-	Name     string   `json:"name"`
-	Type     string   `json:"type"`
-	Path     PathRef  `json:"path"`
-	Evidence Evidence `json:"evidence"`
+	ID       uint32          `json:"id"`
+	Name     string          `json:"name"`
+	Type     string          `json:"type"`
+	Footage  *FootageDetails `json:"footage,omitempty"`
+	Path     PathRef         `json:"path"`
+	Evidence Evidence        `json:"evidence"`
+}
+
+type FootageDetails struct {
+	AssetType  string      `json:"asset_type,omitempty"`
+	Width      uint16      `json:"width,omitempty"`
+	Height     uint16      `json:"height,omitempty"`
+	SolidColor *[3]float64 `json:"solid_color,omitempty"`
 }
 
 type Composition struct {
@@ -449,12 +457,17 @@ func Build(project *aep.Project, opts Options) (*Profile, error) {
 			Evidence: parsedEvidence(),
 		})
 	}
+	sceneFootage := sceneFootageByID(project)
 	for _, f := range jp.Footage {
-		prof.Items.Footage = append(prof.Items.Footage, Item{
+		item := Item{
 			ID: f.ID, Name: f.Name, Type: "footage",
 			Path:     itemPath("footage", f.ID, f.Name),
 			Evidence: parsedEvidence(),
-		})
+		}
+		if sf := sceneFootage[f.ID]; sf != nil {
+			item.Footage = buildFootageDetails(sf)
+		}
+		prof.Items.Footage = append(prof.Items.Footage, item)
 	}
 	for _, f := range jp.Folders {
 		prof.Items.Folders = append(prof.Items.Folders, Item{
@@ -952,6 +965,36 @@ func sourceRef(id uint32, idx *projectindex.Index) *ItemRef {
 		return &ItemRef{ID: id, Kind: "footage", Name: item.Name}
 	}
 	return &ItemRef{ID: id, Kind: "unknown"}
+}
+
+func sceneFootageByID(project *aep.Project) map[uint32]*aep.Footage {
+	out := map[uint32]*aep.Footage{}
+	if project == nil {
+		return out
+	}
+	for _, f := range project.Footage {
+		if f == nil {
+			continue
+		}
+		out[f.ID] = f
+	}
+	return out
+}
+
+func buildFootageDetails(f *aep.Footage) *FootageDetails {
+	if f == nil {
+		return nil
+	}
+	out := &FootageDetails{
+		AssetType: f.AssetType(),
+		Width:     f.Width,
+		Height:    f.Height,
+	}
+	if f.IsSolid {
+		color := f.SolidColor
+		out.SolidColor = &color
+	}
+	return out
 }
 
 func indexSceneLayers(c *aep.Composition) (map[uint32]*aep.Layer, map[int]*aep.Layer) {

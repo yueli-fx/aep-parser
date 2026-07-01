@@ -40,6 +40,44 @@ func TestCompareReportsLayerPresenceAndScalarDiffs(t *testing.T) {
 	assertDiff(t, report, "comps.by_id[1].layers.by_id[10].timing.in_point_seconds", profilediff.KindWrongValue)
 }
 
+func TestCompareReportsFootageItemDetails(t *testing.T) {
+	expectedColor := [3]float64{0.2, 0.4, 0.8}
+	actualColor := [3]float64{1, 0, 0}
+	expected := testProfile()
+	expected.Fingerprint.FootageCount = 1
+	expected.Items.Footage = []profile.Item{{
+		ID:   10,
+		Name: "Solid",
+		Type: "footage",
+		Footage: &profile.FootageDetails{
+			AssetType:  "solid",
+			Width:      1920,
+			Height:     1080,
+			SolidColor: &expectedColor,
+		},
+	}}
+	actual := testProfile()
+	actual.Fingerprint.FootageCount = 1
+	actual.Items.Footage = []profile.Item{{
+		ID:   99,
+		Name: "Solid",
+		Type: "footage",
+		Footage: &profile.FootageDetails{
+			AssetType:  "solid",
+			Width:      1280,
+			Height:     1080,
+			SolidColor: &actualColor,
+		},
+	}}
+
+	report, err := profilediff.Compare(expected, actual, profilediff.Options{})
+	if err != nil {
+		t.Fatalf("Compare: %v", err)
+	}
+	assertDiff(t, report, `items.footage.by_name["Solid"].footage.width`, profilediff.KindWrongValue)
+	assertDiff(t, report, `items.footage.by_name["Solid"].footage.solid_color`, profilediff.KindWrongValue)
+}
+
 func TestCompareReportsLayerMetadataAndFlagDiffs(t *testing.T) {
 	expected := testProfile(testLayer(10, "Hero", func(l *profile.Layer) {
 		l.Label = 9

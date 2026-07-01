@@ -254,6 +254,7 @@ func convertScopeEntries(target VersionLabel, prof *profile.Profile) []Entry {
 		return nil
 	}
 	var entries []Entry
+	footage := newConvertFootageIndex(prof)
 	for _, comp := range prof.Comps {
 		entries = append(entries, Entry{
 			Path:          "comps[" + comp.Name + "]",
@@ -271,11 +272,20 @@ func convertScopeEntries(target VersionLabel, prof *profile.Profile) []Entry {
 				})
 				continue
 			}
+			if isSupportedDefaultSolidLayer(layer, footage) {
+				entries = append(entries, Entry{
+					Path:          "comps[" + comp.Name + "].layers[" + layer.Name + "]",
+					Class:         ClassRetargeted,
+					TargetVersion: target,
+					Reason:        "Default solid layer is recreated through the target AE project template.",
+				})
+				continue
+			}
 			entries = append(entries, Entry{
 				Path:          "comps[" + comp.Name + "].layers[" + layer.Name + "]",
 				Class:         ClassBlocked,
 				TargetVersion: target,
-				Reason:        "This convert slice only reconstructs no-layer comps and default null layers; refusing output to avoid silent layer loss.",
+				Reason:        "This convert slice only reconstructs no-layer comps, default null layers, and default solid layers; refusing output to avoid silent layer loss.",
 			})
 		}
 	}
@@ -284,6 +294,7 @@ func convertScopeEntries(target VersionLabel, prof *profile.Profile) []Entry {
 
 func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, error) {
 	project := aep.NewProject(aepTarget(target))
+	footage := newConvertFootageIndex(prof)
 	for _, comp := range prof.Comps {
 		next, err := aep.NewComposition(project, comp.Name, comp.Width, comp.Height, comp.FrameRate, comp.Duration)
 		if err != nil {
@@ -293,21 +304,51 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 			return nil, err
 		}
 		for _, layer := range comp.Layers {
-			if !isSupportedDefaultNullLayer(layer) {
-				return nil, fmt.Errorf("unsupported layer %q in comp %q", layer.Name, comp.Name)
-			}
-			dstLayer, err := aep.NewNullLayer(next, layer.Name)
-			if err != nil {
-				return nil, fmt.Errorf("comp %q null layer %q: %w", comp.Name, layer.Name, err)
-			}
-			if hasTransformProperties(layer) {
-				if err := aep.SetLayerTransform(dstLayer, aep.NewLayerTransform()); err != nil {
+			switch {
+			case isSupportedDefaultNullLayer(layer):
+				dstLayer, err := aep.NewNullLayer(next, layer.Name)
+				if err != nil {
+					return nil, fmt.Errorf("comp %q null layer %q: %w", comp.Name, layer.Name, err)
+				}
+				if err := materializeDefaultTransformSurface(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q null layer %q transform: %w", comp.Name, layer.Name, err)
 				}
+			case isSupportedDefaultSolidLayer(layer, footage):
+				solid, _ := footage.solidDetails(layer)
+				dstLayer, err := aep.NewSolidLayer(next, layer.Name, int(solid.Width), int(solid.Height), *solid.SolidColor)
+				if err != nil {
+					return nil, fmt.Errorf("comp %q solid layer %q: %w", comp.Name, layer.Name, err)
+				}
+				if err := materializeCenteredTransformSurface(next, dstLayer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q solid layer %q transform: %w", comp.Name, layer.Name, err)
+				}
+			default:
+				return nil, fmt.Errorf("unsupported layer %q in comp %q", layer.Name, comp.Name)
 			}
 		}
 	}
 	return project, nil
+}
+
+func materializeDefaultTransformSurface(layer *aep.Layer, source profile.Layer) error {
+	if !hasTransformProperties(source) {
+		return nil
+	}
+	return aep.SetLayerTransform(layer, aep.NewLayerTransform())
+}
+
+func materializeCenteredTransformSurface(comp *aep.Composition, layer *aep.Layer, source profile.Layer) error {
+	if !hasTransformProperties(source) {
+		return nil
+	}
+	if layer == nil {
+		return fmt.Errorf("layer not found after creation")
+	}
+	transform := aep.NewLayerTransform()
+	if err := transform.Position().SetStaticValue([2]float64{float64(comp.Width) / 2, float64(comp.Height) / 2}); err != nil {
+		return err
+	}
+	return aep.SetLayerTransform(layer, transform)
 }
 
 func hasTransformProperties(layer profile.Layer) bool {
@@ -350,6 +391,78 @@ func isSupportedDefaultNullLayer(layer profile.Layer) bool {
 		!flags.CollapseTransform &&
 		!flags.SamplingBicubic &&
 		!flags.PreserveTransparency
+}
+
+func isSupportedDefaultSolidLayer(layer profile.Layer, footage convertFootageIndex) bool {
+	if layer.Type != "av" || layer.SourceRef == nil || layer.SourceRef.Kind != "footage" {
+		return false
+	}
+	solid, ok := footage.solidDetails(layer)
+	if !ok || solid.Width == 0 || solid.Height == 0 || solid.SolidColor == nil {
+		return false
+	}
+	if layer.Comment != "" || layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
+		return false
+	}
+	if layer.Text != nil || len(layer.Effects) != 0 || len(layer.Masks) != 0 || len(layer.Shapes) != 0 || len(layer.Markers) != 0 {
+		return false
+	}
+	flags := layer.Flags
+	return flags.Visible &&
+		flags.Blend == 2 &&
+		flags.TrackMatte == 0 &&
+		!flags.IsNull &&
+		flags.EffectsEnabled &&
+		flags.AudioEnabled &&
+		!flags.Is3D &&
+		!flags.Solo &&
+		!flags.Shy &&
+		!flags.Locked &&
+		!flags.IsAdjustment &&
+		!flags.IsGuide &&
+		!flags.MotionBlur &&
+		!flags.FrameBlendEnabled &&
+		!flags.MarkersLocked &&
+		!flags.FrameBlendPixelMotion &&
+		!flags.CollapseTransform &&
+		!flags.SamplingBicubic &&
+		!flags.PreserveTransparency
+}
+
+type convertFootageIndex struct {
+	byID   map[uint32]profile.Item
+	byName map[string]profile.Item
+}
+
+func newConvertFootageIndex(prof *profile.Profile) convertFootageIndex {
+	out := convertFootageIndex{
+		byID:   map[uint32]profile.Item{},
+		byName: map[string]profile.Item{},
+	}
+	if prof == nil {
+		return out
+	}
+	for _, item := range prof.Items.Footage {
+		out.byID[item.ID] = item
+		if _, exists := out.byName[item.Name]; !exists {
+			out.byName[item.Name] = item
+		}
+	}
+	return out
+}
+
+func (idx convertFootageIndex) solidDetails(layer profile.Layer) (profile.FootageDetails, bool) {
+	if layer.SourceRef == nil {
+		return profile.FootageDetails{}, false
+	}
+	item, ok := idx.byID[layer.SourceRef.ID]
+	if !ok && layer.SourceRef.Name != "" {
+		item, ok = idx.byName[layer.SourceRef.Name]
+	}
+	if !ok || item.Footage == nil || item.Footage.AssetType != "solid" {
+		return profile.FootageDetails{}, false
+	}
+	return *item.Footage, true
 }
 
 func applyStableCompSettings(dst *aep.Composition, src profile.Composition) error {

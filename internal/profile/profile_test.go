@@ -430,6 +430,26 @@ func TestBuildSyntheticProjectIncludesLayerSourceRefs(t *testing.T) {
 	if got := *solidProfile.SourceRef; got.ID != solid.SourceID || got.Kind != "footage" || got.Name != solidFootage.Name {
 		t.Fatalf("solid SourceRef = %+v, want ID=%d Kind=footage Name=%q", got, solid.SourceID, solidFootage.Name)
 	}
+
+	var solidItem *profile.Item
+	for i := range prof.Items.Footage {
+		if prof.Items.Footage[i].ID == solid.SourceID {
+			solidItem = &prof.Items.Footage[i]
+			break
+		}
+	}
+	if solidItem == nil {
+		t.Fatalf("solid footage item id=%d missing from profile", solid.SourceID)
+	}
+	if solidItem.Footage == nil {
+		t.Fatalf("solid footage details missing: %+v", solidItem)
+	}
+	if solidItem.Footage.AssetType != "solid" || solidItem.Footage.Width != 1920 || solidItem.Footage.Height != 1080 {
+		t.Fatalf("solid footage details = %+v, want solid 1920x1080", solidItem.Footage)
+	}
+	if solidItem.Footage.SolidColor == nil || *solidItem.Footage.SolidColor != [3]float64{0.2, 0.4, 0.8} {
+		t.Fatalf("solid color = %v, want [0.2 0.4 0.8]", solidItem.Footage.SolidColor)
+	}
 }
 
 func TestBuildSyntheticProjectIncludesTrackMatteRef(t *testing.T) {
