@@ -12,7 +12,10 @@ Current focus: versioned AEP migration. The implemented surface now includes
 AE2020-AE2025 writer targets. Matrix AE-open validation can now use a
 separate AE host-version dimension across installed AE2020-AE2025 hosts.
 
-History lives in `history.md`; keep this index short enough to recover from.
+Current migration recovery lives in `current.md`; detailed state and coverage
+live in `versioned-aep-migration-current.json` and
+`versioned-aep-migration-coverage.json`. History lives in `history.md`; keep
+this index short enough to recover from.
 
 ## Next
 
@@ -27,6 +30,7 @@ Do not start automated correction loops.
 
 ## Read now
 
+- `current.md` — short recovery entry for the active versioned migration work.
 - `versioned-aep-migration-spec.md` — product and architecture spec for
   explicit AE-version upgrade/downgrade assessment, conversion, diff, and loss
   reporting.
@@ -34,20 +38,19 @@ Do not start automated correction loops.
   slices: target-version skeleton rebuild for no-layer comp projects and
   default null-layer projects, with unsupported layer-bearing projects blocked
   before output.
-- `versioned-aep-migration-matrix-plan.md` — matrix gate scope, AE-open case
-  guard, and verification record.
-- `versioned-aep-migration-validation-plan.md` — validation axes, evidence
-  levels, and result-recording rules.
-- `versioned-aep-migration-validation-summary.md` — reviewed validation ledger
-  grouped by domain/capability/version coverage.
-- `versioned-aep-migration-remaining-blockers-plan.md` — current total/slice/
-  total plan for refreshing the post-text-animator blocker boundary and
-  attacking the next smallest blocked family.
 - `docs/capabilities.md` — current write capability matrix.
 
 ## Read if
 
 - `history.md` — if you need detailed completed-slice history.
+- `versioned-aep-migration-matrix-plan.md` — frozen historical matrix
+  implementation plan.
+- `versioned-aep-migration-validation-plan.md` — validation axes and evidence
+  terminology background.
+- `versioned-aep-migration-validation-summary.md` — frozen historical
+  Markdown view superseded by `versioned-aep-migration-coverage.json`.
+- `versioned-aep-migration-remaining-blockers-plan.md` — frozen historical
+  per-task execution log superseded by `versioned-aep-migration-current.json`.
 - `versioned-aep-migration-assess-plan.md` — if changing `aepmigrate assess`.
 - `comp-recipe-execution-strategy.md` — before adding comp-level recipe/profile
   fields.

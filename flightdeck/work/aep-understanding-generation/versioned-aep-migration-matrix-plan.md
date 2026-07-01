@@ -1,5 +1,9 @@
 # Versioned AEP Migration Matrix Implementation Plan
 
+> Frozen historical plan. Do not append new execution steps here.
+> Current execution state lives in `versioned-aep-migration-current.json`;
+> current coverage results live in `versioned-aep-migration-coverage.json`.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans or equivalent TDD execution. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Add a one-command migration matrix gate that batch-validates recipe fixtures across supported writer targets and available After Effects hosts.

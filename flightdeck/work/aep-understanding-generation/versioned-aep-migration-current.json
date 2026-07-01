@@ -1,0 +1,375 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-07-02",
+  "status": "validated_checkpoint_ready",
+  "goal": "Continue versioned AEP migration validation using JSON truth sources and batched matrix runs.",
+  "truth_sources": {
+    "current": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json",
+    "coverage": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json"
+  },
+  "frozen_markdown": [
+    {
+      "path": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md",
+      "replacement": "versioned-aep-migration-current.json",
+      "reason": "Old per-task execution log is too verbose for fast matrix iteration."
+    },
+    {
+      "path": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-matrix-plan.md",
+      "replacement": "versioned-aep-migration-current.json",
+      "reason": "Original matrix implementation plan is historical; current matrix operation state lives in JSON."
+    },
+    {
+      "path": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md",
+      "replacement": "versioned-aep-migration-coverage.json",
+      "reason": "Reviewed Markdown ledger is superseded by machine-readable coverage JSON."
+    }
+  ],
+  "operating_rules": [
+    "JSON is the source of truth; Markdown is historical reference or generated view.",
+    "Run validation in batches, then update JSON once per batch.",
+    "Do not update cockpit.md, index.md, or history.md for each validation slice.",
+    "Do not create one commit per small matrix result; batch evidence commits only when a coherent batch is complete.",
+    "Keep raw matrix outputs under tmp/ and reference them from coverage JSON.",
+    "Use markdown rendering only when a human-readable view is needed."
+  ],
+  "current_state": {
+    "writer_targets": ["AE2020", "AE2021", "AE2022", "AE2023", "AE2024", "AE2025"],
+    "installed_host_axis": ["AE2020", "AE2021", "AE2022", "AE2023", "AE2024", "AE2025"],
+    "ae_install_root": "E:/adobe",
+    "latest_recurring_gate": {
+      "artifact": "tmp/migration_matrix_verify/smoke_all/matrix.json",
+      "totals": { "total": 846, "pass": 840, "blocked": 0, "failed": 0, "skipped": 6 },
+      "status": "pass_with_source_contract_skips"
+    },
+    "latest_explicit_matte_gate": {
+      "artifact": "tmp/migration_matrix_verify/explicit_matte_ae2025/matrix.json",
+      "totals": { "total": 1, "pass": 1, "blocked": 0, "failed": 0, "skipped": 0 },
+      "status": "pass"
+    }
+  },
+  "last_batch": {
+    "id": "layer-shape-precomp-writer-coverage",
+    "commit": "94e55a4",
+    "artifacts": [
+      "tmp/migration_matrix_precomp_all_6x6/matrix.json",
+      "tmp/migration_matrix_layer_all_6x6/matrix.json",
+      "tmp/migration_matrix_shape_all_6x6/matrix.json"
+    ],
+    "summary": [
+      { "domain": "precomp", "total": 36, "pass": 36, "blocked": 0, "failed": 0, "skipped": 0 },
+      { "domain": "layer", "total": 576, "pass": 536, "blocked": 10, "failed": 0, "skipped": 30 },
+      { "domain": "shape", "total": 972, "pass": 972, "blocked": 0, "failed": 0, "skipped": 0 }
+    ]
+  },
+  "coverage_batches": [
+    {
+      "id": "layer-shape-precomp-writer-coverage",
+      "description": "Refresh coverage JSON from the last layer/shape/precomp writer matrix artifacts.",
+      "entries": [
+        {
+          "coverage_id": "precomp",
+          "recipe_glob": "examples/recipes/minimal-precomp-*.json",
+          "out": "tmp/migration_matrix_precomp_all_6x6",
+          "matrix": "tmp/migration_matrix_precomp_all_6x6/matrix.json",
+          "ledger": "tmp/migration_matrix_precomp_all_6x6/ledger.md"
+        },
+        {
+          "coverage_id": "layer-all-family",
+          "recipe_glob": "examples/recipes/minimal-layer-*.json",
+          "out": "tmp/migration_matrix_layer_all_6x6",
+          "matrix": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "ledger": "tmp/migration_matrix_layer_all_6x6/ledger.md",
+          "allow_matrix_exit": [1],
+          "allowed_nonpass_reason": "known matte contract boundary"
+        },
+        {
+          "coverage_id": "shape-all-family",
+          "recipe_glob": "examples/recipes/minimal-shape-*.json",
+          "out": "tmp/migration_matrix_shape_all_6x6",
+          "matrix": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "ledger": "tmp/migration_matrix_shape_all_6x6/ledger.md"
+        }
+      ]
+    },
+    {
+      "id": "all-current-writer-coverage",
+      "description": "Refresh coverage JSON from every current writer matrix artifact already tracked in coverage.json.",
+      "entries": [
+        {
+          "coverage_id": "text-baseline",
+          "recipe_paths": [
+            "examples/recipes/minimal-default-text-layer.json",
+            "examples/recipes/minimal-default-text-static-transform.json"
+          ],
+          "out": "tmp/migration_matrix_text_baseline_all_6x6",
+          "matrix": "tmp/migration_matrix_text_baseline_all_6x6/matrix.json",
+          "ledger": "tmp/migration_matrix_text_baseline_all_6x6/ledger.md"
+        },
+        {
+          "coverage_id": "text-style",
+          "recipe_paths": [
+            "examples/recipes/minimal-text-style.json",
+            "examples/recipes/minimal-text-shape.json"
+          ],
+          "out": "tmp/migration_matrix_text_style_all_6x6",
+          "matrix": "tmp/migration_matrix_text_style_all_6x6/matrix.json",
+          "ledger": "tmp/migration_matrix_text_style_all_6x6/ledger.md"
+        },
+        {
+          "coverage_id": "text-animators",
+          "recipe_glob": "examples/recipes/minimal-text-animator-*.json",
+          "out": "tmp/migration_matrix_text_animators_all_6x6",
+          "matrix": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "ledger": "tmp/migration_matrix_text_animators_all_6x6/ledger.md"
+        },
+        {
+          "coverage_id": "effects-static",
+          "recipe_paths": [
+            "examples/recipes/minimal-text-effect.json",
+            "examples/recipes/minimal-adjustment-layer.json"
+          ],
+          "out": "tmp/migration_matrix_static_effects_all_6x6",
+          "matrix": "tmp/migration_matrix_static_effects_all_6x6/matrix.json",
+          "ledger": "tmp/migration_matrix_static_effects_all_6x6/ledger.md"
+        },
+        {
+          "coverage_id": "effects-dynamic-params",
+          "recipe_paths": [
+            "examples/recipes/minimal-effect-layer-param.json",
+            "examples/recipes/minimal-effect-param-expression.json",
+            "examples/recipes/minimal-effect-param-keyframes.json",
+            "examples/recipes/minimal-effect-param-vector-keyframes.json"
+          ],
+          "out": "tmp/migration_matrix_effect_params_all_6x6",
+          "matrix": "tmp/migration_matrix_effect_params_all_6x6/matrix.json",
+          "ledger": "tmp/migration_matrix_effect_params_all_6x6/ledger.md"
+        },
+        {
+          "coverage_id": "transforms-dynamic",
+          "recipe_paths": [
+            "examples/recipes/minimal-transform-keyframes.json",
+            "examples/recipes/minimal-transform-keyframe-ease.json",
+            "examples/recipes/minimal-transform-expression.json"
+          ],
+          "out": "tmp/migration_matrix_transform_all_6x6",
+          "matrix": "tmp/migration_matrix_transform_all_6x6/matrix.json",
+          "ledger": "tmp/migration_matrix_transform_all_6x6/ledger.md"
+        },
+        {
+          "coverage_id": "project",
+          "recipe_glob": "examples/recipes/minimal-project-*.json",
+          "out": "tmp/migration_matrix_project_all_6x6",
+          "matrix": "tmp/migration_matrix_project_all_6x6/matrix.json",
+          "ledger": "tmp/migration_matrix_project_all_6x6/ledger.md"
+        },
+        {
+          "coverage_id": "comp",
+          "recipe_glob": "examples/recipes/minimal-comp-*.json",
+          "out": "tmp/migration_matrix_comp_all_6x6",
+          "matrix": "tmp/migration_matrix_comp_all_6x6/matrix.json",
+          "ledger": "tmp/migration_matrix_comp_all_6x6/ledger.md"
+        },
+        {
+          "coverage_id": "precomp",
+          "recipe_glob": "examples/recipes/minimal-precomp-*.json",
+          "out": "tmp/migration_matrix_precomp_all_6x6",
+          "matrix": "tmp/migration_matrix_precomp_all_6x6/matrix.json",
+          "ledger": "tmp/migration_matrix_precomp_all_6x6/ledger.md"
+        },
+        {
+          "coverage_id": "camera",
+          "recipe_glob": "examples/recipes/minimal-camera-*.json",
+          "out": "tmp/migration_matrix_camera_all_6x6",
+          "matrix": "tmp/migration_matrix_camera_all_6x6/matrix.json",
+          "ledger": "tmp/migration_matrix_camera_all_6x6/ledger.md"
+        },
+        {
+          "coverage_id": "light",
+          "recipe_glob": "examples/recipes/minimal-light-*.json",
+          "out": "tmp/migration_matrix_light_all_6x6",
+          "matrix": "tmp/migration_matrix_light_all_6x6/matrix.json",
+          "ledger": "tmp/migration_matrix_light_all_6x6/ledger.md"
+        },
+        {
+          "coverage_id": "layer-all-family",
+          "recipe_glob": "examples/recipes/minimal-layer-*.json",
+          "out": "tmp/migration_matrix_layer_all_6x6",
+          "matrix": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "ledger": "tmp/migration_matrix_layer_all_6x6/ledger.md",
+          "allow_matrix_exit": [1],
+          "allowed_nonpass_reason": "known matte contract boundary"
+        },
+        {
+          "coverage_id": "shape-all-family",
+          "recipe_glob": "examples/recipes/minimal-shape-*.json",
+          "out": "tmp/migration_matrix_shape_all_6x6",
+          "matrix": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "ledger": "tmp/migration_matrix_shape_all_6x6/ledger.md"
+        }
+      ]
+    }
+  ],
+  "canonical_coverage_batch": "all-current-writer-coverage",
+  "policy_decisions": [
+    {
+      "id": "host-open-fanout-policy",
+      "status": "recorded",
+      "source": "versioned-aep-migration-coverage.json.host_open_policy",
+      "decision": "The matrix command does not need an upgrade for AE host-open fanout; use existing -ae-open, -ae-versions, and -max-ae-open-cases flags.",
+      "default_action": "Use representative host-open evidence by capability. Broader all-host fanout is optional escalation, not the default validation path.",
+      "endpoint_rule": "When target-bound direct AE2020 and AE2025 host-open checks pass for the same capability, AE2021-AE2024 may be marked inferred_by_endpoint, not direct_verified."
+    }
+  ],
+  "host_open_gap_audit": {
+    "status": "completed",
+    "script": "scripts/migration/plan_host_open_gaps.ps1",
+    "command": "pwsh -File scripts/migration/plan_host_open_gaps.ps1 -AERoot E:/adobe",
+    "artifact": "tmp/host_open_gap_audit.json",
+    "summary": {
+      "gap_groups": 0,
+      "gap_recipes": 0,
+      "chunks": 0,
+      "max_ae_open_cases_per_chunk": 24,
+      "ae_open_mode": "target_bound",
+      "endpoint_direct_hosts": ["AE2020", "AE2025"],
+      "inferred_hosts_after_endpoint_pass": ["AE2021", "AE2022", "AE2023", "AE2024"]
+    },
+    "completed_groups": [
+      { "coverage_id": "text-baseline", "gap_recipes": 2, "chunks": 1, "priority": "small_direct_endpoint_batch", "status": "pass", "artifact": "tmp/host_open_gaps/text-baseline/chunk-1/matrix.json" },
+      { "coverage_id": "effects-static", "gap_recipes": 2, "chunks": 1, "priority": "small_direct_endpoint_batch", "status": "pass", "artifact": "tmp/host_open_gaps/effects-static/chunk-1/matrix.json" },
+      {
+        "coverage_id": "layer-all-family",
+        "gap_recipes": 14,
+        "chunks": 3,
+        "priority": "chunked_non_boundary_batch",
+        "status": "pass",
+        "artifacts": [
+          "tmp/host_open_gaps/layer-all-family/chunk-1/matrix.json",
+          "tmp/host_open_gaps/layer-all-family/chunk-2/matrix.json",
+          "tmp/host_open_gaps/layer-all-family/chunk-3/matrix.json"
+        ]
+      },
+      {
+        "coverage_id": "shape-all-family",
+        "gap_recipes": 23,
+        "chunks": 4,
+        "priority": "chunked_non_representative_batch",
+        "status": "pass",
+        "artifacts": [
+          "tmp/host_open_gaps/shape-all-family/chunk-1/matrix.json",
+          "tmp/host_open_gaps/shape-all-family/chunk-2/matrix.json",
+          "tmp/host_open_gaps/shape-all-family/chunk-3/matrix.json",
+          "tmp/host_open_gaps/shape-all-family/chunk-4/matrix.json"
+        ]
+      }
+    ],
+    "remaining_gap_groups": []
+  },
+  "tooling": [
+    {
+      "id": "host-open-gap-planner",
+      "status": "available_verified",
+      "purpose": "Read coverage JSON host_open_status values and generate a chunked endpoint host-open gap audit under tmp/.",
+      "script": "scripts/migration/plan_host_open_gaps.ps1",
+      "output": "tmp/host_open_gap_audit.json"
+    },
+    {
+      "id": "coverage-json-updater",
+      "status": "available_verified",
+      "purpose": "Read a matrix JSON artifact and update one coverage record in versioned-aep-migration-coverage.json.",
+      "script": "scripts/migration/update_coverage.ps1"
+    },
+    {
+      "id": "coverage-json-validator",
+      "status": "available_verified",
+      "purpose": "Validate coverage JSON totals and recipe coverage against referenced matrix artifacts.",
+      "script": "scripts/migration/validate_coverage.ps1"
+    },
+    {
+      "id": "current-json-validator",
+      "status": "available_verified",
+      "purpose": "Validate current JSON references, frozen Markdown paths, scripts, and coverage batch entries.",
+      "script": "scripts/migration/validate_current.ps1"
+    },
+    {
+      "id": "coverage-batch-runner",
+      "status": "available_verified",
+      "purpose": "Run or skip-run a coverage batch from current JSON, sync coverage JSON, then validate artifact totals.",
+      "script": "scripts/migration/run_coverage_batch.ps1"
+    },
+    {
+      "id": "coverage-md-renderer",
+      "status": "available_verified",
+      "purpose": "Generate a temporary human-readable Markdown table from coverage JSON when needed.",
+      "script": "scripts/migration/render_coverage_md.ps1",
+      "output": "tmp/migration_coverage.md"
+    }
+  ],
+  "next_batches": [
+    {
+      "id": "host-open-endpoint-direct-small-gaps",
+      "status": "completed",
+      "scope": "Run the two smallest endpoint direct AE-open chunks from tmp/host_open_gap_audit.json: text-baseline and effects-static.",
+      "expected_cases": 16,
+      "result": "text-baseline and effects-static endpoint target-bound host-open chunks passed 8/8 each."
+    },
+    {
+      "id": "host-open-endpoint-direct-layer-shape",
+      "status": "completed",
+      "scope": "Run remaining chunked endpoint direct AE-open gaps for non-representative shape recipes.",
+      "expected_chunks": 4,
+      "result": "non-boundary layer chunks passed 56/56; non-representative shape chunks passed 92/92."
+    }
+  ],
+  "acceptance_audit": {
+    "status": "pass",
+    "verified_at": "2026-07-02",
+    "summary": "JSON-first versioned migration validation is internally consistent, host-open gap audit is complete, recurring matrix gates pass, and Go package checks pass.",
+    "remaining_active_items": [],
+    "commands": [
+      {
+        "command": "pwsh -File scripts/migration/validate_current.ps1",
+        "status": "pass",
+        "evidence": "current ok: checked 2 coverage batches and 6 tooling entries"
+      },
+      {
+        "command": "pwsh -File scripts/migration/validate_coverage.ps1",
+        "status": "pass",
+        "evidence": "coverage ok: checked 13 matrix artifacts, 2 recurring gates, and host-open policy"
+      },
+      {
+        "command": "pwsh -File scripts/migration/plan_host_open_gaps.ps1 -AERoot E:/adobe",
+        "status": "pass",
+        "evidence": "gap groups=0 gap recipes=0 chunks=0"
+      },
+      {
+        "command": "pwsh -File scripts/migration/verify_matrix.ps1",
+        "status": "pass",
+        "evidence": "full W2020 no-AE matrix 840/846 pass with 6 source-contract skips; explicit matte AE2025 contract 1/1 pass"
+      },
+      {
+        "command": "go test ./...",
+        "status": "pass",
+        "evidence": "all packages passed"
+      },
+      {
+        "command": "go vet ./...",
+        "status": "pass",
+        "evidence": "exit code 0"
+      },
+      {
+        "command": "git diff --check",
+        "status": "pass",
+        "evidence": "exit code 0; LF/CRLF warnings only"
+      }
+    ]
+  },
+  "open_contract_boundaries": [
+    {
+      "id": "layer-matte-source-contract",
+      "status": "known_boundary",
+      "affected_recipes": ["minimal-layer-explicit-matte", "minimal-layer-track-matte"],
+      "summary": "AE2025 explicit matte source data cannot be safely downgraded to AE2020-AE2024 in the current writer contract; lower explicit-matte sources are source-contract skips."
+    }
+  ]
+}

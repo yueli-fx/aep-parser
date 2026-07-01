@@ -1,0 +1,387 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-07-01",
+  "purpose": "Machine-readable total coverage ledger for versioned AEP migration validation.",
+  "writer_axes": {
+    "source_writers": ["AE2020", "AE2021", "AE2022", "AE2023", "AE2024", "AE2025"],
+    "target_writers": ["AE2020", "AE2021", "AE2022", "AE2023", "AE2024", "AE2025"]
+  },
+  "host_open_axis": {
+    "hosts": ["AE2020", "AE2021", "AE2022", "AE2023", "AE2024", "AE2025"],
+    "note": "Host-open evidence is tracked separately from writer source/target profile-diff evidence."
+  },
+  "host_open_policy": {
+    "matrix_command_status": "no_upgrade_required",
+    "available_flags": ["-ae-open", "-ae-versions", "-max-ae-open-cases"],
+    "default_strategy": "representative_host_open_by_capability",
+    "broad_fanout_status": "optional_policy_escalation",
+    "endpoint_inference": {
+      "enabled": true,
+      "direct_hosts": ["AE2020", "AE2025"],
+      "inferred_hosts": ["AE2021", "AE2022", "AE2023", "AE2024"],
+      "label": "inferred_by_endpoint",
+      "open_mode": "target_bound",
+      "rule": "If the same capability passes target-bound direct host-open on AE2020 targets opened by AE2020 and AE2025 targets opened by AE2025, intermediate hosts may be marked inferred_by_endpoint, not direct_verified.",
+      "limits": "Do not infer across known source-contract boundaries, version-gated fixture features, or any capability with a direct host-open failure."
+    },
+    "evidence_levels": [
+      "direct_all_hosts",
+      "direct_endpoint_hosts",
+      "inferred_by_endpoint",
+      "representative_only",
+      "pending_per_capability"
+    ]
+  },
+  "recurring_gates": [
+    {
+      "id": "full-w2020-no-ae-boundary",
+      "command": "pwsh -File scripts/migration/verify_matrix.ps1",
+      "artifact": "tmp/migration_matrix_smoke_all/matrix.json",
+      "ledger": "tmp/migration_matrix_smoke_all/ledger.md",
+      "writer_coverage": {
+        "source_writers": ["AE2020"],
+        "target_writers": ["AE2020", "AE2021", "AE2022", "AE2023", "AE2024", "AE2025"]
+      },
+      "totals": { "total": 846, "pass": 840, "blocked": 0, "failed": 0, "skipped": 6 },
+      "status": "pass_with_source_contract_skips"
+    },
+    {
+      "id": "explicit-matte-ae2025-contract",
+      "command": "pwsh -File scripts/migration/verify_matrix.ps1",
+      "artifact": "tmp/migration_matrix_explicit_matte_ae2025/matrix.json",
+      "ledger": "tmp/migration_matrix_explicit_matte_ae2025/ledger.md",
+      "writer_coverage": {
+        "source_writers": ["AE2025"],
+        "target_writers": ["AE2025"]
+      },
+      "totals": { "total": 1, "pass": 1, "blocked": 0, "failed": 0, "skipped": 0 },
+      "status": "pass"
+    }
+  ],
+  "coverage": [
+    {
+      "id": "text-baseline",
+      "domain": "text",
+      "scope": "default text layer creation and static transform text fixtures",
+      "recipes": ["minimal-default-text-layer", "minimal-default-text-static-transform"],
+      "writer_status": "PD-6x6",
+      "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
+      "host_open_status": "direct_endpoint_hosts_pass; AE2021-AE2024 inferred_by_endpoint",
+      "host_open_endpoint_evidence": {
+        "open_mode": "target_bound",
+        "direct_hosts": ["AE2020", "AE2025"],
+        "inferred_hosts": ["AE2021", "AE2022", "AE2023", "AE2024"],
+        "recipes": ["minimal-default-text-layer", "minimal-default-text-static-transform"],
+        "artifact": "tmp/host_open_gaps/text-baseline/chunk-1/matrix.json",
+        "ledger": "tmp/host_open_gaps/text-baseline/chunk-1/ledger.md",
+        "totals": { "total": 8, "pass": 8, "blocked": 0, "failed": 0, "skipped": 0 }
+      },
+      "artifact": "tmp/migration_matrix_text_baseline_all_6x6/matrix.json",
+      "ledger": "tmp/migration_matrix_text_baseline_all_6x6/ledger.md",
+      "totals": { "total": 72, "pass": 72, "blocked": 0, "failed": 0, "skipped": 0 }
+    },
+    {
+      "id": "text-style",
+      "domain": "text",
+      "scope": "current text style fixture set",
+      "recipes": ["minimal-text-style", "minimal-text-shape"],
+      "writer_status": "PD-6x6",
+      "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
+      "host_open_status": "OPEN-H2025 plus OPEN-ALL-HOSTS representative",
+      "host_open_representatives": ["minimal-text-style"],
+      "artifact": "tmp/migration_matrix_text_style_all_6x6/matrix.json",
+      "ledger": "tmp/migration_matrix_text_style_all_6x6/ledger.md",
+      "totals": { "total": 72, "pass": 72, "blocked": 0, "failed": 0, "skipped": 0 }
+    },
+    {
+      "id": "text-animators",
+      "domain": "text",
+      "scope": "all 22 current recipe-owned text animator fixtures",
+      "recipe_pattern": "minimal-text-animator-*",
+      "recipe_count": 22,
+      "writer_status": "PD-6x6",
+      "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
+      "host_open_status": "OPEN-ALL-HOSTS representatives only",
+      "host_open_representatives": ["minimal-text-animator-skew", "minimal-text-animator-color-value-keyframes"],
+      "artifact": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+      "ledger": "tmp/migration_matrix_text_animators_all_6x6/ledger.md",
+      "totals": { "total": 792, "pass": 792, "blocked": 0, "failed": 0, "skipped": 0 }
+    },
+    {
+      "id": "effects-static",
+      "domain": "effect",
+      "scope": "static supported effects",
+      "recipes": ["minimal-text-effect", "minimal-adjustment-layer"],
+      "writer_status": "PD-6x6",
+      "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
+      "host_open_status": "direct_endpoint_hosts_pass; AE2021-AE2024 inferred_by_endpoint",
+      "host_open_endpoint_evidence": {
+        "open_mode": "target_bound",
+        "direct_hosts": ["AE2020", "AE2025"],
+        "inferred_hosts": ["AE2021", "AE2022", "AE2023", "AE2024"],
+        "recipes": ["minimal-text-effect", "minimal-adjustment-layer"],
+        "artifact": "tmp/host_open_gaps/effects-static/chunk-1/matrix.json",
+        "ledger": "tmp/host_open_gaps/effects-static/chunk-1/ledger.md",
+        "totals": { "total": 8, "pass": 8, "blocked": 0, "failed": 0, "skipped": 0 }
+      },
+      "artifact": "tmp/migration_matrix_static_effects_all_6x6/matrix.json",
+      "ledger": "tmp/migration_matrix_static_effects_all_6x6/ledger.md",
+      "totals": { "total": 72, "pass": 72, "blocked": 0, "failed": 0, "skipped": 0 }
+    },
+    {
+      "id": "effects-dynamic-params",
+      "domain": "effect",
+      "scope": "layer-ref params, expressions, scalar keyframes, vector keyframes",
+      "recipes": ["minimal-effect-layer-param", "minimal-effect-param-expression", "minimal-effect-param-keyframes", "minimal-effect-param-vector-keyframes"],
+      "writer_status": "PD-6x6",
+      "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
+      "host_open_status": "OPEN-H2025 plus OPEN-ALL-HOSTS representative",
+      "host_open_representatives": ["minimal-effect-param-vector-keyframes"],
+      "artifact": "tmp/migration_matrix_effect_params_all_6x6/matrix.json",
+      "ledger": "tmp/migration_matrix_effect_params_all_6x6/ledger.md",
+      "totals": { "total": 144, "pass": 144, "blocked": 0, "failed": 0, "skipped": 0 }
+    },
+    {
+      "id": "transforms-dynamic",
+      "domain": "transform",
+      "scope": "transform keyframes, keyframe ease, and transform expressions",
+      "recipes": ["minimal-transform-keyframes", "minimal-transform-keyframe-ease", "minimal-transform-expression"],
+      "writer_status": "PD-6x6",
+      "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
+      "host_open_status": "OPEN-H2025 plus OPEN-ALL-HOSTS representative",
+      "host_open_representatives": ["minimal-transform-keyframe-ease"],
+      "artifact": "tmp/migration_matrix_transform_all_6x6/matrix.json",
+      "ledger": "tmp/migration_matrix_transform_all_6x6/ledger.md",
+      "totals": { "total": 108, "pass": 108, "blocked": 0, "failed": 0, "skipped": 0 }
+    },
+    {
+      "id": "project",
+      "domain": "project",
+      "scope": "all 4 current project setting recipes",
+      "recipe_pattern": "minimal-project-*",
+      "recipe_count": 4,
+      "writer_status": "PD-6x6",
+      "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
+      "host_open_status": "OPEN-ALL-HOSTS representative",
+      "host_open_representatives": ["minimal-project-display-settings"],
+      "artifact": "tmp/migration_matrix_project_all_6x6/matrix.json",
+      "ledger": "tmp/migration_matrix_project_all_6x6/ledger.md",
+      "totals": { "total": 144, "pass": 144, "blocked": 0, "failed": 0, "skipped": 0 }
+    },
+    {
+      "id": "comp",
+      "domain": "comp",
+      "scope": "all 18 current comp setting recipes",
+      "recipe_pattern": "minimal-comp-*",
+      "recipe_count": 18,
+      "writer_status": "PD-6x6",
+      "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
+      "host_open_status": "OPEN-ALL-HOSTS representative",
+      "host_open_representatives": ["minimal-comp-object-profile"],
+      "artifact": "tmp/migration_matrix_comp_all_6x6/matrix.json",
+      "ledger": "tmp/migration_matrix_comp_all_6x6/ledger.md",
+      "totals": { "total": 648, "pass": 648, "blocked": 0, "failed": 0, "skipped": 0 }
+    },
+    {
+      "id": "precomp",
+      "domain": "precomp",
+      "scope": "all 1 current precomp recipe",
+      "recipe_pattern": "minimal-precomp-*",
+      "recipe_count": 1,
+      "writer_status": "PD-6x6",
+      "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
+      "host_open_status": "OPEN-ALL-HOSTS for current recipe",
+      "host_open_representatives": ["minimal-precomp-layer"],
+      "artifact": "tmp/migration_matrix_precomp_all_6x6/matrix.json",
+      "ledger": "tmp/migration_matrix_precomp_all_6x6/ledger.md",
+      "totals": { "total": 36, "pass": 36, "blocked": 0, "failed": 0, "skipped": 0 }
+    },
+    {
+      "id": "camera",
+      "domain": "camera",
+      "scope": "all 15 current camera recipes",
+      "recipe_pattern": "minimal-camera-*",
+      "recipe_count": 15,
+      "writer_status": "PD-6x6",
+      "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
+      "host_open_status": "OPEN-ALL-HOSTS representative",
+      "host_open_representatives": ["minimal-camera-object-profile"],
+      "artifact": "tmp/migration_matrix_camera_all_6x6/matrix.json",
+      "ledger": "tmp/migration_matrix_camera_all_6x6/ledger.md",
+      "totals": { "total": 540, "pass": 540, "blocked": 0, "failed": 0, "skipped": 0 }
+    },
+    {
+      "id": "light",
+      "domain": "light",
+      "scope": "all 14 current light recipes",
+      "recipe_pattern": "minimal-light-*",
+      "recipe_count": 14,
+      "writer_status": "PD-6x6",
+      "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
+      "host_open_status": "OPEN-ALL-HOSTS representative",
+      "host_open_representatives": ["minimal-light-object-profile"],
+      "artifact": "tmp/migration_matrix_light_all_6x6/matrix.json",
+      "ledger": "tmp/migration_matrix_light_all_6x6/ledger.md",
+      "totals": { "total": 504, "pass": 504, "blocked": 0, "failed": 0, "skipped": 0 }
+    },
+    {
+      "id": "layer-all-family",
+      "domain": "layer",
+      "scope": "all 16 current layer recipes",
+      "recipe_pattern": "minimal-layer-*",
+      "recipe_count": 16,
+      "writer_status": "boundary",
+      "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
+      "host_open_status": "direct_endpoint_hosts_pass for non-boundary recipes; matte boundary recipes excluded",
+      "host_open_endpoint_evidence": {
+        "open_mode": "target_bound",
+        "scope": "non_boundary_recipes",
+        "direct_hosts": ["AE2020", "AE2025"],
+        "inferred_hosts": ["AE2021", "AE2022", "AE2023", "AE2024"],
+        "excluded_known_boundary_recipes": ["minimal-layer-explicit-matte", "minimal-layer-track-matte"],
+        "recipes": [
+          "minimal-layer-advanced-switches",
+          "minimal-layer-auto-orient",
+          "minimal-layer-comment",
+          "minimal-layer-common-switches",
+          "minimal-layer-label",
+          "minimal-layer-mask",
+          "minimal-layer-motion-blur",
+          "minimal-layer-null-flag",
+          "minimal-layer-object-profile",
+          "minimal-layer-parent",
+          "minimal-layer-quality-blending",
+          "minimal-layer-shy",
+          "minimal-layer-source-ref",
+          "minimal-layer-timing"
+        ],
+        "chunks": [
+          {
+            "id": "chunk-1",
+            "artifact": "tmp/host_open_gaps/layer-all-family/chunk-1/matrix.json",
+            "ledger": "tmp/host_open_gaps/layer-all-family/chunk-1/ledger.md",
+            "totals": { "total": 24, "pass": 24, "blocked": 0, "failed": 0, "skipped": 0 }
+          },
+          {
+            "id": "chunk-2",
+            "artifact": "tmp/host_open_gaps/layer-all-family/chunk-2/matrix.json",
+            "ledger": "tmp/host_open_gaps/layer-all-family/chunk-2/ledger.md",
+            "totals": { "total": 24, "pass": 24, "blocked": 0, "failed": 0, "skipped": 0 }
+          },
+          {
+            "id": "chunk-3",
+            "artifact": "tmp/host_open_gaps/layer-all-family/chunk-3/matrix.json",
+            "ledger": "tmp/host_open_gaps/layer-all-family/chunk-3/ledger.md",
+            "totals": { "total": 8, "pass": 8, "blocked": 0, "failed": 0, "skipped": 0 }
+          }
+        ],
+        "totals": { "total": 56, "pass": 56, "blocked": 0, "failed": 0, "skipped": 0 }
+      },
+      "artifact": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+      "ledger": "tmp/migration_matrix_layer_all_6x6/ledger.md",
+      "totals": { "total": 576, "pass": 536, "blocked": 10, "failed": 0, "skipped": 30 },
+      "boundary": {
+        "status": "known_matte_contract_boundary",
+        "passing_recipe_count": 14,
+        "blocked_recipe_ids": ["minimal-layer-explicit-matte", "minimal-layer-track-matte"],
+        "details": [
+          {
+            "recipe": "minimal-layer-explicit-matte",
+            "pass": 1,
+            "blocked": 5,
+            "skipped": 30,
+            "reason": "AE2025-only explicit matte source contract; lower sources skipped, AE2025 downgrades blocked"
+          },
+          {
+            "recipe": "minimal-layer-track-matte",
+            "pass": 31,
+            "blocked": 5,
+            "skipped": 0,
+            "reason": "AE2025 source downgrades to AE2020-AE2024 blocked by explicit matte source contract"
+          }
+        ]
+      }
+    },
+    {
+      "id": "shape-all-family",
+      "domain": "shape",
+      "scope": "all 27 current shape recipes",
+      "recipe_pattern": "minimal-shape-*",
+      "recipe_count": 27,
+      "writer_status": "PD-6x6",
+      "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
+      "host_open_status": "OPEN-ALL-HOSTS for gradient-stroke variants; direct_endpoint_hosts_pass for remaining shape recipes",
+      "host_open_representatives": ["minimal-shape-gradient-stroke", "minimal-shape-gradient-stroke-alpha-stops", "minimal-shape-gradient-stroke-highlight", "minimal-shape-gradient-stroke-style"],
+      "host_open_endpoint_evidence": {
+        "open_mode": "target_bound",
+        "scope": "non_representative_recipes",
+        "direct_hosts": ["AE2020", "AE2025"],
+        "inferred_hosts": ["AE2021", "AE2022", "AE2023", "AE2024"],
+        "excluded_all_host_representatives": ["minimal-shape-gradient-stroke", "minimal-shape-gradient-stroke-alpha-stops", "minimal-shape-gradient-stroke-highlight", "minimal-shape-gradient-stroke-style"],
+        "recipes": [
+          "minimal-shape-fill-blend-mode",
+          "minimal-shape-fill-composite-order",
+          "minimal-shape-fill-rule",
+          "minimal-shape-gradient-fill",
+          "minimal-shape-gradient-fill-alpha-stops",
+          "minimal-shape-gradient-fill-highlight",
+          "minimal-shape-merge-paths",
+          "minimal-shape-offset-paths",
+          "minimal-shape-polystar",
+          "minimal-shape-pucker-bloat",
+          "minimal-shape-rect-fill-default-transform",
+          "minimal-shape-repeater",
+          "minimal-shape-round-corners",
+          "minimal-shape-stroke-composite-order",
+          "minimal-shape-stroke-dashes",
+          "minimal-shape-stroke-style",
+          "minimal-shape-stroke-taper",
+          "minimal-shape-stroke-wave",
+          "minimal-shape-trim",
+          "minimal-shape-twist",
+          "minimal-shape-wiggle-paths",
+          "minimal-shape-wiggle-transform",
+          "minimal-shape-zigzag"
+        ],
+        "chunks": [
+          {
+            "id": "chunk-1",
+            "artifact": "tmp/host_open_gaps/shape-all-family/chunk-1/matrix.json",
+            "ledger": "tmp/host_open_gaps/shape-all-family/chunk-1/ledger.md",
+            "totals": { "total": 24, "pass": 24, "blocked": 0, "failed": 0, "skipped": 0 }
+          },
+          {
+            "id": "chunk-2",
+            "artifact": "tmp/host_open_gaps/shape-all-family/chunk-2/matrix.json",
+            "ledger": "tmp/host_open_gaps/shape-all-family/chunk-2/ledger.md",
+            "totals": { "total": 24, "pass": 24, "blocked": 0, "failed": 0, "skipped": 0 }
+          },
+          {
+            "id": "chunk-3",
+            "artifact": "tmp/host_open_gaps/shape-all-family/chunk-3/matrix.json",
+            "ledger": "tmp/host_open_gaps/shape-all-family/chunk-3/ledger.md",
+            "totals": { "total": 24, "pass": 24, "blocked": 0, "failed": 0, "skipped": 0 }
+          },
+          {
+            "id": "chunk-4",
+            "artifact": "tmp/host_open_gaps/shape-all-family/chunk-4/matrix.json",
+            "ledger": "tmp/host_open_gaps/shape-all-family/chunk-4/ledger.md",
+            "totals": { "total": 20, "pass": 20, "blocked": 0, "failed": 0, "skipped": 0 }
+          }
+        ],
+        "totals": { "total": 92, "pass": 92, "blocked": 0, "failed": 0, "skipped": 0 }
+      },
+      "artifact": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+      "ledger": "tmp/migration_matrix_shape_all_6x6/ledger.md",
+      "totals": { "total": 972, "pass": 972, "blocked": 0, "failed": 0, "skipped": 0 }
+    }
+  ],
+  "open_items": [
+    {
+      "id": "host-open-fanout",
+      "scope": "non-representative text animator, effect, transform, project/comp, and camera-light variants",
+      "status": "resolved_by_endpoint_policy",
+      "note": "Coverage now has direct target-bound endpoint host-open evidence for prior pending text/effect/layer/shape gaps. Broader all-host fanout remains optional policy escalation, not an active gap."
+    }
+  ]
+}

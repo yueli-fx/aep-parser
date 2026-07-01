@@ -1,5 +1,9 @@
 # Versioned AEP Migration Validation Summary
 
+> Frozen historical Markdown view. Do not treat this file as the current source
+> of truth. Current coverage lives in `versioned-aep-migration-coverage.json`;
+> current execution state lives in `versioned-aep-migration-current.json`.
+
 This file is the reviewed validation ledger for versioned AEP migration. Raw
 matrix output under `tmp/` is supporting evidence, not the source of truth.
 

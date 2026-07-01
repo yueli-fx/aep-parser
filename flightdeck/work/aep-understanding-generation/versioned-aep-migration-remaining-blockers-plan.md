@@ -1,5 +1,9 @@
 # Versioned AEP Migration Remaining Blockers Implementation Plan
 
+> Frozen historical plan. Do not append new execution steps here.
+> Current execution state lives in `versioned-aep-migration-current.json`;
+> current coverage results live in `versioned-aep-migration-coverage.json`.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Continue the `aep-understanding-generation` mainline by turning the post-text-animator migration boundary into a reviewed blocker ledger, then remove the next smallest blocked family.
