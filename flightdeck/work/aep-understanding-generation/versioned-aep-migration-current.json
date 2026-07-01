@@ -437,6 +437,20 @@
           "tmp/host_open_gaps/comp/non-representative-endpoint/chunk-3/matrix.json"
         ],
         "result": "non-representative comp recipes passed endpoint target-bound host-open 68/68."
+      },
+      {
+        "coverage_id": "text-animators",
+        "gap_recipes": 20,
+        "chunks": 4,
+        "priority": "representative_covered_endpoint_batch",
+        "status": "pass",
+        "artifacts": [
+          "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-1/matrix.json",
+          "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-2/matrix.json",
+          "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-3/matrix.json",
+          "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-4/matrix.json"
+        ],
+        "result": "non-representative text animator recipes passed endpoint target-bound host-open 80/80."
       }
     ],
     "remaining_gap_groups": []
@@ -577,7 +591,7 @@
       {
         "command": "pwsh -File scripts/migration/query_coverage_summary.ps1 -Totals",
         "status": "pass",
-        "evidence": "host_open_evidence_levels recorded_status_only=0, representative_covered=20, and endpoint host-open cases=424/424 pass"
+        "evidence": "host_open_evidence_levels recorded_status_only=0, representative_covered=0, and endpoint host-open cases=504/504 pass"
       },
       {
         "command": "pwsh -File scripts/migration/plan_host_open_gaps.ps1 -AERoot E:/adobe",
