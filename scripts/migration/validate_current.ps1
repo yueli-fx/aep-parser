@@ -30,6 +30,25 @@ function Assert-Equal {
   }
 }
 
+function Assert-MatrixGate {
+  param(
+    [string]$Label,
+    $Gate
+  )
+
+  if (-not $Gate) {
+    return
+  }
+
+  Assert-PathExists "$Label.artifact" $Gate.artifact
+  $matrix = Get-Content -Raw $Gate.artifact | ConvertFrom-Json
+  Assert-Equal "$Label.totals.total" ([int]$Gate.totals.total) ([int]$matrix.summary.total)
+  Assert-Equal "$Label.totals.pass" ([int]$Gate.totals.pass) ([int]$matrix.summary.passed)
+  Assert-Equal "$Label.totals.blocked" ([int]$Gate.totals.blocked) ([int]$matrix.summary.blocked)
+  Assert-Equal "$Label.totals.failed" ([int]$Gate.totals.failed) ([int]$matrix.summary.failed)
+  Assert-Equal "$Label.totals.skipped" ([int]$Gate.totals.skipped) ([int]$matrix.summary.skipped)
+}
+
 $current = Get-Content -Raw $CurrentPath | ConvertFrom-Json
 
 Assert-PathExists "truth_sources.current" $current.truth_sources.current
@@ -40,6 +59,9 @@ if ($current.truth_sources.capability_ledger) {
 
 $coverage = Get-Content -Raw $current.truth_sources.coverage | ConvertFrom-Json
 $coverageIds = @($coverage.coverage | ForEach-Object { $_.id })
+
+Assert-MatrixGate "current_state.latest_recurring_gate" $current.current_state.latest_recurring_gate
+Assert-MatrixGate "current_state.latest_explicit_matte_gate" $current.current_state.latest_explicit_matte_gate
 
 foreach ($doc in $current.frozen_markdown) {
   Assert-PathExists "frozen_markdown.path" $doc.path
