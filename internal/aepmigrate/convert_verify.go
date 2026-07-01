@@ -28,10 +28,11 @@ func verifyConvertedProfileBytes(report *Report, source *profile.Profile, target
 	if err != nil {
 		return fmt.Errorf("profile diff compare: %w", err)
 	}
-	report.Verification.ProfileDiffCount = diffReport.DiffCount
-	report.Verification.ProfileDiffIgnoredCount = diffReport.IgnoredCount
-	report.Verification.ProfileDiffs = verificationDiffs(diffReport.Diffs)
-	if diffReport.DiffCount == 0 {
+	unexpectedDiffs, allowedCount := filterReportedProfileDiffs(diffReport.Diffs, report, report.Target.Version)
+	report.Verification.ProfileDiffCount = len(unexpectedDiffs)
+	report.Verification.ProfileDiffIgnoredCount = diffReport.IgnoredCount + allowedCount
+	report.Verification.ProfileDiffs = verificationDiffs(unexpectedDiffs)
+	if len(unexpectedDiffs) == 0 {
 		report.Verification.ProfileDiffStatus = "pass"
 		return nil
 	}
