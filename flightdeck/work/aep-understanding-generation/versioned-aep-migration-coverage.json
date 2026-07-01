@@ -517,10 +517,84 @@
       "recipe_count": 14,
       "writer_status": "PD-6x6",
       "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
-      "host_open_status": "OPEN-ALL-HOSTS representative",
+      "host_open_status": "OPEN-ALL-HOSTS representative plus direct_endpoint_hosts_pass for non-representative recipes; AE2021-AE2024 inferred_by_endpoint",
       "host_open_representatives": [
         "minimal-light-object-profile"
       ],
+      "host_open_endpoint_evidence": {
+        "open_mode": "target_bound",
+        "scope": "non_representative_recipes",
+        "direct_hosts": [
+          "AE2020",
+          "AE2025"
+        ],
+        "inferred_hosts": [
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024"
+        ],
+        "recipes": [
+          "minimal-light-casts-shadows",
+          "minimal-light-color",
+          "minimal-light-cone-angle",
+          "minimal-light-cone-feather",
+          "minimal-light-falloff-distance",
+          "minimal-light-falloff-start",
+          "minimal-light-falloff-type",
+          "minimal-light-intensity",
+          "minimal-light-kind",
+          "minimal-light-layer",
+          "minimal-light-shadow-darkness",
+          "minimal-light-shadow-diffusion",
+          "minimal-light-source"
+        ],
+        "chunks": [
+          {
+            "id": "chunk-1",
+            "artifact": "tmp/host_open_gaps/light/non-representative-endpoint/chunk-1/matrix.json",
+            "ledger": "tmp/host_open_gaps/light/non-representative-endpoint/chunk-1/ledger.md",
+            "totals": {
+              "total": 24,
+              "pass": 24,
+              "blocked": 0,
+              "failed": 0,
+              "skipped": 0
+            }
+          },
+          {
+            "id": "chunk-2",
+            "artifact": "tmp/host_open_gaps/light/non-representative-endpoint/chunk-2/matrix.json",
+            "ledger": "tmp/host_open_gaps/light/non-representative-endpoint/chunk-2/ledger.md",
+            "totals": {
+              "total": 24,
+              "pass": 24,
+              "blocked": 0,
+              "failed": 0,
+              "skipped": 0
+            }
+          },
+          {
+            "id": "chunk-3",
+            "artifact": "tmp/host_open_gaps/light/non-representative-endpoint/chunk-3/matrix.json",
+            "ledger": "tmp/host_open_gaps/light/non-representative-endpoint/chunk-3/ledger.md",
+            "totals": {
+              "total": 4,
+              "pass": 4,
+              "blocked": 0,
+              "failed": 0,
+              "skipped": 0
+            }
+          }
+        ],
+        "totals": {
+          "total": 52,
+          "pass": 52,
+          "blocked": 0,
+          "failed": 0,
+          "skipped": 0
+        }
+      },
       "artifact": "tmp/migration_matrix_light_all_6x6/matrix.json",
       "ledger": "tmp/migration_matrix_light_all_6x6/ledger.md",
       "totals": {

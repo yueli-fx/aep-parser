@@ -398,6 +398,19 @@
           "tmp/host_open_gaps/project/non-representative-endpoint/matrix.json"
         ],
         "result": "small representative-covered text/effect/transform/project recipes passed endpoint target-bound host-open 36/36."
+      },
+      {
+        "coverage_id": "light",
+        "gap_recipes": 13,
+        "chunks": 3,
+        "priority": "representative_covered_endpoint_batch",
+        "status": "pass",
+        "artifacts": [
+          "tmp/host_open_gaps/light/non-representative-endpoint/chunk-1/matrix.json",
+          "tmp/host_open_gaps/light/non-representative-endpoint/chunk-2/matrix.json",
+          "tmp/host_open_gaps/light/non-representative-endpoint/chunk-3/matrix.json"
+        ],
+        "result": "non-representative light recipes passed endpoint target-bound host-open 52/52."
       }
     ],
     "remaining_gap_groups": []
@@ -538,7 +551,7 @@
       {
         "command": "pwsh -File scripts/migration/query_coverage_summary.ps1 -Totals",
         "status": "pass",
-        "evidence": "host_open_evidence_levels recorded_status_only=0, representative_covered=64, and endpoint host-open cases=248/248 pass"
+        "evidence": "host_open_evidence_levels recorded_status_only=0, representative_covered=51, and endpoint host-open cases=300/300 pass"
       },
       {
         "command": "pwsh -File scripts/migration/plan_host_open_gaps.ps1 -AERoot E:/adobe",
