@@ -78,6 +78,10 @@ func Convert(opts ConvertOptions) (Report, error) {
 	if err != nil {
 		return Report{}, err
 	}
+	targetProject, err = materializeProjectEffects(targetProject, prof)
+	if err != nil {
+		return Report{}, err
+	}
 	var out bytes.Buffer
 	if err := targetProject.WriteAEP(&out); err != nil {
 		return Report{}, err
@@ -1844,7 +1848,10 @@ func isSupportedDefaultSolidLayer(layer profile.Layer, footage convertFootageInd
 	if layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
 		return false
 	}
-	if layer.Text != nil || len(layer.Effects) != 0 || len(layer.Masks) != 0 || len(layer.Shapes) != 0 || len(layer.Markers) != 0 {
+	if layer.Text != nil || len(layer.Masks) != 0 || len(layer.Shapes) != 0 || len(layer.Markers) != 0 {
+		return false
+	}
+	if !isSupportedStaticEffectSurface(layer) {
 		return false
 	}
 	flags := layer.Flags
@@ -1880,7 +1887,10 @@ func isSupportedDefaultAdjustmentLayer(layer profile.Layer, footage convertFoota
 	if layer.MatteRef != nil || layer.LightSourceRef != nil {
 		return false
 	}
-	if layer.Text != nil || len(layer.Effects) != 0 || len(layer.Masks) != 0 || len(layer.Shapes) != 0 || len(layer.Markers) != 0 {
+	if layer.Text != nil || len(layer.Masks) != 0 || len(layer.Shapes) != 0 || len(layer.Markers) != 0 {
+		return false
+	}
+	if !isSupportedStaticEffectSurface(layer) {
 		return false
 	}
 	flags := layer.Flags
@@ -1951,7 +1961,10 @@ func isSupportedDefaultTextLayer(layer profile.Layer) bool {
 	if layer.MatteRef != nil || layer.LightSourceRef != nil {
 		return false
 	}
-	if len(layer.Effects) != 0 || len(layer.Masks) != 0 || len(layer.Shapes) != 0 || len(layer.Markers) != 0 {
+	if len(layer.Masks) != 0 || len(layer.Shapes) != 0 || len(layer.Markers) != 0 {
+		return false
+	}
+	if !isSupportedStaticEffectSurface(layer) {
 		return false
 	}
 	if layer.Text.IsBoxText {
@@ -2375,6 +2388,207 @@ func hasCompMetadata(prof *profile.Profile) bool {
 		}
 	}
 	return false
+}
+
+func materializeProjectEffects(project *aep.Project, prof *profile.Profile) (*aep.Project, error) {
+	if !hasProfileEffects(prof) {
+		return project, nil
+	}
+	reopened, err := aep.Reopen(project)
+	if err != nil {
+		return nil, fmt.Errorf("reopen for effects: %w", err)
+	}
+	for compIndex, sourceComp := range prof.Comps {
+		targetComp, err := targetCompBySource(reopened, compIndex, sourceComp)
+		if err != nil {
+			return nil, err
+		}
+		for layerIndex, sourceLayer := range sourceComp.Layers {
+			if len(sourceLayer.Effects) == 0 {
+				continue
+			}
+			if layerIndex >= len(targetComp.Layers) {
+				return nil, fmt.Errorf("comp %q effects: target layer index %d missing", sourceComp.Name, layerIndex)
+			}
+			targetLayer := targetComp.Layers[layerIndex]
+			for _, sourceEffect := range sourceLayer.Effects {
+				targetEffect, err := aep.AddEffect(targetLayer, sourceEffect.MatchName)
+				if err != nil {
+					return nil, fmt.Errorf("comp %q layer %q add effect %q: %w", sourceComp.Name, sourceLayer.Name, sourceEffect.MatchName, err)
+				}
+				if err := materializeEffectParams(targetComp, targetLayer, sourceLayer, targetEffect, sourceEffect); err != nil {
+					return nil, fmt.Errorf("comp %q layer %q effect %q params: %w", sourceComp.Name, sourceLayer.Name, sourceEffect.MatchName, err)
+				}
+			}
+		}
+	}
+	return reopened, nil
+}
+
+func materializeEffectParams(targetComp *aep.Composition, targetLayer *aep.Layer, sourceLayer profile.Layer, targetEffect *aep.Effect, sourceEffect profile.Effect) error {
+	for _, param := range sourceEffect.Params {
+		if param.LayerRef != nil && !effectParamLayerRefIsSelf(param.LayerRef, sourceLayer) {
+			target := targetLayerBySourceRef(targetComp, param.LayerRef)
+			if target == nil {
+				return fmt.Errorf("param %q target layer %q not found", param.MatchName, param.LayerRef.Name)
+			}
+			if err := aep.SetEffectLayerParam(targetLayer, targetEffect, param.MatchName, target); err != nil {
+				return fmt.Errorf("param %q layer_ref: %w", param.MatchName, err)
+			}
+			continue
+		}
+		value, ok := effectParamStaticValue(param.StaticValue)
+		if !ok {
+			if param.Changed {
+				return fmt.Errorf("param %q static value unsupported (%T)", param.MatchName, param.StaticValue)
+			}
+			continue
+		}
+		if _, err := aep.SetEffectParam(targetLayer, targetEffect, param.MatchName, value); err != nil {
+			return fmt.Errorf("param %q static value: %w", param.MatchName, err)
+		}
+	}
+	return nil
+}
+
+func hasProfileEffects(prof *profile.Profile) bool {
+	if prof == nil {
+		return false
+	}
+	for _, comp := range prof.Comps {
+		for _, layer := range comp.Layers {
+			if len(layer.Effects) != 0 {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func isSupportedStaticEffectSurface(layer profile.Layer) bool {
+	for _, effect := range layer.Effects {
+		if !isSupportedEffectMatchName(effect.MatchName) {
+			return false
+		}
+		for _, param := range effect.Params {
+			if len(param.Keyframes) != 0 || param.Expression != "" || param.ExpressionEnabled != nil {
+				return false
+			}
+			if param.LayerRef != nil {
+				continue
+			}
+			if param.StaticValue != nil {
+				if _, ok := effectParamStaticValue(param.StaticValue); !ok {
+					return false
+				}
+			}
+		}
+	}
+	return true
+}
+
+func isSupportedEffectMatchName(matchName string) bool {
+	for _, supported := range aep.SupportedEffects() {
+		if supported == matchName {
+			return true
+		}
+	}
+	return false
+}
+
+func effectParamStaticValue(value any) (any, bool) {
+	switch v := value.(type) {
+	case nil:
+		return nil, false
+	case float64:
+		return v, true
+	case float32:
+		return float64(v), true
+	case int:
+		return float64(v), true
+	case int64:
+		return float64(v), true
+	case bool:
+		if v {
+			return 1.0, true
+		}
+		return 0.0, true
+	case []float64:
+		return append([]float64(nil), v...), true
+	case []any:
+		out := make([]float64, 0, len(v))
+		for _, item := range v {
+			n, ok := effectParamNumber(item)
+			if !ok {
+				return nil, false
+			}
+			out = append(out, n)
+		}
+		return out, true
+	default:
+		return nil, false
+	}
+}
+
+func effectParamNumber(value any) (float64, bool) {
+	switch v := value.(type) {
+	case float64:
+		return v, true
+	case float32:
+		return float64(v), true
+	case int:
+		return float64(v), true
+	case int64:
+		return float64(v), true
+	default:
+		return 0, false
+	}
+}
+
+func effectParamLayerRefIsSelf(ref *profile.LayerRef, layer profile.Layer) bool {
+	if ref == nil {
+		return false
+	}
+	if ref.Name != "" && ref.Name == layer.Name {
+		return true
+	}
+	if ref.ID != 0 && ref.ID == layer.ID {
+		return true
+	}
+	if ref.Index != 0 && ref.Index == layer.Index {
+		return true
+	}
+	return false
+}
+
+func targetCompBySource(project *aep.Project, index int, source profile.Composition) (*aep.Composition, error) {
+	if index < len(project.Compositions) {
+		return project.Compositions[index], nil
+	}
+	for _, comp := range project.Compositions {
+		if comp.Name == source.Name {
+			return comp, nil
+		}
+	}
+	return nil, fmt.Errorf("comp %q effects: target comp missing", source.Name)
+}
+
+func targetLayerBySourceRef(comp *aep.Composition, ref *profile.LayerRef) *aep.Layer {
+	if ref == nil {
+		return nil
+	}
+	if ref.Name != "" {
+		if layer := comp.LayerByName(ref.Name); layer != nil {
+			return layer
+		}
+	}
+	if ref.Index >= 0 && ref.Index < len(comp.Layers) {
+		return comp.Layers[ref.Index]
+	}
+	if ref.Index > 0 && ref.Index <= len(comp.Layers) {
+		return comp.Layers[ref.Index-1]
+	}
+	return nil
 }
 
 func aepTarget(target VersionLabel) aep.AETarget {

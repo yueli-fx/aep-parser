@@ -106,6 +106,13 @@ Current:
 - Text layer object-profile reconstruction now includes markers-locked and
   auto-orient in the switch surface; `minimal-layer-object-profile.json` passes
   AE2020/AE2022/AE2025 matrix conversion and AE2025 open smoke.
+- Static effect reconstruction now reopens the target project, adds supported
+  built-in effects, materializes profile-visible static params, and remaps
+  same-comp effect layer-ref params. `minimal-text-effect.json`,
+  `minimal-adjustment-layer.json`, and `minimal-effect-layer-param.json` pass
+  AE2020/AE2022/AE2025 matrix conversion; text-effect and layer-ref effect
+  AE2025 open smokes pass. Effect expressions and effect keyframes remain
+  blocked.
 - Continue versioned migration by expanding supported conversion surface or
   deciding whether native AE2021/AE2023/AE2024 writer templates are worth
   adding.
