@@ -318,6 +318,15 @@ func convertScopeEntries(target VersionLabel, prof *profile.Profile) []Entry {
 				})
 				continue
 			}
+			if isSupportedDefaultShapeLayer(layer) {
+				entries = append(entries, Entry{
+					Path:          "comps[" + comp.Name + "].layers[" + layer.Name + "]",
+					Class:         ClassRetargeted,
+					TargetVersion: target,
+					Reason:        "Default empty shape layer is recreated through the target AE project template.",
+				})
+				continue
+			}
 			if isSupportedDefaultPrecompLayer(layer, comps) {
 				entries = append(entries, Entry{
 					Path:          "comps[" + comp.Name + "].layers[" + layer.Name + "]",
@@ -331,7 +340,7 @@ func convertScopeEntries(target VersionLabel, prof *profile.Profile) []Entry {
 				Path:          "comps[" + comp.Name + "].layers[" + layer.Name + "]",
 				Class:         ClassBlocked,
 				TargetVersion: target,
-				Reason:        "This convert slice only reconstructs no-layer comps, default null layers, default solid layers, default adjustment layers, default camera layers, default light layers, default text layers, and default precomp layers; refusing output to avoid silent layer loss.",
+				Reason:        "This convert slice only reconstructs no-layer comps, default null layers, default solid layers, default adjustment layers, default camera layers, default light layers, default text layers, default empty shape layers, and default precomp layers; refusing output to avoid silent layer loss.",
 			})
 		}
 	}
@@ -416,6 +425,10 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				}
 				if err := materializeDefaultTransformSurface(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q text layer %q transform: %w", comp.Name, layer.Name, err)
+				}
+			case isSupportedDefaultShapeLayer(layer):
+				if _, err := aep.NewShapeLayer(next, layer.Name); err != nil {
+					return nil, fmt.Errorf("comp %q shape layer %q: %w", comp.Name, layer.Name, err)
 				}
 			case isSupportedDefaultPrecompLayer(layer, comps):
 				sourceComp, ok := targetComps.sourceComposition(layer)
@@ -682,6 +695,38 @@ func isSupportedDefaultTextLayer(layer profile.Layer) bool {
 		return false
 	}
 	if layer.Text.IsBoxText {
+		return false
+	}
+	flags := layer.Flags
+	return flags.Visible &&
+		flags.Blend == 2 &&
+		flags.TrackMatte == 0 &&
+		!flags.IsNull &&
+		flags.EffectsEnabled &&
+		flags.AudioEnabled &&
+		!flags.Is3D &&
+		!flags.Solo &&
+		!flags.Shy &&
+		!flags.Locked &&
+		!flags.IsAdjustment &&
+		!flags.IsGuide &&
+		!flags.MotionBlur &&
+		!flags.FrameBlendEnabled &&
+		!flags.MarkersLocked &&
+		!flags.FrameBlendPixelMotion &&
+		flags.CollapseTransform &&
+		!flags.SamplingBicubic &&
+		!flags.PreserveTransparency
+}
+
+func isSupportedDefaultShapeLayer(layer profile.Layer) bool {
+	if layer.Type != "shape" || layer.SourceRef != nil || layer.Text != nil {
+		return false
+	}
+	if layer.Comment != "" || layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
+		return false
+	}
+	if len(layer.Effects) != 0 || len(layer.Masks) != 0 || len(layer.Shapes) != 0 || len(layer.Markers) != 0 {
 		return false
 	}
 	flags := layer.Flags
