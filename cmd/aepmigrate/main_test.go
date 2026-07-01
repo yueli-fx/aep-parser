@@ -272,6 +272,25 @@ func TestRunConvertWritesDefaultShapeLayerOutput(t *testing.T) {
 	}
 }
 
+func TestRunConvertWritesRectFillShapeLayerOutput(t *testing.T) {
+	input := writeTempProjectWithRectFillShapeLayer(t)
+	outPath := filepath.Join(t.TempDir(), "converted.aep")
+	reportPath := filepath.Join(t.TempDir(), "convert.json")
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"convert", "-in", input, "-target", "AE2025", "-out", outPath, "-report", reportPath}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("run convert = %d, stderr=%s", code, stderr.String())
+	}
+	if _, err := os.Stat(outPath); err != nil {
+		t.Fatalf("converted output missing: %v", err)
+	}
+	report := readReportSummary(t, reportPath)
+	if report.Summary.Status != "pass" || report.Verification.ProfileDiffStatus != "pass" {
+		t.Fatalf("report = %+v, want pass with profile diff pass", report)
+	}
+}
+
 func TestRunConvertWritesBlockedReportWithoutOutput(t *testing.T) {
 	input := writeTempProjectWithCommentedTextLayer(t)
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
@@ -386,6 +405,34 @@ func writeTempProjectWithDefaultShapeLayer(t *testing.T) string {
 		t.Fatalf("NewShapeLayer: %v", err)
 	}
 	return writeProject(t, project, "default-shape-layer.aep")
+}
+
+func writeTempProjectWithRectFillShapeLayer(t *testing.T) string {
+	t.Helper()
+	project := aep.NewProject(aep.TargetAE2020)
+	comp, err := aep.NewComposition(project, "Main", 640, 360, 24, 2)
+	if err != nil {
+		t.Fatalf("NewComposition: %v", err)
+	}
+	shape, err := aep.NewShapeLayer(comp, "Card")
+	if err != nil {
+		t.Fatalf("NewShapeLayer: %v", err)
+	}
+	rect, err := shape.RootGroup().AddRect()
+	if err != nil {
+		t.Fatalf("AddRect: %v", err)
+	}
+	if err := rect.SetSize([2]float64{320, 180}); err != nil {
+		t.Fatalf("Rect.SetSize: %v", err)
+	}
+	fill, err := shape.RootGroup().AddFill()
+	if err != nil {
+		t.Fatalf("AddFill: %v", err)
+	}
+	if err := fill.SetColor([4]float64{1, 0.25, 0.5, 1}); err != nil {
+		t.Fatalf("Fill.SetColor: %v", err)
+	}
+	return writeProject(t, project, "rect-fill-shape-layer.aep")
 }
 
 func writeTempProjectWithOneAdjustmentLayer(t *testing.T) string {

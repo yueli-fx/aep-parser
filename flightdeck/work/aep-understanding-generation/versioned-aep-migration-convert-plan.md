@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans or equivalent TDD execution. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add the first conservative `aepmigrate convert` slices: convert no-layer composition skeleton projects, default null-layer projects, default solid-layer projects, default adjustment-layer projects, default camera-layer projects, default light-layer projects, default text-layer projects, default empty shape-layer projects, and default precomp-layer projects to a requested AE target version, and refuse projects that would require unsupported layer reconstruction.
+**Goal:** Add the first conservative `aepmigrate convert` slices: convert no-layer composition skeleton projects, default null-layer projects, default solid-layer projects, default adjustment-layer projects, default camera-layer projects, default light-layer projects, default text-layer projects, default empty shape-layer projects, single rect+fill shape-layer projects, and default precomp-layer projects to a requested AE target version, and refuse projects that would require unsupported layer reconstruction.
 
 **Architecture:** Extend `internal/aepmigrate` with a `Convert` function that opens the source, builds a profile, runs existing assess checks, adds convert-scope blockers, and writes a new target-version project only when the source is inside the first supported surface. After writing, reopen the target, build its profile, and run `profilediff.Compare` before reporting success. Add `cmd/aepmigrate convert` as a CLI wrapper. Do not copy raw chunks across AE versions.
 
@@ -19,7 +19,8 @@ This slice supports:
 - every composition has zero layers, or every layer is inside the first explicit
   layer-bearing slices: default null layers, default solid layers, default
   adjustment layers, default camera layers, default light layers, default text
-  layers, default empty shape layers, and default precomp layers;
+  layers, default empty shape layers, single rect+fill shape layers, and
+  default precomp layers;
 - each composition is recreated with name, width, height, frame rate, and duration;
 - stable profile-visible composition settings are recreated through target-version
   writers: background color, resolution factor, pixel aspect, display start
@@ -33,7 +34,7 @@ This slice supports:
 
 This slice refuses:
 
-- any source project with layers outside the default-null/default-solid/default-adjustment/default-camera/default-light/default-text/default-empty-shape/default-precomp slice;
+- any source project with layers outside the default-null/default-solid/default-adjustment/default-camera/default-light/default-text/default-empty-shape/single-rect-fill/default-precomp slice;
 - existing assess blockers such as AE2025 explicit matte downgrade;
 - unknown target version labels.
 
@@ -237,6 +238,14 @@ git diff --check
     fixture passes AE2025 open gate with `ae_open_status: "pass"` /
     `ae_open_exit_code: 0`. This slice intentionally excludes shape content
     nodes; rect/fill/stroke/path/filter migration remains a later surface.
+  - Single rect+fill shape-layer sources generated through `aep.NewShapeLayer`
+    with `RootGroup().AddRect()` / `RootGroup().AddFill()` and
+    `examples/recipes/minimal-shape-rect-fill-default-transform.json` convert
+    to AE2025 with `profile_diff_status: "pass"` and `profile_diff_count: 0`;
+    the recipe fixture passes AE2025 open gate with `ae_open_status: "pass"` /
+    `ae_open_exit_code: 0`. This slice reconstructs rect size/position/
+    roundness plus fill color/opacity/blend/composite/fill-rule from stable
+    profile properties and intentionally keeps layer transform at the default.
 
 - [x] Update `flightdeck/work/aep-understanding-generation/index.md` and `flightdeck/cockpit.md` to state:
   - `assess` is available;
@@ -244,7 +253,8 @@ git diff --check
     default null-layer projects, default solid-layer projects, default
     adjustment-layer projects, default camera-layer projects, default
     light-layer projects, default text-layer projects, default empty
-    shape-layer projects, and default precomp-layer projects;
+    shape-layer projects, single rect+fill shape-layer projects, and default
+    precomp-layer projects;
   - stable no-layer comp settings are preserved through target-version writers;
   - renderer and Motion Graphics template name are preserved through their comp
     writers;

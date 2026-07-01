@@ -693,22 +693,23 @@ Current:
   cannot silently drop layer content. The first layer-bearing slices are default
   null layers, default solid layers, default adjustment layers, default camera
   layers, default light layers, default text layers, default empty shape layers,
-  and default precomp layers. Default
+  single rect+fill shape layers, and default precomp layers. Default
   null/adjustment/camera/light
   conversion preserves the source profile's visible default transform surface
   when needed; default solid conversion uses profile-visible footage item
   details for source dimensions/color; default text conversion uses
   `aep.NewTextLayer` + `Layer.SetText` and relies on profile diff for text
-  document/style fidelity; default empty shape conversion uses `aep.NewShapeLayer`
-  and intentionally excludes shape content nodes; default precomp conversion
-  rebuilds all target comps before resolving composition source refs into
-  recreated target comps. Go-writer and recipe fixtures for all eight slices now
-  pass profile diff.
+  document/style fidelity; default empty shape conversion uses `aep.NewShapeLayer`;
+  single rect+fill shape conversion rebuilds rect and fill nodes from stable
+  profile properties while keeping layer transform at default; default precomp
+  conversion rebuilds all target comps before resolving composition source refs
+  into recreated target comps. Go-writer and recipe fixtures for all nine slices
+  now pass profile diff.
   Successful convert reopens the target and
   runs source-vs-target `profilediff`; unexpected profile diffs are recorded in
   the migration report and block success. AE2025 open smoke has passed for the
   converted no-layer comp object profile output and recipe default null, solid,
-  adjustment, camera, light, text, empty shape, and precomp outputs.
+  adjustment, camera, light, text, empty shape, rect+fill shape, and precomp outputs.
   `cmd/aepmigrate convert -ae-open -ae <AfterFX.exe>` writes AE open gate status
   into the migration report.
 - `profilediff` now compares profile-visible layer metadata, quality/blending/

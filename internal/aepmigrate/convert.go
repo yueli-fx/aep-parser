@@ -327,6 +327,15 @@ func convertScopeEntries(target VersionLabel, prof *profile.Profile) []Entry {
 				})
 				continue
 			}
+			if isSupportedRectFillShapeLayer(layer) {
+				entries = append(entries, Entry{
+					Path:          "comps[" + comp.Name + "].layers[" + layer.Name + "]",
+					Class:         ClassRetargeted,
+					TargetVersion: target,
+					Reason:        "Single rect+fill shape layer is recreated from the stable profile shape properties.",
+				})
+				continue
+			}
 			if isSupportedDefaultPrecompLayer(layer, comps) {
 				entries = append(entries, Entry{
 					Path:          "comps[" + comp.Name + "].layers[" + layer.Name + "]",
@@ -340,7 +349,7 @@ func convertScopeEntries(target VersionLabel, prof *profile.Profile) []Entry {
 				Path:          "comps[" + comp.Name + "].layers[" + layer.Name + "]",
 				Class:         ClassBlocked,
 				TargetVersion: target,
-				Reason:        "This convert slice only reconstructs no-layer comps, default null layers, default solid layers, default adjustment layers, default camera layers, default light layers, default text layers, default empty shape layers, and default precomp layers; refusing output to avoid silent layer loss.",
+				Reason:        "This convert slice only reconstructs no-layer comps, default null layers, default solid layers, default adjustment layers, default camera layers, default light layers, default text layers, default empty shape layers, single rect+fill shape layers, and default precomp layers; refusing output to avoid silent layer loss.",
 			})
 		}
 	}
@@ -430,6 +439,10 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				if _, err := aep.NewShapeLayer(next, layer.Name); err != nil {
 					return nil, fmt.Errorf("comp %q shape layer %q: %w", comp.Name, layer.Name, err)
 				}
+			case isSupportedRectFillShapeLayer(layer):
+				if err := materializeRectFillShapeLayer(next, layer); err != nil {
+					return nil, fmt.Errorf("comp %q shape layer %q: %w", comp.Name, layer.Name, err)
+				}
 			case isSupportedDefaultPrecompLayer(layer, comps):
 				sourceComp, ok := targetComps.sourceComposition(layer)
 				if !ok {
@@ -483,6 +496,134 @@ func materializePrecompTransformSurface(comp *aep.Composition, layer *aep.Layer,
 		return materializeDefaultTransformSurface(layer, source)
 	}
 	return materializeCenteredTransformSurface(comp, layer, source)
+}
+
+func materializeRectFillShapeLayer(comp *aep.Composition, source profile.Layer) error {
+	shapeLayer, err := aep.NewShapeLayer(comp, source.Name)
+	if err != nil {
+		return err
+	}
+	rectShape := source.Shapes[0]
+	rect, err := shapeLayer.RootGroup().AddRect()
+	if err != nil {
+		return err
+	}
+	if value, ok := propertyVector(rectShape.Properties, "ADBE Vector Rect Size", 2); ok {
+		if err := rect.SetSize([2]float64{value[0], value[1]}); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyVector(rectShape.Properties, "ADBE Vector Rect Position", 2); ok {
+		if err := rect.SetPosition([2]float64{value[0], value[1]}); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(rectShape.Properties, "ADBE Vector Rect Roundness"); ok {
+		if err := rect.SetRoundness(value); err != nil {
+			return err
+		}
+	}
+	fill, err := shapeLayer.RootGroup().AddFill()
+	if err != nil {
+		return err
+	}
+	if value, ok := propertyVector(source.Properties, "ADBE Vector Fill Color", 4); ok {
+		if err := fill.SetColor(profileARGBToRGBA(value)); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Fill Opacity"); ok {
+		if err := fill.SetOpacity(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Blend Mode"); ok {
+		if err := fill.SetBlendMode(aep.ShapeBlendMode(int(value))); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Composite Order"); ok {
+		if err := fill.SetCompositeOrder(aep.ShapeCompositeOrder(int(value))); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Fill Rule"); ok {
+		if err := fill.SetFillRule(aep.FillRule(int(value))); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func propertyVector(properties []profile.Property, matchName string, length int) ([]float64, bool) {
+	for _, property := range properties {
+		if property.MatchName != matchName {
+			continue
+		}
+		return staticVector(property.StaticValue, length)
+	}
+	return nil, false
+}
+
+func propertyFloat(properties []profile.Property, matchName string) (float64, bool) {
+	for _, property := range properties {
+		if property.MatchName != matchName {
+			continue
+		}
+		switch value := property.StaticValue.(type) {
+		case float64:
+			return value, true
+		case int:
+			return float64(value), true
+		}
+		return 0, false
+	}
+	return 0, false
+}
+
+func staticVector(value any, length int) ([]float64, bool) {
+	var out []float64
+	switch v := value.(type) {
+	case []float64:
+		out = append([]float64(nil), v...)
+	case []any:
+		out = make([]float64, 0, len(v))
+		for _, item := range v {
+			got, ok := item.(float64)
+			if !ok {
+				return nil, false
+			}
+			out = append(out, got)
+		}
+	case [2]float64:
+		out = []float64{v[0], v[1]}
+	case [3]float64:
+		out = []float64{v[0], v[1], v[2]}
+	case [4]float64:
+		out = []float64{v[0], v[1], v[2], v[3]}
+	default:
+		return nil, false
+	}
+	if len(out) != length {
+		return nil, false
+	}
+	return out, true
+}
+
+func profileARGBToRGBA(value []float64) [4]float64 {
+	return [4]float64{
+		colorByteToUnit(value[1]),
+		colorByteToUnit(value[2]),
+		colorByteToUnit(value[3]),
+		colorByteToUnit(value[0]),
+	}
+}
+
+func colorByteToUnit(value float64) float64 {
+	if value > 1 {
+		return value / 255
+	}
+	return value
 }
 
 func hasTransformProperties(layer profile.Layer) bool {
@@ -727,6 +868,60 @@ func isSupportedDefaultShapeLayer(layer profile.Layer) bool {
 		return false
 	}
 	if len(layer.Effects) != 0 || len(layer.Masks) != 0 || len(layer.Shapes) != 0 || len(layer.Markers) != 0 {
+		return false
+	}
+	flags := layer.Flags
+	return flags.Visible &&
+		flags.Blend == 2 &&
+		flags.TrackMatte == 0 &&
+		!flags.IsNull &&
+		flags.EffectsEnabled &&
+		flags.AudioEnabled &&
+		!flags.Is3D &&
+		!flags.Solo &&
+		!flags.Shy &&
+		!flags.Locked &&
+		!flags.IsAdjustment &&
+		!flags.IsGuide &&
+		!flags.MotionBlur &&
+		!flags.FrameBlendEnabled &&
+		!flags.MarkersLocked &&
+		!flags.FrameBlendPixelMotion &&
+		flags.CollapseTransform &&
+		!flags.SamplingBicubic &&
+		!flags.PreserveTransparency
+}
+
+func isSupportedRectFillShapeLayer(layer profile.Layer) bool {
+	if !isSupportedShapeLayerBase(layer) {
+		return false
+	}
+	if len(layer.Shapes) != 1 || layer.Shapes[0].Kind != "rect" {
+		return false
+	}
+	if _, ok := propertyVector(layer.Shapes[0].Properties, "ADBE Vector Rect Size", 2); !ok {
+		return false
+	}
+	if _, ok := propertyVector(layer.Properties, "ADBE Vector Fill Color", 4); !ok {
+		return false
+	}
+	if hasProperty(layer, "ADBE Vector Stroke Color") ||
+		hasProperty(layer, "ADBE Vector Grad Colors") ||
+		hasProperty(layer, "ADBE Vector Filter - Trim") ||
+		hasProperty(layer, "ADBE Vector Graphic - Stroke") {
+		return false
+	}
+	return true
+}
+
+func isSupportedShapeLayerBase(layer profile.Layer) bool {
+	if layer.Type != "shape" || layer.SourceRef != nil || layer.Text != nil {
+		return false
+	}
+	if layer.Comment != "" || layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
+		return false
+	}
+	if len(layer.Effects) != 0 || len(layer.Masks) != 0 || len(layer.Markers) != 0 {
 		return false
 	}
 	flags := layer.Flags
