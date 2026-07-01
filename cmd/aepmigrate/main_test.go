@@ -177,6 +177,44 @@ func TestRunConvertWritesDefaultAdjustmentLayerOutput(t *testing.T) {
 	}
 }
 
+func TestRunConvertWritesDefaultCameraLayerOutput(t *testing.T) {
+	input := writeTempProjectWithOneCameraLayer(t)
+	outPath := filepath.Join(t.TempDir(), "converted.aep")
+	reportPath := filepath.Join(t.TempDir(), "convert.json")
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"convert", "-in", input, "-target", "AE2025", "-out", outPath, "-report", reportPath}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("run convert = %d, stderr=%s", code, stderr.String())
+	}
+	if _, err := os.Stat(outPath); err != nil {
+		t.Fatalf("converted output missing: %v", err)
+	}
+	report := readReportSummary(t, reportPath)
+	if report.Summary.Status != "pass" || report.Verification.ProfileDiffStatus != "pass" {
+		t.Fatalf("report = %+v, want pass with profile diff pass", report)
+	}
+}
+
+func TestRunConvertWritesDefaultLightLayerOutput(t *testing.T) {
+	input := writeTempProjectWithOneLightLayer(t)
+	outPath := filepath.Join(t.TempDir(), "converted.aep")
+	reportPath := filepath.Join(t.TempDir(), "convert.json")
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"convert", "-in", input, "-target", "AE2025", "-out", outPath, "-report", reportPath}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("run convert = %d, stderr=%s", code, stderr.String())
+	}
+	if _, err := os.Stat(outPath); err != nil {
+		t.Fatalf("converted output missing: %v", err)
+	}
+	report := readReportSummary(t, reportPath)
+	if report.Summary.Status != "pass" || report.Verification.ProfileDiffStatus != "pass" {
+		t.Fatalf("report = %+v, want pass with profile diff pass", report)
+	}
+}
+
 func TestRunConvertWritesBlockedReportWithoutOutput(t *testing.T) {
 	input := writeTempProjectWithOneTextLayer(t)
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
@@ -257,6 +295,32 @@ func writeTempProjectWithOneAdjustmentLayer(t *testing.T) string {
 		t.Fatalf("NewAdjustmentLayer: %v", err)
 	}
 	return writeProject(t, project, "one-adjustment-layer.aep")
+}
+
+func writeTempProjectWithOneCameraLayer(t *testing.T) string {
+	t.Helper()
+	project := aep.NewProject(aep.TargetAE2020)
+	comp, err := aep.NewComposition(project, "Main", 640, 360, 24, 2)
+	if err != nil {
+		t.Fatalf("NewComposition: %v", err)
+	}
+	if _, err := aep.NewCameraLayer(comp, "Camera"); err != nil {
+		t.Fatalf("NewCameraLayer: %v", err)
+	}
+	return writeProject(t, project, "one-camera-layer.aep")
+}
+
+func writeTempProjectWithOneLightLayer(t *testing.T) string {
+	t.Helper()
+	project := aep.NewProject(aep.TargetAE2020)
+	comp, err := aep.NewComposition(project, "Main", 640, 360, 24, 2)
+	if err != nil {
+		t.Fatalf("NewComposition: %v", err)
+	}
+	if _, err := aep.NewLightLayer(comp, "Light"); err != nil {
+		t.Fatalf("NewLightLayer: %v", err)
+	}
+	return writeProject(t, project, "one-light-layer.aep")
 }
 
 func writeTempProjectWithOneNullLayer(t *testing.T) string {

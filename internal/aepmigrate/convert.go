@@ -290,11 +290,29 @@ func convertScopeEntries(target VersionLabel, prof *profile.Profile) []Entry {
 				})
 				continue
 			}
+			if isSupportedDefaultCameraLayer(layer) {
+				entries = append(entries, Entry{
+					Path:          "comps[" + comp.Name + "].layers[" + layer.Name + "]",
+					Class:         ClassRetargeted,
+					TargetVersion: target,
+					Reason:        "Default camera layer is recreated through the target AE project template.",
+				})
+				continue
+			}
+			if isSupportedDefaultLightLayer(layer) {
+				entries = append(entries, Entry{
+					Path:          "comps[" + comp.Name + "].layers[" + layer.Name + "]",
+					Class:         ClassRetargeted,
+					TargetVersion: target,
+					Reason:        "Default light layer is recreated through the target AE project template.",
+				})
+				continue
+			}
 			entries = append(entries, Entry{
 				Path:          "comps[" + comp.Name + "].layers[" + layer.Name + "]",
 				Class:         ClassBlocked,
 				TargetVersion: target,
-				Reason:        "This convert slice only reconstructs no-layer comps, default null layers, default solid layers, and default adjustment layers; refusing output to avoid silent layer loss.",
+				Reason:        "This convert slice only reconstructs no-layer comps, default null layers, default solid layers, default adjustment layers, default camera layers, and default light layers; refusing output to avoid silent layer loss.",
 			})
 		}
 	}
@@ -339,6 +357,22 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				if err := materializeDefaultTransformSurface(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q adjustment layer %q transform: %w", comp.Name, layer.Name, err)
 				}
+			case isSupportedDefaultCameraLayer(layer):
+				dstLayer, err := aep.NewCameraLayer(next, layer.Name)
+				if err != nil {
+					return nil, fmt.Errorf("comp %q camera layer %q: %w", comp.Name, layer.Name, err)
+				}
+				if err := materializeCameraLightTransformSurface(dstLayer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q camera layer %q transform: %w", comp.Name, layer.Name, err)
+				}
+			case isSupportedDefaultLightLayer(layer):
+				dstLayer, err := aep.NewLightLayer(next, layer.Name)
+				if err != nil {
+					return nil, fmt.Errorf("comp %q light layer %q: %w", comp.Name, layer.Name, err)
+				}
+				if err := materializeCameraLightTransformSurface(dstLayer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q light layer %q transform: %w", comp.Name, layer.Name, err)
+				}
 			default:
 				return nil, fmt.Errorf("unsupported layer %q in comp %q", layer.Name, comp.Name)
 			}
@@ -368,10 +402,24 @@ func materializeCenteredTransformSurface(comp *aep.Composition, layer *aep.Layer
 	return aep.SetLayerTransform(layer, transform)
 }
 
+func materializeCameraLightTransformSurface(layer *aep.Layer, source profile.Layer) error {
+	if hasProperty(source, "ADBE Position_2") {
+		return nil
+	}
+	return materializeDefaultTransformSurface(layer, source)
+}
+
 func hasTransformProperties(layer profile.Layer) bool {
+	return hasProperty(layer, "ADBE Anchor Point") ||
+		hasProperty(layer, "ADBE Position") ||
+		hasProperty(layer, "ADBE Scale") ||
+		hasProperty(layer, "ADBE Rotate Z") ||
+		hasProperty(layer, "ADBE Opacity")
+}
+
+func hasProperty(layer profile.Layer, matchName string) bool {
 	for _, property := range layer.Properties {
-		switch property.MatchName {
-		case "ADBE Anchor Point", "ADBE Position", "ADBE Scale", "ADBE Rotate Z", "ADBE Opacity":
+		if property.MatchName == matchName {
 			return true
 		}
 	}
@@ -469,6 +517,42 @@ func isSupportedDefaultAdjustmentLayer(layer profile.Layer, footage convertFoota
 		flags.EffectsEnabled &&
 		flags.AudioEnabled &&
 		!flags.Is3D &&
+		!flags.Solo &&
+		!flags.Shy &&
+		!flags.Locked &&
+		!flags.IsGuide &&
+		!flags.MotionBlur &&
+		!flags.FrameBlendEnabled &&
+		!flags.MarkersLocked &&
+		!flags.FrameBlendPixelMotion &&
+		!flags.CollapseTransform &&
+		!flags.SamplingBicubic &&
+		!flags.PreserveTransparency
+}
+
+func isSupportedDefaultCameraLayer(layer profile.Layer) bool {
+	return isSupportedDefaultCameraOrLightLayer(layer, "camera")
+}
+
+func isSupportedDefaultLightLayer(layer profile.Layer) bool {
+	return isSupportedDefaultCameraOrLightLayer(layer, "light")
+}
+
+func isSupportedDefaultCameraOrLightLayer(layer profile.Layer, typ string) bool {
+	if layer.Type != typ || layer.SourceRef != nil {
+		return false
+	}
+	if layer.Comment != "" || layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
+		return false
+	}
+	if layer.Text != nil || len(layer.Effects) != 0 || len(layer.Masks) != 0 || len(layer.Shapes) != 0 || len(layer.Markers) != 0 {
+		return false
+	}
+	flags := layer.Flags
+	return flags.Visible &&
+		flags.TrackMatte == 0 &&
+		!flags.IsNull &&
+		!flags.IsAdjustment &&
 		!flags.Solo &&
 		!flags.Shy &&
 		!flags.Locked &&
