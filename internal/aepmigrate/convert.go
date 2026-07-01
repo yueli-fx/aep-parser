@@ -575,15 +575,13 @@ func materializeRectGraphicShapeLayer(comp *aep.Composition, source profile.Laye
 			return nil, err
 		}
 	}
-	if hasProperty(source, "ADBE Vector Roughen Size") ||
-		hasProperty(source, "ADBE Vector Roughen Detail") ||
-		hasProperty(source, "ADBE Vector Temporal Freq") ||
-		hasProperty(source, "ADBE Vector Random Seed") ||
-		hasProperty(source, "ADBE Vector Roughen Points") ||
-		hasProperty(source, "ADBE Vector Correlation") ||
-		hasProperty(source, "ADBE Vector Temporal Phase") ||
-		hasProperty(source, "ADBE Vector Spatial Phase") {
+	if hasWigglePathsFilter(source) {
 		if err := materializeShapeWigglePaths(shapeLayer, source); err != nil {
+			return nil, err
+		}
+	}
+	if hasWiggleTransformFilter(source) {
+		if err := materializeShapeWiggleTransform(shapeLayer, source); err != nil {
 			return nil, err
 		}
 	}
@@ -832,6 +830,60 @@ func materializeShapeWigglePaths(shapeLayer *aep.ShapeLayer, source profile.Laye
 	}
 	if value, ok := propertyFloat(source.Properties, "ADBE Vector Spatial Phase"); ok {
 		if err := wigglePaths.SetSpatialPhase(value); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func materializeShapeWiggleTransform(shapeLayer *aep.ShapeLayer, source profile.Layer) error {
+	wiggleTransform, err := shapeLayer.RootGroup().AddWiggleTransform()
+	if err != nil {
+		return err
+	}
+	transform := wiggleTransform.Transform()
+	if value, ok := propertyVector(source.Properties, "ADBE Vector Wiggler Anchor", 2); ok {
+		if err := transform.SetAnchor([2]float64{value[0], value[1]}); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyVector(source.Properties, "ADBE Vector Wiggler Position", 2); ok {
+		if err := transform.SetPosition([2]float64{value[0], value[1]}); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyVector(source.Properties, "ADBE Vector Wiggler Scale", 2); ok {
+		if err := transform.SetScale([2]float64{value[0], value[1]}); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Wiggler Rotation"); ok {
+		if err := transform.SetRotation(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Xform Temporal Freq"); ok {
+		if err := wiggleTransform.SetWigglesPerSecond(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Random Seed"); ok {
+		if err := wiggleTransform.SetRandomSeed(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Correlation"); ok {
+		if err := wiggleTransform.SetCorrelation(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Temporal Phase"); ok {
+		if err := wiggleTransform.SetTemporalPhase(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Spatial Phase"); ok {
+		if err := wiggleTransform.SetSpatialPhase(value); err != nil {
 			return err
 		}
 	}
@@ -1455,14 +1507,23 @@ func hasSupportedShapeFilter(layer profile.Layer) bool {
 		hasProperty(layer, "ADBE Vector PuckerBloat Amount") ||
 		hasProperty(layer, "ADBE Vector Twist Angle") ||
 		hasProperty(layer, "ADBE Vector Twist Center") ||
-		hasProperty(layer, "ADBE Vector Roughen Size") ||
+		hasWigglePathsFilter(layer) ||
+		hasWiggleTransformFilter(layer)
+}
+
+func hasWigglePathsFilter(layer profile.Layer) bool {
+	return hasProperty(layer, "ADBE Vector Roughen Size") ||
 		hasProperty(layer, "ADBE Vector Roughen Detail") ||
 		hasProperty(layer, "ADBE Vector Temporal Freq") ||
-		hasProperty(layer, "ADBE Vector Random Seed") ||
-		hasProperty(layer, "ADBE Vector Roughen Points") ||
-		hasProperty(layer, "ADBE Vector Correlation") ||
-		hasProperty(layer, "ADBE Vector Temporal Phase") ||
-		hasProperty(layer, "ADBE Vector Spatial Phase")
+		hasProperty(layer, "ADBE Vector Roughen Points")
+}
+
+func hasWiggleTransformFilter(layer profile.Layer) bool {
+	return hasProperty(layer, "ADBE Vector Wiggler Anchor") ||
+		hasProperty(layer, "ADBE Vector Wiggler Position") ||
+		hasProperty(layer, "ADBE Vector Wiggler Scale") ||
+		hasProperty(layer, "ADBE Vector Wiggler Rotation") ||
+		hasProperty(layer, "ADBE Vector Xform Temporal Freq")
 }
 
 func isSupportedParametricGraphicShape(shape profile.Shape) bool {
