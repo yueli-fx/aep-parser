@@ -203,7 +203,7 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				return nil, fmt.Errorf("unsupported layer %q in comp %q", layer.Name, comp.Name)
 			}
 		}
-		if err := materializeLayerRefs(createdLayers); err != nil {
+		if err := materializeLayerRefs(target, createdLayers); err != nil {
 			return nil, fmt.Errorf("comp %q layer refs: %w", comp.Name, err)
 		}
 	}

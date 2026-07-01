@@ -14,7 +14,7 @@ type convertLayerPair struct {
 	target *aep.Layer
 }
 
-func materializeLayerRefs(layers []convertLayerPair) error {
+func materializeLayerRefs(target VersionLabel, layers []convertLayerPair) error {
 	bySourceID := map[uint32]*aep.Layer{}
 	byName := map[string]*aep.Layer{}
 	for _, pair := range layers {
@@ -55,7 +55,49 @@ func materializeLayerRefs(layers []convertLayerPair) error {
 			return fmt.Errorf("layer %q light source %q: %w", pair.source.Name, pair.source.LightSourceRef.Name, err)
 		}
 	}
+	for _, pair := range layers {
+		mode, ok := convertTrackMatteMode(pair.source.Flags.TrackMatte)
+		if !ok {
+			return fmt.Errorf("layer %q track matte mode %d unsupported", pair.source.Name, pair.source.Flags.TrackMatte)
+		}
+		if mode == aep.TrackMatteNone {
+			continue
+		}
+		if pair.source.MatteRef != nil && target == VersionAE2025 {
+			matte := bySourceID[pair.source.MatteRef.ID]
+			if matte == nil && pair.source.MatteRef.Name != "" {
+				matte = byName[pair.source.MatteRef.Name]
+			}
+			if matte == nil {
+				return fmt.Errorf("layer %q matte source %q not found", pair.source.Name, pair.source.MatteRef.Name)
+			}
+			if err := pair.target.SetTrackMatteSource(matte, mode); err != nil {
+				return fmt.Errorf("layer %q matte source %q: %w", pair.source.Name, pair.source.MatteRef.Name, err)
+			}
+			continue
+		}
+		if err := pair.target.SetTrackMatte(mode); err != nil {
+			return fmt.Errorf("layer %q track matte: %w", pair.source.Name, err)
+		}
+	}
 	return nil
+}
+
+func convertTrackMatteMode(mode uint8) (aep.TrackMatteType, bool) {
+	switch mode {
+	case uint8(aep.TrackMatteNone):
+		return aep.TrackMatteNone, true
+	case uint8(aep.TrackMatteAlpha):
+		return aep.TrackMatteAlpha, true
+	case uint8(aep.TrackMatteAlphaInverse):
+		return aep.TrackMatteAlphaInverse, true
+	case uint8(aep.TrackMatteLuma):
+		return aep.TrackMatteLuma, true
+	case uint8(aep.TrackMatteLumaInverse):
+		return aep.TrackMatteLumaInverse, true
+	default:
+		return aep.TrackMatteNone, false
+	}
 }
 
 func materializeLayerMetadata(layer *aep.Layer, source profile.Layer) error {

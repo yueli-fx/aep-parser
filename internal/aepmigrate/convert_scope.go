@@ -159,6 +159,10 @@ func isSupportedDefaultNullLayer(layer profile.Layer, footage convertFootageInde
 		!flags.PreserveTransparency
 }
 
+func isSupportedTrackMatteMode(mode uint8) bool {
+	return mode <= 4
+}
+
 func isSupportedDefaultSolidLayer(layer profile.Layer, footage convertFootageIndex) bool {
 	if layer.Type != "av" || layer.SourceRef == nil || layer.SourceRef.Kind != "footage" {
 		return false
@@ -167,7 +171,7 @@ func isSupportedDefaultSolidLayer(layer profile.Layer, footage convertFootageInd
 	if !ok || solid.Width == 0 || solid.Height == 0 || solid.SolidColor == nil {
 		return false
 	}
-	if layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
+	if layer.ParentRef != nil || layer.LightSourceRef != nil {
 		return false
 	}
 	if layer.Text != nil || len(layer.Masks) != 0 || len(layer.Shapes) != 0 || len(layer.Markers) != 0 {
@@ -179,7 +183,7 @@ func isSupportedDefaultSolidLayer(layer profile.Layer, footage convertFootageInd
 	flags := layer.Flags
 	return flags.Visible &&
 		flags.Blend == 2 &&
-		flags.TrackMatte == 0 &&
+		isSupportedTrackMatteMode(flags.TrackMatte) &&
 		!flags.IsNull &&
 		flags.EffectsEnabled &&
 		flags.AudioEnabled &&

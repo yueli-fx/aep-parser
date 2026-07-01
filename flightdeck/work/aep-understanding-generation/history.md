@@ -763,3 +763,14 @@ Current:
   rebuild, layer, shape, text, transform, effect, profile-value helper, and
   index/ref code live in focused `convert_*.go` files. This slice is intended as
   behavior-preserving refactor groundwork for future migration domains.
+- Layer matte migration now preserves supported solid-layer matte refs.
+  Conversion materializes classic track matte mode and AE2025 explicit matte
+  sources after all layers are rebuilt, using the existing writer APIs
+  `SetTrackMatte` and `SetTrackMatteSource`. Focused matte matrix evidence:
+  `tmp/migration_matrix_layer_matte/matrix.json` is 6 total, 4 pass, 2
+  intentionally blocked, 0 failed, 0 skipped. `minimal-layer-track-matte`
+  passes recipe-source conversion into AE2020/AE2022/AE2025 writer targets.
+  `minimal-layer-explicit-matte` passes AE2025 source to AE2025 target; AE2020
+  and AE2022 targets remain blocked by the current explicit-matte writer
+  contract. Latest full no-AE migration matrix: 423 total, 405 pass, 18
+  intentionally blocked, 0 failed, 0 skipped.
