@@ -274,15 +274,22 @@ git diff --check
     from stable profile
     properties while still excluding stroke offset, additional dash/gap pairs,
     wave units/cycles, gradient stroke, and other filter shape content.
-  - Static layer transform reconstruction now maps profile-visible
+  - Layer transform reconstruction now maps profile-visible
     `ADBE Anchor Point`, `ADBE Position`, `ADBE Scale`, `ADBE Rotate Z`, and
     `ADBE Opacity` back into `LayerTransform`, converting profile scale/opacity
-    unit values into writer percent units. `writeTempProjectWithMovedNullLayer`
-    and `examples/recipes/minimal-default-text-static-transform.json` convert
-    to AE2025 with `profile_diff_status: "pass"` and
-    `profile_diff_count: 0`; the recipe fixture passes AE2025 open gate with
-    `ae_open_status: "pass"` / `ae_open_exit_code: 0`. Transform keyframes
-    remain outside this static slice and are still blocked by profile diff.
+    unit values into writer percent units. It now covers static values,
+    keyframes, temporal ease, and expressions; expressions are applied in a
+    reopen-backed pass after `SetLayerTransform` materializes the transform
+    streams. `writeTempProjectWithMovedNullLayer`,
+    `writeTempProjectWithKeyframedNullLayer`,
+    `examples/recipes/minimal-default-text-static-transform.json`,
+    `minimal-transform-keyframes.json`,
+    `minimal-transform-keyframe-ease.json`, and
+    `minimal-transform-expression.json` convert with `profile_diff_status:
+    "pass"` and `profile_diff_count: 0`; the three dynamic transform fixtures
+    pass AE2025 open gate, and the transform-ease fixture as an AE2020 writer
+    target opens across AE2020, AE2021, AE2022, AE2023, AE2024, and AE2025
+    hosts. This also unlocks `minimal-layer-auto-orient.json`.
   - Layer timing reconstruction now applies profile-visible `start_time`,
     `in_point`, `out_point`, and `stretch` through `Layer.SetStartTime`,
     `Layer.SetInPoint`, `Layer.SetOutPoint`, and `Layer.SetStretch` for all
@@ -360,8 +367,8 @@ git diff --check
     `profile_diff_count: 0`; the three dynamic effect-param fixtures pass
     AE2025 open gate, and the vector-keyframe fixture as an AE2020 writer target
     opens across AE2020, AE2021, AE2022, AE2023, AE2024, and AE2025 hosts.
-  - Latest full no-AE matrix after dynamic effect-param migration:
-    `423 total, 318 pass, 105 blocked, 0 failed, 0 skipped`. The command exits
+  - Latest full no-AE matrix after dynamic transform migration:
+    `423 total, 330 pass, 93 blocked, 0 failed, 0 skipped`. The command exits
     non-zero because blocked cases remain intentional.
 
 - [x] Update `flightdeck/work/aep-understanding-generation/index.md` and `flightdeck/cockpit.md` to state:

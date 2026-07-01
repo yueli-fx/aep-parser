@@ -73,16 +73,17 @@ Done at a high level:
 Current:
 - Current `cmd/aepmigrate convert` surface includes conservative comp/layer
   skeleton rebuild, stable comp settings, supported non-shape layer metadata /
-  switches / refs / timing / transforms, supported camera/light options,
-  supported parametric graphic/filter shape slices, precomp refs, and supported
-  built-in effects.
+  switches / refs / timing / transforms, transform keyframes/ease/expressions,
+  supported camera/light options, supported parametric graphic/filter shape
+  slices, precomp refs, and supported built-in effects.
 - Effect reconstruction now covers supported static params, same-comp layer-ref
   params, parameter expressions, scalar keyframes, and vector keyframes.
-- Latest full no-AE matrix: 423 total, 318 pass, 105 intentionally blocked,
+- Latest full no-AE matrix: 423 total, 330 pass, 93 intentionally blocked,
   0 failed, 0 skipped.
-- Latest AE-open checks: the three dynamic effect-param fixtures pass AE2025
-  open smoke; `minimal-effect-param-vector-keyframes.json` as an AE2020 writer
-  target opens across AE2020, AE2021, AE2022, AE2023, AE2024, and AE2025 hosts.
+- Latest AE-open checks: dynamic effect-param and transform dynamic fixtures
+  pass AE2025 open smoke; representative AE2020 writer outputs for vector
+  effect keyframes and transform ease open across AE2020, AE2021, AE2022,
+  AE2023, AE2024, and AE2025 hosts.
 - Continue versioned migration by expanding supported conversion surface,
   turning the useful matrix boundary into a recurring verification command, or
   deciding whether native AE2021/AE2023/AE2024 writer templates are worth adding.

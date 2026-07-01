@@ -899,6 +899,66 @@ func TestConvertWritesRecipeEffectParamVectorKeyframesProject(t *testing.T) {
 	}
 }
 
+func TestConvertWritesRecipeTransformKeyframesProject(t *testing.T) {
+	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-transform-keyframes.json"))
+	outPath := filepath.Join(t.TempDir(), "converted.aep")
+
+	report, err := Convert(ConvertOptions{
+		InputPath:  source,
+		OutputPath: outPath,
+		Target:     VersionAE2025,
+	})
+	if err != nil {
+		t.Fatalf("Convert: %v", err)
+	}
+	if report.Summary.Status != StatusPass {
+		t.Fatalf("status = %q, entries=%+v, diffs=%+v", report.Summary.Status, report.Entries, report.Verification.ProfileDiffs)
+	}
+	if report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 {
+		t.Fatalf("profile diff verification = %+v, want pass with 0 diffs", report.Verification)
+	}
+}
+
+func TestConvertWritesRecipeTransformKeyframeEaseProject(t *testing.T) {
+	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-transform-keyframe-ease.json"))
+	outPath := filepath.Join(t.TempDir(), "converted.aep")
+
+	report, err := Convert(ConvertOptions{
+		InputPath:  source,
+		OutputPath: outPath,
+		Target:     VersionAE2025,
+	})
+	if err != nil {
+		t.Fatalf("Convert: %v", err)
+	}
+	if report.Summary.Status != StatusPass {
+		t.Fatalf("status = %q, entries=%+v, diffs=%+v", report.Summary.Status, report.Entries, report.Verification.ProfileDiffs)
+	}
+	if report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 {
+		t.Fatalf("profile diff verification = %+v, want pass with 0 diffs", report.Verification)
+	}
+}
+
+func TestConvertWritesRecipeTransformExpressionProject(t *testing.T) {
+	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-transform-expression.json"))
+	outPath := filepath.Join(t.TempDir(), "converted.aep")
+
+	report, err := Convert(ConvertOptions{
+		InputPath:  source,
+		OutputPath: outPath,
+		Target:     VersionAE2025,
+	})
+	if err != nil {
+		t.Fatalf("Convert: %v", err)
+	}
+	if report.Summary.Status != StatusPass {
+		t.Fatalf("status = %q, entries=%+v, diffs=%+v", report.Summary.Status, report.Entries, report.Verification.ProfileDiffs)
+	}
+	if report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 {
+		t.Fatalf("profile diff verification = %+v, want pass with 0 diffs", report.Verification)
+	}
+}
+
 func TestConvertWritesRecipeTextStaticTransformProject(t *testing.T) {
 	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-default-text-static-transform.json"))
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
@@ -1419,7 +1479,7 @@ func TestConvertWritesMovedNullLayerProject(t *testing.T) {
 	}
 }
 
-func TestConvertBlocksKeyframedNullLayerBeforeWritingOutput(t *testing.T) {
+func TestConvertWritesKeyframedNullLayerProject(t *testing.T) {
 	source := writeTempProjectWithKeyframedNullLayer(t)
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
 
@@ -1431,14 +1491,14 @@ func TestConvertBlocksKeyframedNullLayerBeforeWritingOutput(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Convert: %v", err)
 	}
-	if report.Summary.Status != StatusBlocked {
-		t.Fatalf("status = %q, want blocked; verification=%+v", report.Summary.Status, report.Verification)
+	if report.Summary.Status != StatusPass {
+		t.Fatalf("status = %q, entries=%+v, diffs=%+v", report.Summary.Status, report.Entries, report.Verification.ProfileDiffs)
 	}
-	if report.Verification.ProfileDiffStatus != "fail" || report.Verification.ProfileDiffCount == 0 {
-		t.Fatalf("profile diff verification = %+v, want fail with diffs", report.Verification)
+	if report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 {
+		t.Fatalf("profile diff verification = %+v, want pass with 0 diffs", report.Verification)
 	}
-	if _, err := os.Stat(outPath); !os.IsNotExist(err) {
-		t.Fatalf("blocked output exists or stat failed unexpectedly: %v", err)
+	if _, err := os.Stat(outPath); err != nil {
+		t.Fatalf("converted output missing: %v", err)
 	}
 }
 
@@ -1534,8 +1594,8 @@ func TestWriteAEOpenArgsUsesAbsolutePaths(t *testing.T) {
 	}
 }
 
-func TestConvertRefusesLayerProjects(t *testing.T) {
-	source := writeTempProjectWithKeyframedNullLayer(t)
+func TestConvertRefusesUnsupportedMaskLayerProjects(t *testing.T) {
+	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-layer-mask.json"))
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
 
 	report, err := Convert(ConvertOptions{

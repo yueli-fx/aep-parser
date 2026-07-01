@@ -78,6 +78,10 @@ func Convert(opts ConvertOptions) (Report, error) {
 	if err != nil {
 		return Report{}, err
 	}
+	targetProject, err = materializeProjectTransformExpressions(targetProject, prof)
+	if err != nil {
+		return Report{}, err
+	}
 	targetProject, err = materializeProjectEffects(targetProject, prof)
 	if err != nil {
 		return Report{}, err
@@ -1578,20 +1582,38 @@ func propertyVector(properties []profile.Property, matchName string, length int)
 	return nil, false
 }
 
+func propertyByMatchName(properties []profile.Property, matchName string) (profile.Property, bool) {
+	for _, property := range properties {
+		if property.MatchName == matchName {
+			return property, true
+		}
+	}
+	return profile.Property{}, false
+}
+
 func propertyFloat(properties []profile.Property, matchName string) (float64, bool) {
 	for _, property := range properties {
 		if property.MatchName != matchName {
 			continue
 		}
-		switch value := property.StaticValue.(type) {
-		case float64:
-			return value, true
-		case int:
-			return float64(value), true
-		}
-		return 0, false
+		return propertyFloatValue(property.StaticValue)
 	}
 	return 0, false
+}
+
+func propertyFloatValue(value any) (float64, bool) {
+	switch v := value.(type) {
+	case float64:
+		return v, true
+	case float32:
+		return float64(v), true
+	case int:
+		return float64(v), true
+	case int64:
+		return float64(v), true
+	default:
+		return 0, false
+	}
 }
 
 func propertyGradient(properties []profile.Property, matchName string) (*codec.Gradient, bool) {
@@ -1662,32 +1684,145 @@ func colorByteToUnit(value float64) float64 {
 
 func layerTransformFromStaticProfile(layer profile.Layer) (*aep.LayerTransform, error) {
 	transform := aep.NewLayerTransform()
-	if value, ok := propertyVectorAtLeast(layer.Properties, "ADBE Anchor Point", 2); ok {
-		if err := transform.AnchorPoint().SetStaticValue([2]float64{value[0], value[1]}); err != nil {
-			return nil, err
+	if property, ok := propertyByMatchName(layer.Properties, "ADBE Anchor Point"); ok {
+		if len(property.Keyframes) != 0 {
+			if err := addTransformVectorKeyframes(transform.AnchorPoint(), property, profileVector2); err != nil {
+				return nil, fmt.Errorf("anchor point keyframes: %w", err)
+			}
+		} else if value, ok := staticVectorAtLeast(property.StaticValue, 2); ok {
+			if err := transform.AnchorPoint().SetStaticValue([2]float64{value[0], value[1]}); err != nil {
+				return nil, err
+			}
 		}
 	}
-	if value, ok := propertyVectorAtLeast(layer.Properties, "ADBE Position", 2); ok {
-		if err := transform.Position().SetStaticValue([2]float64{value[0], value[1]}); err != nil {
-			return nil, err
+	if property, ok := propertyByMatchName(layer.Properties, "ADBE Position"); ok {
+		if len(property.Keyframes) != 0 {
+			if err := addTransformVectorKeyframes(transform.Position(), property, profileVector2); err != nil {
+				return nil, fmt.Errorf("position keyframes: %w", err)
+			}
+		} else if value, ok := staticVectorAtLeast(property.StaticValue, 2); ok {
+			if err := transform.Position().SetStaticValue([2]float64{value[0], value[1]}); err != nil {
+				return nil, err
+			}
 		}
 	}
-	if value, ok := propertyVectorAtLeast(layer.Properties, "ADBE Scale", 2); ok {
-		if err := transform.Scale().SetStaticValue([2]float64{profileScaleToWriter(value[0]), profileScaleToWriter(value[1])}); err != nil {
-			return nil, err
+	if property, ok := propertyByMatchName(layer.Properties, "ADBE Scale"); ok {
+		if len(property.Keyframes) != 0 {
+			if err := addTransformVectorKeyframes(transform.Scale(), property, profileScaleVector2); err != nil {
+				return nil, fmt.Errorf("scale keyframes: %w", err)
+			}
+		} else if value, ok := staticVectorAtLeast(property.StaticValue, 2); ok {
+			if err := transform.Scale().SetStaticValue([2]float64{profileScaleToWriter(value[0]), profileScaleToWriter(value[1])}); err != nil {
+				return nil, err
+			}
 		}
 	}
-	if value, ok := propertyFloat(layer.Properties, "ADBE Rotate Z"); ok {
-		if err := transform.Rotation().SetStaticValue(value); err != nil {
-			return nil, err
+	if property, ok := propertyByMatchName(layer.Properties, "ADBE Rotate Z"); ok {
+		if len(property.Keyframes) != 0 {
+			if err := addTransformScalarKeyframes(transform.Rotation(), property, profileScalar); err != nil {
+				return nil, fmt.Errorf("rotation keyframes: %w", err)
+			}
+		} else if value, ok := propertyFloatValue(property.StaticValue); ok {
+			if err := transform.Rotation().SetStaticValue(value); err != nil {
+				return nil, err
+			}
 		}
 	}
-	if value, ok := propertyFloat(layer.Properties, "ADBE Opacity"); ok {
-		if err := transform.Opacity().SetStaticValue(profileOpacityToWriter(value)); err != nil {
-			return nil, err
+	if property, ok := propertyByMatchName(layer.Properties, "ADBE Opacity"); ok {
+		if len(property.Keyframes) != 0 {
+			if err := addTransformScalarKeyframes(transform.Opacity(), property, profileOpacityScalar); err != nil {
+				return nil, fmt.Errorf("opacity keyframes: %w", err)
+			}
+		} else if value, ok := propertyFloatValue(property.StaticValue); ok {
+			if err := transform.Opacity().SetStaticValue(profileOpacityToWriter(value)); err != nil {
+				return nil, err
+			}
 		}
 	}
 	return transform, nil
+}
+
+func addTransformVectorKeyframes(stream *codec.PropertyStream[[2]float64], property profile.Property, convert func(any) ([2]float64, bool)) error {
+	if len(property.Keyframes) < 2 {
+		return fmt.Errorf("need >= 2 keyframes, got %d", len(property.Keyframes))
+	}
+	for i, keyframe := range property.Keyframes {
+		value, ok := convert(keyframe.Value)
+		if !ok {
+			return fmt.Errorf("keyframes[%d].value unsupported (%T)", i, keyframe.Value)
+		}
+		inEase := transformTemporalEase(keyframe.InTemporalEase)
+		outEase := transformTemporalEase(keyframe.OutTemporalEase)
+		if inEase != (aep.TemporalEase{}) || outEase != (aep.TemporalEase{}) {
+			if err := stream.AddKeyframeWithEase(keyframe.Time, value, inEase, outEase); err != nil {
+				return err
+			}
+			continue
+		}
+		if err := stream.AddKeyframeLinear(keyframe.Time, value); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func addTransformScalarKeyframes(stream *codec.PropertyStream[float64], property profile.Property, convert func(any) (float64, bool)) error {
+	if len(property.Keyframes) < 2 {
+		return fmt.Errorf("need >= 2 keyframes, got %d", len(property.Keyframes))
+	}
+	for i, keyframe := range property.Keyframes {
+		value, ok := convert(keyframe.Value)
+		if !ok {
+			return fmt.Errorf("keyframes[%d].value unsupported (%T)", i, keyframe.Value)
+		}
+		inEase := transformTemporalEase(keyframe.InTemporalEase)
+		outEase := transformTemporalEase(keyframe.OutTemporalEase)
+		if inEase != (aep.TemporalEase{}) || outEase != (aep.TemporalEase{}) {
+			if err := stream.AddKeyframeWithEase(keyframe.Time, value, inEase, outEase); err != nil {
+				return err
+			}
+			continue
+		}
+		if err := stream.AddKeyframeLinear(keyframe.Time, value); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func profileVector2(value any) ([2]float64, bool) {
+	vector, ok := staticVectorAtLeast(value, 2)
+	if !ok {
+		return [2]float64{}, false
+	}
+	return [2]float64{vector[0], vector[1]}, true
+}
+
+func profileScaleVector2(value any) ([2]float64, bool) {
+	vector, ok := staticVectorAtLeast(value, 2)
+	if !ok {
+		return [2]float64{}, false
+	}
+	return [2]float64{profileScaleToWriter(vector[0]), profileScaleToWriter(vector[1])}, true
+}
+
+func profileScalar(value any) (float64, bool) {
+	return propertyFloatValue(value)
+}
+
+func profileOpacityScalar(value any) (float64, bool) {
+	valueFloat, ok := propertyFloatValue(value)
+	if !ok {
+		return 0, false
+	}
+	return profileOpacityToWriter(valueFloat), true
+}
+
+func transformTemporalEase(in []profile.TemporalEase) aep.TemporalEase {
+	if len(in) == 0 {
+		return aep.TemporalEase{}
+	}
+	return aep.TemporalEase{Speed: in[0].Speed, Influence: in[0].Influence}
 }
 
 func propertyVectorAtLeast(properties []profile.Property, matchName string, length int) ([]float64, bool) {
@@ -2388,6 +2523,113 @@ func hasCompMetadata(prof *profile.Profile) bool {
 		}
 	}
 	return false
+}
+
+func materializeProjectTransformExpressions(project *aep.Project, prof *profile.Profile) (*aep.Project, error) {
+	if !hasProfileTransformExpressions(prof) {
+		return project, nil
+	}
+	reopened, err := aep.Reopen(project)
+	if err != nil {
+		return nil, fmt.Errorf("reopen for transform expressions: %w", err)
+	}
+	for compIndex, sourceComp := range prof.Comps {
+		targetComp, err := targetCompBySource(reopened, compIndex, sourceComp)
+		if err != nil {
+			return nil, err
+		}
+		for layerIndex, sourceLayer := range sourceComp.Layers {
+			if !hasLayerTransformExpressions(sourceLayer) {
+				continue
+			}
+			if layerIndex >= len(targetComp.Layers) {
+				return nil, fmt.Errorf("comp %q transform expressions: target layer index %d missing", sourceComp.Name, layerIndex)
+			}
+			if err := materializeLayerTransformExpressions(targetComp.Layers[layerIndex], sourceLayer); err != nil {
+				return nil, fmt.Errorf("comp %q layer %q transform expressions: %w", sourceComp.Name, sourceLayer.Name, err)
+			}
+		}
+	}
+	return reopened, nil
+}
+
+func hasProfileTransformExpressions(prof *profile.Profile) bool {
+	if prof == nil {
+		return false
+	}
+	for _, comp := range prof.Comps {
+		for _, layer := range comp.Layers {
+			if hasLayerTransformExpressions(layer) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func hasLayerTransformExpressions(layer profile.Layer) bool {
+	for _, property := range layer.Properties {
+		if isTransformProperty(property.MatchName) && property.Expression != "" {
+			return true
+		}
+		if isTransformProperty(property.MatchName) && property.ExpressionEnabled != nil {
+			return true
+		}
+	}
+	return false
+}
+
+func materializeLayerTransformExpressions(targetLayer *aep.Layer, sourceLayer profile.Layer) error {
+	for _, property := range sourceLayer.Properties {
+		if !isTransformProperty(property.MatchName) || !hasPropertyExpression(property) {
+			continue
+		}
+		targetProperty := targetTransformProperty(targetLayer, property.MatchName)
+		if targetProperty == nil {
+			return fmt.Errorf("property %q not found", property.MatchName)
+		}
+		if property.Expression != "" {
+			if err := targetProperty.SetExpression(property.Expression); err != nil {
+				return fmt.Errorf("property %q expression source: %w", property.MatchName, err)
+			}
+		}
+		if property.ExpressionEnabled != nil {
+			if err := targetProperty.SetExpressionEnabled(*property.ExpressionEnabled); err != nil {
+				return fmt.Errorf("property %q expression enabled: %w", property.MatchName, err)
+			}
+		}
+	}
+	return nil
+}
+
+func hasPropertyExpression(property profile.Property) bool {
+	return property.Expression != "" || property.ExpressionEnabled != nil
+}
+
+func isTransformProperty(matchName string) bool {
+	switch matchName {
+	case "ADBE Anchor Point", "ADBE Position", "ADBE Scale", "ADBE Rotate Z", "ADBE Opacity":
+		return true
+	default:
+		return false
+	}
+}
+
+func targetTransformProperty(layer *aep.Layer, matchName string) *aep.Property {
+	switch matchName {
+	case "ADBE Anchor Point":
+		return layer.AnchorPoint()
+	case "ADBE Position":
+		return layer.Position()
+	case "ADBE Scale":
+		return layer.Scale()
+	case "ADBE Rotate Z":
+		return layer.Rotation()
+	case "ADBE Opacity":
+		return layer.Opacity()
+	default:
+		return nil
+	}
 }
 
 func materializeProjectEffects(project *aep.Project, prof *profile.Profile) (*aep.Project, error) {

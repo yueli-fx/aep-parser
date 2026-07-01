@@ -11,6 +11,7 @@ import (
 
 	"github.com/yueli-fx/aep-parser/internal/aehost"
 	"github.com/yueli-fx/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/recipe"
 )
 
 func TestRunAssessWritesJSONReport(t *testing.T) {
@@ -411,7 +412,7 @@ func TestRunConvertWritesRectFillShapeLayerOutput(t *testing.T) {
 }
 
 func TestRunConvertWritesBlockedReportWithoutOutput(t *testing.T) {
-	input := writeTempProjectWithKeyframedNullLayer(t)
+	input := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-layer-mask.json"))
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
 	reportPath := filepath.Join(t.TempDir(), "convert.json")
 	var stdout, stderr bytes.Buffer
@@ -427,6 +428,27 @@ func TestRunConvertWritesBlockedReportWithoutOutput(t *testing.T) {
 	if report.Summary.Status != "blocked" {
 		t.Fatalf("report status = %q, want blocked", report.Summary.Status)
 	}
+}
+
+func writeTempRecipe(t *testing.T, recipePath string) string {
+	t.Helper()
+	data, err := os.ReadFile(recipePath)
+	if err != nil {
+		t.Fatalf("ReadFile recipe: %v", err)
+	}
+	var rec recipe.Recipe
+	if err := json.Unmarshal(data, &rec); err != nil {
+		t.Fatalf("Unmarshal recipe: %v", err)
+	}
+	path := filepath.Join(t.TempDir(), "source.aep")
+	report, err := recipe.CompileToFile(rec, path, recipe.StaticCapabilities{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("recipe report invalid: refusals=%+v", report.Refusals)
+	}
+	return path
 }
 
 func writeTempProject(t *testing.T, target aep.AETarget) string {
