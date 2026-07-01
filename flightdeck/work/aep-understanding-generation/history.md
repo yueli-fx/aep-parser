@@ -865,3 +865,8 @@ Current:
   `tmp/migration_matrix_text_animators_all_6x6/matrix.json` is 792 total,
   792 pass, 0 blocked, 0 failed, 0 skipped for all 22 recipe-owned text
   animator fixtures across 6 source writers and 6 target writers.
+- Dynamic transform writer coverage was upgraded from `PD-1x3` to full
+  W2020-W2025 source-and-target coverage. The matrix
+  `tmp/migration_matrix_transform_all_6x6/matrix.json` is 108 total, 108 pass,
+  0 blocked, 0 failed, 0 skipped for transform keyframes, keyframe ease, and
+  transform expression fixtures across 6 source writers and 6 target writers.

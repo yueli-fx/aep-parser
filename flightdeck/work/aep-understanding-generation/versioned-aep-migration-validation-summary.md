@@ -25,7 +25,7 @@ which AE versions are validated." The current reviewed answer is:
 - Text animator migration has `PD-6x6` evidence for 22 recipe-owned animator fixtures, plus `OPEN-ALL-HOSTS` evidence for two representatives: static scalar skew and animated fill-color keyframes.
 - Text style migration has `PD-1x3`, `OPEN-H2025`, and `OPEN-ALL-HOSTS` evidence for the current style fixture set.
 - Dynamic effect params have `PD-1x3`, `OPEN-H2025`, and one vector-keyframe `OPEN-ALL-HOSTS` representative.
-- Dynamic transforms have `PD-1x3`, `OPEN-H2025`, and one transform-ease `OPEN-ALL-HOSTS` representative.
+- Dynamic transforms have `PD-6x6`, `OPEN-H2025`, and one transform-ease `OPEN-ALL-HOSTS` representative.
 - Layer track matte migration has `PD-1x3` evidence for the classic track-matte fixture and `OPEN-ALL-HOSTS` evidence for its W2020 output. AE2025 explicit matte has `PD-1x1` evidence for AE2025 source to AE2025 target; lower-source explicit matte matrix cases are now marked as source-contract skips, not conversion blockers.
 - Layer mask migration has `PD-1x3` evidence for the current recipe-owned mask surface: mode/options, static outline, and path keyframes. The representative W2020 mask output has `OPEN-ALL-HOSTS` evidence.
 - Shape gradient stroke migration has `PD-1x3` and `OPEN-ALL-HOSTS` evidence for the current recipe-owned gradient stroke surface: base gradient stroke, alpha stops, radial highlight, and stroke style.
@@ -66,9 +66,9 @@ which AE versions are validated." The current reviewed answer is:
 
 | Capability | Recipes / scope | Profile-diff writer coverage | AE host open coverage | Evidence |
 | --- | --- | --- | --- | --- |
-| Transform keyframes | `minimal-transform-keyframes` | `PD-1x3`: W2020 -> W2020/W2022/W2025 | `OPEN-H2025` | `history.md` dynamic transform entry |
-| Transform keyframe ease | `minimal-transform-keyframe-ease` | `PD-1x3` | `OPEN-H2025`; `OPEN-ALL-HOSTS` for W2020 representative | `history.md` dynamic transform entry |
-| Transform expressions | `minimal-transform-expression` | `PD-1x3` | `OPEN-H2025` | `history.md` dynamic transform entry |
+| Transform keyframes | `minimal-transform-keyframes` | `PD-6x6`: W2020-W2025 -> W2020-W2025 | `OPEN-H2025` | `tmp/migration_matrix_transform_all_6x6/matrix.json`: 108 total, 108 pass |
+| Transform keyframe ease | `minimal-transform-keyframe-ease` | `PD-6x6` | `OPEN-H2025`; `OPEN-ALL-HOSTS` for W2020 representative | `tmp/migration_matrix_transform_all_6x6/matrix.json`; `history.md` dynamic transform entry |
+| Transform expressions | `minimal-transform-expression` | `PD-6x6` | `OPEN-H2025` | `tmp/migration_matrix_transform_all_6x6/matrix.json`; `history.md` dynamic transform entry |
 | Auto-orient unlock | `minimal-layer-auto-orient` | Included in latest full `PD-1x6` boundary after transform keyframes | pending per-capability host ledger | `history.md` dynamic transform entry; latest full no-AE matrix 846 total, 840 pass, 0 blocked, 6 skipped |
 
 ## Layer Domain
@@ -118,6 +118,7 @@ Reviewed raw artifacts currently known:
 - `tmp/migration_matrix_text_animators/matrix.json`: 66 total, 66 pass, 0 blocked, 0 failed, 0 skipped. This is W2020 source into W2020/W2022/W2025 targets for all 22 text animator recipes.
 - `tmp/migration_matrix_text_animators_all_writers/matrix.json`: 198 total, 198 pass, 0 blocked, 0 failed, 0 skipped. This is W2020/W2022/W2025 source writers into W2020/W2022/W2025 target writers for all 22 text animator recipes.
 - `tmp/migration_matrix_text_animators_all_6x6/matrix.json`: 792 total, 792 pass, 0 blocked, 0 failed, 0 skipped. This is W2020-W2025 source writers into W2020-W2025 target writers for all 22 text animator recipes.
+- `tmp/migration_matrix_transform_all_6x6/matrix.json`: 108 total, 108 pass, 0 blocked, 0 failed, 0 skipped. This is W2020-W2025 source writers into W2020-W2025 target writers for `minimal-transform-keyframes`, `minimal-transform-keyframe-ease`, and `minimal-transform-expression`.
 - `tmp/migration_matrix_text_animators_endpoint_hosts/matrix.json`: 4 total, 4 pass, 0 blocked, 0 failed, 0 skipped. This is W2020 writer output for `minimal-text-animator-skew` and `minimal-text-animator-color-value-keyframes` opened in H2020 and H2025. H2021-H2024 were not run and are only inferred low-risk.
 - `tmp/migration_matrix_representative_all_hosts/matrix.json`: 30 total, 30 pass, 0 blocked, 0 failed, 0 skipped. This is W2020 source into W2020 target with AE-open on H2020-H2025 for `minimal-text-animator-skew`, `minimal-text-animator-color-value-keyframes`, `minimal-layer-track-matte`, `minimal-layer-mask`, and `minimal-shape-gradient-stroke`.
 - `tmp/migration_matrix_structural_all_hosts/matrix.json`: 30 total, 30 pass, 0 blocked, 0 failed, 0 skipped. This is W2020 source into W2020 target with AE-open on H2020-H2025 for `minimal-project-display-settings`, `minimal-comp-object-profile`, `minimal-camera-object-profile`, `minimal-light-object-profile`, and `minimal-precomp-layer`.
@@ -133,6 +134,7 @@ Reviewed raw artifacts currently known:
 - Generated coverage ledger artifacts:
   - `tmp/migration_matrix_writer_targets_all/ledger.md`: generated from the narrow writer-target matrix; 1 recipe row with W2020-W2025 target evidence.
   - `tmp/migration_matrix_text_animators_all_6x6/ledger.md`: generated from the text animator 6x6 writer matrix; 22 recipe rows, each with W2020-W2025 source and target evidence.
+  - `tmp/migration_matrix_transform_all_6x6/ledger.md`: generated from the dynamic transform 6x6 writer matrix; 3 recipe rows, each with W2020-W2025 source and target evidence.
   - `tmp/migration_matrix_explicit_matte_source_contract/ledger.md`: generated from the AE2020-source explicit-matte source-contract matrix; 1 recipe row, 6 skipped cases.
   - `tmp/migration_matrix_explicit_matte_ae2025/ledger.md`: generated from the valid AE2025 explicit-matte matrix; 1 recipe row, 1 passed case.
   - `tmp/migration_matrix_smoke_all/ledger.md`: generated by the recurring full no-AE matrix command via `-ledger-out`; 141 recipe rows grouped by inferred domain.
