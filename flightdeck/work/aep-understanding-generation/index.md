@@ -71,51 +71,21 @@ Done at a high level:
   `matrix` gates for AE2020/AE2022/AE2025 writer targets.
 
 Current:
-- `cmd/aepmigrate matrix` is the latest completed slice. It batches recipe
-  fixtures across source/target writer labels, writes aggregate/per-case
-  reports, discovers AE hosts, supports explicit `-ae-versions` host-version
-  fanout for `-ae-open`, and protects broad AE-open runs with
-  `-max-ae-open-cases`.
-- `cmd/aepmigrate convert` now also preserves supported layer-level label and
-  comment metadata for reconstructed non-shape layers; the layer label/comment
-  recipe fixtures pass AE2020/AE2022/AE2025 matrix conversion and AE2025 open
-  smoke.
-- Supported text-layer switch reconstruction now covers visible, solo, shy,
-  locked, effects/audio switches, motion blur, frame blend, blending mode, and
-  quality; the common-switches/shy/motion-blur/quality-blending recipe fixtures
-  pass AE2020/AE2022/AE2025 matrix conversion and AE2025 open smoke.
-- Supported text-layer advanced switch reconstruction now covers collapse
-  transform, 3D, adjustment, guide, bicubic sampling, pixel-motion frame blend,
-  and preserve transparency; `minimal-layer-advanced-switches.json` passes
-  AE2020/AE2022/AE2025 matrix conversion and AE2025 open smoke.
-- Text-layer parent refs are now remapped onto the target project's layer IDs
-  after same-comp layer reconstruction; `minimal-layer-parent.json` and the
-  null-parent `minimal-null-layer.json` pass AE2020/AE2022/AE2025 matrix
-  conversion and AE2025 open smoke.
-- Solid-backed null-controller layers now preserve source solid dimensions,
-  color, visibility, and null flag while rebuilding as null layers;
-  `minimal-layer-null-flag.json` passes AE2020/AE2022/AE2025 matrix conversion
-  and AE2025 open smoke.
-- Camera and light static option reconstruction now preserves profile-visible
-  camera options and light kind/color/intensity/cone/falloff/shadow options;
-  camera option fixtures and light option fixtures pass AE2020/AE2022/AE2025
-  matrix conversion, with camera/light object-profile and light-source AE2025
-  open smokes passing. Light source refs are resolved after same-comp layer
-  reconstruction, and solid transform materialization now preserves source
-  profile Position when present.
-- Text layer object-profile reconstruction now includes markers-locked and
-  auto-orient in the switch surface; `minimal-layer-object-profile.json` passes
-  AE2020/AE2022/AE2025 matrix conversion and AE2025 open smoke.
-- Static effect reconstruction now reopens the target project, adds supported
-  built-in effects, materializes profile-visible static params, and remaps
-  same-comp effect layer-ref params. `minimal-text-effect.json`,
-  `minimal-adjustment-layer.json`, and `minimal-effect-layer-param.json` pass
-  AE2020/AE2022/AE2025 matrix conversion; text-effect and layer-ref effect
-  AE2025 open smokes pass. Effect expressions and effect keyframes remain
-  blocked.
-- Continue versioned migration by expanding supported conversion surface or
-  deciding whether native AE2021/AE2023/AE2024 writer templates are worth
-  adding.
+- Current `cmd/aepmigrate convert` surface includes conservative comp/layer
+  skeleton rebuild, stable comp settings, supported non-shape layer metadata /
+  switches / refs / timing / transforms, supported camera/light options,
+  supported parametric graphic/filter shape slices, precomp refs, and supported
+  built-in effects.
+- Effect reconstruction now covers supported static params, same-comp layer-ref
+  params, parameter expressions, scalar keyframes, and vector keyframes.
+- Latest full no-AE matrix: 423 total, 318 pass, 105 intentionally blocked,
+  0 failed, 0 skipped.
+- Latest AE-open checks: the three dynamic effect-param fixtures pass AE2025
+  open smoke; `minimal-effect-param-vector-keyframes.json` as an AE2020 writer
+  target opens across AE2020, AE2021, AE2022, AE2023, AE2024, and AE2025 hosts.
+- Continue versioned migration by expanding supported conversion surface,
+  turning the useful matrix boundary into a recurring verification command, or
+  deciding whether native AE2021/AE2023/AE2024 writer templates are worth adding.
 - Do not start automated correction loops.
 
 ## Open questions

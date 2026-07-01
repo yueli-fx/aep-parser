@@ -345,16 +345,24 @@ git diff --check
     `profile_diff_status: "pass"` and `profile_diff_count: 0`; the fixture
     passes AE2025 open gate with `ae_open_status: "pass"` /
     `ae_open_exit_code: 0`.
-  - Static effect reconstruction now runs after base layer reconstruction by
-    reopening the target project, applying `AddEffect`, materializing all
-    profile-visible static effect params through `SetEffectParam`, and remapping
-    same-comp effect layer-ref params through `SetEffectLayerParam`. The scope
-    remains conservative: effect params with expressions or keyframes stay
-    blocked. `minimal-text-effect.json`, `minimal-adjustment-layer.json`, and
-    `minimal-effect-layer-param.json` pass AE2020/AE2022/AE2025 matrix
-    conversion with `profile_diff_status: "pass"` and `profile_diff_count: 0`;
-    text-effect and layer-ref effect fixtures pass AE2025 open gate with
-    `ae_open_status: "pass"` / `ae_open_exit_code: 0`.
+  - Effect reconstruction now runs after base layer reconstruction by
+    reopening the target project, applying `AddEffect`, materializing
+    profile-visible static effect params through `SetEffectParam`, remapping
+    same-comp effect layer-ref params through `SetEffectLayerParam`, mapping
+    scalar/vector keyframes through `AnimateEffectParam` /
+    `AnimateEffectParamVec`, and applying effect-param expressions through
+    `Property.SetExpression` / `SetExpressionEnabled`. `minimal-text-effect.json`,
+    `minimal-adjustment-layer.json`, `minimal-effect-layer-param.json`,
+    `minimal-effect-param-expression.json`,
+    `minimal-effect-param-keyframes.json`, and
+    `minimal-effect-param-vector-keyframes.json` pass AE2020/AE2022/AE2025
+    matrix conversion with `profile_diff_status: "pass"` and
+    `profile_diff_count: 0`; the three dynamic effect-param fixtures pass
+    AE2025 open gate, and the vector-keyframe fixture as an AE2020 writer target
+    opens across AE2020, AE2021, AE2022, AE2023, AE2024, and AE2025 hosts.
+  - Latest full no-AE matrix after dynamic effect-param migration:
+    `423 total, 318 pass, 105 blocked, 0 failed, 0 skipped`. The command exits
+    non-zero because blocked cases remain intentional.
 
 - [x] Update `flightdeck/work/aep-understanding-generation/index.md` and `flightdeck/cockpit.md` to state:
   - `assess` is available;

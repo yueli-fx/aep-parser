@@ -645,9 +645,9 @@ Current:
   reconstruction now preserves static camera options and light
   kind/color/intensity/cone/falloff/shadow options plus same-comp light source
   refs; text object-profile reconstruction preserves markers-locked and
-  auto-orient; static effect reconstruction preserves supported built-in effects,
-  profile-visible static effect params, and same-comp effect layer-ref params
-  while still blocking effect expressions/keyframes; solid transform
+  auto-orient; effect reconstruction preserves supported built-in effects,
+  profile-visible static effect params, same-comp effect layer-ref params,
+  parameter expressions, scalar keyframes, and vector keyframes; solid transform
   materialization preserves source profile Position when present before falling
   back to comp center; default precomp conversion rebuilds all target comps
   before resolving composition source refs into recreated target comps. Go-writer
@@ -681,6 +681,18 @@ Current:
   recipe matrices cannot accidentally launch hundreds of AE open gates; set the
   cap higher or `0` only for an intentional long run. This replaces manual
   one-fixture-at-a-time migration smoke runs for supported slices.
+- Dynamic effect-param migration is implemented for supported built-in effects.
+  `materializeProjectEffects` now maps profile keyframes to
+  `AnimateEffectParam` / `AnimateEffectParamVec` and attaches
+  `Property.SetExpression` / `SetExpressionEnabled` after materializing the
+  underlying parameter value stream. `minimal-effect-param-expression.json`,
+  `minimal-effect-param-keyframes.json`, and
+  `minimal-effect-param-vector-keyframes.json` each pass AE2020/AE2022/AE2025
+  matrix conversion with profile diff pass. All three pass AE2025 open smoke,
+  and the vector-keyframe fixture as an AE2020 writer target opens across
+  AE2020, AE2021, AE2022, AE2023, AE2024, and AE2025 hosts. Latest full no-AE
+  migration matrix: 423 total, 318 pass, 105 intentionally blocked, 0 failed,
+  0 skipped.
 - `profilediff` now compares profile-visible layer metadata, quality/blending/
   auto-orient/light kind, all current layer flags, stable layer refs by
   name/index, layer properties, expression status, layer-ref params, keyframe
