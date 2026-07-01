@@ -174,6 +174,13 @@ git diff --check
 ```
 
 - [x] Run a real command on a generated fixture through tests or temp output.
+  - `examples/recipes/minimal-comp-object-profile.json` compiled to
+    `tmp\migration_verify_gate_smoke\source.aep`.
+  - `cmd/aepmigrate convert` retargeted it to AE2025 with
+    `profile_diff_status: "pass"` and `profile_diff_count: 0`.
+  - AE 2025 open gate passed via `test_data/generators/verify_open.jsx` and
+    `scripts/ae-worker/ae_run.ps1`; readback saw 1 composition named `Main`
+    and 0 layers.
 
 - [x] Update `flightdeck/work/aep-understanding-generation/index.md` and `flightdeck/cockpit.md` to state:
   - `assess` is available;
@@ -194,3 +201,5 @@ git diff --check
 - Target version is proven by reopening the output and reading the version string.
 - Successful convert is now also proven by source-vs-target profile diff status
   `pass`; AE open/render gates remain a separate, stronger validation layer.
+- First AE 2025 open smoke passed for the no-layer comp object profile
+  migration output.

@@ -691,7 +691,8 @@ Current:
   with layers are intentionally blocked before output so conversion cannot
   silently drop layer content. Successful convert now reopens the target and
   runs source-vs-target `profilediff`; unexpected profile diffs are recorded in
-  the migration report and block success.
+  the migration report and block success. First AE 2025 open smoke passed for
+  the converted no-layer comp object profile output.
 - Recipe IR coverage for the current comp and layer strategy matrices is
   complete: comp settings have object-level and field-level profile checks,
   authored-layer examples carry `expected_profile.layers[]`, camera/light
