@@ -84,6 +84,10 @@ Current:
   locked, effects/audio switches, motion blur, frame blend, blending mode, and
   quality; the common-switches/shy/motion-blur/quality-blending recipe fixtures
   pass AE2020/AE2022/AE2025 matrix conversion and AE2025 open smoke.
+- Supported text-layer advanced switch reconstruction now covers collapse
+  transform, 3D, adjustment, guide, bicubic sampling, pixel-motion frame blend,
+  and preserve transparency; `minimal-layer-advanced-switches.json` passes
+  AE2020/AE2022/AE2025 matrix conversion and AE2025 open smoke.
 - Text-layer parent refs are now remapped onto the target project's layer IDs
   after same-comp layer reconstruction; `minimal-layer-parent.json` and the
   null-parent `minimal-null-layer.json` pass AE2020/AE2022/AE2025 matrix

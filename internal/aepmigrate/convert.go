@@ -626,6 +626,27 @@ func materializeLayerSwitchSurface(layer *aep.Layer, source profile.Layer) error
 	if err := layer.SetFrameBlendEnabled(flags.FrameBlendEnabled); err != nil {
 		return err
 	}
+	if err := layer.SetCollapseTransform(flags.CollapseTransform); err != nil {
+		return err
+	}
+	if err := layer.SetIs3D(flags.Is3D); err != nil {
+		return err
+	}
+	if err := layer.SetIsAdjust(flags.IsAdjustment); err != nil {
+		return err
+	}
+	if err := layer.SetIsGuide(flags.IsGuide); err != nil {
+		return err
+	}
+	if err := layer.SetSamplingBicubic(flags.SamplingBicubic); err != nil {
+		return err
+	}
+	if err := layer.SetFrameBlendPixelMotion(flags.FrameBlendPixelMotion); err != nil {
+		return err
+	}
+	if err := layer.SetPreserveTransparency(flags.PreserveTransparency); err != nil {
+		return err
+	}
 	if flags.Blend != 0 {
 		if err := layer.SetBlendingMode(aep.BlendingMode(flags.Blend)); err != nil {
 			return err
@@ -1780,14 +1801,8 @@ func isSupportedDefaultTextLayer(layer profile.Layer) bool {
 	return flags.Blend != 0 &&
 		flags.TrackMatte == 0 &&
 		!flags.IsNull &&
-		!flags.Is3D &&
-		!flags.IsAdjustment &&
-		!flags.IsGuide &&
 		!flags.MarkersLocked &&
-		!flags.FrameBlendPixelMotion &&
-		flags.CollapseTransform &&
-		!flags.SamplingBicubic &&
-		!flags.PreserveTransparency
+		flags.CollapseTransform
 }
 
 func isSupportedDefaultShapeLayer(layer profile.Layer) bool {

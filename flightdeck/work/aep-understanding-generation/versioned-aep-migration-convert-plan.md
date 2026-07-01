@@ -304,6 +304,13 @@ git diff --check
     conversion with `profile_diff_status: "pass"` and `profile_diff_count: 0`;
     all four pass AE2025 open gate with `ae_open_status: "pass"` /
     `ae_open_exit_code: 0`.
+  - Text-layer advanced switch reconstruction now applies collapse transform,
+    3D, adjustment, guide, bicubic sampling, pixel-motion frame blend, and
+    preserve transparency through stable layer setters.
+    `minimal-layer-advanced-switches.json` passes AE2020/AE2022/AE2025 matrix
+    conversion with `profile_diff_status: "pass"` and `profile_diff_count: 0`;
+    the fixture passes AE2025 open gate with `ae_open_status: "pass"` /
+    `ae_open_exit_code: 0`.
   - Text-layer parent reconstruction now records source-to-target layer
     mappings per comp, then applies `Layer.SetParent` using the target parent
     layer ID after all same-comp layers exist. `minimal-layer-parent.json` and
