@@ -281,11 +281,20 @@ func convertScopeEntries(target VersionLabel, prof *profile.Profile) []Entry {
 				})
 				continue
 			}
+			if isSupportedDefaultAdjustmentLayer(layer, footage) {
+				entries = append(entries, Entry{
+					Path:          "comps[" + comp.Name + "].layers[" + layer.Name + "]",
+					Class:         ClassRetargeted,
+					TargetVersion: target,
+					Reason:        "Default adjustment layer is recreated through the target AE project template.",
+				})
+				continue
+			}
 			entries = append(entries, Entry{
 				Path:          "comps[" + comp.Name + "].layers[" + layer.Name + "]",
 				Class:         ClassBlocked,
 				TargetVersion: target,
-				Reason:        "This convert slice only reconstructs no-layer comps, default null layers, and default solid layers; refusing output to avoid silent layer loss.",
+				Reason:        "This convert slice only reconstructs no-layer comps, default null layers, default solid layers, and default adjustment layers; refusing output to avoid silent layer loss.",
 			})
 		}
 	}
@@ -321,6 +330,14 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				}
 				if err := materializeCenteredTransformSurface(next, dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q solid layer %q transform: %w", comp.Name, layer.Name, err)
+				}
+			case isSupportedDefaultAdjustmentLayer(layer, footage):
+				dstLayer, err := aep.NewAdjustmentLayer(next, layer.Name)
+				if err != nil {
+					return nil, fmt.Errorf("comp %q adjustment layer %q: %w", comp.Name, layer.Name, err)
+				}
+				if err := materializeDefaultTransformSurface(dstLayer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q adjustment layer %q transform: %w", comp.Name, layer.Name, err)
 				}
 			default:
 				return nil, fmt.Errorf("unsupported layer %q in comp %q", layer.Name, comp.Name)
@@ -419,6 +436,42 @@ func isSupportedDefaultSolidLayer(layer profile.Layer, footage convertFootageInd
 		!flags.Shy &&
 		!flags.Locked &&
 		!flags.IsAdjustment &&
+		!flags.IsGuide &&
+		!flags.MotionBlur &&
+		!flags.FrameBlendEnabled &&
+		!flags.MarkersLocked &&
+		!flags.FrameBlendPixelMotion &&
+		!flags.CollapseTransform &&
+		!flags.SamplingBicubic &&
+		!flags.PreserveTransparency
+}
+
+func isSupportedDefaultAdjustmentLayer(layer profile.Layer, footage convertFootageIndex) bool {
+	if layer.Type != "adjustment" || layer.SourceRef == nil || layer.SourceRef.Kind != "footage" {
+		return false
+	}
+	source, ok := footage.solidDetails(layer)
+	if !ok || source.Width == 0 || source.Height == 0 || source.SolidColor == nil {
+		return false
+	}
+	if layer.Comment != "" || layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
+		return false
+	}
+	if layer.Text != nil || len(layer.Effects) != 0 || len(layer.Masks) != 0 || len(layer.Shapes) != 0 || len(layer.Markers) != 0 {
+		return false
+	}
+	flags := layer.Flags
+	return flags.Visible &&
+		flags.Blend == 2 &&
+		flags.TrackMatte == 0 &&
+		!flags.IsNull &&
+		flags.IsAdjustment &&
+		flags.EffectsEnabled &&
+		flags.AudioEnabled &&
+		!flags.Is3D &&
+		!flags.Solo &&
+		!flags.Shy &&
+		!flags.Locked &&
 		!flags.IsGuide &&
 		!flags.MotionBlur &&
 		!flags.FrameBlendEnabled &&

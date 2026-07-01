@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "project": {
+    "target_version": "AE2020",
+    "name": "Minimal default adjustment layer"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 1,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "adjustment",
+          "name": "Grade"
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 1,
+    "layers": [
+      {
+        "name": "Grade",
+        "type": "adjustment",
+        "flags": {
+          "is_adjustment": true
+        }
+      }
+    ]
+  }
+}

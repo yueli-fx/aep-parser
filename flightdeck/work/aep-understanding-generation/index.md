@@ -691,16 +691,17 @@ Current:
   renderer, Motion Graphics template name, label, and comment. Source projects
   with unsupported layers are intentionally blocked before output so conversion
   cannot silently drop layer content. The first layer-bearing slices are default
-  null layers and default solid layers. Default null conversion preserves the
-  source profile's visible default transform surface when present, and default
-  solid conversion uses profile-visible footage item details for source
-  dimensions/color. Go-writer and recipe fixtures for both slices now pass
-  profile diff. Successful convert reopens the target and runs source-vs-target
-  `profilediff`; unexpected profile diffs are recorded in the migration report
-  and block success. AE2025 open smoke has passed for the converted no-layer
-  comp object profile output, recipe default-null output, and recipe
-  default-solid output, and `cmd/aepmigrate convert -ae-open -ae <AfterFX.exe>`
-  writes AE open gate status into the migration report.
+  null layers, default solid layers, and default adjustment layers. Default null
+  and adjustment conversion preserve the source profile's visible default
+  transform surface when present; default solid conversion uses
+  profile-visible footage item details for source dimensions/color. Go-writer
+  and recipe fixtures for all three slices now pass profile diff. Successful
+  convert reopens the target and runs source-vs-target `profilediff`;
+  unexpected profile diffs are recorded in the migration report and block
+  success. AE2025 open smoke has passed for the converted no-layer comp object
+  profile output, recipe default-null output, recipe default-solid output, and
+  recipe default-adjustment output, and `cmd/aepmigrate convert -ae-open -ae
+  <AfterFX.exe>` writes AE open gate status into the migration report.
 - `profilediff` now compares profile-visible layer metadata, quality/blending/
   auto-orient/light kind, all current layer flags, stable layer refs by
   name/index, layer properties, expression status, layer-ref params, keyframe

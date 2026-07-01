@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans or equivalent TDD execution. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add the first conservative `aepmigrate convert` slices: convert no-layer composition skeleton projects, default null-layer projects, and default solid-layer projects to a requested AE target version, and refuse projects that would require unsupported layer reconstruction.
+**Goal:** Add the first conservative `aepmigrate convert` slices: convert no-layer composition skeleton projects, default null-layer projects, default solid-layer projects, and default adjustment-layer projects to a requested AE target version, and refuse projects that would require unsupported layer reconstruction.
 
 **Architecture:** Extend `internal/aepmigrate` with a `Convert` function that opens the source, builds a profile, runs existing assess checks, adds convert-scope blockers, and writes a new target-version project only when the source is inside the first supported surface. After writing, reopen the target, build its profile, and run `profilediff.Compare` before reporting success. Add `cmd/aepmigrate convert` as a CLI wrapper. Do not copy raw chunks across AE versions.
 
@@ -17,7 +17,8 @@ This slice supports:
 - source project opens and profiles successfully;
 - target is `AE2020`, `AE2022`, or `AE2025`;
 - every composition has zero layers, or every layer is inside the first explicit
-  layer-bearing slices: default null layers and default solid layers;
+  layer-bearing slices: default null layers, default solid layers, and default
+  adjustment layers;
 - each composition is recreated with name, width, height, frame rate, and duration;
 - stable profile-visible composition settings are recreated through target-version
   writers: background color, resolution factor, pixel aspect, display start
@@ -31,7 +32,7 @@ This slice supports:
 
 This slice refuses:
 
-- any source project with layers outside the default-null/default-solid slice;
+- any source project with layers outside the default-null/default-solid/default-adjustment slice;
 - existing assess blockers such as AE2025 explicit matte downgrade;
 - unknown target version labels.
 
@@ -203,11 +204,17 @@ git diff --check
     `profile_diff_status: "pass"` and `profile_diff_count: 0`; the recipe
     fixture also passes AE2025 open gate with `ae_open_status: "pass"` /
     `ae_open_exit_code: 0`.
+  - Default adjustment-layer sources generated through `aep.NewAdjustmentLayer`
+    and `examples/recipes/minimal-default-adjustment-layer.json` convert to
+    AE2025 with `profile_diff_status: "pass"` and `profile_diff_count: 0`;
+    the recipe fixture also passes AE2025 open gate with
+    `ae_open_status: "pass"` / `ae_open_exit_code: 0`.
 
 - [x] Update `flightdeck/work/aep-understanding-generation/index.md` and `flightdeck/cockpit.md` to state:
   - `assess` is available;
   - `convert` first slices are available only for no-layer comp skeleton projects,
-    default null-layer projects, and default solid-layer projects;
+    default null-layer projects, default solid-layer projects, and default
+    adjustment-layer projects;
   - stable no-layer comp settings are preserved through target-version writers;
   - renderer and Motion Graphics template name are preserved through their comp
     writers;

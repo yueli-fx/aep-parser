@@ -158,6 +158,25 @@ func TestRunConvertWritesDefaultSolidLayerOutput(t *testing.T) {
 	}
 }
 
+func TestRunConvertWritesDefaultAdjustmentLayerOutput(t *testing.T) {
+	input := writeTempProjectWithOneAdjustmentLayer(t)
+	outPath := filepath.Join(t.TempDir(), "converted.aep")
+	reportPath := filepath.Join(t.TempDir(), "convert.json")
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"convert", "-in", input, "-target", "AE2025", "-out", outPath, "-report", reportPath}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("run convert = %d, stderr=%s", code, stderr.String())
+	}
+	if _, err := os.Stat(outPath); err != nil {
+		t.Fatalf("converted output missing: %v", err)
+	}
+	report := readReportSummary(t, reportPath)
+	if report.Summary.Status != "pass" || report.Verification.ProfileDiffStatus != "pass" {
+		t.Fatalf("report = %+v, want pass with profile diff pass", report)
+	}
+}
+
 func TestRunConvertWritesBlockedReportWithoutOutput(t *testing.T) {
 	input := writeTempProjectWithOneTextLayer(t)
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
@@ -225,6 +244,19 @@ func writeTempProjectWithOneTextLayer(t *testing.T) string {
 		t.Fatalf("NewTextLayer: %v", err)
 	}
 	return writeProject(t, project, "one-text-layer.aep")
+}
+
+func writeTempProjectWithOneAdjustmentLayer(t *testing.T) string {
+	t.Helper()
+	project := aep.NewProject(aep.TargetAE2020)
+	comp, err := aep.NewComposition(project, "Main", 640, 360, 24, 2)
+	if err != nil {
+		t.Fatalf("NewComposition: %v", err)
+	}
+	if _, err := aep.NewAdjustmentLayer(comp, "Grade"); err != nil {
+		t.Fatalf("NewAdjustmentLayer: %v", err)
+	}
+	return writeProject(t, project, "one-adjustment-layer.aep")
 }
 
 func writeTempProjectWithOneNullLayer(t *testing.T) string {
