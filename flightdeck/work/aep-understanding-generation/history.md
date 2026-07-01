@@ -802,3 +802,12 @@ Current:
   pass, 0 blocked, 0 failed, 0 skipped. This removes the prior H2021-H2024
   inference marker for the two text animator representatives and adds direct
   all-host smoke evidence for recent matte, mask, and gradient-stroke slices.
+- `aepmigrate ledger` now turns a matrix report into a generated Markdown
+  coverage ledger grouped by inferred recipe domain. The generated ledger keeps
+  raw recipe rows, pass/blocked/failed/skipped counts, writer sources/targets,
+  and AE host-open versions visible for review. Current generated artifacts:
+  `tmp/migration_matrix_smoke_all/ledger.md` has 141 recipe rows for the full
+  no-AE matrix, and
+  `tmp/migration_matrix_representative_all_hosts/ledger.md` has 5 recipe rows
+  for the all-host representative matrix. These artifacts support the reviewed
+  validation summary; they do not replace it.

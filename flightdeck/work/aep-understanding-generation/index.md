@@ -93,6 +93,9 @@ Current:
   stroke width, skew, range-offset keyframes, and supported value keyframes.
 - Latest full no-AE matrix: 423 total, 420 pass, 3 intentionally blocked,
   0 failed, 0 skipped.
+- `aepmigrate ledger` can generate per-recipe/domain Markdown ledgers from
+  matrix JSON outputs; current generated ledgers live beside the smoke and
+  all-host representative matrix artifacts under `tmp/`.
 - Latest AE-open checks: dynamic effect-param and transform dynamic fixtures
   plus text style fixtures pass AE2025 open smoke; representative AE2020 writer
   outputs for vector effect keyframes, transform ease, text style, text

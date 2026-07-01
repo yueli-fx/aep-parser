@@ -31,6 +31,8 @@ func runWithHost(args []string, stdout, stderr io.Writer, host aehost.Host) int 
 		return runAssess(args[1:], stdout, stderr)
 	case "convert":
 		return runConvert(args[1:], stdout, stderr, host)
+	case "ledger":
+		return runLedger(args[1:], stdout, stderr)
 	case "matrix":
 		return runMatrix(args[1:], stdout, stderr, host)
 	default:
@@ -78,6 +80,36 @@ func runAssess(args []string, stdout, stderr io.Writer) int {
 	}
 	fmt.Fprint(stdout, string(data))
 	return statusCode(report.Summary.Status)
+}
+
+func runLedger(args []string, stdout, stderr io.Writer) int {
+	fs := flag.NewFlagSet("aepmigrate ledger", flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	matrixPath := fs.String("matrix", "", "matrix.json path")
+	outPath := fs.String("out", "", "optional Markdown output path")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	if *matrixPath == "" {
+		fmt.Fprintln(stderr, "usage: aepmigrate ledger -matrix matrix.json [-out ledger.md]")
+		return 2
+	}
+	ledger, err := aepmigrate.ReadMatrixLedger(*matrixPath)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	markdown := aepmigrate.RenderMatrixLedgerMarkdown(ledger)
+	if *outPath != "" {
+		if err := os.WriteFile(*outPath, []byte(markdown), 0o644); err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		fmt.Fprintf(stdout, "migration ledger: %s\n", *outPath)
+		return 0
+	}
+	fmt.Fprint(stdout, markdown)
+	return 0
 }
 
 func runMatrix(args []string, stdout, stderr io.Writer, host aehost.Host) int {

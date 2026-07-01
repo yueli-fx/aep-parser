@@ -221,6 +221,65 @@ func TestRunMatrixAEOpenVersionsExpandCaseLimit(t *testing.T) {
 	}
 }
 
+func TestRunLedgerWritesMarkdown(t *testing.T) {
+	root := t.TempDir()
+	matrixPath := filepath.Join(root, "matrix.json")
+	ledgerPath := filepath.Join(root, "ledger.md")
+	if err := os.WriteFile(matrixPath, []byte(`{
+  "schema_version": 1,
+  "out_root": "tmp/matrix",
+  "summary": {
+    "total": 2,
+    "passed": 1,
+    "blocked": 1,
+    "failed": 0,
+    "skipped": 0
+  },
+  "cases": [
+    {
+      "recipe_name": "minimal-text-animator-skew",
+      "source_version": "AE2020",
+      "target_version": "AE2020",
+      "ae_open_version": "AE2020",
+      "status": "pass"
+    },
+    {
+      "recipe_name": "minimal-layer-explicit-matte",
+      "source_version": "AE2025",
+      "target_version": "AE2020",
+      "status": "blocked",
+      "reason": "convert_blocked"
+    }
+  ]
+}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{
+		"ledger",
+		"-matrix", matrixPath,
+		"-out", ledgerPath,
+	}, &stdout, &stderr)
+
+	if code != 0 {
+		t.Fatalf("run ledger = %d, stderr=%s", code, stderr.String())
+	}
+	data, err := os.ReadFile(ledgerPath)
+	if err != nil {
+		t.Fatalf("ReadFile ledger: %v", err)
+	}
+	if !bytes.Contains(data, []byte("| text | `minimal-text-animator-skew` | pass | 1 | 0 | 0 | 0 | AE2020 | AE2020 | AE2020 |")) {
+		t.Fatalf("ledger missing text row:\n%s", string(data))
+	}
+	if !bytes.Contains(data, []byte("| layer | `minimal-layer-explicit-matte` | blocked | 0 | 1 | 0 | 0 | AE2025 | AE2020 | - |")) {
+		t.Fatalf("ledger missing layer row:\n%s", string(data))
+	}
+	if !bytes.Contains(stdout.Bytes(), []byte("migration ledger:")) {
+		t.Fatalf("stdout missing ledger path: %s", stdout.String())
+	}
+}
+
 func TestRunConvertWritesDefaultNullLayerOutput(t *testing.T) {
 	input := writeTempProjectWithOneNullLayer(t)
 	outPath := filepath.Join(t.TempDir(), "converted.aep")

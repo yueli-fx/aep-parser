@@ -459,3 +459,156 @@ Use:
 ```text
 docs(aepmigrate): record all-host migration evidence
 ```
+
+---
+
+## Task 17: Generated Coverage Ledger Plan
+
+- [x] **Step 1: Define the narrow generated-ledger surface**
+
+Add a generated ledger command that reads one `matrix.json` and emits a
+Markdown table grouped by inferred recipe domain. This is not a replacement for
+the reviewed validation summary; it is a repeatable input that answers "which
+recipes/domains passed, blocked, failed, or skipped in this matrix?" without
+manual counting.
+
+Files:
+
+- Create: `internal/aepmigrate/matrix_ledger.go`
+- Create: `internal/aepmigrate/matrix_ledger_test.go`
+- Modify: `cmd/aepmigrate/main.go`
+- Modify: `cmd/aepmigrate/main_test.go`
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/aep-understanding-generation/history.md`
+
+- [x] **Step 2: Keep domain inference conservative**
+
+Infer domain from recipe names only:
+
+- `minimal-text-*` -> `text`
+- `minimal-layer-*` -> `layer`
+- `minimal-shape-*` -> `shape`
+- `minimal-effect-*` or `minimal-adjustment-*` -> `effect`
+- `minimal-transform-*` -> `transform`
+- `minimal-comp-*` -> `comp`
+- `minimal-camera-*` or `minimal-light-*` -> `camera-light`
+- `minimal-precomp-*` -> `precomp`
+- `minimal-project-*` -> `project`
+- anything else -> `other`
+
+The command must preserve raw recipe names and case counts so manual review can
+override any rough domain bucket later.
+
+## Task 18: Generated Coverage Ledger TDD
+
+- [x] **Step 1: Add failing internal ledger tests**
+
+Add tests that build a small `MatrixReport` with mixed text/layer/shape cases
+and assert:
+
+- ledger rows are grouped by recipe name,
+- domain inference follows the conservative recipe prefixes,
+- per-row counts include pass/blocked/failed/skipped,
+- AE-open host versions are listed only when present,
+- Markdown output includes a stable table header and rows.
+
+- [x] **Step 2: Run the red internal test**
+
+```powershell
+go test ./internal/aepmigrate -run TestBuildMatrixLedger -count=1
+```
+
+Expected: fail because the ledger API does not exist.
+
+- [x] **Step 3: Add failing CLI test**
+
+Add a CLI test that writes a tiny `matrix.json`, runs:
+
+```powershell
+aepmigrate ledger -matrix matrix.json -out ledger.md
+```
+
+and asserts the output file contains the Markdown table and stdout prints
+`migration ledger:`.
+
+- [x] **Step 4: Run the red CLI test**
+
+```powershell
+go test ./cmd/aepmigrate -run TestRunLedgerWritesMarkdown -count=1
+```
+
+Expected: fail because the `ledger` subcommand does not exist.
+
+## Task 19: Generated Coverage Ledger Implementation
+
+- [x] **Step 1: Implement internal ledger builder and renderer**
+
+Implement:
+
+```go
+func ReadMatrixLedger(path string) (MatrixLedger, error)
+func BuildMatrixLedger(report MatrixReport) MatrixLedger
+func RenderMatrixLedgerMarkdown(ledger MatrixLedger) string
+```
+
+The Markdown table columns are:
+
+```text
+Domain | Recipe | Status | Pass | Blocked | Failed | Skipped | Sources | Targets | AE Hosts
+```
+
+- [x] **Step 2: Implement `aepmigrate ledger` CLI**
+
+Flags:
+
+```text
+-matrix path/to/matrix.json
+-out path/to/ledger.md
+```
+
+If `-out` is omitted, print Markdown to stdout. If `-out` is present, write the
+file and print `migration ledger: <path>`.
+
+- [x] **Step 3: Run green focused tests**
+
+```powershell
+go test ./internal/aepmigrate -run TestBuildMatrixLedger -count=1
+go test ./cmd/aepmigrate -run TestRunLedgerWritesMarkdown -count=1
+```
+
+Expected: both pass.
+
+## Task 20: Generated Coverage Ledger Matrix Use and Commit Gate
+
+- [x] **Step 1: Generate ledgers for current matrices**
+
+```powershell
+go run ./cmd/aepmigrate ledger -matrix tmp\migration_matrix_smoke_all\matrix.json -out tmp\migration_matrix_smoke_all\ledger.md
+go run ./cmd/aepmigrate ledger -matrix tmp\migration_matrix_representative_all_hosts\matrix.json -out tmp\migration_matrix_representative_all_hosts\ledger.md
+```
+
+- [x] **Step 2: Update validation summary and history**
+
+Record the generated ledger artifacts as supporting evidence. Do not replace
+the reviewed summary table with generated output.
+
+- [x] **Step 3: Run full verification**
+
+```powershell
+go test ./...
+go vet ./...
+git diff --check
+```
+
+- [x] **Step 4: Read commit/verify knowledge and commit**
+
+```powershell
+Get-Content C:\Users\yl\.flightdeck\knowledge\git\commits.md -Raw
+Get-Content flightdeck\knowledge\workflow\verify.md -Raw
+```
+
+Use:
+
+```text
+feat(aepmigrate): generate matrix coverage ledgers
+```
