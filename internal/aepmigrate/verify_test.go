@@ -51,6 +51,31 @@ func TestVerifyBlocksDifferentProfiles(t *testing.T) {
 	}
 }
 
+func TestVerifyBlocksLedgerBoundaryEvenWhenProfilesMatch(t *testing.T) {
+	source := writeTempProjectWithExplicitMatte(t)
+
+	report, err := Verify(VerifyOptions{
+		SourcePath:    source,
+		TargetPath:    source,
+		TargetVersion: VersionAE2020,
+	})
+	if err != nil {
+		t.Fatalf("Verify: %v", err)
+	}
+	if report.Summary.Status != StatusBlocked {
+		t.Fatalf("status = %q, want blocked; entries=%+v", report.Summary.Status, report.Entries)
+	}
+	if report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 {
+		t.Fatalf("profile diff verification = %+v, want pass with 0 diffs", report.Verification)
+	}
+	for _, entry := range report.Entries {
+		if entry.CapabilityKey == "layer.set_track_matte_source" && entry.Class == ClassBlocked {
+			return
+		}
+	}
+	t.Fatalf("missing explicit matte ledger boundary entry: %+v", report.Entries)
+}
+
 func writeTempVerifyProject(t *testing.T, compName string) string {
 	t.Helper()
 	project := aep.NewProject(aep.TargetAE2020)

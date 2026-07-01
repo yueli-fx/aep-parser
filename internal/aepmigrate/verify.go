@@ -48,6 +48,7 @@ func Verify(opts VerifyOptions) (Report, error) {
 			RenderStatus: "not_run",
 		},
 	}
+	report.Entries = append(report.Entries, verificationCapabilityEntries(classifyProfile(sourceVersion.Label, opts.TargetVersion, sourceProfile))...)
 
 	diffReport, err := profilediff.Compare(sourceProfile, targetProfile, profilediff.Options{})
 	if err != nil {
@@ -58,7 +59,7 @@ func Verify(opts VerifyOptions) (Report, error) {
 	report.Verification.ProfileDiffs = verificationDiffs(diffReport.Diffs)
 	if diffReport.DiffCount == 0 {
 		report.Verification.ProfileDiffStatus = "pass"
-		report.Summary = Summary{Status: StatusPass}
+		report.Summary = summarize(report.Entries)
 		return report, nil
 	}
 
@@ -71,4 +72,15 @@ func Verify(opts VerifyOptions) (Report, error) {
 	})
 	report.Summary = summarize(report.Entries)
 	return report, nil
+}
+
+func verificationCapabilityEntries(entries []Entry) []Entry {
+	out := make([]Entry, 0, len(entries))
+	for _, entry := range entries {
+		if entry.Path == "project" && entry.Class == ClassPreserved && entry.CapabilityKey == "" {
+			continue
+		}
+		out = append(out, entry)
+	}
+	return out
 }
