@@ -903,3 +903,8 @@ Current:
   `tmp/migration_matrix_static_effects_all_6x6/matrix.json` is 72 total,
   72 pass, 0 blocked, 0 failed, 0 skipped for `minimal-text-effect` and
   `minimal-adjustment-layer` across 6 source writers and 6 target writers.
+- Auto-orient writer coverage was upgraded from the latest full `PD-1x6`
+  boundary to focused W2020-W2025 source-and-target coverage. The matrix
+  `tmp/migration_matrix_auto_orient_all_6x6/matrix.json` is 36 total, 36 pass,
+  0 blocked, 0 failed, 0 skipped for `minimal-layer-auto-orient` across
+  6 source writers and 6 target writers.

@@ -1713,3 +1713,69 @@ Commit:
 ```text
 docs(aepmigrate): record static effects six-writer evidence
 ```
+
+---
+
+## Task 41: Auto-Orient PD-6x6 Writer Matrix Evidence
+
+**Goal:** Upgrade the auto-orient migration evidence from the latest full
+`PD-1x6` boundary to a focused full W2020-W2025 source-and-target matrix.
+
+**Architecture:** Reuse the matrix runner without AE-open. Run
+`minimal-layer-auto-orient` across `-sources all -targets all` and record the
+reviewed result as `PD-6x6` evidence. This remains separate from the dynamic
+transform 6x6 matrix because the recipe also validates layer auto-orient state.
+
+**Files:**
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/aep-understanding-generation/index.md`
+- Modify: `flightdeck/work/aep-understanding-generation/history.md`
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+- Modify: `flightdeck/cockpit.md`
+
+- [x] **Step 1: Run the auto-orient all-writer matrix**
+
+Run:
+
+```powershell
+go run ./cmd/aepmigrate matrix `
+  -recipe examples\recipes\minimal-layer-auto-orient.json `
+  -sources all `
+  -targets all `
+  -out tmp\migration_matrix_auto_orient_all_6x6 `
+  -ledger-out tmp\migration_matrix_auto_orient_all_6x6\ledger.md
+```
+
+Expected: 36 total, 36 pass, 0 blocked, 0 failed, 0 skipped. This is
+1 recipe x 6 source writers x 6 target writers.
+
+- [x] **Step 2: Update reviewed validation summary**
+
+If Step 1 passes, update the Transform Domain auto-orient row from latest full
+`PD-1x6` boundary evidence to focused `PD-6x6` evidence. Add
+`tmp/migration_matrix_auto_orient_all_6x6/matrix.json` and its ledger to raw
+artifacts. Update `index.md`, `cockpit.md`, and append `history.md`.
+
+- [x] **Step 3: Verification and commit**
+
+Run:
+
+```powershell
+pwsh -File scripts\migration\verify_matrix.ps1
+go test ./...
+go vet ./...
+git diff --check
+```
+
+Read:
+
+```powershell
+Get-Content C:\Users\yl\.flightdeck\knowledge\git\commits.md -Raw
+Get-Content flightdeck\knowledge\workflow\verify.md -Raw
+```
+
+Commit:
+
+```text
+docs(aepmigrate): record auto-orient six-writer evidence
+```

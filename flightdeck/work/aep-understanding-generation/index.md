@@ -92,6 +92,8 @@ Current:
   across AE2020-AE2025 sources and targets.
 - Dynamic transform migration now has a 3-recipe `PD-6x6` writer matrix across
   AE2020-AE2025 sources and targets.
+- Auto-orient migration now has a 1-recipe `PD-6x6` writer matrix across
+  AE2020-AE2025 sources and targets.
 - Text animator reconstruction now covers the current recipe-owned animator
   surface by profile-visible properties: opacity, position, scale, rotation
   Z/X/Y, fill/stroke color, tracking, character offset, fill/stroke opacity,
