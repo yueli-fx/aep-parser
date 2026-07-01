@@ -4583,7 +4583,7 @@
       "go_type": "[]float64",
       "summary": "Static anchor point value.",
       "validation": "When present, anchor_point must contain exactly two numeric values.",
-      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
+      "example": "examples/recipes/minimal-default-text-static-transform.json"
     },
     "comps[].layers[].transform.anchor_point_keyframes[]": {
       "path": "comps[].layers[].transform.anchor_point_keyframes[]",
@@ -4910,7 +4910,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Static opacity value.",
-      "example": "examples/recipes/minimal-text-effect.json"
+      "example": "examples/recipes/minimal-default-text-static-transform.json"
     },
     "comps[].layers[].transform.opacity_keyframes[]": {
       "path": "comps[].layers[].transform.opacity_keyframes[]",
@@ -5145,7 +5145,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Static rotation value.",
-      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
+      "example": "examples/recipes/minimal-default-text-static-transform.json"
     },
     "comps[].layers[].transform.rotation_keyframes[]": {
       "path": "comps[].layers[].transform.rotation_keyframes[]",
@@ -5262,7 +5262,7 @@
       "go_type": "[]float64",
       "summary": "Static scale value.",
       "validation": "When present, scale must contain exactly two numeric values.",
-      "example": "examples/recipes/minimal-text-effect.json"
+      "example": "examples/recipes/minimal-default-text-static-transform.json"
     },
     "comps[].layers[].transform.scale_keyframes[]": {
       "path": "comps[].layers[].transform.scale_keyframes[]",

@@ -519,6 +519,29 @@ func TestConvertWritesRecipeDefaultTextLayerProject(t *testing.T) {
 	}
 }
 
+func TestConvertWritesRecipeTextStaticTransformProject(t *testing.T) {
+	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-default-text-static-transform.json"))
+	outPath := filepath.Join(t.TempDir(), "converted.aep")
+
+	report, err := Convert(ConvertOptions{
+		InputPath:  source,
+		OutputPath: outPath,
+		Target:     VersionAE2025,
+	})
+	if err != nil {
+		t.Fatalf("Convert: %v", err)
+	}
+	if report.Summary.Status != StatusPass {
+		t.Fatalf("status = %q, entries=%+v, diffs=%+v", report.Summary.Status, report.Entries, report.Verification.ProfileDiffs)
+	}
+	if report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 {
+		t.Fatalf("profile diff verification = %+v, want pass with 0 diffs", report.Verification)
+	}
+	if _, err := os.Stat(outPath); err != nil {
+		t.Fatalf("converted output missing: %v", err)
+	}
+}
+
 func TestConvertWritesDefaultShapeLayerProject(t *testing.T) {
 	source := writeTempProjectWithDefaultShapeLayer(t)
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
@@ -605,8 +628,28 @@ func TestConvertWritesRecipeRectFillShapeLayerProject(t *testing.T) {
 	}
 }
 
-func TestConvertBlocksChangedNullLayerBeforeWritingOutput(t *testing.T) {
+func TestConvertWritesMovedNullLayerProject(t *testing.T) {
 	source := writeTempProjectWithMovedNullLayer(t)
+	outPath := filepath.Join(t.TempDir(), "converted.aep")
+
+	report, err := Convert(ConvertOptions{
+		InputPath:  source,
+		OutputPath: outPath,
+		Target:     VersionAE2025,
+	})
+	if err != nil {
+		t.Fatalf("Convert: %v", err)
+	}
+	if report.Summary.Status != StatusPass {
+		t.Fatalf("status = %q, entries=%+v, diffs=%+v", report.Summary.Status, report.Entries, report.Verification.ProfileDiffs)
+	}
+	if report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 {
+		t.Fatalf("profile diff verification = %+v, want pass with 0 diffs", report.Verification)
+	}
+}
+
+func TestConvertBlocksKeyframedNullLayerBeforeWritingOutput(t *testing.T) {
+	source := writeTempProjectWithKeyframedNullLayer(t)
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
 
 	report, err := Convert(ConvertOptions{
@@ -1084,6 +1127,32 @@ func writeTempProjectWithMovedNullLayer(t *testing.T) string {
 		t.Fatalf("SetLayerTransform: %v", err)
 	}
 	path := filepath.Join(t.TempDir(), "moved-null-layer.aep")
+	writeProjectFile(t, project, path)
+	return path
+}
+
+func writeTempProjectWithKeyframedNullLayer(t *testing.T) string {
+	t.Helper()
+	project := aep.NewProject(aep.TargetAE2020)
+	comp, err := aep.NewComposition(project, "Main", 640, 360, 24, 2)
+	if err != nil {
+		t.Fatalf("NewComposition: %v", err)
+	}
+	layer, err := aep.NewNullLayer(comp, "Controller")
+	if err != nil {
+		t.Fatalf("NewNullLayer: %v", err)
+	}
+	transform := aep.NewLayerTransform()
+	if err := transform.Position().AddKeyframeLinear(0, [2]float64{0, 0}); err != nil {
+		t.Fatalf("Position.AddKeyframeLinear 0: %v", err)
+	}
+	if err := transform.Position().AddKeyframeLinear(1, [2]float64{320, 180}); err != nil {
+		t.Fatalf("Position.AddKeyframeLinear 1: %v", err)
+	}
+	if err := aep.SetLayerTransform(layer, transform); err != nil {
+		t.Fatalf("SetLayerTransform: %v", err)
+	}
+	path := filepath.Join(t.TempDir(), "keyframed-null-layer.aep")
 	writeProjectFile(t, project, path)
 	return path
 }

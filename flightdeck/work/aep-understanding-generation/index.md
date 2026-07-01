@@ -701,15 +701,18 @@ Current:
   `aep.NewTextLayer` + `Layer.SetText` and relies on profile diff for text
   document/style fidelity; default empty shape conversion uses `aep.NewShapeLayer`;
   single rect+fill shape conversion rebuilds rect and fill nodes from stable
-  profile properties while keeping layer transform at default; default precomp
-  conversion rebuilds all target comps before resolving composition source refs
-  into recreated target comps. Go-writer and recipe fixtures for all nine slices
-  now pass profile diff.
+  profile properties; static layer transform reconstruction now preserves
+  profile-visible Anchor/Position/Scale/Rotation/Opacity values while converting
+  profile scale/opacity unit values back to writer percent units; default
+  precomp conversion rebuilds all target comps before resolving composition
+  source refs into recreated target comps. Go-writer and recipe fixtures for all
+  nine slices plus the static-transform text fixture now pass profile diff.
   Successful convert reopens the target and
   runs source-vs-target `profilediff`; unexpected profile diffs are recorded in
   the migration report and block success. AE2025 open smoke has passed for the
   converted no-layer comp object profile output and recipe default null, solid,
-  adjustment, camera, light, text, empty shape, rect+fill shape, and precomp outputs.
+  adjustment, camera, light, text, static-transform text, empty shape, rect+fill
+  shape, and precomp outputs.
   `cmd/aepmigrate convert -ae-open -ae <AfterFX.exe>` writes AE open gate status
   into the migration report.
 - `profilediff` now compares profile-visible layer metadata, quality/blending/

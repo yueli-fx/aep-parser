@@ -521,10 +521,10 @@ This reference is generated from the canonical recipe field model.
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
 | `comps[].layers[].transform.position` | `array<float64>` | - | Static position value. | When present, position must contain exactly two numeric values. | - | examples/recipes/minimal-adjustment-layer.json |
-| `comps[].layers[].transform.scale` | `array<float64>` | - | Static scale value. | When present, scale must contain exactly two numeric values. | - | examples/recipes/minimal-text-effect.json |
-| `comps[].layers[].transform.anchor_point` | `array<float64>` | - | Static anchor point value. | When present, anchor_point must contain exactly two numeric values. | - | examples/recipes/minimal-transform-keyframe-ease.json |
-| `comps[].layers[].transform.rotation` | `number` | - | Static rotation value. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
-| `comps[].layers[].transform.opacity` | `number` | - | Static opacity value. | - | - | examples/recipes/minimal-text-effect.json |
+| `comps[].layers[].transform.scale` | `array<float64>` | - | Static scale value. | When present, scale must contain exactly two numeric values. | - | examples/recipes/minimal-default-text-static-transform.json |
+| `comps[].layers[].transform.anchor_point` | `array<float64>` | - | Static anchor point value. | When present, anchor_point must contain exactly two numeric values. | - | examples/recipes/minimal-default-text-static-transform.json |
+| `comps[].layers[].transform.rotation` | `number` | - | Static rotation value. | - | - | examples/recipes/minimal-default-text-static-transform.json |
+| `comps[].layers[].transform.opacity` | `number` | - | Static opacity value. | - | - | examples/recipes/minimal-default-text-static-transform.json |
 | `comps[].layers[].transform.position_keyframes[]` | `array<recipe.VectorKeyframe>` | - | Position keyframe list. | When present, keyframes must be sorted by time and each keyframe time must be within comp duration. | - | examples/recipes/minimal-transform-keyframes.json |
 | `comps[].layers[].transform.anchor_point_keyframes[]` | `array<recipe.VectorKeyframe>` | - | Anchor point keyframe list. | When present, keyframes must be sorted by time and each keyframe time must be within comp duration. | - | examples/recipes/minimal-text-shape.json |
 | `comps[].layers[].transform.scale_keyframes[]` | `array<recipe.VectorKeyframe>` | - | Scale keyframe list. | When present, keyframes must be sorted by time and each keyframe time must be within comp duration. | - | examples/recipes/minimal-text-shape.json |

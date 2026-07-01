@@ -467,7 +467,11 @@ func materializeDefaultTransformSurface(layer *aep.Layer, source profile.Layer) 
 	if !hasTransformProperties(source) {
 		return nil
 	}
-	return aep.SetLayerTransform(layer, aep.NewLayerTransform())
+	transform, err := layerTransformFromStaticProfile(source)
+	if err != nil {
+		return err
+	}
+	return aep.SetLayerTransform(layer, transform)
 }
 
 func materializeCenteredTransformSurface(comp *aep.Composition, layer *aep.Layer, source profile.Layer) error {
@@ -624,6 +628,87 @@ func colorByteToUnit(value float64) float64 {
 		return value / 255
 	}
 	return value
+}
+
+func layerTransformFromStaticProfile(layer profile.Layer) (*aep.LayerTransform, error) {
+	transform := aep.NewLayerTransform()
+	if value, ok := propertyVectorAtLeast(layer.Properties, "ADBE Anchor Point", 2); ok {
+		if err := transform.AnchorPoint().SetStaticValue([2]float64{value[0], value[1]}); err != nil {
+			return nil, err
+		}
+	}
+	if value, ok := propertyVectorAtLeast(layer.Properties, "ADBE Position", 2); ok {
+		if err := transform.Position().SetStaticValue([2]float64{value[0], value[1]}); err != nil {
+			return nil, err
+		}
+	}
+	if value, ok := propertyVectorAtLeast(layer.Properties, "ADBE Scale", 2); ok {
+		if err := transform.Scale().SetStaticValue([2]float64{profileScaleToWriter(value[0]), profileScaleToWriter(value[1])}); err != nil {
+			return nil, err
+		}
+	}
+	if value, ok := propertyFloat(layer.Properties, "ADBE Rotate Z"); ok {
+		if err := transform.Rotation().SetStaticValue(value); err != nil {
+			return nil, err
+		}
+	}
+	if value, ok := propertyFloat(layer.Properties, "ADBE Opacity"); ok {
+		if err := transform.Opacity().SetStaticValue(profileOpacityToWriter(value)); err != nil {
+			return nil, err
+		}
+	}
+	return transform, nil
+}
+
+func propertyVectorAtLeast(properties []profile.Property, matchName string, length int) ([]float64, bool) {
+	for _, property := range properties {
+		if property.MatchName != matchName {
+			continue
+		}
+		return staticVectorAtLeast(property.StaticValue, length)
+	}
+	return nil, false
+}
+
+func staticVectorAtLeast(value any, length int) ([]float64, bool) {
+	out, ok := staticVectorAny(value)
+	if !ok || len(out) < length {
+		return nil, false
+	}
+	return out, true
+}
+
+func staticVectorAny(value any) ([]float64, bool) {
+	switch v := value.(type) {
+	case []float64:
+		return append([]float64(nil), v...), true
+	case []any:
+		out := make([]float64, 0, len(v))
+		for _, item := range v {
+			got, ok := item.(float64)
+			if !ok {
+				return nil, false
+			}
+			out = append(out, got)
+		}
+		return out, true
+	case [2]float64:
+		return []float64{v[0], v[1]}, true
+	case [3]float64:
+		return []float64{v[0], v[1], v[2]}, true
+	case [4]float64:
+		return []float64{v[0], v[1], v[2], v[3]}, true
+	default:
+		return nil, false
+	}
+}
+
+func profileScaleToWriter(value float64) float64 {
+	return value * 100
+}
+
+func profileOpacityToWriter(value float64) float64 {
+	return value * 100
 }
 
 func hasTransformProperties(layer profile.Layer) bool {

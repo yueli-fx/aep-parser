@@ -246,6 +246,15 @@ git diff --check
     `ae_open_exit_code: 0`. This slice reconstructs rect size/position/
     roundness plus fill color/opacity/blend/composite/fill-rule from stable
     profile properties and intentionally keeps layer transform at the default.
+  - Static layer transform reconstruction now maps profile-visible
+    `ADBE Anchor Point`, `ADBE Position`, `ADBE Scale`, `ADBE Rotate Z`, and
+    `ADBE Opacity` back into `LayerTransform`, converting profile scale/opacity
+    unit values into writer percent units. `writeTempProjectWithMovedNullLayer`
+    and `examples/recipes/minimal-default-text-static-transform.json` convert
+    to AE2025 with `profile_diff_status: "pass"` and
+    `profile_diff_count: 0`; the recipe fixture passes AE2025 open gate with
+    `ae_open_status: "pass"` / `ae_open_exit_code: 0`. Transform keyframes
+    remain outside this static slice and are still blocked by profile diff.
 
 - [x] Update `flightdeck/work/aep-understanding-generation/index.md` and `flightdeck/cockpit.md` to state:
   - `assess` is available;
