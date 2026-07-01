@@ -98,9 +98,11 @@ Current:
   and AE2025 open smoke.
 - Camera and light static option reconstruction now preserves profile-visible
   camera options and light kind/color/intensity/cone/falloff/shadow options;
-  camera option fixtures plus light option fixtures except `minimal-light-source.json`
-  pass AE2020/AE2022/AE2025 matrix conversion, with camera/light object-profile
-  AE2025 open smokes passing.
+  camera option fixtures and light option fixtures pass AE2020/AE2022/AE2025
+  matrix conversion, with camera/light object-profile and light-source AE2025
+  open smokes passing. Light source refs are resolved after same-comp layer
+  reconstruction, and solid transform materialization now preserves source
+  profile Position when present.
 - Continue versioned migration by expanding supported conversion surface or
   deciding whether native AE2021/AE2023/AE2024 writer templates are worth
   adding.

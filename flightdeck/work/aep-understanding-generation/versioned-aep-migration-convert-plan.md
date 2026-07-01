@@ -330,11 +330,14 @@ git diff --check
     iris rotation, iris roundness, iris aspect ratio, iris diffraction fringe,
     iris highlight gain/threshold/saturation; light options cover light kind,
     color, intensity, cone angle/feather, falloff type/start/distance, casts
-    shadows, shadow darkness, and shadow diffusion. All dedicated camera option
-    fixtures and light option fixtures except `minimal-light-source.json` pass
-    AE2020/AE2022/AE2025 matrix conversion with `profile_diff_status: "pass"`
-    and `profile_diff_count: 0`; `minimal-camera-object-profile.json` and
-    `minimal-light-object-profile.json` pass AE2025 open gate with
+    shadows, shadow darkness, shadow diffusion, and same-comp light source refs
+    resolved after all same-comp target layers exist. Solid transform
+    materialization now preserves source profile Position when present before
+    falling back to comp center. All dedicated camera option fixtures and light
+    option fixtures pass AE2020/AE2022/AE2025 matrix conversion with
+    `profile_diff_status: "pass"` and `profile_diff_count: 0`;
+    `minimal-camera-object-profile.json`, `minimal-light-object-profile.json`,
+    and `minimal-light-source.json` pass AE2025 open gate with
     `ae_open_status: "pass"` / `ae_open_exit_code: 0`.
 
 - [x] Update `flightdeck/work/aep-understanding-generation/index.md` and `flightdeck/cockpit.md` to state:

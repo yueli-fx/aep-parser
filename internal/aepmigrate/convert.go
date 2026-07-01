@@ -551,8 +551,8 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				return nil, fmt.Errorf("unsupported layer %q in comp %q", layer.Name, comp.Name)
 			}
 		}
-		if err := materializeLayerParents(createdLayers); err != nil {
-			return nil, fmt.Errorf("comp %q parent refs: %w", comp.Name, err)
+		if err := materializeLayerRefs(createdLayers); err != nil {
+			return nil, fmt.Errorf("comp %q layer refs: %w", comp.Name, err)
 		}
 	}
 	return project, nil
@@ -563,7 +563,7 @@ type convertLayerPair struct {
 	target *aep.Layer
 }
 
-func materializeLayerParents(layers []convertLayerPair) error {
+func materializeLayerRefs(layers []convertLayerPair) error {
 	bySourceID := map[uint32]*aep.Layer{}
 	byName := map[string]*aep.Layer{}
 	for _, pair := range layers {
@@ -587,6 +587,21 @@ func materializeLayerParents(layers []convertLayerPair) error {
 		}
 		if err := pair.target.SetParent(parent.ID); err != nil {
 			return fmt.Errorf("layer %q parent %q: %w", pair.source.Name, pair.source.ParentRef.Name, err)
+		}
+	}
+	for _, pair := range layers {
+		if pair.source.LightSourceRef == nil {
+			continue
+		}
+		source := bySourceID[pair.source.LightSourceRef.ID]
+		if source == nil && pair.source.LightSourceRef.Name != "" {
+			source = byName[pair.source.LightSourceRef.Name]
+		}
+		if source == nil {
+			return fmt.Errorf("layer %q light source %q not found", pair.source.Name, pair.source.LightSourceRef.Name)
+		}
+		if err := pair.target.SetLightSource(source); err != nil {
+			return fmt.Errorf("layer %q light source %q: %w", pair.source.Name, pair.source.LightSourceRef.Name, err)
 		}
 	}
 	return nil
@@ -798,6 +813,9 @@ func materializeCenteredTransformSurface(comp *aep.Composition, layer *aep.Layer
 	}
 	if layer == nil {
 		return fmt.Errorf("layer not found after creation")
+	}
+	if _, ok := propertyVectorAtLeast(source.Properties, "ADBE Position", 2); ok {
+		return materializeDefaultTransformSurface(layer, source)
 	}
 	transform := aep.NewLayerTransform()
 	if err := transform.Position().SetStaticValue([2]float64{float64(comp.Width) / 2, float64(comp.Height) / 2}); err != nil {
@@ -1872,7 +1890,10 @@ func isSupportedDefaultCameraOrLightLayer(layer profile.Layer, typ string) bool 
 	if layer.Type != typ || layer.SourceRef != nil {
 		return false
 	}
-	if layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
+	if layer.ParentRef != nil || layer.MatteRef != nil {
+		return false
+	}
+	if typ != "light" && layer.LightSourceRef != nil {
 		return false
 	}
 	if layer.Text != nil || len(layer.Effects) != 0 || len(layer.Masks) != 0 || len(layer.Shapes) != 0 || len(layer.Markers) != 0 {

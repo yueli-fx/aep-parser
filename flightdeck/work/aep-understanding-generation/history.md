@@ -643,9 +643,11 @@ Current:
   advanced text-layer switches, same-comp text parent refs, and solid-backed
   null-controller source dimensions/color/visibility/null flag; camera/light
   reconstruction now preserves static camera options and light
-  kind/color/intensity/cone/falloff/shadow options; default precomp conversion
-  rebuilds all target comps before resolving composition source refs into
-  recreated target comps. Go-writer
+  kind/color/intensity/cone/falloff/shadow options plus same-comp light source
+  refs; solid transform materialization preserves source profile Position when
+  present before falling back to comp center; default precomp conversion rebuilds
+  all target comps before resolving composition source refs into recreated
+  target comps. Go-writer
   and recipe fixtures for the supported migration slices plus the
   static-transform text and layer-timing fixtures now pass profile diff.
   Successful convert reopens the target and
@@ -660,7 +662,7 @@ Current:
   wiggle-transform shape, repeater shape, merge-paths shape, polystar shape,
   precomp, layer label/comment, text common-switch/quality/blend, text advanced
   switch, text-parent, solid-backed null-controller, camera object-profile, and
-  light object-profile outputs.
+  light object-profile/light-source outputs.
   `cmd/aepmigrate convert -ae-open -ae <AfterFX.exe>` writes AE open gate status
   into the migration report.
 - Versioned AEP migration matrix gate is implemented as
