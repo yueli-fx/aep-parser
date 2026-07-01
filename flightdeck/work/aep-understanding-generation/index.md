@@ -37,6 +37,10 @@ Do not start automated correction loops.
   before output.
 - `versioned-aep-migration-matrix-plan.md` — matrix gate scope, AE-open case
   guard, and verification record.
+- `versioned-aep-migration-validation-plan.md` — validation axes, evidence
+  levels, and result-recording rules.
+- `versioned-aep-migration-validation-summary.md` — reviewed validation ledger
+  grouped by domain/capability/version coverage.
 - `docs/capabilities.md` — current write capability matrix.
 
 ## Read if
@@ -74,17 +78,23 @@ Current:
 - Current `cmd/aepmigrate convert` surface includes conservative comp/layer
   skeleton rebuild, stable comp settings, supported non-shape layer metadata /
   switches / refs / timing / transforms, transform keyframes/ease/expressions,
-  single-run/single-paragraph text style, supported camera/light options,
-  supported parametric graphic/filter shape slices, precomp refs, and supported
-  built-in effects.
+  single-run/single-paragraph text style, supported text animator slices,
+  supported camera/light options, supported parametric graphic/filter shape
+  slices, precomp refs, and supported built-in effects.
 - Effect reconstruction now covers supported static params, same-comp layer-ref
   params, parameter expressions, scalar keyframes, and vector keyframes.
+- Text animator reconstruction now covers the current recipe-owned animator
+  surface by profile-visible properties: opacity, position, scale, rotation
+  Z/X/Y, fill/stroke color, tracking, character offset, fill/stroke opacity,
+  stroke width, skew, range-offset keyframes, and supported value keyframes.
 - Latest full no-AE matrix: 423 total, 336 pass, 87 intentionally blocked,
   0 failed, 0 skipped.
 - Latest AE-open checks: dynamic effect-param and transform dynamic fixtures
   plus text style fixtures pass AE2025 open smoke; representative AE2020 writer
   outputs for vector effect keyframes, transform ease, and text style open
-  across AE2020, AE2021, AE2022, AE2023, AE2024, and AE2025 hosts.
+  across AE2020, AE2021, AE2022, AE2023, AE2024, and AE2025 hosts. Text
+  animator representatives now have endpoint host-open evidence on AE2020 and
+  AE2025; AE2021-AE2024 are recorded as inferred, not directly run.
 - Continue versioned migration by expanding supported conversion surface,
   turning the useful matrix boundary into a recurring verification command, or
   deciding whether native AE2021/AE2023/AE2024 writer templates are worth adding.

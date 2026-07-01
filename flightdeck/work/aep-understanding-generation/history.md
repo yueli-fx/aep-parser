@@ -736,3 +736,24 @@ Current:
   spot-checking. For any new comp or layer work, first update the relevant
   execution strategy with the new writer/profile evidence boundary. Do not
   start automated correction loops.
+- Text animator migration is implemented for the current recipe-owned profile
+  surface. `materializeProjectTextAnimators` reopens rebuilt projects and
+  replays profile-visible text animator properties through the existing
+  `AddText*Animator` and `AnimateText*` APIs, including static scalar/vector/
+  color leaves, range-offset keyframes, and supported value keyframes. Rotation
+  X/Y sources are guarded against double-materializing AE's implicit default Z
+  Rotation leaf. Focused convert tests cover opacity, position, range-offset
+  keyframes, color value keyframes, and rotation X/Y. Text animator matrix
+  evidence: W2020 source into W2020/W2022/W2025 targets is 66 total, 66 pass;
+  all supported writer sources into all supported writer targets is 198 total,
+  198 pass. Endpoint AE-open evidence for two representatives
+  (`minimal-text-animator-skew`, `minimal-text-animator-color-value-keyframes`)
+  is 4 total, 4 pass on H2020/H2025; H2021-H2024 are recorded as inferred
+  intermediate compatibility, not direct runs.
+- Migration validation now has a "总 -> 分 -> 总" control surface:
+  `versioned-aep-migration-validation-plan.md` defines writer-vs-host axes,
+  evidence levels, and recording rules, while
+  `versioned-aep-migration-validation-summary.md` is the reviewed ledger grouped
+  by domain/capability/version coverage. Historical matrix results are useful
+  only after being promoted into that summary with artifact paths and evidence
+  levels.

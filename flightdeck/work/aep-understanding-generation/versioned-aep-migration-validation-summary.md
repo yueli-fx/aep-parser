@@ -1,0 +1,92 @@
+# Versioned AEP Migration Validation Summary
+
+This file is the reviewed validation ledger for versioned AEP migration. Raw
+matrix output under `tmp/` is supporting evidence, not the source of truth.
+
+Legend:
+
+- `W2020/W2022/W2025`: writer targets produced by Go.
+- `H2020/H2021/H2022/H2023/H2024/H2025`: installed AE hosts used to open output.
+- `PD-3x3`: profile diff passed for source writers `W2020,W2022,W2025` into target writers `W2020,W2022,W2025`.
+- `PD-1x3`: profile diff passed for source writer `W2020` into target writers `W2020,W2022,W2025`.
+- `OPEN-H2025`: AE2025 open smoke passed.
+- `OPEN-ALL-HOSTS`: one representative writer output opened in every installed AE host from 2020 through 2025.
+- `OPEN-ENDPOINTS`: one representative writer output opened in H2020 and H2025.
+- `INFER-MID-HOSTS`: H2021-H2024 were not run directly; compatibility is inferred from H2020 and H2025 endpoint success and must remain marked as inference.
+- `pending`: not yet formally validated at that level.
+
+## Current Answer
+
+No, before this ledger the project could not quickly answer "which domain and
+which AE versions are validated." The current reviewed answer is:
+
+- Text animator migration has `PD-3x3` evidence for 22 recipe-owned animator fixtures, plus `OPEN-ENDPOINTS` evidence for two representatives: static scalar skew and animated fill-color keyframes. H2021-H2024 are `INFER-MID-HOSTS`, not directly run.
+- Text style migration has `PD-1x3`, `OPEN-H2025`, and `OPEN-ALL-HOSTS` evidence for the current style fixture set.
+- Dynamic effect params have `PD-1x3`, `OPEN-H2025`, and one vector-keyframe `OPEN-ALL-HOSTS` representative.
+- Dynamic transforms have `PD-1x3`, `OPEN-H2025`, and one transform-ease `OPEN-ALL-HOSTS` representative.
+- Many other migrated domains are covered by the latest full no-AE matrix boundary, but they do not yet have this per-capability host-version ledger.
+
+## Text Domain
+
+| Capability | Recipes / scope | Profile-diff writer coverage | AE host open coverage | Evidence |
+| --- | --- | --- | --- | --- |
+| Text layer baseline | `minimal-default-text-layer`, `minimal-default-text-static-transform` | Included in latest full `PD-1x3` boundary | pending per-capability host ledger | `tmp/migration_matrix_smoke_all` previous recorded full matrix: 423 total, 336 pass, 87 blocked |
+| Text style | `minimal-text-style`, `minimal-text-shape` | `PD-1x3`: W2020 -> W2020/W2022/W2025 | `OPEN-H2025`; `OPEN-ALL-HOSTS` for `minimal-text-style` as W2020 output | `history.md` text style entry |
+| Text animator opacity | `minimal-text-animator-opacity`, `minimal-text-animator-opacity-value-keyframes` | `PD-3x3`: W2020/W2022/W2025 -> W2020/W2022/W2025 | pending migration AE-host fanout | `tmp/migration_matrix_text_animators_all_writers/matrix.json`: 198 total, 198 pass |
+| Text animator position | `minimal-text-animator-position`, `minimal-text-animator-position-value-keyframes` | `PD-3x3` | pending migration AE-host fanout | same text animator matrix |
+| Text animator scale | `minimal-text-animator-scale`, `minimal-text-animator-scale-value-keyframes` | `PD-3x3` | pending migration AE-host fanout | same text animator matrix |
+| Text animator rotation Z | `minimal-text-animator-rotation`, `minimal-text-animator-rotation-value-keyframes` | `PD-3x3` | pending migration AE-host fanout | same text animator matrix |
+| Text animator rotation X/Y | `minimal-text-animator-rotation-x`, `minimal-text-animator-rotation-y` | `PD-3x3` | pending migration AE-host fanout | same text animator matrix |
+| Text animator fill color | `minimal-text-animator-color`, `minimal-text-animator-color-value-keyframes` | `PD-3x3` | `OPEN-ENDPOINTS` for `minimal-text-animator-color-value-keyframes` W2020 output on H2020/H2025; H2021-H2024 `INFER-MID-HOSTS` | `tmp/migration_matrix_text_animators_all_writers/matrix.json`; `tmp/migration_matrix_text_animators_endpoint_hosts/matrix.json`: 4 total, 4 pass |
+| Text animator stroke color | `minimal-text-animator-stroke-color` | `PD-3x3` | pending migration AE-host fanout | same text animator matrix |
+| Text animator tracking | `minimal-text-animator-tracking`, `minimal-text-animator-tracking-value-keyframes` | `PD-3x3` | pending migration AE-host fanout | same text animator matrix |
+| Text animator character offset | `minimal-text-animator-character-offset`, `minimal-text-animator-character-offset-value-keyframes` | `PD-3x3` | pending migration AE-host fanout | same text animator matrix |
+| Text animator fill/stroke opacity and stroke width | `minimal-text-animator-fill-opacity`, `minimal-text-animator-stroke-opacity`, `minimal-text-animator-stroke-width` | `PD-3x3` | pending migration AE-host fanout | same text animator matrix |
+| Text animator skew | `minimal-text-animator-skew` | `PD-3x3` | `OPEN-ENDPOINTS` for W2020 output on H2020/H2025; H2021-H2024 `INFER-MID-HOSTS` | `tmp/migration_matrix_text_animators_all_writers/matrix.json`; `tmp/migration_matrix_text_animators_endpoint_hosts/matrix.json`: 4 total, 4 pass |
+| Text animator range selector offset keyframes | `minimal-text-animator-range-offset` | `PD-3x3` | pending migration AE-host fanout | same text animator matrix |
+
+## Effect Domain
+
+| Capability | Recipes / scope | Profile-diff writer coverage | AE host open coverage | Evidence |
+| --- | --- | --- | --- | --- |
+| Static supported effects | `minimal-text-effect`, `minimal-adjustment-layer`, supported static built-in effect params | Included in latest full `PD-1x3` boundary | pending per-capability host ledger | `history.md`; latest full no-AE matrix 423 total, 336 pass, 87 blocked |
+| Effect layer-ref params | `minimal-effect-layer-param` | Included in latest full `PD-1x3` boundary | pending per-capability host ledger | `history.md` |
+| Effect param expression | `minimal-effect-param-expression` | `PD-1x3`: W2020 -> W2020/W2022/W2025 | `OPEN-H2025` | `history.md` dynamic effect-param entry |
+| Effect scalar keyframes | `minimal-effect-param-keyframes` | `PD-1x3` | `OPEN-H2025` | `history.md` dynamic effect-param entry |
+| Effect vector keyframes | `minimal-effect-param-vector-keyframes` | `PD-1x3` | `OPEN-H2025`; `OPEN-ALL-HOSTS` for W2020 representative | `history.md` dynamic effect-param entry |
+
+## Transform Domain
+
+| Capability | Recipes / scope | Profile-diff writer coverage | AE host open coverage | Evidence |
+| --- | --- | --- | --- | --- |
+| Transform keyframes | `minimal-transform-keyframes` | `PD-1x3`: W2020 -> W2020/W2022/W2025 | `OPEN-H2025` | `history.md` dynamic transform entry |
+| Transform keyframe ease | `minimal-transform-keyframe-ease` | `PD-1x3` | `OPEN-H2025`; `OPEN-ALL-HOSTS` for W2020 representative | `history.md` dynamic transform entry |
+| Transform expressions | `minimal-transform-expression` | `PD-1x3` | `OPEN-H2025` | `history.md` dynamic transform entry |
+| Auto-orient unlock | `minimal-layer-auto-orient` | Included in latest full `PD-1x3` boundary after transform keyframes | pending per-capability host ledger | `history.md` dynamic transform entry |
+
+## Other Domains
+
+| Domain | Current reviewed state | Writer coverage | AE host open coverage |
+| --- | --- | --- | --- |
+| project | Implemented in convert surface and included in full no-AE matrix boundary | latest full `PD-1x3` boundary | representative checks only |
+| comp | Implemented for stable comp settings, work area, renderer, metadata | latest full `PD-1x3` boundary | representative checks only |
+| layer | Implemented for default layer creation, switches, refs, timing, parent/source refs for supported slices | latest full `PD-1x3` boundary | representative checks only |
+| shape | Implemented for supported parametric graphic/filter shape slices and gradient fill slices; gradient stroke remains blocked | latest full `PD-1x3` boundary | representative checks only |
+| camera-light | Implemented for supported camera/light options and light source refs | latest full `PD-1x3` boundary | representative checks only |
+| precomp | Implemented for precomp refs/layers | latest full `PD-1x3` boundary | representative checks only |
+
+## Raw Matrix Artifacts
+
+Reviewed raw artifacts currently known:
+
+- `tmp/migration_matrix_text_animators/matrix.json`: 66 total, 66 pass, 0 blocked, 0 failed, 0 skipped. This is W2020 source into W2020/W2022/W2025 targets for all 22 text animator recipes.
+- `tmp/migration_matrix_text_animators_all_writers/matrix.json`: 198 total, 198 pass, 0 blocked, 0 failed, 0 skipped. This is W2020/W2022/W2025 source writers into W2020/W2022/W2025 target writers for all 22 text animator recipes.
+- `tmp/migration_matrix_text_animators_endpoint_hosts/matrix.json`: 4 total, 4 pass, 0 blocked, 0 failed, 0 skipped. This is W2020 writer output for `minimal-text-animator-skew` and `minimal-text-animator-color-value-keyframes` opened in H2020 and H2025. H2021-H2024 were not run and are only inferred low-risk.
+- Earlier full no-AE boundary recorded in `index.md` and `history.md`: 423 total, 336 pass, 87 intentionally blocked, 0 failed, 0 skipped. This was before the current uncommitted text animator migration slice.
+
+## Immediate Missing Evidence
+
+- Full `OPEN-ALL-HOSTS` migration matrix for text animator representatives, if endpoint inference is considered insufficient.
+- Domain coverage ledger generated by tooling instead of maintained manually.
+- Per-domain host-open policy: which capabilities need all-host fanout versus AE2025 smoke only.
+- Updated full no-AE boundary after the current text animator slice, once the validation plan is accepted.

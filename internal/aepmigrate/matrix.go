@@ -70,6 +70,10 @@ type MatrixCase struct {
 	ConvertReportPath string       `json:"convert_report_path,omitempty"`
 }
 
+var matrixWriterLabels = []string{string(VersionAE2020), string(VersionAE2022), string(VersionAE2025)}
+
+var matrixAEHostLabels = []string{"AE2020", "AE2021", "AE2022", "AE2023", "AE2024", "AE2025"}
+
 func BuildAEHostMap(installRoot string) map[string]string {
 	hosts := map[string]string{}
 	if strings.TrimSpace(installRoot) == "" {
@@ -96,11 +100,11 @@ func RunMatrix(opts MatrixOptions) (MatrixReport, error) {
 	if len(recipePaths) == 0 {
 		return MatrixReport{}, fmt.Errorf("matrix requires at least one recipe")
 	}
-	sourceLabels := opts.SourceLabels
+	sourceLabels := expandMatrixSourceLabels(opts.SourceLabels)
 	if len(sourceLabels) == 0 {
 		sourceLabels = []string{"recipe"}
 	}
-	targetLabels := opts.TargetLabels
+	targetLabels := expandMatrixTargetLabels(opts.TargetLabels)
 	if len(targetLabels) == 0 {
 		targetLabels = []string{string(VersionAE2025)}
 	}
@@ -315,6 +319,46 @@ func matrixAEOpenLabels(labels []string) []string {
 	seen := map[string]bool{}
 	var out []string
 	for _, label := range labels {
+		if strings.EqualFold(strings.TrimSpace(label), "all") {
+			for _, expanded := range matrixAEHostLabels {
+				if !seen[expanded] {
+					seen[expanded] = true
+					out = append(out, expanded)
+				}
+			}
+			continue
+		}
+		normalized := normalizeAEHostLabel(label)
+		if normalized == "" || seen[normalized] {
+			continue
+		}
+		seen[normalized] = true
+		out = append(out, normalized)
+	}
+	return out
+}
+
+func expandMatrixSourceLabels(labels []string) []string {
+	return expandMatrixWriterLabels(labels)
+}
+
+func expandMatrixTargetLabels(labels []string) []string {
+	return expandMatrixWriterLabels(labels)
+}
+
+func expandMatrixWriterLabels(labels []string) []string {
+	seen := map[string]bool{}
+	var out []string
+	for _, label := range labels {
+		if strings.EqualFold(strings.TrimSpace(label), "all") {
+			for _, expanded := range matrixWriterLabels {
+				if !seen[expanded] {
+					seen[expanded] = true
+					out = append(out, expanded)
+				}
+			}
+			continue
+		}
 		normalized := normalizeAEHostLabel(label)
 		if normalized == "" || seen[normalized] {
 			continue

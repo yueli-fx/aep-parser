@@ -83,6 +83,24 @@ func TestRunMatrixConvertsRecipeAcrossSupportedTargetsAndSkipsUnsupportedTargets
 	}
 }
 
+func TestMatrixAllPresetsExpandWritersAndAEOpenHosts(t *testing.T) {
+	sourceLabels := expandMatrixSourceLabels([]string{"all"})
+	targetLabels := expandMatrixTargetLabels([]string{"all"})
+	aeOpenLabels := matrixAEOpenLabels([]string{"all"})
+
+	wantWriters := []string{"AE2020", "AE2022", "AE2025"}
+	if strings.Join(sourceLabels, ",") != strings.Join(wantWriters, ",") {
+		t.Fatalf("source all = %v, want %v", sourceLabels, wantWriters)
+	}
+	if strings.Join(targetLabels, ",") != strings.Join(wantWriters, ",") {
+		t.Fatalf("target all = %v, want %v", targetLabels, wantWriters)
+	}
+	wantHosts := []string{"AE2020", "AE2021", "AE2022", "AE2023", "AE2024", "AE2025"}
+	if strings.Join(aeOpenLabels, ",") != strings.Join(wantHosts, ",") {
+		t.Fatalf("ae-versions all = %v, want %v", aeOpenLabels, wantHosts)
+	}
+}
+
 func TestRunMatrixAEOpenUsesAbsoluteWorkerPaths(t *testing.T) {
 	root := t.TempDir()
 	recipePath := filepath.Join(root, "minimal.json")

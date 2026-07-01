@@ -51,6 +51,7 @@
 - commit 直推本地 main，无需逐次点名（既定项目惯例：完成一个可交付单元即 commit；无 PR 流）。
 - 永不 push 远端：所有工作 commit 到本地 main 即可，任何流程都不提议或执行 `git push`，本地 commit 历史就是交付记录（you, 2026-06-16）。
 - 文档可自由更新（含破坏性重写、含 CLAUDE.md）：CLAUDE.md / flightdeck deck / docs / doc comment 无需逐次确认即可更新、重组、删改；分级（Alpha↔Stable）等契约表述变更照常在 commit body 说明；代码 API 契约本身仍按 CLAUDE.md #2 执行（you, 2026-06-11）。
+- **大计划先总分总**：执行范围较大的计划前，先判断是否需要建立「计划总表 / 覆盖总表 / 汇总结果」作为主控件；需要时按 **总 → 分 → 总** 执行：先定义总目标、维度、域划分、验收口径和结果登记位置；再逐域 / 逐 slice 执行并把证据写回总表；最后回到总表汇总状态、缺口、下一步。不得只靠散落的临时结果或零散 history 来证明大计划进度（you, 2026-07-01）。
 - 大计划完成即归档：代表已 ship 功能 arc 的 work effort 完成时，把它的 design.md/plan.md 从 `flightdeck/work/` 移到冷存 `~/.flightdeck/projects/<slug>/archive/`（plain mv，非 git），并同步 cockpit 的 In flight / Next。判定「大计划」= 有独立 work effort、对应一个可交付 feature/结构性 arc；滚动 reference 矩阵不适用，保持在 work/。
 
 ## Subscriptions
