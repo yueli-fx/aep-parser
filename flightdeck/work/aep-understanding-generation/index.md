@@ -93,8 +93,9 @@ Current:
 - Native writer targets now cover AE2020, AE2021, AE2022, AE2023, AE2024, and
   AE2025 project skeletons. The narrow writer-target matrix is 6 total, 6 pass
   for `minimal-comp-object-profile`.
-- Latest full no-AE matrix: 846 total, 840 pass, 6 intentionally blocked,
-  0 failed, 0 skipped.
+- Latest full no-AE matrix: 846 total, 840 pass, 0 blocked, 0 failed,
+  6 source-contract skipped. The skipped cases are `minimal-layer-explicit-matte`
+  under AE2020 source; the AE2025 source to AE2025 target contract passes.
 - `aepmigrate ledger` can generate per-recipe/domain Markdown ledgers from
   matrix JSON outputs; `aepmigrate matrix -ledger-out` now writes the ledger in
   the same recurring matrix run. Current generated ledgers live beside the

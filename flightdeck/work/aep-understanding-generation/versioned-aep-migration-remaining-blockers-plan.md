@@ -857,3 +857,161 @@ Use:
 ```text
 feat(aepmigrate): add native 2021 2023 2024 writer targets
 ```
+
+---
+
+## Task 30: Source-Contract Skips for Explicit Matte Matrix Cases
+
+**Goal:** Keep the full W2020-source no-AE matrix focused on recipes that can
+actually be authored by the requested source writer, while preserving explicit
+matte evidence in an AE2025-source focused matrix.
+
+**Architecture:** Do not loosen the recipe validator or the explicit matte
+writer contract. Classify compile reports whose only refusal is
+`explicit_matte_requires_ae2025` as `skipped` with reason
+`source_contract_unsupported`; all other invalid compile reports remain
+`blocked`.
+
+**Files:**
+- Modify: `internal/aepmigrate/matrix.go`
+- Modify/Test: `internal/aepmigrate/matrix_test.go`
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+- Possibly modify: `flightdeck/work/aep-understanding-generation/index.md`
+- Possibly modify: `flightdeck/work/aep-understanding-generation/history.md`
+
+- [x] **Step 1: Add red matrix test for source-contract skip**
+
+Add a test to `internal/aepmigrate/matrix_test.go` that runs
+`minimal-layer-explicit-matte.json` with source `AE2020` and target `AE2025`.
+Expected result before implementation: the case is currently `blocked` with
+reason `recipe_compile_blocked`; the new expected result is `skipped` with
+reason `source_contract_unsupported`.
+
+```go
+func TestRunMatrixSkipsRecipeWhenSourceWriterViolatesRecipeContract(t *testing.T) {
+	root := t.TempDir()
+	recipePath := filepath.Join("..", "..", "examples", "recipes", "minimal-layer-explicit-matte.json")
+	outRoot := filepath.Join(root, "matrix")
+
+	report, err := RunMatrix(MatrixOptions{
+		RecipePaths:  []string{recipePath},
+		SourceLabels: []string{"AE2020"},
+		TargetLabels: []string{"AE2025"},
+		OutRoot:      outRoot,
+	})
+	if err != nil {
+		t.Fatalf("RunMatrix: %v", err)
+	}
+	if report.Summary.Total != 1 || report.Summary.Skipped != 1 || report.Summary.Blocked != 0 {
+		t.Fatalf("summary = %+v, want total=1 skipped=1 blocked=0; cases=%+v", report.Summary, report.Cases)
+	}
+	if got := report.Cases[0].Status; got != MatrixStatusSkipped {
+		t.Fatalf("status = %s, want %s; case=%+v", got, MatrixStatusSkipped, report.Cases[0])
+	}
+	if got := report.Cases[0].Reason; got != "source_contract_unsupported" {
+		t.Fatalf("reason = %q, want source_contract_unsupported; case=%+v", got, report.Cases[0])
+	}
+}
+```
+
+Run:
+
+```powershell
+go test ./internal/aepmigrate -run TestRunMatrixSkipsRecipeWhenSourceWriterViolatesRecipeContract -count=1
+```
+
+Expected before implementation: FAIL because the case is still blocked.
+
+- [x] **Step 2: Implement source-contract skip classification**
+
+In `internal/aepmigrate/matrix.go`, add a small helper near `runMatrixCase`:
+
+```go
+func matrixCompileInvalidReason(report recipe.Report) (MatrixStatus, string) {
+	if len(report.Refusals) == 1 && report.Refusals[0].Code == "explicit_matte_requires_ae2025" {
+		return MatrixStatusSkipped, "source_contract_unsupported"
+	}
+	return MatrixStatusBlocked, "recipe_compile_blocked"
+}
+```
+
+Then replace the invalid compile block in `runMatrixCase`:
+
+```go
+if !compileReport.Valid {
+	c.Status, c.Reason = matrixCompileInvalidReason(compileReport)
+	return c
+}
+```
+
+Run:
+
+```powershell
+go test ./internal/aepmigrate -run TestRunMatrixSkipsRecipeWhenSourceWriterViolatesRecipeContract -count=1
+```
+
+Expected after implementation: PASS.
+
+- [x] **Step 3: Refresh focused and full matrices**
+
+Run the explicit matte source-contract check:
+
+```powershell
+go run ./cmd/aepmigrate matrix -recipe examples\recipes\minimal-layer-explicit-matte.json -sources AE2020 -targets all -out tmp\migration_matrix_explicit_matte_source_contract -ledger-out tmp\migration_matrix_explicit_matte_source_contract\ledger.md
+```
+
+Expected: 6 total, 0 pass, 0 blocked, 0 failed, 6 skipped.
+
+Run the valid explicit matte contract check:
+
+```powershell
+go run ./cmd/aepmigrate matrix -recipe examples\recipes\minimal-layer-explicit-matte.json -sources AE2025 -targets AE2025 -out tmp\migration_matrix_explicit_matte_ae2025 -ledger-out tmp\migration_matrix_explicit_matte_ae2025\ledger.md
+```
+
+Expected: 1 total, 1 pass, 0 blocked, 0 failed, 0 skipped.
+
+Refresh the recurring full no-AE matrix:
+
+```powershell
+go run ./cmd/aepmigrate matrix -recipes examples\recipes -sources AE2020 -targets all -out tmp\migration_matrix_smoke_all -ledger-out tmp\migration_matrix_smoke_all\ledger.md
+```
+
+Expected: 846 total, 840 pass, 0 blocked, 0 failed, 6 skipped.
+
+- [x] **Step 4: Update validation summary and index/history**
+
+Update `versioned-aep-migration-validation-summary.md` so the current remaining
+blocker section says there are no remaining blocked cases in the W2020-source
+full no-AE matrix, and the six explicit matte cases are source-contract skips.
+Add raw artifacts for:
+
+- `tmp/migration_matrix_explicit_matte_source_contract/matrix.json`
+- `tmp/migration_matrix_explicit_matte_ae2025/matrix.json`
+- refreshed `tmp/migration_matrix_smoke_all/matrix.json`
+
+Update `index.md` and `history.md` with the same current totals only if their
+current-state paragraphs mention the old blocked count.
+
+- [x] **Step 5: Full verification and commit**
+
+Run:
+
+```powershell
+go test ./...
+go vet ./...
+git diff --check
+```
+
+Read:
+
+```powershell
+Get-Content C:\Users\yl\.flightdeck\knowledge\git\commits.md -Raw
+Get-Content flightdeck\knowledge\workflow\verify.md -Raw
+```
+
+Commit:
+
+```text
+fix(aepmigrate): skip source-incompatible matrix recipes
+```

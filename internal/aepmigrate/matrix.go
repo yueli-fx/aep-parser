@@ -252,8 +252,7 @@ func runMatrixCase(opts MatrixOptions, hosts map[string]string, recipePath, sour
 		return c
 	}
 	if !compileReport.Valid {
-		c.Status = MatrixStatusBlocked
-		c.Reason = "recipe_compile_blocked"
+		c.Status, c.Reason = matrixCompileInvalidReason(compileReport)
 		return c
 	}
 	outputPath := filepath.Join(caseDir, "target.aep")
@@ -320,6 +319,13 @@ func runMatrixCase(opts MatrixOptions, hosts map[string]string, recipePath, sour
 		c.Reason = "convert_status_" + string(convertReport.Summary.Status)
 	}
 	return c
+}
+
+func matrixCompileInvalidReason(report recipe.Report) (MatrixStatus, string) {
+	if len(report.Refusals) == 1 && report.Refusals[0].Code == "explicit_matte_requires_ae2025" {
+		return MatrixStatusSkipped, "source_contract_unsupported"
+	}
+	return MatrixStatusBlocked, "recipe_compile_blocked"
 }
 
 func matrixAEOpenLabels(labels []string) []string {

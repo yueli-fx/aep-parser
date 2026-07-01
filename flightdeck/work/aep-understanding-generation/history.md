@@ -837,3 +837,13 @@ Current:
   targets: 846 total, 840 pass, 6 intentionally blocked, 0 failed, 0 skipped;
   the remaining blocked family is still `minimal-layer-explicit-matte` outside
   the AE2025 source contract.
+- Matrix compile refusals that only mean the requested source writer violates a
+  recipe source contract are now classified as skips, not blockers. The explicit
+  matte source-contract check
+  `tmp/migration_matrix_explicit_matte_source_contract/matrix.json` is 6 total,
+  0 pass, 0 blocked, 0 failed, 6 skipped for AE2020 source into W2020-W2025.
+  The valid explicit matte contract
+  `tmp/migration_matrix_explicit_matte_ae2025/matrix.json` is 1 total, 1 pass,
+  0 blocked, 0 failed, 0 skipped for AE2025 source to W2025. The refreshed
+  recurring full no-AE boundary `tmp/migration_matrix_smoke_all/matrix.json` is
+  846 total, 840 pass, 0 blocked, 0 failed, 6 source-contract skipped.

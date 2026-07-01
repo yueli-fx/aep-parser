@@ -83,6 +83,31 @@ func TestRunMatrixConvertsRecipeAcrossNativeWriterTargets(t *testing.T) {
 	}
 }
 
+func TestRunMatrixSkipsRecipeWhenSourceWriterViolatesRecipeContract(t *testing.T) {
+	root := t.TempDir()
+	recipePath := filepath.Join("..", "..", "examples", "recipes", "minimal-layer-explicit-matte.json")
+	outRoot := filepath.Join(root, "matrix")
+
+	report, err := RunMatrix(MatrixOptions{
+		RecipePaths:  []string{recipePath},
+		SourceLabels: []string{"AE2020"},
+		TargetLabels: []string{"AE2025"},
+		OutRoot:      outRoot,
+	})
+	if err != nil {
+		t.Fatalf("RunMatrix: %v", err)
+	}
+	if report.Summary.Total != 1 || report.Summary.Skipped != 1 || report.Summary.Blocked != 0 {
+		t.Fatalf("summary = %+v, want total=1 skipped=1 blocked=0; cases=%+v", report.Summary, report.Cases)
+	}
+	if got := report.Cases[0].Status; got != MatrixStatusSkipped {
+		t.Fatalf("status = %s, want %s; case=%+v", got, MatrixStatusSkipped, report.Cases[0])
+	}
+	if got := report.Cases[0].Reason; got != "source_contract_unsupported" {
+		t.Fatalf("reason = %q, want source_contract_unsupported; case=%+v", got, report.Cases[0])
+	}
+}
+
 func TestMatrixAllPresetsExpandWritersAndAEOpenHosts(t *testing.T) {
 	sourceLabels := expandMatrixSourceLabels([]string{"all"})
 	targetLabels := expandMatrixTargetLabels([]string{"all"})

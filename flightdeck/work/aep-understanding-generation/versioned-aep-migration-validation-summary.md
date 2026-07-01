@@ -25,18 +25,18 @@ which AE versions are validated." The current reviewed answer is:
 - Text style migration has `PD-1x3`, `OPEN-H2025`, and `OPEN-ALL-HOSTS` evidence for the current style fixture set.
 - Dynamic effect params have `PD-1x3`, `OPEN-H2025`, and one vector-keyframe `OPEN-ALL-HOSTS` representative.
 - Dynamic transforms have `PD-1x3`, `OPEN-H2025`, and one transform-ease `OPEN-ALL-HOSTS` representative.
-- Layer track matte migration has `PD-1x3` evidence for the classic track-matte fixture and `OPEN-ALL-HOSTS` evidence for its W2020 output. AE2025 explicit matte has `PD-1x1` evidence for AE2025 source to AE2025 target; AE2020/AE2022 targets remain intentionally blocked by the current explicit-matte writer contract.
+- Layer track matte migration has `PD-1x3` evidence for the classic track-matte fixture and `OPEN-ALL-HOSTS` evidence for its W2020 output. AE2025 explicit matte has `PD-1x1` evidence for AE2025 source to AE2025 target; lower-source explicit matte matrix cases are now marked as source-contract skips, not conversion blockers.
 - Layer mask migration has `PD-1x3` evidence for the current recipe-owned mask surface: mode/options, static outline, and path keyframes. The representative W2020 mask output has `OPEN-ALL-HOSTS` evidence.
 - Shape gradient stroke migration has `PD-1x3` and `OPEN-ALL-HOSTS` evidence for the current recipe-owned gradient stroke surface: base gradient stroke, alpha stops, radial highlight, and stroke style.
 - Native writer targets now exist for W2020-W2025. The narrow writer-target matrix for `minimal-comp-object-profile` is 6 total, 6 pass.
-- Latest full no-AE matrix boundary is 846 total, 840 pass, 6 intentionally blocked, 0 failed, 0 skipped. It covers W2020 source into W2020-W2025 targets.
-- Remaining blocked family is AE2025 explicit matte outside the AE2025 target contract. Other migrated domains are covered by the latest full no-AE matrix boundary, but many do not yet have per-capability host-version ledgers.
+- Latest full no-AE matrix boundary is 846 total, 840 pass, 0 blocked, 0 failed, 6 source-contract skipped. It covers W2020 source into W2020-W2025 targets.
+- There are no remaining blocked or failed cases in the current W2020-source full no-AE matrix. The only skipped family is AE2025 explicit matte outside the AE2025 source contract. Other migrated domains are covered by the latest full no-AE matrix boundary, but many do not yet have per-capability host-version ledgers.
 
 ## Text Domain
 
 | Capability | Recipes / scope | Profile-diff writer coverage | AE host open coverage | Evidence |
 | --- | --- | --- | --- | --- |
-| Text layer baseline | `minimal-default-text-layer`, `minimal-default-text-static-transform` | Included in latest full `PD-1x6` boundary | pending per-capability host ledger | `tmp/migration_matrix_smoke_all`: 846 total, 840 pass, 6 blocked |
+| Text layer baseline | `minimal-default-text-layer`, `minimal-default-text-static-transform` | Included in latest full `PD-1x6` boundary | pending per-capability host ledger | `tmp/migration_matrix_smoke_all`: 846 total, 840 pass, 0 blocked, 6 skipped |
 | Text style | `minimal-text-style`, `minimal-text-shape` | `PD-1x3`: W2020 -> W2020/W2022/W2025 | `OPEN-H2025`; `OPEN-ALL-HOSTS` for `minimal-text-style` as W2020 output | `history.md` text style entry |
 | Text animator opacity | `minimal-text-animator-opacity`, `minimal-text-animator-opacity-value-keyframes` | `PD-3x3`: W2020/W2022/W2025 -> W2020/W2022/W2025 | pending migration AE-host fanout | `tmp/migration_matrix_text_animators_all_writers/matrix.json`: 198 total, 198 pass |
 | Text animator position | `minimal-text-animator-position`, `minimal-text-animator-position-value-keyframes` | `PD-3x3` | pending migration AE-host fanout | same text animator matrix |
@@ -55,7 +55,7 @@ which AE versions are validated." The current reviewed answer is:
 
 | Capability | Recipes / scope | Profile-diff writer coverage | AE host open coverage | Evidence |
 | --- | --- | --- | --- | --- |
-| Static supported effects | `minimal-text-effect`, `minimal-adjustment-layer`, supported static built-in effect params | Included in latest full `PD-1x6` boundary | pending per-capability host ledger | `history.md`; latest full no-AE matrix 846 total, 840 pass, 6 blocked |
+| Static supported effects | `minimal-text-effect`, `minimal-adjustment-layer`, supported static built-in effect params | Included in latest full `PD-1x6` boundary | pending per-capability host ledger | `history.md`; latest full no-AE matrix 846 total, 840 pass, 0 blocked, 6 skipped |
 | Effect layer-ref params | `minimal-effect-layer-param` | Included in latest full `PD-1x3` boundary | pending per-capability host ledger | `history.md` |
 | Effect param expression | `minimal-effect-param-expression` | `PD-1x3`: W2020 -> W2020/W2022/W2025 | `OPEN-H2025` | `history.md` dynamic effect-param entry |
 | Effect scalar keyframes | `minimal-effect-param-keyframes` | `PD-1x3` | `OPEN-H2025` | `history.md` dynamic effect-param entry |
@@ -68,14 +68,14 @@ which AE versions are validated." The current reviewed answer is:
 | Transform keyframes | `minimal-transform-keyframes` | `PD-1x3`: W2020 -> W2020/W2022/W2025 | `OPEN-H2025` | `history.md` dynamic transform entry |
 | Transform keyframe ease | `minimal-transform-keyframe-ease` | `PD-1x3` | `OPEN-H2025`; `OPEN-ALL-HOSTS` for W2020 representative | `history.md` dynamic transform entry |
 | Transform expressions | `minimal-transform-expression` | `PD-1x3` | `OPEN-H2025` | `history.md` dynamic transform entry |
-| Auto-orient unlock | `minimal-layer-auto-orient` | Included in latest full `PD-1x6` boundary after transform keyframes | pending per-capability host ledger | `history.md` dynamic transform entry; latest full no-AE matrix 846 total, 840 pass, 6 blocked |
+| Auto-orient unlock | `minimal-layer-auto-orient` | Included in latest full `PD-1x6` boundary after transform keyframes | pending per-capability host ledger | `history.md` dynamic transform entry; latest full no-AE matrix 846 total, 840 pass, 0 blocked, 6 skipped |
 
 ## Layer Domain
 
 | Capability | Recipes / scope | Profile-diff writer coverage | AE host open coverage | Evidence |
 | --- | --- | --- | --- | --- |
 | Classic track matte | `minimal-layer-track-matte` | `PD-1x3`: recipe source into W2020/W2022/W2025 targets | `OPEN-ALL-HOSTS` for W2020 output on H2020-H2025 | `tmp/migration_matrix_layer_matte/matrix.json`: recipe-source focused matrix, 4 pass / 2 intentional blocked overall; `tmp/migration_matrix_representative_all_hosts/matrix.json`: representative all-host matrix, 30 total, 30 pass |
-| AE2025 explicit matte | `minimal-layer-explicit-matte` | `PD-1x1`: AE2025 source into W2025 target; W2020/W2022 targets intentionally blocked | pending per-capability host ledger | `tmp/migration_matrix_layer_matte/matrix.json`; low targets blocked with `explicit matte source requires AE2025` |
+| AE2025 explicit matte | `minimal-layer-explicit-matte` | `PD-1x1`: AE2025 source into W2025 target; AE2020 source into W2020-W2025 targets skipped by source contract | pending per-capability host ledger | `tmp/migration_matrix_explicit_matte_ae2025/matrix.json`: 1 total, 1 pass; `tmp/migration_matrix_explicit_matte_source_contract/matrix.json`: 6 total, 6 skipped |
 | Layer mask | `minimal-layer-mask` | `PD-1x3`: W2020 source into W2020/W2022/W2025 targets | `OPEN-ALL-HOSTS` for W2020 output on H2020-H2025 | `tmp/migration_matrix_layer_mask/matrix.json`: 3 total, 3 pass; `tmp/migration_matrix_representative_all_hosts/matrix.json`: representative all-host matrix, 30 total, 30 pass |
 
 ## Shape Domain
@@ -95,19 +95,19 @@ which AE versions are validated." The current reviewed answer is:
 | camera-light | Implemented for supported camera/light options and light source refs | latest full `PD-1x6` boundary | representative checks only |
 | precomp | Implemented for precomp refs/layers | latest full `PD-1x6` boundary | representative checks only |
 
-## Current Remaining Blockers
+## Current Remaining Source-Contract Skips
 
 Latest full no-AE matrix:
 
 - Artifact: `tmp/migration_matrix_smoke_all/matrix.json`
-- Summary: 846 total, 840 pass, 6 blocked, 0 failed, 0 skipped
+- Summary: 846 total, 840 pass, 0 blocked, 0 failed, 6 skipped
 - Writer coverage: W2020 source into W2020/W2021/W2022/W2023/W2024/W2025 targets
 
-Blocked recipe groups:
+Skipped recipe groups:
 
 | Domain | Recipe | Cases | Status |
 | --- | --- | ---: | --- |
-| layer | `minimal-layer-explicit-matte` | 6 | blocked in W2020-source full matrix because explicit matte requires AE2025 source/target contract |
+| layer | `minimal-layer-explicit-matte` | 6 | skipped in W2020-source full matrix because explicit matte requires AE2025 source contract |
 
 ## Raw Matrix Artifacts
 
@@ -122,9 +122,13 @@ Reviewed raw artifacts currently known:
 - `tmp/migration_matrix_shape_gradient_stroke/matrix.json`: 12 total, 12 pass, 0 blocked, 0 failed, 0 skipped. This is W2020 source into W2020/W2022/W2025 targets for the current recipe-owned gradient stroke surface.
 - `tmp/migration_matrix_shape_gradient_stroke_all_hosts/matrix.json`: 24 total, 24 pass, 0 blocked, 0 failed, 0 skipped. This is W2020 source into W2020 target with AE-open on H2020-H2025 for every current recipe-owned gradient-stroke variant.
 - `tmp/migration_matrix_writer_targets_all/matrix.json`: 6 total, 6 pass, 0 blocked, 0 failed, 0 skipped. This proves the matrix can produce W2020-W2025 writer targets for the stable `minimal-comp-object-profile` fixture.
-- `tmp/migration_matrix_smoke_all/matrix.json`: 846 total, 840 pass, 6 intentionally blocked, 0 failed, 0 skipped. This is the current post-native-writer-target full no-AE boundary for W2020 source into W2020-W2025 targets.
+- `tmp/migration_matrix_explicit_matte_source_contract/matrix.json`: 6 total, 0 pass, 0 blocked, 0 failed, 6 skipped. This proves AE2020 source does not author the AE2025-only explicit matte recipe and records those cases as source-contract skips.
+- `tmp/migration_matrix_explicit_matte_ae2025/matrix.json`: 1 total, 1 pass, 0 blocked, 0 failed, 0 skipped. This proves the valid AE2025 explicit matte source-to-target contract still passes.
+- `tmp/migration_matrix_smoke_all/matrix.json`: 846 total, 840 pass, 0 blocked, 0 failed, 6 skipped. This is the current post-source-contract-classification full no-AE boundary for W2020 source into W2020-W2025 targets.
 - Generated coverage ledger artifacts:
   - `tmp/migration_matrix_writer_targets_all/ledger.md`: generated from the narrow writer-target matrix; 1 recipe row with W2020-W2025 target evidence.
+  - `tmp/migration_matrix_explicit_matte_source_contract/ledger.md`: generated from the AE2020-source explicit-matte source-contract matrix; 1 recipe row, 6 skipped cases.
+  - `tmp/migration_matrix_explicit_matte_ae2025/ledger.md`: generated from the valid AE2025 explicit-matte matrix; 1 recipe row, 1 passed case.
   - `tmp/migration_matrix_smoke_all/ledger.md`: generated by the recurring full no-AE matrix command via `-ledger-out`; 141 recipe rows grouped by inferred domain.
   - `tmp/migration_matrix_representative_all_hosts/ledger.md`: generated from the all-host representative matrix; 5 recipe rows, each with H2020-H2025 evidence.
   - `tmp/migration_matrix_shape_gradient_stroke_all_hosts/ledger.md`: generated from the all-host gradient-stroke matrix; 4 recipe rows, each with H2020-H2025 evidence.
