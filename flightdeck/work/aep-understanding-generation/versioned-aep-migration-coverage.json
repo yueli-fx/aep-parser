@@ -62,6 +62,7 @@
       "direct_endpoint_hosts",
       "inferred_by_endpoint",
       "representative_only",
+      "representative_covered",
       "pending_per_capability"
     ]
   },

@@ -19,6 +19,7 @@ function New-HostOpenEvidenceCounts {
   return [ordered]@{
     direct_endpoint_hosts = 0
     representative = 0
+    representative_covered = 0
     excluded_known_boundary = 0
     recorded_status_only = 0
   }
@@ -188,6 +189,12 @@ function Get-RecipeHostOpenEvidence {
 
   if (($Record.PSObject.Properties.Name -contains "host_open_representatives") -and @($Record.host_open_representatives) -contains $Recipe) {
     $summary.evidence_level = "representative"
+    return $summary
+  }
+
+  if (($Record.PSObject.Properties.Name -contains "host_open_representatives") -and @($Record.host_open_representatives).Count -gt 0 -and -not ($Record.PSObject.Properties.Name -contains "host_open_endpoint_evidence")) {
+    $summary.evidence_level = "representative_covered"
+    $summary.representatives = @($Record.host_open_representatives)
     return $summary
   }
 

@@ -45,6 +45,7 @@ function New-HostOpenEvidenceCounts {
   return [pscustomobject]@{
     direct_endpoint_hosts = 0
     representative = 0
+    representative_covered = 0
     excluded_known_boundary = 0
     recorded_status_only = 0
   }
@@ -217,6 +218,10 @@ function Get-ExpectedHostOpenEvidenceLevel {
     return "representative"
   }
 
+  if (($Record.PSObject.Properties.Name -contains "host_open_representatives") -and @($Record.host_open_representatives).Count -gt 0 -and -not ($Record.PSObject.Properties.Name -contains "host_open_endpoint_evidence")) {
+    return "representative_covered"
+  }
+
   if ($Record.PSObject.Properties.Name -contains "host_open_endpoint_evidence") {
     $evidence = $Record.host_open_endpoint_evidence
     if (($evidence.PSObject.Properties.Name -contains "excluded_known_boundary_recipes") -and @($evidence.excluded_known_boundary_recipes) -contains $Recipe) {
@@ -237,6 +242,7 @@ function Assert-HostOpenEvidenceCounts {
 
   Assert-Equal "$Label.direct_endpoint_hosts" ([int]$Expected.direct_endpoint_hosts) ([int]$Actual.direct_endpoint_hosts)
   Assert-Equal "$Label.representative" ([int]$Expected.representative) ([int]$Actual.representative)
+  Assert-Equal "$Label.representative_covered" ([int]$Expected.representative_covered) ([int]$Actual.representative_covered)
   Assert-Equal "$Label.excluded_known_boundary" ([int]$Expected.excluded_known_boundary) ([int]$Actual.excluded_known_boundary)
   Assert-Equal "$Label.recorded_status_only" ([int]$Expected.recorded_status_only) ([int]$Actual.recorded_status_only)
 }
@@ -360,6 +366,12 @@ foreach ($record in @($coverage.coverage)) {
 
     if (($record.PSObject.Properties.Name -contains "host_open_representatives") -and @($record.host_open_representatives) -contains $recipe) {
       Assert-Equal "recipe_index.$recipe.host_open_evidence.evidence_level" "representative" $actual[0].host_open_evidence.evidence_level
+      continue
+    }
+
+    if (($record.PSObject.Properties.Name -contains "host_open_representatives") -and @($record.host_open_representatives).Count -gt 0 -and -not ($record.PSObject.Properties.Name -contains "host_open_endpoint_evidence")) {
+      Assert-Equal "recipe_index.$recipe.host_open_evidence.evidence_level" "representative_covered" $actual[0].host_open_evidence.evidence_level
+      Assert-SameStringSet "recipe_index.$recipe.host_open_evidence.representatives" $record.host_open_representatives $actual[0].host_open_evidence.representatives
       continue
     }
 
