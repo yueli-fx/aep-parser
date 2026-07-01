@@ -148,6 +148,8 @@ Assert-Totals "totals.writer_cases" $writerTotals $summary.totals.writer_cases
 Assert-Totals "totals.endpoint_host_open_cases" $endpointHostTotals $summary.totals.endpoint_host_open_cases
 Assert-Equal "totals.known_boundaries" $boundaryCount $summary.totals.known_boundaries
 Assert-Equal "totals.open_items" @($coverage.open_items).Count $summary.totals.open_items
+Assert-SameStringSet "domain_rollup.domains" $domainMap.Keys @($summary.domain_rollup | ForEach-Object { $_.domain })
+Assert-SameStringSet "recipe_index.recipes" $allRecipes @($summary.recipe_index | ForEach-Object { $_.recipe })
 
 foreach ($domainName in $domainMap.Keys) {
   $expected = $domainMap[$domainName]
