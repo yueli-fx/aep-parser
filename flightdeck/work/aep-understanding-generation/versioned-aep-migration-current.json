@@ -378,6 +378,26 @@
           "tmp/host_open_gaps/default-and-mogrt-smoke/chunk-2/matrix.json"
         ],
         "result": "default layer, Essential Graphics, MOGRT name, and null smoke recipes passed endpoint target-bound host-open 44/44."
+      },
+      {
+        "coverage_id": "representative-covered-small-groups",
+        "coverage_ids": [
+          "text-style",
+          "effects-dynamic-params",
+          "transforms-dynamic",
+          "project"
+        ],
+        "gap_recipes": 9,
+        "chunks": 4,
+        "priority": "small_representative_covered_endpoint_batch",
+        "status": "pass",
+        "artifacts": [
+          "tmp/host_open_gaps/text-style/non-representative-endpoint/matrix.json",
+          "tmp/host_open_gaps/effects-dynamic-params/non-representative-endpoint/matrix.json",
+          "tmp/host_open_gaps/transforms-dynamic/non-representative-endpoint/matrix.json",
+          "tmp/host_open_gaps/project/non-representative-endpoint/matrix.json"
+        ],
+        "result": "small representative-covered text/effect/transform/project recipes passed endpoint target-bound host-open 36/36."
       }
     ],
     "remaining_gap_groups": []
@@ -518,7 +538,7 @@
       {
         "command": "pwsh -File scripts/migration/query_coverage_summary.ps1 -Totals",
         "status": "pass",
-        "evidence": "host_open_evidence_levels recorded_status_only=0 and endpoint host-open cases=212/212 pass"
+        "evidence": "host_open_evidence_levels recorded_status_only=0, representative_covered=64, and endpoint host-open cases=248/248 pass"
       },
       {
         "command": "pwsh -File scripts/migration/plan_host_open_gaps.ps1 -AERoot E:/adobe",
