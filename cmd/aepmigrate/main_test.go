@@ -120,6 +120,25 @@ func TestRunConvertCanRunAEOpenGate(t *testing.T) {
 	}
 }
 
+func TestRunConvertWritesDefaultNullLayerOutput(t *testing.T) {
+	input := writeTempProjectWithOneNullLayer(t)
+	outPath := filepath.Join(t.TempDir(), "converted.aep")
+	reportPath := filepath.Join(t.TempDir(), "convert.json")
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"convert", "-in", input, "-target", "AE2025", "-out", outPath, "-report", reportPath}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("run convert = %d, stderr=%s", code, stderr.String())
+	}
+	if _, err := os.Stat(outPath); err != nil {
+		t.Fatalf("converted output missing: %v", err)
+	}
+	report := readReportSummary(t, reportPath)
+	if report.Summary.Status != "pass" || report.Verification.ProfileDiffStatus != "pass" {
+		t.Fatalf("report = %+v, want pass with profile diff pass", report)
+	}
+}
+
 func TestRunConvertWritesBlockedReportWithoutOutput(t *testing.T) {
 	input := writeTempProjectWithOneSolidLayer(t)
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
@@ -174,6 +193,19 @@ func writeTempProjectWithOneSolidLayer(t *testing.T) string {
 		t.Fatalf("NewSolidLayer: %v", err)
 	}
 	return writeProject(t, project, "one-layer.aep")
+}
+
+func writeTempProjectWithOneNullLayer(t *testing.T) string {
+	t.Helper()
+	project := aep.NewProject(aep.TargetAE2020)
+	comp, err := aep.NewComposition(project, "Main", 640, 360, 24, 2)
+	if err != nil {
+		t.Fatalf("NewComposition: %v", err)
+	}
+	if _, err := aep.NewNullLayer(comp, "Controller"); err != nil {
+		t.Fatalf("NewNullLayer: %v", err)
+	}
+	return writeProject(t, project, "one-null-layer.aep")
 }
 
 func writeProject(t *testing.T, project *aep.Project, name string) string {

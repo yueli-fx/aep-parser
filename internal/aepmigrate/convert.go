@@ -68,7 +68,7 @@ func Convert(opts ConvertOptions) (Report, error) {
 	if report.Summary.Status == StatusBlocked {
 		return report, nil
 	}
-	targetProject, err := rebuildNoLayerProject(opts.Target, prof)
+	targetProject, err := rebuildProject(opts.Target, prof)
 	if err != nil {
 		return Report{}, err
 	}
@@ -76,19 +76,18 @@ func Convert(opts ConvertOptions) (Report, error) {
 	if err != nil {
 		return Report{}, err
 	}
-	out, err := os.Create(opts.OutputPath)
-	if err != nil {
-		return Report{}, err
-	}
-	if err := targetProject.WriteAEP(out); err != nil {
-		out.Close()
-		return Report{}, err
-	}
-	if err := out.Close(); err != nil {
+	var out bytes.Buffer
+	if err := targetProject.WriteAEP(&out); err != nil {
 		return Report{}, err
 	}
 	report.Target.Path = opts.OutputPath
-	if err := verifyConvertedProfile(&report, prof, opts.OutputPath); err != nil {
+	if err := verifyConvertedProfileBytes(&report, prof, opts.OutputPath, out.Bytes()); err != nil {
+		return Report{}, err
+	}
+	if report.Summary.Status == StatusBlocked {
+		return report, nil
+	}
+	if err := os.WriteFile(opts.OutputPath, out.Bytes(), 0o644); err != nil {
 		return Report{}, err
 	}
 	if err := verifyAEOpen(&report, opts); err != nil {
@@ -97,8 +96,8 @@ func Convert(opts ConvertOptions) (Report, error) {
 	return report, nil
 }
 
-func verifyConvertedProfile(report *Report, source *profile.Profile, targetPath string) error {
-	targetProject, err := aep.Open(targetPath)
+func verifyConvertedProfileBytes(report *Report, source *profile.Profile, targetPath string, targetBytes []byte) error {
+	targetProject, err := aep.FromReader(bytes.NewReader(targetBytes))
 	if err != nil {
 		return fmt.Errorf("profile diff target open: %w", err)
 	}
@@ -256,28 +255,34 @@ func convertScopeEntries(target VersionLabel, prof *profile.Profile) []Entry {
 	}
 	var entries []Entry
 	for _, comp := range prof.Comps {
-		if len(comp.Layers) == 0 {
-			entries = append(entries, Entry{
-				Path:          "comps[" + comp.Name + "]",
-				Class:         ClassRetargeted,
-				TargetVersion: target,
-				Reason:        "No-layer composition and stable composition settings are recreated through the target AE project template.",
-			})
-			continue
-		}
+		entries = append(entries, Entry{
+			Path:          "comps[" + comp.Name + "]",
+			Class:         ClassRetargeted,
+			TargetVersion: target,
+			Reason:        "Composition and stable composition settings are recreated through the target AE project template.",
+		})
 		for _, layer := range comp.Layers {
+			if isSupportedDefaultNullLayer(layer) {
+				entries = append(entries, Entry{
+					Path:          "comps[" + comp.Name + "].layers[" + layer.Name + "]",
+					Class:         ClassRetargeted,
+					TargetVersion: target,
+					Reason:        "Default null layer is recreated through the target AE project template.",
+				})
+				continue
+			}
 			entries = append(entries, Entry{
 				Path:          "comps[" + comp.Name + "].layers[" + layer.Name + "]",
 				Class:         ClassBlocked,
 				TargetVersion: target,
-				Reason:        "The first convert slice does not reconstruct layers; refusing output to avoid silent layer loss.",
+				Reason:        "This convert slice only reconstructs no-layer comps and default null layers; refusing output to avoid silent layer loss.",
 			})
 		}
 	}
 	return entries
 }
 
-func rebuildNoLayerProject(target VersionLabel, prof *profile.Profile) (*aep.Project, error) {
+func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, error) {
 	project := aep.NewProject(aepTarget(target))
 	for _, comp := range prof.Comps {
 		next, err := aep.NewComposition(project, comp.Name, comp.Width, comp.Height, comp.FrameRate, comp.Duration)
@@ -287,8 +292,48 @@ func rebuildNoLayerProject(target VersionLabel, prof *profile.Profile) (*aep.Pro
 		if err := applyStableCompSettings(next, comp); err != nil {
 			return nil, err
 		}
+		for _, layer := range comp.Layers {
+			if !isSupportedDefaultNullLayer(layer) {
+				return nil, fmt.Errorf("unsupported layer %q in comp %q", layer.Name, comp.Name)
+			}
+			if _, err := aep.NewNullLayer(next, layer.Name); err != nil {
+				return nil, fmt.Errorf("comp %q null layer %q: %w", comp.Name, layer.Name, err)
+			}
+		}
 	}
 	return project, nil
+}
+
+func isSupportedDefaultNullLayer(layer profile.Layer) bool {
+	if layer.Type != "null" {
+		return false
+	}
+	if layer.Comment != "" || layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
+		return false
+	}
+	if layer.Text != nil || len(layer.Effects) != 0 || len(layer.Masks) != 0 || len(layer.Shapes) != 0 || len(layer.Markers) != 0 {
+		return false
+	}
+	flags := layer.Flags
+	return flags.Visible &&
+		flags.Blend == 2 &&
+		flags.TrackMatte == 0 &&
+		flags.IsNull &&
+		flags.EffectsEnabled &&
+		flags.AudioEnabled &&
+		!flags.Is3D &&
+		!flags.Solo &&
+		!flags.Shy &&
+		!flags.Locked &&
+		!flags.IsAdjustment &&
+		!flags.IsGuide &&
+		!flags.MotionBlur &&
+		!flags.FrameBlendEnabled &&
+		!flags.MarkersLocked &&
+		!flags.FrameBlendPixelMotion &&
+		!flags.CollapseTransform &&
+		!flags.SamplingBicubic &&
+		!flags.PreserveTransparency
 }
 
 func applyStableCompSettings(dst *aep.Composition, src profile.Composition) error {

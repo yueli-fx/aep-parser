@@ -194,6 +194,63 @@ func TestConvertRunsProfileDiffVerification(t *testing.T) {
 	}
 }
 
+func TestConvertWritesDefaultNullLayerProject(t *testing.T) {
+	source := writeTempProjectWithDefaultNullLayer(t)
+	outPath := filepath.Join(t.TempDir(), "converted.aep")
+
+	report, err := Convert(ConvertOptions{
+		InputPath:  source,
+		OutputPath: outPath,
+		Target:     VersionAE2025,
+	})
+	if err != nil {
+		t.Fatalf("Convert: %v", err)
+	}
+	if report.Summary.Status != StatusPass {
+		t.Fatalf("status = %q, entries=%+v, diffs=%+v", report.Summary.Status, report.Entries, report.Verification.ProfileDiffs)
+	}
+	if report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 {
+		t.Fatalf("profile diff verification = %+v, want pass with 0 diffs", report.Verification)
+	}
+	outProject, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open converted: %v", err)
+	}
+	prof, err := profile.Build(outProject, profile.Options{Path: outPath})
+	if err != nil {
+		t.Fatalf("profile converted: %v", err)
+	}
+	if len(prof.Comps) != 1 || len(prof.Comps[0].Layers) != 1 {
+		t.Fatalf("converted profile layers = %+v", prof.Comps)
+	}
+	if got := prof.Comps[0].Layers[0].Type; got != "null" {
+		t.Fatalf("layer type = %q, want null", got)
+	}
+}
+
+func TestConvertBlocksChangedNullLayerBeforeWritingOutput(t *testing.T) {
+	source := writeTempProjectWithMovedNullLayer(t)
+	outPath := filepath.Join(t.TempDir(), "converted.aep")
+
+	report, err := Convert(ConvertOptions{
+		InputPath:  source,
+		OutputPath: outPath,
+		Target:     VersionAE2025,
+	})
+	if err != nil {
+		t.Fatalf("Convert: %v", err)
+	}
+	if report.Summary.Status != StatusBlocked {
+		t.Fatalf("status = %q, want blocked; verification=%+v", report.Summary.Status, report.Verification)
+	}
+	if report.Verification.ProfileDiffStatus != "fail" || report.Verification.ProfileDiffCount == 0 {
+		t.Fatalf("profile diff verification = %+v, want fail with diffs", report.Verification)
+	}
+	if _, err := os.Stat(outPath); !os.IsNotExist(err) {
+		t.Fatalf("blocked output exists or stat failed unexpectedly: %v", err)
+	}
+}
+
 func TestConvertRunsAEOpenGateWhenConfigured(t *testing.T) {
 	source := writeTempProjectWithOneComp(t, aep.TargetAE2020)
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
@@ -451,5 +508,43 @@ func writeTempProjectWithOneSolidLayer(t *testing.T) string {
 	if err := project.WriteAEP(out); err != nil {
 		t.Fatalf("WriteAEP: %v", err)
 	}
+	return path
+}
+
+func writeTempProjectWithDefaultNullLayer(t *testing.T) string {
+	t.Helper()
+	project := aep.NewProject(aep.TargetAE2020)
+	comp, err := aep.NewComposition(project, "Main", 640, 360, 24, 2)
+	if err != nil {
+		t.Fatalf("NewComposition: %v", err)
+	}
+	if _, err := aep.NewNullLayer(comp, "Controller"); err != nil {
+		t.Fatalf("NewNullLayer: %v", err)
+	}
+	path := filepath.Join(t.TempDir(), "one-null-layer.aep")
+	writeProjectFile(t, project, path)
+	return path
+}
+
+func writeTempProjectWithMovedNullLayer(t *testing.T) string {
+	t.Helper()
+	project := aep.NewProject(aep.TargetAE2020)
+	comp, err := aep.NewComposition(project, "Main", 640, 360, 24, 2)
+	if err != nil {
+		t.Fatalf("NewComposition: %v", err)
+	}
+	layer, err := aep.NewNullLayer(comp, "Controller")
+	if err != nil {
+		t.Fatalf("NewNullLayer: %v", err)
+	}
+	transform := aep.NewLayerTransform()
+	if err := transform.Position().SetStaticValue([2]float64{320, 180}); err != nil {
+		t.Fatalf("Position.SetStaticValue: %v", err)
+	}
+	if err := aep.SetLayerTransform(layer, transform); err != nil {
+		t.Fatalf("SetLayerTransform: %v", err)
+	}
+	path := filepath.Join(t.TempDir(), "moved-null-layer.aep")
+	writeProjectFile(t, project, path)
 	return path
 }

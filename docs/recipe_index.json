@@ -6581,7 +6581,7 @@
       "type": "boolean",
       "go_type": "*bool",
       "summary": "Expected null-layer switch.",
-      "example": "examples/recipes/minimal-layer-null-flag.json"
+      "example": "examples/recipes/minimal-default-null-layer.json"
     },
     "expected_profile.layers[].flags.locked": {
       "path": "expected_profile.layers[].flags.locked",

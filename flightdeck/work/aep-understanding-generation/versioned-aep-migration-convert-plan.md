@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans or equivalent TDD execution. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add the first conservative `aepmigrate convert` slice: convert only no-layer composition skeleton projects to a requested AE target version, and refuse projects that would require layer reconstruction.
+**Goal:** Add the first conservative `aepmigrate convert` slices: convert no-layer composition skeleton projects and default null-layer projects to a requested AE target version, and refuse projects that would require unsupported layer reconstruction.
 
 **Architecture:** Extend `internal/aepmigrate` with a `Convert` function that opens the source, builds a profile, runs existing assess checks, adds convert-scope blockers, and writes a new target-version project only when the source is inside the first supported surface. After writing, reopen the target, build its profile, and run `profilediff.Compare` before reporting success. Add `cmd/aepmigrate convert` as a CLI wrapper. Do not copy raw chunks across AE versions.
 
@@ -16,7 +16,8 @@ This slice supports:
 
 - source project opens and profiles successfully;
 - target is `AE2020`, `AE2022`, or `AE2025`;
-- every composition has zero layers;
+- every composition has zero layers, or every layer is inside the first explicit
+  layer-bearing slice: default null layers only;
 - each composition is recreated with name, width, height, frame rate, and duration;
 - stable profile-visible composition settings are recreated through target-version
   writers: background color, resolution factor, pixel aspect, display start
@@ -30,12 +31,12 @@ This slice supports:
 
 This slice refuses:
 
-- any source project with layers;
+- any source project with layers outside the default-null slice;
 - existing assess blockers such as AE2025 explicit matte downgrade;
 - unknown target version labels.
 
-The refusal is intentional. A project with layers should not produce an output
-file in this first slice because that would silently drop content.
+The refusal is intentional. A project with unsupported layers should not produce
+an output file because that would silently drop content.
 
 ## Files
 
@@ -44,7 +45,7 @@ file in this first slice because that would silently drop content.
 - Create: `internal/aepmigrate/convert.go`
   - `Convert(opts ConvertOptions) (Report, error)`.
   - target-label to `aep.AETarget` mapping.
-  - no-layer profile gate.
+  - no-layer/default-null profile gate.
   - target project skeleton rebuild.
 - Modify: `internal/aepmigrate/assess_test.go`
   - Reuse fixture helpers.
@@ -183,21 +184,30 @@ git diff --check
     and 0 layers.
   - `cmd/aepmigrate convert -ae-open -ae <AfterFX.exe>` now runs the same gate
     directly and writes `ae_open_status: "pass"` into the migration report.
+  - Default null-layer source generated through `aep.NewNullLayer` converted to
+    AE2025 with `profile_diff_status: "pass"`, `profile_diff_count: 0`,
+    `ae_open_status: "pass"`, and `ae_open_exit_code: 0`.
+  - `examples/recipes/minimal-default-null-layer.json` validates and compiles,
+    but its explicit transform properties are outside the default-null convert
+    slice; `convert` blocks it via pre-write profile diff and leaves no target
+    output.
 
 - [x] Update `flightdeck/work/aep-understanding-generation/index.md` and `flightdeck/cockpit.md` to state:
   - `assess` is available;
-  - `convert` first slice is available only for no-layer comp skeleton projects;
+  - `convert` first slices are available only for no-layer comp skeleton projects
+    and default null-layer projects;
   - stable no-layer comp settings are preserved through target-version writers;
   - renderer and Motion Graphics template name are preserved through their comp
     writers;
   - item-level comp metadata is preserved through the reopen-backed item writer;
   - successful convert runs source-vs-target profile diff and blocks success on
     unexpected differences;
-  - layer-bearing projects are intentionally blocked until layer reconstruction enters the migration surface.
+  - unsupported layer-bearing projects are intentionally blocked until their
+    reconstruction enters the migration surface.
 
 ## Self-Review
 
-- No silent layer drops: layer-bearing projects block before writing.
+- No silent layer drops: unsupported layer-bearing projects block before writing.
 - No raw chunk copying across target versions.
 - No claim of full-project migration.
 - Target version is proven by reopening the output and reading the version string.

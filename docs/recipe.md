@@ -748,7 +748,7 @@ This reference is generated from the canonical recipe field model.
 | `expected_profile.layers[].flags.locked` | `boolean` | - | Expected layer lock switch. | - | - | examples/recipes/minimal-layer-common-switches.json |
 | `expected_profile.layers[].flags.is_3d` | `boolean` | - | Expected layer 3D switch. | - | - | examples/recipes/minimal-layer-advanced-switches.json |
 | `expected_profile.layers[].flags.is_adjustment` | `boolean` | - | Expected adjustment-layer switch. | - | - | examples/recipes/minimal-adjustment-layer.json |
-| `expected_profile.layers[].flags.is_null` | `boolean` | - | Expected null-layer switch. | - | - | examples/recipes/minimal-layer-null-flag.json |
+| `expected_profile.layers[].flags.is_null` | `boolean` | - | Expected null-layer switch. | - | - | examples/recipes/minimal-default-null-layer.json |
 | `expected_profile.layers[].flags.is_guide` | `boolean` | - | Expected guide-layer switch. | - | - | examples/recipes/minimal-layer-advanced-switches.json |
 | `expected_profile.layers[].flags.motion_blur` | `boolean` | - | Expected layer motion blur switch. | - | - | examples/recipes/minimal-layer-motion-blur.json |
 | `expected_profile.layers[].flags.effects_enabled` | `boolean` | - | Expected layer effects enable switch. | - | - | examples/recipes/minimal-layer-common-switches.json |

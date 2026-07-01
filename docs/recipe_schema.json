@@ -10285,7 +10285,7 @@
       "type": "boolean",
       "go_type": "*bool",
       "description": "Expected null-layer switch.",
-      "x-aep-example": "examples/recipes/minimal-layer-null-flag.json"
+      "x-aep-example": "examples/recipes/minimal-default-null-layer.json"
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.is_guide",

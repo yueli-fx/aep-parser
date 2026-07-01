@@ -67,9 +67,10 @@ Phase 0 export-surface audit and contract lock before extracting
 - `versioned-aep-migration-assess-plan.md` — first implementation plan for
   read-only version migration assessment via `internal/aepmigrate` and
   `cmd/aepmigrate assess`.
-- `versioned-aep-migration-convert-plan.md` — first conservative convert slice:
-  target-version skeleton rebuild for no-layer comp projects, with layer-bearing
-  projects blocked before output.
+- `versioned-aep-migration-convert-plan.md` — first conservative convert
+  slices: target-version skeleton rebuild for no-layer comp projects and
+  default null-layer projects, with unsupported layer-bearing projects blocked
+  before output.
 - `flightdeck/knowledge/techniques/understand-a-project.md` — existing
   reference-project internalization workflow.
 - `flightdeck/knowledge/techniques/fx-techniques.md` — current technique
@@ -688,13 +689,14 @@ Current:
   settings for no-layer comps: background color, resolution factor, pixel
   aspect, display start time, work area, comp flags, motion-blur settings,
   renderer, Motion Graphics template name, label, and comment. Source projects
-  with layers are intentionally blocked before output so conversion cannot
-  silently drop layer content. Successful convert now reopens the target and
-  runs source-vs-target `profilediff`; unexpected profile diffs are recorded in
-  the migration report and block success. First AE 2025 open smoke passed for
-  the converted no-layer comp object profile output, and `cmd/aepmigrate
-  convert -ae-open -ae <AfterFX.exe>` now writes AE open gate status into the
-  migration report.
+  with unsupported layers are intentionally blocked before output so conversion
+  cannot silently drop layer content. The first layer-bearing slice is default
+  null layers only. Successful convert now reopens the target and runs
+  source-vs-target `profilediff`; unexpected profile diffs are recorded in the
+  migration report and block success. First AE 2025 open smoke passed for the
+  converted no-layer comp object profile output, and `cmd/aepmigrate convert
+  -ae-open -ae <AfterFX.exe>` now writes AE open gate status into the migration
+  report.
 - `profilediff` now compares profile-visible layer metadata, quality/blending/
   auto-orient/light kind, all current layer flags, stable layer refs by
   name/index, layer properties, expression status, layer-ref params, and
