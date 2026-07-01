@@ -706,6 +706,18 @@ Current:
   hosts. This also unlocks `minimal-layer-auto-orient.json` because its
   Position keyframes are now preserved. Latest full no-AE migration matrix:
   423 total, 330 pass, 93 intentionally blocked, 0 failed, 0 skipped.
+- Text style migration is implemented for supported text layers with the
+  current single-run/single-paragraph profile surface. Conversion replays
+  profile-visible run fields through the existing text setters: font size, fill,
+  auto-leading/leading, tracking, baseline shift, horizontal/vertical scale,
+  tsume, caps/baseline/auto-kern/line-join/digit enums, no-break, faux
+  bold/italic, stroke enable/color/width/order; paragraph fields include
+  justification, indents, spacing, auto-hyphenation, leading type, hanging
+  Roman, and direction. `minimal-text-style.json` and `minimal-text-shape.json`
+  pass AE2020/AE2022/AE2025 matrix conversion and AE2025 open smoke; the
+  text-style fixture as an AE2020 writer target opens across AE2020, AE2021,
+  AE2022, AE2023, AE2024, and AE2025 hosts. Latest full no-AE migration matrix:
+  423 total, 336 pass, 87 intentionally blocked, 0 failed, 0 skipped.
 - `profilediff` now compares profile-visible layer metadata, quality/blending/
   auto-orient/light kind, all current layer flags, stable layer refs by
   name/index, layer properties, expression status, layer-ref params, keyframe

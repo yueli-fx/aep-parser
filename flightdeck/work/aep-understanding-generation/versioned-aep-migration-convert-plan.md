@@ -370,6 +370,16 @@ git diff --check
   - Latest full no-AE matrix after dynamic transform migration:
     `423 total, 330 pass, 93 blocked, 0 failed, 0 skipped`. The command exits
     non-zero because blocked cases remain intentional.
+  - Text style reconstruction now replays the current profile-visible
+    single-run/single-paragraph text surface through the existing text setters:
+    run font size, fill/stroke, tracking, leading, scale, CJK/enum switches, and
+    paragraph justification/indent/spacing/direction fields. `minimal-text-style.json`
+    and `minimal-text-shape.json` pass AE2020/AE2022/AE2025 matrix conversion,
+    pass AE2025 open gate, and the text-style fixture as an AE2020 writer target
+    opens across AE2020, AE2021, AE2022, AE2023, AE2024, and AE2025 hosts.
+  - Latest full no-AE matrix after text style migration:
+    `423 total, 336 pass, 87 blocked, 0 failed, 0 skipped`. The command exits
+    non-zero because blocked cases remain intentional.
 
 - [x] Update `flightdeck/work/aep-understanding-generation/index.md` and `flightdeck/cockpit.md` to state:
   - `assess` is available;

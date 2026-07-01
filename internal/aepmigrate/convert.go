@@ -507,6 +507,9 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 					if err := dstLayer.SetText(layer.Text.Text); err != nil {
 						return nil, fmt.Errorf("comp %q text layer %q text: %w", comp.Name, layer.Name, err)
 					}
+					if err := materializeTextStyle(dstLayer, layer.Text); err != nil {
+						return nil, fmt.Errorf("comp %q text layer %q text style: %w", comp.Name, layer.Name, err)
+					}
 				}
 				if err := materializeDefaultTransformSurface(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q text layer %q transform: %w", comp.Name, layer.Name, err)
@@ -1570,6 +1573,253 @@ func materializeLayerTiming(layer *aep.Layer, source profile.Layer) error {
 
 func isDefaultLayerOutPoint(timing profile.LayerTiming) bool {
 	return timing.InPoint == 0 && math.Abs(timing.OutPoint-timing.Duration) < 1e-6
+}
+
+func materializeTextStyle(layer *aep.Layer, source *profile.TextSource) error {
+	if source == nil {
+		return nil
+	}
+	for i, run := range source.Runs {
+		if err := layer.SetRunFontSize(i, run.FontSize); err != nil {
+			return fmt.Errorf("run %d font_size: %w", i, err)
+		}
+		if err := layer.SetRunFillColor(i, run.FillColor); err != nil {
+			return fmt.Errorf("run %d fill_color: %w", i, err)
+		}
+		if err := layer.SetRunAutoLeading(i, run.AutoLeading); err != nil {
+			return fmt.Errorf("run %d auto_leading: %w", i, err)
+		}
+		if err := layer.SetRunLeading(i, run.Leading); err != nil {
+			return fmt.Errorf("run %d leading: %w", i, err)
+		}
+		if err := layer.SetRunTracking(i, run.Tracking); err != nil {
+			return fmt.Errorf("run %d tracking: %w", i, err)
+		}
+		if err := layer.SetRunBaselineShift(i, run.BaselineShift); err != nil {
+			return fmt.Errorf("run %d baseline_shift: %w", i, err)
+		}
+		if err := layer.SetRunHorizontalScale(i, run.HorizontalScale); err != nil {
+			return fmt.Errorf("run %d horizontal_scale: %w", i, err)
+		}
+		if err := layer.SetRunVerticalScale(i, run.VerticalScale); err != nil {
+			return fmt.Errorf("run %d vertical_scale: %w", i, err)
+		}
+		if err := layer.SetRunTsume(i, run.Tsume); err != nil {
+			return fmt.Errorf("run %d tsume: %w", i, err)
+		}
+		caps, err := textCapsOption(run.CapsOption)
+		if err != nil {
+			return fmt.Errorf("run %d caps_option: %w", i, err)
+		}
+		if err := layer.SetRunCapsOption(i, caps); err != nil {
+			return fmt.Errorf("run %d caps_option: %w", i, err)
+		}
+		baseline, err := textBaselineOption(run.BaselineOption)
+		if err != nil {
+			return fmt.Errorf("run %d baseline_option: %w", i, err)
+		}
+		if err := layer.SetRunBaselineOption(i, baseline); err != nil {
+			return fmt.Errorf("run %d baseline_option: %w", i, err)
+		}
+		kern, err := textAutoKernType(run.AutoKernType)
+		if err != nil {
+			return fmt.Errorf("run %d auto_kern_type: %w", i, err)
+		}
+		if err := layer.SetRunAutoKernType(i, kern); err != nil {
+			return fmt.Errorf("run %d auto_kern_type: %w", i, err)
+		}
+		lineJoin, err := textLineJoinType(run.LineJoinType)
+		if err != nil {
+			return fmt.Errorf("run %d line_join_type: %w", i, err)
+		}
+		if err := layer.SetRunLineJoinType(i, lineJoin); err != nil {
+			return fmt.Errorf("run %d line_join_type: %w", i, err)
+		}
+		digitSet, err := textDigitSet(run.DigitSet)
+		if err != nil {
+			return fmt.Errorf("run %d digit_set: %w", i, err)
+		}
+		if err := layer.SetRunDigitSet(i, digitSet); err != nil {
+			return fmt.Errorf("run %d digit_set: %w", i, err)
+		}
+		if err := layer.SetRunNoBreak(i, run.NoBreak); err != nil {
+			return fmt.Errorf("run %d no_break: %w", i, err)
+		}
+		if err := layer.SetRunFauxBold(i, run.FauxBold); err != nil {
+			return fmt.Errorf("run %d faux_bold: %w", i, err)
+		}
+		if err := layer.SetRunFauxItalic(i, run.FauxItalic); err != nil {
+			return fmt.Errorf("run %d faux_italic: %w", i, err)
+		}
+		if err := layer.SetRunApplyStroke(i, run.ApplyStroke); err != nil {
+			return fmt.Errorf("run %d apply_stroke: %w", i, err)
+		}
+		if err := layer.SetRunStrokeColor(i, run.StrokeColor); err != nil {
+			return fmt.Errorf("run %d stroke_color: %w", i, err)
+		}
+		if err := layer.SetRunStrokeWidth(i, run.StrokeWidth); err != nil {
+			return fmt.Errorf("run %d stroke_width: %w", i, err)
+		}
+		if err := layer.SetRunStrokeOverFill(i, run.StrokeOverFill); err != nil {
+			return fmt.Errorf("run %d stroke_over_fill: %w", i, err)
+		}
+	}
+	for i, paragraph := range source.Paragraphs {
+		justification, err := textJustification(paragraph.Justification)
+		if err != nil {
+			return fmt.Errorf("paragraph %d justification: %w", i, err)
+		}
+		if err := layer.SetParagraphJustification(i, justification); err != nil {
+			return fmt.Errorf("paragraph %d justification: %w", i, err)
+		}
+		if err := layer.SetParagraphFirstLineIndent(i, paragraph.FirstLineIndent); err != nil {
+			return fmt.Errorf("paragraph %d first_line_indent: %w", i, err)
+		}
+		if err := layer.SetParagraphStartIndent(i, paragraph.StartIndent); err != nil {
+			return fmt.Errorf("paragraph %d start_indent: %w", i, err)
+		}
+		if err := layer.SetParagraphEndIndent(i, paragraph.EndIndent); err != nil {
+			return fmt.Errorf("paragraph %d end_indent: %w", i, err)
+		}
+		if err := layer.SetParagraphSpaceBefore(i, paragraph.SpaceBefore); err != nil {
+			return fmt.Errorf("paragraph %d space_before: %w", i, err)
+		}
+		if err := layer.SetParagraphSpaceAfter(i, paragraph.SpaceAfter); err != nil {
+			return fmt.Errorf("paragraph %d space_after: %w", i, err)
+		}
+		if err := layer.SetParagraphAutoHyphenate(i, paragraph.AutoHyphenate); err != nil {
+			return fmt.Errorf("paragraph %d auto_hyphenate: %w", i, err)
+		}
+		leadingType, err := textLeadingType(paragraph.LeadingType)
+		if err != nil {
+			return fmt.Errorf("paragraph %d leading_type: %w", i, err)
+		}
+		if err := layer.SetParagraphLeadingType(i, leadingType); err != nil {
+			return fmt.Errorf("paragraph %d leading_type: %w", i, err)
+		}
+		if err := layer.SetParagraphHangingRoman(i, paragraph.HangingRoman); err != nil {
+			return fmt.Errorf("paragraph %d hanging_roman: %w", i, err)
+		}
+		direction, err := textParagraphDirection(paragraph.Direction)
+		if err != nil {
+			return fmt.Errorf("paragraph %d direction: %w", i, err)
+		}
+		if err := layer.SetParagraphDirection(i, direction); err != nil {
+			return fmt.Errorf("paragraph %d direction: %w", i, err)
+		}
+	}
+	return nil
+}
+
+func normalizeTextEnum(value string) string {
+	value = strings.ToLower(strings.TrimSpace(value))
+	return strings.ReplaceAll(value, "-", "_")
+}
+
+func textJustification(value string) (aep.TextJustification, error) {
+	switch normalizeTextEnum(value) {
+	case "", "left":
+		return aep.TextJustifyLeft, nil
+	case "right":
+		return aep.TextJustifyRight, nil
+	case "center":
+		return aep.TextJustifyCenter, nil
+	default:
+		return 0, fmt.Errorf("unsupported justification %q", value)
+	}
+}
+
+func textCapsOption(value string) (aep.TextCapsOption, error) {
+	switch normalizeTextEnum(value) {
+	case "", "normal":
+		return aep.TextCapsNormal, nil
+	case "small_caps":
+		return aep.TextCapsSmall, nil
+	case "all_caps":
+		return aep.TextCapsAll, nil
+	case "all_small_caps":
+		return aep.TextCapsAllSmall, nil
+	default:
+		return 0, fmt.Errorf("unsupported caps_option %q", value)
+	}
+}
+
+func textBaselineOption(value string) (aep.TextBaselineOption, error) {
+	switch normalizeTextEnum(value) {
+	case "", "normal":
+		return aep.TextBaselineNormal, nil
+	case "superscript":
+		return aep.TextBaselineSuperscript, nil
+	case "subscript":
+		return aep.TextBaselineSubscript, nil
+	default:
+		return 0, fmt.Errorf("unsupported baseline_option %q", value)
+	}
+}
+
+func textAutoKernType(value string) (aep.TextAutoKernType, error) {
+	switch normalizeTextEnum(value) {
+	case "no_auto":
+		return aep.TextAutoKernNoAuto, nil
+	case "", "metric":
+		return aep.TextAutoKernMetric, nil
+	case "optical":
+		return aep.TextAutoKernOptical, nil
+	default:
+		return 0, fmt.Errorf("unsupported auto_kern_type %q", value)
+	}
+}
+
+func textLineJoinType(value string) (aep.TextLineJoinType, error) {
+	switch normalizeTextEnum(value) {
+	case "", "miter":
+		return aep.TextLineJoinMiter, nil
+	case "round":
+		return aep.TextLineJoinRound, nil
+	case "bevel":
+		return aep.TextLineJoinBevel, nil
+	default:
+		return 0, fmt.Errorf("unsupported line_join_type %q", value)
+	}
+}
+
+func textDigitSet(value string) (aep.TextDigitSet, error) {
+	switch normalizeTextEnum(value) {
+	case "", "default":
+		return aep.TextDigitSetDefault, nil
+	case "arabic":
+		return aep.TextDigitSetArabic, nil
+	case "hindi":
+		return aep.TextDigitSetHindi, nil
+	case "farsi":
+		return aep.TextDigitSetFarsi, nil
+	case "arabic_rtl":
+		return aep.TextDigitSetArabicRTL, nil
+	default:
+		return 0, fmt.Errorf("unsupported digit_set %q", value)
+	}
+}
+
+func textLeadingType(value string) (aep.TextLeadingType, error) {
+	switch normalizeTextEnum(value) {
+	case "", "roman":
+		return aep.TextLeadingRoman, nil
+	case "japanese":
+		return aep.TextLeadingJapanese, nil
+	default:
+		return 0, fmt.Errorf("unsupported leading_type %q", value)
+	}
+}
+
+func textParagraphDirection(value string) (aep.TextParagraphDirection, error) {
+	switch normalizeTextEnum(value) {
+	case "", "ltr":
+		return aep.TextDirectionLeftToRight, nil
+	case "rtl":
+		return aep.TextDirectionRightToLeft, nil
+	default:
+		return 0, fmt.Errorf("unsupported paragraph_direction %q", value)
+	}
 }
 
 func propertyVector(properties []profile.Property, matchName string, length int) ([]float64, bool) {
