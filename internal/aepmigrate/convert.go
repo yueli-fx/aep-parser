@@ -564,6 +564,11 @@ func materializeRectGraphicShapeLayer(comp *aep.Composition, source profile.Laye
 			return nil, err
 		}
 	}
+	if hasProperty(source, "ADBE Vector PuckerBloat Amount") {
+		if err := materializeShapePuckerBloat(shapeLayer, source); err != nil {
+			return nil, err
+		}
+	}
 	if hasProperty(source, "ADBE Vector Fill Color") {
 		if err := materializeShapeFill(shapeLayer, source); err != nil {
 			return nil, err
@@ -730,6 +735,19 @@ func materializeShapeZigZag(shapeLayer *aep.ShapeLayer, source profile.Layer) er
 	}
 	if value, ok := propertyFloat(source.Properties, "ADBE Vector Zigzag Points"); ok {
 		if err := zigZag.SetPoints(aep.ZigZagPoints(int(value))); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func materializeShapePuckerBloat(shapeLayer *aep.ShapeLayer, source profile.Layer) error {
+	puckerBloat, err := shapeLayer.RootGroup().AddPuckerBloat()
+	if err != nil {
+		return err
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector PuckerBloat Amount"); ok {
+		if err := puckerBloat.SetAmount(value); err != nil {
 			return err
 		}
 	}
@@ -1349,7 +1367,8 @@ func hasSupportedShapeFilter(layer profile.Layer) bool {
 		hasProperty(layer, "ADBE Vector Trim Offset") ||
 		hasProperty(layer, "ADBE Vector Zigzag Size") ||
 		hasProperty(layer, "ADBE Vector Zigzag Detail") ||
-		hasProperty(layer, "ADBE Vector Zigzag Points")
+		hasProperty(layer, "ADBE Vector Zigzag Points") ||
+		hasProperty(layer, "ADBE Vector PuckerBloat Amount")
 }
 
 func isSupportedParametricGraphicShape(shape profile.Shape) bool {
