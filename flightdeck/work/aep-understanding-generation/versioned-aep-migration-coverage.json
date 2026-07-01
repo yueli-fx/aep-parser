@@ -694,7 +694,66 @@
       ],
       "writer_status": "PD-6x6",
       "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
-      "host_open_status": "covered by recurring full-smoke gate; no active host-open gap",
+      "host_open_status": "direct_endpoint_hosts_pass; AE2021-AE2024 inferred_by_endpoint",
+      "host_open_endpoint_evidence": {
+        "open_mode": "target_bound",
+        "direct_hosts": [
+          "AE2020",
+          "AE2025"
+        ],
+        "inferred_hosts": [
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024"
+        ],
+        "recipes": [
+          "minimal-default-adjustment-layer",
+          "minimal-default-camera-layer",
+          "minimal-default-light-layer",
+          "minimal-default-null-layer",
+          "minimal-default-precomp-layer",
+          "minimal-default-shape-layer",
+          "minimal-essential-graphics-checkbox-controller",
+          "minimal-essential-graphics-color-controller",
+          "minimal-essential-graphics-controller",
+          "minimal-motion-graphics-template-name",
+          "minimal-null-layer"
+        ],
+        "chunks": [
+          {
+            "id": "chunk-1",
+            "artifact": "tmp/host_open_gaps/default-and-mogrt-smoke/chunk-1/matrix.json",
+            "ledger": "tmp/host_open_gaps/default-and-mogrt-smoke/chunk-1/ledger.md",
+            "totals": {
+              "total": 24,
+              "pass": 24,
+              "blocked": 0,
+              "failed": 0,
+              "skipped": 0
+            }
+          },
+          {
+            "id": "chunk-2",
+            "artifact": "tmp/host_open_gaps/default-and-mogrt-smoke/chunk-2/matrix.json",
+            "ledger": "tmp/host_open_gaps/default-and-mogrt-smoke/chunk-2/ledger.md",
+            "totals": {
+              "total": 20,
+              "pass": 20,
+              "blocked": 0,
+              "failed": 0,
+              "skipped": 0
+            }
+          }
+        ],
+        "totals": {
+          "total": 44,
+          "pass": 44,
+          "blocked": 0,
+          "failed": 0,
+          "skipped": 0
+        }
+      },
       "artifact": "tmp/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
       "ledger": "tmp/migration_matrix_uncovered_default_mogrt_all_6x6/ledger.md",
       "totals": {
@@ -711,7 +770,7 @@
       "id": "host-open-fanout",
       "scope": "non-representative text animator, effect, transform, project/comp, and camera-light variants",
       "status": "resolved_by_endpoint_policy",
-      "note": "Coverage now has direct target-bound endpoint host-open evidence for prior pending text/effect/layer/shape gaps. Broader all-host fanout remains optional policy escalation, not an active gap."
+      "note": "Coverage now has direct target-bound endpoint host-open evidence for prior pending text/effect/layer/shape gaps and default/MOGRT smoke recipes. Broader all-host fanout remains optional policy escalation, not an active gap."
     }
   ]
 }

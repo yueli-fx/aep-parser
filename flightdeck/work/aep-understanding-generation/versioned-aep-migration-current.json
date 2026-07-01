@@ -366,6 +366,18 @@
           "tmp/host_open_gaps/shape-all-family/chunk-3/matrix.json",
           "tmp/host_open_gaps/shape-all-family/chunk-4/matrix.json"
         ]
+      },
+      {
+        "coverage_id": "default-and-mogrt-smoke",
+        "gap_recipes": 11,
+        "chunks": 2,
+        "priority": "recorded_only_endpoint_batch",
+        "status": "pass",
+        "artifacts": [
+          "tmp/host_open_gaps/default-and-mogrt-smoke/chunk-1/matrix.json",
+          "tmp/host_open_gaps/default-and-mogrt-smoke/chunk-2/matrix.json"
+        ],
+        "result": "default layer, Essential Graphics, MOGRT name, and null smoke recipes passed endpoint target-bound host-open 44/44."
       }
     ],
     "remaining_gap_groups": []
@@ -502,6 +514,11 @@
         "command": "pwsh -File scripts/migration/query_coverage_summary.ps1 -Recipe minimal-layer-explicit-matte",
         "status": "pass",
         "evidence": "query returned layer-all-family writer matrix totals 1 pass, 5 blocked, 30 skipped and host-open evidence_level excluded_known_boundary"
+      },
+      {
+        "command": "pwsh -File scripts/migration/query_coverage_summary.ps1 -Totals",
+        "status": "pass",
+        "evidence": "host_open_evidence_levels recorded_status_only=0 and endpoint host-open cases=212/212 pass"
       },
       {
         "command": "pwsh -File scripts/migration/plan_host_open_gaps.ps1 -AERoot E:/adobe",
