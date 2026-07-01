@@ -898,3 +898,8 @@ Current:
   `tmp/migration_matrix_shape_gradient_stroke_all_6x6/matrix.json` is 144
   total, 144 pass, 0 blocked, 0 failed, 0 skipped for all four current
   gradient-stroke variants across 6 source writers and 6 target writers.
+- Static effect writer coverage was upgraded from the latest full `PD-1x6`
+  boundary to focused W2020-W2025 source-and-target coverage. The matrix
+  `tmp/migration_matrix_static_effects_all_6x6/matrix.json` is 72 total,
+  72 pass, 0 blocked, 0 failed, 0 skipped for `minimal-text-effect` and
+  `minimal-adjustment-layer` across 6 source writers and 6 target writers.

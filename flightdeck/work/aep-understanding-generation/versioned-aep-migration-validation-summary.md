@@ -25,6 +25,7 @@ which AE versions are validated." The current reviewed answer is:
 - Text animator migration has `PD-6x6` evidence for 22 recipe-owned animator fixtures, plus `OPEN-ALL-HOSTS` evidence for two representatives: static scalar skew and animated fill-color keyframes.
 - Text style migration has `PD-6x6`, `OPEN-H2025`, and `OPEN-ALL-HOSTS` evidence for the current style fixture set.
 - Dynamic effect params have `PD-6x6`, `OPEN-H2025`, and one vector-keyframe `OPEN-ALL-HOSTS` representative.
+- Static supported effects have `PD-6x6` evidence for the current recipe-owned static effect surface: text-layer Gaussian Blur params and adjustment-layer Gaussian Blur params.
 - Dynamic transforms have `PD-6x6`, `OPEN-H2025`, and one transform-ease `OPEN-ALL-HOSTS` representative.
 - Layer track matte migration has 31/36 all-writer matrix evidence for the classic track-matte fixture and `OPEN-ALL-HOSTS` evidence for its W2020 output. AE2025 source downgrades to W2020-W2024 are blocked by the explicit matte source contract; AE2025 source to W2025 passes. AE2025 explicit matte has `PD-1x1` evidence for AE2025 source to AE2025 target; lower-source explicit matte matrix cases are marked as source-contract skips, not conversion blockers.
 - Layer mask migration has `PD-6x6` evidence for the current recipe-owned mask surface: mode/options, static outline, and path keyframes. The representative W2020 mask output has `OPEN-ALL-HOSTS` evidence.
@@ -56,7 +57,7 @@ which AE versions are validated." The current reviewed answer is:
 
 | Capability | Recipes / scope | Profile-diff writer coverage | AE host open coverage | Evidence |
 | --- | --- | --- | --- | --- |
-| Static supported effects | `minimal-text-effect`, `minimal-adjustment-layer`, supported static built-in effect params | Included in latest full `PD-1x6` boundary | pending per-capability host ledger | `history.md`; latest full no-AE matrix 846 total, 840 pass, 0 blocked, 6 skipped |
+| Static supported effects | `minimal-text-effect`, `minimal-adjustment-layer`, supported static built-in effect params | `PD-6x6`: W2020-W2025 -> W2020-W2025 | pending per-capability host ledger | `tmp/migration_matrix_static_effects_all_6x6/matrix.json`: 72 total, 72 pass |
 | Effect layer-ref params | `minimal-effect-layer-param` | `PD-6x6`: W2020-W2025 -> W2020-W2025 | pending per-capability host ledger | `tmp/migration_matrix_effect_params_all_6x6/matrix.json`: 144 total, 144 pass |
 | Effect param expression | `minimal-effect-param-expression` | `PD-6x6` | `OPEN-H2025` | `tmp/migration_matrix_effect_params_all_6x6/matrix.json`; `history.md` dynamic effect-param entry |
 | Effect scalar keyframes | `minimal-effect-param-keyframes` | `PD-6x6` | `OPEN-H2025` | `tmp/migration_matrix_effect_params_all_6x6/matrix.json`; `history.md` dynamic effect-param entry |
@@ -121,6 +122,7 @@ Reviewed raw artifacts currently known:
 - `tmp/migration_matrix_text_style_all_6x6/matrix.json`: 72 total, 72 pass, 0 blocked, 0 failed, 0 skipped. This is W2020-W2025 source writers into W2020-W2025 target writers for `minimal-text-style` and `minimal-text-shape`.
 - `tmp/migration_matrix_transform_all_6x6/matrix.json`: 108 total, 108 pass, 0 blocked, 0 failed, 0 skipped. This is W2020-W2025 source writers into W2020-W2025 target writers for `minimal-transform-keyframes`, `minimal-transform-keyframe-ease`, and `minimal-transform-expression`.
 - `tmp/migration_matrix_effect_params_all_6x6/matrix.json`: 144 total, 144 pass, 0 blocked, 0 failed, 0 skipped. This is W2020-W2025 source writers into W2020-W2025 target writers for layer-ref, expression, scalar-keyframe, and vector-keyframe effect params.
+- `tmp/migration_matrix_static_effects_all_6x6/matrix.json`: 72 total, 72 pass, 0 blocked, 0 failed, 0 skipped. This is W2020-W2025 source writers into W2020-W2025 target writers for `minimal-text-effect` and `minimal-adjustment-layer`.
 - `tmp/migration_matrix_text_animators_endpoint_hosts/matrix.json`: 4 total, 4 pass, 0 blocked, 0 failed, 0 skipped. This is W2020 writer output for `minimal-text-animator-skew` and `minimal-text-animator-color-value-keyframes` opened in H2020 and H2025. H2021-H2024 were not run and are only inferred low-risk.
 - `tmp/migration_matrix_representative_all_hosts/matrix.json`: 30 total, 30 pass, 0 blocked, 0 failed, 0 skipped. This is W2020 source into W2020 target with AE-open on H2020-H2025 for `minimal-text-animator-skew`, `minimal-text-animator-color-value-keyframes`, `minimal-layer-track-matte`, `minimal-layer-mask`, and `minimal-shape-gradient-stroke`.
 - `tmp/migration_matrix_structural_all_hosts/matrix.json`: 30 total, 30 pass, 0 blocked, 0 failed, 0 skipped. This is W2020 source into W2020 target with AE-open on H2020-H2025 for `minimal-project-display-settings`, `minimal-comp-object-profile`, `minimal-camera-object-profile`, `minimal-light-object-profile`, and `minimal-precomp-layer`.
@@ -142,6 +144,7 @@ Reviewed raw artifacts currently known:
   - `tmp/migration_matrix_text_style_all_6x6/ledger.md`: generated from the text style 6x6 writer matrix; 2 recipe rows, each with W2020-W2025 source and target evidence.
   - `tmp/migration_matrix_transform_all_6x6/ledger.md`: generated from the dynamic transform 6x6 writer matrix; 3 recipe rows, each with W2020-W2025 source and target evidence.
   - `tmp/migration_matrix_effect_params_all_6x6/ledger.md`: generated from the dynamic effect-param 6x6 writer matrix; 4 recipe rows, each with W2020-W2025 source and target evidence.
+  - `tmp/migration_matrix_static_effects_all_6x6/ledger.md`: generated from the static effect 6x6 writer matrix; 2 recipe rows, each with W2020-W2025 source and target evidence.
   - `tmp/migration_matrix_layer_track_matte_all_6x6/ledger.md`: generated from the classic track matte all-writer matrix; 1 recipe row with 31 passed cases and 5 blocked AE2025-source downgrade cases.
   - `tmp/migration_matrix_layer_mask_all_6x6/ledger.md`: generated from the layer mask 6x6 writer matrix; 1 recipe row with W2020-W2025 source and target evidence.
   - `tmp/migration_matrix_shape_gradient_stroke_all_6x6/ledger.md`: generated from the gradient stroke 6x6 writer matrix; 4 recipe rows, each with W2020-W2025 source and target evidence.

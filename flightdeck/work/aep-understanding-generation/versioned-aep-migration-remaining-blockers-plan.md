@@ -1644,3 +1644,72 @@ Commit:
 ```text
 docs(aepmigrate): record gradient stroke six-writer evidence
 ```
+
+---
+
+## Task 40: Static Effect PD-6x6 Writer Matrix Evidence
+
+**Goal:** Upgrade static supported effect writer coverage from the latest full
+`PD-1x6` boundary to a focused full W2020-W2025 source-and-target matrix for
+the current recipe-owned static effect surface.
+
+**Architecture:** Reuse the matrix runner without AE-open. Run the two static
+effect recipes that actually materialize effects and static params:
+`minimal-text-effect` and `minimal-adjustment-layer`. Do not include
+`minimal-default-adjustment-layer` in this slice because it validates
+adjustment-layer creation without effect params.
+
+**Files:**
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/aep-understanding-generation/index.md`
+- Modify: `flightdeck/work/aep-understanding-generation/history.md`
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+- Modify: `flightdeck/cockpit.md`
+
+- [x] **Step 1: Run the static effect all-writer matrix**
+
+Run:
+
+```powershell
+go run ./cmd/aepmigrate matrix `
+  -recipe examples\recipes\minimal-text-effect.json `
+  -recipe examples\recipes\minimal-adjustment-layer.json `
+  -sources all `
+  -targets all `
+  -out tmp\migration_matrix_static_effects_all_6x6 `
+  -ledger-out tmp\migration_matrix_static_effects_all_6x6\ledger.md
+```
+
+Expected: 72 total, 72 pass, 0 blocked, 0 failed, 0 skipped. This is
+2 recipes x 6 source writers x 6 target writers.
+
+- [x] **Step 2: Update reviewed validation summary**
+
+If Step 1 passes, update the Effect Domain static supported effects row from
+latest full `PD-1x6` boundary evidence to focused `PD-6x6` evidence. Add
+`tmp/migration_matrix_static_effects_all_6x6/matrix.json` and its ledger to raw
+artifacts. Update `index.md`, `cockpit.md`, and append `history.md`.
+
+- [x] **Step 3: Verification and commit**
+
+Run:
+
+```powershell
+pwsh -File scripts\migration\verify_matrix.ps1
+go test ./...
+go vet ./...
+git diff --check
+```
+
+Read:
+
+```powershell
+Get-Content C:\Users\yl\.flightdeck\knowledge\git\commits.md -Raw
+Get-Content flightdeck\knowledge\workflow\verify.md -Raw
+```
+
+Commit:
+
+```text
+docs(aepmigrate): record static effects six-writer evidence
+```
