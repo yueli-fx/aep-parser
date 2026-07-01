@@ -76,6 +76,10 @@ Current:
   reports, discovers AE hosts, supports explicit `-ae-versions` host-version
   fanout for `-ae-open`, and protects broad AE-open runs with
   `-max-ae-open-cases`.
+- `cmd/aepmigrate convert` now also preserves supported layer-level label and
+  comment metadata for reconstructed non-shape layers; the layer label/comment
+  recipe fixtures pass AE2020/AE2022/AE2025 matrix conversion and AE2025 open
+  smoke.
 - Continue versioned migration by expanding supported conversion surface or
   deciding whether native AE2021/AE2023/AE2024 writer templates are worth
   adding.

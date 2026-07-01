@@ -290,6 +290,12 @@ git diff --check
     converts to AE2025 with `profile_diff_status: "pass"` and
     `profile_diff_count: 0`, and passes AE2025 open gate with
     `ae_open_status: "pass"` / `ae_open_exit_code: 0`.
+  - Layer metadata reconstruction now applies profile-visible layer `label`
+    and `comment` through `Layer.SetLabel` / `Layer.SetComment` for supported
+    non-shape layer reconstruction paths. `minimal-layer-label.json` and
+    `minimal-layer-comment.json` pass AE2020/AE2022/AE2025 matrix conversion
+    with `profile_diff_status: "pass"` and `profile_diff_count: 0`; both pass
+    AE2025 open gate with `ae_open_status: "pass"` / `ae_open_exit_code: 0`.
 
 - [x] Update `flightdeck/work/aep-understanding-generation/index.md` and `flightdeck/cockpit.md` to state:
   - `assess` is available;

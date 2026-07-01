@@ -388,6 +388,9 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				if err != nil {
 					return nil, fmt.Errorf("comp %q null layer %q: %w", comp.Name, layer.Name, err)
 				}
+				if err := materializeLayerMetadata(dstLayer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q null layer %q metadata: %w", comp.Name, layer.Name, err)
+				}
 				if err := materializeDefaultTransformSurface(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q null layer %q transform: %w", comp.Name, layer.Name, err)
 				}
@@ -400,6 +403,9 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				if err != nil {
 					return nil, fmt.Errorf("comp %q solid layer %q: %w", comp.Name, layer.Name, err)
 				}
+				if err := materializeLayerMetadata(dstLayer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q solid layer %q metadata: %w", comp.Name, layer.Name, err)
+				}
 				if err := materializeCenteredTransformSurface(next, dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q solid layer %q transform: %w", comp.Name, layer.Name, err)
 				}
@@ -410,6 +416,9 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				dstLayer, err := aep.NewAdjustmentLayer(next, layer.Name)
 				if err != nil {
 					return nil, fmt.Errorf("comp %q adjustment layer %q: %w", comp.Name, layer.Name, err)
+				}
+				if err := materializeLayerMetadata(dstLayer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q adjustment layer %q metadata: %w", comp.Name, layer.Name, err)
 				}
 				if err := materializeDefaultTransformSurface(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q adjustment layer %q transform: %w", comp.Name, layer.Name, err)
@@ -422,6 +431,9 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				if err != nil {
 					return nil, fmt.Errorf("comp %q camera layer %q: %w", comp.Name, layer.Name, err)
 				}
+				if err := materializeLayerMetadata(dstLayer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q camera layer %q metadata: %w", comp.Name, layer.Name, err)
+				}
 				if err := materializeCameraLightTransformSurface(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q camera layer %q transform: %w", comp.Name, layer.Name, err)
 				}
@@ -433,6 +445,9 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				if err != nil {
 					return nil, fmt.Errorf("comp %q light layer %q: %w", comp.Name, layer.Name, err)
 				}
+				if err := materializeLayerMetadata(dstLayer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q light layer %q metadata: %w", comp.Name, layer.Name, err)
+				}
 				if err := materializeCameraLightTransformSurface(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q light layer %q transform: %w", comp.Name, layer.Name, err)
 				}
@@ -443,6 +458,9 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				dstLayer, err := aep.NewTextLayer(next, layer.Name)
 				if err != nil {
 					return nil, fmt.Errorf("comp %q text layer %q: %w", comp.Name, layer.Name, err)
+				}
+				if err := materializeLayerMetadata(dstLayer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q text layer %q metadata: %w", comp.Name, layer.Name, err)
 				}
 				if layer.Text != nil {
 					if err := dstLayer.SetText(layer.Text.Text); err != nil {
@@ -480,6 +498,9 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				if err != nil {
 					return nil, fmt.Errorf("comp %q precomp layer %q: %w", comp.Name, layer.Name, err)
 				}
+				if err := materializeLayerMetadata(dstLayer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q precomp layer %q metadata: %w", comp.Name, layer.Name, err)
+				}
 				if err := materializePrecompTransformSurface(next, dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q precomp layer %q transform: %w", comp.Name, layer.Name, err)
 				}
@@ -492,6 +513,20 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 		}
 	}
 	return project, nil
+}
+
+func materializeLayerMetadata(layer *aep.Layer, source profile.Layer) error {
+	if source.Label != 0 && source.Label != layer.Label {
+		if err := layer.SetLabel(source.Label); err != nil {
+			return err
+		}
+	}
+	if source.Comment != "" {
+		if err := layer.SetComment(source.Comment); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func materializeDefaultTransformSurface(layer *aep.Layer, source profile.Layer) error {
@@ -1468,7 +1503,7 @@ func isSupportedDefaultNullLayer(layer profile.Layer) bool {
 	if layer.Type != "null" {
 		return false
 	}
-	if layer.Comment != "" || layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
+	if layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
 		return false
 	}
 	if layer.Text != nil || len(layer.Effects) != 0 || len(layer.Masks) != 0 || len(layer.Shapes) != 0 || len(layer.Markers) != 0 {
@@ -1504,7 +1539,7 @@ func isSupportedDefaultSolidLayer(layer profile.Layer, footage convertFootageInd
 	if !ok || solid.Width == 0 || solid.Height == 0 || solid.SolidColor == nil {
 		return false
 	}
-	if layer.Comment != "" || layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
+	if layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
 		return false
 	}
 	if layer.Text != nil || len(layer.Effects) != 0 || len(layer.Masks) != 0 || len(layer.Shapes) != 0 || len(layer.Markers) != 0 {
@@ -1540,7 +1575,7 @@ func isSupportedDefaultAdjustmentLayer(layer profile.Layer, footage convertFoota
 	if !ok || source.Width == 0 || source.Height == 0 || source.SolidColor == nil {
 		return false
 	}
-	if layer.Comment != "" || layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
+	if layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
 		return false
 	}
 	if layer.Text != nil || len(layer.Effects) != 0 || len(layer.Masks) != 0 || len(layer.Shapes) != 0 || len(layer.Markers) != 0 {
@@ -1580,7 +1615,7 @@ func isSupportedDefaultCameraOrLightLayer(layer profile.Layer, typ string) bool 
 	if layer.Type != typ || layer.SourceRef != nil {
 		return false
 	}
-	if layer.Comment != "" || layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
+	if layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
 		return false
 	}
 	if layer.Text != nil || len(layer.Effects) != 0 || len(layer.Masks) != 0 || len(layer.Shapes) != 0 || len(layer.Markers) != 0 {
@@ -1608,7 +1643,7 @@ func isSupportedDefaultTextLayer(layer profile.Layer) bool {
 	if layer.Type != "text" || layer.Text == nil || layer.SourceRef != nil {
 		return false
 	}
-	if layer.Comment != "" || layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
+	if layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
 		return false
 	}
 	if len(layer.Effects) != 0 || len(layer.Masks) != 0 || len(layer.Shapes) != 0 || len(layer.Markers) != 0 {
@@ -1643,7 +1678,7 @@ func isSupportedDefaultShapeLayer(layer profile.Layer) bool {
 	if layer.Type != "shape" || layer.SourceRef != nil || layer.Text != nil {
 		return false
 	}
-	if layer.Comment != "" || layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
+	if layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
 		return false
 	}
 	if len(layer.Effects) != 0 || len(layer.Masks) != 0 || len(layer.Shapes) != 0 || len(layer.Markers) != 0 {
@@ -1767,7 +1802,7 @@ func isSupportedShapeLayerBase(layer profile.Layer) bool {
 	if layer.Type != "shape" || layer.SourceRef != nil || layer.Text != nil {
 		return false
 	}
-	if layer.Comment != "" || layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
+	if layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
 		return false
 	}
 	if len(layer.Effects) != 0 || len(layer.Masks) != 0 || len(layer.Markers) != 0 {
@@ -1802,7 +1837,7 @@ func isSupportedDefaultPrecompLayer(layer profile.Layer, comps convertCompIndex)
 	if _, ok := comps.sourceComposition(layer); !ok {
 		return false
 	}
-	if layer.Comment != "" || layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
+	if layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
 		return false
 	}
 	if layer.Text != nil || len(layer.Effects) != 0 || len(layer.Masks) != 0 || len(layer.Shapes) != 0 || len(layer.Markers) != 0 {

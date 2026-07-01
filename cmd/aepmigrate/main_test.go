@@ -411,7 +411,7 @@ func TestRunConvertWritesRectFillShapeLayerOutput(t *testing.T) {
 }
 
 func TestRunConvertWritesBlockedReportWithoutOutput(t *testing.T) {
-	input := writeTempProjectWithCommentedTextLayer(t)
+	input := writeTempProjectWithKeyframedNullLayer(t)
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
 	reportPath := filepath.Join(t.TempDir(), "convert.json")
 	var stdout, stderr bytes.Buffer
@@ -515,6 +515,30 @@ func writeTempProjectWithMovedNullLayer(t *testing.T) string {
 		t.Fatalf("SetLayerTransform: %v", err)
 	}
 	return writeProject(t, project, "moved-null-layer.aep")
+}
+
+func writeTempProjectWithKeyframedNullLayer(t *testing.T) string {
+	t.Helper()
+	project := aep.NewProject(aep.TargetAE2020)
+	comp, err := aep.NewComposition(project, "Main", 640, 360, 24, 2)
+	if err != nil {
+		t.Fatalf("NewComposition: %v", err)
+	}
+	layer, err := aep.NewNullLayer(comp, "Controller")
+	if err != nil {
+		t.Fatalf("NewNullLayer: %v", err)
+	}
+	transform := aep.NewLayerTransform()
+	if err := transform.Position().AddKeyframeLinear(0, [2]float64{0, 0}); err != nil {
+		t.Fatalf("Position.AddKeyframeLinear 0: %v", err)
+	}
+	if err := transform.Position().AddKeyframeLinear(1, [2]float64{320, 180}); err != nil {
+		t.Fatalf("Position.AddKeyframeLinear 1: %v", err)
+	}
+	if err := aep.SetLayerTransform(layer, transform); err != nil {
+		t.Fatalf("SetLayerTransform: %v", err)
+	}
+	return writeProject(t, project, "keyframed-null-layer.aep")
 }
 
 func writeTempProjectWithCommentedTextLayer(t *testing.T) string {
