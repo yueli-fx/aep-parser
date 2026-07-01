@@ -374,6 +374,30 @@
       "artifact": "tmp/migration_matrix_shape_all_6x6/matrix.json",
       "ledger": "tmp/migration_matrix_shape_all_6x6/ledger.md",
       "totals": { "total": 972, "pass": 972, "blocked": 0, "failed": 0, "skipped": 0 }
+    },
+    {
+      "id": "default-and-mogrt-smoke",
+      "domain": "mixed",
+      "scope": "current recipes not owned by a narrower family matrix: default layer smoke, null parent smoke, Essential Graphics controllers, and motion graphics template name",
+      "recipes": [
+        "minimal-default-adjustment-layer",
+        "minimal-default-camera-layer",
+        "minimal-default-light-layer",
+        "minimal-default-null-layer",
+        "minimal-default-precomp-layer",
+        "minimal-default-shape-layer",
+        "minimal-essential-graphics-checkbox-controller",
+        "minimal-essential-graphics-color-controller",
+        "minimal-essential-graphics-controller",
+        "minimal-motion-graphics-template-name",
+        "minimal-null-layer"
+      ],
+      "writer_status": "PD-6x6",
+      "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
+      "host_open_status": "covered by recurring full-smoke gate; no active host-open gap",
+      "artifact": "tmp/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
+      "ledger": "tmp/migration_matrix_uncovered_default_mogrt_all_6x6/ledger.md",
+      "totals": { "total": 396, "pass": 396, "blocked": 0, "failed": 0, "skipped": 0 }
     }
   ],
   "open_items": [

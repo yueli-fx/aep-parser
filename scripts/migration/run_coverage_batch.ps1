@@ -91,6 +91,22 @@ if ($SkipRun) {
   }
 }
 
+if (-not (Test-Path -LiteralPath $CoveragePath)) {
+  $sourceCoverage = $current.truth_sources.coverage
+  if (-not $sourceCoverage) {
+    throw "CoveragePath '$CoveragePath' does not exist and current JSON has no truth_sources.coverage"
+  }
+  if (-not (Test-Path -LiteralPath $sourceCoverage)) {
+    throw "CoveragePath '$CoveragePath' does not exist and source coverage not found: $sourceCoverage"
+  }
+  $coverageDir = Split-Path -Parent $CoveragePath
+  if ($coverageDir -and -not (Test-Path -LiteralPath $coverageDir)) {
+    New-Item -ItemType Directory -Path $coverageDir | Out-Null
+  }
+  Copy-Item -LiteralPath $sourceCoverage -Destination $CoveragePath
+  Write-Output "seeded coverage candidate from '$sourceCoverage': $CoveragePath"
+}
+
 $sync = Join-Path (Resolve-Path ".").Path "scripts/migration/sync_coverage_batch.ps1"
 pwsh -File $sync -BatchId $BatchId -CurrentPath $CurrentPath -CoveragePath $CoveragePath
 if ($LASTEXITCODE -ne 0) {

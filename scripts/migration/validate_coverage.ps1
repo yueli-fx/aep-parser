@@ -45,6 +45,7 @@ $coverage = Get-Content -Raw $CoveragePath | ConvertFrom-Json
 $checked = 0
 $checkedGates = 0
 $missing = @()
+$coveredRecipeNames = [System.Collections.Generic.HashSet[string]]::new()
 
 if (-not $coverage.host_open_policy) {
   throw "host_open_policy is required"
@@ -112,6 +113,9 @@ foreach ($record in $coverage.coverage) {
   $matrix = Get-Content -Raw $record.artifact | ConvertFrom-Json
   $matrixTotals = Get-MatrixTotals $matrix
   $matrixRecipes = @($matrix.cases | ForEach-Object { $_.recipe_name } | Sort-Object -Unique)
+  foreach ($matrixRecipe in $matrixRecipes) {
+    [void]$coveredRecipeNames.Add($matrixRecipe)
+  }
 
   Assert-Equal "$($record.id).total" ([int]$record.totals.total) $matrixTotals.total
   Assert-Equal "$($record.id).pass" ([int]$record.totals.pass) $matrixTotals.pass
@@ -203,4 +207,10 @@ if ($missing.Count -gt 0) {
   throw "Missing coverage artifacts:`n$($missing -join "`n")"
 }
 
-Write-Output "coverage ok: checked $checked matrix artifacts, $checkedGates recurring gates, and host-open policy"
+$allRecipeNames = @(Get-ChildItem "examples/recipes/*.json" | ForEach-Object { $_.BaseName } | Sort-Object -Unique)
+$uncoveredRecipeNames = @($allRecipeNames | Where-Object { -not $coveredRecipeNames.Contains($_) })
+if ($uncoveredRecipeNames.Count -gt 0) {
+  throw "Coverage records do not cover all recipes. missing=[$($uncoveredRecipeNames -join ',')]"
+}
+
+Write-Output "coverage ok: checked $checked matrix artifacts, $checkedGates recurring gates, host-open policy, and $($allRecipeNames.Count) recipes"

@@ -205,6 +205,25 @@
           "out": "tmp/migration_matrix_shape_all_6x6",
           "matrix": "tmp/migration_matrix_shape_all_6x6/matrix.json",
           "ledger": "tmp/migration_matrix_shape_all_6x6/ledger.md"
+        },
+        {
+          "coverage_id": "default-and-mogrt-smoke",
+          "recipe_paths": [
+            "examples/recipes/minimal-default-adjustment-layer.json",
+            "examples/recipes/minimal-default-camera-layer.json",
+            "examples/recipes/minimal-default-light-layer.json",
+            "examples/recipes/minimal-default-null-layer.json",
+            "examples/recipes/minimal-default-precomp-layer.json",
+            "examples/recipes/minimal-default-shape-layer.json",
+            "examples/recipes/minimal-essential-graphics-checkbox-controller.json",
+            "examples/recipes/minimal-essential-graphics-color-controller.json",
+            "examples/recipes/minimal-essential-graphics-controller.json",
+            "examples/recipes/minimal-motion-graphics-template-name.json",
+            "examples/recipes/minimal-null-layer.json"
+          ],
+          "out": "tmp/migration_matrix_uncovered_default_mogrt_all_6x6",
+          "matrix": "tmp/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
+          "ledger": "tmp/migration_matrix_uncovered_default_mogrt_all_6x6/ledger.md"
         }
       ]
     }
@@ -335,7 +354,7 @@
       {
         "command": "pwsh -File scripts/migration/validate_coverage.ps1",
         "status": "pass",
-        "evidence": "coverage ok: checked 13 matrix artifacts, 2 recurring gates, and host-open policy"
+        "evidence": "coverage ok: checked 14 matrix artifacts, 2 recurring gates, host-open policy, and 141 recipes"
       },
       {
         "command": "pwsh -File scripts/migration/plan_host_open_gaps.ps1 -AERoot E:/adobe",
