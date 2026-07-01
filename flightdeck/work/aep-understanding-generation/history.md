@@ -783,3 +783,12 @@ Current:
   0 failed, 0 skipped for AE2020 source into AE2020/AE2022/AE2025 writer
   targets. Latest full no-AE migration matrix: 423 total, 408 pass, 15
   intentionally blocked, 0 failed, 0 skipped.
+- Shape gradient stroke migration now preserves the current recipe-owned
+  gradient stroke surface on supported parametric shape layers. Conversion
+  replays gradient type, start/end points, radial highlight length/angle,
+  color/alpha stops, stroke width, line cap, line join, and miter limit through
+  `GradientStrokeNode`. Focused gradient-stroke matrix evidence:
+  `tmp/migration_matrix_shape_gradient_stroke/matrix.json` is 12 total, 12
+  pass, 0 blocked, 0 failed, 0 skipped for AE2020 source into
+  AE2020/AE2022/AE2025 writer targets. Latest full no-AE migration matrix:
+  423 total, 420 pass, 3 intentionally blocked, 0 failed, 0 skipped.

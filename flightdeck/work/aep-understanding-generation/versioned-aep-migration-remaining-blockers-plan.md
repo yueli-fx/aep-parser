@@ -286,3 +286,105 @@ Use:
 ```text
 feat(aepmigrate): preserve layer masks
 ```
+
+---
+
+## Task 10: Shape Gradient Stroke Slice, Red Tests
+
+- [x] **Step 1: Add focused failing convert tests**
+
+Add tests for the four existing gradient-stroke recipes:
+
+```go
+func TestConvertWritesRecipeShapeGradientStrokeProjects(t *testing.T)
+```
+
+The table should cover:
+
+- `minimal-shape-gradient-stroke.json`
+- `minimal-shape-gradient-stroke-alpha-stops.json`
+- `minimal-shape-gradient-stroke-highlight.json`
+- `minimal-shape-gradient-stroke-style.json`
+
+Each case should compile the recipe, run `Convert` to `VersionAE2025`, and
+assert status pass with profile diff pass and zero diffs.
+
+- [x] **Step 2: Run the red tests**
+
+```powershell
+go test ./internal/aepmigrate -run TestConvertWritesRecipeShapeGradientStrokeProjects -count=1
+```
+
+Expected: fail because gradient stroke migration is not implemented or still
+blocked by the current convert scope.
+
+## Task 11: Shape Gradient Stroke Implementation
+
+- [x] **Step 1: Inspect writer/profile support**
+
+Use narrow searches around `GradientStrokeNode`, `AddGradientStroke`,
+`hasGradientFillGraphic`, `materializeShapeGradientFill`, and shape profile
+properties.
+
+- [x] **Step 2: Implement the supported gradient stroke path**
+
+Reuse the gradient fill replay pattern for gradient stroke, including gradient
+type, start/end points, highlight length/angle, gradient color/alpha stops,
+stroke width, line cap, line join, and miter limit.
+
+- [x] **Step 3: Run the green tests**
+
+```powershell
+go test ./internal/aepmigrate -run TestConvertWritesRecipeShapeGradientStrokeProjects -count=1
+```
+
+Expected: all four recipe-owned gradient-stroke fixtures pass profile diff
+verification.
+
+## Task 12: Gradient Stroke Matrix and Ledger
+
+- [x] **Step 1: Run focused gradient-stroke matrix**
+
+```powershell
+go run ./cmd/aepmigrate matrix -recipe examples\recipes\minimal-shape-gradient-stroke.json -recipe examples\recipes\minimal-shape-gradient-stroke-alpha-stops.json -recipe examples\recipes\minimal-shape-gradient-stroke-highlight.json -recipe examples\recipes\minimal-shape-gradient-stroke-style.json -sources AE2020 -targets AE2020,AE2022,AE2025 -out tmp\migration_matrix_shape_gradient_stroke
+```
+
+Actual result: 12 total, 12 pass, 0 blocked, 0 failed, 0 skipped.
+
+- [x] **Step 2: Refresh full no-AE matrix**
+
+```powershell
+go run ./cmd/aepmigrate matrix -recipes examples\recipes -sources AE2020 -targets AE2020,AE2022,AE2025 -out tmp\migration_matrix_smoke_all
+```
+
+Actual result: 423 total, 420 pass, 3 blocked, 0 failed, 0 skipped.
+
+- [x] **Step 3: Update validation summary, index, and history**
+
+Record the focused gradient-stroke matrix, refreshed full boundary, and
+remaining blockers.
+
+## Task 13: Gradient Stroke Commit Gate
+
+- [x] **Step 1: Run full verification**
+
+```powershell
+go test ./...
+go vet ./...
+git diff --check
+```
+
+- [x] **Step 2: Read commit/verify knowledge**
+
+```powershell
+Get-Content C:\Users\yl\.flightdeck\knowledge\git\commits.md -Raw
+Get-Content flightdeck\knowledge\workflow\verify.md -Raw
+```
+
+- [x] **Step 3: Commit**
+
+Use:
+
+```text
+feat(aepmigrate): preserve gradient strokes
+```

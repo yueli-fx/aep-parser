@@ -83,15 +83,15 @@ Current:
   switches / refs / timing / transforms, transform keyframes/ease/expressions,
   single-run/single-paragraph text style, supported text animator slices,
   supported camera/light options, supported parametric graphic/filter shape
-  slices, precomp refs, supported layer matte/mask slices, and supported
-  built-in effects.
+  slices, supported gradient fill/stroke slices, precomp refs, supported layer
+  matte/mask slices, and supported built-in effects.
 - Effect reconstruction now covers supported static params, same-comp layer-ref
   params, parameter expressions, scalar keyframes, and vector keyframes.
 - Text animator reconstruction now covers the current recipe-owned animator
   surface by profile-visible properties: opacity, position, scale, rotation
   Z/X/Y, fill/stroke color, tracking, character offset, fill/stroke opacity,
   stroke width, skew, range-offset keyframes, and supported value keyframes.
-- Latest full no-AE matrix: 423 total, 408 pass, 15 intentionally blocked,
+- Latest full no-AE matrix: 423 total, 420 pass, 3 intentionally blocked,
   0 failed, 0 skipped.
 - Latest AE-open checks: dynamic effect-param and transform dynamic fixtures
   plus text style fixtures pass AE2025 open smoke; representative AE2020 writer

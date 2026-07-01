@@ -345,10 +345,11 @@ func isSupportedRectGraphicShapeLayer(layer profile.Layer) bool {
 	hasFill := hasProperty(layer, "ADBE Vector Fill Color")
 	hasStroke := hasProperty(layer, "ADBE Vector Stroke Color")
 	hasGradientFill := hasGradientFillGraphic(layer)
-	if !hasFill && !hasStroke && !hasGradientFill && !hasSupportedShapeFilter(layer) {
+	hasGradientStroke := hasGradientStrokeGraphic(layer)
+	if !hasFill && !hasStroke && !hasGradientFill && !hasGradientStroke && !hasSupportedShapeFilter(layer) {
 		return false
 	}
-	if (hasProperty(layer, "ADBE Vector Grad Colors") && !hasGradientFill) ||
+	if (hasProperty(layer, "ADBE Vector Grad Colors") && !hasGradientFill && !hasGradientStroke) ||
 		hasProperty(layer, "ADBE Vector Stroke Dash 2") ||
 		hasProperty(layer, "ADBE Vector Stroke Gap 2") ||
 		hasProperty(layer, "ADBE Vector Stroke Offset") ||
@@ -363,6 +364,12 @@ func hasGradientFillGraphic(layer profile.Layer) bool {
 	return hasProperty(layer, "ADBE Vector Grad Colors") &&
 		hasProperty(layer, "ADBE Vector Grad Type") &&
 		!hasProperty(layer, "ADBE Vector Stroke Width")
+}
+
+func hasGradientStrokeGraphic(layer profile.Layer) bool {
+	return hasProperty(layer, "ADBE Vector Grad Colors") &&
+		hasProperty(layer, "ADBE Vector Grad Type") &&
+		hasProperty(layer, "ADBE Vector Stroke Width")
 }
 
 func hasSupportedShapeFilter(layer profile.Layer) bool {
