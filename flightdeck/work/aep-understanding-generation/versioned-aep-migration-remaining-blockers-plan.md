@@ -388,3 +388,74 @@ Use:
 ```text
 feat(aepmigrate): preserve gradient strokes
 ```
+
+---
+
+## Task 14: Host-Open Representative Plan
+
+- [x] **Step 1: Treat writer targets and AE host versions as separate axes**
+
+Current writer targets remain `W2020/W2022/W2025` because those are the
+implemented writer fingerprints. AE host-open validation should cover installed
+hosts `H2020/H2021/H2022/H2023/H2024/H2025` through `-ae-versions all`.
+
+- [x] **Step 2: Select representative W2020 outputs for all-host smoke**
+
+Use W2020 source and W2020 target outputs so older hosts can open the files.
+This slice covers recent and previously inferred evidence without expanding the
+writer surface:
+
+- `minimal-text-animator-skew.json`
+- `minimal-text-animator-color-value-keyframes.json`
+- `minimal-layer-track-matte.json`
+- `minimal-layer-mask.json`
+- `minimal-shape-gradient-stroke.json`
+
+The AE2025 explicit matte fixture is excluded from all-host smoke because its
+current writer contract is AE2025-target only.
+
+## Task 15: Host-Open Representative Matrix
+
+- [x] **Step 1: Run all-host representative matrix**
+
+```powershell
+go run ./cmd/aepmigrate matrix -recipe examples\recipes\minimal-text-animator-skew.json -recipe examples\recipes\minimal-text-animator-color-value-keyframes.json -recipe examples\recipes\minimal-layer-track-matte.json -recipe examples\recipes\minimal-layer-mask.json -recipe examples\recipes\minimal-shape-gradient-stroke.json -sources AE2020 -targets AE2020 -ae-open -ae-root E:\adobe -ae-versions all -max-ae-open-cases 30 -out tmp\migration_matrix_representative_all_hosts
+```
+
+Actual result: 30 total, 30 pass, 0 blocked, 0 failed, 0 skipped. The matrix
+converted five W2020 writer outputs and opened each output in H2020-H2025.
+
+- [x] **Step 2: Summarize host-open result by recipe and host**
+
+Record any skipped host as missing environment, any blocked case as conversion
+scope, and any failed case as a real host-open regression until proven
+otherwise.
+
+## Task 16: Host-Open Ledger and Commit Gate
+
+- [x] **Step 1: Update validation summary, index, and history**
+
+Promote the all-host representative matrix into the validation summary. Remove
+`INFER-MID-HOSTS` wording for the two text animator representatives only if the
+all-host matrix passes for H2021-H2024.
+
+- [x] **Step 2: Run full verification**
+
+```powershell
+go test ./...
+go vet ./...
+git diff --check
+```
+
+- [x] **Step 3: Read commit/verify knowledge and commit**
+
+```powershell
+Get-Content C:\Users\yl\.flightdeck\knowledge\git\commits.md -Raw
+Get-Content flightdeck\knowledge\workflow\verify.md -Raw
+```
+
+Use:
+
+```text
+docs(aepmigrate): record all-host migration evidence
+```

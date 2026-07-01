@@ -95,10 +95,10 @@ Current:
   0 failed, 0 skipped.
 - Latest AE-open checks: dynamic effect-param and transform dynamic fixtures
   plus text style fixtures pass AE2025 open smoke; representative AE2020 writer
-  outputs for vector effect keyframes, transform ease, and text style open
-  across AE2020, AE2021, AE2022, AE2023, AE2024, and AE2025 hosts. Text
-  animator representatives now have endpoint host-open evidence on AE2020 and
-  AE2025; AE2021-AE2024 are recorded as inferred, not directly run.
+  outputs for vector effect keyframes, transform ease, text style, text
+  animator skew/color-keyframes, classic track matte, layer mask, and base
+  shape gradient stroke open across AE2020, AE2021, AE2022, AE2023, AE2024, and
+  AE2025 hosts.
 - Continue versioned migration by expanding supported conversion surface,
   turning the useful matrix boundary into a recurring verification command, or
   deciding whether native AE2021/AE2023/AE2024 writer templates are worth adding.

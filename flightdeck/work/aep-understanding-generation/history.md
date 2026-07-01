@@ -792,3 +792,13 @@ Current:
   pass, 0 blocked, 0 failed, 0 skipped for AE2020 source into
   AE2020/AE2022/AE2025 writer targets. Latest full no-AE migration matrix:
   423 total, 420 pass, 3 intentionally blocked, 0 failed, 0 skipped.
+- Migration host-open representative evidence now covers five W2020 writer
+  outputs across every installed AE host from AE2020 through AE2025:
+  `minimal-text-animator-skew`,
+  `minimal-text-animator-color-value-keyframes`,
+  `minimal-layer-track-matte`, `minimal-layer-mask`, and
+  `minimal-shape-gradient-stroke`. Matrix artifact
+  `tmp/migration_matrix_representative_all_hosts/matrix.json` is 30 total, 30
+  pass, 0 blocked, 0 failed, 0 skipped. This removes the prior H2021-H2024
+  inference marker for the two text animator representatives and adds direct
+  all-host smoke evidence for recent matte, mask, and gradient-stroke slices.
