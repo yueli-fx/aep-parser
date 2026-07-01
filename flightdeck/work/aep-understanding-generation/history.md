@@ -931,3 +931,8 @@ Current:
   `tmp/migration_matrix_light_all_6x6/matrix.json` is 504 total, 504 pass,
   0 blocked, 0 failed, 0 skipped for all 14 current `minimal-light-*` recipes
   across 6 source writers and 6 target writers.
+- Project writer coverage was upgraded from structural representative evidence
+  to focused W2020-W2025 source-and-target coverage. The matrix
+  `tmp/migration_matrix_project_all_6x6/matrix.json` is 144 total, 144 pass,
+  0 blocked, 0 failed, 0 skipped for all 4 current `minimal-project-*` recipes
+  across 6 source writers and 6 target writers.
