@@ -66,6 +66,23 @@ if ($current.host_open_gap_audit) {
   }
 }
 
+if ($current.current_state.latest_standalone_verify_gate) {
+  $gate = $current.current_state.latest_standalone_verify_gate
+  Assert-PathExists "current_state.latest_standalone_verify_gate.artifact" $gate.artifact
+  Assert-PathExists "current_state.latest_standalone_verify_gate.source" $gate.source
+  Assert-PathExists "current_state.latest_standalone_verify_gate.target" $gate.target
+  Assert-PathExists "current_state.latest_standalone_verify_gate.migration_report" $gate.migration_report
+
+  $verify = Get-Content -Raw $gate.artifact | ConvertFrom-Json
+  if ($gate.status -ne $verify.summary.status) {
+    throw "current_state.latest_standalone_verify_gate.status mismatch: current=$($gate.status) actual=$($verify.summary.status)"
+  }
+  if ($gate.profile_diff_status -ne $verify.verification.profile_diff_status) {
+    throw "current_state.latest_standalone_verify_gate.profile_diff_status mismatch: current=$($gate.profile_diff_status) actual=$($verify.verification.profile_diff_status)"
+  }
+  Assert-Equal "current_state.latest_standalone_verify_gate.profile_diff_count" ([int]$gate.profile_diff_count) ([int]$verify.verification.profile_diff_count)
+}
+
 foreach ($tool in $current.tooling) {
   if (-not $tool.id) {
     throw "tooling entry missing id"
