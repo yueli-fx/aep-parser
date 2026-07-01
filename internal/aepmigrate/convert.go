@@ -333,7 +333,7 @@ func convertScopeEntries(target VersionLabel, prof *profile.Profile) []Entry {
 					Path:          "comps[" + comp.Name + "].layers[" + layer.Name + "]",
 					Class:         ClassRetargeted,
 					TargetVersion: target,
-					Reason:        "Single rect graphic shape layer is recreated from the stable profile shape properties.",
+					Reason:        "Single parametric graphic shape layer is recreated from the stable profile shape properties.",
 				})
 				continue
 			}
@@ -350,7 +350,7 @@ func convertScopeEntries(target VersionLabel, prof *profile.Profile) []Entry {
 				Path:          "comps[" + comp.Name + "].layers[" + layer.Name + "]",
 				Class:         ClassBlocked,
 				TargetVersion: target,
-				Reason:        "This convert slice only reconstructs no-layer comps, default null layers, default solid layers, default adjustment layers, default camera layers, default light layers, default text layers, default empty shape layers, single rect fill/stroke shape layers, and default precomp layers; refusing output to avoid silent layer loss.",
+				Reason:        "This convert slice only reconstructs no-layer comps, default null layers, default solid layers, default adjustment layers, default camera layers, default light layers, default text layers, default empty shape layers, single rect/ellipse fill/stroke shape layers, and default precomp layers; refusing output to avoid silent layer loss.",
 			})
 		}
 	}
@@ -730,6 +730,21 @@ func materializeShapeStroke(shapeLayer *aep.ShapeLayer, source profile.Layer) er
 	}
 	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper End Ease"); ok {
 		if err := stroke.Taper().SetEndEase(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper Wave Amount"); ok {
+		if err := stroke.Wave().SetAmount(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper Wavelength"); ok {
+		if err := stroke.Wave().SetWavelength(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper Wave Phase"); ok {
+		if err := stroke.Wave().SetPhase(value); err != nil {
 			return err
 		}
 	}
@@ -1199,7 +1214,8 @@ func isSupportedRectGraphicShapeLayer(layer profile.Layer) bool {
 		hasProperty(layer, "ADBE Vector Stroke Dash 2") ||
 		hasProperty(layer, "ADBE Vector Stroke Gap 2") ||
 		hasProperty(layer, "ADBE Vector Stroke Offset") ||
-		hasProperty(layer, "ADBE Vector Stroke Wave Amount") {
+		hasProperty(layer, "ADBE Vector Taper Wave Units") ||
+		hasProperty(layer, "ADBE Vector Taper Wave Cycles") {
 		return false
 	}
 	return true
