@@ -238,14 +238,16 @@ git diff --check
     fixture passes AE2025 open gate with `ae_open_status: "pass"` /
     `ae_open_exit_code: 0`. This slice intentionally excludes shape content
     nodes; rect/fill/stroke/path/filter migration remains a later surface.
-  - Single rect+fill shape-layer sources generated through `aep.NewShapeLayer`
-    with `RootGroup().AddRect()` / `RootGroup().AddFill()` and
-    `examples/recipes/minimal-shape-rect-fill-default-transform.json` convert
-    to AE2025 with `profile_diff_status: "pass"` and `profile_diff_count: 0`;
-    the recipe fixture passes AE2025 open gate with `ae_open_status: "pass"` /
-    `ae_open_exit_code: 0`. This slice reconstructs rect size/position/
-    roundness plus fill color/opacity/blend/composite/fill-rule from stable
-    profile properties and intentionally keeps layer transform at the default.
+  - Single rect fill/stroke shape-layer sources generated through
+    `aep.NewShapeLayer` with `RootGroup().AddRect()` plus `AddFill()` and/or
+    `AddStroke()` convert to AE2025 with `profile_diff_status: "pass"` and
+    `profile_diff_count: 0`; `minimal-shape-rect-fill-default-transform.json`
+    and `minimal-shape-stroke-style.json` pass AE2025 open gate with
+    `ae_open_status: "pass"` / `ae_open_exit_code: 0`. This slice reconstructs
+    rect size/position/roundness, fill color/opacity/blend/composite/fill-rule,
+    and stroke color/opacity/width/cap/join/miter/composite/blend from stable
+    profile properties while still excluding dashes/taper/wave/gradient/filter
+    shape content.
   - Static layer transform reconstruction now maps profile-visible
     `ADBE Anchor Point`, `ADBE Position`, `ADBE Scale`, `ADBE Rotate Z`, and
     `ADBE Opacity` back into `LayerTransform`, converting profile scale/opacity

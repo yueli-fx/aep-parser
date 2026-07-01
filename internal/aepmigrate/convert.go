@@ -328,12 +328,12 @@ func convertScopeEntries(target VersionLabel, prof *profile.Profile) []Entry {
 				})
 				continue
 			}
-			if isSupportedRectFillShapeLayer(layer) {
+			if isSupportedRectGraphicShapeLayer(layer) {
 				entries = append(entries, Entry{
 					Path:          "comps[" + comp.Name + "].layers[" + layer.Name + "]",
 					Class:         ClassRetargeted,
 					TargetVersion: target,
-					Reason:        "Single rect+fill shape layer is recreated from the stable profile shape properties.",
+					Reason:        "Single rect graphic shape layer is recreated from the stable profile shape properties.",
 				})
 				continue
 			}
@@ -350,7 +350,7 @@ func convertScopeEntries(target VersionLabel, prof *profile.Profile) []Entry {
 				Path:          "comps[" + comp.Name + "].layers[" + layer.Name + "]",
 				Class:         ClassBlocked,
 				TargetVersion: target,
-				Reason:        "This convert slice only reconstructs no-layer comps, default null layers, default solid layers, default adjustment layers, default camera layers, default light layers, default text layers, default empty shape layers, single rect+fill shape layers, and default precomp layers; refusing output to avoid silent layer loss.",
+				Reason:        "This convert slice only reconstructs no-layer comps, default null layers, default solid layers, default adjustment layers, default camera layers, default light layers, default text layers, default empty shape layers, single rect fill/stroke shape layers, and default precomp layers; refusing output to avoid silent layer loss.",
 			})
 		}
 	}
@@ -462,8 +462,8 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				if err := materializeLayerTiming(dstLayer.Layer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q shape layer %q timing: %w", comp.Name, layer.Name, err)
 				}
-			case isSupportedRectFillShapeLayer(layer):
-				dstLayer, err := materializeRectFillShapeLayer(next, layer)
+			case isSupportedRectGraphicShapeLayer(layer):
+				dstLayer, err := materializeRectGraphicShapeLayer(next, layer)
 				if err != nil {
 					return nil, fmt.Errorf("comp %q shape layer %q: %w", comp.Name, layer.Name, err)
 				}
@@ -532,7 +532,7 @@ func materializePrecompTransformSurface(comp *aep.Composition, layer *aep.Layer,
 	return materializeCenteredTransformSurface(comp, layer, source)
 }
 
-func materializeRectFillShapeLayer(comp *aep.Composition, source profile.Layer) (*aep.Layer, error) {
+func materializeRectGraphicShapeLayer(comp *aep.Composition, source profile.Layer) (*aep.Layer, error) {
 	shapeLayer, err := aep.NewShapeLayer(comp, source.Name)
 	if err != nil {
 		return nil, err
@@ -557,36 +557,98 @@ func materializeRectFillShapeLayer(comp *aep.Composition, source profile.Layer) 
 			return nil, err
 		}
 	}
-	fill, err := shapeLayer.RootGroup().AddFill()
-	if err != nil {
-		return nil, err
-	}
-	if value, ok := propertyVector(source.Properties, "ADBE Vector Fill Color", 4); ok {
-		if err := fill.SetColor(profileARGBToRGBA(value)); err != nil {
+	if hasProperty(source, "ADBE Vector Fill Color") {
+		if err := materializeShapeFill(shapeLayer, source); err != nil {
 			return nil, err
 		}
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Fill Opacity"); ok {
-		if err := fill.SetOpacity(value); err != nil {
-			return nil, err
-		}
-	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Blend Mode"); ok {
-		if err := fill.SetBlendMode(aep.ShapeBlendMode(int(value))); err != nil {
-			return nil, err
-		}
-	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Composite Order"); ok {
-		if err := fill.SetCompositeOrder(aep.ShapeCompositeOrder(int(value))); err != nil {
-			return nil, err
-		}
-	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Fill Rule"); ok {
-		if err := fill.SetFillRule(aep.FillRule(int(value))); err != nil {
+	if hasProperty(source, "ADBE Vector Stroke Color") {
+		if err := materializeShapeStroke(shapeLayer, source); err != nil {
 			return nil, err
 		}
 	}
 	return shapeLayer.Layer, nil
+}
+
+func materializeShapeFill(shapeLayer *aep.ShapeLayer, source profile.Layer) error {
+	fill, err := shapeLayer.RootGroup().AddFill()
+	if err != nil {
+		return err
+	}
+	if value, ok := propertyVector(source.Properties, "ADBE Vector Fill Color", 4); ok {
+		if err := fill.SetColor(profileARGBToRGBA(value)); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Fill Opacity"); ok {
+		if err := fill.SetOpacity(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Blend Mode"); ok {
+		if err := fill.SetBlendMode(aep.ShapeBlendMode(int(value))); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Composite Order"); ok {
+		if err := fill.SetCompositeOrder(aep.ShapeCompositeOrder(int(value))); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Fill Rule"); ok {
+		if err := fill.SetFillRule(aep.FillRule(int(value))); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func materializeShapeStroke(shapeLayer *aep.ShapeLayer, source profile.Layer) error {
+	stroke, err := shapeLayer.RootGroup().AddStroke()
+	if err != nil {
+		return err
+	}
+	if value, ok := propertyVector(source.Properties, "ADBE Vector Stroke Color", 4); ok {
+		if err := stroke.SetColor(profileARGBToRGBA(value)); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Stroke Opacity"); ok {
+		if err := stroke.SetOpacity(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Stroke Width"); ok {
+		if err := stroke.SetWidth(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Stroke Line Cap"); ok {
+		if err := stroke.SetLineCap(aep.StrokeLineCap(int(value))); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Stroke Line Join"); ok {
+		if err := stroke.SetLineJoin(aep.StrokeLineJoin(int(value))); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Stroke Miter Limit"); ok {
+		if err := stroke.SetMiterLimit(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Blend Mode"); ok {
+		if err := stroke.SetBlendMode(aep.ShapeBlendMode(int(value))); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Composite Order"); ok {
+		if err := stroke.SetCompositeOrder(aep.ShapeCompositeOrder(int(value))); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func materializeLayerTiming(layer *aep.Layer, source profile.Layer) error {
@@ -1035,7 +1097,7 @@ func isSupportedDefaultShapeLayer(layer profile.Layer) bool {
 		!flags.PreserveTransparency
 }
 
-func isSupportedRectFillShapeLayer(layer profile.Layer) bool {
+func isSupportedRectGraphicShapeLayer(layer profile.Layer) bool {
 	if !isSupportedShapeLayerBase(layer) {
 		return false
 	}
@@ -1045,13 +1107,17 @@ func isSupportedRectFillShapeLayer(layer profile.Layer) bool {
 	if _, ok := propertyVector(layer.Shapes[0].Properties, "ADBE Vector Rect Size", 2); !ok {
 		return false
 	}
-	if _, ok := propertyVector(layer.Properties, "ADBE Vector Fill Color", 4); !ok {
+	hasFill := hasProperty(layer, "ADBE Vector Fill Color")
+	hasStroke := hasProperty(layer, "ADBE Vector Stroke Color")
+	if !hasFill && !hasStroke {
 		return false
 	}
-	if hasProperty(layer, "ADBE Vector Stroke Color") ||
-		hasProperty(layer, "ADBE Vector Grad Colors") ||
+	if hasProperty(layer, "ADBE Vector Grad Colors") ||
 		hasProperty(layer, "ADBE Vector Filter - Trim") ||
-		hasProperty(layer, "ADBE Vector Graphic - Stroke") {
+		hasProperty(layer, "ADBE Vector Stroke Dash 1") ||
+		hasProperty(layer, "ADBE Vector Stroke Gap 1") ||
+		hasProperty(layer, "ADBE Vector Stroke Taper Start Length") ||
+		hasProperty(layer, "ADBE Vector Stroke Wave Amount") {
 		return false
 	}
 	return true
