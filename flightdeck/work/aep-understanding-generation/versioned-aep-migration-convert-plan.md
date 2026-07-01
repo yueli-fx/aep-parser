@@ -250,8 +250,9 @@ git diff --check
     `minimal-shape-trim.json`, `minimal-shape-zigzag.json`,
     `minimal-shape-pucker-bloat.json`, `minimal-shape-twist.json`,
     `minimal-shape-wiggle-paths.json`,
-    `minimal-shape-wiggle-transform.json`, and
-    `minimal-shape-repeater.json` pass
+    `minimal-shape-wiggle-transform.json`,
+    `minimal-shape-repeater.json`, and
+    `minimal-shape-merge-paths.json` pass
     AE2025 open gate with
     `ae_open_status: "pass"` / `ae_open_exit_code: 0`. This slice reconstructs
     rect size/position/roundness, ellipse size/position, fill
@@ -264,8 +265,9 @@ git diff --check
     size/detail/wiggles-per-second/random-seed/points/correlation/temporal
     phase/spatial phase, Wiggle Transform
     anchor/position/scale/rotation/wiggles-per-second/random-seed/correlation/
-    temporal-phase/spatial-phase, and Repeater copies/offset/order/anchor/
-    position/scale/rotation/start-opacity/end-opacity from stable profile
+    temporal-phase/spatial-phase, Repeater copies/offset/order/anchor/
+    position/scale/rotation/start-opacity/end-opacity, and Merge Paths type
+    from stable profile
     properties while still excluding stroke offset, additional dash/gap pairs,
     wave units/cycles, gradient, and other filter shape content.
   - Static layer transform reconstruction now maps profile-visible

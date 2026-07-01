@@ -590,6 +590,11 @@ func materializeRectGraphicShapeLayer(comp *aep.Composition, source profile.Laye
 			return nil, err
 		}
 	}
+	if hasProperty(source, "ADBE Vector Merge Type") {
+		if err := materializeShapeMergePaths(shapeLayer, source); err != nil {
+			return nil, err
+		}
+	}
 	if hasProperty(source, "ADBE Vector Fill Color") {
 		if err := materializeShapeFill(shapeLayer, source); err != nil {
 			return nil, err
@@ -943,6 +948,19 @@ func materializeShapeRepeater(shapeLayer *aep.ShapeLayer, source profile.Layer) 
 	}
 	if value, ok := propertyFloat(source.Properties, "ADBE Vector Repeater Opacity 2"); ok {
 		if err := transform.SetEndOpacity(value); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func materializeShapeMergePaths(shapeLayer *aep.ShapeLayer, source profile.Layer) error {
+	mergePaths, err := shapeLayer.RootGroup().AddMergePaths()
+	if err != nil {
+		return err
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Merge Type"); ok {
+		if err := mergePaths.SetType(aep.MergeType(int(value))); err != nil {
 			return err
 		}
 	}
@@ -1568,7 +1586,8 @@ func hasSupportedShapeFilter(layer profile.Layer) bool {
 		hasProperty(layer, "ADBE Vector Twist Center") ||
 		hasWigglePathsFilter(layer) ||
 		hasWiggleTransformFilter(layer) ||
-		hasRepeaterFilter(layer)
+		hasRepeaterFilter(layer) ||
+		hasProperty(layer, "ADBE Vector Merge Type")
 }
 
 func hasWigglePathsFilter(layer profile.Layer) bool {
