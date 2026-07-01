@@ -31,6 +31,8 @@ func runWithHost(args []string, stdout, stderr io.Writer, host aehost.Host) int 
 		return runAssess(args[1:], stdout, stderr)
 	case "convert":
 		return runConvert(args[1:], stdout, stderr, host)
+	case "verify":
+		return runVerify(args[1:], stdout, stderr)
 	case "ledger":
 		return runLedger(args[1:], stdout, stderr)
 	case "matrix":
@@ -79,6 +81,42 @@ func runAssess(args []string, stdout, stderr io.Writer) int {
 		return statusCode(report.Summary.Status)
 	}
 	fmt.Fprint(stdout, string(data))
+	return statusCode(report.Summary.Status)
+}
+
+func runVerify(args []string, stdout, stderr io.Writer) int {
+	fs := flag.NewFlagSet("aepmigrate verify", flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	sourcePath := fs.String("source", "", "source .aep path")
+	targetPath := fs.String("target", "", "target .aep path")
+	targetVersionRaw := fs.String("target-version", "", "target AE version: AE2020 through AE2025")
+	outPath := fs.String("out", "", "JSON verification report output path")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	if *sourcePath == "" || *targetPath == "" || *targetVersionRaw == "" || *outPath == "" {
+		fmt.Fprintln(stderr, "usage: aepmigrate verify -source source.aep -target migrated.aep -target-version AE2020 -out verify.json")
+		return 2
+	}
+	targetVersion, err := aepmigrate.ParseVersionLabel(*targetVersionRaw)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 2
+	}
+	report, err := aepmigrate.Verify(aepmigrate.VerifyOptions{
+		SourcePath:    *sourcePath,
+		TargetPath:    *targetPath,
+		TargetVersion: targetVersion,
+	})
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	if err := writeJSONReport(*outPath, report); err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	fmt.Fprintf(stdout, "migration verify: %s\n", *outPath)
 	return statusCode(report.Summary.Status)
 }
 

@@ -122,6 +122,52 @@ func TestRunConvertCanRunAEOpenGate(t *testing.T) {
 	}
 }
 
+func TestRunVerifyWritesPassingReport(t *testing.T) {
+	source := writeTempProjectWithOneComp(t, aep.TargetAE2020)
+	outPath := filepath.Join(t.TempDir(), "verify.json")
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{
+		"verify",
+		"-source", source,
+		"-target", source,
+		"-target-version", "AE2020",
+		"-out", outPath,
+	}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("run verify = %d, stderr=%s", code, stderr.String())
+	}
+	report := readReportSummary(t, outPath)
+	if report.Summary.Status != "pass" || report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 {
+		t.Fatalf("verify report = %+v", report)
+	}
+	if !bytes.Contains(stdout.Bytes(), []byte("migration verify:")) {
+		t.Fatalf("stdout missing verify report path: %s", stdout.String())
+	}
+}
+
+func TestRunVerifyReturnsOneForProfileDiffs(t *testing.T) {
+	source := writeTempProjectWithOneComp(t, aep.TargetAE2020)
+	target := writeTempProjectWithNamedComp(t, "Different")
+	outPath := filepath.Join(t.TempDir(), "verify.json")
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{
+		"verify",
+		"-source", source,
+		"-target", target,
+		"-target-version", "AE2020",
+		"-out", outPath,
+	}, &stdout, &stderr)
+	if code != 1 {
+		t.Fatalf("run verify = %d, want 1; stderr=%s", code, stderr.String())
+	}
+	report := readReportSummary(t, outPath)
+	if report.Summary.Status != "blocked" || report.Verification.ProfileDiffStatus != "fail" || report.Verification.ProfileDiffCount == 0 {
+		t.Fatalf("verify report = %+v", report)
+	}
+}
+
 func TestRunMatrixWritesAggregateReport(t *testing.T) {
 	root := t.TempDir()
 	recipePath := filepath.Join(root, "minimal.json")
@@ -570,6 +616,15 @@ func writeTempProjectWithOneComp(t *testing.T, target aep.AETarget) string {
 		t.Fatalf("NewComposition: %v", err)
 	}
 	return writeProject(t, project, "one-comp.aep")
+}
+
+func writeTempProjectWithNamedComp(t *testing.T, name string) string {
+	t.Helper()
+	project := aep.NewProject(aep.TargetAE2020)
+	if _, err := aep.NewComposition(project, name, 640, 360, 24, 2.5); err != nil {
+		t.Fatalf("NewComposition: %v", err)
+	}
+	return writeProject(t, project, name+".aep")
 }
 
 func writeTempProjectWithOneSolidLayer(t *testing.T) string {
