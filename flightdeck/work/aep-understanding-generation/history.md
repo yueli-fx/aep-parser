@@ -852,3 +852,11 @@ Current:
   `tmp/migration_matrix_verify`, asserts the 846/840/0/0/6 full W2020-source
   boundary, and asserts the valid AE2025 explicit-matte source-to-target matrix
   remains 1 total, 1 pass.
+- Structural all-host representative evidence now covers project, comp,
+  camera, light, and precomp domains. The matrix
+  `tmp/migration_matrix_structural_all_hosts/matrix.json` is 30 total, 30 pass,
+  0 blocked, 0 failed, 0 skipped for W2020 source into W2020 target opened on
+  H2020-H2025, with one representative row each for
+  `minimal-project-display-settings`, `minimal-comp-object-profile`,
+  `minimal-camera-object-profile`, `minimal-light-object-profile`, and
+  `minimal-precomp-layer`.

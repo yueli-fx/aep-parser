@@ -106,8 +106,10 @@ Current:
   outputs for vector effect keyframes, transform ease, text style, text
   animator skew/color-keyframes, classic track matte, layer mask, and base
   shape gradient stroke open across AE2020, AE2021, AE2022, AE2023, AE2024, and
-  AE2025 hosts. All current gradient-stroke variants also open across
-  AE2020-AE2025 hosts.
+  AE2025 hosts. Project display settings, comp object profile, camera object
+  profile, light object profile, and precomp-layer representatives also open
+  across AE2020-AE2025 hosts. All current gradient-stroke variants also open
+  across AE2020-AE2025 hosts.
 - Continue versioned migration by expanding supported conversion surface or by
   broadening per-capability host-open evidence.
 - Do not start automated correction loops.

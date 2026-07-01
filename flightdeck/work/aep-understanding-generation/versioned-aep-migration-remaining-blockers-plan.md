@@ -1091,3 +1091,85 @@ Commit:
 ```text
 chore(aepmigrate): add recurring matrix verification
 ```
+
+---
+
+## Task 32: Structural Domain All-Host Representative Evidence
+
+**Goal:** Add direct H2020-H2025 open evidence for migrated structural domains
+that currently have only generic representative coverage: project, comp,
+camera, light, and precomp.
+
+**Architecture:** Use the matrix runner's separated writer-target and AE host
+axes. Produce W2020 output from stable representative recipes, then open that
+same target writer output in every installed AE host from 2020 through 2025.
+Keep the AE-open case count explicit at 30.
+
+**Files:**
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/aep-understanding-generation/index.md`
+- Modify: `flightdeck/work/aep-understanding-generation/history.md`
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+
+- [x] **Step 1: Run the structural all-host representative matrix**
+
+Run:
+
+```powershell
+go run ./cmd/aepmigrate matrix `
+  -recipe examples\recipes\minimal-project-display-settings.json `
+  -recipe examples\recipes\minimal-comp-object-profile.json `
+  -recipe examples\recipes\minimal-camera-object-profile.json `
+  -recipe examples\recipes\minimal-light-object-profile.json `
+  -recipe examples\recipes\minimal-precomp-layer.json `
+  -sources AE2020 `
+  -targets AE2020 `
+  -out tmp\migration_matrix_structural_all_hosts `
+  -ledger-out tmp\migration_matrix_structural_all_hosts\ledger.md `
+  -ae-root E:\adobe `
+  -ae-open `
+  -ae-versions all `
+  -ae-timeout-sec 240 `
+  -max-ae-open-cases 30
+```
+
+Expected: 30 total, 30 pass, 0 blocked, 0 failed, 0 skipped. If any AE host is
+missing or an open fails, do not broaden the summary; record the exact missing
+host or failure.
+
+- [x] **Step 2: Update reviewed validation summary**
+
+If Step 1 passes, add `tmp/migration_matrix_structural_all_hosts/matrix.json`
+and `ledger.md` to raw artifacts, then update Other Domains host-open coverage:
+
+- `project`: `OPEN-ALL-HOSTS` for `minimal-project-display-settings`
+- `comp`: `OPEN-ALL-HOSTS` for `minimal-comp-object-profile`
+- `camera-light`: `OPEN-ALL-HOSTS` for `minimal-camera-object-profile` and
+  `minimal-light-object-profile`
+- `precomp`: `OPEN-ALL-HOSTS` for `minimal-precomp-layer`
+
+Also update `index.md` and append `history.md`.
+
+- [x] **Step 3: Verification and commit**
+
+Run:
+
+```powershell
+pwsh -File scripts\migration\verify_matrix.ps1
+go test ./...
+go vet ./...
+git diff --check
+```
+
+Read:
+
+```powershell
+Get-Content C:\Users\yl\.flightdeck\knowledge\git\commits.md -Raw
+Get-Content flightdeck\knowledge\workflow\verify.md -Raw
+```
+
+Commit:
+
+```text
+docs(aepmigrate): record structural all-host evidence
+```
