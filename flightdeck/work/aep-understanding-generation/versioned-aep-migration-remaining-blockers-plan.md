@@ -612,3 +612,74 @@ Use:
 ```text
 feat(aepmigrate): generate matrix coverage ledgers
 ```
+
+---
+
+## Task 21: Host-Open Policy
+
+- [x] **Step 1: Add the host-open policy to the validation plan**
+
+Define when a capability needs `OPEN-ALL-HOSTS`, when `OPEN-H2025` is enough,
+and when `INFER-MID-HOSTS` is allowed. Keep writer targets and AE hosts
+separate: policy cannot imply W2021/W2023/W2024 writer support.
+
+- [x] **Step 2: Apply the policy to current gaps**
+
+Current policy application:
+
+- Text animator variants: `OPEN-ALL-HOSTS` representatives plus `PD-3x3` are
+  enough for non-representative variants unless a new writer path appears.
+- Layer mask: the only current recipe-owned mask fixture already has
+  `OPEN-ALL-HOSTS`.
+- Classic track matte: current representative already has `OPEN-ALL-HOSTS`.
+- AE2025 explicit matte: version-gated; do not run H2020-H2024 against a
+  W2025-only contract as if it were normal all-host evidence.
+- Shape gradient stroke: alpha stops, highlight, and style use distinct
+  gradient/stroke writer paths, so run all current gradient-stroke variants
+  across H2020-H2025.
+
+## Task 22: Shape Gradient Stroke All-Host Matrix
+
+- [x] **Step 1: Run all-host matrix for every gradient-stroke variant**
+
+```powershell
+go run ./cmd/aepmigrate matrix -recipe examples\recipes\minimal-shape-gradient-stroke.json -recipe examples\recipes\minimal-shape-gradient-stroke-alpha-stops.json -recipe examples\recipes\minimal-shape-gradient-stroke-highlight.json -recipe examples\recipes\minimal-shape-gradient-stroke-style.json -sources AE2020 -targets AE2020 -ae-open -ae-root E:\adobe -ae-versions all -ae-timeout-sec 240 -max-ae-open-cases 24 -out tmp\migration_matrix_shape_gradient_stroke_all_hosts
+```
+
+Actual result: 24 total, 24 pass, 0 blocked, 0 failed, 0 skipped. This proves
+W2020 gradient-stroke variant outputs open in H2020-H2025.
+
+- [x] **Step 2: Generate the matrix ledger**
+
+```powershell
+go run ./cmd/aepmigrate ledger -matrix tmp\migration_matrix_shape_gradient_stroke_all_hosts\matrix.json -out tmp\migration_matrix_shape_gradient_stroke_all_hosts\ledger.md
+```
+
+## Task 23: Host-Open Policy Ledger and Commit Gate
+
+- [x] **Step 1: Update validation summary, index, and history**
+
+Record the policy and the shape gradient-stroke all-host artifact. Remove the
+missing-evidence item for non-representative layer/shape variants if the matrix
+passes and the policy says no remaining current variant requires more evidence.
+
+- [x] **Step 2: Run full verification**
+
+```powershell
+go test ./...
+go vet ./...
+git diff --check
+```
+
+- [x] **Step 3: Read commit/verify knowledge and commit**
+
+```powershell
+Get-Content C:\Users\yl\.flightdeck\knowledge\git\commits.md -Raw
+Get-Content flightdeck\knowledge\workflow\verify.md -Raw
+```
+
+Use:
+
+```text
+docs(aepmigrate): define host-open validation policy
+```

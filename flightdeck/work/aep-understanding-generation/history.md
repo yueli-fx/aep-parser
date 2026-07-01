@@ -811,3 +811,12 @@ Current:
   `tmp/migration_matrix_representative_all_hosts/ledger.md` has 5 recipe rows
   for the all-host representative matrix. These artifacts support the reviewed
   validation summary; they do not replace it.
+- Migration validation now has an explicit host-open policy in
+  `versioned-aep-migration-validation-plan.md`: all-host fanout is required for
+  representative migrated writer structures and for variants with materially
+  different encodings, while scalar/value-only variants can rely on profile
+  diff plus an existing all-host representative. Applying that policy, the
+  shape gradient-stroke variants were promoted from representative evidence to
+  full variant evidence: `tmp/migration_matrix_shape_gradient_stroke_all_hosts`
+  is 24 total, 24 pass, 0 blocked, 0 failed, 0 skipped for the four current
+  gradient-stroke recipes opened on H2020-H2025.

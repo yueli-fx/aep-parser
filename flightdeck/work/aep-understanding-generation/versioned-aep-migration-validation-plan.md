@@ -107,6 +107,40 @@ Use these buckets in the summary:
 - `camera-light`: camera options, light options, light source refs.
 - `precomp`: precomp items and precomp layers.
 
+## AE Host-Open Policy
+
+Host-open validation is not a substitute for profile diff. It answers whether a
+produced writer output can be opened by a real AE host after the profile-diff
+matrix has proven the intended migration semantics.
+
+Use these policy levels when updating
+`versioned-aep-migration-validation-summary.md`:
+
+- `OPEN-ALL-HOSTS` is required for one representative W2020 output per migrated
+  domain family that exercises a distinct writer structure: text style, text
+  animator, dynamic transform, dynamic effect param, classic track matte, mask,
+  and shape gradient encoding.
+- `OPEN-ALL-HOSTS` is also required for non-representative variants when they
+  exercise materially different writer encodings from the representative. For
+  the current surface, gradient-stroke alpha stops, radial highlight, and stroke
+  style count as distinct enough to run all-host fanout.
+- `OPEN-H2025` is sufficient for variants that only change scalar values,
+  keyframe values, expressions, or profile-visible fields on a writer structure
+  that already has a passing all-host representative, provided the domain matrix
+  has `PD-1x3` or stronger coverage.
+- `OPEN-ENDPOINTS` is allowed only as transitional evidence. It must be recorded
+  with `INFER-MID-HOSTS` for H2021-H2024 until direct host cases exist.
+- Version-gated features must not be treated as all-host failures just because
+  older hosts are outside the writer contract. Record the compatible writer and
+  host scope instead, for example AE2025 explicit matte as W2025/H2025-scoped
+  until the writer contract changes.
+- Lower-level ship-gates are supporting evidence for writer APIs, but they do
+  not replace migration matrix host-open evidence.
+
+Do not run broad AE-open matrices across the full recipe catalog. Choose the
+smallest representative set that proves the policy requirement and keep the
+case-count guard explicit in the command.
+
 ## Execution Rules
 
 - Use the project-level "总 → 分 → 总" rule for this validation work:

@@ -26,7 +26,7 @@ which AE versions are validated." The current reviewed answer is:
 - Dynamic transforms have `PD-1x3`, `OPEN-H2025`, and one transform-ease `OPEN-ALL-HOSTS` representative.
 - Layer track matte migration has `PD-1x3` evidence for the classic track-matte fixture and `OPEN-ALL-HOSTS` evidence for its W2020 output. AE2025 explicit matte has `PD-1x1` evidence for AE2025 source to AE2025 target; AE2020/AE2022 targets remain intentionally blocked by the current explicit-matte writer contract.
 - Layer mask migration has `PD-1x3` evidence for the current recipe-owned mask surface: mode/options, static outline, and path keyframes. The representative W2020 mask output has `OPEN-ALL-HOSTS` evidence.
-- Shape gradient stroke migration has `PD-1x3` evidence for the current recipe-owned gradient stroke surface: base gradient stroke, alpha stops, radial highlight, and stroke style. The representative W2020 base gradient-stroke output has `OPEN-ALL-HOSTS` evidence.
+- Shape gradient stroke migration has `PD-1x3` and `OPEN-ALL-HOSTS` evidence for the current recipe-owned gradient stroke surface: base gradient stroke, alpha stops, radial highlight, and stroke style.
 - Latest full no-AE matrix boundary is 423 total, 420 pass, 3 intentionally blocked, 0 failed, 0 skipped.
 - Remaining blocked family is AE2025 explicit matte outside the AE2025 target contract. Other migrated domains are covered by the latest full no-AE matrix boundary, but many do not yet have per-capability host-version ledgers.
 
@@ -80,7 +80,7 @@ which AE versions are validated." The current reviewed answer is:
 
 | Capability | Recipes / scope | Profile-diff writer coverage | AE host open coverage | Evidence |
 | --- | --- | --- | --- | --- |
-| Gradient stroke | `minimal-shape-gradient-stroke`, `minimal-shape-gradient-stroke-alpha-stops`, `minimal-shape-gradient-stroke-highlight`, `minimal-shape-gradient-stroke-style` | `PD-1x3`: W2020 source into W2020/W2022/W2025 targets | `OPEN-ALL-HOSTS` for base W2020 output on H2020-H2025 | `tmp/migration_matrix_shape_gradient_stroke/matrix.json`: 12 total, 12 pass; `tmp/migration_matrix_representative_all_hosts/matrix.json`: representative all-host matrix, 30 total, 30 pass |
+| Gradient stroke | `minimal-shape-gradient-stroke`, `minimal-shape-gradient-stroke-alpha-stops`, `minimal-shape-gradient-stroke-highlight`, `minimal-shape-gradient-stroke-style` | `PD-1x3`: W2020 source into W2020/W2022/W2025 targets | `OPEN-ALL-HOSTS` for all current gradient-stroke W2020 outputs on H2020-H2025 | `tmp/migration_matrix_shape_gradient_stroke/matrix.json`: 12 total, 12 pass; `tmp/migration_matrix_shape_gradient_stroke_all_hosts/matrix.json`: 24 total, 24 pass |
 
 ## Other Domains
 
@@ -118,12 +118,13 @@ Reviewed raw artifacts currently known:
 - `tmp/migration_matrix_layer_matte/matrix.json`: 6 total, 4 pass, 2 intentionally blocked, 0 failed, 0 skipped. This is recipe-source focused matte coverage: classic track matte passes W2020/W2022/W2025 targets; AE2025 explicit matte passes W2025 and is intentionally blocked for W2020/W2022 targets.
 - `tmp/migration_matrix_layer_mask/matrix.json`: 3 total, 3 pass, 0 blocked, 0 failed, 0 skipped. This is W2020 source into W2020/W2022/W2025 targets for the current recipe-owned layer mask surface.
 - `tmp/migration_matrix_shape_gradient_stroke/matrix.json`: 12 total, 12 pass, 0 blocked, 0 failed, 0 skipped. This is W2020 source into W2020/W2022/W2025 targets for the current recipe-owned gradient stroke surface.
+- `tmp/migration_matrix_shape_gradient_stroke_all_hosts/matrix.json`: 24 total, 24 pass, 0 blocked, 0 failed, 0 skipped. This is W2020 source into W2020 target with AE-open on H2020-H2025 for every current recipe-owned gradient-stroke variant.
 - `tmp/migration_matrix_smoke_all/matrix.json`: 423 total, 420 pass, 3 intentionally blocked, 0 failed, 0 skipped. This is the current post-gradient-stroke full no-AE boundary.
 - Generated coverage ledger artifacts:
   - `tmp/migration_matrix_smoke_all/ledger.md`: generated from the full no-AE matrix; 141 recipe rows grouped by inferred domain.
   - `tmp/migration_matrix_representative_all_hosts/ledger.md`: generated from the all-host representative matrix; 5 recipe rows, each with H2020-H2025 evidence.
+  - `tmp/migration_matrix_shape_gradient_stroke_all_hosts/ledger.md`: generated from the all-host gradient-stroke matrix; 4 recipe rows, each with H2020-H2025 evidence.
 
 ## Immediate Missing Evidence
 
-- Per-domain host-open policy: which capabilities need all-host fanout versus AE2025 smoke only.
-- AE-host open evidence for non-representative layer and shape variants where policy requires more than a representative smoke.
+- Broader host-open fanout for text animator, effect, transform, project/comp, camera-light, and precomp variants if the host-open policy later raises them above representative coverage.
