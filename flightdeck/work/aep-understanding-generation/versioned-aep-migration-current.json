@@ -72,6 +72,16 @@
         "skipped": 0
       },
       "status": "pass"
+    },
+    "latest_standalone_verify_gate": {
+      "artifact": "tmp/migration_matrix_verify/smoke_all/minimal-adjustment-layer/AE2020_to_AE2025/verify_report.json",
+      "source": "tmp/migration_matrix_verify/smoke_all/minimal-adjustment-layer/AE2020_to_AE2025/source.aep",
+      "target": "tmp/migration_matrix_verify/smoke_all/minimal-adjustment-layer/AE2020_to_AE2025/target.aep",
+      "migration_report": "tmp/migration_matrix_verify/smoke_all/minimal-adjustment-layer/AE2020_to_AE2025/convert_report.json",
+      "target_version": "AE2025",
+      "status": "pass",
+      "profile_diff_status": "pass",
+      "profile_diff_count": 0
     }
   },
   "last_batch": {
@@ -398,6 +408,14 @@
       "purpose": "Generate a temporary human-readable Markdown table from coverage JSON when needed.",
       "script": "scripts/migration/render_coverage_md.ps1",
       "output": "tmp/migration_coverage.md"
+    },
+    {
+      "id": "standalone-verify-cli",
+      "status": "available_verified",
+      "purpose": "Run a source/target AEP verification report with profile diff, migration-report allowed differences, capability-ledger boundaries, and optional AE-open verification.",
+      "command": "go run ./cmd/aepmigrate verify -source source.aep -target target.aep -target-version AE2025 -report convert_report.json -out verify_report.json",
+      "script": "scripts/migration/verify_matrix.ps1",
+      "evidence": "tmp/migration_matrix_verify/smoke_all/minimal-adjustment-layer/AE2020_to_AE2025/verify_report.json"
     }
   ],
   "next_batches": [
@@ -425,7 +443,7 @@
       {
         "command": "pwsh -File scripts/migration/validate_current.ps1",
         "status": "pass",
-        "evidence": "current ok: checked 2 coverage batches and 6 tooling entries"
+        "evidence": "current ok: checked 2 coverage batches and 7 tooling entries"
       },
       {
         "command": "pwsh -File scripts/migration/validate_coverage.ps1",
@@ -440,7 +458,7 @@
       {
         "command": "pwsh -File scripts/migration/verify_matrix.ps1",
         "status": "pass",
-        "evidence": "full W2020 no-AE matrix 840/846 pass with 6 source-contract skips; explicit matte AE2025 contract 1/1 pass"
+        "evidence": "full W2020 no-AE matrix 840/846 pass with 6 source-contract skips; standalone verify CLI smoke pass; explicit matte AE2025 contract 1/1 pass"
       },
       {
         "command": "go test ./...",
