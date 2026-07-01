@@ -15,6 +15,7 @@ type VerifyOptions struct {
 	TargetPath          string
 	TargetVersion       VersionLabel
 	MigrationReportPath string
+	AEOpen              *AEOpenOptions
 }
 
 func Verify(opts VerifyOptions) (Report, error) {
@@ -74,6 +75,12 @@ func Verify(opts VerifyOptions) (Report, error) {
 	if len(unexpectedDiffs) == 0 {
 		report.Verification.ProfileDiffStatus = "pass"
 		report.Summary = summarize(report.Entries)
+		if report.Summary.Status == StatusBlocked {
+			return report, nil
+		}
+		if err := verifyAEOpen(&report, ConvertOptions{AEOpen: opts.AEOpen}); err != nil {
+			return Report{}, err
+		}
 		return report, nil
 	}
 

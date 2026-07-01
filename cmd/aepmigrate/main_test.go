@@ -146,6 +146,43 @@ func TestRunVerifyWritesPassingReport(t *testing.T) {
 	}
 }
 
+func TestRunVerifyCanRunAEOpenGate(t *testing.T) {
+	source := writeTempProjectWithOneComp(t, aep.TargetAE2020)
+	outPath := filepath.Join(t.TempDir(), "verify.json")
+	host := &fakeCLIHost{doneBody: "PASS\nproject items.length=1\ncomp=Main layers.length=0\n"}
+	var stdout, stderr bytes.Buffer
+
+	code := runWithHost([]string{
+		"verify",
+		"-source", source,
+		"-target", source,
+		"-target-version", "AE2020",
+		"-out", outPath,
+		"-ae-open",
+		"-ae", "AfterFX.exe",
+	}, &stdout, &stderr, host)
+	if code != 0 {
+		t.Fatalf("run verify = %d, stderr=%s", code, stderr.String())
+	}
+	report := readReportSummary(t, outPath)
+	if report.Verification.AEOpenStatus != "pass" {
+		t.Fatalf("AE open verification = %+v, want pass", report.Verification)
+	}
+	if !host.called {
+		t.Fatal("fake AE host was not called")
+	}
+	if !filepath.IsAbs(host.request.JSXPath) || !filepath.IsAbs(host.request.DonePath) {
+		t.Fatalf("AE open request paths must be absolute: %+v", host.request)
+	}
+	argsPath := host.request.Env["AE_OPEN_ARGS"]
+	if argsPath == "" || !filepath.IsAbs(filepath.FromSlash(argsPath)) {
+		t.Fatalf("AE open args path must be absolute in env: %+v", host.request.Env)
+	}
+	if filepath.Dir(filepath.FromSlash(argsPath)) != filepath.Dir(source) {
+		t.Fatalf("AE open args path should live beside target: %q", argsPath)
+	}
+}
+
 func TestRunVerifyReturnsOneForProfileDiffs(t *testing.T) {
 	source := writeTempProjectWithOneComp(t, aep.TargetAE2020)
 	target := writeTempProjectWithNamedComp(t, "Different")

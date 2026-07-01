@@ -32,7 +32,7 @@ func runWithHost(args []string, stdout, stderr io.Writer, host aehost.Host) int 
 	case "convert":
 		return runConvert(args[1:], stdout, stderr, host)
 	case "verify":
-		return runVerify(args[1:], stdout, stderr)
+		return runVerify(args[1:], stdout, stderr, host)
 	case "ledger":
 		return runLedger(args[1:], stdout, stderr)
 	case "matrix":
@@ -84,7 +84,7 @@ func runAssess(args []string, stdout, stderr io.Writer) int {
 	return statusCode(report.Summary.Status)
 }
 
-func runVerify(args []string, stdout, stderr io.Writer) int {
+func runVerify(args []string, stdout, stderr io.Writer, host aehost.Host) int {
 	fs := flag.NewFlagSet("aepmigrate verify", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	sourcePath := fs.String("source", "", "source .aep path")
@@ -92,6 +92,9 @@ func runVerify(args []string, stdout, stderr io.Writer) int {
 	targetVersionRaw := fs.String("target-version", "", "target AE version: AE2020 through AE2025")
 	migrationReportPath := fs.String("report", "", "optional migration report JSON path for allowed profile diffs")
 	outPath := fs.String("out", "", "JSON verification report output path")
+	aeOpen := fs.Bool("ae-open", false, "run AE open verification after profile diff")
+	aePath := fs.String("ae", "", "After Effects executable path for -ae-open")
+	aeTimeout := fs.Int("ae-timeout-sec", 180, "AE open verification timeout in seconds")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
@@ -104,12 +107,42 @@ func runVerify(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintln(stderr, err)
 		return 2
 	}
-	report, err := aepmigrate.Verify(aepmigrate.VerifyOptions{
+	opts := aepmigrate.VerifyOptions{
 		SourcePath:          *sourcePath,
 		TargetPath:          *targetPath,
 		TargetVersion:       targetVersion,
 		MigrationReportPath: *migrationReportPath,
-	})
+	}
+	if *aeOpen {
+		if *aePath == "" {
+			fmt.Fprintln(stderr, "-ae-open requires -ae <AfterFX.exe>")
+			return 2
+		}
+		jsxPath, err := filepath.Abs(filepath.Join("test_data", "generators", "verify_open.jsx"))
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		argsPath, err := filepath.Abs(*targetPath + ".ae_open.args.json")
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		donePath, err := filepath.Abs(*targetPath + ".ae_open.done")
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		opts.AEOpen = &aepmigrate.AEOpenOptions{
+			Host:       host,
+			AEPath:     *aePath,
+			JSXPath:    jsxPath,
+			ArgsPath:   argsPath,
+			DonePath:   donePath,
+			TimeoutSec: *aeTimeout,
+		}
+	}
+	report, err := aepmigrate.Verify(opts)
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return 1
