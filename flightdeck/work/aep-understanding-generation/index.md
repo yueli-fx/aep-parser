@@ -700,10 +700,11 @@ Current:
   details for source dimensions/color; default text conversion uses
   `aep.NewTextLayer` + `Layer.SetText` and relies on profile diff for text
   document/style fidelity; default empty shape conversion uses `aep.NewShapeLayer`;
-  single rect fill/stroke shape conversion rebuilds rect, fill, stroke, and one
-  Dash 1/Gap 1 pair from stable profile properties while still excluding stroke
-  offset, additional dash/gap pairs, taper/wave, gradient, and filter shape
-  content; static layer transform reconstruction now preserves
+  single rect/ellipse fill/stroke shape conversion rebuilds the parametric
+  primitive, fill, stroke, one Dash 1/Gap 1 pair, and percent-mode stroke taper
+  from stable profile properties while still excluding stroke offset, additional
+  dash/gap pairs, stroke wave, gradient, and filter shape content; static layer
+  transform reconstruction now preserves
   profile-visible Anchor/Position/Scale/Rotation/Opacity values while converting
   profile scale/opacity unit values back to writer percent units; layer timing
   reconstruction now preserves start_time/in_point/out_point/stretch for all
@@ -716,8 +717,8 @@ Current:
   the migration report and block success. AE2025 open smoke has passed for the
   converted no-layer comp object profile output and recipe default null, solid,
   adjustment, camera, light, text, static-transform text, layer timing, empty
-  shape, rect+fill shape, rect+stroke shape, rect+dashed-stroke shape, and
-  precomp outputs.
+  shape, rect+fill shape, rect+stroke shape, rect+dashed-stroke shape,
+  ellipse+tapered-stroke shape, and precomp outputs.
   `cmd/aepmigrate convert -ae-open -ae <AfterFX.exe>` writes AE open gate status
   into the migration report.
 - `profilediff` now compares profile-visible layer metadata, quality/blending/

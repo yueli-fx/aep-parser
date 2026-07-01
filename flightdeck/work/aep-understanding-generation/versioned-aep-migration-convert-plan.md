@@ -238,18 +238,20 @@ git diff --check
     fixture passes AE2025 open gate with `ae_open_status: "pass"` /
     `ae_open_exit_code: 0`. This slice intentionally excludes shape content
     nodes; rect/fill/stroke/path/filter migration remains a later surface.
-  - Single rect fill/stroke shape-layer sources generated through
-    `aep.NewShapeLayer` with `RootGroup().AddRect()` plus `AddFill()` and/or
+  - Single rect/ellipse fill/stroke shape-layer sources generated through
+    `aep.NewShapeLayer` with one parametric primitive plus `AddFill()` and/or
     `AddStroke()` convert to AE2025 with `profile_diff_status: "pass"` and
-    `profile_diff_count: 0`; `minimal-shape-rect-fill-default-transform.json`
+    `profile_diff_count: 0`; `minimal-shape-rect-fill-default-transform.json`,
     `minimal-shape-stroke-style.json`, and
-    `minimal-shape-stroke-dashes.json` pass AE2025 open gate with
+    `minimal-shape-stroke-dashes.json`, plus the ellipse
+    `minimal-shape-stroke-taper.json`, pass AE2025 open gate with
     `ae_open_status: "pass"` / `ae_open_exit_code: 0`. This slice reconstructs
-    rect size/position/roundness, fill color/opacity/blend/composite/fill-rule,
-    and stroke color/opacity/width/cap/join/miter/composite/blend plus a single
-    Dash 1/Gap 1 pair from stable profile properties while still excluding
-    stroke offset, additional dash/gap pairs, taper/wave, gradient, and filter
-    shape content.
+    rect size/position/roundness, ellipse size/position, fill
+    color/opacity/blend/composite/fill-rule, and stroke
+    color/opacity/width/cap/join/miter/composite/blend plus a single Dash 1/Gap
+    1 pair and percent-mode stroke taper controls from stable profile
+    properties while still excluding stroke offset, additional dash/gap pairs,
+    stroke wave, gradient, and filter shape content.
   - Static layer transform reconstruction now maps profile-visible
     `ADBE Anchor Point`, `ADBE Position`, `ADBE Scale`, `ADBE Rotate Z`, and
     `ADBE Opacity` back into `LayerTransform`, converting profile scale/opacity

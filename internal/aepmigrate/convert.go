@@ -537,25 +537,8 @@ func materializeRectGraphicShapeLayer(comp *aep.Composition, source profile.Laye
 	if err != nil {
 		return nil, err
 	}
-	rectShape := source.Shapes[0]
-	rect, err := shapeLayer.RootGroup().AddRect()
-	if err != nil {
+	if err := materializeShapePrimitive(shapeLayer, source.Shapes[0]); err != nil {
 		return nil, err
-	}
-	if value, ok := propertyVector(rectShape.Properties, "ADBE Vector Rect Size", 2); ok {
-		if err := rect.SetSize([2]float64{value[0], value[1]}); err != nil {
-			return nil, err
-		}
-	}
-	if value, ok := propertyVector(rectShape.Properties, "ADBE Vector Rect Position", 2); ok {
-		if err := rect.SetPosition([2]float64{value[0], value[1]}); err != nil {
-			return nil, err
-		}
-	}
-	if value, ok := propertyFloat(rectShape.Properties, "ADBE Vector Rect Roundness"); ok {
-		if err := rect.SetRoundness(value); err != nil {
-			return nil, err
-		}
 	}
 	if hasProperty(source, "ADBE Vector Fill Color") {
 		if err := materializeShapeFill(shapeLayer, source); err != nil {
@@ -568,6 +551,68 @@ func materializeRectGraphicShapeLayer(comp *aep.Composition, source profile.Laye
 		}
 	}
 	return shapeLayer.Layer, nil
+}
+
+func materializeShapePrimitive(shapeLayer *aep.ShapeLayer, shape profile.Shape) error {
+	switch shape.Kind {
+	case "rect":
+		return materializeRectPrimitive(shapeLayer, shape)
+	case "ellipse":
+		return materializeEllipsePrimitive(shapeLayer, shape)
+	default:
+		return fmt.Errorf("unsupported shape primitive %q", shape.Kind)
+	}
+}
+
+func materializeRectPrimitive(shapeLayer *aep.ShapeLayer, shape profile.Shape) error {
+	rect, err := shapeLayer.RootGroup().AddRect()
+	if err != nil {
+		return err
+	}
+	if value, ok := propertyVector(shape.Properties, "ADBE Vector Rect Size", 2); ok {
+		if err := rect.SetSize([2]float64{value[0], value[1]}); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyVector(shape.Properties, "ADBE Vector Rect Position", 2); ok {
+		if err := rect.SetPosition([2]float64{value[0], value[1]}); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(shape.Properties, "ADBE Vector Rect Roundness"); ok {
+		if err := rect.SetRoundness(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(shape.Properties, "ADBE Vector Shape Direction"); ok {
+		if err := rect.SetDirection(aep.ShapeDirection(int(value))); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func materializeEllipsePrimitive(shapeLayer *aep.ShapeLayer, shape profile.Shape) error {
+	ellipse, err := shapeLayer.RootGroup().AddEllipse()
+	if err != nil {
+		return err
+	}
+	if value, ok := propertyVector(shape.Properties, "ADBE Vector Ellipse Size", 2); ok {
+		if err := ellipse.SetSize([2]float64{value[0], value[1]}); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyVector(shape.Properties, "ADBE Vector Ellipse Position", 2); ok {
+		if err := ellipse.SetPosition([2]float64{value[0], value[1]}); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(shape.Properties, "ADBE Vector Shape Direction"); ok {
+		if err := ellipse.SetDirection(aep.ShapeDirection(int(value))); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func materializeShapeFill(shapeLayer *aep.ShapeLayer, source profile.Layer) error {
@@ -655,6 +700,36 @@ func materializeShapeStroke(shapeLayer *aep.ShapeLayer, source profile.Layer) er
 	}
 	if value, ok := propertyFloat(source.Properties, "ADBE Vector Stroke Gap 1"); ok {
 		if err := stroke.Dashes().SetGap(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper Start Length"); ok {
+		if err := stroke.Taper().SetStartLength(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper End Length"); ok {
+		if err := stroke.Taper().SetEndLength(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper Start Width"); ok {
+		if err := stroke.Taper().SetStartWidth(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper End Width"); ok {
+		if err := stroke.Taper().SetEndWidth(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper Start Ease"); ok {
+		if err := stroke.Taper().SetStartEase(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper End Ease"); ok {
+		if err := stroke.Taper().SetEndEase(value); err != nil {
 			return err
 		}
 	}
@@ -1111,10 +1186,7 @@ func isSupportedRectGraphicShapeLayer(layer profile.Layer) bool {
 	if !isSupportedShapeLayerBase(layer) {
 		return false
 	}
-	if len(layer.Shapes) != 1 || layer.Shapes[0].Kind != "rect" {
-		return false
-	}
-	if _, ok := propertyVector(layer.Shapes[0].Properties, "ADBE Vector Rect Size", 2); !ok {
+	if len(layer.Shapes) != 1 || !isSupportedParametricGraphicShape(layer.Shapes[0]) {
 		return false
 	}
 	hasFill := hasProperty(layer, "ADBE Vector Fill Color")
@@ -1127,11 +1199,23 @@ func isSupportedRectGraphicShapeLayer(layer profile.Layer) bool {
 		hasProperty(layer, "ADBE Vector Stroke Dash 2") ||
 		hasProperty(layer, "ADBE Vector Stroke Gap 2") ||
 		hasProperty(layer, "ADBE Vector Stroke Offset") ||
-		hasProperty(layer, "ADBE Vector Stroke Taper Start Length") ||
 		hasProperty(layer, "ADBE Vector Stroke Wave Amount") {
 		return false
 	}
 	return true
+}
+
+func isSupportedParametricGraphicShape(shape profile.Shape) bool {
+	switch shape.Kind {
+	case "rect":
+		_, ok := propertyVector(shape.Properties, "ADBE Vector Rect Size", 2)
+		return ok
+	case "ellipse":
+		_, ok := propertyVector(shape.Properties, "ADBE Vector Ellipse Size", 2)
+		return ok
+	default:
+		return false
+	}
 }
 
 func isSupportedShapeLayerBase(layer profile.Layer) bool {
