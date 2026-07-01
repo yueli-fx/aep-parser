@@ -1173,3 +1173,64 @@ Commit:
 ```text
 docs(aepmigrate): record structural all-host evidence
 ```
+
+---
+
+## Task 33: Text Animator PD-6x6 Writer Matrix Evidence
+
+**Goal:** Upgrade text animator writer coverage from the historical W2020/W2022/W2025
+`PD-3x3` matrix to a full W2020-W2025 source-and-target matrix now that native
+writer targets exist for every installed AE year.
+
+**Architecture:** Reuse the existing matrix runner without AE-open. Run every
+`minimal-text-animator*.json` recipe across `-sources all -targets all` and
+record the reviewed result as `PD-6x6` evidence. Do not infer host-open coverage
+from this profile-diff matrix.
+
+**Files:**
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/aep-understanding-generation/index.md`
+- Modify: `flightdeck/work/aep-understanding-generation/history.md`
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+
+- [x] **Step 1: Run the text animator all-writer matrix**
+
+Run:
+
+```powershell
+$recipes = Get-ChildItem examples\recipes\minimal-text-animator*.json | ForEach-Object { @('-recipe', $_.FullName) }
+go run ./cmd/aepmigrate matrix @recipes -sources all -targets all -out tmp\migration_matrix_text_animators_all_6x6 -ledger-out tmp\migration_matrix_text_animators_all_6x6\ledger.md
+```
+
+Expected: 792 total, 792 pass, 0 blocked, 0 failed, 0 skipped. This is
+22 recipes x 6 source writers x 6 target writers.
+
+- [x] **Step 2: Update reviewed validation summary**
+
+If Step 1 passes, update the text animator rows from `PD-3x3` to `PD-6x6`.
+Add `tmp/migration_matrix_text_animators_all_6x6/matrix.json` and its ledger to
+raw artifacts. Update `index.md` and append `history.md`.
+
+- [x] **Step 3: Verification and commit**
+
+Run:
+
+```powershell
+pwsh -File scripts\migration\verify_matrix.ps1
+go test ./...
+go vet ./...
+git diff --check
+```
+
+Read:
+
+```powershell
+Get-Content C:\Users\yl\.flightdeck\knowledge\git\commits.md -Raw
+Get-Content flightdeck\knowledge\workflow\verify.md -Raw
+```
+
+Commit:
+
+```text
+docs(aepmigrate): record text animator six-writer evidence
+```

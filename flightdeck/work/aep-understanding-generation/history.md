@@ -860,3 +860,8 @@ Current:
   `minimal-project-display-settings`, `minimal-comp-object-profile`,
   `minimal-camera-object-profile`, `minimal-light-object-profile`, and
   `minimal-precomp-layer`.
+- Text animator writer coverage was upgraded from the historical W2020/W2022/W2025
+  `PD-3x3` matrix to full W2020-W2025 source-and-target coverage. The matrix
+  `tmp/migration_matrix_text_animators_all_6x6/matrix.json` is 792 total,
+  792 pass, 0 blocked, 0 failed, 0 skipped for all 22 recipe-owned text
+  animator fixtures across 6 source writers and 6 target writers.

@@ -8,6 +8,7 @@ Legend:
 - `W2020/W2021/W2022/W2023/W2024/W2025`: writer targets produced by Go.
 - `H2020/H2021/H2022/H2023/H2024/H2025`: installed AE hosts used to open output.
 - `PD-3x3`: profile diff passed for source writers `W2020,W2022,W2025` into target writers `W2020,W2022,W2025`.
+- `PD-6x6`: profile diff passed for source writers `W2020,W2021,W2022,W2023,W2024,W2025` into target writers `W2020,W2021,W2022,W2023,W2024,W2025`.
 - `PD-1x3`: profile diff passed for source writer `W2020` into target writers `W2020,W2022,W2025`.
 - `PD-1x6`: profile diff passed for source writer `W2020` into target writers `W2020,W2021,W2022,W2023,W2024,W2025`.
 - `OPEN-H2025`: AE2025 open smoke passed.
@@ -21,7 +22,7 @@ Legend:
 No, before this ledger the project could not quickly answer "which domain and
 which AE versions are validated." The current reviewed answer is:
 
-- Text animator migration has `PD-3x3` evidence for 22 recipe-owned animator fixtures, plus `OPEN-ALL-HOSTS` evidence for two representatives: static scalar skew and animated fill-color keyframes.
+- Text animator migration has `PD-6x6` evidence for 22 recipe-owned animator fixtures, plus `OPEN-ALL-HOSTS` evidence for two representatives: static scalar skew and animated fill-color keyframes.
 - Text style migration has `PD-1x3`, `OPEN-H2025`, and `OPEN-ALL-HOSTS` evidence for the current style fixture set.
 - Dynamic effect params have `PD-1x3`, `OPEN-H2025`, and one vector-keyframe `OPEN-ALL-HOSTS` representative.
 - Dynamic transforms have `PD-1x3`, `OPEN-H2025`, and one transform-ease `OPEN-ALL-HOSTS` representative.
@@ -38,18 +39,18 @@ which AE versions are validated." The current reviewed answer is:
 | --- | --- | --- | --- | --- |
 | Text layer baseline | `minimal-default-text-layer`, `minimal-default-text-static-transform` | Included in latest full `PD-1x6` boundary | pending per-capability host ledger | `tmp/migration_matrix_smoke_all`: 846 total, 840 pass, 0 blocked, 6 skipped |
 | Text style | `minimal-text-style`, `minimal-text-shape` | `PD-1x3`: W2020 -> W2020/W2022/W2025 | `OPEN-H2025`; `OPEN-ALL-HOSTS` for `minimal-text-style` as W2020 output | `history.md` text style entry |
-| Text animator opacity | `minimal-text-animator-opacity`, `minimal-text-animator-opacity-value-keyframes` | `PD-3x3`: W2020/W2022/W2025 -> W2020/W2022/W2025 | pending migration AE-host fanout | `tmp/migration_matrix_text_animators_all_writers/matrix.json`: 198 total, 198 pass |
-| Text animator position | `minimal-text-animator-position`, `minimal-text-animator-position-value-keyframes` | `PD-3x3` | pending migration AE-host fanout | same text animator matrix |
-| Text animator scale | `minimal-text-animator-scale`, `minimal-text-animator-scale-value-keyframes` | `PD-3x3` | pending migration AE-host fanout | same text animator matrix |
-| Text animator rotation Z | `minimal-text-animator-rotation`, `minimal-text-animator-rotation-value-keyframes` | `PD-3x3` | pending migration AE-host fanout | same text animator matrix |
-| Text animator rotation X/Y | `minimal-text-animator-rotation-x`, `minimal-text-animator-rotation-y` | `PD-3x3` | pending migration AE-host fanout | same text animator matrix |
-| Text animator fill color | `minimal-text-animator-color`, `minimal-text-animator-color-value-keyframes` | `PD-3x3` | `OPEN-ALL-HOSTS` for `minimal-text-animator-color-value-keyframes` W2020 output on H2020-H2025 | `tmp/migration_matrix_text_animators_all_writers/matrix.json`; `tmp/migration_matrix_representative_all_hosts/matrix.json`: representative all-host matrix, 30 total, 30 pass |
-| Text animator stroke color | `minimal-text-animator-stroke-color` | `PD-3x3` | pending migration AE-host fanout | same text animator matrix |
-| Text animator tracking | `minimal-text-animator-tracking`, `minimal-text-animator-tracking-value-keyframes` | `PD-3x3` | pending migration AE-host fanout | same text animator matrix |
-| Text animator character offset | `minimal-text-animator-character-offset`, `minimal-text-animator-character-offset-value-keyframes` | `PD-3x3` | pending migration AE-host fanout | same text animator matrix |
-| Text animator fill/stroke opacity and stroke width | `minimal-text-animator-fill-opacity`, `minimal-text-animator-stroke-opacity`, `minimal-text-animator-stroke-width` | `PD-3x3` | pending migration AE-host fanout | same text animator matrix |
-| Text animator skew | `minimal-text-animator-skew` | `PD-3x3` | `OPEN-ALL-HOSTS` for W2020 output on H2020-H2025 | `tmp/migration_matrix_text_animators_all_writers/matrix.json`; `tmp/migration_matrix_representative_all_hosts/matrix.json`: representative all-host matrix, 30 total, 30 pass |
-| Text animator range selector offset keyframes | `minimal-text-animator-range-offset` | `PD-3x3` | pending migration AE-host fanout | same text animator matrix |
+| Text animator opacity | `minimal-text-animator-opacity`, `minimal-text-animator-opacity-value-keyframes` | `PD-6x6`: W2020-W2025 -> W2020-W2025 | pending migration AE-host fanout | `tmp/migration_matrix_text_animators_all_6x6/matrix.json`: 792 total, 792 pass |
+| Text animator position | `minimal-text-animator-position`, `minimal-text-animator-position-value-keyframes` | `PD-6x6` | pending migration AE-host fanout | same text animator 6x6 matrix |
+| Text animator scale | `minimal-text-animator-scale`, `minimal-text-animator-scale-value-keyframes` | `PD-6x6` | pending migration AE-host fanout | same text animator 6x6 matrix |
+| Text animator rotation Z | `minimal-text-animator-rotation`, `minimal-text-animator-rotation-value-keyframes` | `PD-6x6` | pending migration AE-host fanout | same text animator 6x6 matrix |
+| Text animator rotation X/Y | `minimal-text-animator-rotation-x`, `minimal-text-animator-rotation-y` | `PD-6x6` | pending migration AE-host fanout | same text animator 6x6 matrix |
+| Text animator fill color | `minimal-text-animator-color`, `minimal-text-animator-color-value-keyframes` | `PD-6x6` | `OPEN-ALL-HOSTS` for `minimal-text-animator-color-value-keyframes` W2020 output on H2020-H2025 | `tmp/migration_matrix_text_animators_all_6x6/matrix.json`; `tmp/migration_matrix_representative_all_hosts/matrix.json`: representative all-host matrix, 30 total, 30 pass |
+| Text animator stroke color | `minimal-text-animator-stroke-color` | `PD-6x6` | pending migration AE-host fanout | same text animator 6x6 matrix |
+| Text animator tracking | `minimal-text-animator-tracking`, `minimal-text-animator-tracking-value-keyframes` | `PD-6x6` | pending migration AE-host fanout | same text animator 6x6 matrix |
+| Text animator character offset | `minimal-text-animator-character-offset`, `minimal-text-animator-character-offset-value-keyframes` | `PD-6x6` | pending migration AE-host fanout | same text animator 6x6 matrix |
+| Text animator fill/stroke opacity and stroke width | `minimal-text-animator-fill-opacity`, `minimal-text-animator-stroke-opacity`, `minimal-text-animator-stroke-width` | `PD-6x6` | pending migration AE-host fanout | same text animator 6x6 matrix |
+| Text animator skew | `minimal-text-animator-skew` | `PD-6x6` | `OPEN-ALL-HOSTS` for W2020 output on H2020-H2025 | `tmp/migration_matrix_text_animators_all_6x6/matrix.json`; `tmp/migration_matrix_representative_all_hosts/matrix.json`: representative all-host matrix, 30 total, 30 pass |
+| Text animator range selector offset keyframes | `minimal-text-animator-range-offset` | `PD-6x6` | pending migration AE-host fanout | same text animator 6x6 matrix |
 
 ## Effect Domain
 
@@ -116,6 +117,7 @@ Reviewed raw artifacts currently known:
 
 - `tmp/migration_matrix_text_animators/matrix.json`: 66 total, 66 pass, 0 blocked, 0 failed, 0 skipped. This is W2020 source into W2020/W2022/W2025 targets for all 22 text animator recipes.
 - `tmp/migration_matrix_text_animators_all_writers/matrix.json`: 198 total, 198 pass, 0 blocked, 0 failed, 0 skipped. This is W2020/W2022/W2025 source writers into W2020/W2022/W2025 target writers for all 22 text animator recipes.
+- `tmp/migration_matrix_text_animators_all_6x6/matrix.json`: 792 total, 792 pass, 0 blocked, 0 failed, 0 skipped. This is W2020-W2025 source writers into W2020-W2025 target writers for all 22 text animator recipes.
 - `tmp/migration_matrix_text_animators_endpoint_hosts/matrix.json`: 4 total, 4 pass, 0 blocked, 0 failed, 0 skipped. This is W2020 writer output for `minimal-text-animator-skew` and `minimal-text-animator-color-value-keyframes` opened in H2020 and H2025. H2021-H2024 were not run and are only inferred low-risk.
 - `tmp/migration_matrix_representative_all_hosts/matrix.json`: 30 total, 30 pass, 0 blocked, 0 failed, 0 skipped. This is W2020 source into W2020 target with AE-open on H2020-H2025 for `minimal-text-animator-skew`, `minimal-text-animator-color-value-keyframes`, `minimal-layer-track-matte`, `minimal-layer-mask`, and `minimal-shape-gradient-stroke`.
 - `tmp/migration_matrix_structural_all_hosts/matrix.json`: 30 total, 30 pass, 0 blocked, 0 failed, 0 skipped. This is W2020 source into W2020 target with AE-open on H2020-H2025 for `minimal-project-display-settings`, `minimal-comp-object-profile`, `minimal-camera-object-profile`, `minimal-light-object-profile`, and `minimal-precomp-layer`.
@@ -130,6 +132,7 @@ Reviewed raw artifacts currently known:
 - `tmp/migration_matrix_verify/`: generated by `scripts/migration/verify_matrix.ps1`; contains the recurring full W2020-source matrix and AE2025 explicit-matte contract matrix with asserted totals.
 - Generated coverage ledger artifacts:
   - `tmp/migration_matrix_writer_targets_all/ledger.md`: generated from the narrow writer-target matrix; 1 recipe row with W2020-W2025 target evidence.
+  - `tmp/migration_matrix_text_animators_all_6x6/ledger.md`: generated from the text animator 6x6 writer matrix; 22 recipe rows, each with W2020-W2025 source and target evidence.
   - `tmp/migration_matrix_explicit_matte_source_contract/ledger.md`: generated from the AE2020-source explicit-matte source-contract matrix; 1 recipe row, 6 skipped cases.
   - `tmp/migration_matrix_explicit_matte_ae2025/ledger.md`: generated from the valid AE2025 explicit-matte matrix; 1 recipe row, 1 passed case.
   - `tmp/migration_matrix_smoke_all/ledger.md`: generated by the recurring full no-AE matrix command via `-ledger-out`; 141 recipe rows grouped by inferred domain.
