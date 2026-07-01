@@ -116,6 +116,8 @@ Current:
   targets.
 - Project migration now has a 4-recipe `PD-6x6` writer matrix across
   AE2020-AE2025 sources and targets.
+- Comp migration now has an 18-recipe `PD-6x6` writer matrix across
+  AE2020-AE2025 sources and targets.
 - Camera migration now has a 15-recipe `PD-6x6` writer matrix across
   AE2020-AE2025 sources and targets.
 - Light migration now has a 14-recipe `PD-6x6` writer matrix across

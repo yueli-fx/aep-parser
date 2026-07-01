@@ -2129,3 +2129,70 @@ Commit:
 ```text
 docs(aepmigrate): record project six-writer evidence
 ```
+
+---
+
+## Task 47: Comp PD-6x6 Writer Matrix Evidence
+
+**Goal:** Upgrade current recipe-owned comp setting writer coverage from
+structural representative `PD-6x6` evidence to focused W2020-W2025
+source-and-target evidence for every current `minimal-comp-*` recipe.
+
+**Architecture:** Reuse the matrix runner without AE-open. Run all 18 current
+comp recipes across `-sources all -targets all`. Record the result as comp
+`PD-6x6` evidence while keeping AE host-open scope at the existing
+`minimal-comp-object-profile` representative.
+
+**Files:**
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/aep-understanding-generation/index.md`
+- Modify: `flightdeck/work/aep-understanding-generation/history.md`
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+- Modify: `flightdeck/cockpit.md`
+
+- [x] **Step 1: Run the comp all-writer matrix**
+
+Run:
+
+```powershell
+$recipes = Get-ChildItem examples\recipes\minimal-comp-*.json | ForEach-Object { @('-recipe', $_.FullName) }
+go run ./cmd/aepmigrate matrix @recipes `
+  -sources all `
+  -targets all `
+  -out tmp\migration_matrix_comp_all_6x6 `
+  -ledger-out tmp\migration_matrix_comp_all_6x6\ledger.md
+```
+
+Expected: 648 total, 648 pass, 0 blocked, 0 failed, 0 skipped. This is
+18 recipes x 6 source writers x 6 target writers.
+
+- [x] **Step 2: Update reviewed validation summary**
+
+If Step 1 passes, update the Other Domains comp row to cite focused comp
+`PD-6x6` evidence for all 18 current comp recipes. Add
+`tmp/migration_matrix_comp_all_6x6/matrix.json` and its ledger to raw artifacts.
+Update `index.md`, `cockpit.md`, and append `history.md`.
+
+- [x] **Step 3: Verification and commit**
+
+Run:
+
+```powershell
+pwsh -File scripts\migration\verify_matrix.ps1
+go test ./...
+go vet ./...
+git diff --check
+```
+
+Read:
+
+```powershell
+Get-Content C:\Users\yl\.flightdeck\knowledge\git\commits.md -Raw
+Get-Content flightdeck\knowledge\workflow\verify.md -Raw
+```
+
+Commit:
+
+```text
+docs(aepmigrate): record comp six-writer evidence
+```
