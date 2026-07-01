@@ -296,6 +296,14 @@ git diff --check
     `minimal-layer-comment.json` pass AE2020/AE2022/AE2025 matrix conversion
     with `profile_diff_status: "pass"` and `profile_diff_count: 0`; both pass
     AE2025 open gate with `ae_open_status: "pass"` / `ae_open_exit_code: 0`.
+  - Text-layer switch reconstruction now applies visible, solo, shy, locked,
+    effects-enabled, audio-enabled, motion-blur, frame-blend, blending mode,
+    and quality through stable layer setters. `minimal-layer-common-switches.json`,
+    `minimal-layer-shy.json`, `minimal-layer-motion-blur.json`, and
+    `minimal-layer-quality-blending.json` pass AE2020/AE2022/AE2025 matrix
+    conversion with `profile_diff_status: "pass"` and `profile_diff_count: 0`;
+    all four pass AE2025 open gate with `ae_open_status: "pass"` /
+    `ae_open_exit_code: 0`.
 
 - [x] Update `flightdeck/work/aep-understanding-generation/index.md` and `flightdeck/cockpit.md` to state:
   - `assess` is available;

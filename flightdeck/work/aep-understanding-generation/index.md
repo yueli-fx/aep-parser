@@ -80,6 +80,10 @@ Current:
   comment metadata for reconstructed non-shape layers; the layer label/comment
   recipe fixtures pass AE2020/AE2022/AE2025 matrix conversion and AE2025 open
   smoke.
+- Supported text-layer switch reconstruction now covers visible, solo, shy,
+  locked, effects/audio switches, motion blur, frame blend, blending mode, and
+  quality; the common-switches/shy/motion-blur/quality-blending recipe fixtures
+  pass AE2020/AE2022/AE2025 matrix conversion and AE2025 open smoke.
 - Continue versioned migration by expanding supported conversion surface or
   deciding whether native AE2021/AE2023/AE2024 writer templates are worth
   adding.

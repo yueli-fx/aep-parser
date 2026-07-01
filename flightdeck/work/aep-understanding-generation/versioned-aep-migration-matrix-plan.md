@@ -74,9 +74,9 @@
 - `go test ./cmd/aepmigrate -run Matrix -count=1 -v`
 - `go run ./cmd/aepmigrate matrix -recipe examples\recipes\minimal-comp-object-profile.json -sources AE2020 -targets AE2020,AE2022,AE2025 -out tmp\migration_matrix_smoke_one`
 - `go run ./cmd/aepmigrate matrix -recipes examples\recipes -sources AE2020 -targets AE2020,AE2022,AE2025 -out tmp\migration_matrix_smoke_all`
-  - Result after layer metadata convert slice: 423 total, 183 pass,
-    240 blocked, 0 failed, 0 skipped; command exits 1 because intentional
-    blocked cases remain.
+  - Result after layer metadata and text-layer switch convert slices:
+    423 total, 195 pass, 228 blocked, 0 failed, 0 skipped; command exits 1
+    because intentional blocked cases remain.
 - `go run ./cmd/aepmigrate matrix -recipes examples\recipes -sources AE2020 -targets AE2020,AE2022,AE2025 -out tmp\migration_matrix_guard_all_ae -ae-root E:\adobe -ae-open`
   - Result: refused before launching AE: `AE open matrix would run 423 cases, above limit 25`.
 - `go run ./cmd/aepmigrate matrix -recipe examples\recipes\minimal-comp-object-profile.json -sources AE2020 -targets AE2025 -out tmp\migration_matrix_smoke_ae2025 -ae-root E:\adobe -ae-open -max-ae-open-cases 1`

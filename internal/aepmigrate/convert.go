@@ -391,6 +391,9 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				if err := materializeLayerMetadata(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q null layer %q metadata: %w", comp.Name, layer.Name, err)
 				}
+				if err := materializeLayerSwitchSurface(dstLayer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q null layer %q switches: %w", comp.Name, layer.Name, err)
+				}
 				if err := materializeDefaultTransformSurface(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q null layer %q transform: %w", comp.Name, layer.Name, err)
 				}
@@ -406,6 +409,9 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				if err := materializeLayerMetadata(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q solid layer %q metadata: %w", comp.Name, layer.Name, err)
 				}
+				if err := materializeLayerSwitchSurface(dstLayer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q solid layer %q switches: %w", comp.Name, layer.Name, err)
+				}
 				if err := materializeCenteredTransformSurface(next, dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q solid layer %q transform: %w", comp.Name, layer.Name, err)
 				}
@@ -419,6 +425,9 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				}
 				if err := materializeLayerMetadata(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q adjustment layer %q metadata: %w", comp.Name, layer.Name, err)
+				}
+				if err := materializeLayerSwitchSurface(dstLayer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q adjustment layer %q switches: %w", comp.Name, layer.Name, err)
 				}
 				if err := materializeDefaultTransformSurface(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q adjustment layer %q transform: %w", comp.Name, layer.Name, err)
@@ -434,6 +443,9 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				if err := materializeLayerMetadata(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q camera layer %q metadata: %w", comp.Name, layer.Name, err)
 				}
+				if err := materializeLayerSwitchSurface(dstLayer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q camera layer %q switches: %w", comp.Name, layer.Name, err)
+				}
 				if err := materializeCameraLightTransformSurface(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q camera layer %q transform: %w", comp.Name, layer.Name, err)
 				}
@@ -448,6 +460,9 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				if err := materializeLayerMetadata(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q light layer %q metadata: %w", comp.Name, layer.Name, err)
 				}
+				if err := materializeLayerSwitchSurface(dstLayer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q light layer %q switches: %w", comp.Name, layer.Name, err)
+				}
 				if err := materializeCameraLightTransformSurface(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q light layer %q transform: %w", comp.Name, layer.Name, err)
 				}
@@ -461,6 +476,9 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				}
 				if err := materializeLayerMetadata(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q text layer %q metadata: %w", comp.Name, layer.Name, err)
+				}
+				if err := materializeLayerSwitchSurface(dstLayer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q text layer %q switches: %w", comp.Name, layer.Name, err)
 				}
 				if layer.Text != nil {
 					if err := dstLayer.SetText(layer.Text.Text); err != nil {
@@ -501,6 +519,9 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				if err := materializeLayerMetadata(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q precomp layer %q metadata: %w", comp.Name, layer.Name, err)
 				}
+				if err := materializeLayerSwitchSurface(dstLayer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q precomp layer %q switches: %w", comp.Name, layer.Name, err)
+				}
 				if err := materializePrecompTransformSurface(next, dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q precomp layer %q transform: %w", comp.Name, layer.Name, err)
 				}
@@ -527,6 +548,59 @@ func materializeLayerMetadata(layer *aep.Layer, source profile.Layer) error {
 		}
 	}
 	return nil
+}
+
+func materializeLayerSwitchSurface(layer *aep.Layer, source profile.Layer) error {
+	flags := source.Flags
+	if err := layer.SetVisible(flags.Visible); err != nil {
+		return err
+	}
+	if err := layer.SetSolo(flags.Solo); err != nil {
+		return err
+	}
+	if err := layer.SetShy(flags.Shy); err != nil {
+		return err
+	}
+	if err := layer.SetLocked(flags.Locked); err != nil {
+		return err
+	}
+	if err := layer.SetEffectsEnabled(flags.EffectsEnabled); err != nil {
+		return err
+	}
+	if err := layer.SetAudioEnabled(flags.AudioEnabled); err != nil {
+		return err
+	}
+	if err := layer.SetMotionBlur(flags.MotionBlur); err != nil {
+		return err
+	}
+	if err := layer.SetFrameBlendEnabled(flags.FrameBlendEnabled); err != nil {
+		return err
+	}
+	if flags.Blend != 0 {
+		if err := layer.SetBlendingMode(aep.BlendingMode(flags.Blend)); err != nil {
+			return err
+		}
+	}
+	quality, ok := convertLayerQuality(source.Quality)
+	if ok {
+		if err := layer.SetQuality(quality); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func convertLayerQuality(value string) (aep.LayerQuality, bool) {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "wireframe":
+		return aep.LayerQualityWireframe, true
+	case "draft":
+		return aep.LayerQualityDraft, true
+	case "best":
+		return aep.LayerQualityBest, true
+	default:
+		return 0, false
+	}
 }
 
 func materializeDefaultTransformSurface(layer *aep.Layer, source profile.Layer) error {
@@ -1653,20 +1727,12 @@ func isSupportedDefaultTextLayer(layer profile.Layer) bool {
 		return false
 	}
 	flags := layer.Flags
-	return flags.Visible &&
-		flags.Blend == 2 &&
+	return flags.Blend != 0 &&
 		flags.TrackMatte == 0 &&
 		!flags.IsNull &&
-		flags.EffectsEnabled &&
-		flags.AudioEnabled &&
 		!flags.Is3D &&
-		!flags.Solo &&
-		!flags.Shy &&
-		!flags.Locked &&
 		!flags.IsAdjustment &&
 		!flags.IsGuide &&
-		!flags.MotionBlur &&
-		!flags.FrameBlendEnabled &&
 		!flags.MarkersLocked &&
 		!flags.FrameBlendPixelMotion &&
 		flags.CollapseTransform &&
