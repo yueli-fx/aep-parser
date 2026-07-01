@@ -557,6 +557,13 @@ func materializeRectGraphicShapeLayer(comp *aep.Composition, source profile.Laye
 			return nil, err
 		}
 	}
+	if hasProperty(source, "ADBE Vector Zigzag Size") ||
+		hasProperty(source, "ADBE Vector Zigzag Detail") ||
+		hasProperty(source, "ADBE Vector Zigzag Points") {
+		if err := materializeShapeZigZag(shapeLayer, source); err != nil {
+			return nil, err
+		}
+	}
 	if hasProperty(source, "ADBE Vector Fill Color") {
 		if err := materializeShapeFill(shapeLayer, source); err != nil {
 			return nil, err
@@ -700,6 +707,29 @@ func materializeShapeTrim(shapeLayer *aep.ShapeLayer, source profile.Layer) erro
 	}
 	if value, ok := propertyFloat(source.Properties, "ADBE Vector Trim Type"); ok {
 		if err := trim.SetType(aep.TrimType(int(value))); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func materializeShapeZigZag(shapeLayer *aep.ShapeLayer, source profile.Layer) error {
+	zigZag, err := shapeLayer.RootGroup().AddZigZag()
+	if err != nil {
+		return err
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Zigzag Size"); ok {
+		if err := zigZag.SetSize(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Zigzag Detail"); ok {
+		if err := zigZag.SetDetail(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Zigzag Points"); ok {
+		if err := zigZag.SetPoints(aep.ZigZagPoints(int(value))); err != nil {
 			return err
 		}
 	}
@@ -1316,7 +1346,10 @@ func hasSupportedShapeFilter(layer profile.Layer) bool {
 		hasProperty(layer, "ADBE Vector Offset Amount") ||
 		hasProperty(layer, "ADBE Vector Trim Start") ||
 		hasProperty(layer, "ADBE Vector Trim End") ||
-		hasProperty(layer, "ADBE Vector Trim Offset")
+		hasProperty(layer, "ADBE Vector Trim Offset") ||
+		hasProperty(layer, "ADBE Vector Zigzag Size") ||
+		hasProperty(layer, "ADBE Vector Zigzag Detail") ||
+		hasProperty(layer, "ADBE Vector Zigzag Points")
 }
 
 func isSupportedParametricGraphicShape(shape profile.Shape) bool {

@@ -246,17 +246,19 @@ git diff --check
     `minimal-shape-stroke-style.json`, and
     `minimal-shape-stroke-dashes.json`, plus the ellipse
     `minimal-shape-stroke-taper.json`, `minimal-shape-stroke-wave.json`,
-    `minimal-shape-round-corners.json`, `minimal-shape-offset-paths.json`, and
-    `minimal-shape-trim.json` pass AE2025 open gate with
+    `minimal-shape-round-corners.json`, `minimal-shape-offset-paths.json`,
+    `minimal-shape-trim.json`, and `minimal-shape-zigzag.json` pass AE2025
+    open gate with
     `ae_open_status: "pass"` / `ae_open_exit_code: 0`. This slice reconstructs
     rect size/position/roundness, ellipse size/position, fill
     color/opacity/blend/composite/fill-rule, and stroke
     color/opacity/width/cap/join/miter/composite/blend plus a single Dash 1/Gap
     1 pair, percent-mode stroke taper controls, wavelength-mode stroke wave
-    controls, Trim Paths start/end/offset, Round Corners radius, and Offset
-    Paths amount/line-join/miter/copies/copy-offset from stable profile
-    properties while still excluding stroke offset, additional dash/gap pairs,
-    wave units/cycles, gradient, and other filter shape content.
+    controls, Trim Paths start/end/offset, Round Corners radius, Offset Paths
+    amount/line-join/miter/copies/copy-offset, and ZigZag size/detail/points
+    from stable profile properties while still excluding stroke offset,
+    additional dash/gap pairs, wave units/cycles, gradient, and other filter
+    shape content.
   - Static layer transform reconstruction now maps profile-visible
     `ADBE Anchor Point`, `ADBE Position`, `ADBE Scale`, `ADBE Rotate Z`, and
     `ADBE Opacity` back into `LayerTransform`, converting profile scale/opacity
