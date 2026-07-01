@@ -757,3 +757,9 @@ Current:
   by domain/capability/version coverage. Historical matrix results are useful
   only after being promoted into that summary with artifact paths and evidence
   levels.
+- `internal/aepmigrate/convert.go` was mechanically split by migration domain
+  to prevent the convert surface from continuing to grow as a single file. The
+  top-level file now keeps the `Convert` orchestration only; verification,
+  rebuild, layer, shape, text, transform, effect, profile-value helper, and
+  index/ref code live in focused `convert_*.go` files. This slice is intended as
+  behavior-preserving refactor groundwork for future migration domains.
