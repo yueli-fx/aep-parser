@@ -255,6 +255,13 @@ git diff --check
     `profile_diff_count: 0`; the recipe fixture passes AE2025 open gate with
     `ae_open_status: "pass"` / `ae_open_exit_code: 0`. Transform keyframes
     remain outside this static slice and are still blocked by profile diff.
+  - Layer timing reconstruction now applies profile-visible `start_time`,
+    `in_point`, `out_point`, and `stretch` through `Layer.SetStartTime`,
+    `Layer.SetInPoint`, `Layer.SetOutPoint`, and `Layer.SetStretch` for all
+    supported layer reconstruction paths. `examples/recipes/minimal-layer-timing.json`
+    converts to AE2025 with `profile_diff_status: "pass"` and
+    `profile_diff_count: 0`, and passes AE2025 open gate with
+    `ae_open_status: "pass"` / `ae_open_exit_code: 0`.
 
 - [x] Update `flightdeck/work/aep-understanding-generation/index.md` and `flightdeck/cockpit.md` to state:
   - `assess` is available;

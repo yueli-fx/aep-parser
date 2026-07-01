@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"strings"
@@ -389,6 +390,9 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				if err := materializeDefaultTransformSurface(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q null layer %q transform: %w", comp.Name, layer.Name, err)
 				}
+				if err := materializeLayerTiming(dstLayer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q null layer %q timing: %w", comp.Name, layer.Name, err)
+				}
 			case isSupportedDefaultSolidLayer(layer, footage):
 				solid, _ := footage.solidDetails(layer)
 				dstLayer, err := aep.NewSolidLayer(next, layer.Name, int(solid.Width), int(solid.Height), *solid.SolidColor)
@@ -398,6 +402,9 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				if err := materializeCenteredTransformSurface(next, dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q solid layer %q transform: %w", comp.Name, layer.Name, err)
 				}
+				if err := materializeLayerTiming(dstLayer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q solid layer %q timing: %w", comp.Name, layer.Name, err)
+				}
 			case isSupportedDefaultAdjustmentLayer(layer, footage):
 				dstLayer, err := aep.NewAdjustmentLayer(next, layer.Name)
 				if err != nil {
@@ -405,6 +412,9 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				}
 				if err := materializeDefaultTransformSurface(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q adjustment layer %q transform: %w", comp.Name, layer.Name, err)
+				}
+				if err := materializeLayerTiming(dstLayer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q adjustment layer %q timing: %w", comp.Name, layer.Name, err)
 				}
 			case isSupportedDefaultCameraLayer(layer):
 				dstLayer, err := aep.NewCameraLayer(next, layer.Name)
@@ -414,6 +424,9 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				if err := materializeCameraLightTransformSurface(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q camera layer %q transform: %w", comp.Name, layer.Name, err)
 				}
+				if err := materializeLayerTiming(dstLayer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q camera layer %q timing: %w", comp.Name, layer.Name, err)
+				}
 			case isSupportedDefaultLightLayer(layer):
 				dstLayer, err := aep.NewLightLayer(next, layer.Name)
 				if err != nil {
@@ -421,6 +434,9 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				}
 				if err := materializeCameraLightTransformSurface(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q light layer %q transform: %w", comp.Name, layer.Name, err)
+				}
+				if err := materializeLayerTiming(dstLayer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q light layer %q timing: %w", comp.Name, layer.Name, err)
 				}
 			case isSupportedDefaultTextLayer(layer):
 				dstLayer, err := aep.NewTextLayer(next, layer.Name)
@@ -435,13 +451,24 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				if err := materializeDefaultTransformSurface(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q text layer %q transform: %w", comp.Name, layer.Name, err)
 				}
+				if err := materializeLayerTiming(dstLayer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q text layer %q timing: %w", comp.Name, layer.Name, err)
+				}
 			case isSupportedDefaultShapeLayer(layer):
-				if _, err := aep.NewShapeLayer(next, layer.Name); err != nil {
+				dstLayer, err := aep.NewShapeLayer(next, layer.Name)
+				if err != nil {
 					return nil, fmt.Errorf("comp %q shape layer %q: %w", comp.Name, layer.Name, err)
 				}
+				if err := materializeLayerTiming(dstLayer.Layer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q shape layer %q timing: %w", comp.Name, layer.Name, err)
+				}
 			case isSupportedRectFillShapeLayer(layer):
-				if err := materializeRectFillShapeLayer(next, layer); err != nil {
+				dstLayer, err := materializeRectFillShapeLayer(next, layer)
+				if err != nil {
 					return nil, fmt.Errorf("comp %q shape layer %q: %w", comp.Name, layer.Name, err)
+				}
+				if err := materializeLayerTiming(dstLayer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q shape layer %q timing: %w", comp.Name, layer.Name, err)
 				}
 			case isSupportedDefaultPrecompLayer(layer, comps):
 				sourceComp, ok := targetComps.sourceComposition(layer)
@@ -454,6 +481,9 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				}
 				if err := materializePrecompTransformSurface(next, dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q precomp layer %q transform: %w", comp.Name, layer.Name, err)
+				}
+				if err := materializeLayerTiming(dstLayer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q precomp layer %q timing: %w", comp.Name, layer.Name, err)
 				}
 			default:
 				return nil, fmt.Errorf("unsupported layer %q in comp %q", layer.Name, comp.Name)
@@ -502,61 +532,89 @@ func materializePrecompTransformSurface(comp *aep.Composition, layer *aep.Layer,
 	return materializeCenteredTransformSurface(comp, layer, source)
 }
 
-func materializeRectFillShapeLayer(comp *aep.Composition, source profile.Layer) error {
+func materializeRectFillShapeLayer(comp *aep.Composition, source profile.Layer) (*aep.Layer, error) {
 	shapeLayer, err := aep.NewShapeLayer(comp, source.Name)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	rectShape := source.Shapes[0]
 	rect, err := shapeLayer.RootGroup().AddRect()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if value, ok := propertyVector(rectShape.Properties, "ADBE Vector Rect Size", 2); ok {
 		if err := rect.SetSize([2]float64{value[0], value[1]}); err != nil {
-			return err
+			return nil, err
 		}
 	}
 	if value, ok := propertyVector(rectShape.Properties, "ADBE Vector Rect Position", 2); ok {
 		if err := rect.SetPosition([2]float64{value[0], value[1]}); err != nil {
-			return err
+			return nil, err
 		}
 	}
 	if value, ok := propertyFloat(rectShape.Properties, "ADBE Vector Rect Roundness"); ok {
 		if err := rect.SetRoundness(value); err != nil {
-			return err
+			return nil, err
 		}
 	}
 	fill, err := shapeLayer.RootGroup().AddFill()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if value, ok := propertyVector(source.Properties, "ADBE Vector Fill Color", 4); ok {
 		if err := fill.SetColor(profileARGBToRGBA(value)); err != nil {
-			return err
+			return nil, err
 		}
 	}
 	if value, ok := propertyFloat(source.Properties, "ADBE Vector Fill Opacity"); ok {
 		if err := fill.SetOpacity(value); err != nil {
-			return err
+			return nil, err
 		}
 	}
 	if value, ok := propertyFloat(source.Properties, "ADBE Vector Blend Mode"); ok {
 		if err := fill.SetBlendMode(aep.ShapeBlendMode(int(value))); err != nil {
-			return err
+			return nil, err
 		}
 	}
 	if value, ok := propertyFloat(source.Properties, "ADBE Vector Composite Order"); ok {
 		if err := fill.SetCompositeOrder(aep.ShapeCompositeOrder(int(value))); err != nil {
-			return err
+			return nil, err
 		}
 	}
 	if value, ok := propertyFloat(source.Properties, "ADBE Vector Fill Rule"); ok {
 		if err := fill.SetFillRule(aep.FillRule(int(value))); err != nil {
+			return nil, err
+		}
+	}
+	return shapeLayer.Layer, nil
+}
+
+func materializeLayerTiming(layer *aep.Layer, source profile.Layer) error {
+	if source.Timing.StartTime != 0 {
+		if err := layer.SetStartTime(source.Timing.StartTime); err != nil {
+			return err
+		}
+	}
+	if source.Timing.InPoint != 0 {
+		if err := layer.SetInPoint(source.Timing.InPoint); err != nil {
+			return err
+		}
+	}
+	if source.Timing.OutPoint != 0 && !isDefaultLayerOutPoint(source.Timing) {
+		if err := layer.SetOutPoint(source.Timing.OutPoint); err != nil {
+			return err
+		}
+	}
+	if source.Timing.Stretch != 0 && source.Timing.Stretch != 1 {
+		if err := layer.SetStretch(source.Timing.Stretch); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func isDefaultLayerOutPoint(timing profile.LayerTiming) bool {
+	return timing.InPoint == 0 && math.Abs(timing.OutPoint-timing.Duration) < 1e-6
 }
 
 func propertyVector(properties []profile.Property, matchName string, length int) ([]float64, bool) {
