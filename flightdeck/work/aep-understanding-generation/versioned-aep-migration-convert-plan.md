@@ -187,10 +187,14 @@ git diff --check
   - Default null-layer source generated through `aep.NewNullLayer` converted to
     AE2025 with `profile_diff_status: "pass"`, `profile_diff_count: 0`,
     `ae_open_status: "pass"`, and `ae_open_exit_code: 0`.
-  - `examples/recipes/minimal-default-null-layer.json` validates and compiles,
-    but its explicit transform properties are outside the default-null convert
-    slice; `convert` blocks it via pre-write profile diff and leaves no target
-    output.
+  - `examples/recipes/minimal-default-null-layer.json` now validates, compiles,
+    converts to AE2025 with `profile_diff_status: "pass"` and
+    `profile_diff_count: 0`, and passes AE2025 open gate with
+    `ae_open_status: "pass"` / `ae_open_exit_code: 0`.
+  - Default null-layer conversion preserves the source profile's visible
+    default transform surface when the source contains transform properties, so
+    recipe-generated default null layers and Go-writer default null layers both
+    pass source-vs-target profile diff.
 
 - [x] Update `flightdeck/work/aep-understanding-generation/index.md` and `flightdeck/cockpit.md` to state:
   - `assess` is available;

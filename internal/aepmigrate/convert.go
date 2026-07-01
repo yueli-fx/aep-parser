@@ -296,12 +296,28 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 			if !isSupportedDefaultNullLayer(layer) {
 				return nil, fmt.Errorf("unsupported layer %q in comp %q", layer.Name, comp.Name)
 			}
-			if _, err := aep.NewNullLayer(next, layer.Name); err != nil {
+			dstLayer, err := aep.NewNullLayer(next, layer.Name)
+			if err != nil {
 				return nil, fmt.Errorf("comp %q null layer %q: %w", comp.Name, layer.Name, err)
+			}
+			if hasTransformProperties(layer) {
+				if err := aep.SetLayerTransform(dstLayer, aep.NewLayerTransform()); err != nil {
+					return nil, fmt.Errorf("comp %q null layer %q transform: %w", comp.Name, layer.Name, err)
+				}
 			}
 		}
 	}
 	return project, nil
+}
+
+func hasTransformProperties(layer profile.Layer) bool {
+	for _, property := range layer.Properties {
+		switch property.MatchName {
+		case "ADBE Anchor Point", "ADBE Position", "ADBE Scale", "ADBE Rotate Z", "ADBE Opacity":
+			return true
+		}
+	}
+	return false
 }
 
 func isSupportedDefaultNullLayer(layer profile.Layer) bool {
