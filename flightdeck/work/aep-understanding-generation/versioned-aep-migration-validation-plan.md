@@ -92,11 +92,16 @@ go run ./cmd/aepmigrate matrix `
   -max-ae-open-cases 6
 ```
 
-Full no-AE migration boundary with generated coverage ledger:
+Recurring full no-AE migration boundary with generated coverage ledgers:
 
 ```powershell
-go run ./cmd/aepmigrate matrix -recipes examples\recipes -sources AE2020 -targets all -out tmp\migration_matrix_smoke_all -ledger-out tmp\migration_matrix_smoke_all\ledger.md
+pwsh -File scripts\migration\verify_matrix.ps1
 ```
+
+The script asserts the reviewed full W2020-source boundary and the separate
+AE2025 explicit-matte source contract. Use the raw `go run ./cmd/aepmigrate
+matrix ...` form only when intentionally refreshing a new matrix artifact or
+changing the reviewed expected totals.
 
 Do not run a broad AE-open matrix without an explicit case count decision.
 

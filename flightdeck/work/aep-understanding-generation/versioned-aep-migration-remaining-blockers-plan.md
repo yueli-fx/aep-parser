@@ -1015,3 +1015,79 @@ Commit:
 ```text
 fix(aepmigrate): skip source-incompatible matrix recipes
 ```
+
+---
+
+## Task 31: Recurring Matrix Verification Script
+
+**Goal:** Turn the reviewed no-AE migration matrix boundary into a single
+tracked command that future workers can run before claiming the matrix is still
+clean.
+
+**Architecture:** Add a PowerShell script under `scripts/migration/` because
+existing repository automation is PowerShell-based and matrix artifacts belong
+under `tmp/`. The script runs the full W2020-source no-AE matrix and the
+AE2025 explicit-matte valid contract matrix, parses each `matrix.json`, and
+fails if totals drift from the reviewed boundary.
+
+**Files:**
+- Create: `scripts/migration/verify_matrix.ps1`
+- Modify: `flightdeck/knowledge/workflow/verify.md`
+- Modify: `flightdeck/work/aep-understanding-generation/index.md`
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-plan.md`
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/aep-understanding-generation/history.md`
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+
+- [x] **Step 1: Add the recurring verification script**
+
+Create `scripts/migration/verify_matrix.ps1` with these behaviors:
+
+- default output root: `tmp\migration_matrix_verify`
+- run full no-AE matrix:
+  `go run ./cmd/aepmigrate matrix -recipes examples\recipes -sources AE2020 -targets all`
+- assert summary is `846 total, 840 pass, 0 blocked, 0 failed, 6 skipped`
+- run explicit matte valid contract matrix:
+  `go run ./cmd/aepmigrate matrix -recipe examples\recipes\minimal-layer-explicit-matte.json -sources AE2025 -targets AE2025`
+- assert summary is `1 total, 1 pass, 0 blocked, 0 failed, 0 skipped`
+- print a concise PASS line for each matrix
+
+Run:
+
+```powershell
+pwsh -File scripts\migration\verify_matrix.ps1
+```
+
+Expected: both matrix checks print `PASS` and the process exits 0.
+
+- [x] **Step 2: Document the recurring command**
+
+Add the command to `flightdeck/knowledge/workflow/verify.md` under the
+versioned migration area. Also point `index.md`,
+`versioned-aep-migration-validation-plan.md`, and
+`versioned-aep-migration-validation-summary.md` at the script as the recurring
+no-AE matrix gate.
+
+- [x] **Step 3: Full verification and commit**
+
+Run:
+
+```powershell
+pwsh -File scripts\migration\verify_matrix.ps1
+go test ./...
+go vet ./...
+git diff --check
+```
+
+Read:
+
+```powershell
+Get-Content C:\Users\yl\.flightdeck\knowledge\git\commits.md -Raw
+Get-Content flightdeck\knowledge\workflow\verify.md -Raw
+```
+
+Commit:
+
+```text
+chore(aepmigrate): add recurring matrix verification
+```

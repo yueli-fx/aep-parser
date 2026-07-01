@@ -20,8 +20,8 @@ Continue versioned migration by choosing one of:
 
 - expand the supported `convert` surface beyond the current conservative layer
   and shape slices;
-- promote matrix coverage into a recurring verification command once the pass /
-  blocked boundary is useful enough.
+- broaden per-capability AE host-open fanout when the no-AE boundary is already
+  clean enough for the domain being promoted.
 
 Do not start automated correction loops.
 
@@ -96,6 +96,7 @@ Current:
 - Latest full no-AE matrix: 846 total, 840 pass, 0 blocked, 0 failed,
   6 source-contract skipped. The skipped cases are `minimal-layer-explicit-matte`
   under AE2020 source; the AE2025 source to AE2025 target contract passes.
+- Recurring no-AE matrix gate: `pwsh -File scripts/migration/verify_matrix.ps1`.
 - `aepmigrate ledger` can generate per-recipe/domain Markdown ledgers from
   matrix JSON outputs; `aepmigrate matrix -ledger-out` now writes the ledger in
   the same recurring matrix run. Current generated ledgers live beside the
@@ -107,8 +108,8 @@ Current:
   shape gradient stroke open across AE2020, AE2021, AE2022, AE2023, AE2024, and
   AE2025 hosts. All current gradient-stroke variants also open across
   AE2020-AE2025 hosts.
-- Continue versioned migration by expanding supported conversion surface,
-  or turning the useful matrix boundary into a recurring verification command.
+- Continue versioned migration by expanding supported conversion surface or by
+  broadening per-capability host-open evidence.
 - Do not start automated correction loops.
 
 ## Open questions

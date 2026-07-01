@@ -39,6 +39,18 @@ pwsh -File scripts/fixtures/regen_fixtures.ps1                  # 只补缺失 f
 
 跨切面改动（ID 分配 / write 路径 / ae_run wrapper / 规则表）→ 跑全量 sweep；新增生成 JSX → 同步 `scripts/fixtures/fixtures_manifest.json`。详 `re-fixture.md` § 全量 gate sweep。
 
+## Versioned migration matrix gate
+
+```powershell
+pwsh -File scripts/migration/verify_matrix.ps1
+```
+
+This recurring no-AE gate runs the full W2020-source migration matrix across
+all writer targets and the valid AE2025 explicit-matte contract matrix. It
+fails if the reviewed totals drift from 846 total / 840 pass / 0 blocked /
+0 failed / 6 skipped for the full matrix or 1 total / 1 pass for the explicit
+matte AE2025 contract.
+
 ## 跑单个测试
 
 ```bash

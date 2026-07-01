@@ -847,3 +847,8 @@ Current:
   0 blocked, 0 failed, 0 skipped for AE2025 source to W2025. The refreshed
   recurring full no-AE boundary `tmp/migration_matrix_smoke_all/matrix.json` is
   846 total, 840 pass, 0 blocked, 0 failed, 6 source-contract skipped.
+- The reviewed no-AE migration matrix boundary is now a tracked recurring gate:
+  `pwsh -File scripts/migration/verify_matrix.ps1`. It writes artifacts under
+  `tmp/migration_matrix_verify`, asserts the 846/840/0/0/6 full W2020-source
+  boundary, and asserts the valid AE2025 explicit-matte source-to-target matrix
+  remains 1 total, 1 pass.
