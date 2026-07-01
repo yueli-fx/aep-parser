@@ -648,6 +648,16 @@ func materializeShapeStroke(shapeLayer *aep.ShapeLayer, source profile.Layer) er
 			return err
 		}
 	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Stroke Dash 1"); ok {
+		if err := stroke.Dashes().SetDash(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(source.Properties, "ADBE Vector Stroke Gap 1"); ok {
+		if err := stroke.Dashes().SetGap(value); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -1114,8 +1124,9 @@ func isSupportedRectGraphicShapeLayer(layer profile.Layer) bool {
 	}
 	if hasProperty(layer, "ADBE Vector Grad Colors") ||
 		hasProperty(layer, "ADBE Vector Filter - Trim") ||
-		hasProperty(layer, "ADBE Vector Stroke Dash 1") ||
-		hasProperty(layer, "ADBE Vector Stroke Gap 1") ||
+		hasProperty(layer, "ADBE Vector Stroke Dash 2") ||
+		hasProperty(layer, "ADBE Vector Stroke Gap 2") ||
+		hasProperty(layer, "ADBE Vector Stroke Offset") ||
 		hasProperty(layer, "ADBE Vector Stroke Taper Start Length") ||
 		hasProperty(layer, "ADBE Vector Stroke Wave Amount") {
 		return false

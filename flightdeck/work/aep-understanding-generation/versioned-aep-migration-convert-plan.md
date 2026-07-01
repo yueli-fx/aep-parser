@@ -242,11 +242,13 @@ git diff --check
     `aep.NewShapeLayer` with `RootGroup().AddRect()` plus `AddFill()` and/or
     `AddStroke()` convert to AE2025 with `profile_diff_status: "pass"` and
     `profile_diff_count: 0`; `minimal-shape-rect-fill-default-transform.json`
-    and `minimal-shape-stroke-style.json` pass AE2025 open gate with
+    `minimal-shape-stroke-style.json`, and
+    `minimal-shape-stroke-dashes.json` pass AE2025 open gate with
     `ae_open_status: "pass"` / `ae_open_exit_code: 0`. This slice reconstructs
     rect size/position/roundness, fill color/opacity/blend/composite/fill-rule,
-    and stroke color/opacity/width/cap/join/miter/composite/blend from stable
-    profile properties while still excluding dashes/taper/wave/gradient/filter
+    and stroke color/opacity/width/cap/join/miter/composite/blend plus a single
+    Dash 1/Gap 1 pair from stable profile properties while still excluding
+    stroke offset, additional dash/gap pairs, taper/wave, gradient, and filter
     shape content.
   - Static layer transform reconstruction now maps profile-visible
     `ADBE Anchor Point`, `ADBE Position`, `ADBE Scale`, `ADBE Rotate Z`, and
