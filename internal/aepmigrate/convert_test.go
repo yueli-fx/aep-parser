@@ -433,6 +433,49 @@ func TestConvertWritesRecipeDefaultLightLayerProject(t *testing.T) {
 	}
 }
 
+func TestConvertWritesDefaultPrecompLayerProject(t *testing.T) {
+	source := writeTempProjectWithOnePrecompLayer(t)
+	outPath := filepath.Join(t.TempDir(), "converted.aep")
+
+	report, err := Convert(ConvertOptions{
+		InputPath:  source,
+		OutputPath: outPath,
+		Target:     VersionAE2025,
+	})
+	if err != nil {
+		t.Fatalf("Convert: %v", err)
+	}
+	if report.Summary.Status != StatusPass {
+		t.Fatalf("status = %q, entries=%+v, diffs=%+v", report.Summary.Status, report.Entries, report.Verification.ProfileDiffs)
+	}
+	if report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 {
+		t.Fatalf("profile diff verification = %+v, want pass with 0 diffs", report.Verification)
+	}
+}
+
+func TestConvertWritesRecipeDefaultPrecompLayerProject(t *testing.T) {
+	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-default-precomp-layer.json"))
+	outPath := filepath.Join(t.TempDir(), "converted.aep")
+
+	report, err := Convert(ConvertOptions{
+		InputPath:  source,
+		OutputPath: outPath,
+		Target:     VersionAE2025,
+	})
+	if err != nil {
+		t.Fatalf("Convert: %v", err)
+	}
+	if report.Summary.Status != StatusPass {
+		t.Fatalf("status = %q, entries=%+v, diffs=%+v", report.Summary.Status, report.Entries, report.Verification.ProfileDiffs)
+	}
+	if report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 {
+		t.Fatalf("profile diff verification = %+v, want pass with 0 diffs", report.Verification)
+	}
+	if _, err := os.Stat(outPath); err != nil {
+		t.Fatalf("converted output missing: %v", err)
+	}
+}
+
 func TestConvertBlocksChangedNullLayerBeforeWritingOutput(t *testing.T) {
 	source := writeTempProjectWithMovedNullLayer(t)
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
@@ -772,6 +815,25 @@ func writeTempProjectWithOneLightLayer(t *testing.T) string {
 		t.Fatalf("NewLightLayer: %v", err)
 	}
 	path := filepath.Join(t.TempDir(), "one-light-layer.aep")
+	writeProjectFile(t, project, path)
+	return path
+}
+
+func writeTempProjectWithOnePrecompLayer(t *testing.T) string {
+	t.Helper()
+	project := aep.NewProject(aep.TargetAE2020)
+	source, err := aep.NewComposition(project, "Source", 640, 360, 24, 2)
+	if err != nil {
+		t.Fatalf("NewComposition source: %v", err)
+	}
+	main, err := aep.NewComposition(project, "Main", 1920, 1080, 30, 3)
+	if err != nil {
+		t.Fatalf("NewComposition main: %v", err)
+	}
+	if _, err := aep.NewPrecompLayer(main, source, "Nested Source"); err != nil {
+		t.Fatalf("NewPrecompLayer: %v", err)
+	}
+	path := filepath.Join(t.TempDir(), "one-precomp-layer.aep")
 	writeProjectFile(t, project, path)
 	return path
 }

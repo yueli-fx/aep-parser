@@ -717,8 +717,8 @@ This reference is generated from the canonical recipe field model.
 | `expected_profile.layers[].blending_mode` | `string` | - | Expected layer blending mode. | Expected blending mode must use a supported recipe blending mode value. | - | examples/recipes/minimal-layer-object-profile.json |
 | `expected_profile.layers[].auto_orient` | `string` | - | Expected layer auto-orientation mode. | Expected auto-orient mode must use a supported recipe auto-orient value. | - | examples/recipes/minimal-layer-auto-orient.json |
 | `expected_profile.layers[].light_kind` | `string` | - | Expected light type. | - | - | examples/recipes/minimal-light-kind.json |
-| `expected_profile.layers[].source` | `string` | - | Expected source item name. | - | - | examples/recipes/minimal-layer-mask.json |
-| `expected_profile.layers[].source_kind` | `string` | - | Expected source item type. | - | - | examples/recipes/minimal-layer-mask.json |
+| `expected_profile.layers[].source` | `string` | - | Expected source item name. | - | - | examples/recipes/minimal-default-precomp-layer.json |
+| `expected_profile.layers[].source_kind` | `string` | - | Expected source item type. | - | - | examples/recipes/minimal-default-precomp-layer.json |
 | `expected_profile.layers[].light_source` | `string` | - | Expected source layer for light data. | - | - | examples/recipes/minimal-light-source.json |
 | `expected_profile.layers[].parent` | `string` | - | Expected parent layer name. | - | - | examples/recipes/minimal-layer-null-flag.json |
 | `expected_profile.layers[].track_matte` | `string` | - | Expected track matte mode. | Expected track matte must use a supported recipe track matte value. | - | examples/recipes/minimal-layer-explicit-matte.json |

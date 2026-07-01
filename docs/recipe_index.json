@@ -6752,7 +6752,7 @@
       "type": "string",
       "go_type": "string",
       "summary": "Expected source item name.",
-      "example": "examples/recipes/minimal-layer-mask.json"
+      "example": "examples/recipes/minimal-default-precomp-layer.json"
     },
     "expected_profile.layers[].source_kind": {
       "path": "expected_profile.layers[].source_kind",
@@ -6762,7 +6762,7 @@
       "type": "string",
       "go_type": "string",
       "summary": "Expected source item type.",
-      "example": "examples/recipes/minimal-layer-mask.json"
+      "example": "examples/recipes/minimal-default-precomp-layer.json"
     },
     "expected_profile.layers[].timing": {
       "path": "expected_profile.layers[].timing",

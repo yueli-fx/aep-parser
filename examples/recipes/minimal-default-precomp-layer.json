@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "project": {
+    "target_version": "AE2020",
+    "name": "Minimal default precomp layer"
+  },
+  "comps": [
+    {
+      "name": "Source",
+      "width": 640,
+      "height": 360,
+      "frame_rate": 24,
+      "duration": 2,
+      "background_color": [0, 0, 0]
+    },
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 3,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "precomp",
+          "name": "Nested Source",
+          "source": "Source"
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 2,
+    "layer_count": 1,
+    "layers": [
+      {
+        "name": "Nested Source",
+        "type": "av",
+        "source": "Source",
+        "source_kind": "composition"
+      }
+    ]
+  }
+}

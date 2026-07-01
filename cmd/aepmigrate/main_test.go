@@ -215,6 +215,25 @@ func TestRunConvertWritesDefaultLightLayerOutput(t *testing.T) {
 	}
 }
 
+func TestRunConvertWritesDefaultPrecompLayerOutput(t *testing.T) {
+	input := writeTempProjectWithOnePrecompLayer(t)
+	outPath := filepath.Join(t.TempDir(), "converted.aep")
+	reportPath := filepath.Join(t.TempDir(), "convert.json")
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"convert", "-in", input, "-target", "AE2025", "-out", outPath, "-report", reportPath}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("run convert = %d, stderr=%s", code, stderr.String())
+	}
+	if _, err := os.Stat(outPath); err != nil {
+		t.Fatalf("converted output missing: %v", err)
+	}
+	report := readReportSummary(t, reportPath)
+	if report.Summary.Status != "pass" || report.Verification.ProfileDiffStatus != "pass" {
+		t.Fatalf("report = %+v, want pass with profile diff pass", report)
+	}
+}
+
 func TestRunConvertWritesBlockedReportWithoutOutput(t *testing.T) {
 	input := writeTempProjectWithOneTextLayer(t)
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
@@ -321,6 +340,23 @@ func writeTempProjectWithOneLightLayer(t *testing.T) string {
 		t.Fatalf("NewLightLayer: %v", err)
 	}
 	return writeProject(t, project, "one-light-layer.aep")
+}
+
+func writeTempProjectWithOnePrecompLayer(t *testing.T) string {
+	t.Helper()
+	project := aep.NewProject(aep.TargetAE2020)
+	source, err := aep.NewComposition(project, "Source", 640, 360, 24, 2)
+	if err != nil {
+		t.Fatalf("NewComposition source: %v", err)
+	}
+	main, err := aep.NewComposition(project, "Main", 1920, 1080, 30, 3)
+	if err != nil {
+		t.Fatalf("NewComposition main: %v", err)
+	}
+	if _, err := aep.NewPrecompLayer(main, source, "Nested Source"); err != nil {
+		t.Fatalf("NewPrecompLayer: %v", err)
+	}
+	return writeProject(t, project, "one-precomp-layer.aep")
 }
 
 func writeTempProjectWithOneNullLayer(t *testing.T) string {

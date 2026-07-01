@@ -255,6 +255,7 @@ func convertScopeEntries(target VersionLabel, prof *profile.Profile) []Entry {
 	}
 	var entries []Entry
 	footage := newConvertFootageIndex(prof)
+	comps := newConvertCompIndex(prof)
 	for _, comp := range prof.Comps {
 		entries = append(entries, Entry{
 			Path:          "comps[" + comp.Name + "]",
@@ -308,11 +309,20 @@ func convertScopeEntries(target VersionLabel, prof *profile.Profile) []Entry {
 				})
 				continue
 			}
+			if isSupportedDefaultPrecompLayer(layer, comps) {
+				entries = append(entries, Entry{
+					Path:          "comps[" + comp.Name + "].layers[" + layer.Name + "]",
+					Class:         ClassRetargeted,
+					TargetVersion: target,
+					Reason:        "Default precomp layer is recreated through the target AE project template.",
+				})
+				continue
+			}
 			entries = append(entries, Entry{
 				Path:          "comps[" + comp.Name + "].layers[" + layer.Name + "]",
 				Class:         ClassBlocked,
 				TargetVersion: target,
-				Reason:        "This convert slice only reconstructs no-layer comps, default null layers, default solid layers, default adjustment layers, default camera layers, and default light layers; refusing output to avoid silent layer loss.",
+				Reason:        "This convert slice only reconstructs no-layer comps, default null layers, default solid layers, default adjustment layers, default camera layers, default light layers, and default precomp layers; refusing output to avoid silent layer loss.",
 			})
 		}
 	}
@@ -322,6 +332,8 @@ func convertScopeEntries(target VersionLabel, prof *profile.Profile) []Entry {
 func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, error) {
 	project := aep.NewProject(aepTarget(target))
 	footage := newConvertFootageIndex(prof)
+	comps := newConvertCompIndex(prof)
+	targetComps := newConvertTargetCompIndex()
 	for _, comp := range prof.Comps {
 		next, err := aep.NewComposition(project, comp.Name, comp.Width, comp.Height, comp.FrameRate, comp.Duration)
 		if err != nil {
@@ -329,6 +341,16 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 		}
 		if err := applyStableCompSettings(next, comp); err != nil {
 			return nil, err
+		}
+		targetComps.add(comp, next)
+	}
+	for _, comp := range prof.Comps {
+		next, ok := targetComps.bySourceID[comp.ID]
+		if !ok {
+			next = targetComps.byName[comp.Name]
+		}
+		if next == nil {
+			return nil, fmt.Errorf("comp %q: target comp missing after creation", comp.Name)
 		}
 		for _, layer := range comp.Layers {
 			switch {
@@ -373,6 +395,18 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				if err := materializeCameraLightTransformSurface(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q light layer %q transform: %w", comp.Name, layer.Name, err)
 				}
+			case isSupportedDefaultPrecompLayer(layer, comps):
+				sourceComp, ok := targetComps.sourceComposition(layer)
+				if !ok {
+					return nil, fmt.Errorf("comp %q precomp layer %q source %q not found", comp.Name, layer.Name, layer.SourceRef.Name)
+				}
+				dstLayer, err := aep.NewPrecompLayer(next, sourceComp, layer.Name)
+				if err != nil {
+					return nil, fmt.Errorf("comp %q precomp layer %q: %w", comp.Name, layer.Name, err)
+				}
+				if err := materializePrecompTransformSurface(next, dstLayer, layer); err != nil {
+					return nil, fmt.Errorf("comp %q precomp layer %q transform: %w", comp.Name, layer.Name, err)
+				}
 			default:
 				return nil, fmt.Errorf("unsupported layer %q in comp %q", layer.Name, comp.Name)
 			}
@@ -409,6 +443,13 @@ func materializeCameraLightTransformSurface(layer *aep.Layer, source profile.Lay
 	return materializeDefaultTransformSurface(layer, source)
 }
 
+func materializePrecompTransformSurface(comp *aep.Composition, layer *aep.Layer, source profile.Layer) error {
+	if hasStaticPropertyVector(source, "ADBE Position", []float64{0, 0, 0}) {
+		return materializeDefaultTransformSurface(layer, source)
+	}
+	return materializeCenteredTransformSurface(comp, layer, source)
+}
+
 func hasTransformProperties(layer profile.Layer) bool {
 	return hasProperty(layer, "ADBE Anchor Point") ||
 		hasProperty(layer, "ADBE Position") ||
@@ -424,6 +465,48 @@ func hasProperty(layer profile.Layer, matchName string) bool {
 		}
 	}
 	return false
+}
+
+func hasStaticPropertyVector(layer profile.Layer, matchName string, want []float64) bool {
+	for _, property := range layer.Properties {
+		if property.MatchName != matchName {
+			continue
+		}
+		return vectorEquals(property.StaticValue, want)
+	}
+	return false
+}
+
+func vectorEquals(value any, want []float64) bool {
+	switch v := value.(type) {
+	case []float64:
+		if len(v) != len(want) {
+			return false
+		}
+		for i := range want {
+			if v[i] != want[i] {
+				return false
+			}
+		}
+		return true
+	case []any:
+		if len(v) != len(want) {
+			return false
+		}
+		for i := range want {
+			got, ok := v[i].(float64)
+			if !ok || got != want[i] {
+				return false
+			}
+		}
+		return true
+	case [2]float64:
+		return len(want) == 2 && v[0] == want[0] && v[1] == want[1]
+	case [3]float64:
+		return len(want) == 3 && v[0] == want[0] && v[1] == want[1] && v[2] == want[2]
+	default:
+		return false
+	}
 }
 
 func isSupportedDefaultNullLayer(layer profile.Layer) bool {
@@ -566,6 +649,116 @@ func isSupportedDefaultCameraOrLightLayer(layer profile.Layer, typ string) bool 
 		!flags.PreserveTransparency
 }
 
+func isSupportedDefaultPrecompLayer(layer profile.Layer, comps convertCompIndex) bool {
+	if layer.Type != "av" || layer.SourceRef == nil || layer.SourceRef.Kind != "composition" {
+		return false
+	}
+	if _, ok := comps.sourceComposition(layer); !ok {
+		return false
+	}
+	if layer.Comment != "" || layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
+		return false
+	}
+	if layer.Text != nil || len(layer.Effects) != 0 || len(layer.Masks) != 0 || len(layer.Shapes) != 0 || len(layer.Markers) != 0 {
+		return false
+	}
+	flags := layer.Flags
+	return flags.Visible &&
+		flags.Blend == 2 &&
+		flags.TrackMatte == 0 &&
+		!flags.IsNull &&
+		flags.EffectsEnabled &&
+		flags.AudioEnabled &&
+		!flags.Is3D &&
+		!flags.Solo &&
+		!flags.Shy &&
+		!flags.Locked &&
+		!flags.IsAdjustment &&
+		!flags.IsGuide &&
+		!flags.MotionBlur &&
+		!flags.FrameBlendEnabled &&
+		!flags.MarkersLocked &&
+		!flags.FrameBlendPixelMotion &&
+		!flags.CollapseTransform &&
+		!flags.SamplingBicubic &&
+		!flags.PreserveTransparency
+}
+
+type convertCompIndex struct {
+	byID   map[uint32]profile.Composition
+	byName map[string]profile.Composition
+}
+
+func newConvertCompIndex(prof *profile.Profile) convertCompIndex {
+	out := convertCompIndex{
+		byID:   map[uint32]profile.Composition{},
+		byName: map[string]profile.Composition{},
+	}
+	if prof == nil {
+		return out
+	}
+	for _, comp := range prof.Comps {
+		if comp.ID != 0 {
+			out.byID[comp.ID] = comp
+		}
+		if _, exists := out.byName[comp.Name]; !exists {
+			out.byName[comp.Name] = comp
+		}
+	}
+	return out
+}
+
+func (idx convertCompIndex) sourceComposition(layer profile.Layer) (profile.Composition, bool) {
+	if layer.SourceRef == nil {
+		return profile.Composition{}, false
+	}
+	var comp profile.Composition
+	var ok bool
+	if layer.SourceRef.ID != 0 {
+		comp, ok = idx.byID[layer.SourceRef.ID]
+	}
+	if !ok && layer.SourceRef.Name != "" {
+		comp, ok = idx.byName[layer.SourceRef.Name]
+	}
+	return comp, ok
+}
+
+type convertTargetCompIndex struct {
+	bySourceID map[uint32]*aep.Composition
+	byName     map[string]*aep.Composition
+}
+
+func newConvertTargetCompIndex() convertTargetCompIndex {
+	return convertTargetCompIndex{
+		bySourceID: map[uint32]*aep.Composition{},
+		byName:     map[string]*aep.Composition{},
+	}
+}
+
+func (idx convertTargetCompIndex) add(source profile.Composition, target *aep.Composition) {
+	if source.ID != 0 {
+		idx.bySourceID[source.ID] = target
+	}
+	if _, exists := idx.byName[source.Name]; !exists {
+		idx.byName[source.Name] = target
+	}
+}
+
+func (idx convertTargetCompIndex) sourceComposition(layer profile.Layer) (*aep.Composition, bool) {
+	if layer.SourceRef == nil {
+		return nil, false
+	}
+	var comp *aep.Composition
+	var ok bool
+	if layer.SourceRef.ID != 0 {
+		comp, ok = idx.bySourceID[layer.SourceRef.ID]
+	}
+	if !ok && layer.SourceRef.Name != "" {
+		comp, ok = idx.byName[layer.SourceRef.Name]
+	}
+	return comp, ok && comp != nil
+}
+
 type convertFootageIndex struct {
 	byID   map[uint32]profile.Item
 	byName map[string]profile.Item
@@ -580,7 +773,9 @@ func newConvertFootageIndex(prof *profile.Profile) convertFootageIndex {
 		return out
 	}
 	for _, item := range prof.Items.Footage {
-		out.byID[item.ID] = item
+		if item.ID != 0 {
+			out.byID[item.ID] = item
+		}
 		if _, exists := out.byName[item.Name]; !exists {
 			out.byName[item.Name] = item
 		}
@@ -592,7 +787,11 @@ func (idx convertFootageIndex) solidDetails(layer profile.Layer) (profile.Footag
 	if layer.SourceRef == nil {
 		return profile.FootageDetails{}, false
 	}
-	item, ok := idx.byID[layer.SourceRef.ID]
+	var item profile.Item
+	var ok bool
+	if layer.SourceRef.ID != 0 {
+		item, ok = idx.byID[layer.SourceRef.ID]
+	}
 	if !ok && layer.SourceRef.Name != "" {
 		item, ok = idx.byName[layer.SourceRef.Name]
 	}

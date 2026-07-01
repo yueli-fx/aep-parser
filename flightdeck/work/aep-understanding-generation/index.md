@@ -692,16 +692,20 @@ Current:
   with unsupported layers are intentionally blocked before output so conversion
   cannot silently drop layer content. The first layer-bearing slices are default
   null layers, default solid layers, default adjustment layers, default camera
-  layers, and default light layers. Default null/adjustment/camera/light
+  layers, default light layers, and default precomp layers. Default
+  null/adjustment/camera/light
   conversion preserves the source profile's visible default transform surface
   when needed; default solid conversion uses profile-visible footage item
-  details for source dimensions/color. Go-writer and recipe fixtures for all
-  five slices now pass profile diff. Successful convert reopens the target and
+  details for source dimensions/color; default precomp conversion rebuilds all
+  target comps before resolving composition source refs into recreated target
+  comps. Go-writer and recipe fixtures for all six slices now pass profile diff.
+  Successful convert reopens the target and
   runs source-vs-target `profilediff`; unexpected profile diffs are recorded in
   the migration report and block success. AE2025 open smoke has passed for the
   converted no-layer comp object profile output and recipe default null, solid,
-  adjustment, camera, and light outputs. `cmd/aepmigrate convert -ae-open -ae
-  <AfterFX.exe>` writes AE open gate status into the migration report.
+  adjustment, camera, light, and precomp outputs. `cmd/aepmigrate convert
+  -ae-open -ae <AfterFX.exe>` writes AE open gate status into the migration
+  report.
 - `profilediff` now compares profile-visible layer metadata, quality/blending/
   auto-orient/light kind, all current layer flags, stable layer refs by
   name/index, layer properties, expression status, layer-ref params, keyframe
