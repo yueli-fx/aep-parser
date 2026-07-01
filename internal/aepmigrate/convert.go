@@ -266,7 +266,7 @@ func convertScopeEntries(target VersionLabel, prof *profile.Profile) []Entry {
 			Reason:        "Composition and stable composition settings are recreated through the target AE project template.",
 		})
 		for _, layer := range comp.Layers {
-			if isSupportedDefaultNullLayer(layer) {
+			if isSupportedDefaultNullLayer(layer, footage) {
 				entries = append(entries, Entry{
 					Path:          "comps[" + comp.Name + "].layers[" + layer.Name + "]",
 					Class:         ClassRetargeted,
@@ -387,8 +387,8 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 		}
 		for _, layer := range comp.Layers {
 			switch {
-			case isSupportedDefaultNullLayer(layer):
-				dstLayer, err := aep.NewNullLayer(next, layer.Name)
+			case isSupportedDefaultNullLayer(layer, footage):
+				dstLayer, err := materializeNullLayer(next, layer, footage)
 				if err != nil {
 					return nil, fmt.Errorf("comp %q null layer %q: %w", comp.Name, layer.Name, err)
 				}
@@ -598,6 +598,20 @@ func materializeLayerMetadata(layer *aep.Layer, source profile.Layer) error {
 		}
 	}
 	return nil
+}
+
+func materializeNullLayer(comp *aep.Composition, source profile.Layer, footage convertFootageIndex) (*aep.Layer, error) {
+	if solid, ok := footage.solidDetails(source); ok && solid.Width != 0 && solid.Height != 0 && solid.SolidColor != nil {
+		layer, err := aep.NewSolidLayer(comp, source.Name, int(solid.Width), int(solid.Height), *solid.SolidColor)
+		if err != nil {
+			return nil, err
+		}
+		if err := layer.SetIsNull(true); err != nil {
+			return nil, err
+		}
+		return layer, nil
+	}
+	return aep.NewNullLayer(comp, source.Name)
 }
 
 func materializeLayerSwitchSurface(layer *aep.Layer, source profile.Layer) error {
@@ -1644,9 +1658,15 @@ func vectorEquals(value any, want []float64) bool {
 	}
 }
 
-func isSupportedDefaultNullLayer(layer profile.Layer) bool {
+func isSupportedDefaultNullLayer(layer profile.Layer, footage convertFootageIndex) bool {
 	if layer.Type != "null" {
 		return false
+	}
+	if layer.SourceRef != nil {
+		solid, ok := footage.solidDetails(layer)
+		if !ok || solid.Width == 0 || solid.Height == 0 || solid.SolidColor == nil {
+			return false
+		}
 	}
 	if layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
 		return false
@@ -1655,8 +1675,7 @@ func isSupportedDefaultNullLayer(layer profile.Layer) bool {
 		return false
 	}
 	flags := layer.Flags
-	return flags.Visible &&
-		flags.Blend == 2 &&
+	return flags.Blend == 2 &&
 		flags.TrackMatte == 0 &&
 		flags.IsNull &&
 		flags.EffectsEnabled &&

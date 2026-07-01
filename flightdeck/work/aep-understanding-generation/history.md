@@ -640,7 +640,8 @@ Current:
   reconstruction now preserves start_time/in_point/out_point/stretch for all
   supported layer paths; supported non-shape layer reconstruction now preserves
   layer label/comment metadata, text-layer common switches/quality/blend,
-  advanced text-layer switches, and same-comp text parent refs; default precomp
+  advanced text-layer switches, same-comp text parent refs, and solid-backed
+  null-controller source dimensions/color/visibility/null flag; default precomp
   conversion rebuilds all target comps before resolving composition source refs
   into recreated target comps. Go-writer
   and recipe fixtures for the supported migration slices plus the
@@ -656,7 +657,7 @@ Current:
   shape, pucker-bloat shape, twist shape, wiggle-paths shape,
   wiggle-transform shape, repeater shape, merge-paths shape, polystar shape,
   precomp, layer label/comment, text common-switch/quality/blend, text advanced
-  switch, and text-parent outputs.
+  switch, text-parent, and solid-backed null-controller outputs.
   `cmd/aepmigrate convert -ae-open -ae <AfterFX.exe>` writes AE open gate status
   into the migration report.
 - Versioned AEP migration matrix gate is implemented as

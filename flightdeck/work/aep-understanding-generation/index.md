@@ -92,6 +92,10 @@ Current:
   after same-comp layer reconstruction; `minimal-layer-parent.json` and the
   null-parent `minimal-null-layer.json` pass AE2020/AE2022/AE2025 matrix
   conversion and AE2025 open smoke.
+- Solid-backed null-controller layers now preserve source solid dimensions,
+  color, visibility, and null flag while rebuilding as null layers;
+  `minimal-layer-null-flag.json` passes AE2020/AE2022/AE2025 matrix conversion
+  and AE2025 open smoke.
 - Continue versioned migration by expanding supported conversion surface or
   deciding whether native AE2021/AE2023/AE2024 writer templates are worth
   adding.
