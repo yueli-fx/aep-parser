@@ -881,3 +881,8 @@ Current:
   `tmp/migration_matrix_text_style_all_6x6/matrix.json` is 72 total, 72 pass,
   0 blocked, 0 failed, 0 skipped for `minimal-text-style` and
   `minimal-text-shape` across 6 source writers and 6 target writers.
+- Layer mask writer coverage was upgraded from `PD-1x3` to full W2020-W2025
+  source-and-target coverage. The matrix
+  `tmp/migration_matrix_layer_mask_all_6x6/matrix.json` is 36 total, 36 pass,
+  0 blocked, 0 failed, 0 skipped for `minimal-layer-mask` across 6 source
+  writers and 6 target writers.
