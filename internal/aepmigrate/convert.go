@@ -381,6 +381,10 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 		if next == nil {
 			return nil, fmt.Errorf("comp %q: target comp missing after creation", comp.Name)
 		}
+		var createdLayers []convertLayerPair
+		recordLayer := func(source profile.Layer, target *aep.Layer) {
+			createdLayers = append(createdLayers, convertLayerPair{source: source, target: target})
+		}
 		for _, layer := range comp.Layers {
 			switch {
 			case isSupportedDefaultNullLayer(layer):
@@ -400,6 +404,7 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				if err := materializeLayerTiming(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q null layer %q timing: %w", comp.Name, layer.Name, err)
 				}
+				recordLayer(layer, dstLayer)
 			case isSupportedDefaultSolidLayer(layer, footage):
 				solid, _ := footage.solidDetails(layer)
 				dstLayer, err := aep.NewSolidLayer(next, layer.Name, int(solid.Width), int(solid.Height), *solid.SolidColor)
@@ -418,6 +423,7 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				if err := materializeLayerTiming(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q solid layer %q timing: %w", comp.Name, layer.Name, err)
 				}
+				recordLayer(layer, dstLayer)
 			case isSupportedDefaultAdjustmentLayer(layer, footage):
 				dstLayer, err := aep.NewAdjustmentLayer(next, layer.Name)
 				if err != nil {
@@ -435,6 +441,7 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				if err := materializeLayerTiming(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q adjustment layer %q timing: %w", comp.Name, layer.Name, err)
 				}
+				recordLayer(layer, dstLayer)
 			case isSupportedDefaultCameraLayer(layer):
 				dstLayer, err := aep.NewCameraLayer(next, layer.Name)
 				if err != nil {
@@ -452,6 +459,7 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				if err := materializeLayerTiming(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q camera layer %q timing: %w", comp.Name, layer.Name, err)
 				}
+				recordLayer(layer, dstLayer)
 			case isSupportedDefaultLightLayer(layer):
 				dstLayer, err := aep.NewLightLayer(next, layer.Name)
 				if err != nil {
@@ -469,6 +477,7 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				if err := materializeLayerTiming(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q light layer %q timing: %w", comp.Name, layer.Name, err)
 				}
+				recordLayer(layer, dstLayer)
 			case isSupportedDefaultTextLayer(layer):
 				dstLayer, err := aep.NewTextLayer(next, layer.Name)
 				if err != nil {
@@ -491,6 +500,7 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				if err := materializeLayerTiming(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q text layer %q timing: %w", comp.Name, layer.Name, err)
 				}
+				recordLayer(layer, dstLayer)
 			case isSupportedDefaultShapeLayer(layer):
 				dstLayer, err := aep.NewShapeLayer(next, layer.Name)
 				if err != nil {
@@ -499,6 +509,7 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				if err := materializeLayerTiming(dstLayer.Layer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q shape layer %q timing: %w", comp.Name, layer.Name, err)
 				}
+				recordLayer(layer, dstLayer.Layer)
 			case isSupportedRectGraphicShapeLayer(layer):
 				dstLayer, err := materializeRectGraphicShapeLayer(next, layer)
 				if err != nil {
@@ -507,6 +518,7 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				if err := materializeLayerTiming(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q shape layer %q timing: %w", comp.Name, layer.Name, err)
 				}
+				recordLayer(layer, dstLayer)
 			case isSupportedDefaultPrecompLayer(layer, comps):
 				sourceComp, ok := targetComps.sourceComposition(layer)
 				if !ok {
@@ -528,12 +540,50 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 				if err := materializeLayerTiming(dstLayer, layer); err != nil {
 					return nil, fmt.Errorf("comp %q precomp layer %q timing: %w", comp.Name, layer.Name, err)
 				}
+				recordLayer(layer, dstLayer)
 			default:
 				return nil, fmt.Errorf("unsupported layer %q in comp %q", layer.Name, comp.Name)
 			}
 		}
+		if err := materializeLayerParents(createdLayers); err != nil {
+			return nil, fmt.Errorf("comp %q parent refs: %w", comp.Name, err)
+		}
 	}
 	return project, nil
+}
+
+type convertLayerPair struct {
+	source profile.Layer
+	target *aep.Layer
+}
+
+func materializeLayerParents(layers []convertLayerPair) error {
+	bySourceID := map[uint32]*aep.Layer{}
+	byName := map[string]*aep.Layer{}
+	for _, pair := range layers {
+		if pair.source.ID != 0 {
+			bySourceID[pair.source.ID] = pair.target
+		}
+		if _, exists := byName[pair.source.Name]; !exists {
+			byName[pair.source.Name] = pair.target
+		}
+	}
+	for _, pair := range layers {
+		if pair.source.ParentRef == nil {
+			continue
+		}
+		parent := bySourceID[pair.source.ParentRef.ID]
+		if parent == nil && pair.source.ParentRef.Name != "" {
+			parent = byName[pair.source.ParentRef.Name]
+		}
+		if parent == nil {
+			return fmt.Errorf("layer %q parent %q not found", pair.source.Name, pair.source.ParentRef.Name)
+		}
+		if err := pair.target.SetParent(parent.ID); err != nil {
+			return fmt.Errorf("layer %q parent %q: %w", pair.source.Name, pair.source.ParentRef.Name, err)
+		}
+	}
+	return nil
 }
 
 func materializeLayerMetadata(layer *aep.Layer, source profile.Layer) error {
@@ -1649,7 +1699,7 @@ func isSupportedDefaultAdjustmentLayer(layer profile.Layer, footage convertFoota
 	if !ok || source.Width == 0 || source.Height == 0 || source.SolidColor == nil {
 		return false
 	}
-	if layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
+	if layer.MatteRef != nil || layer.LightSourceRef != nil {
 		return false
 	}
 	if layer.Text != nil || len(layer.Effects) != 0 || len(layer.Masks) != 0 || len(layer.Shapes) != 0 || len(layer.Markers) != 0 {
@@ -1717,7 +1767,7 @@ func isSupportedDefaultTextLayer(layer profile.Layer) bool {
 	if layer.Type != "text" || layer.Text == nil || layer.SourceRef != nil {
 		return false
 	}
-	if layer.ParentRef != nil || layer.MatteRef != nil || layer.LightSourceRef != nil {
+	if layer.MatteRef != nil || layer.LightSourceRef != nil {
 		return false
 	}
 	if len(layer.Effects) != 0 || len(layer.Masks) != 0 || len(layer.Shapes) != 0 || len(layer.Markers) != 0 {
