@@ -1369,3 +1369,69 @@ Commit:
 ```text
 docs(aepmigrate): record effect six-writer evidence
 ```
+
+---
+
+## Task 36: Text Style PD-6x6 Writer Matrix Evidence
+
+**Goal:** Upgrade text style writer coverage from `PD-1x3` to a full
+W2020-W2025 source-and-target matrix for the current recipe-owned text style
+surface.
+
+**Architecture:** Reuse the matrix runner without AE-open. Run the two current
+text style recipes across `-sources all -targets all` and record the reviewed
+result as `PD-6x6` evidence. Keep host-open coverage separate: the existing
+`minimal-text-style` W2020 representative already has `OPEN-ALL-HOSTS`.
+
+**Files:**
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/aep-understanding-generation/index.md`
+- Modify: `flightdeck/work/aep-understanding-generation/history.md`
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+
+- [x] **Step 1: Run the text style all-writer matrix**
+
+Run:
+
+```powershell
+go run ./cmd/aepmigrate matrix `
+  -recipe examples\recipes\minimal-text-style.json `
+  -recipe examples\recipes\minimal-text-shape.json `
+  -sources all `
+  -targets all `
+  -out tmp\migration_matrix_text_style_all_6x6 `
+  -ledger-out tmp\migration_matrix_text_style_all_6x6\ledger.md
+```
+
+Expected: 72 total, 72 pass, 0 blocked, 0 failed, 0 skipped. This is
+2 recipes x 6 source writers x 6 target writers.
+
+- [x] **Step 2: Update reviewed validation summary**
+
+If Step 1 passes, update the Text Domain text style row from `PD-1x3` to
+`PD-6x6`. Add `tmp/migration_matrix_text_style_all_6x6/matrix.json` and its
+ledger to raw artifacts. Update `index.md` and append `history.md`.
+
+- [x] **Step 3: Verification and commit**
+
+Run:
+
+```powershell
+pwsh -File scripts\migration\verify_matrix.ps1
+go test ./...
+go vet ./...
+git diff --check
+```
+
+Read:
+
+```powershell
+Get-Content C:\Users\yl\.flightdeck\knowledge\git\commits.md -Raw
+Get-Content flightdeck\knowledge\workflow\verify.md -Raw
+```
+
+Commit:
+
+```text
+docs(aepmigrate): record text style six-writer evidence
+```

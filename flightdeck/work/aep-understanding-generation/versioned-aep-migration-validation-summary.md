@@ -23,7 +23,7 @@ No, before this ledger the project could not quickly answer "which domain and
 which AE versions are validated." The current reviewed answer is:
 
 - Text animator migration has `PD-6x6` evidence for 22 recipe-owned animator fixtures, plus `OPEN-ALL-HOSTS` evidence for two representatives: static scalar skew and animated fill-color keyframes.
-- Text style migration has `PD-1x3`, `OPEN-H2025`, and `OPEN-ALL-HOSTS` evidence for the current style fixture set.
+- Text style migration has `PD-6x6`, `OPEN-H2025`, and `OPEN-ALL-HOSTS` evidence for the current style fixture set.
 - Dynamic effect params have `PD-6x6`, `OPEN-H2025`, and one vector-keyframe `OPEN-ALL-HOSTS` representative.
 - Dynamic transforms have `PD-6x6`, `OPEN-H2025`, and one transform-ease `OPEN-ALL-HOSTS` representative.
 - Layer track matte migration has `PD-1x3` evidence for the classic track-matte fixture and `OPEN-ALL-HOSTS` evidence for its W2020 output. AE2025 explicit matte has `PD-1x1` evidence for AE2025 source to AE2025 target; lower-source explicit matte matrix cases are now marked as source-contract skips, not conversion blockers.
@@ -38,7 +38,7 @@ which AE versions are validated." The current reviewed answer is:
 | Capability | Recipes / scope | Profile-diff writer coverage | AE host open coverage | Evidence |
 | --- | --- | --- | --- | --- |
 | Text layer baseline | `minimal-default-text-layer`, `minimal-default-text-static-transform` | Included in latest full `PD-1x6` boundary | pending per-capability host ledger | `tmp/migration_matrix_smoke_all`: 846 total, 840 pass, 0 blocked, 6 skipped |
-| Text style | `minimal-text-style`, `minimal-text-shape` | `PD-1x3`: W2020 -> W2020/W2022/W2025 | `OPEN-H2025`; `OPEN-ALL-HOSTS` for `minimal-text-style` as W2020 output | `history.md` text style entry |
+| Text style | `minimal-text-style`, `minimal-text-shape` | `PD-6x6`: W2020-W2025 -> W2020-W2025 | `OPEN-H2025`; `OPEN-ALL-HOSTS` for `minimal-text-style` as W2020 output | `tmp/migration_matrix_text_style_all_6x6/matrix.json`: 72 total, 72 pass; `history.md` text style entry |
 | Text animator opacity | `minimal-text-animator-opacity`, `minimal-text-animator-opacity-value-keyframes` | `PD-6x6`: W2020-W2025 -> W2020-W2025 | pending migration AE-host fanout | `tmp/migration_matrix_text_animators_all_6x6/matrix.json`: 792 total, 792 pass |
 | Text animator position | `minimal-text-animator-position`, `minimal-text-animator-position-value-keyframes` | `PD-6x6` | pending migration AE-host fanout | same text animator 6x6 matrix |
 | Text animator scale | `minimal-text-animator-scale`, `minimal-text-animator-scale-value-keyframes` | `PD-6x6` | pending migration AE-host fanout | same text animator 6x6 matrix |
@@ -118,6 +118,7 @@ Reviewed raw artifacts currently known:
 - `tmp/migration_matrix_text_animators/matrix.json`: 66 total, 66 pass, 0 blocked, 0 failed, 0 skipped. This is W2020 source into W2020/W2022/W2025 targets for all 22 text animator recipes.
 - `tmp/migration_matrix_text_animators_all_writers/matrix.json`: 198 total, 198 pass, 0 blocked, 0 failed, 0 skipped. This is W2020/W2022/W2025 source writers into W2020/W2022/W2025 target writers for all 22 text animator recipes.
 - `tmp/migration_matrix_text_animators_all_6x6/matrix.json`: 792 total, 792 pass, 0 blocked, 0 failed, 0 skipped. This is W2020-W2025 source writers into W2020-W2025 target writers for all 22 text animator recipes.
+- `tmp/migration_matrix_text_style_all_6x6/matrix.json`: 72 total, 72 pass, 0 blocked, 0 failed, 0 skipped. This is W2020-W2025 source writers into W2020-W2025 target writers for `minimal-text-style` and `minimal-text-shape`.
 - `tmp/migration_matrix_transform_all_6x6/matrix.json`: 108 total, 108 pass, 0 blocked, 0 failed, 0 skipped. This is W2020-W2025 source writers into W2020-W2025 target writers for `minimal-transform-keyframes`, `minimal-transform-keyframe-ease`, and `minimal-transform-expression`.
 - `tmp/migration_matrix_effect_params_all_6x6/matrix.json`: 144 total, 144 pass, 0 blocked, 0 failed, 0 skipped. This is W2020-W2025 source writers into W2020-W2025 target writers for layer-ref, expression, scalar-keyframe, and vector-keyframe effect params.
 - `tmp/migration_matrix_text_animators_endpoint_hosts/matrix.json`: 4 total, 4 pass, 0 blocked, 0 failed, 0 skipped. This is W2020 writer output for `minimal-text-animator-skew` and `minimal-text-animator-color-value-keyframes` opened in H2020 and H2025. H2021-H2024 were not run and are only inferred low-risk.
@@ -135,6 +136,7 @@ Reviewed raw artifacts currently known:
 - Generated coverage ledger artifacts:
   - `tmp/migration_matrix_writer_targets_all/ledger.md`: generated from the narrow writer-target matrix; 1 recipe row with W2020-W2025 target evidence.
   - `tmp/migration_matrix_text_animators_all_6x6/ledger.md`: generated from the text animator 6x6 writer matrix; 22 recipe rows, each with W2020-W2025 source and target evidence.
+  - `tmp/migration_matrix_text_style_all_6x6/ledger.md`: generated from the text style 6x6 writer matrix; 2 recipe rows, each with W2020-W2025 source and target evidence.
   - `tmp/migration_matrix_transform_all_6x6/ledger.md`: generated from the dynamic transform 6x6 writer matrix; 3 recipe rows, each with W2020-W2025 source and target evidence.
   - `tmp/migration_matrix_effect_params_all_6x6/ledger.md`: generated from the dynamic effect-param 6x6 writer matrix; 4 recipe rows, each with W2020-W2025 source and target evidence.
   - `tmp/migration_matrix_explicit_matte_source_contract/ledger.md`: generated from the AE2020-source explicit-matte source-contract matrix; 1 recipe row, 6 skipped cases.
