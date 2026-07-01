@@ -78,6 +78,7 @@ $writerTotals = New-EmptyTotals
 $endpointHostTotals = New-EmptyTotals
 $domainMap = [ordered]@{}
 $records = @()
+$recipeIndex = @()
 $allRecipes = [System.Collections.Generic.HashSet[string]]::new()
 $boundaryRecords = @()
 
@@ -137,6 +138,24 @@ foreach ($record in @($coverage.coverage)) {
     $domain.boundary_ids = @($domain.boundary_ids + $record.id | Sort-Object -Unique)
   }
 
+  foreach ($recipe in $recipes) {
+    $boundaryStatus = "none"
+    if ($record.PSObject.Properties.Name -contains "boundary" -and @($record.boundary.blocked_recipe_ids) -contains $recipe) {
+      $boundaryStatus = $record.boundary.status
+    }
+
+    $recipeIndex += [pscustomobject][ordered]@{
+      recipe = $recipe
+      coverage_id = $record.id
+      domain = $record.domain
+      writer_status = $record.writer_status
+      writer_sources = @($coverage.writer_axes.source_writers)
+      writer_targets = @($coverage.writer_axes.target_writers)
+      host_open_status = $record.host_open_status
+      boundary_status = $boundaryStatus
+    }
+  }
+
   if ($record.host_open_endpoint_evidence) {
     Add-Totals $endpointHostTotals $record.host_open_endpoint_evidence.totals
   }
@@ -171,6 +190,7 @@ $summary = [ordered]@{
   host_open_policy = $coverage.host_open_policy
   recurring_gates = @($coverage.recurring_gates)
   domain_rollup = $domainRollup
+  recipe_index = @($recipeIndex | Sort-Object recipe)
   coverage = $records
   boundaries = @($boundaryRecords)
   open_items = @($coverage.open_items)
