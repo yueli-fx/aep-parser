@@ -63,6 +63,8 @@
       "inferred_by_endpoint",
       "representative_only",
       "representative_covered",
+      "excluded_known_boundary",
+      "recorded_status_only",
       "pending_per_capability"
     ]
   },

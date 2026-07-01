@@ -31,6 +31,18 @@ function Assert-SameStringSet {
   }
 }
 
+function Assert-DeclaredEvidenceLevel {
+  param(
+    [string]$Label,
+    [string[]]$Declared,
+    [string]$Actual
+  )
+
+  if ($Declared -notcontains $Actual) {
+    throw "$Label uses undeclared evidence level: $Actual"
+  }
+}
+
 function New-EmptyTotals {
   return [pscustomobject]@{
     total = 0
@@ -44,7 +56,7 @@ function New-EmptyTotals {
 function New-HostOpenEvidenceCounts {
   return [pscustomobject]@{
     direct_endpoint_hosts = 0
-    representative = 0
+    representative_only = 0
     representative_covered = 0
     excluded_known_boundary = 0
     recorded_status_only = 0
@@ -215,7 +227,7 @@ function Get-ExpectedHostOpenEvidenceLevel {
   )
 
   if (($Record.PSObject.Properties.Name -contains "host_open_representatives") -and @($Record.host_open_representatives) -contains $Recipe) {
-    return "representative"
+    return "representative_only"
   }
 
   if (($Record.PSObject.Properties.Name -contains "host_open_representatives") -and @($Record.host_open_representatives).Count -gt 0 -and -not ($Record.PSObject.Properties.Name -contains "host_open_endpoint_evidence")) {
@@ -241,7 +253,7 @@ function Assert-HostOpenEvidenceCounts {
   )
 
   Assert-Equal "$Label.direct_endpoint_hosts" ([int]$Expected.direct_endpoint_hosts) ([int]$Actual.direct_endpoint_hosts)
-  Assert-Equal "$Label.representative" ([int]$Expected.representative) ([int]$Actual.representative)
+  Assert-Equal "$Label.representative_only" ([int]$Expected.representative_only) ([int]$Actual.representative_only)
   Assert-Equal "$Label.representative_covered" ([int]$Expected.representative_covered) ([int]$Actual.representative_covered)
   Assert-Equal "$Label.excluded_known_boundary" ([int]$Expected.excluded_known_boundary) ([int]$Actual.excluded_known_boundary)
   Assert-Equal "$Label.recorded_status_only" ([int]$Expected.recorded_status_only) ([int]$Actual.recorded_status_only)
@@ -256,6 +268,7 @@ if (-not (Test-Path -LiteralPath $SummaryPath)) {
 
 $coverage = Get-Content -Raw $CoveragePath | ConvertFrom-Json
 $summary = Get-Content -Raw $SummaryPath | ConvertFrom-Json
+$declaredEvidenceLevels = @($coverage.host_open_policy.evidence_levels)
 
 Assert-Equal "schema_version" 1 $summary.schema_version
 Assert-Equal "generated_from" $CoveragePath $summary.generated_from
@@ -322,6 +335,9 @@ Assert-Equal "totals.known_boundaries" $boundaryCount $summary.totals.known_boun
 Assert-Equal "totals.open_items" @($coverage.open_items).Count $summary.totals.open_items
 Assert-SameStringSet "domain_rollup.domains" $domainMap.Keys @($summary.domain_rollup | ForEach-Object { $_.domain })
 Assert-SameStringSet "recipe_index.recipes" $allRecipes @($summary.recipe_index | ForEach-Object { $_.recipe })
+foreach ($evidenceLevel in @($summary.totals.host_open_evidence_levels.PSObject.Properties.Name)) {
+  Assert-DeclaredEvidenceLevel "totals.host_open_evidence_levels" $declaredEvidenceLevels $evidenceLevel
+}
 
 foreach ($domainName in $domainMap.Keys) {
   $expected = $domainMap[$domainName]
@@ -333,6 +349,9 @@ foreach ($domainName in $domainMap.Keys) {
   Assert-SameStringSet "domain_rollup.$domainName.writer_statuses" $expected.writer_statuses $actual[0].writer_statuses
   Assert-SameStringSet "domain_rollup.$domainName.host_open_statuses" $expected.host_open_statuses $actual[0].host_open_statuses
   Assert-HostOpenEvidenceCounts "domain_rollup.$domainName.host_open_evidence_levels" $expected.host_open_evidence_levels $actual[0].host_open_evidence_levels
+  foreach ($evidenceLevel in @($actual[0].host_open_evidence_levels.PSObject.Properties.Name)) {
+    Assert-DeclaredEvidenceLevel "domain_rollup.$domainName.host_open_evidence_levels" $declaredEvidenceLevels $evidenceLevel
+  }
   Assert-SameStringSet "domain_rollup.$domainName.boundary_ids" $expected.boundary_ids $actual[0].boundary_ids
 }
 
@@ -357,6 +376,7 @@ foreach ($record in @($coverage.coverage)) {
     Assert-SameStringSet "recipe_index.$recipe.writer_matrix.status_sets.skipped" $expectedMatrix.status_sets.skipped $actual[0].writer_matrix.status_sets.skipped
     Assert-Equal "recipe_index.$recipe.host_open_status" $record.host_open_status $actual[0].host_open_status
     Assert-Equal "recipe_index.$recipe.host_open_evidence.status" $record.host_open_status $actual[0].host_open_evidence.status
+    Assert-DeclaredEvidenceLevel "recipe_index.$recipe.host_open_evidence.evidence_level" $declaredEvidenceLevels $actual[0].host_open_evidence.evidence_level
 
     $expectedBoundaryStatus = "none"
     if ($record.PSObject.Properties.Name -contains "boundary" -and @($record.boundary.blocked_recipe_ids) -contains $recipe) {
@@ -365,7 +385,7 @@ foreach ($record in @($coverage.coverage)) {
     Assert-Equal "recipe_index.$recipe.boundary_status" $expectedBoundaryStatus $actual[0].boundary_status
 
     if (($record.PSObject.Properties.Name -contains "host_open_representatives") -and @($record.host_open_representatives) -contains $recipe) {
-      Assert-Equal "recipe_index.$recipe.host_open_evidence.evidence_level" "representative" $actual[0].host_open_evidence.evidence_level
+      Assert-Equal "recipe_index.$recipe.host_open_evidence.evidence_level" "representative_only" $actual[0].host_open_evidence.evidence_level
       continue
     }
 
