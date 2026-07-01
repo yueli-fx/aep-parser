@@ -100,6 +100,8 @@ Current:
   stroke width, skew, range-offset keyframes, and supported value keyframes.
   Text animator migration now has a 22-recipe `PD-6x6` writer matrix across
   AE2020-AE2025 sources and targets.
+- Text layer baseline migration now has a 2-recipe `PD-6x6` writer matrix
+  across AE2020-AE2025 sources and targets.
 - Text style migration now has a 2-recipe `PD-6x6` writer matrix across
   AE2020-AE2025 sources and targets.
 - Layer mask migration now has a 1-recipe `PD-6x6` writer matrix across

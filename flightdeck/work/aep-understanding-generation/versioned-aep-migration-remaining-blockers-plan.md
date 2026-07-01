@@ -1779,3 +1779,71 @@ Commit:
 ```text
 docs(aepmigrate): record auto-orient six-writer evidence
 ```
+
+---
+
+## Task 42: Text Baseline PD-6x6 Writer Matrix Evidence
+
+**Goal:** Upgrade text layer baseline migration evidence from the latest full
+`PD-1x6` boundary to a focused full W2020-W2025 source-and-target matrix.
+
+**Architecture:** Reuse the matrix runner without AE-open. Run
+`minimal-default-text-layer` and `minimal-default-text-static-transform` across
+`-sources all -targets all` and record the reviewed result as `PD-6x6`
+evidence. Keep this separate from text style and text animator matrices, which
+already have focused `PD-6x6` evidence.
+
+**Files:**
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/aep-understanding-generation/index.md`
+- Modify: `flightdeck/work/aep-understanding-generation/history.md`
+- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+- Modify: `flightdeck/cockpit.md`
+
+- [x] **Step 1: Run the text baseline all-writer matrix**
+
+Run:
+
+```powershell
+go run ./cmd/aepmigrate matrix `
+  -recipe examples\recipes\minimal-default-text-layer.json `
+  -recipe examples\recipes\minimal-default-text-static-transform.json `
+  -sources all `
+  -targets all `
+  -out tmp\migration_matrix_text_baseline_all_6x6 `
+  -ledger-out tmp\migration_matrix_text_baseline_all_6x6\ledger.md
+```
+
+Expected: 72 total, 72 pass, 0 blocked, 0 failed, 0 skipped. This is
+2 recipes x 6 source writers x 6 target writers.
+
+- [x] **Step 2: Update reviewed validation summary**
+
+If Step 1 passes, update the Text Domain text layer baseline row from latest
+full `PD-1x6` boundary evidence to focused `PD-6x6` evidence. Add
+`tmp/migration_matrix_text_baseline_all_6x6/matrix.json` and its ledger to raw
+artifacts. Update `index.md`, `cockpit.md`, and append `history.md`.
+
+- [x] **Step 3: Verification and commit**
+
+Run:
+
+```powershell
+pwsh -File scripts\migration\verify_matrix.ps1
+go test ./...
+go vet ./...
+git diff --check
+```
+
+Read:
+
+```powershell
+Get-Content C:\Users\yl\.flightdeck\knowledge\git\commits.md -Raw
+Get-Content flightdeck\knowledge\workflow\verify.md -Raw
+```
+
+Commit:
+
+```text
+docs(aepmigrate): record text baseline six-writer evidence
+```
