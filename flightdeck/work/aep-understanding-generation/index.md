@@ -700,8 +700,9 @@ Current:
   details for source dimensions/color; default text conversion uses
   `aep.NewTextLayer` + `Layer.SetText` and relies on profile diff for text
   document/style fidelity; default empty shape conversion uses `aep.NewShapeLayer`;
-  single rect/ellipse graphic/filter shape conversion rebuilds the parametric
-  primitive, Trim Paths, Round Corners radius, Offset Paths fields, ZigZag
+  single parametric graphic/filter shape conversion rebuilds the parametric
+  primitive, including rect, ellipse, and polystar fields, plus Trim Paths, Round
+  Corners radius, Offset Paths fields, ZigZag
   fields, Pucker & Bloat amount, Twist angle/center, Wiggle Paths fields,
   Wiggle Transform fields, Repeater fields, Merge Paths type, fill, stroke, one
   Dash 1/Gap 1 pair, percent-mode stroke taper, and
@@ -724,8 +725,8 @@ Current:
   shape, rect+fill shape, rect+stroke shape, rect+dashed-stroke shape,
   ellipse+tapered-stroke shape, ellipse+waved-stroke shape, trim-paths shape,
   round-corners shape, offset-paths shape, zigzag shape, pucker-bloat shape,
-  twist shape, wiggle-paths shape, wiggle-transform shape, repeater shape, and
-  merge-paths shape, and precomp outputs.
+  twist shape, wiggle-paths shape, wiggle-transform shape, repeater shape,
+  merge-paths shape, polystar shape, and precomp outputs.
   `cmd/aepmigrate convert -ae-open -ae <AfterFX.exe>` writes AE open gate status
   into the migration report.
 - `profilediff` now compares profile-visible layer metadata, quality/blending/

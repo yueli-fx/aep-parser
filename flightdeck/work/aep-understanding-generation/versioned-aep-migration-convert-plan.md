@@ -238,7 +238,7 @@ git diff --check
     fixture passes AE2025 open gate with `ae_open_status: "pass"` /
     `ae_open_exit_code: 0`. This slice intentionally excludes shape content
     nodes; rect/fill/stroke/path/filter migration remains a later surface.
-  - Single rect/ellipse graphic/filter shape-layer sources generated through
+  - Single parametric graphic/filter shape-layer sources generated through
     `aep.NewShapeLayer` with one parametric primitive plus supported graphic
     nodes and/or supported vector filters convert to AE2025 with
     `profile_diff_status: "pass"` and `profile_diff_count: 0`;
@@ -251,11 +251,14 @@ git diff --check
     `minimal-shape-pucker-bloat.json`, `minimal-shape-twist.json`,
     `minimal-shape-wiggle-paths.json`,
     `minimal-shape-wiggle-transform.json`,
-    `minimal-shape-repeater.json`, and
-    `minimal-shape-merge-paths.json` pass
+    `minimal-shape-repeater.json`,
+    `minimal-shape-merge-paths.json`, and
+    `minimal-shape-polystar.json` pass
     AE2025 open gate with
     `ae_open_status: "pass"` / `ae_open_exit_code: 0`. This slice reconstructs
-    rect size/position/roundness, ellipse size/position, fill
+    rect size/position/roundness, ellipse size/position, polystar
+    type/points/position/rotation/inner-radius/outer-radius/inner-roundness/
+    outer-roundness, fill
     color/opacity/blend/composite/fill-rule, and stroke
     color/opacity/width/cap/join/miter/composite/blend plus a single Dash 1/Gap
     1 pair, percent-mode stroke taper controls, wavelength-mode stroke wave

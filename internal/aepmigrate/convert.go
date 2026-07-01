@@ -350,7 +350,7 @@ func convertScopeEntries(target VersionLabel, prof *profile.Profile) []Entry {
 				Path:          "comps[" + comp.Name + "].layers[" + layer.Name + "]",
 				Class:         ClassBlocked,
 				TargetVersion: target,
-				Reason:        "This convert slice only reconstructs no-layer comps, default null layers, default solid layers, default adjustment layers, default camera layers, default light layers, default text layers, default empty shape layers, single rect/ellipse fill/stroke shape layers, and default precomp layers; refusing output to avoid silent layer loss.",
+				Reason:        "This convert slice only reconstructs no-layer comps, default null layers, default solid layers, default adjustment layers, default camera layers, default light layers, default text layers, default empty shape layers, single parametric graphic/filter shape layers, and default precomp layers; refusing output to avoid silent layer loss.",
 			})
 		}
 	}
@@ -614,6 +614,8 @@ func materializeShapePrimitive(shapeLayer *aep.ShapeLayer, shape profile.Shape) 
 		return materializeRectPrimitive(shapeLayer, shape)
 	case "ellipse":
 		return materializeEllipsePrimitive(shapeLayer, shape)
+	case "star":
+		return materializeStarPrimitive(shapeLayer, shape)
 	default:
 		return fmt.Errorf("unsupported shape primitive %q", shape.Kind)
 	}
@@ -664,6 +666,54 @@ func materializeEllipsePrimitive(shapeLayer *aep.ShapeLayer, shape profile.Shape
 	}
 	if value, ok := propertyFloat(shape.Properties, "ADBE Vector Shape Direction"); ok {
 		if err := ellipse.SetDirection(aep.ShapeDirection(int(value))); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func materializeStarPrimitive(shapeLayer *aep.ShapeLayer, shape profile.Shape) error {
+	star, err := shapeLayer.RootGroup().AddStar()
+	if err != nil {
+		return err
+	}
+	if value, ok := propertyFloat(shape.Properties, "ADBE Vector Star Type"); ok {
+		if err := star.SetStarType(aep.StarType(int(value))); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(shape.Properties, "ADBE Vector Star Points"); ok {
+		if err := star.SetPoints(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyVector(shape.Properties, "ADBE Vector Star Position", 2); ok {
+		if err := star.SetPosition([2]float64{value[0], value[1]}); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(shape.Properties, "ADBE Vector Star Rotation"); ok {
+		if err := star.SetRotation(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(shape.Properties, "ADBE Vector Star Inner Radius"); ok {
+		if err := star.SetInnerRadius(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(shape.Properties, "ADBE Vector Star Outer Radius"); ok {
+		if err := star.SetOuterRadius(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(shape.Properties, "ADBE Vector Star Inner Roundess"); ok {
+		if err := star.SetInnerRoundness(value); err != nil {
+			return err
+		}
+	}
+	if value, ok := propertyFloat(shape.Properties, "ADBE Vector Star Outer Roundess"); ok {
+		if err := star.SetOuterRoundness(value); err != nil {
 			return err
 		}
 	}
@@ -1625,6 +1675,10 @@ func isSupportedParametricGraphicShape(shape profile.Shape) bool {
 	case "ellipse":
 		_, ok := propertyVector(shape.Properties, "ADBE Vector Ellipse Size", 2)
 		return ok
+	case "star":
+		_, hasPoints := propertyFloat(shape.Properties, "ADBE Vector Star Points")
+		_, hasOuterRadius := propertyFloat(shape.Properties, "ADBE Vector Star Outer Radius")
+		return hasPoints || hasOuterRadius
 	default:
 		return false
 	}
