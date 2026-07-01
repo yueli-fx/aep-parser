@@ -67,10 +67,13 @@
       "type": "string",
       "go_type": "string",
       "description": "AE target template used when compiling the recipe.",
-      "x-aep-validation": "Must be AE2020, AE2022, or AE2025. Omitted target_version defaults to AE2020.",
+      "x-aep-validation": "Must be AE2020, AE2021, AE2022, AE2023, AE2024, or AE2025. Omitted target_version defaults to AE2020.",
       "enum": [
         "AE2020",
+        "AE2021",
         "AE2022",
+        "AE2023",
+        "AE2024",
         "AE2025"
       ],
       "x-aep-capabilities": [
@@ -82,7 +85,7 @@
           "domain": "project",
           "verify": "ae-accept",
           "minver": "2020",
-          "boundary": "zero args defaults to TargetAE2020; targets 2020 / 2022 / 2025 supported",
+          "boundary": "zero args defaults to TargetAE2020; targets 2020 through 2025 supported",
           "gate": [
             "TestV2_1_AEShipGate_AE2020",
             "TestV2_1_AEShipGate_AE2025"

@@ -15,7 +15,10 @@ import (
 // 来源: hex dump of internal/aep/templates/{2020,2022,2025}.aep svap chunk
 const (
 	svapExpectedAE2020 = "0b0b862d"
+	svapExpectedAE2021 = "0b120e04"
 	svapExpectedAE2022 = "0b330640"
+	svapExpectedAE2023 = "0b3a8634"
+	svapExpectedAE2024 = "0f010e02"
 	svapExpectedAE2025 = "0f088644"
 )
 
@@ -48,7 +51,10 @@ func TestNewProject_AllTargetsParseAndSvap(t *testing.T) {
 		wantChunkN int // root Egg! 直接 children 数（24 for 2020, 30 for 2022/2025）
 	}{
 		{aep.TargetAE2020, svapExpectedAE2020, 24},
+		{aep.TargetAE2021, svapExpectedAE2021, 26},
 		{aep.TargetAE2022, svapExpectedAE2022, 30},
+		{aep.TargetAE2023, svapExpectedAE2023, 30},
+		{aep.TargetAE2024, svapExpectedAE2024, 31},
 		{aep.TargetAE2025, svapExpectedAE2025, 30},
 	}
 	for _, tc := range cases {
@@ -128,8 +134,14 @@ func targetName(t aep.AETarget) string {
 	switch t {
 	case aep.TargetAE2020:
 		return "AE2020"
+	case aep.TargetAE2021:
+		return "AE2021"
 	case aep.TargetAE2022:
 		return "AE2022"
+	case aep.TargetAE2023:
+		return "AE2023"
+	case aep.TargetAE2024:
+		return "AE2024"
 	case aep.TargetAE2025:
 		return "AE2025"
 	}

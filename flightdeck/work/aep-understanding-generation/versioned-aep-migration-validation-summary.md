@@ -5,10 +5,11 @@ matrix output under `tmp/` is supporting evidence, not the source of truth.
 
 Legend:
 
-- `W2020/W2022/W2025`: writer targets produced by Go.
+- `W2020/W2021/W2022/W2023/W2024/W2025`: writer targets produced by Go.
 - `H2020/H2021/H2022/H2023/H2024/H2025`: installed AE hosts used to open output.
 - `PD-3x3`: profile diff passed for source writers `W2020,W2022,W2025` into target writers `W2020,W2022,W2025`.
 - `PD-1x3`: profile diff passed for source writer `W2020` into target writers `W2020,W2022,W2025`.
+- `PD-1x6`: profile diff passed for source writer `W2020` into target writers `W2020,W2021,W2022,W2023,W2024,W2025`.
 - `OPEN-H2025`: AE2025 open smoke passed.
 - `OPEN-ALL-HOSTS`: one representative writer output opened in every installed AE host from 2020 through 2025.
 - `OPEN-ENDPOINTS`: one representative writer output opened in H2020 and H2025.
@@ -27,14 +28,15 @@ which AE versions are validated." The current reviewed answer is:
 - Layer track matte migration has `PD-1x3` evidence for the classic track-matte fixture and `OPEN-ALL-HOSTS` evidence for its W2020 output. AE2025 explicit matte has `PD-1x1` evidence for AE2025 source to AE2025 target; AE2020/AE2022 targets remain intentionally blocked by the current explicit-matte writer contract.
 - Layer mask migration has `PD-1x3` evidence for the current recipe-owned mask surface: mode/options, static outline, and path keyframes. The representative W2020 mask output has `OPEN-ALL-HOSTS` evidence.
 - Shape gradient stroke migration has `PD-1x3` and `OPEN-ALL-HOSTS` evidence for the current recipe-owned gradient stroke surface: base gradient stroke, alpha stops, radial highlight, and stroke style.
-- Latest full no-AE matrix boundary is 423 total, 420 pass, 3 intentionally blocked, 0 failed, 0 skipped.
+- Native writer targets now exist for W2020-W2025. The narrow writer-target matrix for `minimal-comp-object-profile` is 6 total, 6 pass.
+- Latest full no-AE matrix boundary is 846 total, 840 pass, 6 intentionally blocked, 0 failed, 0 skipped. It covers W2020 source into W2020-W2025 targets.
 - Remaining blocked family is AE2025 explicit matte outside the AE2025 target contract. Other migrated domains are covered by the latest full no-AE matrix boundary, but many do not yet have per-capability host-version ledgers.
 
 ## Text Domain
 
 | Capability | Recipes / scope | Profile-diff writer coverage | AE host open coverage | Evidence |
 | --- | --- | --- | --- | --- |
-| Text layer baseline | `minimal-default-text-layer`, `minimal-default-text-static-transform` | Included in latest full `PD-1x3` boundary | pending per-capability host ledger | `tmp/migration_matrix_smoke_all` previous recorded full matrix: 423 total, 336 pass, 87 blocked |
+| Text layer baseline | `minimal-default-text-layer`, `minimal-default-text-static-transform` | Included in latest full `PD-1x6` boundary | pending per-capability host ledger | `tmp/migration_matrix_smoke_all`: 846 total, 840 pass, 6 blocked |
 | Text style | `minimal-text-style`, `minimal-text-shape` | `PD-1x3`: W2020 -> W2020/W2022/W2025 | `OPEN-H2025`; `OPEN-ALL-HOSTS` for `minimal-text-style` as W2020 output | `history.md` text style entry |
 | Text animator opacity | `minimal-text-animator-opacity`, `minimal-text-animator-opacity-value-keyframes` | `PD-3x3`: W2020/W2022/W2025 -> W2020/W2022/W2025 | pending migration AE-host fanout | `tmp/migration_matrix_text_animators_all_writers/matrix.json`: 198 total, 198 pass |
 | Text animator position | `minimal-text-animator-position`, `minimal-text-animator-position-value-keyframes` | `PD-3x3` | pending migration AE-host fanout | same text animator matrix |
@@ -53,7 +55,7 @@ which AE versions are validated." The current reviewed answer is:
 
 | Capability | Recipes / scope | Profile-diff writer coverage | AE host open coverage | Evidence |
 | --- | --- | --- | --- | --- |
-| Static supported effects | `minimal-text-effect`, `minimal-adjustment-layer`, supported static built-in effect params | Included in latest full `PD-1x3` boundary | pending per-capability host ledger | `history.md`; latest full no-AE matrix 423 total, 336 pass, 87 blocked |
+| Static supported effects | `minimal-text-effect`, `minimal-adjustment-layer`, supported static built-in effect params | Included in latest full `PD-1x6` boundary | pending per-capability host ledger | `history.md`; latest full no-AE matrix 846 total, 840 pass, 6 blocked |
 | Effect layer-ref params | `minimal-effect-layer-param` | Included in latest full `PD-1x3` boundary | pending per-capability host ledger | `history.md` |
 | Effect param expression | `minimal-effect-param-expression` | `PD-1x3`: W2020 -> W2020/W2022/W2025 | `OPEN-H2025` | `history.md` dynamic effect-param entry |
 | Effect scalar keyframes | `minimal-effect-param-keyframes` | `PD-1x3` | `OPEN-H2025` | `history.md` dynamic effect-param entry |
@@ -66,7 +68,7 @@ which AE versions are validated." The current reviewed answer is:
 | Transform keyframes | `minimal-transform-keyframes` | `PD-1x3`: W2020 -> W2020/W2022/W2025 | `OPEN-H2025` | `history.md` dynamic transform entry |
 | Transform keyframe ease | `minimal-transform-keyframe-ease` | `PD-1x3` | `OPEN-H2025`; `OPEN-ALL-HOSTS` for W2020 representative | `history.md` dynamic transform entry |
 | Transform expressions | `minimal-transform-expression` | `PD-1x3` | `OPEN-H2025` | `history.md` dynamic transform entry |
-| Auto-orient unlock | `minimal-layer-auto-orient` | Included in latest full `PD-1x3` boundary after transform keyframes | pending per-capability host ledger | `history.md` dynamic transform entry |
+| Auto-orient unlock | `minimal-layer-auto-orient` | Included in latest full `PD-1x6` boundary after transform keyframes | pending per-capability host ledger | `history.md` dynamic transform entry; latest full no-AE matrix 846 total, 840 pass, 6 blocked |
 
 ## Layer Domain
 
@@ -86,26 +88,26 @@ which AE versions are validated." The current reviewed answer is:
 
 | Domain | Current reviewed state | Writer coverage | AE host open coverage |
 | --- | --- | --- | --- |
-| project | Implemented in convert surface and included in full no-AE matrix boundary | latest full `PD-1x3` boundary | representative checks only |
-| comp | Implemented for stable comp settings, work area, renderer, metadata | latest full `PD-1x3` boundary | representative checks only |
-| layer | Implemented for default layer creation, switches, refs, timing, parent/source refs, supported matte slices, and supported mask slices | latest full `PD-1x3` boundary plus focused matte/mask matrices | representative checks only |
-| shape | Implemented for supported parametric graphic/filter shape slices, gradient fill slices, and gradient stroke slices | latest full `PD-1x3` boundary plus focused gradient-stroke matrix | representative checks only |
-| camera-light | Implemented for supported camera/light options and light source refs | latest full `PD-1x3` boundary | representative checks only |
-| precomp | Implemented for precomp refs/layers | latest full `PD-1x3` boundary | representative checks only |
+| project | Implemented in convert surface and included in full no-AE matrix boundary | latest full `PD-1x6` boundary | representative checks only |
+| comp | Implemented for stable comp settings, work area, renderer, metadata | latest full `PD-1x6` boundary | representative checks only |
+| layer | Implemented for default layer creation, switches, refs, timing, parent/source refs, supported matte slices, and supported mask slices | latest full `PD-1x6` boundary plus focused matte/mask matrices | representative checks only |
+| shape | Implemented for supported parametric graphic/filter shape slices, gradient fill slices, and gradient stroke slices | latest full `PD-1x6` boundary plus focused gradient-stroke matrix | representative checks only |
+| camera-light | Implemented for supported camera/light options and light source refs | latest full `PD-1x6` boundary | representative checks only |
+| precomp | Implemented for precomp refs/layers | latest full `PD-1x6` boundary | representative checks only |
 
 ## Current Remaining Blockers
 
 Latest full no-AE matrix:
 
 - Artifact: `tmp/migration_matrix_smoke_all/matrix.json`
-- Summary: 423 total, 420 pass, 3 blocked, 0 failed, 0 skipped
-- Writer coverage: W2020 source into W2020/W2022/W2025 targets
+- Summary: 846 total, 840 pass, 6 blocked, 0 failed, 0 skipped
+- Writer coverage: W2020 source into W2020/W2021/W2022/W2023/W2024/W2025 targets
 
 Blocked recipe groups:
 
 | Domain | Recipe | Cases | Status |
 | --- | --- | ---: | --- |
-| layer | `minimal-layer-explicit-matte` | 3 | blocked in W2020-source full matrix because explicit matte requires AE2025 source/target contract |
+| layer | `minimal-layer-explicit-matte` | 6 | blocked in W2020-source full matrix because explicit matte requires AE2025 source/target contract |
 
 ## Raw Matrix Artifacts
 
@@ -119,8 +121,10 @@ Reviewed raw artifacts currently known:
 - `tmp/migration_matrix_layer_mask/matrix.json`: 3 total, 3 pass, 0 blocked, 0 failed, 0 skipped. This is W2020 source into W2020/W2022/W2025 targets for the current recipe-owned layer mask surface.
 - `tmp/migration_matrix_shape_gradient_stroke/matrix.json`: 12 total, 12 pass, 0 blocked, 0 failed, 0 skipped. This is W2020 source into W2020/W2022/W2025 targets for the current recipe-owned gradient stroke surface.
 - `tmp/migration_matrix_shape_gradient_stroke_all_hosts/matrix.json`: 24 total, 24 pass, 0 blocked, 0 failed, 0 skipped. This is W2020 source into W2020 target with AE-open on H2020-H2025 for every current recipe-owned gradient-stroke variant.
-- `tmp/migration_matrix_smoke_all/matrix.json`: 423 total, 420 pass, 3 intentionally blocked, 0 failed, 0 skipped. This is the current post-gradient-stroke full no-AE boundary.
+- `tmp/migration_matrix_writer_targets_all/matrix.json`: 6 total, 6 pass, 0 blocked, 0 failed, 0 skipped. This proves the matrix can produce W2020-W2025 writer targets for the stable `minimal-comp-object-profile` fixture.
+- `tmp/migration_matrix_smoke_all/matrix.json`: 846 total, 840 pass, 6 intentionally blocked, 0 failed, 0 skipped. This is the current post-native-writer-target full no-AE boundary for W2020 source into W2020-W2025 targets.
 - Generated coverage ledger artifacts:
+  - `tmp/migration_matrix_writer_targets_all/ledger.md`: generated from the narrow writer-target matrix; 1 recipe row with W2020-W2025 target evidence.
   - `tmp/migration_matrix_smoke_all/ledger.md`: generated by the recurring full no-AE matrix command via `-ledger-out`; 141 recipe rows grouped by inferred domain.
   - `tmp/migration_matrix_representative_all_hosts/ledger.md`: generated from the all-host representative matrix; 5 recipe rows, each with H2020-H2025 evidence.
   - `tmp/migration_matrix_shape_gradient_stroke_all_hosts/ledger.md`: generated from the all-host gradient-stroke matrix; 4 recipe rows, each with H2020-H2025 evidence.

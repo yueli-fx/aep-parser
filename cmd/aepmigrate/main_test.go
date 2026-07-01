@@ -154,7 +154,7 @@ func TestRunMatrixWritesAggregateReport(t *testing.T) {
 	if err := json.Unmarshal(data, &report); err != nil {
 		t.Fatalf("Unmarshal matrix report: %v", err)
 	}
-	if report.Summary.Total != 3 || report.Summary.Passed != 2 || report.Summary.Skipped != 1 {
+	if report.Summary.Total != 3 || report.Summary.Passed != 3 || report.Summary.Skipped != 0 {
 		t.Fatalf("matrix summary = %+v", report.Summary)
 	}
 	if !bytes.Contains(stdout.Bytes(), []byte("migration matrix:")) {

@@ -70,7 +70,14 @@ type MatrixCase struct {
 	ConvertReportPath string       `json:"convert_report_path,omitempty"`
 }
 
-var matrixWriterLabels = []string{string(VersionAE2020), string(VersionAE2022), string(VersionAE2025)}
+var matrixWriterLabels = []string{
+	string(VersionAE2020),
+	string(VersionAE2021),
+	string(VersionAE2022),
+	string(VersionAE2023),
+	string(VersionAE2024),
+	string(VersionAE2025),
+}
 
 var matrixAEHostLabels = []string{"AE2020", "AE2021", "AE2022", "AE2023", "AE2024", "AE2025"}
 
@@ -405,7 +412,7 @@ func matrixWriterTarget(label string) (VersionLabel, bool) {
 		return "", false
 	}
 	switch target {
-	case VersionAE2020, VersionAE2022, VersionAE2025:
+	case VersionAE2020, VersionAE2021, VersionAE2022, VersionAE2023, VersionAE2024, VersionAE2025:
 		return target, true
 	default:
 		return "", false

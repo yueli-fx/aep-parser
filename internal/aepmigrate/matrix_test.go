@@ -32,7 +32,7 @@ func TestBuildAEHostMapDiscoversInstalledAfterEffectsVersions(t *testing.T) {
 	}
 }
 
-func TestRunMatrixConvertsRecipeAcrossSupportedTargetsAndSkipsUnsupportedTargets(t *testing.T) {
+func TestRunMatrixConvertsRecipeAcrossNativeWriterTargets(t *testing.T) {
 	root := t.TempDir()
 	recipePath := filepath.Join(root, "minimal.json")
 	writeMinimalMatrixRecipe(t, recipePath)
@@ -56,14 +56,14 @@ func TestRunMatrixConvertsRecipeAcrossSupportedTargetsAndSkipsUnsupportedTargets
 	if report.Summary.Total != 3 {
 		t.Fatalf("total = %d, want 3", report.Summary.Total)
 	}
-	if report.Summary.Passed != 2 {
-		t.Fatalf("passed = %d, want 2; cases=%+v", report.Summary.Passed, report.Cases)
+	if report.Summary.Passed != 3 {
+		t.Fatalf("passed = %d, want 3; cases=%+v", report.Summary.Passed, report.Cases)
 	}
-	if report.Summary.Skipped != 1 {
-		t.Fatalf("skipped = %d, want 1; cases=%+v", report.Summary.Skipped, report.Cases)
+	if report.Summary.Skipped != 0 {
+		t.Fatalf("skipped = %d, want 0; cases=%+v", report.Summary.Skipped, report.Cases)
 	}
 	assertMatrixCaseStatus(t, report.Cases, "AE2020", MatrixStatusPass)
-	assertMatrixCaseStatus(t, report.Cases, "AE2021", MatrixStatusSkipped)
+	assertMatrixCaseStatus(t, report.Cases, "AE2021", MatrixStatusPass)
 	assertMatrixCaseStatus(t, report.Cases, "AE2025", MatrixStatusPass)
 
 	matrixJSON := filepath.Join(outRoot, "matrix.json")
@@ -88,7 +88,7 @@ func TestMatrixAllPresetsExpandWritersAndAEOpenHosts(t *testing.T) {
 	targetLabels := expandMatrixTargetLabels([]string{"all"})
 	aeOpenLabels := matrixAEOpenLabels([]string{"all"})
 
-	wantWriters := []string{"AE2020", "AE2022", "AE2025"}
+	wantWriters := []string{"AE2020", "AE2021", "AE2022", "AE2023", "AE2024", "AE2025"}
 	if strings.Join(sourceLabels, ",") != strings.Join(wantWriters, ",") {
 		t.Fatalf("source all = %v, want %v", sourceLabels, wantWriters)
 	}

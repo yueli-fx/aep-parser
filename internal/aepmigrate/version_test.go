@@ -6,8 +6,14 @@ func TestParseVersionLabelAcceptsSupportedTargets(t *testing.T) {
 	tests := map[string]VersionLabel{
 		"AE2020": VersionAE2020,
 		"2020":   VersionAE2020,
+		"ae2021": VersionAE2021,
+		"2021":   VersionAE2021,
 		"ae2022": VersionAE2022,
 		"2022":   VersionAE2022,
+		"AE2023": VersionAE2023,
+		"2023":   VersionAE2023,
+		"AE2024": VersionAE2024,
+		"2024":   VersionAE2024,
 		"AE2025": VersionAE2025,
 		"2025":   VersionAE2025,
 	}

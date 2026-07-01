@@ -763,3 +763,97 @@ Use:
 ```text
 feat(aepmigrate): write matrix ledgers during runs
 ```
+
+---
+
+## Task 27: Native Writer Targets 2021/2023/2024 TDD
+
+- [x] **Step 1: Add failing `NewProject` target tests**
+
+Extend `TestNewProject_AllTargetsParseAndSvap` to include existing embedded
+templates:
+
+- AE2021 svap `0b120e04`, 26 root children
+- AE2023 svap `0b3a8634`, 30 root children
+- AE2024 svap `0f010e02`, 31 root children
+
+Expected: compile fails until `TargetAE2021`, `TargetAE2023`, and
+`TargetAE2024` exist.
+
+- [x] **Step 2: Add failing migration version/matrix tests**
+
+Extend `TestParseVersionLabelAcceptsSupportedTargets` and
+`TestMatrixAllPresetsExpandWritersAndAEOpenHosts` so writer `all` expands to
+AE2020-AE2025 inclusive.
+
+Expected: compile/test failure until migration labels and matrix writer labels
+include the new targets.
+
+## Task 28: Native Writer Target Implementation
+
+- [x] **Step 1: Add target constants, aliases, and embedded templates**
+
+Expose `TargetAE2021`, `TargetAE2023`, and `TargetAE2024` through scene,
+serializer aliases, and public aep aliases. Embed the existing project
+templates under `internal/serializer/templates/project/`.
+
+- [x] **Step 2: Add migration version labels and target mapping**
+
+Add `VersionAE2021`, `VersionAE2023`, and `VersionAE2024`; update
+`ParseVersionLabel`, `NormalizeSourceVersion`, `matrixWriterLabels`, and
+`aepTarget`.
+
+- [x] **Step 3: Run focused green tests**
+
+```powershell
+go test ./internal/aep_test -run TestNewProject_AllTargetsParseAndSvap -count=1
+go test ./internal/aepmigrate -run "TestParseVersionLabel|TestMatrixAllPresetsExpandWritersAndAEOpenHosts" -count=1
+```
+
+## Task 29: Native Writer Target Matrix and Ledger
+
+- [x] **Step 1: Run a narrow 6-target writer matrix**
+
+```powershell
+go run ./cmd/aepmigrate matrix -recipe examples\recipes\minimal-comp-object-profile.json -sources AE2020 -targets all -out tmp\migration_matrix_writer_targets_all -ledger-out tmp\migration_matrix_writer_targets_all\ledger.md
+```
+
+Actual result: 6 total, 6 pass, 0 blocked, 0 failed, 0 skipped. This proves the
+matrix can produce all writer targets for a stable comp-only fixture.
+
+Also refreshed the full no-AE boundary with all writer targets:
+
+```powershell
+go run ./cmd/aepmigrate matrix -recipes examples\recipes -sources AE2020 -targets all -out tmp\migration_matrix_smoke_all -ledger-out tmp\migration_matrix_smoke_all\ledger.md
+```
+
+Actual result: 846 total, 840 pass, 6 blocked, 0 failed, 0 skipped. The blocked
+cases are still only `minimal-layer-explicit-matte` outside the AE2025 source
+contract.
+
+- [x] **Step 2: Update validation plan, summary, index, and history**
+
+Record that W2021/W2023/W2024 are now native writer targets for the project
+skeleton and matrix runner, with narrow fixture evidence before broad migration
+claims.
+
+- [x] **Step 3: Run full verification**
+
+```powershell
+go test ./...
+go vet ./...
+git diff --check
+```
+
+- [x] **Step 4: Read commit/verify knowledge and commit**
+
+```powershell
+Get-Content C:\Users\yl\.flightdeck\knowledge\git\commits.md -Raw
+Get-Content flightdeck\knowledge\workflow\verify.md -Raw
+```
+
+Use:
+
+```text
+feat(aepmigrate): add native 2021 2023 2024 writer targets
+```

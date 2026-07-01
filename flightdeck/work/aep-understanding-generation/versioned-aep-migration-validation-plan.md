@@ -17,10 +17,16 @@
 Writer targets are the AEP templates the Go writer can currently produce:
 
 - `W2020` = `AE2020`
+- `W2021` = `AE2021`
 - `W2022` = `AE2022`
+- `W2023` = `AE2023`
+- `W2024` = `AE2024`
 - `W2025` = `AE2025`
 
-Current code does not provide native `AE2021`, `AE2023`, or `AE2024` writer templates. Those years must not be reported as writer targets until serializer templates exist.
+`W2021`, `W2023`, and `W2024` are admitted only after their native project
+skeleton templates parse, roundtrip with stable `svap` bytes, and pass a narrow
+writer-target matrix. Broader migration claims still need explicit matrix
+evidence at the requested scope.
 
 ### AE Host Versions
 
@@ -39,6 +45,7 @@ Host validation answers compatibility: "Can this produced AEP open in AE version
 
 - `PD-3x3`: profile-diff matrix passed for source writers `W2020,W2022,W2025` into target writers `W2020,W2022,W2025`.
 - `PD-1x3`: profile-diff matrix passed for source writer `W2020` into target writers `W2020,W2022,W2025`.
+- `PD-1x6`: profile-diff matrix passed for source writer `W2020` into target writers `W2020,W2021,W2022,W2023,W2024,W2025`.
 - `OPEN-H2025`: converted output opened in AE2025.
 - `OPEN-ALL-HOSTS`: one chosen writer output opened in `H2020,H2021,H2022,H2023,H2024,H2025`.
 - `OPEN-ENDPOINTS`: one chosen writer output opened in `H2020` and `H2025`.
@@ -88,7 +95,7 @@ go run ./cmd/aepmigrate matrix `
 Full no-AE migration boundary with generated coverage ledger:
 
 ```powershell
-go run ./cmd/aepmigrate matrix -recipes examples\recipes -sources AE2020 -targets AE2020,AE2022,AE2025 -out tmp\migration_matrix_smoke_all -ledger-out tmp\migration_matrix_smoke_all\ledger.md
+go run ./cmd/aepmigrate matrix -recipes examples\recipes -sources AE2020 -targets all -out tmp\migration_matrix_smoke_all -ledger-out tmp\migration_matrix_smoke_all\ledger.md
 ```
 
 Do not run a broad AE-open matrix without an explicit case count decision.

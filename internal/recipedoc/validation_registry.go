@@ -5,8 +5,8 @@ var fieldValidation = map[string]FieldMeta{
 		Validation: "Must equal the supported recipe schema version.",
 	},
 	"project.target_version": {
-		Validation: "Must be AE2020, AE2022, or AE2025. Omitted target_version defaults to AE2020.",
-		Enum:       []string{"AE2020", "AE2022", "AE2025"},
+		Validation: "Must be AE2020, AE2021, AE2022, AE2023, AE2024, or AE2025. Omitted target_version defaults to AE2020.",
+		Enum:       []string{"AE2020", "AE2021", "AE2022", "AE2023", "AE2024", "AE2025"},
 	},
 	"project.bits_per_channel": {
 		Validation: "Must be 8, 16, or 32 bits per channel.",

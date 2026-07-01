@@ -212,8 +212,14 @@ func rebuildProject(target VersionLabel, prof *profile.Profile) (*aep.Project, e
 
 func aepTarget(target VersionLabel) aep.AETarget {
 	switch target {
+	case VersionAE2021:
+		return aep.TargetAE2021
 	case VersionAE2022:
 		return aep.TargetAE2022
+	case VersionAE2023:
+		return aep.TargetAE2023
+	case VersionAE2024:
+		return aep.TargetAE2024
 	case VersionAE2025:
 		return aep.TargetAE2025
 	default:

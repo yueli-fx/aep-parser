@@ -7,7 +7,10 @@ type VersionLabel string
 const (
 	VersionUnknown VersionLabel = "unknown"
 	VersionAE2020  VersionLabel = "AE2020"
+	VersionAE2021  VersionLabel = "AE2021"
 	VersionAE2022  VersionLabel = "AE2022"
+	VersionAE2023  VersionLabel = "AE2023"
+	VersionAE2024  VersionLabel = "AE2024"
 	VersionAE2025  VersionLabel = "AE2025"
 )
 

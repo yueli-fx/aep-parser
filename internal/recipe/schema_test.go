@@ -98,6 +98,21 @@ func TestValidateReportsProjectBitsPerChannelCapability(t *testing.T) {
 	assertCapability(t, report, "Project.SetBitsPerChannel")
 }
 
+func TestValidateAcceptsAllNativeProjectTargets(t *testing.T) {
+	for _, target := range []string{"AE2020", "AE2021", "AE2022", "AE2023", "AE2024", "AE2025"} {
+		t.Run(target, func(t *testing.T) {
+			rec := minimalRecipe()
+			rec.Project.TargetVersion = target
+
+			report := recipe.Validate(rec)
+
+			if !report.Valid {
+				t.Fatalf("Valid = false, report=%+v", report)
+			}
+		})
+	}
+}
+
 func TestValidateReportsProjectLinearColorCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	enabled := true

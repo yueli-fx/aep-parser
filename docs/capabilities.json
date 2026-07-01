@@ -6004,7 +6004,7 @@
         "TestV2_1_AEShipGate_AE2020",
         "TestV2_1_AEShipGate_AE2025"
       ],
-      "boundary": "zero args defaults to TargetAE2020; targets 2020 / 2022 / 2025 supported",
+      "boundary": "zero args defaults to TargetAE2020; targets 2020 through 2025 supported",
       "incident": [
         "ae25-acceptance-gate"
       ],
@@ -8196,7 +8196,7 @@
     "symbol": "NewPuckerBloatNode",
     "kind": "func",
     "signature": "func NewPuckerBloatNode() *PuckerBloatNode",
-    "summary": "@summary     Create a detached Pucker \u0026 Bloat filter node @description Returns a Pucker \u0026 Bloat filter with Amount=0, which leaves the   path unchanged until its value is set.",
+    "summary": "@summary     Create a detached Pucker \u0026 Bloat filter node @description Returns a Pucker \u0026 Bloat filter with Amount=0, which leaves the",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8247,7 +8247,7 @@
     "symbol": "NewRepeaterNode",
     "kind": "func",
     "signature": "func NewRepeaterNode() *RepeaterNode",
-    "summary": "@summary     Create a detached Repeater filter node @description Returns a Repeater filter that makes 3 copies with an identity   transform, so each copy sits on top of the original until configured.",
+    "summary": "@summary     Create a detached Repeater filter node @description Returns a Repeater filter that makes 3 copies with an identity",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8354,7 +8354,7 @@
     "symbol": "NewTrimNode",
     "kind": "func",
     "signature": "func NewTrimNode() *TrimNode",
-    "summary": "@summary     Create a detached Trim Paths filter node @description Returns the identity Trim Paths filter with Start=0, End=100,   and Offset=0, so it leaves the path unchanged until its values are set.",
+    "summary": "@summary     Create a detached Trim Paths filter node @description Returns the identity Trim Paths filter with Start=0, End=100,",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8382,7 +8382,7 @@
     "symbol": "NewTwistNode",
     "kind": "func",
     "signature": "func NewTwistNode() *TwistNode",
-    "summary": "@summary     Create a detached Twist filter node @description Returns a Twist filter with Angle=0, which leaves the path   unchanged until its value is set.",
+    "summary": "@summary     Create a detached Twist filter node @description Returns a Twist filter with Angle=0, which leaves the path",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8436,7 +8436,7 @@
     "symbol": "NewWigglePathsNode",
     "kind": "func",
     "signature": "func NewWigglePathsNode() *WigglePathsNode",
-    "summary": "@summary     Create a detached Wiggle Paths filter node @description Returns a Wiggle Paths filter with Size=0, which leaves the path   unchanged until its value is set.",
+    "summary": "@summary     Create a detached Wiggle Paths filter node @description Returns a Wiggle Paths filter with Size=0, which leaves the path",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8463,7 +8463,7 @@
     "symbol": "NewWiggleTransformNode",
     "kind": "func",
     "signature": "func NewWiggleTransformNode() *WiggleTransformNode",
-    "summary": "@summary     Create a detached Wiggle Transform filter node @description Returns a Wiggle Transform filter with zero amplitudes, which   leaves the shape unchanged until its values are set.",
+    "summary": "@summary     Create a detached Wiggle Transform filter node @description Returns a Wiggle Transform filter with zero amplitudes, which",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8488,7 +8488,7 @@
     "symbol": "NewZigZagNode",
     "kind": "func",
     "signature": "func NewZigZagNode() *ZigZagNode",
-    "summary": "@summary     Create a detached ZigZag filter node @description Returns a ZigZag filter with Size=5 and Detail=10 as its   starting values.",
+    "summary": "@summary     Create a detached ZigZag filter node @description Returns a ZigZag filter with Size=5 and Detail=10 as its",
     "has_cap": true,
     "cap": {
       "domain": "shape",

@@ -11,7 +11,10 @@ type recipeProjectTarget int
 
 const (
 	aepTargetAE2020 recipeProjectTarget = 2020
+	aepTargetAE2021 recipeProjectTarget = 2021
 	aepTargetAE2022 recipeProjectTarget = 2022
+	aepTargetAE2023 recipeProjectTarget = 2023
+	aepTargetAE2024 recipeProjectTarget = 2024
 	aepTargetAE2025 recipeProjectTarget = 2025
 )
 
@@ -19,12 +22,18 @@ func parseRecipeProjectTarget(version string) (recipeProjectTarget, error) {
 	switch strings.ToUpper(strings.TrimSpace(version)) {
 	case "", "AE2020", "2020":
 		return aepTargetAE2020, nil
+	case "AE2021", "2021":
+		return aepTargetAE2021, nil
 	case "AE2022", "2022":
 		return aepTargetAE2022, nil
+	case "AE2023", "2023":
+		return aepTargetAE2023, nil
+	case "AE2024", "2024":
+		return aepTargetAE2024, nil
 	case "AE2025", "2025":
 		return aepTargetAE2025, nil
 	default:
-		return 0, fmt.Errorf("target_version must be AE2020, AE2022, or AE2025")
+		return 0, fmt.Errorf("target_version must be AE2020, AE2021, AE2022, AE2023, AE2024, or AE2025")
 	}
 }
 
@@ -185,8 +194,14 @@ func projectTimecodeDefaultBase(value int) error {
 
 func (target recipeProjectTarget) aepTarget() aep.AETarget {
 	switch target {
+	case aepTargetAE2021:
+		return aep.TargetAE2021
 	case aepTargetAE2022:
 		return aep.TargetAE2022
+	case aepTargetAE2023:
+		return aep.TargetAE2023
+	case aepTargetAE2024:
+		return aep.TargetAE2024
 	case aepTargetAE2025:
 		return aep.TargetAE2025
 	default:

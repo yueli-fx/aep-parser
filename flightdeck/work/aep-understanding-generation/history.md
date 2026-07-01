@@ -825,3 +825,15 @@ Current:
   `tmp/migration_matrix_smoke_all` remains 423 total, 420 pass, 3 intentionally
   blocked, 0 failed, 0 skipped, and the generated ledger contains 141 recipe
   rows grouped by inferred domain.
+- Native writer target support now includes AE2021, AE2023, and AE2024 in
+  addition to the existing AE2020/AE2022/AE2025 targets. The existing project
+  templates parse and roundtrip with frozen svap bytes:
+  AE2021=`0b120e04`, AE2023=`0b3a8634`, AE2024=`0f010e02`.
+  `aepmigrate` target parsing, recipe `project.target_version`, and matrix
+  `-sources/-targets all` now include AE2020-AE2025. Narrow writer-target
+  evidence: `tmp/migration_matrix_writer_targets_all/matrix.json` is 6 total,
+  6 pass, 0 blocked, 0 failed, 0 skipped for `minimal-comp-object-profile`.
+  Latest full no-AE boundary was refreshed with W2020 source into W2020-W2025
+  targets: 846 total, 840 pass, 6 intentionally blocked, 0 failed, 0 skipped;
+  the remaining blocked family is still `minimal-layer-explicit-matte` outside
+  the AE2025 source contract.

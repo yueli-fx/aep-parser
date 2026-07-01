@@ -9,7 +9,7 @@ recipe generation, corpus learning, and versioned AEP migration.
 
 Current focus: versioned AEP migration. The implemented surface now includes
 `cmd/aepmigrate assess`, conservative `convert`, and `matrix` gates for
-AE2020/AE2022/AE2025 writer targets. Matrix AE-open validation can now use a
+AE2020-AE2025 writer targets. Matrix AE-open validation can now use a
 separate AE host-version dimension across installed AE2020-AE2025 hosts.
 
 History lives in `history.md`; keep this index short enough to recover from.
@@ -20,7 +20,6 @@ Continue versioned migration by choosing one of:
 
 - expand the supported `convert` surface beyond the current conservative layer
   and shape slices;
-- decide whether AE2021/AE2023/AE2024 native writer templates are worth adding;
 - promote matrix coverage into a recurring verification command once the pass /
   blocked boundary is useful enough.
 
@@ -75,7 +74,7 @@ Done at a high level:
 - Technique facts, portrait, corpus, explain mode, and selfhost report/verify
   flows are implemented for project understanding and corpus learning.
 - Versioned AEP migration now has `assess`, conservative `convert`, and
-  `matrix` gates for AE2020/AE2022/AE2025 writer targets.
+  `matrix` gates for AE2020-AE2025 writer targets.
 
 Current:
 - Current `cmd/aepmigrate convert` surface includes conservative comp/layer
@@ -91,7 +90,10 @@ Current:
   surface by profile-visible properties: opacity, position, scale, rotation
   Z/X/Y, fill/stroke color, tracking, character offset, fill/stroke opacity,
   stroke width, skew, range-offset keyframes, and supported value keyframes.
-- Latest full no-AE matrix: 423 total, 420 pass, 3 intentionally blocked,
+- Native writer targets now cover AE2020, AE2021, AE2022, AE2023, AE2024, and
+  AE2025 project skeletons. The narrow writer-target matrix is 6 total, 6 pass
+  for `minimal-comp-object-profile`.
+- Latest full no-AE matrix: 846 total, 840 pass, 6 intentionally blocked,
   0 failed, 0 skipped.
 - `aepmigrate ledger` can generate per-recipe/domain Markdown ledgers from
   matrix JSON outputs; `aepmigrate matrix -ledger-out` now writes the ledger in
@@ -105,8 +107,7 @@ Current:
   AE2025 hosts. All current gradient-stroke variants also open across
   AE2020-AE2025 hosts.
 - Continue versioned migration by expanding supported conversion surface,
-  turning the useful matrix boundary into a recurring verification command, or
-  deciding whether native AE2021/AE2023/AE2024 writer templates are worth adding.
+  or turning the useful matrix boundary into a recurring verification command.
 - Do not start automated correction loops.
 
 ## Open questions

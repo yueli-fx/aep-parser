@@ -418,7 +418,10 @@ const (
 	StrokeLineJoinMiter                           = scene.StrokeLineJoinMiter
 	StrokeLineJoinRound                           = scene.StrokeLineJoinRound
 	TargetAE2020                                  = scene.TargetAE2020
+	TargetAE2021                                  = scene.TargetAE2021
 	TargetAE2022                                  = scene.TargetAE2022
+	TargetAE2023                                  = scene.TargetAE2023
+	TargetAE2024                                  = scene.TargetAE2024
 	TargetAE2025                                  = scene.TargetAE2025
 	TextAutoKernMetric                            = scene.TextAutoKernMetric
 	TextAutoKernNoAuto                            = scene.TextAutoKernNoAuto
@@ -545,7 +548,9 @@ func NewStrokeNode() *StrokeNode { return scene.NewStrokeNode() }
 
 // @summary     Create a detached Trim Paths filter node
 // @description Returns the identity Trim Paths filter with Start=0, End=100,
-//   and Offset=0, so it leaves the path unchanged until its values are set.
+//
+//	and Offset=0, so it leaves the path unchanged until its values are set.
+//
 // @returns     a new Trim Paths filter node not yet attached to any layer
 // @domain      shape
 // @stability   stable
@@ -558,7 +563,9 @@ func NewTrimNode() *TrimNode { return scene.NewTrimNode() }
 
 // @summary     Create a detached Repeater filter node
 // @description Returns a Repeater filter that makes 3 copies with an identity
-//   transform, so each copy sits on top of the original until configured.
+//
+//	transform, so each copy sits on top of the original until configured.
+//
 // @returns     a new Repeater filter node not yet attached to any layer
 // @domain      shape
 // @stability   stable
@@ -607,7 +614,9 @@ func NewMergePathsNode() *MergePathsNode { return scene.NewMergePathsNode() }
 
 // @summary     Create a detached ZigZag filter node
 // @description Returns a ZigZag filter with Size=5 and Detail=10 as its
-//   starting values.
+//
+//	starting values.
+//
 // @returns     a new ZigZag filter node not yet attached to any layer
 // @domain      shape
 // @stability   stable
@@ -631,7 +640,9 @@ func NewStarNode() *StarNode { return scene.NewStarNode() }
 
 // @summary     Create a detached Pucker & Bloat filter node
 // @description Returns a Pucker & Bloat filter with Amount=0, which leaves the
-//   path unchanged until its value is set.
+//
+//	path unchanged until its value is set.
+//
 // @returns     a new Pucker & Bloat filter node not yet attached to any layer
 // @domain      shape
 // @stability   stable
@@ -644,7 +655,9 @@ func NewPuckerBloatNode() *PuckerBloatNode { return scene.NewPuckerBloatNode() }
 
 // @summary     Create a detached Twist filter node
 // @description Returns a Twist filter with Angle=0, which leaves the path
-//   unchanged until its value is set.
+//
+//	unchanged until its value is set.
+//
 // @returns     a new Twist filter node not yet attached to any layer
 // @domain      shape
 // @stability   stable
@@ -657,7 +670,9 @@ func NewTwistNode() *TwistNode { return scene.NewTwistNode() }
 
 // @summary     Create a detached Wiggle Paths filter node
 // @description Returns a Wiggle Paths filter with Size=0, which leaves the path
-//   unchanged until its value is set.
+//
+//	unchanged until its value is set.
+//
 // @returns     a new Wiggle Paths filter node not yet attached to any layer
 // @domain      shape
 // @stability   alpha
@@ -671,7 +686,9 @@ func NewWigglePathsNode() *WigglePathsNode { return scene.NewWigglePathsNode() }
 
 // @summary     Create a detached Wiggle Transform filter node
 // @description Returns a Wiggle Transform filter with zero amplitudes, which
-//   leaves the shape unchanged until its values are set.
+//
+//	leaves the shape unchanged until its values are set.
+//
 // @returns     a new Wiggle Transform filter node not yet attached to any layer
 // @domain      shape
 // @stability   alpha

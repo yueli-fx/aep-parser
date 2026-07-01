@@ -12,8 +12,17 @@ import (
 //go:embed templates/project/2020.aep
 var embeddedTemplate2020 []byte
 
+//go:embed templates/project/2021.aep
+var embeddedTemplate2021 []byte
+
 //go:embed templates/project/2022.aep
 var embeddedTemplate2022 []byte
+
+//go:embed templates/project/2023.aep
+var embeddedTemplate2023 []byte
+
+//go:embed templates/project/2024.aep
+var embeddedTemplate2024 []byte
 
 //go:embed templates/project/2025.aep
 var embeddedTemplate2025 []byte
@@ -36,8 +45,14 @@ func NewProject(target ...AETarget) *Project {
 	switch t {
 	case TargetAE2020:
 		tmpl = embeddedTemplate2020
+	case TargetAE2021:
+		tmpl = embeddedTemplate2021
 	case TargetAE2022:
 		tmpl = embeddedTemplate2022
+	case TargetAE2023:
+		tmpl = embeddedTemplate2023
+	case TargetAE2024:
+		tmpl = embeddedTemplate2024
 	case TargetAE2025:
 		tmpl = embeddedTemplate2025
 	default:

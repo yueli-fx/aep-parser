@@ -404,7 +404,10 @@ const (
 	StrokeLineJoinMiter                           = scene.StrokeLineJoinMiter
 	StrokeLineJoinRound                           = scene.StrokeLineJoinRound
 	TargetAE2020                                  = scene.TargetAE2020
+	TargetAE2021                                  = scene.TargetAE2021
 	TargetAE2022                                  = scene.TargetAE2022
+	TargetAE2023                                  = scene.TargetAE2023
+	TargetAE2024                                  = scene.TargetAE2024
 	TargetAE2025                                  = scene.TargetAE2025
 	TextAutoKernMetric                            = scene.TextAutoKernMetric
 	TextAutoKernNoAuto                            = scene.TextAutoKernNoAuto
