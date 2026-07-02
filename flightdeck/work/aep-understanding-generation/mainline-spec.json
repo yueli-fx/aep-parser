@@ -91,6 +91,11 @@
       "path": "tmp/registry_coverage_summary.json",
       "role": "generated_report",
       "description": "Read-only coverage atom-row summary output for quick total-table queries; ignored by git."
+    },
+    {
+      "path": "tmp/registry_coverage_rows_*.json",
+      "role": "generated_report",
+      "description": "Read-only filtered coverage atom-row query outputs; ignored by git."
     }
   ],
   "phases": [
@@ -173,27 +178,30 @@
     "phase": "version_matrix_totalization",
     "last_completed_target": {
       "location": "coverage_ledger",
-      "group": "coverage_summary_query",
-      "reason": "Add a Go-generated quick summary over coverage atom_rows so total-table questions can be answered from tmp/registry_coverage_summary.json without manually reading the full coverage report.",
-      "source_report": "tmp/registry_coverage_summary.json",
+      "group": "coverage_rows_query",
+      "reason": "Add filtered atom-row query output so exact atom, record, writer-status, host-open evidence, and boundary-status slices can be generated as JSON instead of manually filtering the full coverage report.",
+      "source_report": "tmp/registry_coverage_rows_text_opacity.json",
       "result": {
-        "command_added": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_summary.json -summary",
+        "command_added": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_rows_text_opacity.json -rows -atom text.animator.opacity",
+        "supported_filters": [
+          "record",
+          "atom",
+          "writer-status",
+          "host-level",
+          "boundary-status"
+        ],
+        "example_text_animator_opacity_rows": 1,
+        "example_boundary_rows": 1,
+        "example_text_animators_record_rows": 22,
+        "coverage_errors": 0
+      },
+      "previous_target": {
+        "location": "coverage_ledger",
+        "group": "coverage_summary_query",
         "records": 16,
         "artifacts": 45,
         "atoms": 141,
         "atom_rows": 141,
-        "direct_host_atoms": 126,
-        "inferred_host_atoms": 126,
-        "boundary_atom_rows": 1,
-        "coverage_errors": 0
-      },
-      "previous_target": {
-        "location": "recipe_atoms",
-        "group": "static_effects_remaining_recipes",
-        "capability_atoms_added": 2,
-        "recipe_atoms_owned_files_after": 141,
-        "recipe_atoms_unowned_files_after": 0,
-        "coverage_atom_rows_after": 141,
         "coverage_errors": 0
       },
       "previous_atom_target": {
@@ -207,7 +215,7 @@
         "minimal-layer-explicit-matte remains covered by layer.track_matte.explicit_source as a version-boundary atom, not a pass-complete layer atom."
       ]
     },
-    "next_action": "Use registry_coverage_summary.json as the quick total table and add focused query/filter output only when a user-facing question needs exact atom, record, or version-axis slices.",
+    "next_action": "Use coverage summary and rows query reports as the main version-matrix total table; next useful increment is per-cell source-target detail only for atoms whose pass/blocked/skipped totals need explanation beyond source/target version sets.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
@@ -251,6 +259,13 @@
     {
       "id": "registry_coverage_summary",
       "command": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_summary.json -summary",
+      "required_for": [
+        "version_matrix_totalization"
+      ]
+    },
+    {
+      "id": "registry_coverage_rows_example",
+      "command": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_rows_text_opacity.json -rows -atom text.animator.opacity",
       "required_for": [
         "version_matrix_totalization"
       ]

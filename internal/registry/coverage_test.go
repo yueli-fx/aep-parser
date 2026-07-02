@@ -295,6 +295,45 @@ func TestSummarizeCoverageGroupsAtomRowsForQuickQueries(t *testing.T) {
 	}
 }
 
+func TestFilterCoverageRowsSelectsAtomRowsForFocusedQueries(t *testing.T) {
+	report := CoverageReport{
+		AtomRows: []AtomCoverageRow{
+			{
+				AtomID:                "text.a",
+				RecordID:              "text",
+				WriterStatus:          "PD-6x6",
+				HostOpenEvidenceLevel: "direct_endpoint_hosts_pass",
+			},
+			{
+				AtomID:                "text.b",
+				RecordID:              "text",
+				WriterStatus:          "boundary",
+				HostOpenEvidenceLevel: "excluded_known_boundary",
+			},
+			{
+				AtomID:                "shape.a",
+				RecordID:              "shape",
+				WriterStatus:          "PD-6x6",
+				HostOpenEvidenceLevel: "direct_all_hosts_representative",
+			},
+		},
+	}
+
+	rows := FilterCoverageRows(report, CoverageRowFilter{
+		RecordID:              "text",
+		WriterStatus:          "PD-6x6",
+		HostOpenEvidenceLevel: "direct_endpoint_hosts_pass",
+	})
+	if len(rows) != 1 || rows[0].AtomID != "text.a" {
+		t.Fatalf("rows = %+v, want text.a only", rows)
+	}
+
+	rows = FilterCoverageRows(report, CoverageRowFilter{AtomID: "shape.a"})
+	if len(rows) != 1 || rows[0].RecordID != "shape" {
+		t.Fatalf("rows = %+v, want shape.a only", rows)
+	}
+}
+
 func TestValidateCoverageFailsWhenDeclaredRecipesDoNotMatchMatrix(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 1)

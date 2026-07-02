@@ -46,6 +46,22 @@ type CoverageSummaryBucket struct {
 	AtomRows int    `json:"atom_rows"`
 }
 
+type CoverageRowsReport struct {
+	SchemaVersion int               `json:"schema_version"`
+	Status        string            `json:"status"`
+	Count         int               `json:"count"`
+	Filter        CoverageRowFilter `json:"filter"`
+	Rows          []AtomCoverageRow `json:"rows"`
+}
+
+type CoverageRowFilter struct {
+	RecordID              string `json:"record_id,omitempty"`
+	AtomID                string `json:"atom_id,omitempty"`
+	WriterStatus          string `json:"writer_status,omitempty"`
+	HostOpenEvidenceLevel string `json:"host_open_evidence_level,omitempty"`
+	BoundaryStatus        string `json:"boundary_status,omitempty"`
+}
+
 type CoverageIssue struct {
 	Code     string `json:"code"`
 	Severity string `json:"severity"`
@@ -223,6 +239,40 @@ func SummarizeCoverage(report CoverageReport) CoverageSummaryReport {
 	summary.ByHostOpenEvidenceLevel = coverageSummaryBuckets(byHostOpenEvidenceLevel)
 	summary.ByBoundaryStatus = coverageSummaryBuckets(byBoundaryStatus)
 	return summary
+}
+
+func FilterCoverageRows(report CoverageReport, filter CoverageRowFilter) []AtomCoverageRow {
+	var rows []AtomCoverageRow
+	for _, row := range report.AtomRows {
+		if filter.RecordID != "" && row.RecordID != filter.RecordID {
+			continue
+		}
+		if filter.AtomID != "" && row.AtomID != filter.AtomID {
+			continue
+		}
+		if filter.WriterStatus != "" && row.WriterStatus != filter.WriterStatus {
+			continue
+		}
+		if filter.HostOpenEvidenceLevel != "" && row.HostOpenEvidenceLevel != filter.HostOpenEvidenceLevel {
+			continue
+		}
+		if filter.BoundaryStatus != "" && row.BoundaryStatus != filter.BoundaryStatus {
+			continue
+		}
+		rows = append(rows, row)
+	}
+	return rows
+}
+
+func CoverageRows(report CoverageReport, filter CoverageRowFilter) CoverageRowsReport {
+	rows := FilterCoverageRows(report, filter)
+	return CoverageRowsReport{
+		SchemaVersion: 1,
+		Status:        report.Status,
+		Count:         len(rows),
+		Filter:        filter,
+		Rows:          rows,
+	}
 }
 
 func incrementBucket(buckets map[string]int, name string) {

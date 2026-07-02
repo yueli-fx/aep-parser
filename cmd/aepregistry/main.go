@@ -78,12 +78,22 @@ func runCoverage(args []string) int {
 	coveragePath := fs.String("coverage", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
 	outPath := fs.String("out", "tmp/registry_coverage.json", "coverage validation report JSON path")
 	summaryOut := fs.Bool("summary", false, "write summary JSON instead of full coverage validation report")
+	rowsOut := fs.Bool("rows", false, "write filtered atom rows JSON instead of full coverage validation report")
+	recordFilter := fs.String("record", "", "filter atom rows by coverage record id")
+	atomFilter := fs.String("atom", "", "filter atom rows by atom id")
+	writerStatusFilter := fs.String("writer-status", "", "filter atom rows by writer status")
+	hostLevelFilter := fs.String("host-level", "", "filter atom rows by host-open evidence level")
+	boundaryStatusFilter := fs.String("boundary-status", "", "filter atom rows by boundary status")
 	jsonOut := fs.Bool("json", false, "print JSON report")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage [-root .] [-coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json] [-out tmp/registry_coverage.json] [-summary] [-json]")
+		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage [-root .] [-coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json] [-out tmp/registry_coverage.json] [-summary|-rows] [-record id] [-atom id] [-writer-status status] [-host-level level] [-boundary-status status] [-json]")
+		return 2
+	}
+	if *summaryOut && *rowsOut {
+		fmt.Fprintln(os.Stderr, "coverage: choose only one of -summary or -rows")
 		return 2
 	}
 
@@ -95,6 +105,14 @@ func runCoverage(args []string) int {
 	output := any(report)
 	if *summaryOut {
 		output = registry.SummarizeCoverage(report)
+	} else if *rowsOut {
+		output = registry.CoverageRows(report, registry.CoverageRowFilter{
+			RecordID:              *recordFilter,
+			AtomID:                *atomFilter,
+			WriterStatus:          *writerStatusFilter,
+			HostOpenEvidenceLevel: *hostLevelFilter,
+			BoundaryStatus:        *boundaryStatusFilter,
+		})
 	}
 	if err := writeJSONFile(*outPath, output); err != nil {
 		fmt.Fprintln(os.Stderr, "write:", err)
@@ -109,6 +127,9 @@ func runCoverage(args []string) int {
 		if *summaryOut {
 			summary := output.(registry.CoverageSummaryReport)
 			fmt.Printf("registry coverage summary: %s (%d atom rows, %d errors)\n", summary.Status, summary.AtomRows, summary.Errors)
+		} else if *rowsOut {
+			rows := output.(registry.CoverageRowsReport)
+			fmt.Printf("registry coverage rows: %s (%d rows)\n", rows.Status, rows.Count)
 		} else {
 			fmt.Printf("registry coverage: %s (%d artifacts, %d errors)\n", report.Status, report.Summary.Artifacts, report.Summary.Errors)
 		}

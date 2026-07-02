@@ -155,6 +155,54 @@ func TestRunCoverageCanWriteSummaryReport(t *testing.T) {
 	}
 }
 
+func TestRunCoverageCanWriteFilteredAtomRows(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+		"schema_version": 1,
+		"coverage": []map[string]any{
+			{
+				"id":            "text",
+				"artifact":      "tmp/matrix/text/matrix.json",
+				"recipes":       []string{"text-basic"},
+				"writer_status": "PD-6x6",
+				"totals":        map[string]any{"total": 1, "pass": 1, "blocked": 0, "failed": 0, "skipped": 0},
+			},
+		},
+	})
+	writeJSON(t, root, "tmp/matrix/text/matrix.json", map[string]any{
+		"schema_version": 1,
+		"summary":        map[string]any{"total": 1, "passed": 1, "blocked": 0, "failed": 0, "skipped": 0},
+		"cases": []map[string]any{
+			{"recipe_name": "text-basic", "source_version": "AE2020", "target_version": "AE2025", "status": "pass"},
+		},
+	})
+	out := filepath.Join(root, "tmp", "registry_coverage_rows.json")
+
+	code := run([]string{
+		"coverage",
+		"-root", root,
+		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-out", out,
+		"-rows",
+		"-record", "text",
+	})
+	if code != 0 {
+		t.Fatalf("run(coverage -rows) = %d, want 0", code)
+	}
+
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var report registry.CoverageRowsReport
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Count != 1 || report.Rows[0].AtomID != "text.source.default" {
+		t.Fatalf("rows report = %+v, want one text.source.default row", report)
+	}
+}
+
 func newRegistryRoot(t *testing.T) string {
 	t.Helper()
 	root := t.TempDir()
