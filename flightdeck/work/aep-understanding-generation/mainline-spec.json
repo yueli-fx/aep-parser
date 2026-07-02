@@ -791,17 +791,17 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "text_animator_values_split",
-      "reason": "Reduce convert_text_animator.go growth risk by separating text animator initial value, keyframe, and color conversion helpers from animator materialization while preserving behavior.",
+      "group": "shape_support_split",
+      "reason": "Reduce convert_scope_support.go growth risk by separating shape-layer and shape-filter support predicates from non-shape layer support predicates while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_text_animator.go",
-          "internal/aepmigrate/convert_text_animator_values.go"
+          "internal/aepmigrate/convert_scope_support.go",
+          "internal/aepmigrate/convert_shape_support.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Text animator initial value, keyframe, and color conversion helpers have been split from convert_text_animator.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_scope_support.go, convert_rebuild_layers.go, or remaining layer camera/light helpers without changing behavior.",
+    "next_action": "Shape-layer and shape-filter support predicates have been split from convert_scope_support.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_rebuild_layers.go or remaining layer camera/light helpers without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
