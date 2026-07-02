@@ -1031,18 +1031,24 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/registry",
-      "group": "generated_cleanup_summary_split",
-      "reason": "Make generated cleanup planning safer by separating direct cleanup candidates from files that require explicit review/prune handling.",
+      "group": "cleanup_prune_review_dry_run_gate",
+      "reason": "Make review-prunable generated cleanup explicit in the asset-policy gate before any apply path is considered.",
       "result": {
         "files": [
-          "internal/registry/generated_cleanup.go",
-          "internal/registry/generated_cleanup_test.go"
+          "cmd/aepregistry/main.go",
+          "cmd/aepregistry/main_test.go"
         ],
-        "behavior": "GeneratedCleanupSummary keeps cleanup_candidate_files as the total compatibility field and adds direct_cleanup_candidate_files plus review_prunable_files so disposable tmp cleanup can be planned without confusing direct deletes with protected sibling pruning.",
-        "cleanup_summary": {
-          "cleanup_candidate_files": 344,
-          "direct_cleanup_candidate_files": 0,
-          "review_prunable_files": 344
+        "behavior": "Asset-policy gate now writes tmp/registry_generated_cleanup_execution_prune_review.json using prune-review-siblings in dry-run mode, alongside the existing non-prune execution report.",
+        "asset_gate": {
+          "steps": 6,
+          "failed": 0
+        },
+        "prune_review_dry_run_summary": {
+          "mode": "dry_run",
+          "planned_groups": 3,
+          "planned_files": 344,
+          "skipped_groups": 21,
+          "errors": 0
         }
       }
     },
@@ -1073,7 +1079,7 @@
         }
       }
     },
-    "next_action": "Generated cleanup summary now distinguishes direct deletes from review-prunable siblings. Continue with either an explicit dry-run prune report gate or the next scoped capability family, using the same JSON source-of-truth pattern.",
+    "next_action": "Review-prunable cleanup now has an explicit dry-run gate artifact. Continue with either a guarded apply policy for selected generated producers or the next scoped capability family, using the same JSON source-of-truth pattern.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
@@ -1133,7 +1139,15 @@
     },
     {
       "id": "registry_generated_cleanup_execution_dry_run",
-      "command": "go run ./cmd/aepregistry cleanup -root . -out tmp/registry_generated_cleanup.json -exec-out tmp/registry_generated_cleanup_execution.json -sample-limit 3",
+      "command": "go run ./cmd/aepregistry cleanup -root . -out tmp/registry_generated_cleanup.json -exec-out tmp/registry_generated_cleanup_execution.json -exclude-producer registry_report -sample-limit 3",
+      "required_for": [
+        "asset_visibility",
+        "atom_taxonomy_expansion"
+      ]
+    },
+    {
+      "id": "registry_generated_cleanup_execution_prune_review_dry_run",
+      "command": "go run ./cmd/aepregistry cleanup -root . -out tmp/registry_generated_cleanup.json -exec-out tmp/registry_generated_cleanup_execution_prune_review.json -prune-review-siblings -exclude-producer registry_report -sample-limit 3",
       "required_for": [
         "asset_visibility",
         "atom_taxonomy_expansion"

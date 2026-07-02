@@ -537,7 +537,7 @@ func TestRunGateAssetPolicyWritesOwnershipAndCleanupReports(t *testing.T) {
 	if err := json.Unmarshal(data, &report); err != nil {
 		t.Fatal(err)
 	}
-	if report.Scope != "asset-policy" || report.Status != registry.StatusPass || report.Summary.Steps != 5 || report.Summary.Failed != 0 {
+	if report.Scope != "asset-policy" || report.Status != registry.StatusPass || report.Summary.Steps != 6 || report.Summary.Failed != 0 {
 		t.Fatalf("asset gate report = %+v", report)
 	}
 	wantOrder := []string{
@@ -546,6 +546,7 @@ func TestRunGateAssetPolicyWritesOwnershipAndCleanupReports(t *testing.T) {
 		"registry_layout",
 		"registry_generated_cleanup",
 		"registry_generated_cleanup_execution_dry_run",
+		"registry_generated_cleanup_execution_prune_review_dry_run",
 	}
 	for i, want := range wantOrder {
 		if report.Steps[i].ID != want {
@@ -557,10 +558,22 @@ func TestRunGateAssetPolicyWritesOwnershipAndCleanupReports(t *testing.T) {
 		"tmp/registry_layout.json",
 		"tmp/registry_generated_cleanup.json",
 		"tmp/registry_generated_cleanup_execution.json",
+		"tmp/registry_generated_cleanup_execution_prune_review.json",
 	} {
 		if _, err := os.Stat(filepath.Join(root, filepath.FromSlash(rel))); err != nil {
 			t.Fatalf("expected asset gate output %s: %v", rel, err)
 		}
+	}
+	pruneData, err := os.ReadFile(filepath.Join(root, "tmp", "registry_generated_cleanup_execution_prune_review.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var pruneReport registry.GeneratedCleanupExecutionReport
+	if err := json.Unmarshal(pruneData, &pruneReport); err != nil {
+		t.Fatal(err)
+	}
+	if pruneReport.Mode != "dry_run" || pruneReport.Summary.Errors != 0 {
+		t.Fatalf("prune-review dry run = %+v, want dry-run without errors", pruneReport)
 	}
 }
 

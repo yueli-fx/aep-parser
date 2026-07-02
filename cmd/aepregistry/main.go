@@ -256,7 +256,18 @@ func runAssetPolicyGate(root string, addStep func(gateStepReport)) error {
 	if exec.Summary.Errors > 0 {
 		execStatus = registry.StatusFail
 	}
-	addStep(gateStepReport{ID: "registry_generated_cleanup_execution_dry_run", Command: "go run ./cmd/aepregistry cleanup -root . -out " + cleanupOut + " -exec-out " + execOut + " -sample-limit 3", Output: execOut, Status: execStatus, Errors: exec.Summary.Errors})
+	addStep(gateStepReport{ID: "registry_generated_cleanup_execution_dry_run", Command: "go run ./cmd/aepregistry cleanup -root . -out " + cleanupOut + " -exec-out " + execOut + " -exclude-producer registry_report -sample-limit 3", Output: execOut, Status: execStatus, Errors: exec.Summary.Errors})
+
+	pruneExecOut := "tmp/registry_generated_cleanup_execution_prune_review.json"
+	pruneExec := registry.ExecuteGeneratedCleanup(root, cleanup, registry.GeneratedCleanupExecutionOptions{ExcludeProducers: []string{"registry_report"}, PruneReviewSiblings: true})
+	if err := writeJSONFile(filepath.Join(root, filepath.FromSlash(pruneExecOut)), pruneExec); err != nil {
+		return fmt.Errorf("write prune-review cleanup execution: %w", err)
+	}
+	pruneExecStatus := registry.StatusPass
+	if pruneExec.Summary.Errors > 0 {
+		pruneExecStatus = registry.StatusFail
+	}
+	addStep(gateStepReport{ID: "registry_generated_cleanup_execution_prune_review_dry_run", Command: "go run ./cmd/aepregistry cleanup -root . -out " + cleanupOut + " -exec-out " + pruneExecOut + " -prune-review-siblings -exclude-producer registry_report -sample-limit 3", Output: pruneExecOut, Status: pruneExecStatus, Errors: pruneExec.Summary.Errors})
 	return nil
 }
 
