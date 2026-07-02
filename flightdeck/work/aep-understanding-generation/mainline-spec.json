@@ -791,19 +791,19 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "convert_verify_topic_test_split",
-      "reason": "Reduce broad test-file growth risk by separating no-layer comp preservation tests from convert_test.go and AE open gate verification from verify_test.go while preserving behavior.",
+      "group": "convert_layer_surface_switch_test_split",
+      "reason": "Reduce layer test-file growth risk by separating solid/adjustment surface layer tests from null layer tests and layer switch tests from metadata/parent attribute tests while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_test.go",
-          "internal/aepmigrate/convert_comp_test.go",
-          "internal/aepmigrate/verify_test.go",
-          "internal/aepmigrate/verify_ae_open_test.go"
+          "internal/aepmigrate/convert_layer_test.go",
+          "internal/aepmigrate/convert_layer_surface_test.go",
+          "internal/aepmigrate/convert_layer_attributes_test.go",
+          "internal/aepmigrate/convert_layer_switches_test.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "No-layer comp preservation tests and AE open gate verification tests have been split from broad test files. Next useful increment is to continue reducing remaining 5-7KB aepmigrate tests or 4-5KB conversion support files into coherent topic files without changing behavior.",
+    "next_action": "Layer surface and switch conversion tests have been split from broad layer test files. Next useful increment is to continue reducing remaining 5-6KB aepmigrate tests or 4-5KB conversion support files into coherent topic files without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
