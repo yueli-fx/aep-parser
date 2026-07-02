@@ -1062,10 +1062,18 @@
           "failed": 0,
           "skipped": 0
         },
-        "host_open_status": "recorded_status_only; endpoint host-open evidence remains a follow-up"
+        "host_open_status": "direct_endpoint_hosts_pass; AE2021-AE2024 inferred_by_endpoint",
+        "host_open_endpoint_matrix": "tmp/host_open_gaps/effects-control-static-values/chunk-1/matrix.json",
+        "host_open_totals": {
+          "total": 4,
+          "pass": 4,
+          "blocked": 0,
+          "failed": 0,
+          "skipped": 0
+        }
       }
     },
-    "next_action": "Run endpoint host-open evidence for effect.control.static_values when host automation is available, or continue with the next scoped capability family using the same recipe -> atom -> coverage -> axis pattern.",
+    "next_action": "effect.control.static_values now has writer 6x6 and endpoint host-open evidence. Continue with the next scoped capability family using the same recipe -> atom -> coverage -> axis pattern.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
