@@ -47,7 +47,7 @@ func runAssess(args []string, stdout, stderr io.Writer) int {
 	fs := flag.NewFlagSet("aepmigrate assess", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	input := fs.String("in", "", "source .aep path")
-	targetRaw := fs.String("target", "", "target AE version: AE2020 through AE2025")
+	targetRaw := fs.String("target", "", aepmigrate.TargetVersionHelp())
 	outPath := fs.String("out", "", "optional JSON output path")
 	if err := fs.Parse(args); err != nil {
 		return 2
@@ -89,7 +89,7 @@ func runVerify(args []string, stdout, stderr io.Writer, host aehost.Host) int {
 	fs.SetOutput(stderr)
 	sourcePath := fs.String("source", "", "source .aep path")
 	targetPath := fs.String("target", "", "target .aep path")
-	targetVersionRaw := fs.String("target-version", "", "target AE version: AE2020 through AE2025")
+	targetVersionRaw := fs.String("target-version", "", aepmigrate.TargetVersionHelp())
 	migrationReportPath := fs.String("report", "", "optional migration report JSON path for allowed profile diffs")
 	outPath := fs.String("out", "", "JSON verification report output path")
 	aeOpen := fs.Bool("ae-open", false, "run AE open verification after profile diff")
@@ -257,7 +257,7 @@ func runConvert(args []string, stdout, stderr io.Writer, host aehost.Host) int {
 	fs := flag.NewFlagSet("aepmigrate convert", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	input := fs.String("in", "", "source .aep path")
-	targetRaw := fs.String("target", "", "target AE version: AE2020 through AE2025")
+	targetRaw := fs.String("target", "", aepmigrate.TargetVersionHelp())
 	outPath := fs.String("out", "", "target .aep output path")
 	reportPath := fs.String("report", "", "JSON migration report output path")
 	aeOpen := fs.Bool("ae-open", false, "run AE open verification after profile diff")

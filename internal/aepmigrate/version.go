@@ -5,27 +5,72 @@ import (
 	"strings"
 )
 
+var supportedVersionLabels = []VersionLabel{
+	VersionAE2020,
+	VersionAE2021,
+	VersionAE2022,
+	VersionAE2023,
+	VersionAE2024,
+	VersionAE2025,
+}
+
+func SupportedVersionLabels() []VersionLabel {
+	return append([]VersionLabel(nil), supportedVersionLabels...)
+}
+
+func SupportedVersionStrings() []string {
+	labels := SupportedVersionLabels()
+	out := make([]string, 0, len(labels))
+	for _, label := range labels {
+		out = append(out, string(label))
+	}
+	return out
+}
+
+func IsSupportedVersionLabel(label VersionLabel) bool {
+	for _, supported := range supportedVersionLabels {
+		if label == supported {
+			return true
+		}
+	}
+	return false
+}
+
+func TargetVersionHelp() string {
+	labels := SupportedVersionStrings()
+	if len(labels) == 0 {
+		return "target AE version"
+	}
+	return fmt.Sprintf("target AE version: %s through %s", labels[0], labels[len(labels)-1])
+}
+
 type SourceVersion struct {
 	Label VersionLabel
 	Raw   string
 }
 
 func ParseVersionLabel(value string) (VersionLabel, error) {
-	switch strings.ToUpper(strings.TrimSpace(value)) {
-	case "AE2020", "2020":
-		return VersionAE2020, nil
-	case "AE2021", "2021":
-		return VersionAE2021, nil
-	case "AE2022", "2022":
-		return VersionAE2022, nil
-	case "AE2023", "2023":
-		return VersionAE2023, nil
-	case "AE2024", "2024":
-		return VersionAE2024, nil
-	case "AE2025", "2025":
-		return VersionAE2025, nil
+	normalized := strings.ToUpper(strings.TrimSpace(value))
+	for _, label := range supportedVersionLabels {
+		labelText := string(label)
+		if normalized == labelText || normalized == strings.TrimPrefix(labelText, "AE") {
+			return label, nil
+		}
+	}
+	return "", fmt.Errorf("target version must be %s", supportedVersionListForError())
+}
+
+func supportedVersionListForError() string {
+	labels := SupportedVersionStrings()
+	switch len(labels) {
+	case 0:
+		return "a supported AE version"
+	case 1:
+		return labels[0]
+	case 2:
+		return labels[0] + " or " + labels[1]
 	default:
-		return "", fmt.Errorf("target version must be AE2020, AE2021, AE2022, AE2023, AE2024, or AE2025")
+		return strings.Join(labels[:len(labels)-1], ", ") + ", or " + labels[len(labels)-1]
 	}
 }
 

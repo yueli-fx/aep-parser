@@ -791,30 +791,21 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "shape_property_setter_dedup",
-      "reason": "Reduce shape materializer drift by centralizing repeated profile property lookup plus setter application for float, vector2, ARGB color, and gradient stop properties.",
+      "group": "supported_version_axis_dedup",
+      "reason": "Centralize the AE2020-AE2025 supported version axis used by parsing, matrix writer labels, AE host discovery, and CLI help so future AE2026/AE2027 expansion has one source.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_shape_property_setters.go",
-          "internal/aepmigrate/convert_shape_filter_deform.go",
-          "internal/aepmigrate/convert_shape_filters.go",
-          "internal/aepmigrate/convert_shape_gradient_stroke.go",
-          "internal/aepmigrate/convert_shape_gradient_styles.go",
-          "internal/aepmigrate/convert_shape_primitives.go",
-          "internal/aepmigrate/convert_shape_repeater_filter.go",
-          "internal/aepmigrate/convert_shape_star_primitive.go",
-          "internal/aepmigrate/convert_shape_stroke_dashes.go",
-          "internal/aepmigrate/convert_shape_stroke_style.go",
-          "internal/aepmigrate/convert_shape_stroke_taper.go",
-          "internal/aepmigrate/convert_shape_stroke_wave.go",
-          "internal/aepmigrate/convert_shape_styles.go",
-          "internal/aepmigrate/convert_shape_wiggle_paths_filter.go",
-          "internal/aepmigrate/convert_shape_wiggle_transform_filter.go"
+          "internal/aepmigrate/version.go",
+          "internal/aepmigrate/version_test.go",
+          "internal/aepmigrate/matrix.go",
+          "internal/aepmigrate/matrix_labels.go",
+          "internal/aepmigrate/matrix_hosts.go",
+          "cmd/aepmigrate/main.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Shape materializers now share helper paths for profile property lookup plus setter application. Next useful increment is to inspect non-shape materializers for the same low-risk pattern, or move back to matrix/AE-open tests only with extra care because those cover orchestration behavior.",
+    "next_action": "Supported version labels are now centralized for parser, matrix, host discovery, and CLI help. Next useful increment is to inspect registry coverage and version-boundary code for remaining hardcoded AE2020-AE2025 axes or run the registry gates before expanding matrix validation.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

@@ -91,10 +91,8 @@ func matrixWriterTarget(label string) (VersionLabel, bool) {
 	if err != nil {
 		return "", false
 	}
-	switch target {
-	case VersionAE2020, VersionAE2021, VersionAE2022, VersionAE2023, VersionAE2024, VersionAE2025:
+	if IsSupportedVersionLabel(target) {
 		return target, true
-	default:
-		return "", false
 	}
+	return "", false
 }

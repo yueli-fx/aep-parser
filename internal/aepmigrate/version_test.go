@@ -34,6 +34,23 @@ func TestParseVersionLabelRejectsUnsupportedTarget(t *testing.T) {
 	}
 }
 
+func TestSupportedVersionLabelsAreCopied(t *testing.T) {
+	labels := SupportedVersionLabels()
+	if len(labels) != 6 || labels[0] != VersionAE2020 || labels[len(labels)-1] != VersionAE2025 {
+		t.Fatalf("supported labels = %v, want AE2020..AE2025", labels)
+	}
+	labels[0] = VersionUnknown
+	if got := SupportedVersionLabels()[0]; got != VersionAE2020 {
+		t.Fatalf("SupportedVersionLabels returned mutable backing slice, first = %q", got)
+	}
+}
+
+func TestTargetVersionHelpUsesSupportedRange(t *testing.T) {
+	if got := TargetVersionHelp(); got != "target AE version: AE2020 through AE2025" {
+		t.Fatalf("TargetVersionHelp = %q", got)
+	}
+}
+
 func TestNormalizeSourceVersionKeepsUnknownHonest(t *testing.T) {
 	if got := NormalizeSourceVersion(""); got.Label != VersionUnknown {
 		t.Fatalf("empty source label = %q, want unknown", got.Label)
