@@ -4441,6 +4441,681 @@
       "boundaries": [
         "Verified against the existing camera all_6x6 migration matrix; host-open evidence remains separately totalized."
       ]
+    },
+    {
+      "id": "layer.advanced_switches",
+      "domain": "layer",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-layer-advanced-switches.json",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing layer all_6x6 migration matrix; explicit matte remains a separate version-boundary atom."
+      ]
+    },
+    {
+      "id": "layer.auto_orient",
+      "domain": "layer",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-layer-auto-orient.json",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing layer all_6x6 migration matrix; explicit matte remains a separate version-boundary atom."
+      ]
+    },
+    {
+      "id": "layer.comment",
+      "domain": "layer",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-layer-comment.json",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing layer all_6x6 migration matrix; explicit matte remains a separate version-boundary atom."
+      ]
+    },
+    {
+      "id": "layer.common_switches",
+      "domain": "layer",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-layer-common-switches.json",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing layer all_6x6 migration matrix; explicit matte remains a separate version-boundary atom."
+      ]
+    },
+    {
+      "id": "layer.label",
+      "domain": "layer",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-layer-label.json",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing layer all_6x6 migration matrix; explicit matte remains a separate version-boundary atom."
+      ]
+    },
+    {
+      "id": "layer.mask",
+      "domain": "layer",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-layer-mask.json",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing layer all_6x6 migration matrix; explicit matte remains a separate version-boundary atom."
+      ]
+    },
+    {
+      "id": "layer.motion_blur",
+      "domain": "layer",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-layer-motion-blur.json",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing layer all_6x6 migration matrix; explicit matte remains a separate version-boundary atom."
+      ]
+    },
+    {
+      "id": "layer.null_flag",
+      "domain": "layer",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-layer-null-flag.json",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing layer all_6x6 migration matrix; explicit matte remains a separate version-boundary atom."
+      ]
+    },
+    {
+      "id": "layer.object_profile",
+      "domain": "layer",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-layer-object-profile.json",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing layer all_6x6 migration matrix; explicit matte remains a separate version-boundary atom."
+      ]
+    },
+    {
+      "id": "layer.parent",
+      "domain": "layer",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-layer-parent.json",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing layer all_6x6 migration matrix; explicit matte remains a separate version-boundary atom."
+      ]
+    },
+    {
+      "id": "layer.quality_blending",
+      "domain": "layer",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-layer-quality-blending.json",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing layer all_6x6 migration matrix; explicit matte remains a separate version-boundary atom."
+      ]
+    },
+    {
+      "id": "layer.shy",
+      "domain": "layer",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-layer-shy.json",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing layer all_6x6 migration matrix; explicit matte remains a separate version-boundary atom."
+      ]
+    },
+    {
+      "id": "layer.source_ref",
+      "domain": "layer",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-layer-source-ref.json",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing layer all_6x6 migration matrix; explicit matte remains a separate version-boundary atom."
+      ]
+    },
+    {
+      "id": "layer.timing",
+      "domain": "layer",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-layer-timing.json",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing layer all_6x6 migration matrix; explicit matte remains a separate version-boundary atom."
+      ]
+    },
+    {
+      "id": "layer.track_matte",
+      "domain": "layer",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-layer-track-matte.json",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing layer all_6x6 migration matrix; explicit matte remains a separate version-boundary atom."
+      ]
     }
   ]
 }
