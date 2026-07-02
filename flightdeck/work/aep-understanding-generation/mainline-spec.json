@@ -98,7 +98,7 @@
     },
     {
       "id": "asset_visibility",
-      "status": "active",
+      "status": "complete",
       "objective": "Make asset distribution and ownership visible enough to guide cleanup and atomization.",
       "allowed_work": [
         "Improve aepregistry inventory and ownership reports.",
@@ -120,7 +120,7 @@
     },
     {
       "id": "atom_taxonomy_expansion",
-      "status": "planned",
+      "status": "active",
       "objective": "Expand capability atoms from representative samples toward coverage of recipes, templates, fixtures, and version evidence.",
       "entry_criteria": [
         "asset_visibility exit criteria are satisfied.",
@@ -160,10 +160,29 @@
     }
   ],
   "current_execution": {
-    "phase": "asset_visibility",
-    "next_action": "Finish or revise the in-progress ownership grouping change only if it satisfies asset_visibility exit criteria.",
+    "phase": "atom_taxonomy_expansion",
+    "last_completed_target": {
+      "location": "recipe_atoms",
+      "group": "shape",
+      "reason": "registry ownership report shows recipe_atoms shape is the largest unowned recipe group and existing shape matrix evidence can support a first scoped atom taxonomy expansion.",
+      "source_report": "tmp/registry_ownership.json",
+      "observed_counts": {
+        "files": 141,
+        "owned_files": 5,
+        "unowned_files": 136,
+        "selected_group_unowned_files": 26
+      },
+      "result": {
+        "capability_atoms_added": 26,
+        "recipe_atoms_owned_files_after": 31,
+        "recipe_atoms_unowned_files_after": 110,
+        "selected_group_remaining_unowned_files": 0
+      }
+    },
+    "next_action": "Select the next atom taxonomy target from the updated ownership report; current largest recipe_atoms group is text with 24 unowned files.",
     "must_not_skip": [
       "Run registry audit after report changes.",
+      "Run registry ownership after atom taxonomy changes.",
       "Run focused Go tests for internal/registry and cmd/aepregistry.",
       "Run full go test ./... before claiming completion of a committed Go change."
     ]

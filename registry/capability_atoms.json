@@ -461,6 +461,1316 @@
       "boundaries": [
         "AI generation should consume registered atoms and workflows, not scrape tmp or flightdeck markdown directly."
       ]
+    },
+    {
+      "id": "shape.fill.blend_mode",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-fill-blend-mode.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/fill_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing shape all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "shape.fill.composite_order",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-fill-composite-order.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/fill_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing shape all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "shape.fill.rule",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-fill-rule.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/fill_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing shape all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "shape.gradient_fill.base",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-gradient-fill.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/gradfill_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing shape all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "shape.gradient_fill.alpha_stops",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-gradient-fill-alpha-stops.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/gradfill_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing shape all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "shape.gradient_fill.highlight",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-gradient-fill-highlight.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/gradfill_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing shape all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "shape.gradient_stroke.base",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-gradient-stroke.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/gradstroke_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing shape all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "shape.gradient_stroke.alpha_stops",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/gradstroke_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing shape all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "shape.gradient_stroke.highlight",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-gradient-stroke-highlight.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/gradstroke_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing shape all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "shape.gradient_stroke.style",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-gradient-stroke-style.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/gradstroke_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing shape all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "shape.filter.merge_paths",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-merge-paths.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/merge_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing shape all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "shape.filter.offset_paths",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-offset-paths.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/offset_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing shape all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "shape.primitive.polystar",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-polystar.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/star_body.bin",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/starpolygon_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing shape all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "shape.filter.pucker_bloat",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-pucker-bloat.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/puckerbloat_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing shape all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "shape.primitive.rect_fill_default_transform",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-rect-fill-default-transform.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/rect_body.bin",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/fill_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing shape all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "shape.filter.repeater",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-repeater.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/repeater_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing shape all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "shape.filter.round_corners",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-round-corners.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/roundcorners_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing shape all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "shape.stroke.composite_order",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-stroke-composite-order.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/stroke_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing shape all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "shape.stroke.dashes",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-stroke-dashes.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/stroke_dashed_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing shape all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "shape.stroke.style",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-stroke-style.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/stroke_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing shape all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "shape.stroke.taper",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-stroke-taper.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/stroke_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing shape all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "shape.stroke.wave",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-stroke-wave.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/stroke_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing shape all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "shape.filter.twist",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-twist.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/twist_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing shape all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "shape.filter.wiggle_paths",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-wiggle-paths.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/wiggle_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing shape all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "shape.filter.wiggle_transform",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-wiggle-transform.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/wiggletransform_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing shape all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "shape.filter.zigzag",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-zigzag.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/zigzag_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the existing shape all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
     }
   ]
 }
