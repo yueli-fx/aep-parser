@@ -177,16 +177,30 @@ type CoverageCell struct {
 
 type coverageFile struct {
 	SchemaVersion  int                    `json:"schema_version"`
+	GeneratedAt    string                 `json:"generated_at"`
+	WriterAxes     coverageWriterAxes     `json:"writer_axes"`
+	HostOpenAxis   coverageHostOpenAxis   `json:"host_open_axis"`
 	HostOpenPolicy coverageHostOpenPolicy `json:"host_open_policy"`
 	RecurringGates []coverageArtifact     `json:"recurring_gates"`
 	ContractGates  []coverageContractGate `json:"contract_gates"`
 	Coverage       []coverageRecord       `json:"coverage"`
+	OpenItems      []json.RawMessage      `json:"open_items"`
+}
+
+type coverageWriterAxes struct {
+	SourceWriters []string `json:"source_writers"`
+	TargetWriters []string `json:"target_writers"`
+}
+
+type coverageHostOpenAxis struct {
+	Hosts []string `json:"hosts"`
 }
 
 type coverageHostOpenPolicy struct {
 	MatrixCommandStatus string                    `json:"matrix_command_status"`
 	DefaultStrategy     string                    `json:"default_strategy"`
 	BroadFanoutStatus   string                    `json:"broad_fanout_status"`
+	EvidenceLevels      []string                  `json:"evidence_levels"`
 	EndpointInference   coverageEndpointInference `json:"endpoint_inference"`
 }
 
@@ -199,9 +213,12 @@ type coverageEndpointInference struct {
 type coverageRecord struct {
 	ID                       string           `json:"id"`
 	Domain                   string           `json:"domain"`
+	Scope                    string           `json:"scope"`
 	Artifact                 string           `json:"artifact"`
+	RecipePattern            string           `json:"recipe_pattern"`
 	Recipes                  []string         `json:"recipes"`
 	WriterStatus             string           `json:"writer_status"`
+	WriterCoverage           string           `json:"writer_coverage"`
 	HostOpenStatus           string           `json:"host_open_status"`
 	HostOpenRepresentatives  []string         `json:"host_open_representatives"`
 	Totals                   CoverageTotals   `json:"totals"`
@@ -210,12 +227,14 @@ type coverageRecord struct {
 }
 
 type coverageEndpoint struct {
-	Artifact      string             `json:"artifact"`
-	Recipes       []string           `json:"recipes"`
-	DirectHosts   []string           `json:"direct_hosts"`
-	InferredHosts []string           `json:"inferred_hosts"`
-	Totals        CoverageTotals     `json:"totals"`
-	Chunks        []coverageArtifact `json:"chunks"`
+	OpenMode                     string             `json:"open_mode"`
+	Artifact                     string             `json:"artifact"`
+	Recipes                      []string           `json:"recipes"`
+	DirectHosts                  []string           `json:"direct_hosts"`
+	InferredHosts                []string           `json:"inferred_hosts"`
+	Totals                       CoverageTotals     `json:"totals"`
+	Chunks                       []coverageArtifact `json:"chunks"`
+	ExcludedKnownBoundaryRecipes []string           `json:"excluded_known_boundary_recipes"`
 }
 
 type coverageArtifact struct {

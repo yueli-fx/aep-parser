@@ -32,6 +32,8 @@ func run(args []string) int {
 		return runGate(args[1:])
 	case "host-open-gaps":
 		return runHostOpenGaps(args[1:])
+	case "migration-summary":
+		return runMigrationSummary(args[1:])
 	case "cleanup":
 		return runCleanup(args[1:])
 	case "inventory":
@@ -44,6 +46,60 @@ func run(args []string) int {
 		usage()
 		return 2
 	}
+}
+
+func runMigrationSummary(args []string) int {
+	fs := flag.NewFlagSet("aepregistry migration-summary", flag.ContinueOnError)
+	fs.SetOutput(os.Stderr)
+	root := fs.String("root", ".", "repository root")
+	coveragePath := fs.String("coverage", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
+	outPath := fs.String("out", "tmp/migration_coverage_summary.json", "migration coverage summary JSON path")
+	check := fs.Bool("check", false, "validate the existing summary at -out instead of writing a new summary")
+	jsonOut := fs.Bool("json", false, "print JSON report")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	if fs.NArg() != 0 {
+		fmt.Fprintln(os.Stderr, "usage: aepregistry migration-summary [-root .] [-coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json] [-out tmp/migration_coverage_summary.json] [-check] [-json]")
+		return 2
+	}
+	if *check {
+		report, err := registry.CheckMigrationCoverageSummary(*root, *coveragePath, *outPath)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "migration-summary:", err)
+			return 2
+		}
+		if *jsonOut {
+			if err := json.NewEncoder(os.Stdout).Encode(report); err != nil {
+				fmt.Fprintln(os.Stderr, "stdout:", err)
+				return 2
+			}
+		} else {
+			fmt.Printf("coverage summary check: %s (%d errors)\n", report.Status, report.Errors)
+		}
+		if report.Status == registry.StatusFail {
+			return 1
+		}
+		return 0
+	}
+	summary, err := registry.BuildMigrationCoverageSummary(*root, *coveragePath)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "migration-summary:", err)
+		return 2
+	}
+	if err := writeJSONFile(*outPath, summary); err != nil {
+		fmt.Fprintln(os.Stderr, "write:", err)
+		return 2
+	}
+	if *jsonOut {
+		if err := json.NewEncoder(os.Stdout).Encode(summary); err != nil {
+			fmt.Fprintln(os.Stderr, "stdout:", err)
+			return 2
+		}
+	} else {
+		fmt.Printf("rendered coverage summary json: %s\n", *outPath)
+	}
+	return 0
 }
 
 func runHostOpenGaps(args []string) int {
@@ -1043,5 +1099,5 @@ func writeJSONFile(path string, value any) error {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: aepregistry <audit|boundaries|cleanup|coverage|gate|host-open-gaps|inventory|layout|ownership> [flags]")
+	fmt.Fprintln(os.Stderr, "usage: aepregistry <audit|boundaries|cleanup|coverage|gate|host-open-gaps|inventory|layout|migration-summary|ownership> [flags]")
 }

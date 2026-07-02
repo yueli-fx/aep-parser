@@ -40,11 +40,11 @@ Invoke-Step "validate coverage JSON" {
 }
 
 Invoke-Step "render coverage summary JSON" {
-  pwsh -File (Join-Path $repoRoot "scripts/migration/render_coverage_summary_json.ps1") -CoveragePath $CoveragePath -Out $SummaryPath
+  go run ./cmd/aepregistry migration-summary -root . -coverage $CoveragePath -out $SummaryPath
 }
 
 Invoke-Step "validate coverage summary JSON" {
-  pwsh -File (Join-Path $repoRoot "scripts/migration/validate_coverage_summary_json.ps1") -CoveragePath $CoveragePath -SummaryPath $SummaryPath
+  go run ./cmd/aepregistry migration-summary -root . -coverage $CoveragePath -out $SummaryPath -check
 }
 
 if ($aeRoot) {

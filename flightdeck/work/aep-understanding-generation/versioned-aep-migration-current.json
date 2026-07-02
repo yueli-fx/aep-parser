@@ -525,15 +525,19 @@
     {
       "id": "coverage-summary-json-renderer",
       "status": "available_verified",
-      "purpose": "Generate a machine-readable total/split/total coverage summary from coverage JSON by domain, recipe, writer totals, recipe version-pair outcomes, per-recipe host-open evidence, and known boundaries.",
+      "purpose": "Generate a machine-readable total/split/total coverage summary from coverage JSON by domain, recipe, writer totals, recipe version-pair outcomes, per-recipe host-open evidence, and known boundaries. Go command is primary; the PowerShell script remains as legacy compatibility.",
+      "command": "go run ./cmd/aepregistry migration-summary -root . -out tmp/migration_coverage_summary.json",
       "script": "scripts/migration/render_coverage_summary_json.ps1",
+      "legacy_command": "pwsh -File scripts/migration/render_coverage_summary_json.ps1",
       "output": "tmp/migration_coverage_summary.json"
     },
     {
       "id": "coverage-summary-json-validator",
       "status": "available_verified",
-      "purpose": "Validate generated coverage summary JSON totals, domain rollups, recipe index entries, recipe version-pair outcomes, and per-recipe host-open evidence against coverage JSON and matrix artifacts.",
+      "purpose": "Validate generated coverage summary JSON totals, domain rollups, recipe index entries, recipe version-pair outcomes, and per-recipe host-open evidence against coverage JSON and matrix artifacts. Go command is primary; the PowerShell script remains as legacy compatibility.",
+      "command": "go run ./cmd/aepregistry migration-summary -root . -out tmp/migration_coverage_summary.json -check",
       "script": "scripts/migration/validate_coverage_summary_json.ps1",
+      "legacy_command": "pwsh -File scripts/migration/validate_coverage_summary_json.ps1",
       "input": "tmp/migration_coverage_summary.json"
     },
     {
@@ -587,22 +591,22 @@
       {
         "command": "pwsh -File scripts/migration/validate_checkpoint.ps1 -IncludeCoverageBatch",
         "status": "pass",
-        "evidence": "checkpoint ok: canonical all-current-writer-coverage replayed into a temporary coverage file from 14 matrix artifacts and validated 141 recipes"
+        "evidence": "checkpoint ok: canonical all-current-writer-coverage replayed into a temporary coverage file from 16 matrix artifacts and validated 143 recipes"
       },
       {
         "command": "pwsh -File scripts/migration/validate_coverage.ps1",
         "status": "pass",
-        "evidence": "coverage ok: checked 14 matrix artifacts, 2 recurring gates, host-open policy, and 141 recipes"
+        "evidence": "coverage ok: checked 16 matrix artifacts, 2 recurring gates, host-open policy, and 143 recipes"
       },
       {
-        "command": "pwsh -File scripts/migration/render_coverage_summary_json.ps1",
+        "command": "go run ./cmd/aepregistry migration-summary -root . -out tmp/migration_coverage_summary.json",
         "status": "pass",
-        "evidence": "rendered coverage summary json: tmp/migration_coverage_summary.json; totals: 14 records, 11 domains, 141 recipes"
+        "evidence": "rendered coverage summary json: tmp/migration_coverage_summary.json; totals: 16 records, 11 domains, 143 recipes"
       },
       {
-        "command": "pwsh -File scripts/migration/validate_coverage_summary_json.ps1",
+        "command": "go run ./cmd/aepregistry migration-summary -root . -out tmp/migration_coverage_summary.json -check",
         "status": "pass",
-        "evidence": "coverage summary ok: checked 14 records, 11 domains, and 141 recipes"
+        "evidence": "coverage summary check: pass (0 errors)"
       },
       {
         "command": "pwsh -File scripts/migration/query_coverage_summary.ps1 -Recipe minimal-layer-explicit-matte",
@@ -612,7 +616,7 @@
       {
         "command": "pwsh -File scripts/migration/query_coverage_summary.ps1 -Totals",
         "status": "pass",
-        "evidence": "host_open_evidence_levels recorded_status_only=0, representative_covered=0, and endpoint host-open cases=504/504 pass"
+        "evidence": "host_open_evidence_levels recorded_status_only=0, representative_covered=0, and endpoint host-open cases=512/512 pass"
       },
       {
         "command": "go run ./cmd/aepregistry host-open-gaps -root . -out tmp/host_open_gap_audit_go.json -ae-root E:/adobe",

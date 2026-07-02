@@ -1046,11 +1046,13 @@
     },
     "last_code_maintenance_target": {
       "location": "registry_tooling",
-      "group": "go_host_open_gap_planner",
-      "reason": "Move host-open gap planning onto a Go-first registry command so migration evidence planning no longer depends on a PowerShell-only workflow.",
+      "group": "go_migration_coverage_summary",
+      "reason": "Move migration coverage summary rendering and validation onto a Go-first registry command so checkpoint summary evidence no longer depends on PowerShell-only helper scripts.",
       "result": {
         "commands": {
-          "go_host_open_gap_audit": "go run ./cmd/aepregistry host-open-gaps -root . -out tmp/host_open_gap_audit_go.json -ae-root E:/adobe",
+          "go_migration_summary_render": "go run ./cmd/aepregistry migration-summary -root . -out tmp/migration_coverage_summary.json",
+          "go_migration_summary_check": "go run ./cmd/aepregistry migration-summary -root . -out tmp/migration_coverage_summary.json -check",
+          "checkpoint": "pwsh -File scripts/migration/validate_checkpoint.ps1",
           "focused_registry_tests": "go test ./cmd/aepregistry ./internal/registry",
           "version_gate": "go run ./cmd/aepregistry gate -root . -out tmp/registry_gate.json -scope version-matrix",
           "asset_gate": "go run ./cmd/aepregistry gate -root . -out tmp/registry_asset_gate.json -scope asset-policy"
@@ -1059,22 +1061,26 @@
           "cmd/aepregistry/main.go",
           "cmd/aepregistry/main_test.go",
           "internal/registry/coverage.go",
-          "internal/registry/host_open_gaps.go",
-          "internal/registry/host_open_gaps_test.go",
+          "internal/registry/migration_coverage_summary.go",
+          "internal/registry/migration_coverage_summary_test.go",
           "scripts/migration/validate_checkpoint.ps1",
           "flightdeck/work/aep-understanding-generation/current.md",
-          "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json",
           "flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json",
           "flightdeck/work/aep-understanding-generation/mainline-spec.json"
         ],
-        "planner_result": {
-          "artifact": "tmp/host_open_gap_audit_go.json",
-          "gap_groups": 0,
-          "gap_recipes": 0,
-          "chunks": 0,
-          "checkpoint_uses_go_planner": true,
-          "coverage_validator_fix": "Removed the non-glob shape-all-family recipe_pattern so explicit 27-recipe membership remains authoritative after shape-ellipse-fill became an independent coverage record.",
-          "legacy_script_retained_for_current_tooling_compatibility": "scripts/migration/plan_host_open_gaps.ps1"
+        "summary_result": {
+          "artifact": "tmp/migration_coverage_summary.json",
+          "coverage_records": 16,
+          "domains": 11,
+          "recipes": 143,
+          "writer_cases": 5148,
+          "endpoint_host_open_cases": 512,
+          "checkpoint_uses_go_summary_render": true,
+          "checkpoint_uses_go_summary_check": true,
+          "legacy_scripts_retained_for_current_tooling_compatibility": [
+            "scripts/migration/render_coverage_summary_json.ps1",
+            "scripts/migration/validate_coverage_summary_json.ps1"
+          ]
         },
         "current_totals": {
           "records": 18,
@@ -1131,7 +1137,7 @@
         }
       }
     },
-    "next_action": "Host-open gap planning now has a Go-first registry command, checkpoint uses it, and current evidence still reports zero host-open gaps. Continue mainline by either moving the next PowerShell-only checkpoint helper into Go or selecting a real unsupported conversion surface.",
+    "next_action": "Migration coverage summary render/check now has a Go-first registry command and checkpoint uses it. Continue mainline by either moving the next PowerShell-only checkpoint helper/query into Go or selecting a real unsupported conversion surface.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
