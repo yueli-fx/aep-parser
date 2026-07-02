@@ -238,6 +238,63 @@ func TestValidateCoverageReportsAtomRowBoundaryLabels(t *testing.T) {
 	}
 }
 
+func TestSummarizeCoverageGroupsAtomRowsForQuickQueries(t *testing.T) {
+	report := CoverageReport{
+		Status: StatusPass,
+		Summary: CoverageSummary{
+			Records:   2,
+			Artifacts: 3,
+			Atoms:     3,
+		},
+		AtomRows: []AtomCoverageRow{
+			{
+				AtomID:                "text.a",
+				RecordID:              "text",
+				Recipe:                "minimal-text-a",
+				WriterStatus:          "PD-6x6",
+				SourceVersions:        []string{"AE2020", "AE2025"},
+				TargetVersions:        []string{"AE2020", "AE2025"},
+				HostOpenEvidenceLevel: "direct_endpoint_hosts_pass",
+				DirectHostVersions:    []string{"AE2020", "AE2025"},
+				InferredHostVersions:  []string{"AE2021", "AE2022", "AE2023", "AE2024"},
+			},
+			{
+				AtomID:                "text.b",
+				RecordID:              "text",
+				Recipe:                "minimal-text-b",
+				WriterStatus:          "PD-6x6",
+				SourceVersions:        []string{"AE2020", "AE2025"},
+				TargetVersions:        []string{"AE2020", "AE2025"},
+				HostOpenEvidenceLevel: "direct_all_hosts_representative",
+			},
+			{
+				AtomID:                "layer.boundary",
+				RecordID:              "layer",
+				Recipe:                "minimal-layer-boundary",
+				WriterStatus:          "boundary",
+				BoundaryStatus:        "known_matte_contract_boundary",
+				HostOpenEvidenceLevel: "excluded_known_boundary",
+			},
+		},
+	}
+
+	summary := SummarizeCoverage(report)
+	if summary.Status != StatusPass || summary.AtomRows != 3 || summary.Atoms != 3 {
+		t.Fatalf("summary status/rows/atoms = %q/%d/%d", summary.Status, summary.AtomRows, summary.Atoms)
+	}
+	assertCoverageSummaryBucket(t, summary.ByRecord, "text", 2)
+	assertCoverageSummaryBucket(t, summary.ByRecord, "layer", 1)
+	assertCoverageSummaryBucket(t, summary.ByWriterStatus, "PD-6x6", 2)
+	assertCoverageSummaryBucket(t, summary.ByWriterStatus, "boundary", 1)
+	assertCoverageSummaryBucket(t, summary.ByHostOpenEvidenceLevel, "direct_endpoint_hosts_pass", 1)
+	assertCoverageSummaryBucket(t, summary.ByHostOpenEvidenceLevel, "direct_all_hosts_representative", 1)
+	assertCoverageSummaryBucket(t, summary.ByHostOpenEvidenceLevel, "excluded_known_boundary", 1)
+	assertCoverageSummaryBucket(t, summary.ByBoundaryStatus, "known_matte_contract_boundary", 1)
+	if summary.DirectHostAtoms != 1 || summary.InferredHostAtoms != 1 {
+		t.Fatalf("host atoms = direct %d inferred %d", summary.DirectHostAtoms, summary.InferredHostAtoms)
+	}
+}
+
 func TestValidateCoverageFailsWhenDeclaredRecipesDoNotMatchMatrix(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 1)
@@ -359,4 +416,17 @@ func findAtomCoverageRow(t *testing.T, report CoverageReport, atomID string) Ato
 	}
 	t.Fatalf("atom row %q not found in %+v", atomID, report.AtomRows)
 	return AtomCoverageRow{}
+}
+
+func assertCoverageSummaryBucket(t *testing.T, buckets []CoverageSummaryBucket, name string, atomRows int) {
+	t.Helper()
+	for _, bucket := range buckets {
+		if bucket.Name == name {
+			if bucket.AtomRows != atomRows {
+				t.Fatalf("bucket %q atom rows = %d, want %d", name, bucket.AtomRows, atomRows)
+			}
+			return
+		}
+	}
+	t.Fatalf("bucket %q not found in %+v", name, buckets)
 }

@@ -125,6 +125,36 @@ func TestRunCoverageWritesReportAndReturnsOneForDrift(t *testing.T) {
 	}
 }
 
+func TestRunCoverageCanWriteSummaryReport(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 2)
+	writeMatrixFixture(t, root, "tmp/matrix/text/matrix.json", 2)
+	out := filepath.Join(root, "tmp", "registry_coverage_summary.json")
+
+	code := run([]string{
+		"coverage",
+		"-root", root,
+		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-out", out,
+		"-summary",
+	})
+	if code != 0 {
+		t.Fatalf("run(coverage -summary) = %d, want 0", code)
+	}
+
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var summary registry.CoverageSummaryReport
+	if err := json.Unmarshal(data, &summary); err != nil {
+		t.Fatal(err)
+	}
+	if summary.Status != registry.StatusPass || summary.AtomRows != 0 {
+		t.Fatalf("summary status/atom rows = %q/%d", summary.Status, summary.AtomRows)
+	}
+}
+
 func newRegistryRoot(t *testing.T) string {
 	t.Helper()
 	root := t.TempDir()

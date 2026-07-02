@@ -86,6 +86,11 @@
       "path": "tmp/registry_coverage.json",
       "role": "generated_report",
       "description": "Read-only coverage ledger validation output; ignored by git."
+    },
+    {
+      "path": "tmp/registry_coverage_summary.json",
+      "role": "generated_report",
+      "description": "Read-only coverage atom-row summary output for quick total-table queries; ignored by git."
     }
   ],
   "phases": [
@@ -167,27 +172,28 @@
   "current_execution": {
     "phase": "version_matrix_totalization",
     "last_completed_target": {
-      "location": "recipe_atoms",
-      "group": "static_effects_remaining_recipes",
-      "reason": "Resolve the two remaining recipe_atoms entries by registering static effect atoms for minimal-adjustment-layer and minimal-text-effect. Both recipes already had complete AE2020-AE2025 all_6x6 evidence in tmp/migration_matrix_static_effects_all_6x6/matrix.json, so the prior pending note was stale.",
-      "source_report": "tmp/registry_ownership.json",
+      "location": "coverage_ledger",
+      "group": "coverage_summary_query",
+      "reason": "Add a Go-generated quick summary over coverage atom_rows so total-table questions can be answered from tmp/registry_coverage_summary.json without manually reading the full coverage report.",
+      "source_report": "tmp/registry_coverage_summary.json",
       "result": {
-        "capability_atoms_added": 2,
-        "recipe_atoms_files": 141,
-        "recipe_atoms_owned_files_after": 141,
-        "recipe_atoms_unowned_files_after": 0,
-        "coverage_atom_rows_after": 141,
-        "evidence": "tmp/migration_matrix_static_effects_all_6x6/matrix.json",
+        "command_added": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_summary.json -summary",
+        "records": 16,
+        "artifacts": 45,
+        "atoms": 141,
+        "atom_rows": 141,
+        "direct_host_atoms": 126,
+        "inferred_host_atoms": 126,
+        "boundary_atom_rows": 1,
         "coverage_errors": 0
       },
       "previous_target": {
-        "location": "coverage_ledger",
-        "group": "coverage_atom_boundary_labels",
-        "records_checked": 16,
-        "artifacts_checked": 45,
-        "atoms_linked": 139,
-        "atom_rows": 139,
-        "boundary_atom_rows": 1,
+        "location": "recipe_atoms",
+        "group": "static_effects_remaining_recipes",
+        "capability_atoms_added": 2,
+        "recipe_atoms_owned_files_after": 141,
+        "recipe_atoms_unowned_files_after": 0,
+        "coverage_atom_rows_after": 141,
         "coverage_errors": 0
       },
       "previous_atom_target": {
@@ -201,7 +207,7 @@
         "minimal-layer-explicit-matte remains covered by layer.track_matte.explicit_source as a version-boundary atom, not a pass-complete layer atom."
       ]
     },
-    "next_action": "With recipe_atoms now fully owned, use coverage atom_rows as the next total table and extend it with matrix cell detail only where user-facing answers need exact source-target status rather than version-axis summaries.",
+    "next_action": "Use registry_coverage_summary.json as the quick total table and add focused query/filter output only when a user-facing question needs exact atom, record, or version-axis slices.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
@@ -238,6 +244,13 @@
     {
       "id": "registry_coverage",
       "command": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage.json",
+      "required_for": [
+        "version_matrix_totalization"
+      ]
+    },
+    {
+      "id": "registry_coverage_summary",
+      "command": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_summary.json -summary",
       "required_for": [
         "version_matrix_totalization"
       ]

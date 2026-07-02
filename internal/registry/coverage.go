@@ -25,6 +25,27 @@ type CoverageSummary struct {
 	Errors    int `json:"errors"`
 }
 
+type CoverageSummaryReport struct {
+	SchemaVersion           int                     `json:"schema_version"`
+	Status                  string                  `json:"status"`
+	Records                 int                     `json:"records"`
+	Artifacts               int                     `json:"artifacts"`
+	Atoms                   int                     `json:"atoms"`
+	AtomRows                int                     `json:"atom_rows"`
+	Errors                  int                     `json:"errors"`
+	DirectHostAtoms         int                     `json:"direct_host_atoms"`
+	InferredHostAtoms       int                     `json:"inferred_host_atoms"`
+	ByRecord                []CoverageSummaryBucket `json:"by_record,omitempty"`
+	ByWriterStatus          []CoverageSummaryBucket `json:"by_writer_status,omitempty"`
+	ByHostOpenEvidenceLevel []CoverageSummaryBucket `json:"by_host_open_evidence_level,omitempty"`
+	ByBoundaryStatus        []CoverageSummaryBucket `json:"by_boundary_status,omitempty"`
+}
+
+type CoverageSummaryBucket struct {
+	Name     string `json:"name"`
+	AtomRows int    `json:"atom_rows"`
+}
+
 type CoverageIssue struct {
 	Code     string `json:"code"`
 	Severity string `json:"severity"`
@@ -169,6 +190,59 @@ func ValidateCoverage(root, coveragePath string) (CoverageReport, error) {
 		report.Status = StatusFail
 	}
 	return report, nil
+}
+
+func SummarizeCoverage(report CoverageReport) CoverageSummaryReport {
+	summary := CoverageSummaryReport{
+		SchemaVersion: 1,
+		Status:        report.Status,
+		Records:       report.Summary.Records,
+		Artifacts:     report.Summary.Artifacts,
+		Atoms:         report.Summary.Atoms,
+		AtomRows:      len(report.AtomRows),
+		Errors:        report.Summary.Errors,
+	}
+	byRecord := map[string]int{}
+	byWriterStatus := map[string]int{}
+	byHostOpenEvidenceLevel := map[string]int{}
+	byBoundaryStatus := map[string]int{}
+	for _, row := range report.AtomRows {
+		incrementBucket(byRecord, row.RecordID)
+		incrementBucket(byWriterStatus, row.WriterStatus)
+		incrementBucket(byHostOpenEvidenceLevel, row.HostOpenEvidenceLevel)
+		incrementBucket(byBoundaryStatus, row.BoundaryStatus)
+		if len(row.DirectHostVersions) > 0 {
+			summary.DirectHostAtoms++
+		}
+		if len(row.InferredHostVersions) > 0 {
+			summary.InferredHostAtoms++
+		}
+	}
+	summary.ByRecord = coverageSummaryBuckets(byRecord)
+	summary.ByWriterStatus = coverageSummaryBuckets(byWriterStatus)
+	summary.ByHostOpenEvidenceLevel = coverageSummaryBuckets(byHostOpenEvidenceLevel)
+	summary.ByBoundaryStatus = coverageSummaryBuckets(byBoundaryStatus)
+	return summary
+}
+
+func incrementBucket(buckets map[string]int, name string) {
+	if name == "" {
+		return
+	}
+	buckets[name]++
+}
+
+func coverageSummaryBuckets(counts map[string]int) []CoverageSummaryBucket {
+	names := make([]string, 0, len(counts))
+	for name := range counts {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	buckets := make([]CoverageSummaryBucket, 0, len(names))
+	for _, name := range names {
+		buckets = append(buckets, CoverageSummaryBucket{Name: name, AtomRows: counts[name]})
+	}
+	return buckets
 }
 
 func collectCoverageArtifactRefs(coverage coverageFile) []coverageArtifactRef {
