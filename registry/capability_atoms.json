@@ -1,0 +1,466 @@
+{
+  "schema_version": 1,
+  "purpose": "First-pass capability atom ledger. This is intentionally representative, not exhaustive.",
+  "version_policy": {
+    "minimum_supported": "AE2020",
+    "known_supported": [
+      "AE2020",
+      "AE2021",
+      "AE2022",
+      "AE2023",
+      "AE2024",
+      "AE2025"
+    ],
+    "expansion_policy": "append AE2026/AE2027 as known_supported entries after fixtures, writers, and host-open policy are registered"
+  },
+  "capability_atoms": [
+    {
+      "id": "project.version_skeleton",
+      "domain": "project",
+      "tier": "workflow",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "parse",
+        "profile",
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "code",
+          "path": "internal/aepmigrate",
+          "required": true
+        },
+        {
+          "kind": "state",
+          "path": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Writer targets are registered as data; future AE versions must extend the axis instead of replacing it."
+      ]
+    },
+    {
+      "id": "text.source.default",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "profile",
+        "generate",
+        "migrate",
+        "host_open"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-default-text-layer.json",
+          "required": true
+        },
+        {
+          "kind": "fixture",
+          "path": "test_data/fixtures/re_text.aep",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Text layout equivalence may need render_compare when profile fields are insufficient."
+      ]
+    },
+    {
+      "id": "text.animator.tracking",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": true,
+        "os": [
+          "windows",
+          "macos"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate",
+        "host_open"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-tracking.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_tracking_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Endpoint host-open inference may cover AE2021-AE2024 only when AE2020 and AE2025 direct host-open evidence passes."
+      ]
+    },
+    {
+      "id": "shape.filter.trim_paths",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": true,
+        "os": [
+          "windows",
+          "macos"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate",
+        "host_open",
+        "render_compare"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-trim.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/trim_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Single-feature smoke artifacts under tmp/migration_shape_trim_paths are generated evidence and not the registry source of truth."
+      ]
+    },
+    {
+      "id": "effect.param.scalar_keyframes",
+      "domain": "effect",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": true,
+        "os": [
+          "windows",
+          "macos"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "profile",
+        "generate",
+        "migrate",
+        "host_open"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-effect-param-keyframes.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/effects/effect_adbe_gaussian_blur_2.bin",
+          "required": true
+        },
+        {
+          "kind": "dictionary",
+          "path": "data/effects-dict/effects_en_US_25.1x68.json",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_effect_param_keyframes/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Effect matchName and parameter contracts should stay dictionary-backed instead of being inferred from filenames."
+      ]
+    },
+    {
+      "id": "layer.track_matte.explicit_source",
+      "domain": "layer",
+      "tier": "boundary",
+      "status": "boundary",
+      "platform": {
+        "host_required": true,
+        "os": [
+          "windows",
+          "macos"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "profile",
+        "generate",
+        "migrate",
+        "host_open"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-layer-explicit-matte.json",
+          "required": true
+        },
+        {
+          "kind": "ledger",
+          "path": "internal/aepmigrate/version_capability_ledger.json",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_explicit_matte_ae2025/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Explicit matte source is preserved for AE2025 targets and blocked for older writer targets by source contract."
+      ]
+    },
+    {
+      "id": "migration.version_matrix",
+      "domain": "migration",
+      "tier": "workflow",
+      "status": "active",
+      "platform": {
+        "host_required": true,
+        "os": [
+          "windows",
+          "macos"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "migrate",
+        "host_open"
+      ],
+      "dependencies": [
+        {
+          "kind": "command",
+          "path": "cmd/aepmigrate/main.go",
+          "required": true
+        },
+        {
+          "kind": "state",
+          "path": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json",
+          "required": true
+        },
+        {
+          "kind": "script",
+          "path": "scripts/migration/verify_matrix.ps1",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "PowerShell wrapper remains for host orchestration; new planning/audit tooling should prefer Go where practical."
+      ]
+    },
+    {
+      "id": "learning.technique_portrait",
+      "domain": "learning",
+      "tier": "workflow",
+      "status": "planned",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "parse",
+        "profile",
+        "learn"
+      ],
+      "dependencies": [
+        {
+          "kind": "command",
+          "path": "cmd/aeptechnique/main.go",
+          "required": true
+        },
+        {
+          "kind": "fixtures",
+          "path": "test_data/fixtures",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Learning output must distinguish reusable source contracts from local corpus observations."
+      ]
+    },
+    {
+      "id": "ai.workflow_generation",
+      "domain": "ai",
+      "tier": "workflow",
+      "status": "planned",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "learn",
+        "ai_generate",
+        "generate"
+      ],
+      "dependencies": [
+        {
+          "kind": "registry",
+          "path": "registry/workflows.json",
+          "required": true
+        },
+        {
+          "kind": "registry",
+          "path": "registry/capability_atoms.json",
+          "required": true
+        },
+        {
+          "kind": "command",
+          "path": "cmd/aeprecipe/main.go",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "AI generation should consume registered atoms and workflows, not scrape tmp or flightdeck markdown directly."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "purpose": "Stable workflow identifiers used by capability atoms and evidence records.",
+  "workflows": [
+    {
+      "id": "parse",
+      "summary": "Read AEP/RIFX structure and expose low-level project data.",
+      "cross_platform": "go"
+    },
+    {
+      "id": "profile",
+      "summary": "Build detailed semantic profiles for comparison, reporting, and learning.",
+      "cross_platform": "go"
+    },
+    {
+      "id": "generate",
+      "summary": "Generate AEP projects from recipe-level intent and serializer templates.",
+      "cross_platform": "go"
+    },
+    {
+      "id": "migrate",
+      "summary": "Convert projects between supported AE writer versions with explicit boundaries for version-gated features.",
+      "cross_platform": "go"
+    },
+    {
+      "id": "host_open",
+      "summary": "Open generated or migrated AEPs in installed After Effects hosts to validate compatibility.",
+      "cross_platform": "host_required"
+    },
+    {
+      "id": "learn",
+      "summary": "Harvest fixtures, profiles, gaps, and host-open results into reusable AEP understanding.",
+      "cross_platform": "go_plus_optional_host"
+    },
+    {
+      "id": "ai_generate",
+      "summary": "Expose learned capabilities so AI or higher-level tools can generate project workflows.",
+      "cross_platform": "go"
+    },
+    {
+      "id": "render_compare",
+      "summary": "Compare rendered output when profile equivalence is not enough.",
+      "cross_platform": "host_required"
+    }
+  ]
+}

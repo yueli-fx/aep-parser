@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "purpose": "Machine-readable evidence pointers. Generated tmp artifacts are referenced here but remain disposable.",
+  "evidence_sets": [
+    {
+      "id": "migration.coverage.current",
+      "class": "spec_registry",
+      "artifact_path": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json",
+      "required": true,
+      "workflows": [
+        "migrate",
+        "host_open"
+      ]
+    },
+    {
+      "id": "migration.current_state",
+      "class": "spec_registry",
+      "artifact_path": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json",
+      "required": true,
+      "workflows": [
+        "migrate",
+        "host_open"
+      ]
+    },
+    {
+      "id": "matrix.text_animators.all_6x6",
+      "class": "generated_evidence",
+      "artifact_path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+      "required": true,
+      "workflows": [
+        "migrate",
+        "host_open"
+      ]
+    },
+    {
+      "id": "matrix.shape.all_6x6",
+      "class": "generated_evidence",
+      "artifact_path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+      "required": true,
+      "workflows": [
+        "migrate",
+        "host_open",
+        "render_compare"
+      ]
+    },
+    {
+      "id": "matrix.effect_param_keyframes",
+      "class": "generated_evidence",
+      "artifact_path": "tmp/migration_matrix_effect_param_keyframes/matrix.json",
+      "required": true,
+      "workflows": [
+        "migrate",
+        "host_open"
+      ]
+    },
+    {
+      "id": "matrix.layer_matte",
+      "class": "generated_evidence",
+      "artifact_path": "tmp/migration_matrix_layer_matte/matrix.json",
+      "required": true,
+      "workflows": [
+        "migrate",
+        "host_open"
+      ]
+    },
+    {
+      "id": "matrix.explicit_matte.ae2025_contract",
+      "class": "generated_evidence",
+      "artifact_path": "tmp/migration_matrix_explicit_matte_ae2025/matrix.json",
+      "required": true,
+      "workflows": [
+        "migrate",
+        "host_open"
+      ]
+    },
+    {
+      "id": "host_open.text_animators.endpoint_chunk",
+      "class": "generated_evidence",
+      "artifact_path": "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-4/matrix.json",
+      "required": true,
+      "workflows": [
+        "host_open"
+      ]
+    }
+  ]
+}

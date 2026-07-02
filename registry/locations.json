@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "purpose": "Repository asset map. Cleanup and migration work should classify paths here before moving or deleting data.",
+  "locations": [
+    {
+      "id": "registry",
+      "path": "registry",
+      "class": "spec_registry",
+      "tracked": true,
+      "required": true,
+      "lifecycle": "source_of_truth"
+    },
+    {
+      "id": "serializer_templates",
+      "path": "internal/serializer/templates",
+      "class": "source_contract",
+      "tracked": true,
+      "required": true,
+      "lifecycle": "source_contract"
+    },
+    {
+      "id": "migration_capability_ledger",
+      "path": "internal/aepmigrate/version_capability_ledger.json",
+      "class": "source_contract",
+      "tracked": true,
+      "required": true,
+      "lifecycle": "source_contract"
+    },
+    {
+      "id": "recipe_atoms",
+      "path": "examples/recipes",
+      "class": "atomic_fixtures",
+      "tracked": true,
+      "required": true,
+      "lifecycle": "source_contract"
+    },
+    {
+      "id": "reverse_fixtures",
+      "path": "test_data/fixtures",
+      "class": "reverse_reference",
+      "tracked": true,
+      "required": true,
+      "lifecycle": "regression_corpus"
+    },
+    {
+      "id": "fixture_generators",
+      "path": "test_data/generators",
+      "class": "reverse_reference",
+      "tracked": true,
+      "required": true,
+      "lifecycle": "regression_source"
+    },
+    {
+      "id": "generated_test_data",
+      "path": "test_data/generated",
+      "class": "generated_evidence",
+      "tracked": false,
+      "required": false,
+      "lifecycle": "rebuildable"
+    },
+    {
+      "id": "effects_dictionary",
+      "path": "data/effects-dict",
+      "class": "source_contract",
+      "tracked": true,
+      "required": true,
+      "lifecycle": "reference_dictionary"
+    },
+    {
+      "id": "reverse_reference_notes",
+      "path": "data/reference",
+      "class": "reverse_reference",
+      "tracked": true,
+      "required": true,
+      "lifecycle": "research_record"
+    },
+    {
+      "id": "local_samples",
+      "path": "data/samples",
+      "class": "local_corpus",
+      "tracked": false,
+      "required": false,
+      "lifecycle": "local_only"
+    },
+    {
+      "id": "tmp_evidence",
+      "path": "tmp",
+      "class": "generated_evidence",
+      "tracked": false,
+      "required": false,
+      "lifecycle": "disposable"
+    },
+    {
+      "id": "migration_current_state",
+      "path": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json",
+      "class": "spec_registry",
+      "tracked": true,
+      "required": true,
+      "lifecycle": "active_project_state"
+    },
+    {
+      "id": "migration_coverage_state",
+      "path": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json",
+      "class": "spec_registry",
+      "tracked": true,
+      "required": true,
+      "lifecycle": "active_project_state"
+    },
+    {
+      "id": "migration_scripts",
+      "path": "scripts/migration",
+      "class": "source_contract",
+      "tracked": true,
+      "required": true,
+      "lifecycle": "automation"
+    }
+  ]
+}
