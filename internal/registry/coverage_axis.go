@@ -22,6 +22,7 @@ type CoverageAxisReport struct {
 
 type CoverageAxisFilter struct {
 	RecordID              string `json:"record_id,omitempty"`
+	Domain                string `json:"domain,omitempty"`
 	AtomID                string `json:"atom_id,omitempty"`
 	Recipe                string `json:"recipe,omitempty"`
 	CaseStatus            string `json:"case_status,omitempty"`
@@ -53,6 +54,7 @@ type CoverageAxisSummary struct {
 
 type CoverageAxisRow struct {
 	AtomID                string         `json:"atom_id"`
+	Domain                string         `json:"domain,omitempty"`
 	RecordID              string         `json:"record_id"`
 	Recipe                string         `json:"recipe,omitempty"`
 	WriterStatus          string         `json:"writer_status,omitempty"`
@@ -100,6 +102,7 @@ func coverageAxisWithFilter(root, coveragePath string, versionAxis []string, fil
 	}
 	cells, err := coverageCells(root, coveragePath, CoverageCellFilter{
 		RecordID:              filter.RecordID,
+		Domain:                filter.Domain,
 		AtomID:                filter.AtomID,
 		Recipe:                filter.Recipe,
 		CaseStatus:            filter.CaseStatus,
@@ -204,6 +207,9 @@ func coverageAxisRowMatches(row AtomCoverageRow, filter CoverageAxisFilter) bool
 	if filter.RecordID != "" && row.RecordID != filter.RecordID {
 		return false
 	}
+	if filter.Domain != "" && row.Domain != filter.Domain {
+		return false
+	}
 	if filter.AtomID != "" && row.AtomID != filter.AtomID {
 		return false
 	}
@@ -225,6 +231,7 @@ func coverageAxisRowMatches(row AtomCoverageRow, filter CoverageAxisFilter) bool
 func coverageAxisRow(row AtomCoverageRow, versionAxis []string) CoverageAxisRow {
 	axisRow := CoverageAxisRow{
 		AtomID:                row.AtomID,
+		Domain:                row.Domain,
 		RecordID:              row.RecordID,
 		Recipe:                row.Recipe,
 		WriterStatus:          row.WriterStatus,

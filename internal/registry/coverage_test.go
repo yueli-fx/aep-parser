@@ -327,7 +327,7 @@ func TestCoverageCellsReportsSourceTargetCasesWithBoundaryLabels(t *testing.T) {
 		t.Fatalf("cells status/count = %q/%d, want pass/3", report.Status, report.Count)
 	}
 	blocked := findCoverageCell(t, report.Cells, "blocked")
-	if blocked.RecordID != "layer" || blocked.Recipe != "minimal-layer-explicit-matte" {
+	if blocked.Domain != "layer" || blocked.RecordID != "layer" || blocked.Recipe != "minimal-layer-explicit-matte" {
 		t.Fatalf("blocked cell identity = %+v", blocked)
 	}
 	if blocked.BoundaryStatus != "known_matte_contract_boundary" || blocked.BoundaryReason != "AE2025-only explicit matte source contract" {
@@ -350,6 +350,16 @@ func TestCoverageCellsReportsSourceTargetCasesWithBoundaryLabels(t *testing.T) {
 	if filtered.Count != 1 || filtered.Cells[0].Status != "skipped" {
 		t.Fatalf("filtered cells = %+v, want one skipped cell", filtered.Cells)
 	}
+
+	domainFiltered, err := CoverageCells(root, "flightdeck/work/aep-understanding-generation/coverage.json", CoverageCellFilter{
+		Domain: "layer",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if domainFiltered.Count != 3 || domainFiltered.Filter.Domain != "layer" {
+		t.Fatalf("domain filtered cells = count %d filter=%+v", domainFiltered.Count, domainFiltered.Filter)
+	}
 }
 
 func TestSummarizeCoverageGroupsAtomRowsForQuickQueries(t *testing.T) {
@@ -363,6 +373,7 @@ func TestSummarizeCoverageGroupsAtomRowsForQuickQueries(t *testing.T) {
 		AtomRows: []AtomCoverageRow{
 			{
 				AtomID:                "text.a",
+				Domain:                "text",
 				RecordID:              "text",
 				Recipe:                "minimal-text-a",
 				WriterStatus:          "PD-6x6",
@@ -374,6 +385,7 @@ func TestSummarizeCoverageGroupsAtomRowsForQuickQueries(t *testing.T) {
 			},
 			{
 				AtomID:                "text.b",
+				Domain:                "text",
 				RecordID:              "text",
 				Recipe:                "minimal-text-b",
 				WriterStatus:          "PD-6x6",
@@ -383,6 +395,7 @@ func TestSummarizeCoverageGroupsAtomRowsForQuickQueries(t *testing.T) {
 			},
 			{
 				AtomID:                "layer.boundary",
+				Domain:                "layer",
 				RecordID:              "layer",
 				Recipe:                "minimal-layer-boundary",
 				WriterStatus:          "boundary",
@@ -398,6 +411,8 @@ func TestSummarizeCoverageGroupsAtomRowsForQuickQueries(t *testing.T) {
 	}
 	assertCoverageSummaryBucket(t, summary.ByRecord, "text", 2)
 	assertCoverageSummaryBucket(t, summary.ByRecord, "layer", 1)
+	assertCoverageSummaryBucket(t, summary.ByDomain, "text", 2)
+	assertCoverageSummaryBucket(t, summary.ByDomain, "layer", 1)
 	assertCoverageSummaryBucket(t, summary.ByWriterStatus, "PD-6x6", 2)
 	assertCoverageSummaryBucket(t, summary.ByWriterStatus, "boundary", 1)
 	assertCoverageSummaryBucket(t, summary.ByHostOpenEvidenceLevel, "direct_endpoint_hosts_pass", 1)
@@ -542,12 +557,23 @@ func TestCoverageAxisWithFilterNarrowsRowsAndCells(t *testing.T) {
 				},
 				"totals": map[string]any{"total": 3, "pass": 2, "blocked": 1, "failed": 0, "skipped": 0},
 			},
+			{
+				"id":               "text",
+				"artifact":         "tmp/matrix/text/matrix.json",
+				"recipes":          []string{"minimal-text-source"},
+				"writer_status":    "PD-6x6",
+				"host_open_status": "OPEN-ALL-HOSTS",
+				"totals":           map[string]any{"total": 1, "pass": 1, "blocked": 0, "failed": 0, "skipped": 0},
+			},
 		},
 	})
 	writeMatrixFixtureWithCases(t, root, "tmp/matrix/layer/matrix.json", []map[string]any{
 		{"recipe_name": "minimal-layer-explicit-matte", "source_version": "AE2025", "target_version": "AE2025", "status": "pass"},
 		{"recipe_name": "minimal-layer-explicit-matte", "source_version": "AE2025", "target_version": "AE2024", "status": "blocked"},
 		{"recipe_name": "minimal-layer-parent", "source_version": "AE2020", "target_version": "AE2020", "status": "pass"},
+	})
+	writeMatrixFixtureWithCases(t, root, "tmp/matrix/text/matrix.json", []map[string]any{
+		{"recipe_name": "minimal-text-source", "source_version": "AE2024", "target_version": "AE2024", "status": "pass"},
 	})
 	writeJSON(t, root, "registry/capability_atoms.json", map[string]any{
 		"schema_version": 1,
@@ -567,6 +593,14 @@ func TestCoverageAxisWithFilterNarrowsRowsAndCells(t *testing.T) {
 				"status":       "verified",
 				"workflows":    []string{"migrate"},
 				"dependencies": []map[string]any{{"kind": "recipe", "path": "examples/recipes/minimal-layer-parent.json", "required": true}},
+			},
+			{
+				"id":           "text.source.default",
+				"domain":       "text",
+				"tier":         "atom",
+				"status":       "verified",
+				"workflows":    []string{"migrate"},
+				"dependencies": []map[string]any{{"kind": "recipe", "path": "examples/recipes/minimal-text-source.json", "required": true}},
 			},
 		},
 	})
@@ -619,6 +653,19 @@ func TestCoverageAxisWithFilterNarrowsRowsAndCells(t *testing.T) {
 	}
 	if missingHostOnly.Summary.AtomRows != 1 || missingHostOnly.Summary.HostMissingRows != 1 {
 		t.Fatalf("missing-host summary = %+v", missingHostOnly.Summary)
+	}
+
+	textOnly, err := CoverageAxisWithFilter(root, "flightdeck/work/aep-understanding-generation/coverage.json", []string{"AE2024", "AE2025"}, CoverageAxisFilter{
+		Domain: "text",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if textOnly.Summary.AtomRows != 1 || len(textOnly.Rows) != 1 || textOnly.Rows[0].Domain != "text" || textOnly.Rows[0].AtomID != "text.source.default" {
+		t.Fatalf("text-domain rows = %+v summary=%+v", textOnly.Rows, textOnly.Summary)
+	}
+	if textOnly.Summary.Cells != 1 || textOnly.Summary.Pass != 1 || textOnly.Filter.Domain != "text" {
+		t.Fatalf("text-domain summary = %+v filter=%+v", textOnly.Summary, textOnly.Filter)
 	}
 }
 

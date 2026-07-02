@@ -390,6 +390,30 @@ func TestRunCoverageAxisSupportsFocusedFilters(t *testing.T) {
 	if report.Summary.AtomRows != 1 || report.Filter.WriterAxisStatus != "partial_source_target_axis" || report.Filter.HostAxisStatus != "missing_host_axis" {
 		t.Fatalf("axis-status report = %+v filter=%+v", report.Summary, report.Filter)
 	}
+
+	domainOut := filepath.Join(root, "tmp", "registry_coverage_axis_text.json")
+	code = run([]string{
+		"coverage",
+		"-root", root,
+		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-out", domainOut,
+		"-axis",
+		"-domain", "text",
+		"-versions", "AE2020,AE2024,AE2025",
+	})
+	if code != 0 {
+		t.Fatalf("run(coverage -axis -domain) = %d, want 0", code)
+	}
+	data, err = os.ReadFile(domainOut)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Summary.AtomRows != 1 || report.Filter.Domain != "text" || report.Rows[0].Domain != "text" {
+		t.Fatalf("domain report = %+v rows=%+v filter=%+v", report.Summary, report.Rows, report.Filter)
+	}
 }
 
 func TestRunBoundariesWritesBoundaryCheckReport(t *testing.T) {

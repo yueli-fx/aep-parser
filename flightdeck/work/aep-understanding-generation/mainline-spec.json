@@ -1031,31 +1031,26 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/registry",
-      "group": "coverage_axis_status_filters",
-      "reason": "Make the total/detail/total coverage table directly queryable by writer-axis and host-axis status instead of requiring manual JSON scanning.",
+      "group": "coverage_domain_filters",
+      "reason": "Make the total/detail/total coverage table directly queryable by atom domain so text/effect/shape coverage can be answered without atom-prefix or manual JSON scanning.",
       "result": {
         "files": [
           "cmd/aepregistry/main.go",
           "cmd/aepregistry/main_test.go",
+          "internal/registry/coverage.go",
           "internal/registry/coverage_axis.go",
           "internal/registry/coverage_test.go"
         ],
-        "behavior": "aepregistry coverage -axis now accepts -writer-axis-status and -host-axis-status filters; filtered axis reports also narrow source-target cell summaries to the retained atom rows.",
+        "behavior": "coverage summary now exposes by_domain; coverage rows, cells, and axis rows carry atom domain metadata and aepregistry coverage accepts -domain for rows/cells/axis filters; filtered axis reports narrow source-target cell summaries to the retained domain rows.",
         "queries": {
-          "missing_host_axis": {
-            "command": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_axis_host_missing.json -axis -host-axis-status missing_host_axis",
-            "atom_rows": 0,
-            "cells": 0
-          },
-          "boundary_writer_axis": {
-            "command": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_axis_boundary_writer.json -axis -writer-axis-status boundary_source_contract",
-            "atom_rows": 1,
-            "cells": 36
+          "text_domain_axis": {
+            "command": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_axis_text_domain.json -axis -domain text",
+            "atom_rows": 26,
+            "cells": 936
           }
         },
         "new_filters": [
-          "-writer-axis-status",
-          "-host-axis-status"
+          "-domain"
         ]
       }
     },
@@ -1199,6 +1194,13 @@
     {
       "id": "registry_coverage_axis_boundary_writer",
       "command": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_axis_boundary_writer.json -axis -writer-axis-status boundary_source_contract",
+      "required_for": [
+        "version_matrix_totalization"
+      ]
+    },
+    {
+      "id": "registry_coverage_axis_text_domain",
+      "command": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_axis_text_domain.json -axis -domain text",
       "required_for": [
         "version_matrix_totalization"
       ]

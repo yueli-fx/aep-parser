@@ -37,6 +37,7 @@ type CoverageSummaryReport struct {
 	Errors                  int                     `json:"errors"`
 	DirectHostAtoms         int                     `json:"direct_host_atoms"`
 	InferredHostAtoms       int                     `json:"inferred_host_atoms"`
+	ByDomain                []CoverageSummaryBucket `json:"by_domain,omitempty"`
 	ByRecord                []CoverageSummaryBucket `json:"by_record,omitempty"`
 	ByWriterStatus          []CoverageSummaryBucket `json:"by_writer_status,omitempty"`
 	ByHostOpenEvidenceLevel []CoverageSummaryBucket `json:"by_host_open_evidence_level,omitempty"`
@@ -66,6 +67,7 @@ type CoverageCellsReport struct {
 
 type CoverageRowFilter struct {
 	RecordID              string `json:"record_id,omitempty"`
+	Domain                string `json:"domain,omitempty"`
 	AtomID                string `json:"atom_id,omitempty"`
 	WriterStatus          string `json:"writer_status,omitempty"`
 	HostOpenEvidenceLevel string `json:"host_open_evidence_level,omitempty"`
@@ -74,6 +76,7 @@ type CoverageRowFilter struct {
 
 type CoverageCellFilter struct {
 	RecordID              string `json:"record_id,omitempty"`
+	Domain                string `json:"domain,omitempty"`
 	AtomID                string `json:"atom_id,omitempty"`
 	Recipe                string `json:"recipe,omitempty"`
 	CaseStatus            string `json:"case_status,omitempty"`
@@ -112,6 +115,7 @@ type CoverageRecordReport struct {
 
 type AtomCoverageRow struct {
 	AtomID                string         `json:"atom_id"`
+	Domain                string         `json:"domain,omitempty"`
 	RecordID              string         `json:"record_id"`
 	Recipe                string         `json:"recipe,omitempty"`
 	Artifact              string         `json:"artifact"`
@@ -129,6 +133,7 @@ type AtomCoverageRow struct {
 
 type CoverageCell struct {
 	AtomID                string `json:"atom_id"`
+	Domain                string `json:"domain,omitempty"`
 	RecordID              string `json:"record_id"`
 	Recipe                string `json:"recipe,omitempty"`
 	Artifact              string `json:"artifact"`
@@ -276,11 +281,13 @@ func SummarizeCoverage(report CoverageReport) CoverageSummaryReport {
 		AtomRows:      len(report.AtomRows),
 		Errors:        report.Summary.Errors,
 	}
+	byDomain := map[string]int{}
 	byRecord := map[string]int{}
 	byWriterStatus := map[string]int{}
 	byHostOpenEvidenceLevel := map[string]int{}
 	byBoundaryStatus := map[string]int{}
 	for _, row := range report.AtomRows {
+		incrementBucket(byDomain, row.Domain)
 		incrementBucket(byRecord, row.RecordID)
 		incrementBucket(byWriterStatus, row.WriterStatus)
 		incrementBucket(byHostOpenEvidenceLevel, row.HostOpenEvidenceLevel)
@@ -292,6 +299,7 @@ func SummarizeCoverage(report CoverageReport) CoverageSummaryReport {
 			summary.InferredHostAtoms++
 		}
 	}
+	summary.ByDomain = coverageSummaryBuckets(byDomain)
 	summary.ByRecord = coverageSummaryBuckets(byRecord)
 	summary.ByWriterStatus = coverageSummaryBuckets(byWriterStatus)
 	summary.ByHostOpenEvidenceLevel = coverageSummaryBuckets(byHostOpenEvidenceLevel)
@@ -303,6 +311,9 @@ func FilterCoverageRows(report CoverageReport, filter CoverageRowFilter) []AtomC
 	var rows []AtomCoverageRow
 	for _, row := range report.AtomRows {
 		if filter.RecordID != "" && row.RecordID != filter.RecordID {
+			continue
+		}
+		if filter.Domain != "" && row.Domain != filter.Domain {
 			continue
 		}
 		if filter.AtomID != "" && row.AtomID != filter.AtomID {
@@ -378,6 +389,7 @@ func coverageCellsForRecords(root string, records []coverageRecord, refs coverag
 			for _, atomID := range atomIDs {
 				cell := CoverageCell{
 					AtomID:                atomID,
+					Domain:                refs.domainFor(atomID),
 					RecordID:              record.ID,
 					Recipe:                c.RecipeName,
 					Artifact:              filepath.ToSlash(record.Artifact),
@@ -412,6 +424,9 @@ func coverageCellsForRecords(root string, records []coverageRecord, refs coverag
 
 func coverageCellMatches(cell CoverageCell, filter CoverageCellFilter) bool {
 	if filter.RecordID != "" && cell.RecordID != filter.RecordID {
+		return false
+	}
+	if filter.Domain != "" && cell.Domain != filter.Domain {
 		return false
 	}
 	if filter.AtomID != "" && cell.AtomID != filter.AtomID {
@@ -597,17 +612,21 @@ func (r *CoverageReport) addError(code, recordID, path, message string) {
 }
 
 type coverageAtomRefs struct {
-	byRecipe   map[string][]string
-	byEvidence map[string][]string
+	byRecipe       map[string][]string
+	byEvidence     map[string][]string
+	domainByAtomID map[string]string
 }
 
 func loadCoverageAtomRefs(root string) coverageAtomRefs {
 	var atoms atomsFile
 	if err := readJSONPath(root, "registry/capability_atoms.json", &atoms); err != nil {
-		return coverageAtomRefs{byRecipe: map[string][]string{}, byEvidence: map[string][]string{}}
+		return coverageAtomRefs{byRecipe: map[string][]string{}, byEvidence: map[string][]string{}, domainByAtomID: map[string]string{}}
 	}
-	refs := coverageAtomRefs{byRecipe: map[string][]string{}, byEvidence: map[string][]string{}}
+	refs := coverageAtomRefs{byRecipe: map[string][]string{}, byEvidence: map[string][]string{}, domainByAtomID: map[string]string{}}
 	for _, atom := range atoms.CapabilityAtoms {
+		if atom.ID != "" {
+			refs.domainByAtomID[atom.ID] = atom.Domain
+		}
 		for _, dependency := range atom.Dependencies {
 			path := filepath.ToSlash(dependency.Path)
 			switch dependency.Kind {
@@ -626,6 +645,10 @@ func loadCoverageAtomRefs(root string) coverageAtomRefs {
 		sort.Strings(refs.byEvidence[evidence])
 	}
 	return refs
+}
+
+func (r coverageAtomRefs) domainFor(atomID string) string {
+	return r.domainByAtomID[atomID]
 }
 
 func (r coverageAtomRefs) atomIDsForRecord(artifact string, recipes []string) []string {
@@ -650,6 +673,7 @@ func atomRowsForRecord(record coverageRecord, matrix matrixFile, refs coverageAt
 			stat := stats[recipe]
 			rows = append(rows, AtomCoverageRow{
 				AtomID:                atomID,
+				Domain:                refs.domainFor(atomID),
 				RecordID:              record.ID,
 				Recipe:                recipe,
 				Artifact:              filepath.ToSlash(record.Artifact),
@@ -673,6 +697,7 @@ func atomRowsForRecord(record coverageRecord, matrix matrixFile, refs coverageAt
 		}
 		rows = append(rows, AtomCoverageRow{
 			AtomID:                atomID,
+			Domain:                refs.domainFor(atomID),
 			RecordID:              record.ID,
 			Artifact:              filepath.ToSlash(record.Artifact),
 			WriterStatus:          record.WriterStatus,

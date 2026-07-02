@@ -446,6 +446,7 @@ func runCoverage(args []string) int {
 	axisOut := fs.Bool("axis", false, "write AE version-axis coverage summary JSON instead of full coverage validation report")
 	versions := fs.String("versions", "", "comma-separated AE versions for -axis; defaults to "+aeversion.SupportedRange())
 	recordFilter := fs.String("record", "", "filter rows or cells by coverage record id")
+	domainFilter := fs.String("domain", "", "filter rows, cells, or axis by atom domain")
 	atomFilter := fs.String("atom", "", "filter rows or cells by atom id")
 	recipeFilter := fs.String("recipe", "", "filter cells by recipe id")
 	caseStatusFilter := fs.String("case-status", "", "filter cells by matrix case status")
@@ -459,7 +460,7 @@ func runCoverage(args []string) int {
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage [-root .] [-coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json] [-out tmp/registry_coverage.json] [-summary|-rows|-cells|-axis] [-versions AE2020,AE2021,...] [-record id] [-atom id] [-recipe id] [-case-status status] [-writer-status status] [-writer-axis-status status] [-host-level level] [-host-axis-status status] [-boundary-status status] [-json]")
+		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage [-root .] [-coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json] [-out tmp/registry_coverage.json] [-summary|-rows|-cells|-axis] [-versions AE2020,AE2021,...] [-record id] [-domain name] [-atom id] [-recipe id] [-case-status status] [-writer-status status] [-writer-axis-status status] [-host-level level] [-host-axis-status status] [-boundary-status status] [-json]")
 		return 2
 	}
 	modes := 0
@@ -479,6 +480,7 @@ func runCoverage(args []string) int {
 	if *axisOut {
 		axis, err := registry.CoverageAxisWithFilter(*root, *coveragePath, splitCSV(*versions), registry.CoverageAxisFilter{
 			RecordID:              *recordFilter,
+			Domain:                *domainFilter,
 			AtomID:                *atomFilter,
 			Recipe:                *recipeFilter,
 			CaseStatus:            *caseStatusFilter,
@@ -497,6 +499,7 @@ func runCoverage(args []string) int {
 	} else if *cellsOut {
 		cells, err := registry.CoverageCells(*root, *coveragePath, registry.CoverageCellFilter{
 			RecordID:              *recordFilter,
+			Domain:                *domainFilter,
 			AtomID:                *atomFilter,
 			Recipe:                *recipeFilter,
 			CaseStatus:            *caseStatusFilter,
@@ -524,6 +527,7 @@ func runCoverage(args []string) int {
 		} else if *rowsOut {
 			output = registry.CoverageRows(report, registry.CoverageRowFilter{
 				RecordID:              *recordFilter,
+				Domain:                *domainFilter,
 				AtomID:                *atomFilter,
 				WriterStatus:          *writerStatusFilter,
 				HostOpenEvidenceLevel: *hostLevelFilter,
