@@ -791,18 +791,19 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "convert_test_fixture_split",
-      "reason": "Reduce convert_test.go growth risk by separating AE-open test helpers and shared project/recipe fixture builders while preserving test behavior.",
+      "group": "convert_layer_test_topic_split",
+      "reason": "Reduce convert_layer_test.go growth risk by separating default layer tests from layer attribute, matte/mask, and object/timing test topics while preserving test behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_test.go",
-          "internal/aepmigrate/convert_aeopen_test.go",
-          "internal/aepmigrate/convert_fixtures_test.go"
+          "internal/aepmigrate/convert_layer_test.go",
+          "internal/aepmigrate/convert_layer_attributes_test.go",
+          "internal/aepmigrate/convert_layer_matte_test.go",
+          "internal/aepmigrate/convert_layer_object_test.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "AE-open test helpers and shared project/recipe fixture builders have been split from convert_test.go. Next useful increment is to continue reducing large aepmigrate test files by splitting convert_layer_test.go or convert_shape_test.go into coherent topic files without changing behavior.",
+    "next_action": "Layer attribute, matte/mask, and object/timing tests have been split from convert_layer_test.go. Next useful increment is to continue reducing large aepmigrate test files by splitting convert_shape_test.go or convert_fixtures_test.go into coherent topic files without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
