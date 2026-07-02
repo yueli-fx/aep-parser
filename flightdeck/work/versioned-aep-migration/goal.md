@@ -10,25 +10,22 @@ Suggested user command:
 
 ## Objective
 
-Execute exactly one mainline upgrade package cycle under the AE Understanding
-Mainline Goal Protocol. Do not execute field-level work as a goal, and do not
-interpret one package cycle as completion of the whole AE understanding
-mainline.
+Execute the AE Understanding mainline as a continuous sequence of package
+cycles under the AE Understanding Mainline Goal Protocol. Do not execute
+field-level work as a goal, and do not interpret one package cycle as
+completion of the whole AE understanding mainline.
 
-Default first package:
+Default package selection:
 
 ```text
-essential_graphics_controllers
+Use domain-batch-inventory.json: if active_package is set, resume it;
+otherwise use next_package; otherwise choose the first candidate package.
 ```
 
-Default package scope:
+Current package queue:
 
 ```text
-Batch Essential Graphics controller support and coverage as a package: inventory
-slider, checkbox, color, point2d, point3d, angle, source_text, and dropdown;
-implement only evidence-backed members; mark unsupported members as explicit
-boundaries; run AE2020-AE2025 matrix coverage; update JSON ledgers once; commit
-once.
+text_domain_residuals -> layer_precomp_domain_residuals -> shape_domain_residuals
 ```
 
 ## Required Reading
@@ -48,7 +45,8 @@ instead of coding.
 
 ## Execution Contract
 
-Run exactly one package cycle:
+Run package cycles continuously until the mainline is complete or blocked.
+Each package cycle must remain a coherent package batch:
 
 1. Reconcile the workspace.
 2. Establish or update `domain-batch-inventory.json`.
@@ -62,24 +60,36 @@ Run exactly one package cycle:
 10. Update coverage/current/spec JSON once.
 11. Run registry/checkpoint gates.
 12. Commit once.
-13. Select the next package in JSON only.
-14. Stop.
+13. Select the next package in JSON.
+14. Commit the completed package cycle.
+15. Continue with the next selected package.
 
-Do not start a second package in the same goal run.
+Do not combine multiple packages into one commit. Do not start field-level work
+between packages. After every completed package, the workspace must be
+recoverable from committed JSON state before the next package begins.
 
-When the cycle finishes, report it as:
+When each package cycle finishes, report it internally as:
 
 ```text
 package cycle complete; mainline remains active; next package is <id>
 ```
 
+When all package records are `complete`, `blocked`, or `out_of_scope` and no
+`next_package` can be selected, run a final closure gate and report:
+
+```text
+mainline package queue complete; blocked packages: <ids-or-none>
+```
+
 Do not report:
 
 ```text
-mainline goal complete
 AE understanding complete
 overall goal complete
 ```
+
+unless the final closure gate proves there are no candidate/active packages and
+the JSON ledger records the closed state.
 
 ## Current Workspace Reconciliation
 
@@ -90,9 +100,10 @@ RED-only Essential Graphics point changes:
 - `internal/aepmigrate/convert_essential_graphics_test.go`
 - `internal/recipe/compiler_test.go`
 
-If executing the default `essential_graphics_controllers` package, absorb those
-changes into the package. If executing another package, revert only those
-RED-only changes first.
+This note is historical. Current execution must reconcile the actual workspace
+before each package cycle. If similar interrupted RED-only changes exist for a
+different package, either absorb them into that package or revert only those
+interrupted changes before starting another package.
 
 ## Package Inventory Requirements
 
@@ -174,7 +185,7 @@ unless the user explicitly asks.
 
 ## Commit Rule
 
-Default commit budget:
+Default commit budget per package:
 
 ```text
 one implementation commit
@@ -194,9 +205,9 @@ Default commit message for the default package:
 git commit -m "feat(eg): batch essential graphics controller coverage"
 ```
 
-## Completion Criteria
+## Package Cycle Completion Criteria
 
-This file's execution cycle is complete only when:
+One package cycle is complete only when:
 
 - One package is completed or explicitly blocked.
 - Every package member has a status in JSON.
@@ -206,13 +217,24 @@ This file's execution cycle is complete only when:
 - Unsupported members have explicit boundary reasons.
 - Registry/checkpoint gates pass or the blocking gate is recorded.
 - The package commit is created if implementation was completed.
-- The next package is selected in JSON only.
-- No second package has started.
+- The next package is selected in JSON.
 
 Do not mark the overall AE understanding mainline complete just because one
 package cycle passes. The persistent mainline state after a successful cycle is
 `ready_for_next_batch`, not `complete`, unless a separate user-approved final
 closure plan proves every package is done.
+
+## Continuous Goal Completion Criteria
+
+This goal is complete only when:
+
+- No package has `execution_status` of `candidate` or `active`.
+- Every package is `complete`, `blocked`, or `out_of_scope`.
+- Every blocked package has a concrete `blocked_reason` or boundary reason.
+- The coverage/current/spec JSON files pass registry/checkpoint gates.
+- `domain-batch-inventory.json` records `mainline_status` as `complete` or
+  `blocked_with_boundaries`.
+- The final state is committed.
 
 ## Stop Conditions
 
@@ -223,16 +245,17 @@ Stop and report instead of coding when:
 - Evidence is insufficient and would require guessing binary structure.
 - Matrix evidence cannot be written back to coverage JSON.
 - The diff starts spreading into repeated Markdown logging.
-- Commit count would exceed the budget.
+- Commit count would exceed the per-package budget.
 - The user says the execution is drifting.
 
 When stopped, only update the protocol/plan or redefine the package.
 
-## Next Run Semantics
+## Package Loop Semantics
 
-After a successful package cycle, the next `/goal execute .../goal.md` run must:
+After a successful package cycle, this same `/goal execute .../goal.md` run must:
 
 1. Read `domain-batch-inventory.json`.
 2. Use `next_package` as the new active package unless the user overrides it.
 3. Treat previous completed packages as baseline evidence, not as the end of the mainline.
-4. Execute exactly one more package cycle.
+4. Execute the next package cycle.
+5. Repeat until the continuous goal completion criteria or a stop condition is reached.

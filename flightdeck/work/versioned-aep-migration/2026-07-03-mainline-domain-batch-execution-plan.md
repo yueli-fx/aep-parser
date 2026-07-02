@@ -4,7 +4,7 @@
 
 **Goal:** Continue AE understanding / versioned AEP migration by executing coherent domain batches, not single-field increments.
 
-**Architecture:** Treat JSON ledgers as the source of truth and matrix outputs as rebuildable evidence. Each execution cycle selects one domain package, inventories the whole package, implements all evidence-backed members together, records unsupported members as explicit boundaries, runs AE2020-AE2025 matrix coverage, then updates JSON once and commits once.
+**Architecture:** Treat JSON ledgers as the source of truth and matrix outputs as rebuildable evidence. Each package cycle selects one domain package, inventories the whole package, implements all evidence-backed members together, records unsupported members as explicit boundaries, runs AE2020-AE2025 matrix coverage, then updates JSON once and commits once. A goal run continues from one completed package to the next until no candidate packages remain or a package is explicitly blocked.
 
 **Tech Stack:** Go, `cmd/aepmigrate`, `cmd/aepregistry`, recipe JSON, capability registry JSON, AE2020-AE2025 installed hosts.
 
@@ -21,7 +21,7 @@ rewrite the goal instead of making source changes.
 
 - No single-field goal targets. A valid target is a domain package such as `essential_graphics_controllers`, `effect_controls_static_values`, `text_domain_residuals`, `shape_domain_residuals`, or `layer_precomp_domain_residuals`.
 - No per-run Markdown churn. During execution update only the batch JSON/state files, source/tests/recipes, and final generated registry reports required by gates.
-- No tiny commits. One coherent domain batch should normally produce one commit. Split only when the first commit is infrastructure and the second is the domain implementation.
+- No tiny commits. One coherent domain batch should normally produce one commit. Split only when the first commit is infrastructure and the second is the domain implementation. In continuous goal mode, commit after each package before starting the next package.
 - No guessed binary support. If a control/property has no parser evidence, AE-native fixture, template, or generated host proof, mark it as `boundary_pending_evidence` in JSON rather than implementing it.
 - Matrix axis is AE2020-AE2025: `AE2020`, `AE2021`, `AE2022`, `AE2023`, `AE2024`, `AE2025`.
 - Endpoint inference is allowed only when direct endpoint hosts pass: if `AE2020` and `AE2025` pass, mark `AE2021-AE2024` as inferred by endpoint in the host-open evidence, not as unverified pass.
@@ -480,7 +480,7 @@ Expected: one commit contains the domain implementation, tests, recipes, and JSO
 
 ---
 
-## Task 8: Select The Next Batch, Do Not Start It Automatically
+## Task 8: Select The Next Batch And Continue
 
 **Files:**
 - Modify: `flightdeck/work/versioned-aep-migration/domain-batch-inventory.json`
@@ -494,11 +494,16 @@ After completing a package, choose the next candidate by evidence and blast radi
 3. `layer_precomp_domain_residuals`
 4. `shape_domain_residuals`
 
-- [ ] **Step 2: Stop before implementation**
+- [ ] **Step 2: Continue or close**
 
-Do not start another package in the same execution cycle unless the user explicitly resumes with a new goal against this plan.
+If `next_package` is set and no stop condition was hit, begin the next package
+cycle in the same goal run after the completed package commit. If no candidate
+package remains, run final registry/checkpoint gates, mark `mainline_status`
+`complete` or `blocked_with_boundaries`, commit the final state, and stop.
 
-Expected: worktree is clean, the completed package is committed, and the next package is only selected in JSON.
+Expected after each package: worktree is clean, the completed package is
+committed, and the next package is selected in JSON before the next package
+starts.
 
 ---
 
@@ -518,5 +523,5 @@ Expected: worktree is clean, the completed package is committed, and the next pa
 Use this as the next `/goal` objective:
 
 ```text
-Execute flightdeck/work/versioned-aep-migration/2026-07-03-mainline-domain-batch-execution-plan.md through one complete domain batch, starting with workspace reconciliation and stopping after the batch commit plus next-batch selection.
+Execute flightdeck/work/versioned-aep-migration/2026-07-03-mainline-domain-batch-execution-plan.md through the full domain package queue, committing after each completed package and continuing to the next package until no candidates remain or a package is explicitly blocked.
 ```

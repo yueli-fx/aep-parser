@@ -12,7 +12,7 @@ Focus: 当前 active execution 是 `work/versioned-aep-migration/index.md`：AE2
 
 ## Next
 
-- **versioned AEP migration**：从 `work/versioned-aep-migration/goal.md` 执行一个 package cycle；下一批 `text_domain_residuals`。不要默认跑全量 `-ae-open`，除非显式扩大/关闭 `-max-ae-open-cases`。
+- **versioned AEP migration**：从 `work/versioned-aep-migration/goal.md` 执行连续 package queue；下一批 `text_domain_residuals`，每个 package 完成后 commit/checkpoint 并自动进入下一包，直到无 candidate 或明确 blocked。不要默认跑全量 `-ae-open`，除非显式扩大/关闭 `-max-ae-open-cases`。
 - **Booyah 用户真机验收 ⑩⑪⑫**：用户确认后更新 `flightdeck/showcase/booyah-clone/INDEX.md`，再按 review-gate 翻 complete；未确认前不要关闭 Booyah topic。
 - **Technique research**：只有用户明确要继续学习/内化参考工程时才恢复；先选样本，不在主线自动推进。
 

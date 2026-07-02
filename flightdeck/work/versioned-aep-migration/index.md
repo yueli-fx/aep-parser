@@ -18,9 +18,10 @@ was `effect_controls_static_values`.
 
 ## Next
 
-When the user says to execute the mainline goal, run one package cycle from
-`goal.md`. Do not treat one completed package cycle as completion of the whole
-AEP-understanding program.
+When the user says to execute the mainline goal, run the continuous package
+queue from `goal.md`. Each package is still a separate batch and commit, but
+the goal should continue to the next package until no candidates remain or a
+package is explicitly blocked.
 
 ## Read now
 

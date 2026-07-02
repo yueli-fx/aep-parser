@@ -1,8 +1,9 @@
 # AE Understanding Mainline Goal Protocol
 
 This protocol defines how mainline AE-understanding goals must be selected,
-executed, verified, and stopped. It exists to prevent single-field work from
-spreading across the five-layer framework as repeated low-value validation.
+executed, verified, checkpointed, and closed. It exists to prevent single-field
+work from spreading across the five-layer framework as repeated low-value
+validation.
 
 ## 1. Goal Unit
 
@@ -131,6 +132,10 @@ One mainline upgrade package defaults to:
 - One implementation commit
 - Optionally one prior infrastructure commit
 
+A continuous mainline goal may complete multiple packages in one goal run, but
+the commit budget resets per package. Each completed package must be committed
+and recoverable before the next package starts.
+
 Forbidden:
 
 - One field per commit
@@ -146,9 +151,9 @@ Default changed files should be limited to:
 - `flightdeck/work/versioned-aep-migration/mainline-spec.json` when the mainline pointer changes
 - `flightdeck/work/versioned-aep-migration/domain-batch-inventory.json` when package state changes
 
-## 7. Completion Definition
+## 7. Package Completion Definition
 
-A single package-cycle goal is complete only when:
+A package cycle is complete only when:
 
 - Every package member has a recorded status.
 - Every implemented member has tests.
@@ -164,8 +169,22 @@ complete.
 
 Completing one package cycle does not complete the whole AE understanding
 mainline. After a successful package cycle, the persistent mainline status is
-`ready_for_next_batch` with a selected next package. Only a separate
-user-approved final closure plan may mark the overall mainline complete.
+`ready_for_next_batch` with a selected next package when more candidates remain.
+
+## 7.1 Continuous Goal Completion Definition
+
+A continuous mainline goal is complete only when:
+
+- `domain-batch-inventory.json` has no package with `execution_status` of
+  `candidate` or `active`.
+- Every package is `complete`, `blocked`, or `out_of_scope`.
+- Every blocked package has a concrete `blocked_reason` or boundary reason.
+- Registry coverage/checkpoint gates pass for the final ledger state.
+- The final state is committed.
+
+If candidates remain, continue to the next package in the same goal run after
+the previous package commit. Do not stop merely because one package cycle
+passed.
 
 ## 8. Stop Conditions
 
@@ -191,10 +210,11 @@ Do not continue writing field-level implementation code.
 Good goal wording:
 
 ```text
-Execute the essential_graphics_controllers mainline upgrade package. First
-establish/update domain-batch-inventory.json, inventory all members, implement
+Execute the versioned AEP migration mainline package queue. For each package in
+domain-batch-inventory.json, inventory all members, implement or verify the
 evidence-backed members as one batch, run AE2020-AE2025 matrix coverage, update
-coverage JSON, and use at most one implementation commit.
+coverage JSON once, commit the package, then continue to the next package until
+no candidate packages remain or a package is explicitly blocked.
 ```
 
 Bad goal wording:
