@@ -791,19 +791,18 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "convert_layer_test_topic_split",
-      "reason": "Reduce convert_layer_test.go growth risk by separating default layer tests from layer attribute, matte/mask, and object/timing test topics while preserving test behavior.",
+      "group": "convert_shape_test_topic_split",
+      "reason": "Reduce convert_shape_test.go growth risk by separating basic shape tests from shape filter and polystar/gradient test topics while preserving test behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_layer_test.go",
-          "internal/aepmigrate/convert_layer_attributes_test.go",
-          "internal/aepmigrate/convert_layer_matte_test.go",
-          "internal/aepmigrate/convert_layer_object_test.go"
+          "internal/aepmigrate/convert_shape_test.go",
+          "internal/aepmigrate/convert_shape_filter_test.go",
+          "internal/aepmigrate/convert_shape_gradient_test.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Layer attribute, matte/mask, and object/timing tests have been split from convert_layer_test.go. Next useful increment is to continue reducing large aepmigrate test files by splitting convert_shape_test.go or convert_fixtures_test.go into coherent topic files without changing behavior.",
+    "next_action": "Shape filter and polystar/gradient tests have been split from convert_shape_test.go. Next useful increment is to continue reducing large aepmigrate test files by splitting convert_fixtures_test.go or matrix_test.go into coherent topic files without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
