@@ -59,6 +59,8 @@ type AtomCoverageRow struct {
 	Recipe                string         `json:"recipe,omitempty"`
 	Artifact              string         `json:"artifact"`
 	WriterStatus          string         `json:"writer_status,omitempty"`
+	BoundaryStatus        string         `json:"boundary_status,omitempty"`
+	BoundaryReason        string         `json:"boundary_reason,omitempty"`
 	SourceVersions        []string       `json:"source_versions,omitempty"`
 	TargetVersions        []string       `json:"target_versions,omitempty"`
 	AEOpenVersions        []string       `json:"ae_open_versions,omitempty"`
@@ -83,6 +85,7 @@ type coverageRecord struct {
 	HostOpenRepresentatives  []string         `json:"host_open_representatives"`
 	Totals                   CoverageTotals   `json:"totals"`
 	HostOpenEndpointEvidence coverageEndpoint `json:"host_open_endpoint_evidence"`
+	Boundary                 coverageBoundary `json:"boundary"`
 }
 
 type coverageEndpoint struct {
@@ -99,6 +102,17 @@ type coverageArtifact struct {
 	Command  string         `json:"command"`
 	Artifact string         `json:"artifact"`
 	Totals   CoverageTotals `json:"totals"`
+}
+
+type coverageBoundary struct {
+	Status           string                   `json:"status"`
+	BlockedRecipeIDs []string                 `json:"blocked_recipe_ids"`
+	Details          []coverageBoundaryDetail `json:"details"`
+}
+
+type coverageBoundaryDetail struct {
+	Recipe string `json:"recipe"`
+	Reason string `json:"reason"`
 }
 
 type matrixFile struct {
@@ -317,6 +331,8 @@ func atomRowsForRecord(record coverageRecord, matrix matrixFile, refs coverageAt
 				Recipe:                recipe,
 				Artifact:              filepath.ToSlash(record.Artifact),
 				WriterStatus:          record.WriterStatus,
+				BoundaryStatus:        boundaryStatus(record, recipe),
+				BoundaryReason:        boundaryReason(record, recipe),
 				SourceVersions:        sortedKeys(stat.sourceVersions),
 				TargetVersions:        sortedKeys(stat.targetVersions),
 				AEOpenVersions:        sortedKeys(stat.aeOpenVersions),
@@ -401,6 +417,9 @@ func matrixStatsByRecipe(matrix matrixFile) map[string]recipeMatrixStats {
 }
 
 func hostOpenEvidenceLevel(record coverageRecord, recipe string) string {
+	if boundaryStatus(record, recipe) != "" {
+		return "excluded_known_boundary"
+	}
 	if stringSet(record.HostOpenEndpointEvidence.Recipes)[recipe] {
 		return "direct_endpoint_hosts_pass"
 	}
@@ -412,6 +431,28 @@ func hostOpenEvidenceLevel(record coverageRecord, recipe string) string {
 	}
 	if record.HostOpenStatus != "" {
 		return "recorded_status_only"
+	}
+	return ""
+}
+
+func boundaryStatus(record coverageRecord, recipe string) string {
+	if recipe == "" || record.Boundary.Status == "" {
+		return ""
+	}
+	if stringSet(record.Boundary.BlockedRecipeIDs)[recipe] {
+		return record.Boundary.Status
+	}
+	return ""
+}
+
+func boundaryReason(record coverageRecord, recipe string) string {
+	if boundaryStatus(record, recipe) == "" {
+		return ""
+	}
+	for _, detail := range record.Boundary.Details {
+		if detail.Recipe == recipe {
+			return detail.Reason
+		}
 	}
 	return ""
 }

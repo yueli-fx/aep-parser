@@ -173,6 +173,71 @@ func TestValidateCoverageReportsAtomRowsWithHostOpenEvidenceLabels(t *testing.T)
 	assertStringSet(t, rowB.InferredHostVersions, []string{"AE2021", "AE2022", "AE2023", "AE2024"})
 }
 
+func TestValidateCoverageReportsAtomRowBoundaryLabels(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+		"schema_version": 1,
+		"coverage": []map[string]any{
+			{
+				"id":            "layer",
+				"artifact":      "tmp/matrix/layer/matrix.json",
+				"recipes":       []string{"minimal-layer-explicit-matte"},
+				"writer_status": "boundary",
+				"boundary": map[string]any{
+					"status":             "known_matte_contract_boundary",
+					"blocked_recipe_ids": []string{"minimal-layer-explicit-matte"},
+					"details": []map[string]any{
+						{
+							"recipe":  "minimal-layer-explicit-matte",
+							"reason":  "AE2025-only explicit matte source contract",
+							"pass":    1,
+							"blocked": 5,
+							"skipped": 30,
+						},
+					},
+				},
+				"totals": map[string]any{"total": 3, "pass": 1, "blocked": 1, "failed": 0, "skipped": 1},
+			},
+		},
+	})
+	writeMatrixFixtureWithCases(t, root, "tmp/matrix/layer/matrix.json", []map[string]any{
+		{"recipe_name": "minimal-layer-explicit-matte", "source_version": "AE2025", "target_version": "AE2025", "status": "pass"},
+		{"recipe_name": "minimal-layer-explicit-matte", "source_version": "AE2025", "target_version": "AE2024", "status": "blocked"},
+		{"recipe_name": "minimal-layer-explicit-matte", "source_version": "AE2020", "target_version": "AE2020", "status": "skipped"},
+	})
+	writeJSON(t, root, "registry/capability_atoms.json", map[string]any{
+		"schema_version": 1,
+		"capability_atoms": []map[string]any{
+			{
+				"id":           "layer.track_matte.explicit_source",
+				"domain":       "layer",
+				"tier":         "atom",
+				"status":       "boundary",
+				"workflows":    []string{"migrate"},
+				"dependencies": []map[string]any{{"kind": "recipe", "path": "examples/recipes/minimal-layer-explicit-matte.json", "required": true}},
+			},
+		},
+	})
+
+	report, err := ValidateCoverage(root, "flightdeck/work/aep-understanding-generation/coverage.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != StatusPass {
+		t.Fatalf("status = %q, want %q; issues: %+v", report.Status, StatusPass, report.Issues)
+	}
+	row := findAtomCoverageRow(t, report, "layer.track_matte.explicit_source")
+	if row.BoundaryStatus != "known_matte_contract_boundary" {
+		t.Fatalf("boundary status = %q", row.BoundaryStatus)
+	}
+	if row.BoundaryReason != "AE2025-only explicit matte source contract" {
+		t.Fatalf("boundary reason = %q", row.BoundaryReason)
+	}
+	if row.HostOpenEvidenceLevel != "excluded_known_boundary" {
+		t.Fatalf("host level = %q", row.HostOpenEvidenceLevel)
+	}
+}
+
 func TestValidateCoverageFailsWhenDeclaredRecipesDoNotMatchMatrix(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 1)
@@ -232,18 +297,30 @@ func writeMatrixFixture(t *testing.T, root, rel string, total int) {
 
 func writeMatrixFixtureWithCases(t *testing.T, root, rel string, cases []map[string]any) {
 	t.Helper()
-	total := len(cases)
+	summary := map[string]any{
+		"total":   len(cases),
+		"passed":  0,
+		"blocked": 0,
+		"failed":  0,
+		"skipped": 0,
+	}
+	for _, c := range cases {
+		switch c["status"] {
+		case "blocked":
+			summary["blocked"] = summary["blocked"].(int) + 1
+		case "failed":
+			summary["failed"] = summary["failed"].(int) + 1
+		case "skipped":
+			summary["skipped"] = summary["skipped"].(int) + 1
+		default:
+			summary["passed"] = summary["passed"].(int) + 1
+		}
+	}
 	writeJSON(t, root, rel, map[string]any{
 		"schema_version": 1,
 		"out_root":       filepath.Dir(rel),
-		"summary": map[string]any{
-			"total":   total,
-			"passed":  total,
-			"blocked": 0,
-			"failed":  0,
-			"skipped": 0,
-		},
-		"cases": cases,
+		"summary":        summary,
+		"cases":          cases,
 	})
 }
 

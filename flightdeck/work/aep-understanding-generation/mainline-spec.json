@@ -168,8 +168,8 @@
     "phase": "version_matrix_totalization",
     "last_completed_target": {
       "location": "coverage_ledger",
-      "group": "coverage_atom_status_rows",
-      "reason": "Extend the Go coverage gate from record-level summaries to per-atom status rows. The report now emits one row per linked atom with recipe, writer source/target versions, per-recipe totals, and explicit host-open evidence labels for direct all-host representatives versus direct endpoint plus inferred intermediate hosts.",
+      "group": "coverage_atom_boundary_labels",
+      "reason": "Extend atom coverage rows with explicit known-boundary labels so version-gated source-contract behavior is not reported as generic recorded status. The layer explicit matte atom now carries boundary status, reason, and excluded_known_boundary host-open level.",
       "source_report": "tmp/registry_coverage.json",
       "result": {
         "command": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage.json",
@@ -177,6 +177,7 @@
         "artifacts_checked": 45,
         "atoms_linked": 139,
         "atom_rows": 139,
+        "boundary_atom_rows": 1,
         "host_open_evidence_levels": [
           {
             "level": "direct_all_hosts_representative",
@@ -187,7 +188,7 @@
             "atom_rows": 124
           },
           {
-            "level": "recorded_status_only",
+            "level": "excluded_known_boundary",
             "atom_rows": 1
           }
         ],
@@ -195,10 +196,11 @@
       },
       "previous_target": {
         "location": "coverage_ledger",
-        "group": "coverage_recipe_atom_version_validator",
+        "group": "coverage_atom_status_rows",
         "records_checked": 16,
         "artifacts_checked": 45,
         "atoms_linked": 139,
+        "atom_rows": 139,
         "coverage_errors": 0
       },
       "previous_atom_target": {
@@ -214,7 +216,7 @@
         "minimal-layer-explicit-matte remains covered by layer.track_matte.explicit_source as a version-boundary atom, not a pass-complete layer atom."
       ]
     },
-    "next_action": "Extend atom rows with explicit known-boundary labels and matrix cell detail where needed, then decide whether the two remaining recipe_atoms entries need full all_6x6 evidence or pending/boundary atom rows.",
+    "next_action": "Decide and encode policy for the two remaining recipe_atoms entries: generate full all_6x6 evidence for minimal-adjustment-layer and minimal-text-effect, or register explicit pending/boundary atom rows without marking them verified.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
