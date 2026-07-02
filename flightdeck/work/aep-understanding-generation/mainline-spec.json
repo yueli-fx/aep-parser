@@ -163,35 +163,35 @@
     "phase": "atom_taxonomy_expansion",
     "last_completed_target": {
       "location": "recipe_atoms",
-      "group": "comp",
-      "reason": "registry ownership report selected comp as the largest remaining recipe_atoms group after text, and existing comp all_6x6 matrix covers all 18 comp recipes.",
+      "group": "camera",
+      "reason": "registry ownership report selected camera as a largest remaining recipe_atoms group after comp, and existing camera all_6x6 matrix covers all 15 camera recipes without blocked, failed, or skipped cases.",
       "source_report": "tmp/registry_ownership.json",
       "observed_counts": {
         "files": 141,
-        "owned_files_before": 55,
-        "unowned_files_before": 86,
-        "selected_group_unowned_files": 18
+        "owned_files_before": 73,
+        "unowned_files_before": 68,
+        "selected_group_unowned_files": 15
       },
       "result": {
-        "capability_atoms_added": 18,
-        "recipe_atoms_owned_files_after": 73,
-        "recipe_atoms_unowned_files_after": 68,
+        "capability_atoms_added": 15,
+        "recipe_atoms_owned_files_after": 88,
+        "recipe_atoms_unowned_files_after": 53,
         "selected_group_remaining_unowned_files": 0
       },
       "previous_target": {
         "location": "recipe_atoms",
-        "group": "text",
-        "capability_atoms_added": 24,
+        "group": "comp",
+        "capability_atoms_added": 18,
         "selected_group_remaining_unowned_files": 0,
         "previous_target": {
           "location": "recipe_atoms",
-          "group": "shape",
-          "capability_atoms_added": 26,
+          "group": "text",
+          "capability_atoms_added": 24,
           "selected_group_remaining_unowned_files": 0
         }
       }
     },
-    "next_action": "Select the next atom taxonomy target from the updated ownership report; current largest recipe_atoms groups are camera and layer with 15 unowned files each.",
+    "next_action": "Select the next atom taxonomy target from the updated ownership report; current largest recipe_atoms group is layer with 15 unowned files, but layer all_6x6 includes blocked/skipped cases and must be split by evidence status.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
