@@ -791,17 +791,17 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "mask_values_split",
-      "reason": "Reduce convert_mask.go growth risk by separating mask path, enum, and color conversion helpers from mask replay and surface materialization while preserving behavior.",
+      "group": "text_animator_keyframes_split",
+      "reason": "Reduce convert_text_animator_materialize.go growth risk by separating text animator keyframe replay from animator creation while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_mask.go",
-          "internal/aepmigrate/convert_mask_values.go"
+          "internal/aepmigrate/convert_text_animator_materialize.go",
+          "internal/aepmigrate/convert_text_animator_keyframes.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Mask path, enum, and color conversion helpers have been split from convert_mask.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_text_animator_materialize.go, convert_scope_support.go, or convert_shape_support.go without changing behavior.",
+    "next_action": "Text animator keyframe replay has been split from convert_text_animator_materialize.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_scope_support.go, convert_shape_support.go, or convert_profile_values.go without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
