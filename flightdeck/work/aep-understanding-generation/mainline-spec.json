@@ -78,6 +78,11 @@
       "description": "Read-only location inventory output; ignored by git."
     },
     {
+      "path": "tmp/registry_layout.json",
+      "role": "generated_report",
+      "description": "Read-only location layout cleanup guardrail output; ignored by git."
+    },
+    {
       "path": "tmp/registry_ownership.json",
       "role": "generated_report",
       "description": "Read-only ownership/unowned output; ignored by git."
@@ -180,47 +185,99 @@
     }
   ],
   "current_execution": {
-    "phase": "version_matrix_totalization",
+    "phase": "atom_taxonomy_expansion",
     "last_completed_target": {
-      "location": "coverage_ledger",
-      "group": "coverage_cells_query",
-      "reason": "Add filtered source-target matrix cell output so atoms with pass/blocked/skipped totals can expose the exact source version, target version, AE-open version, status, and reason as JSON.",
-      "source_report": "tmp/registry_coverage_cells_explicit_matte.json",
+      "location": "registry_layout",
+      "group": "data_layout_cleanup_guardrail",
+      "reason": "Add a generated JSON report that combines location inventory and ownership into cleanup actions, so generated/untracked cleanup candidates are separated from tracked/required files that must be atomized or registered first.",
+      "source_report": "tmp/registry_layout.json",
       "result": {
-        "command_added": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_cells_explicit_matte.json -cells -atom layer.track_matte.explicit_source",
-        "supported_filters": [
-          "record",
-          "atom",
-          "recipe",
-          "case-status",
-          "writer-status",
-          "host-level",
-          "boundary-status"
+        "command_added": "go run ./cmd/aepregistry layout -root . -out tmp/registry_layout.json -sample-limit 20",
+        "locations": 17,
+        "files": 49150,
+        "owned_files": 398,
+        "unowned_files": 48752,
+        "cleanup_candidate_files": 47934,
+        "blocked_unowned_files": 532,
+        "local_only_files": 286,
+        "action_distribution": [
+          {
+            "action": "atomize_or_register_unowned",
+            "locations": 9,
+            "files": 573,
+            "unowned_files": 532,
+            "blocked_unowned_files": 532
+          },
+          {
+            "action": "review_generated_cleanup",
+            "locations": 2,
+            "files": 47952,
+            "unowned_files": 47934,
+            "cleanup_candidate_files": 47934
+          },
+          {
+            "action": "exclude_local_only",
+            "locations": 1,
+            "files": 286,
+            "unowned_files": 286,
+            "local_only_files": 286
+          },
+          {
+            "action": "keep_registered",
+            "locations": 5,
+            "files": 339,
+            "unowned_files": 0
+          }
         ],
-        "example_explicit_matte_cells": 36,
-        "example_explicit_matte_pass": 1,
-        "example_explicit_matte_blocked": 5,
-        "example_explicit_matte_skipped": 30,
-        "example_explicit_matte_blocked_report": "tmp/registry_coverage_cells_explicit_matte_blocked.json",
-        "coverage_errors": 0
+        "top_blocked_unowned_locations": [
+          {
+            "id": "serializer_templates",
+            "path": "internal/serializer/templates",
+            "blocked_unowned_files": 257
+          },
+          {
+            "id": "fixture_generators",
+            "path": "test_data/generators",
+            "blocked_unowned_files": 239
+          },
+          {
+            "id": "reverse_reference_notes",
+            "path": "data/reference",
+            "blocked_unowned_files": 12
+          },
+          {
+            "id": "migration_scripts",
+            "path": "scripts/migration",
+            "blocked_unowned_files": 11
+          },
+          {
+            "id": "effects_dictionary",
+            "path": "data/effects-dict",
+            "blocked_unowned_files": 8
+          }
+        ]
       },
       "previous_target": {
         "location": "coverage_ledger",
-        "group": "coverage_rows_query",
-        "reason": "Add filtered atom-row query output so exact atom, record, writer-status, host-open evidence, and boundary-status slices can be generated as JSON instead of manually filtering the full coverage report.",
-        "source_report": "tmp/registry_coverage_rows_text_opacity.json",
+        "group": "coverage_cells_query",
+        "reason": "Add filtered source-target matrix cell output so atoms with pass/blocked/skipped totals can expose the exact source version, target version, AE-open version, status, and reason as JSON.",
+        "source_report": "tmp/registry_coverage_cells_explicit_matte.json",
         "result": {
-          "command_added": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_rows_text_opacity.json -rows -atom text.animator.opacity",
+          "command_added": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_cells_explicit_matte.json -cells -atom layer.track_matte.explicit_source",
           "supported_filters": [
             "record",
             "atom",
+            "recipe",
+            "case-status",
             "writer-status",
             "host-level",
             "boundary-status"
           ],
-          "example_text_animator_opacity_rows": 1,
-          "example_boundary_rows": 1,
-          "example_text_animators_record_rows": 22,
+          "example_explicit_matte_cells": 36,
+          "example_explicit_matte_pass": 1,
+          "example_explicit_matte_blocked": 5,
+          "example_explicit_matte_skipped": 30,
+          "example_explicit_matte_blocked_report": "tmp/registry_coverage_cells_explicit_matte_blocked.json",
           "coverage_errors": 0
         }
       },
@@ -235,7 +292,7 @@
         "minimal-layer-explicit-matte remains covered by layer.track_matte.explicit_source as a version-boundary atom, not a pass-complete layer atom."
       ]
     },
-    "next_action": "Use coverage summary, rows, and cells query reports as the version-matrix total/detail/total surface; next useful increment is deciding the next atom family to totalize or starting the planned repository data-layout cleanup with the registry as guardrail.",
+    "next_action": "Use tmp/registry_layout.json to pick the next cleanup-safe atomization target. The highest-impact tracked blockers are serializer_templates and fixture_generators; generated cleanup candidates must stay review-only until their producing workflows are identified.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
@@ -259,6 +316,14 @@
       "command": "go run ./cmd/aepregistry inventory -root . -out tmp/registry_inventory.json",
       "required_for": [
         "asset_visibility"
+      ]
+    },
+    {
+      "id": "registry_layout",
+      "command": "go run ./cmd/aepregistry layout -root . -out tmp/registry_layout.json -sample-limit 20",
+      "required_for": [
+        "asset_visibility",
+        "atom_taxonomy_expansion"
       ]
     },
     {
