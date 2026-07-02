@@ -154,6 +154,8 @@ func runCoverage(args []string) int {
 	summaryOut := fs.Bool("summary", false, "write summary JSON instead of full coverage validation report")
 	rowsOut := fs.Bool("rows", false, "write filtered atom rows JSON instead of full coverage validation report")
 	cellsOut := fs.Bool("cells", false, "write filtered source-target matrix cells JSON instead of full coverage validation report")
+	axisOut := fs.Bool("axis", false, "write AE version-axis coverage summary JSON instead of full coverage validation report")
+	versions := fs.String("versions", "", "comma-separated AE versions for -axis; defaults to AE2020-AE2025")
 	recordFilter := fs.String("record", "", "filter rows or cells by coverage record id")
 	atomFilter := fs.String("atom", "", "filter rows or cells by atom id")
 	recipeFilter := fs.String("recipe", "", "filter cells by recipe id")
@@ -166,24 +168,32 @@ func runCoverage(args []string) int {
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage [-root .] [-coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json] [-out tmp/registry_coverage.json] [-summary|-rows|-cells] [-record id] [-atom id] [-recipe id] [-case-status status] [-writer-status status] [-host-level level] [-boundary-status status] [-json]")
+		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage [-root .] [-coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json] [-out tmp/registry_coverage.json] [-summary|-rows|-cells|-axis] [-versions AE2020,AE2021,...] [-record id] [-atom id] [-recipe id] [-case-status status] [-writer-status status] [-host-level level] [-boundary-status status] [-json]")
 		return 2
 	}
 	modes := 0
-	for _, enabled := range []bool{*summaryOut, *rowsOut, *cellsOut} {
+	for _, enabled := range []bool{*summaryOut, *rowsOut, *cellsOut, *axisOut} {
 		if enabled {
 			modes++
 		}
 	}
 	if modes > 1 {
-		fmt.Fprintln(os.Stderr, "coverage: choose only one of -summary, -rows, or -cells")
+		fmt.Fprintln(os.Stderr, "coverage: choose only one of -summary, -rows, -cells, or -axis")
 		return 2
 	}
 
 	var status string
 	var report registry.CoverageReport
 	var output any
-	if *cellsOut {
+	if *axisOut {
+		axis, err := registry.CoverageAxis(*root, *coveragePath, splitCSV(*versions))
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "coverage:", err)
+			return 2
+		}
+		output = axis
+		status = axis.Status
+	} else if *cellsOut {
 		cells, err := registry.CoverageCells(*root, *coveragePath, registry.CoverageCellFilter{
 			RecordID:              *recordFilter,
 			AtomID:                *atomFilter,
@@ -239,6 +249,9 @@ func runCoverage(args []string) int {
 		} else if *cellsOut {
 			cells := output.(registry.CoverageCellsReport)
 			fmt.Printf("registry coverage cells: %s (%d cells)\n", cells.Status, cells.Count)
+		} else if *axisOut {
+			axis := output.(registry.CoverageAxisReport)
+			fmt.Printf("registry coverage axis: %s (%d atom rows, %d cells)\n", axis.Status, axis.Summary.AtomRows, axis.Summary.Cells)
 		} else {
 			fmt.Printf("registry coverage: %s (%d artifacts, %d errors)\n", report.Status, report.Summary.Artifacts, report.Summary.Errors)
 		}

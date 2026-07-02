@@ -373,6 +373,120 @@ func TestSummarizeCoverageGroupsAtomRowsForQuickQueries(t *testing.T) {
 	}
 }
 
+func TestCoverageAxisSummarizesVersionAxisAndHostLabels(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+		"schema_version": 1,
+		"coverage": []map[string]any{
+			{
+				"id":                        "text",
+				"artifact":                  "tmp/matrix/text/matrix.json",
+				"recipes":                   []string{"minimal-text-a", "minimal-text-b"},
+				"writer_status":             "PD-6x6",
+				"host_open_representatives": []string{"minimal-text-a"},
+				"host_open_endpoint_evidence": map[string]any{
+					"direct_hosts":   []string{"AE2020", "AE2025"},
+					"inferred_hosts": []string{"AE2021", "AE2022", "AE2023", "AE2024"},
+					"recipes":        []string{"minimal-text-b"},
+					"artifact":       "tmp/matrix/text-host/matrix.json",
+					"totals":         map[string]any{"total": 2, "pass": 2, "blocked": 0, "failed": 0, "skipped": 0},
+				},
+				"totals": map[string]any{"total": 4, "pass": 4, "blocked": 0, "failed": 0, "skipped": 0},
+			},
+			{
+				"id":            "layer",
+				"artifact":      "tmp/matrix/layer/matrix.json",
+				"recipes":       []string{"minimal-layer-explicit-matte"},
+				"writer_status": "boundary",
+				"boundary": map[string]any{
+					"status":             "known_matte_contract_boundary",
+					"blocked_recipe_ids": []string{"minimal-layer-explicit-matte"},
+					"details": []map[string]any{
+						{"recipe": "minimal-layer-explicit-matte", "reason": "AE2025-only explicit matte source contract"},
+					},
+				},
+				"totals": map[string]any{"total": 2, "pass": 1, "blocked": 1, "failed": 0, "skipped": 0},
+			},
+		},
+	})
+	writeMatrixFixtureWithCases(t, root, "tmp/matrix/text/matrix.json", []map[string]any{
+		{"recipe_name": "minimal-text-a", "source_version": "AE2020", "target_version": "AE2020", "status": "pass"},
+		{"recipe_name": "minimal-text-a", "source_version": "AE2025", "target_version": "AE2025", "status": "pass"},
+		{"recipe_name": "minimal-text-b", "source_version": "AE2020", "target_version": "AE2020", "status": "pass"},
+		{"recipe_name": "minimal-text-b", "source_version": "AE2025", "target_version": "AE2025", "status": "pass"},
+	})
+	writeMatrixFixtureWithCases(t, root, "tmp/matrix/text-host/matrix.json", []map[string]any{
+		{"recipe_name": "minimal-text-b", "source_version": "AE2020", "target_version": "AE2020", "ae_open_version": "AE2020", "status": "pass"},
+		{"recipe_name": "minimal-text-b", "source_version": "AE2025", "target_version": "AE2025", "ae_open_version": "AE2025", "status": "pass"},
+	})
+	writeMatrixFixtureWithCases(t, root, "tmp/matrix/layer/matrix.json", []map[string]any{
+		{"recipe_name": "minimal-layer-explicit-matte", "source_version": "AE2025", "target_version": "AE2025", "status": "pass"},
+		{"recipe_name": "minimal-layer-explicit-matte", "source_version": "AE2025", "target_version": "AE2024", "status": "blocked"},
+	})
+	writeJSON(t, root, "registry/capability_atoms.json", map[string]any{
+		"schema_version": 1,
+		"capability_atoms": []map[string]any{
+			{
+				"id":           "text.a",
+				"domain":       "text",
+				"tier":         "atom",
+				"status":       "verified",
+				"workflows":    []string{"migrate"},
+				"dependencies": []map[string]any{{"kind": "recipe", "path": "examples/recipes/minimal-text-a.json", "required": true}},
+			},
+			{
+				"id":           "text.b",
+				"domain":       "text",
+				"tier":         "atom",
+				"status":       "verified",
+				"workflows":    []string{"migrate"},
+				"dependencies": []map[string]any{{"kind": "recipe", "path": "examples/recipes/minimal-text-b.json", "required": true}},
+			},
+			{
+				"id":           "layer.track_matte.explicit_source",
+				"domain":       "layer",
+				"tier":         "atom",
+				"status":       "boundary",
+				"workflows":    []string{"migrate"},
+				"dependencies": []map[string]any{{"kind": "recipe", "path": "examples/recipes/minimal-layer-explicit-matte.json", "required": true}},
+			},
+		},
+	})
+
+	axis, err := CoverageAxis(root, "flightdeck/work/aep-understanding-generation/coverage.json", []string{"AE2020", "AE2025"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if axis.Status != StatusPass || axis.Summary.AtomRows != 3 {
+		t.Fatalf("axis status/rows = %q/%d", axis.Status, axis.Summary.AtomRows)
+	}
+	if axis.Summary.WriterFullAxisRows != 2 || axis.Summary.BoundaryRows != 1 {
+		t.Fatalf("writer summary = %+v", axis.Summary)
+	}
+	if axis.Summary.HostFullAxisRows != 2 || axis.Summary.HostMissingRows != 0 || axis.Summary.HostBoundaryRows != 1 {
+		t.Fatalf("host summary = %+v", axis.Summary)
+	}
+	textA := findCoverageAxisRow(t, axis, "text.a")
+	if textA.HostAxisStatus != "full_direct_all_hosts_axis" {
+		t.Fatalf("text.a axis row = %+v", textA)
+	}
+	textB := findCoverageAxisRow(t, axis, "text.b")
+	if textB.WriterAxisStatus != "full_source_target_axis" || textB.HostAxisStatus != "full_direct_or_inferred_axis" {
+		t.Fatalf("text.b axis row = %+v", textB)
+	}
+	boundary := findCoverageAxisRow(t, axis, "layer.track_matte.explicit_source")
+	if boundary.WriterAxisStatus != "boundary_source_contract" || boundary.HostAxisStatus != "excluded_known_boundary" {
+		t.Fatalf("boundary axis row = %+v", boundary)
+	}
+	pair := findCoverageAxisPair(t, axis, "AE2025", "AE2024")
+	if pair.Blocked != 1 {
+		t.Fatalf("AE2025->AE2024 pair = %+v, want one blocked", pair)
+	}
+	if axis.Summary.SourceTargetPairs != 5 || axis.Summary.Cells != 6 {
+		t.Fatalf("pair/cell summary = %+v", axis.Summary)
+	}
+}
+
 func findCoverageCell(t *testing.T, cells []CoverageCell, status string) CoverageCell {
 	t.Helper()
 	for _, cell := range cells {
@@ -382,6 +496,28 @@ func findCoverageCell(t *testing.T, cells []CoverageCell, status string) Coverag
 	}
 	t.Fatalf("coverage cell with status %q not found in %+v", status, cells)
 	return CoverageCell{}
+}
+
+func findCoverageAxisRow(t *testing.T, report CoverageAxisReport, atomID string) CoverageAxisRow {
+	t.Helper()
+	for _, row := range report.Rows {
+		if row.AtomID == atomID {
+			return row
+		}
+	}
+	t.Fatalf("axis row %q not found in %+v", atomID, report.Rows)
+	return CoverageAxisRow{}
+}
+
+func findCoverageAxisPair(t *testing.T, report CoverageAxisReport, source, target string) CoverageAxisPairSummary {
+	t.Helper()
+	for _, pair := range report.ByVersionPair {
+		if pair.SourceVersion == source && pair.TargetVersion == target {
+			return pair
+		}
+	}
+	t.Fatalf("axis pair %s->%s not found in %+v", source, target, report.ByVersionPair)
+	return CoverageAxisPairSummary{}
 }
 
 func TestFilterCoverageRowsSelectsAtomRowsForFocusedQueries(t *testing.T) {

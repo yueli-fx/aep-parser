@@ -229,6 +229,44 @@ func TestRunCoverageCanWriteSummaryReport(t *testing.T) {
 	}
 }
 
+func TestRunCoverageCanWriteVersionAxisReport(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 2)
+	writeJSON(t, root, "tmp/matrix/text/matrix.json", map[string]any{
+		"schema_version": 1,
+		"summary":        map[string]any{"total": 2, "passed": 2, "blocked": 0, "failed": 0, "skipped": 0},
+		"cases": []map[string]any{
+			{"recipe_name": "text-basic", "source_version": "AE2020", "target_version": "AE2020", "status": "pass"},
+			{"recipe_name": "text-basic", "source_version": "AE2025", "target_version": "AE2025", "status": "pass"},
+		},
+	})
+	out := filepath.Join(root, "tmp", "registry_coverage_axis.json")
+
+	code := run([]string{
+		"coverage",
+		"-root", root,
+		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-out", out,
+		"-axis",
+		"-versions", "AE2020,AE2025",
+	})
+	if code != 0 {
+		t.Fatalf("run(coverage -axis) = %d, want 0", code)
+	}
+
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var report registry.CoverageAxisReport
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != registry.StatusPass || report.Summary.AtomRows != 1 || report.Summary.SourceTargetPairs != 4 {
+		t.Fatalf("axis report = %+v", report.Summary)
+	}
+}
+
 func TestRunCoverageCanWriteFilteredAtomRows(t *testing.T) {
 	root := newRegistryRoot(t)
 	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
