@@ -435,6 +435,26 @@
       }
     },
     {
+      "id": "effects-control-static-values",
+      "domain": "effect",
+      "scope": "native effect control static values for angle, checkbox, color, point, point3D, and slider controls",
+      "recipes": [
+        "minimal-effect-control-static-values"
+      ],
+      "writer_status": "PD-6x6",
+      "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
+      "host_open_status": "recorded_status_only; host-open endpoint evidence not yet captured for this new atom",
+      "artifact": "tmp/migration_matrix_effect_control_static_values_all_6x6/matrix.json",
+      "ledger": "tmp/migration_matrix_effect_control_static_values_all_6x6/ledger.md",
+      "totals": {
+        "total": 36,
+        "pass": 36,
+        "blocked": 0,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    {
       "id": "transforms-dynamic",
       "domain": "transform",
       "scope": "transform keyframes, keyframe ease, and transform expressions",

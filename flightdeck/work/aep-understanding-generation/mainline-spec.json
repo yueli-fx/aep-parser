@@ -1046,7 +1046,26 @@
         }
       }
     },
-    "next_action": "Convert entry-point growth is guarded by an explicit materialization pipeline. Next useful increment is to add the next capability family through a scoped convert_* file and registry atom/evidence update, using the refreshed AE2020-AE2025 axis totals as the baseline.",
+    "last_capability_target": {
+      "location": "effect",
+      "group": "effect_control_static_values",
+      "reason": "Add one atomized native effect-control family after the Convert materialization pipeline split, without growing convert.go.",
+      "result": {
+        "recipe": "examples/recipes/minimal-effect-control-static-values.json",
+        "atom_id": "effect.control.static_values",
+        "coverage_record": "effects-control-static-values",
+        "matrix": "tmp/migration_matrix_effect_control_static_values_all_6x6/matrix.json",
+        "totals": {
+          "total": 36,
+          "pass": 36,
+          "blocked": 0,
+          "failed": 0,
+          "skipped": 0
+        },
+        "host_open_status": "recorded_status_only; endpoint host-open evidence remains a follow-up"
+      }
+    },
+    "next_action": "Run endpoint host-open evidence for effect.control.static_values when host automation is available, or continue with the next scoped capability family using the same recipe -> atom -> coverage -> axis pattern.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

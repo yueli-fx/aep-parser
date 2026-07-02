@@ -17,3 +17,7 @@ func TestConvertWritesRecipeEffectParamKeyframesProject(t *testing.T) {
 func TestConvertWritesRecipeEffectParamVectorKeyframesProject(t *testing.T) {
 	assertRecipeConvertsPass(t, "minimal-effect-param-vector-keyframes.json")
 }
+
+func TestConvertWritesRecipeEffectControlStaticValuesProject(t *testing.T) {
+	assertRecipeConvertsPass(t, "minimal-effect-control-static-values.json")
+}

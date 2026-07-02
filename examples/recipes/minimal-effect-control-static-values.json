@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "project": {
+    "target_version": "AE2020",
+    "name": "minimal-effect-control-static-values"
+  },
+  "comps": [
+    {
+      "name": "Effect Control Static Values",
+      "width": 640,
+      "height": 360,
+      "frame_rate": 24,
+      "duration": 2,
+      "layers": [
+        {
+          "type": "text",
+          "name": "Controls",
+          "text": "FX",
+          "effects": [
+            {
+              "match_name": "ADBE Angle Control",
+              "params": [
+                {
+                  "match_name": "ADBE Angle Control-0001",
+                  "value": 33
+                }
+              ]
+            },
+            {
+              "match_name": "ADBE Checkbox Control",
+              "params": [
+                {
+                  "match_name": "ADBE Checkbox Control-0001",
+                  "value": true
+                }
+              ]
+            },
+            {
+              "match_name": "ADBE Color Control",
+              "params": [
+                {
+                  "match_name": "ADBE Color Control-0001",
+                  "value": [255, 51, 102, 153]
+                }
+              ]
+            },
+            {
+              "match_name": "ADBE Point Control",
+              "params": [
+                {
+                  "match_name": "ADBE Point Control-0001",
+                  "value": [320, 180]
+                }
+              ]
+            },
+            {
+              "match_name": "ADBE Point3D Control",
+              "params": [
+                {
+                  "match_name": "ADBE Point3D Control-0001",
+                  "value": [320, 180, 90]
+                }
+              ]
+            },
+            {
+              "match_name": "ADBE Slider Control",
+              "params": [
+                {
+                  "match_name": "ADBE Slider Control-0001",
+                  "value": 12.25
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 1,
+    "layers": [
+      {
+        "name": "Controls",
+        "type": "text"
+      }
+    ],
+    "effects": [
+      {
+        "layer_name": "Controls",
+        "match_name": "ADBE Angle Control",
+        "params": [
+          {
+            "match_name": "ADBE Angle Control-0001",
+            "value": 33
+          }
+        ]
+      },
+      {
+        "layer_name": "Controls",
+        "match_name": "ADBE Checkbox Control",
+        "params": [
+          {
+            "match_name": "ADBE Checkbox Control-0001",
+            "value": true
+          }
+        ]
+      },
+      {
+        "layer_name": "Controls",
+        "match_name": "ADBE Color Control",
+        "params": [
+          {
+            "match_name": "ADBE Color Control-0001",
+            "value": [255, 51, 102, 153]
+          }
+        ]
+      },
+      {
+        "layer_name": "Controls",
+        "match_name": "ADBE Point Control",
+        "params": [
+          {
+            "match_name": "ADBE Point Control-0001",
+            "value": [320, 180]
+          }
+        ]
+      },
+      {
+        "layer_name": "Controls",
+        "match_name": "ADBE Point3D Control",
+        "params": [
+          {
+            "match_name": "ADBE Point3D Control-0001",
+            "value": [320, 180, 90]
+          }
+        ]
+      },
+      {
+        "layer_name": "Controls",
+        "match_name": "ADBE Slider Control",
+        "params": [
+          {
+            "match_name": "ADBE Slider Control-0001",
+            "value": 12.25
+          }
+        ]
+      }
+    ]
+  }
+}

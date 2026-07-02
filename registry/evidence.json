@@ -54,6 +54,15 @@
       ]
     },
     {
+      "id": "matrix.effect_control_static_values.all_6x6",
+      "class": "generated_evidence",
+      "artifact_path": "tmp/migration_matrix_effect_control_static_values_all_6x6/matrix.json",
+      "required": true,
+      "workflows": [
+        "migrate"
+      ]
+    },
+    {
       "id": "matrix.layer_matte",
       "class": "generated_evidence",
       "artifact_path": "tmp/migration_matrix_layer_matte/matrix.json",

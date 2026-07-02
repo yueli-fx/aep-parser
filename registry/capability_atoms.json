@@ -5152,6 +5152,69 @@
       ]
     },
     {
+      "id": "effect.control.static_values",
+      "domain": "effect",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-effect-control-static-values.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/effects/effectparam_adbe_angle_control_0001.bin",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/effects/effect_adbe_checkbox_control.bin",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/effects/effectparam_adbe_color_control_0001.bin",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/effects/effectparam_adbe_point_control_0001.bin",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/effects/effectparam_adbe_point3d_control_0001.bin",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/effects/effectparam_adbe_slider_control_0001.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_effect_control_static_values_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Covers static values for native Angle, Checkbox, Color, Point, Point3D, and Slider effect controls across the AE2020-AE2025 writer matrix."
+      ]
+    },
+    {
       "id": "precomp.layer",
       "domain": "precomp",
       "tier": "atom",
