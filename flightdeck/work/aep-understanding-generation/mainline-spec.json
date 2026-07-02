@@ -789,7 +789,19 @@
         }
       }
     },
-  "next_action": "Use aepregistry gate -scope version-matrix and -scope asset-policy as the two main JSON gate entrypoints. Migration capability policy has been separated from the top-level convert flow; next useful increment is to reduce growth risk in the larger materialization modules, starting with text or scope conversion helpers, without changing behavior.",
+    "last_code_maintenance_target": {
+      "location": "internal/aepmigrate",
+      "group": "text_animator_materialization_split",
+      "reason": "Reduce convert_text.go growth risk by separating text animator materialization from text style enum/run/paragraph conversion while preserving behavior.",
+      "result": {
+        "files": [
+          "internal/aepmigrate/convert_text.go",
+          "internal/aepmigrate/convert_text_animator.go"
+        ],
+        "behavior": "no semantic change intended"
+      }
+    },
+    "next_action": "Text animator materialization has been split from convert_text.go. Next useful increment is to split another large materialization boundary, likely text style enum/run/paragraph helpers or convert_scope helpers, without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
