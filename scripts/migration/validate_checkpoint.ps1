@@ -32,7 +32,7 @@ if (-not $CoverageBatchId) {
 }
 
 Invoke-Step "validate current JSON" {
-  pwsh -File (Join-Path $repoRoot "scripts/migration/validate_current.ps1") -CurrentPath $CurrentPath
+  go run ./cmd/aepregistry current -root . -current $CurrentPath -out tmp/registry_current.json
 }
 
 Invoke-Step "validate coverage JSON" {

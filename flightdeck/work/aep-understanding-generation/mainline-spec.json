@@ -1046,13 +1046,12 @@
     },
     "last_code_maintenance_target": {
       "location": "registry_tooling",
-      "group": "go_coverage_validator_gate",
-      "reason": "Move coverage JSON validation rules onto the Go-first registry coverage command so host-open policy, ledger presence, and recipe coverage are checked cross-platform.",
+      "group": "go_current_validator_gate",
+      "reason": "Move current JSON validation onto a Go-first registry command so checkpoint no longer depends on the PowerShell current-state validator.",
       "result": {
         "commands": {
-          "go_coverage_validator": "go run ./cmd/aepregistry coverage -root . -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -out tmp/registry_coverage.json -require-ledgers",
+          "go_current_validator": "go run ./cmd/aepregistry current -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -out tmp/registry_current.json",
           "checkpoint": "pwsh -File scripts/migration/validate_checkpoint.ps1",
-          "coverage_batch_skip_run": "pwsh -File scripts/migration/run_coverage_batch.ps1 -BatchId all-current-writer-coverage -SkipRun",
           "focused_registry_tests": "go test ./cmd/aepregistry ./internal/registry",
           "version_gate": "go run ./cmd/aepregistry gate -root . -out tmp/registry_gate.json -scope version-matrix",
           "asset_gate": "go run ./cmd/aepregistry gate -root . -out tmp/registry_asset_gate.json -scope asset-policy"
@@ -1060,26 +1059,24 @@
         "files": [
           "cmd/aepregistry/main.go",
           "cmd/aepregistry/main_test.go",
-          "internal/registry/coverage.go",
-          "internal/registry/coverage_axis.go",
-          "internal/registry/coverage_test.go",
+          "internal/registry/current.go",
+          "internal/registry/current_test.go",
           "scripts/migration/validate_checkpoint.ps1",
-          "scripts/migration/run_coverage_batch.ps1",
           "flightdeck/work/aep-understanding-generation/current.md",
           "flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json",
           "flightdeck/work/aep-understanding-generation/mainline-spec.json"
         ],
-        "coverage_validator_result": {
-          "report": "tmp/registry_coverage.json",
+        "current_validator_result": {
+          "report": "tmp/registry_current.json",
           "status": "pass",
-          "artifacts": 49,
+          "coverage_batches": 2,
+          "tooling": 11,
           "errors": 0,
-          "host_open_policy_checked": true,
-          "require_ledgers_checked": true,
-          "recipe_coverage_checked": 143,
+          "truth_sources_checked": true,
+          "matrix_gates_checked": true,
+          "coverage_batches_checked": true,
           "checkpoint_uses_go": true,
-          "coverage_batch_runner_uses_go": true,
-          "legacy_script_retained_for_current_tooling_compatibility": "scripts/migration/validate_coverage.ps1"
+          "legacy_script_retained_for_current_tooling_compatibility": "scripts/migration/validate_current.ps1"
         },
         "current_totals": {
           "records": 18,
@@ -1136,7 +1133,7 @@
         }
       }
     },
-    "next_action": "Coverage JSON validation now has Go-first host-open policy, ledger, and all-recipe coverage checks, and checkpoint/batch validation call the Go command. Continue mainline by either moving the next PowerShell-only helper into Go or selecting a real unsupported conversion surface.",
+    "next_action": "Current JSON validation now has a Go-first registry command and checkpoint calls it directly. Continue mainline by either moving the next PowerShell-only helper into Go or selecting a real unsupported conversion surface.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

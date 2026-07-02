@@ -501,8 +501,10 @@
     {
       "id": "current-json-validator",
       "status": "available_verified",
-      "purpose": "Validate current JSON references, frozen Markdown paths, scripts, and coverage batch entries.",
-      "script": "scripts/migration/validate_current.ps1"
+      "purpose": "Validate current JSON references, frozen Markdown paths, tooling scripts, matrix gates, standalone verify gate, host-open gap audit, and coverage batch entries. Go command is primary; the PowerShell script remains as legacy compatibility.",
+      "command": "go run ./cmd/aepregistry current -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -out tmp/registry_current.json",
+      "script": "scripts/migration/validate_current.ps1",
+      "legacy_command": "pwsh -File scripts/migration/validate_current.ps1"
     },
     {
       "id": "migration-checkpoint-validator",
@@ -582,9 +584,9 @@
     "remaining_active_items": [],
     "commands": [
       {
-        "command": "pwsh -File scripts/migration/validate_current.ps1",
+        "command": "go run ./cmd/aepregistry current -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -out tmp/registry_current.json",
         "status": "pass",
-        "evidence": "current ok: checked 2 coverage batches and 11 tooling entries"
+        "evidence": "current validation: pass (2 coverage batches, 11 tooling entries, 0 errors)"
       },
       {
         "command": "pwsh -File scripts/migration/validate_checkpoint.ps1",

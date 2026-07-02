@@ -10,7 +10,7 @@ Read:
 Use:
 
 ```powershell
-pwsh -File scripts\migration\validate_current.ps1
+go run ./cmd/aepregistry current -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -out tmp/registry_current.json
 go run ./cmd/aepregistry migration-summary -root . -out tmp/migration_coverage_summary.json
 go run ./cmd/aepregistry migration-summary -root . -out tmp/migration_coverage_summary.json -check
 go run ./cmd/aepregistry migration-summary -root . -out tmp/migration_coverage_summary.json -totals

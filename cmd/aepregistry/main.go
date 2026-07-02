@@ -29,6 +29,8 @@ func run(args []string) int {
 		return runBoundaries(args[1:])
 	case "coverage":
 		return runCoverage(args[1:])
+	case "current":
+		return runCurrent(args[1:])
 	case "gate":
 		return runGate(args[1:])
 	case "host-open-gaps":
@@ -49,6 +51,43 @@ func run(args []string) int {
 		usage()
 		return 2
 	}
+}
+
+func runCurrent(args []string) int {
+	fs := flag.NewFlagSet("aepregistry current", flag.ContinueOnError)
+	fs.SetOutput(os.Stderr)
+	root := fs.String("root", ".", "repository root")
+	currentPath := fs.String("current", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json", "current state JSON path")
+	outPath := fs.String("out", "tmp/registry_current.json", "current validation report JSON path")
+	jsonOut := fs.Bool("json", false, "print JSON report")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	if fs.NArg() != 0 {
+		fmt.Fprintln(os.Stderr, "usage: aepregistry current [-root .] [-current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json] [-out tmp/registry_current.json] [-json]")
+		return 2
+	}
+	report, err := registry.ValidateCurrent(*root, *currentPath)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "current:", err)
+		return 2
+	}
+	if err := writeJSONFile(resolveRootPath(*root, *outPath), report); err != nil {
+		fmt.Fprintln(os.Stderr, "write:", err)
+		return 2
+	}
+	if *jsonOut {
+		if err := json.NewEncoder(os.Stdout).Encode(report); err != nil {
+			fmt.Fprintln(os.Stderr, "stdout:", err)
+			return 2
+		}
+	} else {
+		fmt.Printf("current validation: %s (%d coverage batches, %d tooling entries, %d errors)\n", report.Status, report.Summary.CoverageBatches, report.Summary.Tooling, report.Summary.Errors)
+	}
+	if report.Status == registry.StatusFail {
+		return 1
+	}
+	return 0
 }
 
 func runRecurringMatrix(args []string) int {
@@ -1265,5 +1304,5 @@ func writeJSONFile(path string, value any) error {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: aepregistry <audit|boundaries|cleanup|coverage|gate|host-open-gaps|inventory|layout|migration-summary|ownership|recurring-matrix> [flags]")
+	fmt.Fprintln(os.Stderr, "usage: aepregistry <audit|boundaries|cleanup|coverage|current|gate|host-open-gaps|inventory|layout|migration-summary|ownership|recurring-matrix> [flags]")
 }
