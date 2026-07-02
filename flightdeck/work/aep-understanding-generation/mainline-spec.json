@@ -1040,29 +1040,30 @@
       }
     },
     "last_code_maintenance_target": {
-      "location": "cmd/aepregistry",
-      "group": "asset_policy_layout_cleanup_consistency",
-      "reason": "Make asset-policy gate fail when layout cleanup totals drift from generated cleanup classification totals.",
+      "location": "tmp",
+      "group": "review_prunable_generated_apply_cleanup",
+      "reason": "Execute the scoped preserve-path cleanup for the remaining version_matrix and host_open_gap review-prunable generated siblings after layout and cleanup reports agreed on the same candidate totals.",
       "result": {
-        "files": [
-          "cmd/aepregistry/main.go",
-          "cmd/aepregistry/main_test.go",
-          "flightdeck/work/aep-understanding-generation/mainline-spec.json"
-        ],
-        "behavior": "aepregistry gate -scope asset-policy now writes tmp/registry_layout_cleanup_consistency.json and fails if layout and generated cleanup disagree on cleanup_candidate_files, direct_cleanup_candidate_files, or review_prunable_files.",
-        "queries": {
-          "layout_cleanup_consistency": {
-            "command": "go run ./cmd/aepregistry gate -root . -out tmp/registry_asset_gate.json -scope asset-policy",
-            "steps": 7,
-            "failed": 0,
-            "cleanup_candidate_files": 344,
-            "direct_cleanup_candidate_files": 0,
-            "review_prunable_files": 344
-          }
+        "commands": {
+          "version_matrix_apply": "go run ./cmd/aepregistry cleanup -root . -out tmp/registry_generated_cleanup.json -exec-out tmp/registry_cleanup_version_matrix_prune_apply.json -prune-review-siblings -producer version_matrix -apply -sample-limit 5",
+          "host_open_gap_apply": "go run ./cmd/aepregistry cleanup -root . -out tmp/registry_generated_cleanup_host_apply_prep.json -exec-out tmp/registry_cleanup_host_open_prune_apply.json -prune-review-siblings -producer host_open_gap -apply -sample-limit 5"
         },
-        "new_report": [
-          "tmp/registry_layout_cleanup_consistency.json"
-        ]
+        "deleted_files": {
+          "version_matrix": 288,
+          "host_open_gap": 56,
+          "total": 344
+        },
+        "post_cleanup": {
+          "cleanup_candidate_files": 0,
+          "direct_cleanup_candidate_files": 0,
+          "review_prunable_files": 0,
+          "blocked_unowned_files": 0,
+          "asset_policy_gate_steps": 7,
+          "asset_policy_gate_failed": 0,
+          "version_matrix_gate_steps": 7,
+          "version_matrix_gate_failed": 0
+        },
+        "preservation": "Only unreferenced generated siblings were deleted; registered evidence and state-referenced matrix/ledger paths were preserved by cleanup preserve_paths."
       }
     },
     "last_capability_target": {
@@ -1092,7 +1093,7 @@
         }
       }
     },
-    "next_action": "Coverage axis can now be queried by writer and host axis status. Continue with the next scoped capability family or add another operator-facing query only when it removes manual JSON scanning.",
+    "next_action": "Generated cleanup candidates are now reduced to zero with asset-policy and version-matrix gates passing. Continue with the next scoped capability family or matrix coverage expansion rather than additional cleanup unless new generated candidates appear.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
