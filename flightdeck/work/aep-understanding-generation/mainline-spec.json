@@ -1046,8 +1046,8 @@
     },
     "last_code_maintenance_target": {
       "location": "coverage_ledger",
-      "group": "camera_recipe_declarations",
-      "reason": "Declare the observed camera writer-matrix recipes in the coverage ledger to reduce observed-but-undeclared recipe gaps before larger family batches.",
+      "group": "remaining_recipe_declarations",
+      "reason": "Declare the remaining observed writer-matrix recipes in the coverage ledger so observed recipes and declared recipes are fully aligned.",
       "result": {
         "commands": {
           "summary_refresh": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_summary.json -summary",
@@ -1059,30 +1059,30 @@
         ],
         "declared_records": [
           {
-            "record": "camera",
-            "recipes": [
-              "minimal-camera-aperture",
-              "minimal-camera-blur-level",
-              "minimal-camera-depth-of-field",
-              "minimal-camera-focus-distance",
-              "minimal-camera-iris-aspect-ratio",
-              "minimal-camera-iris-diffraction-fringe",
-              "minimal-camera-iris-highlight-gain",
-              "minimal-camera-iris-highlight-saturation",
-              "minimal-camera-iris-highlight-threshold",
-              "minimal-camera-iris-rotation",
-              "minimal-camera-iris-roundness",
-              "minimal-camera-iris-shape",
-              "minimal-camera-layer",
-              "minimal-camera-object-profile",
-              "minimal-camera-zoom"
-            ]
+            "record": "layer-all-family",
+            "recipe_count": 16,
+            "recipe_source": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json"
+          },
+          {
+            "record": "comp",
+            "recipe_count": 18,
+            "recipe_source": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json"
+          },
+          {
+            "record": "text-animators",
+            "recipe_count": 22,
+            "recipe_source": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json"
+          },
+          {
+            "record": "shape-all-family",
+            "recipe_count": 27,
+            "recipe_source": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json"
           }
         ],
         "gap_delta": {
-          "declared_recipes": "+15",
-          "observed_recipes_without_declaration": "-15",
-          "records_with_undeclared_recipes": "-1"
+          "declared_recipes": "+83",
+          "observed_recipes_without_declaration": "-83",
+          "records_with_undeclared_recipes": "-4"
         },
         "current_totals": {
           "records": 18,
@@ -1093,20 +1093,15 @@
           "errors": 0,
           "direct_host_atoms": 128,
           "inferred_host_atoms": 128,
-          "declared_recipes": 60,
+          "declared_recipes": 143,
           "observed_recipes": 143,
           "atom_row_recipes": 143,
           "recipes_without_atom_rows": 0,
           "atom_rows_without_recipes": 0,
-          "observed_recipes_without_declaration": 83,
-          "records_with_undeclared_recipes": 4
+          "observed_recipes_without_declaration": 0,
+          "records_with_undeclared_recipes": 0
         },
-        "remaining_undeclared_records": [
-          "shape-all-family",
-          "text-animators",
-          "comp",
-          "layer-all-family"
-        ],
+        "remaining_undeclared_records": [],
         "post_gate_status": {
           "version_matrix": "pass",
           "version_matrix_steps": 8,
@@ -1144,7 +1139,7 @@
         }
       }
     },
-    "next_action": "Coverage ledger undeclared recipe gaps are down to 83 observed recipes across 4 records. Continue reducing by declaring the next scoped family; layer-all-family is the smallest remaining batch before comp/text/shape.",
+    "next_action": "Coverage ledger observed recipe declarations are aligned at 143/143 with zero undeclared records. Return to the AE-understanding mainline by selecting the next matrix-backed capability or architecture cleanup from the spec rather than adding more declaration-only batches.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
