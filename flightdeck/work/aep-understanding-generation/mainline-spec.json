@@ -128,6 +128,11 @@
       "description": "Read-only version-boundary contract check comparing registry/version_boundaries.json against generated coverage-axis totals; ignored by git."
     },
     {
+      "path": "tmp/registry_gate.json",
+      "role": "generated_report",
+      "description": "Read-only ordered registry gate report for audit, version-boundary contracts, coverage, coverage summary, and coverage axis outputs; ignored by git."
+    },
+    {
       "path": "tmp/registry_coverage_rows_*.json",
       "role": "generated_report",
       "description": "Read-only filtered coverage atom-row query outputs; ignored by git."
@@ -779,7 +784,7 @@
         }
       }
     },
-  "next_action": "Use registry/version_boundaries.json, tmp/registry_version_boundaries.json, and focused coverage-axis queries as the version-matrix total/detail/total interface. Next useful increment is to add a single Go gate runner for the ordered registry audit, boundary contract, coverage, and axis reports so version-matrix validation is not manually orchestrated.",
+  "next_action": "Use aepregistry gate as the version-matrix total/detail/total entrypoint. Next useful increment is to extend the same gate-runner pattern to generated cleanup and ownership policy once version-matrix reports remain stable.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
@@ -796,6 +801,13 @@
         "registry",
         "asset_visibility",
         "atom_taxonomy_expansion",
+        "version_matrix_totalization"
+      ]
+    },
+    {
+      "id": "registry_gate",
+      "command": "go run ./cmd/aepregistry gate -root . -out tmp/registry_gate.json",
+      "required_for": [
         "version_matrix_totalization"
       ]
     },

@@ -80,15 +80,19 @@ func CoverageAxis(root, coveragePath string, versionAxis []string) (CoverageAxis
 }
 
 func CoverageAxisWithFilter(root, coveragePath string, versionAxis []string, filter CoverageAxisFilter) (CoverageAxisReport, error) {
+	return coverageAxisWithFilter(root, coveragePath, versionAxis, filter, true)
+}
+
+func coverageAxisWithFilter(root, coveragePath string, versionAxis []string, filter CoverageAxisFilter, checkContractGates bool) (CoverageAxisReport, error) {
 	if len(versionAxis) == 0 {
 		versionAxis = DefaultAEVersionAxis
 	}
 	versionAxis = sortedStrings(versionAxis)
-	report, err := ValidateCoverage(root, coveragePath)
+	report, err := validateCoverage(root, coveragePath, checkContractGates)
 	if err != nil {
 		return CoverageAxisReport{}, err
 	}
-	cells, err := CoverageCells(root, coveragePath, CoverageCellFilter{
+	cells, err := coverageCells(root, coveragePath, CoverageCellFilter{
 		RecordID:              filter.RecordID,
 		AtomID:                filter.AtomID,
 		Recipe:                filter.Recipe,
@@ -96,7 +100,7 @@ func CoverageAxisWithFilter(root, coveragePath string, versionAxis []string, fil
 		WriterStatus:          filter.WriterStatus,
 		HostOpenEvidenceLevel: filter.HostOpenEvidenceLevel,
 		BoundaryStatus:        filter.BoundaryStatus,
-	})
+	}, checkContractGates)
 	if err != nil {
 		return CoverageAxisReport{}, err
 	}

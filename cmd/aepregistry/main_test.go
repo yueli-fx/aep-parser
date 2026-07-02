@@ -364,6 +364,94 @@ func TestRunBoundariesReturnsOneForBoundaryDrift(t *testing.T) {
 	}
 }
 
+func TestRunGateWritesOrderedReports(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeBoundaryCommandFixture(t, root, map[string]any{"total": 2, "pass": 1, "blocked": 1, "failed": 0, "skipped": 0})
+	addCommandBoundaryContractGate(t, root)
+	out := filepath.Join(root, "tmp", "registry_gate.json")
+
+	code := run([]string{
+		"gate",
+		"-root", root,
+		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-out", out,
+		"-versions", "AE2020,AE2025",
+	})
+	if code != 0 {
+		t.Fatalf("run(gate) = %d, want 0", code)
+	}
+
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var report gateReport
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != registry.StatusPass || report.Summary.Steps != 6 || report.Summary.Failed != 0 {
+		t.Fatalf("gate report = %+v", report)
+	}
+	wantOrder := []string{
+		"registry_audit",
+		"registry_version_boundaries",
+		"registry_coverage",
+		"registry_coverage_summary",
+		"registry_coverage_axis",
+		"registry_coverage_axis_boundary",
+	}
+	for i, want := range wantOrder {
+		if report.Steps[i].ID != want {
+			t.Fatalf("step %d = %q, want %q; steps=%+v", i, report.Steps[i].ID, want, report.Steps)
+		}
+	}
+	for _, rel := range []string{
+		"tmp/registry_audit.json",
+		"tmp/registry_version_boundaries.json",
+		"tmp/registry_coverage.json",
+		"tmp/registry_coverage_summary.json",
+		"tmp/registry_coverage_axis.json",
+		"tmp/registry_coverage_axis_boundary.json",
+	} {
+		if _, err := os.Stat(filepath.Join(root, filepath.FromSlash(rel))); err != nil {
+			t.Fatalf("expected gate output %s: %v", rel, err)
+		}
+	}
+}
+
+func TestRunGateReturnsOneForFailedStep(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeBoundaryCommandFixture(t, root, map[string]any{"total": 2, "pass": 1, "blocked": 1, "failed": 0, "skipped": 0})
+	addCommandBoundaryContractGate(t, root)
+	if err := os.Remove(filepath.Join(root, "examples", "recipes", "text-basic.json")); err != nil {
+		t.Fatal(err)
+	}
+	out := filepath.Join(root, "tmp", "registry_gate.json")
+
+	code := run([]string{
+		"gate",
+		"-root", root,
+		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-out", out,
+		"-versions", "AE2020,AE2025",
+	})
+	if code != 1 {
+		t.Fatalf("run(gate failed) = %d, want 1", code)
+	}
+
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var report gateReport
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != registry.StatusFail || report.Summary.Failed == 0 {
+		t.Fatalf("gate report = %+v, want failed step", report)
+	}
+}
+
 func TestRunCoverageCanWriteFilteredAtomRows(t *testing.T) {
 	root := newRegistryRoot(t)
 	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
@@ -625,6 +713,47 @@ func writeBoundaryCommandFixture(t *testing.T, root string, expectedCells map[st
 				},
 				"expected_cells": expectedCells,
 				"evidence":       []map[string]any{{"kind": "matrix", "path": "tmp/matrix/text/matrix.json", "required": true}},
+			},
+		},
+	})
+}
+
+func addCommandBoundaryContractGate(t *testing.T, root string) {
+	t.Helper()
+	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+		"schema_version": 1,
+		"contract_gates": []map[string]any{
+			{
+				"id":       "registry-version-boundaries",
+				"kind":     "version_boundaries",
+				"command":  "go run ./cmd/aepregistry boundaries -root . -out tmp/registry_version_boundaries.json",
+				"artifact": "tmp/registry_version_boundaries.json",
+				"status":   registry.StatusPass,
+				"summary": map[string]any{
+					"boundaries":        1,
+					"matched":           1,
+					"missing_rows":      0,
+					"duplicate_rows":    0,
+					"mismatched_totals": 0,
+					"mismatched_status": 0,
+					"checked_cells":     0,
+					"missing_cells":     0,
+					"mismatched_cells":  0,
+					"errors":            0,
+				},
+			},
+		},
+		"coverage": []map[string]any{
+			{
+				"id":            "text",
+				"artifact":      "tmp/matrix/text/matrix.json",
+				"recipes":       []string{"text-basic"},
+				"writer_status": "boundary",
+				"boundary": map[string]any{
+					"status":             "known_text_boundary",
+					"blocked_recipe_ids": []string{"text-basic"},
+				},
+				"totals": map[string]any{"total": 2, "pass": 1, "blocked": 1, "failed": 0, "skipped": 0},
 			},
 		},
 	})

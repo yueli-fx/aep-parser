@@ -66,6 +66,52 @@ func TestCheckVersionBoundariesReportsCellPolicyDrift(t *testing.T) {
 	}
 }
 
+func TestCheckVersionBoundariesDoesNotRequireExistingContractGateArtifact(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeBoundaryCheckFixture(t, root, CoverageTotals{Total: 3, Pass: 1, Blocked: 1, Failed: 0, Skipped: 1}, boundaryCheckCases("blocked"))
+	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+		"schema_version": 1,
+		"contract_gates": []map[string]any{
+			{
+				"id":       "registry-version-boundaries",
+				"kind":     "version_boundaries",
+				"artifact": "tmp/missing_registry_version_boundaries.json",
+				"status":   StatusPass,
+			},
+		},
+		"coverage": []map[string]any{
+			{
+				"id":            "layer",
+				"artifact":      "tmp/matrix/layer/matrix.json",
+				"recipes":       []string{"minimal-layer-explicit-matte"},
+				"writer_status": "boundary",
+				"boundary": map[string]any{
+					"status":             "known_matte_contract_boundary",
+					"blocked_recipe_ids": []string{"minimal-layer-explicit-matte"},
+				},
+				"totals": map[string]any{"total": 3, "pass": 1, "blocked": 1, "failed": 0, "skipped": 1},
+			},
+		},
+	})
+
+	boundaries, err := CheckVersionBoundaries(root, "flightdeck/work/aep-understanding-generation/coverage.json", []string{"AE2020", "AE2024", "AE2025"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if boundaries.Status != StatusPass {
+		t.Fatalf("boundary status = %q, want pass; issues: %+v", boundaries.Status, boundaries.Issues)
+	}
+
+	coverage, err := ValidateCoverage(root, "flightdeck/work/aep-understanding-generation/coverage.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if coverage.Status != StatusFail {
+		t.Fatalf("coverage status = %q, want fail", coverage.Status)
+	}
+	assertCoverageIssue(t, coverage, "missing_or_invalid_contract_gate", "registry-version-boundaries", "tmp/missing_registry_version_boundaries.json")
+}
+
 func writeBoundaryCheckFixture(t *testing.T, root string, expected CoverageTotals, cases []map[string]any) {
 	t.Helper()
 	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{

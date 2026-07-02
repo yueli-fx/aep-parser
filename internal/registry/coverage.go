@@ -227,6 +227,10 @@ type coverageArtifactRef struct {
 }
 
 func ValidateCoverage(root, coveragePath string) (CoverageReport, error) {
+	return validateCoverage(root, coveragePath, true)
+}
+
+func validateCoverage(root, coveragePath string, checkContractGates bool) (CoverageReport, error) {
 	var coverage coverageFile
 	if err := readJSONPath(root, coveragePath, &coverage); err != nil {
 		return CoverageReport{}, err
@@ -246,8 +250,10 @@ func ValidateCoverage(root, coveragePath string) (CoverageReport, error) {
 	for _, ref := range refs {
 		report.checkArtifact(root, ref)
 	}
-	for _, gate := range coverage.ContractGates {
-		report.checkContractGate(root, gate)
+	if checkContractGates {
+		for _, gate := range coverage.ContractGates {
+			report.checkContractGate(root, gate)
+		}
 	}
 	for _, record := range coverage.Coverage {
 		report.checkCoverageRecord(root, record, atomRefs)
@@ -328,7 +334,11 @@ func CoverageRows(report CoverageReport, filter CoverageRowFilter) CoverageRowsR
 }
 
 func CoverageCells(root, coveragePath string, filter CoverageCellFilter) (CoverageCellsReport, error) {
-	report, err := ValidateCoverage(root, coveragePath)
+	return coverageCells(root, coveragePath, filter, true)
+}
+
+func coverageCells(root, coveragePath string, filter CoverageCellFilter, checkContractGates bool) (CoverageCellsReport, error) {
+	report, err := validateCoverage(root, coveragePath, checkContractGates)
 	if err != nil {
 		return CoverageCellsReport{}, err
 	}

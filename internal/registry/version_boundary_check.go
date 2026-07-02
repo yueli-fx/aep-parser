@@ -76,7 +76,7 @@ func CheckVersionBoundaries(root, coveragePath string, versionAxis []string) (Ve
 			Boundaries: len(reg.VersionBoundaries),
 		},
 	}
-	axis, err := CoverageAxisWithFilter(root, coveragePath, report.VersionAxis, CoverageAxisFilter{})
+	axis, err := coverageAxisWithFilter(root, coveragePath, report.VersionAxis, CoverageAxisFilter{}, false)
 	if err != nil {
 		return VersionBoundaryCheckReport{}, err
 	}
@@ -85,7 +85,7 @@ func CheckVersionBoundaries(root, coveragePath string, versionAxis []string) (Ve
 		key := versionBoundaryRowKey(row.AtomID, row.Recipe)
 		rowsByBoundary[key] = append(rowsByBoundary[key], row)
 	}
-	cells, err := CoverageCells(root, coveragePath, CoverageCellFilter{})
+	cells, err := coverageCells(root, coveragePath, CoverageCellFilter{}, false)
 	if err != nil {
 		return VersionBoundaryCheckReport{}, err
 	}
