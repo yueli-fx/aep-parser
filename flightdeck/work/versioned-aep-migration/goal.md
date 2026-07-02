@@ -37,8 +37,8 @@ Before making source changes, read these files:
 
 0. If context was compacted/resumed/summarized: reload the Flightdeck preflight
    skill/protocol and reread the project Flightdeck state before continuing.
-1. `flightdeck/work/aep-understanding-generation/mainline-goal-protocol.md`
-2. `flightdeck/work/aep-understanding-generation/2026-07-03-mainline-domain-batch-execution-plan.md`
+1. `flightdeck/work/versioned-aep-migration/mainline-goal-protocol.md`
+2. `flightdeck/work/versioned-aep-migration/2026-07-03-mainline-domain-batch-execution-plan.md`
 3. `flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json`
 4. `flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json`
 5. `flightdeck/work/versioned-aep-migration/mainline-spec.json`

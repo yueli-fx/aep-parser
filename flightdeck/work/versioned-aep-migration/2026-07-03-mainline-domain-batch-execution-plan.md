@@ -13,7 +13,7 @@
 ## Required Protocol
 
 Before executing this plan, read and follow
-`flightdeck/work/aep-understanding-generation/mainline-goal-protocol.md`.
+`flightdeck/work/versioned-aep-migration/mainline-goal-protocol.md`.
 If the requested goal is field-level rather than package-level, stop and
 rewrite the goal instead of making source changes.
 
@@ -518,5 +518,5 @@ Expected: worktree is clean, the completed package is committed, and the next pa
 Use this as the next `/goal` objective:
 
 ```text
-Execute flightdeck/work/aep-understanding-generation/2026-07-03-mainline-domain-batch-execution-plan.md through one complete domain batch, starting with workspace reconciliation and stopping after the batch commit plus next-batch selection.
+Execute flightdeck/work/versioned-aep-migration/2026-07-03-mainline-domain-batch-execution-plan.md through one complete domain batch, starting with workspace reconciliation and stopping after the batch commit plus next-batch selection.
 ```
