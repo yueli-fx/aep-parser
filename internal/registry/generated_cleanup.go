@@ -52,13 +52,17 @@ type GeneratedCleanupGroup struct {
 	ProducerWorkflows []string `json:"producer_workflows,omitempty"`
 	Action            string   `json:"action"`
 	CleanupSafety     string   `json:"cleanup_safety"`
+	CleanupOperation  string   `json:"cleanup_operation"`
+	CleanupTarget     string   `json:"cleanup_target,omitempty"`
 	Reason            string   `json:"reason"`
 	Files             int      `json:"files"`
 	Bytes             int64    `json:"bytes"`
 	ReferencedFiles   int      `json:"referenced_files"`
 	UnreferencedFiles int      `json:"unreferenced_files"`
 	EvidenceIDs       []string `json:"evidence_ids,omitempty"`
+	PreservePaths     []string `json:"preserve_paths,omitempty"`
 	Samples           []string `json:"samples,omitempty"`
+	DeleteSamples     []string `json:"delete_samples,omitempty"`
 }
 
 type GeneratedGroupBucket struct {
@@ -168,8 +172,12 @@ func generatedCleanupLocation(root string, location Location, refs ownershipRefs
 		group.Bytes += size
 		if refs.owns(clean) {
 			group.ReferencedFiles++
+			group.PreservePaths = append(group.PreservePaths, clean)
 		} else {
 			group.UnreferencedFiles++
+			if sampleLimit != 0 && len(group.DeleteSamples) < sampleLimit {
+				group.DeleteSamples = append(group.DeleteSamples, clean)
+			}
 		}
 		if sampleLimit != 0 && len(group.Samples) < sampleLimit {
 			group.Samples = append(group.Samples, clean)
@@ -256,6 +264,8 @@ func finalizeGeneratedGroups(groups map[string]*GeneratedCleanupGroup) []Generat
 	out := make([]GeneratedCleanupGroup, 0, len(groups))
 	for _, group := range groups {
 		group.Action, group.CleanupSafety, group.Reason = generatedCleanupDecision(*group)
+		sort.Strings(group.PreservePaths)
+		group.CleanupOperation, group.CleanupTarget = generatedCleanupOperation(*group)
 		out = append(out, *group)
 	}
 	sort.Slice(out, func(i, j int) bool {
@@ -278,6 +288,22 @@ func generatedCleanupDecision(group GeneratedCleanupGroup) (action, safety, reas
 		return "retain_registered_evidence", "registered_generated_evidence", "all files in group are referenced by registry evidence or atom dependencies"
 	}
 	return "cleanup_candidate", "unreferenced_rebuildable_generated", "no registry evidence or atom dependency references this generated group"
+}
+
+func generatedCleanupOperation(group GeneratedCleanupGroup) (operation, target string) {
+	switch group.Action {
+	case "cleanup_candidate":
+		if strings.HasSuffix(group.PathPrefix, "*") {
+			return "delete_file_prefix_matches", group.PathPrefix
+		}
+		return "delete_directory_tree", group.PathPrefix
+	case "review_mixed_registered_generated":
+		return "preserve_paths_then_review_unreferenced_siblings", group.PathPrefix
+	case "retain_registered_evidence":
+		return "no_delete_registered_evidence", ""
+	default:
+		return "review_unknown", group.PathPrefix
+	}
 }
 
 func inferGeneratedProducer(locationID, group string) (string, []string) {

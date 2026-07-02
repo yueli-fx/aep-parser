@@ -6,6 +6,7 @@ func TestGeneratedCleanupClassifiesReferencedMixedAndUnreferencedGroups(t *testi
 	root := newTestRegistryRoot(t)
 	writeFile(t, root, "tmp/migration_matrix_text/matrix.json", "{}\n")
 	writeFile(t, root, "tmp/migration_matrix_text/log.txt", "log\n")
+	writeFile(t, root, "tmp/migration_assess.json", "{}\n")
 	writeFile(t, root, "tmp/technique_smoke/report.json", "{}\n")
 	writeFile(t, root, "test_data/generated/ship-gate/generated.aep", "aep\n")
 	writeJSON(t, root, "registry/locations.json", map[string]any{
@@ -44,11 +45,11 @@ func TestGeneratedCleanupClassifiesReferencedMixedAndUnreferencedGroups(t *testi
 	if report.SchemaVersion != 1 {
 		t.Fatalf("schema version = %d, want 1", report.SchemaVersion)
 	}
-	if report.Summary.Locations != 2 || report.Summary.Groups != 3 || report.Summary.Files != 4 {
-		t.Fatalf("summary counts = %+v, want 2 locations, 3 groups, 4 files", report.Summary)
+	if report.Summary.Locations != 2 || report.Summary.Groups != 4 || report.Summary.Files != 5 {
+		t.Fatalf("summary counts = %+v, want 2 locations, 4 groups, 5 files", report.Summary)
 	}
-	if report.Summary.ReferencedFiles != 1 || report.Summary.UnreferencedFiles != 3 || report.Summary.CleanupCandidateFiles != 3 || report.Summary.MixedGroups != 1 {
-		t.Fatalf("summary refs = %+v, want one referenced, three cleanup candidates, one mixed group", report.Summary)
+	if report.Summary.ReferencedFiles != 1 || report.Summary.UnreferencedFiles != 4 || report.Summary.CleanupCandidateFiles != 4 || report.Summary.MixedGroups != 1 {
+		t.Fatalf("summary refs = %+v, want one referenced, four cleanup candidates, one mixed group", report.Summary)
 	}
 
 	matrix := findGeneratedGroup(t, report, "tmp_evidence", "migration_matrix_text")
@@ -58,10 +59,27 @@ func TestGeneratedCleanupClassifiesReferencedMixedAndUnreferencedGroups(t *testi
 	if matrix.ReferencedFiles != 1 || matrix.UnreferencedFiles != 1 || len(matrix.EvidenceIDs) != 1 || matrix.EvidenceIDs[0] != "matrix.text" {
 		t.Fatalf("matrix refs/evidence = %+v", matrix)
 	}
+	if matrix.CleanupOperation != "preserve_paths_then_review_unreferenced_siblings" || matrix.CleanupTarget != "tmp/migration_matrix_text" {
+		t.Fatalf("matrix cleanup operation/target = %q/%q", matrix.CleanupOperation, matrix.CleanupTarget)
+	}
+	if len(matrix.PreservePaths) != 1 || matrix.PreservePaths[0] != "tmp/migration_matrix_text/matrix.json" {
+		t.Fatalf("matrix preserve paths = %+v", matrix.PreservePaths)
+	}
+	if len(matrix.DeleteSamples) != 1 || matrix.DeleteSamples[0] != "tmp/migration_matrix_text/log.txt" {
+		t.Fatalf("matrix delete samples = %+v", matrix.DeleteSamples)
+	}
 
 	technique := findGeneratedGroup(t, report, "tmp_evidence", "technique_smoke")
 	if technique.Action != "cleanup_candidate" || technique.ProducerCategory != "technique_learning" {
 		t.Fatalf("technique action/category = %q/%q", technique.Action, technique.ProducerCategory)
+	}
+	if technique.CleanupOperation != "delete_directory_tree" || technique.CleanupTarget != "tmp/technique_smoke" {
+		t.Fatalf("technique cleanup operation/target = %q/%q", technique.CleanupOperation, technique.CleanupTarget)
+	}
+
+	migrationRootFiles := findGeneratedGroup(t, report, "tmp_evidence", "migration")
+	if migrationRootFiles.CleanupOperation != "delete_file_prefix_matches" || migrationRootFiles.CleanupTarget != "tmp/migration*" {
+		t.Fatalf("migration root file operation/target = %q/%q", migrationRootFiles.CleanupOperation, migrationRootFiles.CleanupTarget)
 	}
 
 	shipGate := findGeneratedGroup(t, report, "generated_test_data", "ship-gate")
