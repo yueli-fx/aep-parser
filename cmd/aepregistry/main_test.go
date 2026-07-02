@@ -67,6 +67,35 @@ func TestRunInventoryWritesLocationSummary(t *testing.T) {
 	}
 }
 
+func TestRunOwnershipWritesOwnershipSummary(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeFile(t, root, "examples/recipes/unowned.json", "{}\n")
+	out := filepath.Join(root, "tmp", "registry_ownership.json")
+
+	code := run([]string{"ownership", "-root", root, "-out", out, "-sample-limit", "2"})
+	if code != 0 {
+		t.Fatalf("run(ownership) = %d, want 0", code)
+	}
+
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var report registry.OwnershipReport
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Summary.Locations == 0 || len(report.Locations) == 0 {
+		t.Fatalf("empty ownership report: %+v", report)
+	}
+	if !hasOwnershipLocation(report, "recipes") {
+		t.Fatalf("recipes location missing from ownership: %+v", report.Locations)
+	}
+	if report.Summary.UnownedFiles == 0 {
+		t.Fatalf("ownership report should expose unowned files: %+v", report.Summary)
+	}
+}
+
 func newRegistryRoot(t *testing.T) string {
 	t.Helper()
 	root := t.TempDir()
@@ -150,6 +179,15 @@ func readReport(t *testing.T, path string) registry.AuditReport {
 }
 
 func hasInventoryLocation(report registry.InventoryReport, id string) bool {
+	for _, location := range report.Locations {
+		if location.ID == id {
+			return true
+		}
+	}
+	return false
+}
+
+func hasOwnershipLocation(report registry.OwnershipReport, id string) bool {
 	for _, location := range report.Locations {
 		if location.ID == id {
 			return true

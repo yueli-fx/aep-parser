@@ -24,6 +24,8 @@ func run(args []string) int {
 		return runAudit(args[1:])
 	case "inventory":
 		return runInventory(args[1:])
+	case "ownership":
+		return runOwnership(args[1:])
 	default:
 		usage()
 		return 2
@@ -101,6 +103,46 @@ func runInventory(args []string) int {
 	return 0
 }
 
+func runOwnership(args []string) int {
+	fs := flag.NewFlagSet("aepregistry ownership", flag.ContinueOnError)
+	fs.SetOutput(os.Stderr)
+	root := fs.String("root", ".", "repository root")
+	outPath := fs.String("out", "tmp/registry_ownership.json", "ownership report JSON path")
+	sampleLimit := fs.Int("sample-limit", 20, "maximum unowned file samples per location")
+	jsonOut := fs.Bool("json", false, "print JSON report")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	if fs.NArg() != 0 {
+		fmt.Fprintln(os.Stderr, "usage: aepregistry ownership [-root .] [-out tmp/registry_ownership.json] [-sample-limit 20] [-json]")
+		return 2
+	}
+
+	report, err := registry.OwnershipRepository(*root, registry.OwnershipOptions{SampleLimit: *sampleLimit})
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "ownership:", err)
+		return 2
+	}
+	if err := writeJSONFile(*outPath, report); err != nil {
+		fmt.Fprintln(os.Stderr, "write:", err)
+		return 2
+	}
+	if *jsonOut {
+		if err := json.NewEncoder(os.Stdout).Encode(report); err != nil {
+			fmt.Fprintln(os.Stderr, "stdout:", err)
+			return 2
+		}
+	} else {
+		fmt.Printf("registry ownership: %d locations, %d files, %d owned, %d unowned\n",
+			report.Summary.Locations,
+			report.Summary.Files,
+			report.Summary.OwnedFiles,
+			report.Summary.UnownedFiles,
+		)
+	}
+	return 0
+}
+
 func writeJSONFile(path string, value any) error {
 	data, err := json.MarshalIndent(value, "", "  ")
 	if err != nil {
@@ -113,5 +155,5 @@ func writeJSONFile(path string, value any) error {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: aepregistry <audit|inventory> [flags]")
+	fmt.Fprintln(os.Stderr, "usage: aepregistry <audit|inventory|ownership> [flags]")
 }
