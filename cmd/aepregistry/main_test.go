@@ -639,6 +639,65 @@ func TestRunCoverageBatchSyncUpdatesCoverageCandidate(t *testing.T) {
 	}
 }
 
+func TestRunCoverageBatchRunMatricesExecutesGoPlanAndSyncs(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeCoverageBatchCommandFixture(t, root, 0)
+	out := filepath.Join(root, "tmp", "coverage_batch_run.json")
+	var calls [][]string
+	oldRunner := coverageBatchMatrixRunner
+	coverageBatchMatrixRunner = func(root string, args []string) (int, error) {
+		calls = append(calls, append([]string(nil), args...))
+		return 0, nil
+	}
+	defer func() { coverageBatchMatrixRunner = oldRunner }()
+
+	code := run([]string{
+		"coverage-batch",
+		"-root", root,
+		"-current", "flightdeck/work/aep-understanding-generation/current.json",
+		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-out", out,
+		"-batch-id", "all",
+		"-run-matrices",
+	})
+	if code != 0 {
+		t.Fatalf("run(coverage-batch -run-matrices) = %d, want 0", code)
+	}
+	if len(calls) != 1 {
+		t.Fatalf("matrix runner calls = %d, want 1", len(calls))
+	}
+	wantArgs := []string{"run", "./cmd/aepmigrate", "matrix", "-recipe", "examples/recipes/text-basic.json", "-sources", "all", "-targets", "all", "-out", "tmp/matrix/text", "-ledger-out", "tmp/matrix/text/ledger.md"}
+	if !reflect.DeepEqual(calls[0], wantArgs) {
+		t.Fatalf("matrix runner args = %+v, want %+v", calls[0], wantArgs)
+	}
+	var report registry.CoverageBatchReport
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != registry.StatusPass || report.Summary.Entries != 1 || report.Summary.Errors != 0 {
+		t.Fatalf("batch run report = %+v, want pass", report)
+	}
+	var coverage struct {
+		Coverage []struct {
+			Totals registry.CoverageTotals `json:"totals"`
+		} `json:"coverage"`
+	}
+	data, err = os.ReadFile(filepath.Join(root, filepath.FromSlash("flightdeck/work/aep-understanding-generation/coverage.json")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(data, &coverage); err != nil {
+		t.Fatal(err)
+	}
+	if coverage.Coverage[0].Totals.Total != 2 || coverage.Coverage[0].Totals.Pass != 2 {
+		t.Fatalf("coverage after run = %+v, want synced matrix totals", coverage.Coverage)
+	}
+}
+
 func TestRunCheckpointWritesOrderedReport(t *testing.T) {
 	root := newRegistryRoot(t)
 	writeCheckpointCommandFixture(t, root, 2)
@@ -703,6 +762,48 @@ func TestRunCheckpointCanReplayCoverageBatchWithGoSync(t *testing.T) {
 	}
 	if report.Steps[4].ID != "coverage_batch_replay" || report.Steps[4].Status != registry.StatusPass {
 		t.Fatalf("coverage batch step = %+v", report.Steps[4])
+	}
+}
+
+func TestRunCheckpointCanRerunCoverageBatchMatrices(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeCheckpointCommandFixture(t, root, 2)
+	out := filepath.Join(root, "tmp", "registry_checkpoint.json")
+	var calls [][]string
+	oldRunner := coverageBatchMatrixRunner
+	coverageBatchMatrixRunner = func(root string, args []string) (int, error) {
+		calls = append(calls, append([]string(nil), args...))
+		return 0, nil
+	}
+	defer func() { coverageBatchMatrixRunner = oldRunner }()
+
+	code := run([]string{
+		"checkpoint",
+		"-root", root,
+		"-current", "flightdeck/work/aep-understanding-generation/current.json",
+		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-summary", "tmp/migration_coverage_summary.json",
+		"-out", out,
+		"-include-coverage-batch",
+		"-run-coverage-batch-matrices",
+		"-skip-diff-check",
+	})
+	if code != 0 {
+		t.Fatalf("run(checkpoint -run-coverage-batch-matrices) = %d, want 0", code)
+	}
+	if len(calls) != 1 {
+		t.Fatalf("matrix runner calls = %d, want 1", len(calls))
+	}
+	var report checkpointReport
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != registry.StatusPass || report.Summary.Steps != 6 || report.Steps[4].ID != "coverage_batch_matrices" || report.Steps[5].ID != "coverage_batch_replay" {
+		t.Fatalf("checkpoint report = %+v, want matrix rerun then replay", report)
 	}
 }
 

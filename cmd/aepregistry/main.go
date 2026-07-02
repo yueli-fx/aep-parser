@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -149,13 +150,14 @@ func runCoverageBatch(args []string) int {
 	batchID := fs.String("batch-id", "", "coverage batch id")
 	list := fs.Bool("list", false, "list known coverage batches")
 	skipRun := fs.Bool("skip-run", false, "validate existing batch artifacts without regenerating matrices or rewriting coverage JSON")
+	runMatrices := fs.Bool("run-matrices", false, "rerun batch matrix artifacts with go run ./cmd/aepmigrate matrix, then sync and validate coverage")
 	sync := fs.Bool("sync", false, "update the coverage JSON at -coverage from existing batch matrix artifacts before validating")
 	jsonOut := fs.Bool("json", false, "print JSON report")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage-batch [-root .] [-current path] [-coverage path] [-out tmp/registry_coverage_batch.json] [-list|-batch-id id -skip-run [-sync]] [-json]")
+		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage-batch [-root .] [-current path] [-coverage path] [-out tmp/registry_coverage_batch.json] [-list|-batch-id id (-skip-run [-sync]|-run-matrices)] [-json]")
 		return 2
 	}
 	if *list {
@@ -178,13 +180,19 @@ func runCoverageBatch(args []string) int {
 		}
 		return 0
 	}
-	if *batchID == "" || !*skipRun {
-		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage-batch [-root .] [-current path] [-coverage path] [-out tmp/registry_coverage_batch.json] [-list|-batch-id id -skip-run [-sync]] [-json]")
+	if *batchID == "" || (*skipRun == *runMatrices) {
+		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage-batch [-root .] [-current path] [-coverage path] [-out tmp/registry_coverage_batch.json] [-list|-batch-id id (-skip-run [-sync]|-run-matrices)] [-json]")
 		return 2
 	}
 	var report registry.CoverageBatchReport
 	var err error
-	if *sync {
+	if *runMatrices {
+		if err := runCoverageBatchMatrices(*root, *currentPath, *batchID); err != nil {
+			fmt.Fprintln(os.Stderr, "coverage-batch:", err)
+			return 2
+		}
+		report, err = registry.SyncCoverageBatchFromMatrices(*root, *currentPath, *coveragePath, *batchID)
+	} else if *sync {
 		report, err = registry.SyncCoverageBatchFromMatrices(*root, *currentPath, *coveragePath, *batchID)
 	} else {
 		report, err = registry.CheckCoverageBatch(*root, *currentPath, *coveragePath, *batchID)
@@ -209,6 +217,56 @@ func runCoverageBatch(args []string) int {
 		return 1
 	}
 	return 0
+}
+
+var coverageBatchMatrixRunner = runCoverageBatchMatrixCommand
+
+func runCoverageBatchMatrices(root, currentPath, batchID string) error {
+	plan, err := registry.PlanCoverageBatchMatrices(root, currentPath, batchID)
+	if err != nil {
+		return err
+	}
+	if plan.Status == registry.StatusFail {
+		return fmt.Errorf("matrix plan failed: %+v", plan.Issues)
+	}
+	for _, entry := range plan.Entries {
+		exitCode, err := coverageBatchMatrixRunner(root, entry.Args)
+		if err != nil && !allowedMatrixExit(exitCode, entry.AllowExitCodes) {
+			return fmt.Errorf("matrix run failed for %q with exit code %d: %w", entry.CoverageID, exitCode, err)
+		}
+		if err == nil && exitCode != 0 && !allowedMatrixExit(exitCode, entry.AllowExitCodes) {
+			return fmt.Errorf("matrix run failed for %q with exit code %d", entry.CoverageID, exitCode)
+		}
+	}
+	return nil
+}
+
+func runCoverageBatchMatrixCommand(root string, args []string) (int, error) {
+	cmd := exec.Command("go", args...)
+	cmd.Dir = root
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	if err == nil {
+		return 0, nil
+	}
+	var exitErr *exec.ExitError
+	if errors.As(err, &exitErr) {
+		return exitErr.ExitCode(), err
+	}
+	return 1, err
+}
+
+func allowedMatrixExit(exitCode int, allowed []int) bool {
+	if exitCode == 0 {
+		return true
+	}
+	for _, value := range allowed {
+		if value == exitCode {
+			return true
+		}
+	}
+	return false
 }
 
 type checkpointReport struct {
@@ -258,13 +316,14 @@ func runCheckpoint(args []string) int {
 	outPath := fs.String("out", "tmp/registry_checkpoint.json", "checkpoint report JSON path")
 	coverageBatchID := fs.String("coverage-batch-id", "", "coverage batch id for -include-coverage-batch; defaults to current canonical_coverage_batch")
 	includeCoverageBatch := fs.Bool("include-coverage-batch", false, "replay the coverage batch into a temporary coverage candidate using Go sync")
+	runCoverageBatchMatricesFlag := fs.Bool("run-coverage-batch-matrices", false, "with -include-coverage-batch, rerun batch matrices before syncing the temporary coverage candidate")
 	skipDiffCheck := fs.Bool("skip-diff-check", false, "skip git diff --check; intended for non-git test fixtures")
 	jsonOut := fs.Bool("json", false, "print JSON report")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(os.Stderr, "usage: aepregistry checkpoint [-root .] [-current path] [-coverage path] [-summary tmp/migration_coverage_summary.json] [-out tmp/registry_checkpoint.json] [-include-coverage-batch] [-coverage-batch-id id] [-skip-diff-check] [-json]")
+		fmt.Fprintln(os.Stderr, "usage: aepregistry checkpoint [-root .] [-current path] [-coverage path] [-summary tmp/migration_coverage_summary.json] [-out tmp/registry_checkpoint.json] [-include-coverage-batch] [-run-coverage-batch-matrices] [-coverage-batch-id id] [-skip-diff-check] [-json]")
 		return 2
 	}
 
@@ -351,11 +410,17 @@ func runCheckpoint(args []string) int {
 				addStep(checkpointStep("coverage_batch_replay", "copy temporary coverage candidate", "", registry.StatusFail, 1, err))
 			} else {
 				defer cleanup()
-				batch, err := registry.SyncCoverageBatchFromMatrices(*root, *currentPath, tempCoverage, *coverageBatchID)
-				addStep(checkpointStep("coverage_batch_replay", "go run ./cmd/aepregistry coverage-batch -root . -current "+*currentPath+" -coverage <temp coverage copy> -out tmp/registry_coverage_batch.json -batch-id "+*coverageBatchID+" -skip-run -sync", "tmp/registry_coverage_batch.json", batch.Status, batch.Summary.Errors, err))
-				if err == nil {
-					if writeErr := writeJSONFile(resolveRootPath(*root, "tmp/registry_coverage_batch.json"), batch); writeErr != nil {
-						addStep(checkpointStep("coverage_batch_replay_write", "write tmp/registry_coverage_batch.json", "tmp/registry_coverage_batch.json", registry.StatusFail, 1, writeErr))
+				if *runCoverageBatchMatricesFlag {
+					err := runCoverageBatchMatrices(*root, *currentPath, *coverageBatchID)
+					addStep(checkpointStep("coverage_batch_matrices", "go run ./cmd/aepregistry coverage-batch -root . -current "+*currentPath+" -coverage <temp coverage copy> -out tmp/registry_coverage_batch.json -batch-id "+*coverageBatchID+" -run-matrices", "", registry.StatusPass, 0, err))
+				}
+				if !stopIfFailed() {
+					batch, err := registry.SyncCoverageBatchFromMatrices(*root, *currentPath, tempCoverage, *coverageBatchID)
+					addStep(checkpointStep("coverage_batch_replay", "go run ./cmd/aepregistry coverage-batch -root . -current "+*currentPath+" -coverage <temp coverage copy> -out tmp/registry_coverage_batch.json -batch-id "+*coverageBatchID+" -skip-run -sync", "tmp/registry_coverage_batch.json", batch.Status, batch.Summary.Errors, err))
+					if err == nil {
+						if writeErr := writeJSONFile(resolveRootPath(*root, "tmp/registry_coverage_batch.json"), batch); writeErr != nil {
+							addStep(checkpointStep("coverage_batch_replay_write", "write tmp/registry_coverage_batch.json", "tmp/registry_coverage_batch.json", registry.StatusFail, 1, writeErr))
+						}
 					}
 				}
 			}

@@ -95,6 +95,53 @@ func TestSyncCoverageBatchFromMatricesAcceptsAbsoluteCoveragePath(t *testing.T) 
 	}
 }
 
+func TestPlanCoverageBatchMatricesBuildsStableCommands(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeCoverageBatchFixture(t, root, 2)
+	writeFile(t, root, "examples/recipes/glob-b.json", "{}\n")
+	writeFile(t, root, "examples/recipes/glob-a.json", "{}\n")
+	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/current.json", map[string]any{
+		"coverage_batches": []map[string]any{
+			{
+				"id": "all",
+				"entries": []map[string]any{
+					{
+						"coverage_id":  "text-paths",
+						"out":          "tmp/matrix/text-paths",
+						"ledger":       "tmp/matrix/text-paths/ledger.md",
+						"recipe_paths": []string{"examples/recipes/text-basic.json"},
+					},
+					{
+						"coverage_id":       "text-glob",
+						"out":               "tmp/matrix/text-glob",
+						"ledger":            "tmp/matrix/text-glob/ledger.md",
+						"recipe_glob":       "examples/recipes/glob-*.json",
+						"allow_matrix_exit": []int{1},
+					},
+				},
+			},
+		},
+	})
+
+	plan, err := PlanCoverageBatchMatrices(root, "flightdeck/work/aep-understanding-generation/current.json", "all")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if plan.Status != StatusPass || plan.Summary.Entries != 2 {
+		t.Fatalf("plan = %+v, want two entries", plan)
+	}
+	first := plan.Entries[0]
+	if first.CoverageID != "text-paths" || first.Out != "tmp/matrix/text-paths" || first.Ledger != "tmp/matrix/text-paths/ledger.md" {
+		t.Fatalf("first entry = %+v", first)
+	}
+	assertStringSet(t, first.Args, []string{"run", "./cmd/aepmigrate", "matrix", "-recipe", "examples/recipes/text-basic.json", "-sources", "all", "-targets", "all", "-out", "tmp/matrix/text-paths", "-ledger-out", "tmp/matrix/text-paths/ledger.md"})
+	second := plan.Entries[1]
+	assertStringSet(t, second.Recipes, []string{"examples/recipes/glob-a.json", "examples/recipes/glob-b.json"})
+	if len(second.AllowExitCodes) != 1 || second.AllowExitCodes[0] != 1 {
+		t.Fatalf("allow exit codes = %+v", second.AllowExitCodes)
+	}
+}
+
 func writeCoverageBatchFixture(t *testing.T, root string, coverageTotal int) {
 	t.Helper()
 	writeFile(t, root, "examples/recipes/text-basic.json", "{}\n")

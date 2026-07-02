@@ -3,6 +3,7 @@ package registry
 import (
 	"fmt"
 	"path/filepath"
+	"sort"
 )
 
 type CoverageBatchListReport struct {
@@ -22,6 +23,25 @@ type CoverageBatchReport struct {
 	Summary       CoverageBatchSummary `json:"summary"`
 	Entries       []CoverageBatchEntry `json:"entries,omitempty"`
 	Issues        []CoverageBatchIssue `json:"issues,omitempty"`
+}
+
+type CoverageBatchMatrixPlanReport struct {
+	SchemaVersion int                            `json:"schema_version"`
+	Status        string                         `json:"status"`
+	CurrentPath   string                         `json:"current_path"`
+	BatchID       string                         `json:"batch_id"`
+	Summary       CoverageBatchSummary           `json:"summary"`
+	Entries       []CoverageBatchMatrixPlanEntry `json:"entries,omitempty"`
+	Issues        []CoverageBatchIssue           `json:"issues,omitempty"`
+}
+
+type CoverageBatchMatrixPlanEntry struct {
+	CoverageID     string   `json:"coverage_id"`
+	Out            string   `json:"out"`
+	Ledger         string   `json:"ledger"`
+	Recipes        []string `json:"recipes"`
+	Args           []string `json:"args"`
+	AllowExitCodes []int    `json:"allow_exit_codes,omitempty"`
 }
 
 type CoverageBatchSummary struct {
@@ -112,6 +132,87 @@ func CheckCoverageBatch(root, currentPath, coveragePath, batchID string) (Covera
 	report.Summary.Entries = len(report.Entries)
 	report.finish()
 	return report, nil
+}
+
+func PlanCoverageBatchMatrices(root, currentPath, batchID string) (CoverageBatchMatrixPlanReport, error) {
+	var current currentFile
+	if err := readJSONPath(root, currentPath, &current); err != nil {
+		return CoverageBatchMatrixPlanReport{}, err
+	}
+	report := CoverageBatchMatrixPlanReport{
+		SchemaVersion: 1,
+		Status:        StatusPass,
+		CurrentPath:   filepath.ToSlash(currentPath),
+		BatchID:       batchID,
+	}
+	batch := findCurrentCoverageBatch(current.CoverageBatches, batchID)
+	if batch == nil {
+		report.addIssue("missing_coverage_batch", "", "", fmt.Sprintf("coverage batch %q not found", batchID))
+		report.finish()
+		return report, nil
+	}
+	for _, entry := range batch.Entries {
+		planEntry, err := planCoverageBatchMatrixEntry(root, entry)
+		if err != nil {
+			report.addIssue("invalid_matrix_plan", entry.CoverageID, entry.RecipeGlob, err.Error())
+			continue
+		}
+		report.Entries = append(report.Entries, planEntry)
+	}
+	report.Summary.Entries = len(report.Entries)
+	report.finish()
+	return report, nil
+}
+
+func planCoverageBatchMatrixEntry(root string, entry currentCoverageBatchEntry) (CoverageBatchMatrixPlanEntry, error) {
+	if entry.Out == "" || entry.Ledger == "" {
+		return CoverageBatchMatrixPlanEntry{}, fmt.Errorf("batch entry %q lacks out/ledger", entry.CoverageID)
+	}
+	recipes, err := coverageBatchRecipeArgs(root, entry)
+	if err != nil {
+		return CoverageBatchMatrixPlanEntry{}, err
+	}
+	args := []string{"run", "./cmd/aepmigrate", "matrix"}
+	for _, recipe := range recipes {
+		args = append(args, "-recipe", recipe)
+	}
+	args = append(args, "-sources", "all", "-targets", "all", "-out", filepath.ToSlash(entry.Out), "-ledger-out", filepath.ToSlash(entry.Ledger))
+	return CoverageBatchMatrixPlanEntry{
+		CoverageID:     entry.CoverageID,
+		Out:            filepath.ToSlash(entry.Out),
+		Ledger:         filepath.ToSlash(entry.Ledger),
+		Recipes:        recipes,
+		Args:           args,
+		AllowExitCodes: append([]int(nil), entry.AllowMatrixExit...),
+	}, nil
+}
+
+func coverageBatchRecipeArgs(root string, entry currentCoverageBatchEntry) ([]string, error) {
+	var recipes []string
+	for _, recipePath := range entry.RecipePaths {
+		if !fileExists(root, recipePath) {
+			return nil, fmt.Errorf("recipe path not found: %s", recipePath)
+		}
+		recipes = append(recipes, filepath.ToSlash(recipePath))
+	}
+	if entry.RecipeGlob != "" {
+		matches, err := filepath.Glob(filepath.Join(root, filepath.FromSlash(entry.RecipeGlob)))
+		if err != nil {
+			return nil, err
+		}
+		sort.Strings(matches)
+		for _, match := range matches {
+			rel, err := filepath.Rel(root, match)
+			if err != nil {
+				return nil, err
+			}
+			recipes = append(recipes, filepath.ToSlash(rel))
+		}
+	}
+	if len(recipes) == 0 {
+		return nil, fmt.Errorf("batch entry %q lacks recipe_glob or recipe_paths", entry.CoverageID)
+	}
+	return recipes, nil
 }
 
 func SyncCoverageBatchFromMatrices(root, currentPath, coveragePath, batchID string) (CoverageBatchReport, error) {
@@ -235,6 +336,24 @@ func (r *CoverageBatchReport) addIssue(code, coverageID, path, message string) {
 }
 
 func (r *CoverageBatchReport) finish() {
+	r.Summary.Errors = len(r.Issues)
+	if r.Summary.Errors > 0 {
+		r.Status = StatusFail
+		return
+	}
+	r.Status = StatusPass
+}
+
+func (r *CoverageBatchMatrixPlanReport) addIssue(code, coverageID, path, message string) {
+	r.Issues = append(r.Issues, CoverageBatchIssue{
+		Code:       code,
+		CoverageID: coverageID,
+		Path:       filepath.ToSlash(path),
+		Message:    message,
+	})
+}
+
+func (r *CoverageBatchMatrixPlanReport) finish() {
 	r.Summary.Errors = len(r.Issues)
 	if r.Summary.Errors > 0 {
 		r.Status = StatusFail

@@ -1046,32 +1046,34 @@
     },
     "last_code_maintenance_target": {
       "location": "registry_tooling",
-      "group": "go_checkpoint_orchestrator",
-      "reason": "Move the JSON-first checkpoint orchestration from a PowerShell-only entry point onto a Go registry command while retaining the legacy script for compatibility and matrix-rerun orchestration.",
+      "group": "go_coverage_batch_matrix_rerun",
+      "reason": "Move coverage batch matrix rerun orchestration from the PowerShell helper onto an explicit Go registry path, with command planning, allowed exit handling, sync, and validation.",
       "result": {
         "commands": {
-          "go_checkpoint": "go run ./cmd/aepregistry checkpoint -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -summary tmp/migration_coverage_summary.json -out tmp/registry_checkpoint.json",
-          "go_checkpoint_with_batch": "go run ./cmd/aepregistry checkpoint -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -summary tmp/migration_coverage_summary.json -out tmp/registry_checkpoint_with_batch.json -include-coverage-batch",
-          "focused_registry_tests": "go test ./cmd/aepregistry -run Checkpoint",
+          "go_coverage_batch_run_candidate": "go run ./cmd/aepregistry coverage-batch -root . -current tmp/current_batch_run_candidate.json -coverage tmp/coverage_batch_run_candidate.json -out tmp/registry_coverage_batch_run_candidate.json -batch-id single-text-baseline -run-matrices",
+          "focused_registry_tests": "go test ./internal/registry -run PlanCoverageBatchMatrices && go test ./cmd/aepregistry -run \"CoverageBatchRunMatrices|CheckpointCanRerun\"",
           "version_gate": "go run ./cmd/aepregistry gate -root . -out tmp/registry_gate.json -scope version-matrix",
           "asset_gate": "go run ./cmd/aepregistry gate -root . -out tmp/registry_asset_gate.json -scope asset-policy"
         },
         "files": [
           "cmd/aepregistry/main.go",
           "cmd/aepregistry/main_test.go",
-          "flightdeck/work/aep-understanding-generation/current.md",
+          "internal/registry/coverage_batch.go",
+          "internal/registry/coverage_batch_test.go",
           "flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json",
           "flightdeck/work/aep-understanding-generation/mainline-spec.json"
         ],
-        "checkpoint_result": {
-          "report": "tmp/registry_checkpoint.json",
+        "coverage_batch_matrix_rerun_result": {
+          "candidate_current": "tmp/current_batch_run_candidate.json",
+          "candidate_coverage": "tmp/coverage_batch_run_candidate.json",
+          "report": "tmp/registry_coverage_batch_run_candidate.json",
+          "batch": "single-text-baseline",
           "status": "pass",
-          "steps": 6,
-          "failed": 0,
-          "with_batch_report": "tmp/registry_checkpoint_with_batch.json",
-          "with_batch_steps": 7,
-          "with_batch_failed": 0,
-          "legacy_script_retained": "scripts/migration/validate_checkpoint.ps1"
+          "entries": 1,
+          "matrix_total": 72,
+          "matrix_pass": 72,
+          "real_coverage_ledger_modified": false,
+          "legacy_script_retained": "scripts/migration/run_coverage_batch.ps1"
         },
         "current_totals": {
           "records": 18,
@@ -1128,7 +1130,7 @@
         }
       }
     },
-    "next_action": "JSON-first checkpoint orchestration now has a Go-primary command. Continue mainline by moving the remaining legacy matrix-rerun orchestration toward Go, or select a real unsupported conversion surface.",
+    "next_action": "Coverage batch matrix rerun orchestration now has an explicit Go path. Continue mainline by selecting a real unsupported conversion surface or by retiring remaining compatibility-only PowerShell references after another pass.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
