@@ -791,18 +791,17 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "rebuild_layer_materialize_split",
-      "reason": "Reduce convert_rebuild_layers.go growth risk by separating per-layer materialization details from layer dispatch and reference finalization while preserving behavior.",
+      "group": "text_enum_mapping_split",
+      "reason": "Reduce convert_text.go growth risk by separating text enum normalization and mapping from text style replay while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_rebuild_layers.go",
-          "internal/aepmigrate/convert_rebuild_layer_materialize.go",
-          "internal/aepmigrate/convert_rebuild_special_materialize.go"
+          "internal/aepmigrate/convert_text.go",
+          "internal/aepmigrate/convert_text_enums.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Per-layer rebuild materialization has been split from convert_rebuild_layers.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_text.go, convert_effect.go, or convert_shape_styles.go without changing behavior.",
+    "next_action": "Text enum normalization and mapping have been split from convert_text.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_effect.go, convert_shape_styles.go, or convert_index.go without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
