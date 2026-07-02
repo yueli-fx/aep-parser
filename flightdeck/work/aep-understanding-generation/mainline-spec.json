@@ -790,22 +790,18 @@
       }
     },
     "last_code_maintenance_target": {
-      "location": "internal/aeversion",
-      "group": "shared_supported_version_axis",
-      "reason": "Promote the AE2020-AE2025 supported version axis into a small shared internal package so migration code, registry coverage-axis defaults, version-boundary checks, and CLI help derive from one source without registry depending on aepmigrate.",
+      "location": "cmd/aepregistry",
+      "group": "resolved_gate_version_axis",
+      "reason": "Make registry version-matrix gate reports write the resolved default AE2020-AE2025 version axis when -versions is omitted, so the top-level gate JSON answers which versions were checked.",
       "result": {
         "files": [
-          "internal/aeversion/axis.go",
-          "internal/aeversion/axis_test.go",
-          "internal/aepmigrate/version.go",
-          "internal/registry/coverage_axis.go",
-          "internal/registry/version_boundary_check.go",
-          "cmd/aepregistry/main.go"
+          "cmd/aepregistry/main.go",
+          "cmd/aepregistry/main_test.go"
         ],
-        "behavior": "no semantic change intended"
+        "behavior": "gate report metadata now includes the default version axis for version-matrix/all scope"
       }
     },
-    "next_action": "The supported version axis is now shared by migration and registry matrix reporting code. Next useful increment is to run the registry version-matrix gate and inspect any remaining hardcoded AE2020-AE2025 lists in data contracts before adding new validation runs.",
+    "next_action": "The registry version-matrix gate now reports the resolved AE2020-AE2025 axis and passes on the current coverage ledger. Next useful increment is to inspect registry capability atom version-axis repetition and decide whether defaults should be data-level inheritance rather than repeated arrays.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

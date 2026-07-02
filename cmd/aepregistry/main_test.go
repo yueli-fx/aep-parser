@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 
 	"github.com/yueli-fx/aep-parser/internal/registry"
@@ -392,6 +393,9 @@ func TestRunGateWritesOrderedReports(t *testing.T) {
 	if report.Status != registry.StatusPass || report.Summary.Steps != 6 || report.Summary.Failed != 0 {
 		t.Fatalf("gate report = %+v", report)
 	}
+	if !reflect.DeepEqual(report.VersionAxis, []string{"AE2020", "AE2025"}) {
+		t.Fatalf("version axis = %v, want explicit AE2020/AE2025", report.VersionAxis)
+	}
 	wantOrder := []string{
 		"registry_audit",
 		"registry_version_boundaries",
@@ -416,6 +420,35 @@ func TestRunGateWritesOrderedReports(t *testing.T) {
 		if _, err := os.Stat(filepath.Join(root, filepath.FromSlash(rel))); err != nil {
 			t.Fatalf("expected gate output %s: %v", rel, err)
 		}
+	}
+}
+
+func TestRunGateDefaultsVersionAxisInReport(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 0)
+	writeMatrixFixture(t, root, "tmp/matrix/text/matrix.json", 0)
+	out := filepath.Join(root, "tmp", "registry_gate.json")
+
+	code := run([]string{
+		"gate",
+		"-root", root,
+		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-out", out,
+	})
+	if code != 0 {
+		t.Fatalf("run(gate default versions) = %d, want 0", code)
+	}
+
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var report gateReport
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(report.VersionAxis, registry.DefaultAEVersionAxis()) {
+		t.Fatalf("version axis = %v, want default %v", report.VersionAxis, registry.DefaultAEVersionAxis())
 	}
 }
 

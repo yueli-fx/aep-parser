@@ -92,6 +92,9 @@ func runGate(args []string) int {
 	}
 
 	axis := splitCSV(*versions)
+	if len(axis) == 0 && (*scope == "version-matrix" || *scope == "all") {
+		axis = registry.DefaultAEVersionAxis()
+	}
 	report := gateReport{
 		SchemaVersion: 1,
 		Status:        registry.StatusPass,
