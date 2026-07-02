@@ -606,6 +606,63 @@ func TestRunGateReturnsOneForFailedStep(t *testing.T) {
 	}
 }
 
+func TestRunGateReturnsOneForStaleMainlineSpecCoverageAxisSummary(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeBoundaryCommandFixture(t, root, map[string]any{"total": 2, "pass": 1, "blocked": 1, "failed": 0, "skipped": 0})
+	addCommandBoundaryContractGate(t, root)
+	writeMainlineSpecSummary(t, root, map[string]any{
+		"atom_rows":             999,
+		"writer_full_axis_rows": 1,
+		"writer_partial_rows":   0,
+		"boundary_rows":         0,
+		"host_full_axis_rows":   0,
+		"host_missing_rows":     1,
+		"source_target_pairs":   4,
+		"cells":                 2,
+		"pass":                  1,
+		"blocked":               1,
+		"failed":                0,
+		"skipped":               0,
+	})
+	out := filepath.Join(root, "tmp", "registry_gate.json")
+
+	code := run([]string{
+		"gate",
+		"-root", root,
+		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-out", out,
+		"-versions", "AE2020,AE2025",
+	})
+	if code != 1 {
+		t.Fatalf("run(gate stale spec) = %d, want 1", code)
+	}
+
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var report gateReport
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	step := findGateStep(t, report, "registry_mainline_spec_coverage_axis")
+	if step.Status != registry.StatusFail || step.Errors == 0 {
+		t.Fatalf("mainline spec step = %+v", step)
+	}
+	specReportPath := filepath.Join(root, filepath.FromSlash("tmp/registry_mainline_spec_coverage_axis.json"))
+	data, err = os.ReadFile(specReportPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var specReport mainlineSpecCoverageAxisReport
+	if err := json.Unmarshal(data, &specReport); err != nil {
+		t.Fatal(err)
+	}
+	if specReport.Status != registry.StatusFail || !hasMainlineSpecIssue(specReport, "atom_rows") {
+		t.Fatalf("mainline spec report = %+v", specReport)
+	}
+}
+
 func TestRunGateAssetPolicyWritesOwnershipAndCleanupReports(t *testing.T) {
 	root := newRegistryRoot(t)
 	out := filepath.Join(root, "tmp", "registry_asset_gate.json")
@@ -889,6 +946,40 @@ func writeFile(t *testing.T, root, rel, body string) {
 	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func writeMainlineSpecSummary(t *testing.T, root string, summary map[string]any) {
+	t.Helper()
+	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/mainline-spec.json", map[string]any{
+		"schema_version": 1,
+		"current_execution": map[string]any{
+			"last_completed_target": map[string]any{
+				"result": map[string]any{
+					"summary": summary,
+				},
+			},
+		},
+	})
+}
+
+func findGateStep(t *testing.T, report gateReport, id string) gateStepReport {
+	t.Helper()
+	for _, step := range report.Steps {
+		if step.ID == id {
+			return step
+		}
+	}
+	t.Fatalf("gate step %q not found in %+v", id, report.Steps)
+	return gateStepReport{}
+}
+
+func hasMainlineSpecIssue(report mainlineSpecCoverageAxisReport, field string) bool {
+	for _, issue := range report.Issues {
+		if issue.Field == field {
+			return true
+		}
+	}
+	return false
 }
 
 func readReport(t *testing.T, path string) registry.AuditReport {

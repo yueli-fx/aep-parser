@@ -70,6 +70,22 @@ type gateStepReport struct {
 	Errors  int    `json:"errors,omitempty"`
 }
 
+type mainlineSpecCoverageAxisReport struct {
+	SchemaVersion int                             `json:"schema_version"`
+	Status        string                          `json:"status"`
+	SpecPath      string                          `json:"spec_path"`
+	Expected      map[string]int                  `json:"expected"`
+	Actual        map[string]int                  `json:"actual"`
+	Issues        []mainlineSpecCoverageAxisIssue `json:"issues,omitempty"`
+}
+
+type mainlineSpecCoverageAxisIssue struct {
+	Field    string `json:"field"`
+	Expected int    `json:"expected"`
+	Actual   int    `json:"actual"`
+	Message  string `json:"message"`
+}
+
 func runGate(args []string) int {
 	fs := flag.NewFlagSet("aepregistry gate", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
@@ -196,6 +212,18 @@ func runVersionMatrixGate(root, coveragePath string, axis []string, addStep func
 	}
 	addStep(gateStepReport{ID: "registry_coverage_axis", Command: "go run ./cmd/aepregistry coverage -root . -out " + axisOut + " -axis", Output: axisOut, Status: axisReport.Status})
 
+	specAxisOut := "tmp/registry_mainline_spec_coverage_axis.json"
+	specAxis, exists, err := checkMainlineSpecCoverageAxis(root, axisReport)
+	if err != nil {
+		return fmt.Errorf("mainline spec coverage axis: %w", err)
+	}
+	if exists {
+		if err := writeJSONFile(filepath.Join(root, filepath.FromSlash(specAxisOut)), specAxis); err != nil {
+			return fmt.Errorf("write mainline spec coverage axis: %w", err)
+		}
+		addStep(gateStepReport{ID: "registry_mainline_spec_coverage_axis", Command: "go run ./cmd/aepregistry gate -root . -out tmp/registry_gate.json -scope version-matrix", Output: specAxisOut, Status: specAxis.Status, Errors: len(specAxis.Issues)})
+	}
+
 	boundaryAxisOut := "tmp/registry_coverage_axis_boundary.json"
 	boundaryAxis, err := registry.CoverageAxisWithFilter(root, coveragePath, axis, registry.CoverageAxisFilter{AtomID: "layer.track_matte.explicit_source"})
 	if err != nil {
@@ -206,6 +234,95 @@ func runVersionMatrixGate(root, coveragePath string, axis []string, addStep func
 	}
 	addStep(gateStepReport{ID: "registry_coverage_axis_boundary", Command: "go run ./cmd/aepregistry coverage -root . -out " + boundaryAxisOut + " -axis -atom layer.track_matte.explicit_source", Output: boundaryAxisOut, Status: boundaryAxis.Status})
 	return nil
+}
+
+func checkMainlineSpecCoverageAxis(root string, axisReport registry.CoverageAxisReport) (mainlineSpecCoverageAxisReport, bool, error) {
+	specPath := "flightdeck/work/aep-understanding-generation/mainline-spec.json"
+	absPath := filepath.Join(root, filepath.FromSlash(specPath))
+	if _, err := os.Stat(absPath); err != nil {
+		if os.IsNotExist(err) {
+			return mainlineSpecCoverageAxisReport{}, false, nil
+		}
+		return mainlineSpecCoverageAxisReport{}, false, err
+	}
+	var spec struct {
+		CurrentExecution struct {
+			LastCompletedTarget struct {
+				Result struct {
+					Summary map[string]int `json:"summary"`
+				} `json:"result"`
+			} `json:"last_completed_target"`
+		} `json:"current_execution"`
+	}
+	data, err := os.ReadFile(absPath)
+	if err != nil {
+		return mainlineSpecCoverageAxisReport{}, false, err
+	}
+	if err := json.Unmarshal(data, &spec); err != nil {
+		return mainlineSpecCoverageAxisReport{}, false, err
+	}
+	expected := spec.CurrentExecution.LastCompletedTarget.Result.Summary
+	actual := coverageAxisSummaryMap(axisReport.Summary)
+	report := mainlineSpecCoverageAxisReport{
+		SchemaVersion: 1,
+		Status:        registry.StatusPass,
+		SpecPath:      specPath,
+		Expected:      expected,
+		Actual:        actual,
+	}
+	if len(expected) == 0 {
+		report.Status = registry.StatusFail
+		report.Issues = append(report.Issues, mainlineSpecCoverageAxisIssue{Field: "summary", Message: "current_execution.last_completed_target.result.summary is missing"})
+		return report, true, nil
+	}
+	for _, field := range coverageAxisSummaryFields() {
+		if expected[field] != actual[field] {
+			report.Issues = append(report.Issues, mainlineSpecCoverageAxisIssue{
+				Field:    field,
+				Expected: expected[field],
+				Actual:   actual[field],
+				Message:  fmt.Sprintf("mainline spec summary %s=%d does not match coverage axis %d", field, expected[field], actual[field]),
+			})
+		}
+	}
+	if len(report.Issues) > 0 {
+		report.Status = registry.StatusFail
+	}
+	return report, true, nil
+}
+
+func coverageAxisSummaryFields() []string {
+	return []string{
+		"atom_rows",
+		"writer_full_axis_rows",
+		"writer_partial_rows",
+		"boundary_rows",
+		"host_full_axis_rows",
+		"host_missing_rows",
+		"source_target_pairs",
+		"cells",
+		"pass",
+		"blocked",
+		"failed",
+		"skipped",
+	}
+}
+
+func coverageAxisSummaryMap(summary registry.CoverageAxisSummary) map[string]int {
+	return map[string]int{
+		"atom_rows":             summary.AtomRows,
+		"writer_full_axis_rows": summary.WriterFullAxisRows,
+		"writer_partial_rows":   summary.WriterPartialRows,
+		"boundary_rows":         summary.BoundaryRows,
+		"host_full_axis_rows":   summary.HostFullAxisRows,
+		"host_missing_rows":     summary.HostMissingRows,
+		"source_target_pairs":   summary.SourceTargetPairs,
+		"cells":                 summary.Cells,
+		"pass":                  summary.Pass,
+		"blocked":               summary.Blocked,
+		"failed":                summary.Failed,
+		"skipped":               summary.Skipped,
+	}
 }
 
 func runAssetPolicyGate(root string, addStep func(gateStepReport)) error {

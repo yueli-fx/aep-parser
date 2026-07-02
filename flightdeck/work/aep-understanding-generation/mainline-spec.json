@@ -130,7 +130,12 @@
     {
       "path": "tmp/registry_gate.json",
       "role": "generated_report",
-      "description": "Read-only ordered registry gate report for audit, version-boundary contracts, coverage, coverage summary, and coverage axis outputs; ignored by git."
+      "description": "Read-only ordered registry gate report for audit, version-boundary contracts, coverage, coverage summary, coverage axis, and mainline spec consistency outputs; ignored by git."
+    },
+    {
+      "path": "tmp/registry_mainline_spec_coverage_axis.json",
+      "role": "generated_report",
+      "description": "Read-only consistency report comparing mainline-spec current coverage-axis summary against regenerated coverage-axis totals; ignored by git."
     },
     {
       "path": "tmp/registry_asset_gate.json",
@@ -247,15 +252,15 @@
           "AE2025"
         ],
         "summary": {
-          "atom_rows": 141,
-          "writer_full_axis_rows": 140,
+          "atom_rows": 143,
+          "writer_full_axis_rows": 142,
           "writer_partial_rows": 0,
           "boundary_rows": 1,
-          "host_full_axis_rows": 140,
+          "host_full_axis_rows": 142,
           "host_missing_rows": 0,
           "source_target_pairs": 36,
-          "cells": 5076,
-          "pass": 5041,
+          "cells": 5148,
+          "pass": 5113,
           "blocked": 5,
           "failed": 0,
           "skipped": 30
@@ -1030,42 +1035,39 @@
       }
     },
     "last_code_maintenance_target": {
-      "location": "internal/registry",
-      "group": "coverage_axis_domain_totals",
-      "reason": "Make the total/detail/total coverage table expose domain-level axis totals directly, so text/effect/shape/layer coverage can be answered from one JSON report before drilling into rows.",
+      "location": "cmd/aepregistry",
+      "group": "mainline_spec_coverage_axis_consistency",
+      "reason": "Make version-matrix gate fail when mainline-spec current coverage-axis totals drift from regenerated coverage-axis evidence.",
       "result": {
         "files": [
-          "internal/registry/coverage_axis.go",
-          "internal/registry/coverage_test.go"
+          "cmd/aepregistry/main.go",
+          "cmd/aepregistry/main_test.go",
+          "flightdeck/work/aep-understanding-generation/mainline-spec.json"
         ],
-        "behavior": "aepregistry coverage -axis now includes by_domain summaries with atom rows, writer/host axis status counts, and cell pass/blocked/failed/skipped totals for each atom domain.",
+        "behavior": "aepregistry gate -scope version-matrix now writes tmp/registry_mainline_spec_coverage_axis.json when mainline-spec exists, compares current_execution.last_completed_target.result.summary against regenerated coverage-axis totals, and fails the gate on drift.",
         "queries": {
-          "axis_domain_totals": {
-            "command": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_axis.json -axis",
-            "domains": 14,
-            "text": {
-              "atom_rows": 26,
-              "cells": 936,
-              "pass": 936,
-              "blocked": 0
-            },
-            "shape": {
-              "atom_rows": 28,
-              "cells": 1008,
-              "pass": 1008,
-              "blocked": 0
-            },
-            "layer": {
-              "atom_rows": 16,
-              "boundary_rows": 1,
-              "cells": 576,
-              "pass": 541,
-              "blocked": 5
-            }
+          "mainline_spec_coverage_axis": {
+            "command": "go run ./cmd/aepregistry gate -root . -out tmp/registry_gate.json -scope version-matrix",
+            "steps": 7,
+            "failed": 0,
+            "checked_fields": [
+              "atom_rows",
+              "writer_full_axis_rows",
+              "writer_partial_rows",
+              "boundary_rows",
+              "host_full_axis_rows",
+              "host_missing_rows",
+              "source_target_pairs",
+              "cells",
+              "pass",
+              "blocked",
+              "failed",
+              "skipped"
+            ]
           }
         },
-        "new_report_fields": [
-          "by_domain"
+        "new_report": [
+          "tmp/registry_mainline_spec_coverage_axis.json"
         ]
       }
     },
