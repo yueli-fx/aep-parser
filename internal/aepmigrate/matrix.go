@@ -2,10 +2,7 @@ package aepmigrate
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
-	"sort"
-	"strings"
 
 	"github.com/yueli-fx/aep-parser/internal/aehost"
 	"github.com/yueli-fx/aep-parser/internal/recipe"
@@ -80,21 +77,6 @@ var matrixWriterLabels = []string{
 
 var matrixAEHostLabels = []string{"AE2020", "AE2021", "AE2022", "AE2023", "AE2024", "AE2025"}
 
-func BuildAEHostMap(installRoot string) map[string]string {
-	hosts := map[string]string{}
-	if strings.TrimSpace(installRoot) == "" {
-		return hosts
-	}
-	for year := 2020; year <= 2025; year++ {
-		label := fmt.Sprintf("AE%d", year)
-		path := filepath.Join(installRoot, fmt.Sprintf("Adobe After Effects %d", year), "Support Files", "AfterFX.exe")
-		if _, err := os.Stat(path); err == nil {
-			hosts[label] = path
-		}
-	}
-	return hosts
-}
-
 func RunMatrix(opts MatrixOptions) (MatrixReport, error) {
 	if opts.OutRoot == "" {
 		return MatrixReport{}, fmt.Errorf("matrix out root is required")
@@ -148,30 +130,4 @@ func RunMatrix(opts MatrixOptions) (MatrixReport, error) {
 		return MatrixReport{}, err
 	}
 	return report, nil
-}
-
-func matrixRecipePaths(opts MatrixOptions) ([]string, error) {
-	seen := map[string]bool{}
-	var paths []string
-	add := func(path string) {
-		if path == "" || seen[path] {
-			return
-		}
-		seen[path] = true
-		paths = append(paths, path)
-	}
-	for _, path := range opts.RecipePaths {
-		add(path)
-	}
-	if opts.RecipeDir != "" {
-		matches, err := filepath.Glob(filepath.Join(opts.RecipeDir, "*.json"))
-		if err != nil {
-			return nil, err
-		}
-		for _, path := range matches {
-			add(path)
-		}
-	}
-	sort.Strings(paths)
-	return paths, nil
 }

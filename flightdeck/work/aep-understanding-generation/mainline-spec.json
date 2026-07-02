@@ -791,19 +791,20 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "shape_graphic_and_transform_keyframe_helpers_split",
-      "reason": "Reduce convert_shape_support.go and convert_transform.go growth risk by separating shape graphic/filter predicates and transform keyframe conversion helpers while preserving behavior.",
+      "group": "matrix_ledger_and_inputs_helpers_split",
+      "reason": "Reduce matrix_ledger.go and matrix.go growth risk by separating ledger Markdown rendering, AE host discovery, and matrix recipe input collection while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_shape_support.go",
-          "internal/aepmigrate/convert_shape_graphic_support.go",
-          "internal/aepmigrate/convert_transform.go",
-          "internal/aepmigrate/convert_transform_keyframes.go"
+          "internal/aepmigrate/matrix_ledger.go",
+          "internal/aepmigrate/matrix_ledger_markdown.go",
+          "internal/aepmigrate/matrix.go",
+          "internal/aepmigrate/matrix_hosts.go",
+          "internal/aepmigrate/matrix_inputs.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Shape graphic/filter predicates and transform keyframe conversion helpers have been split from their entry files. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from matrix_ledger.go, matrix.go, or remaining test files without changing behavior.",
+    "next_action": "Matrix ledger Markdown rendering, AE host discovery, and matrix recipe input collection have been split from their entry files. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from the largest test files or convert_text.go without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
