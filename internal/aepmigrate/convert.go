@@ -66,23 +66,7 @@ func Convert(opts ConvertOptions) (Report, error) {
 	if err != nil {
 		return Report{}, err
 	}
-	targetProject, err = applyNoLayerCompMetadata(targetProject, prof)
-	if err != nil {
-		return Report{}, err
-	}
-	targetProject, err = materializeProjectTransformExpressions(targetProject, prof)
-	if err != nil {
-		return Report{}, err
-	}
-	targetProject, err = materializeProjectTextAnimators(targetProject, prof)
-	if err != nil {
-		return Report{}, err
-	}
-	targetProject, err = materializeProjectMasks(targetProject, prof)
-	if err != nil {
-		return Report{}, err
-	}
-	targetProject, err = materializeProjectEffects(targetProject, prof)
+	targetProject, err = materializeRebuiltProject(targetProject, prof)
 	if err != nil {
 		return Report{}, err
 	}

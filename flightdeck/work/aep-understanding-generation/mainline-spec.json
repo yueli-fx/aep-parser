@@ -1030,19 +1030,23 @@
       }
     },
     "last_code_maintenance_target": {
-      "location": "internal/registry",
-      "group": "registry_report_self_noise_policy",
-      "reason": "Teach generated cleanup classification to separate registry_report self-noise from actionable cleanup candidates while preserving registry/state referenced generated evidence.",
+      "location": "internal/aepmigrate",
+      "group": "convert_materialization_pipeline",
+      "reason": "Keep Convert as a small orchestration entry point before adding more capability families. The materialization sequence is now an explicit ordered pipeline so future comp/text/mask/effect/shape steps do not keep expanding convert.go.",
       "result": {
         "files": [
-          "internal/registry/generated_cleanup.go",
-          "internal/registry/generated_cleanup_test.go",
-          "internal/registry/generated_cleanup_execute.go"
+          "internal/aepmigrate/convert.go",
+          "internal/aepmigrate/convert_materialize.go",
+          "internal/aepmigrate/convert_materialize_test.go"
         ],
-        "behavior": "registry_report groups now use retain_registry_report_outputs/no_delete_registry_report and contribute registry_report_groups/files instead of cleanup_candidate_files; execution producer filters still run before action eligibility"
+        "behavior": "Convert delegates rebuilt-project materialization to materializeRebuiltProject; convertProjectMaterializers exposes the ordered comp_metadata, transform_expressions, text_animators, masks, effects pipeline and is covered by an ordering test",
+        "line_counts_after": {
+          "convert_go": 86,
+          "convert_materialize_go": 28
+        }
       }
     },
-    "next_action": "Coverage-axis reports are refreshed after cleanup and still prove AE2020-AE2025 total/detail/total coverage: 141 atom rows, 5076 cells, 5041 pass, 5 known blocked boundary cells, 0 failed. Next useful increment is to inspect convert/aepmigrate architecture size risks, especially internal/aepmigrate/convert.go growth, before adding the next capability family.",
+    "next_action": "Convert entry-point growth is guarded by an explicit materialization pipeline. Next useful increment is to add the next capability family through a scoped convert_* file and registry atom/evidence update, using the refreshed AE2020-AE2025 axis totals as the baseline.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
