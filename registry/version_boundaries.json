@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "purpose": "Known AE version feature boundaries. These contracts explain expected blocked or skipped matrix cells so coverage and cleanup do not treat them as unexplained failures.",
+  "version_boundaries": [
+    {
+      "id": "ae2025.explicit_matte_source",
+      "atom_id": "layer.track_matte.explicit_source",
+      "recipe": "minimal-layer-explicit-matte",
+      "feature": "AE2025 explicit track matte source references",
+      "policy": "known_source_contract_boundary",
+      "source_contract": {
+        "min_source_version": "AE2025",
+        "available_source_versions": [
+          "AE2025"
+        ],
+        "unavailable_source_versions": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024"
+        ]
+      },
+      "target_contract": {
+        "supported_targets": [
+          "AE2025"
+        ],
+        "blocked_downgrade_targets": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024"
+        ]
+      },
+      "expected_cells": {
+        "total": 36,
+        "pass": 1,
+        "blocked": 5,
+        "failed": 0,
+        "skipped": 30
+      },
+      "evidence": [
+        {
+          "kind": "matrix",
+          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "required": true
+        },
+        {
+          "kind": "matrix",
+          "path": "tmp/migration_matrix_explicit_matte_ae2025/matrix.json",
+          "required": true
+        }
+      ],
+      "cleanup_policy": "preserve_registered_evidence",
+      "expansion_policy": "when AE2026 or newer is added, rerun the layer matrix and update supported_targets or blocked_downgrade_targets from evidence",
+      "notes": [
+        "AE2020 through AE2024 source projects skip this recipe because the source contract is unavailable before AE2025.",
+        "AE2025 source projects pass only when the target remains AE2025 and are blocked for AE2020 through AE2024 downgrade targets."
+      ]
+    }
+  ]
+}

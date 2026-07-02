@@ -168,6 +168,42 @@ func TestOwnershipRepositoryTreatsGlobDependencyAsOwningMatches(t *testing.T) {
 	}
 }
 
+func TestOwnershipRepositoryTreatsVersionBoundaryEvidenceAsOwned(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeFile(t, root, "tmp/boundary/matrix.json", "{}\n")
+	writeFile(t, root, "tmp/unused/matrix.json", "{}\n")
+	writeValidRegistry(t, root, nil)
+	writeJSON(t, root, "registry/version_boundaries.json", map[string]any{
+		"schema_version": 1,
+		"version_boundaries": []map[string]any{
+			{
+				"id":      "ae2025.explicit_matte_source",
+				"atom_id": "layer.track_matte.explicit_source",
+				"recipe":  "minimal-layer-explicit-matte",
+				"feature": "AE2025 explicit matte source references",
+				"policy":  "known_source_contract_boundary",
+				"source_contract": map[string]any{
+					"min_source_version":        "AE2025",
+					"available_source_versions": []string{"AE2025"},
+				},
+				"target_contract": map[string]any{
+					"supported_targets": []string{"AE2025"},
+				},
+				"evidence": []map[string]any{{"kind": "matrix", "path": "tmp/boundary/matrix.json", "required": true}},
+			},
+		},
+	})
+
+	report, err := OwnershipRepository(root, OwnershipOptions{SampleLimit: 5})
+	if err != nil {
+		t.Fatal(err)
+	}
+	tmp := findOwnershipLocation(t, report, "tmp")
+	if tmp.Files != 2 || tmp.OwnedFiles != 1 || tmp.UnownedFiles != 1 {
+		t.Fatalf("tmp files/owned/unowned = %d/%d/%d, want 2/1/1", tmp.Files, tmp.OwnedFiles, tmp.UnownedFiles)
+	}
+}
+
 func findOwnershipLocation(t *testing.T, report OwnershipReport, id string) LocationOwnership {
 	t.Helper()
 	for _, location := range report.Locations {

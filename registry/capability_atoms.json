@@ -147,6 +147,11 @@
           "kind": "registry",
           "path": "registry/evidence.json",
           "required": true
+        },
+        {
+          "kind": "registry",
+          "path": "registry/version_boundaries.json",
+          "required": true
         }
       ],
       "boundaries": [

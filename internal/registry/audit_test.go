@@ -77,6 +77,92 @@ func TestAuditRepositoryReportsMissingRequiredDependency(t *testing.T) {
 	assertIssue(t, report, "missing_dependency", SeverityError, "text.animator.tracking", "examples/recipes/text-animator-tracking.json")
 }
 
+func TestAuditRepositoryAcceptsVersionBoundaryContract(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeFile(t, root, "tmp/text-basic/matrix.json", "{}\n")
+	writeValidRegistry(t, root, []map[string]any{
+		{
+			"id":       "layer.track_matte.explicit_source",
+			"domain":   "layer",
+			"tier":     "boundary",
+			"status":   "boundary",
+			"platform": map[string]any{"host_required": true, "os": []string{"windows", "macos"}},
+			"version_axis": map[string]any{
+				"min_supported":    "AE2020",
+				"known_supported":  []string{"AE2020", "AE2025"},
+				"expansion_policy": "append_new_ae_versions",
+			},
+			"workflows": []string{"generate", "migrate"},
+		},
+	})
+	writeJSON(t, root, "registry/version_boundaries.json", map[string]any{
+		"schema_version": 1,
+		"version_boundaries": []map[string]any{
+			{
+				"id":      "ae2025.explicit_matte_source",
+				"atom_id": "layer.track_matte.explicit_source",
+				"recipe":  "minimal-layer-explicit-matte",
+				"feature": "AE2025 explicit matte source references",
+				"policy":  "known_source_contract_boundary",
+				"source_contract": map[string]any{
+					"min_source_version":          "AE2025",
+					"available_source_versions":   []string{"AE2025"},
+					"unavailable_source_versions": []string{"AE2020", "AE2021", "AE2022", "AE2023", "AE2024"},
+				},
+				"target_contract": map[string]any{
+					"supported_targets":         []string{"AE2025"},
+					"blocked_downgrade_targets": []string{"AE2020", "AE2021", "AE2022", "AE2023", "AE2024"},
+				},
+				"expected_cells": map[string]any{"total": 36, "pass": 1, "blocked": 5, "failed": 0, "skipped": 30},
+				"evidence":       []map[string]any{{"kind": "matrix", "path": "tmp/text-basic/matrix.json", "required": true}},
+			},
+		},
+	})
+
+	report, err := AuditRepository(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != StatusPass {
+		t.Fatalf("status = %q, want %q; issues: %+v", report.Status, StatusPass, report.Issues)
+	}
+	if report.Summary.VersionBoundaries != 1 {
+		t.Fatalf("version boundaries = %d, want 1", report.Summary.VersionBoundaries)
+	}
+}
+
+func TestAuditRepositoryReportsUnknownVersionBoundaryAtom(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeFile(t, root, "tmp/text-basic/matrix.json", "{}\n")
+	writeValidRegistry(t, root, nil)
+	writeJSON(t, root, "registry/version_boundaries.json", map[string]any{
+		"schema_version": 1,
+		"version_boundaries": []map[string]any{
+			{
+				"id":      "ae2025.explicit_matte_source",
+				"atom_id": "missing.atom",
+				"recipe":  "minimal-layer-explicit-matte",
+				"feature": "AE2025 explicit matte source references",
+				"policy":  "known_source_contract_boundary",
+				"source_contract": map[string]any{
+					"min_source_version":        "AE2025",
+					"available_source_versions": []string{"AE2025"},
+				},
+				"target_contract": map[string]any{
+					"supported_targets": []string{"AE2025"},
+				},
+				"evidence": []map[string]any{{"kind": "matrix", "path": "tmp/text-basic/matrix.json", "required": true}},
+			},
+		},
+	})
+
+	report, err := AuditRepository(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertBoundaryIssue(t, report, "unknown_version_boundary_atom", SeverityError, "ae2025.explicit_matte_source", "missing.atom", "")
+}
+
 func TestAuditRepositoryReportsUnknownWorkflowReferences(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeValidRegistry(t, root, []map[string]any{
@@ -344,4 +430,14 @@ func assertIssue(t *testing.T, report AuditReport, code, severity, atomID, path 
 		}
 	}
 	t.Fatalf("issue %s/%s atom=%q path=%q not found in %+v", code, severity, atomID, path, report.Issues)
+}
+
+func assertBoundaryIssue(t *testing.T, report AuditReport, code, severity, boundaryID, atomID, path string) {
+	t.Helper()
+	for _, issue := range report.Issues {
+		if issue.Code == code && issue.Severity == severity && issue.BoundaryID == boundaryID && issue.AtomID == atomID && issue.Path == path {
+			return
+		}
+	}
+	t.Fatalf("issue %s/%s boundary=%q atom=%q path=%q not found in %+v", code, severity, boundaryID, atomID, path, report.Issues)
 }

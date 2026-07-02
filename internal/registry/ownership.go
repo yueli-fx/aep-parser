@@ -89,6 +89,11 @@ func collectOwnershipRefs(root string, reg Registry) ownershipRefs {
 	for _, evidence := range reg.EvidenceSets {
 		refs.add(root, evidence.ArtifactPath)
 	}
+	for _, boundary := range reg.VersionBoundaries {
+		for _, dep := range boundary.Evidence {
+			refs.addDependency(root, dep)
+		}
+	}
 	sort.Strings(refs.roots)
 	return refs
 }

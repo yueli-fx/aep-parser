@@ -63,6 +63,11 @@
       "description": "Points at generated or tracked evidence artifacts without making tmp itself authoritative."
     },
     {
+      "path": "registry/version_boundaries.json",
+      "role": "source_of_truth",
+      "description": "Defines known AE version feature boundaries that explain expected blocked or skipped matrix cells."
+    },
+    {
       "path": "flightdeck/work/aep-understanding-generation/mainline-spec.json",
       "role": "source_of_truth",
       "description": "Defines this mainline scope, phases, gates, and current execution pointer."
@@ -769,7 +774,7 @@
         }
       }
     },
-    "next_action": "Use focused coverage-axis queries as the version-matrix total/detail/total interface. Next useful increment is to make the single explicit-matte boundary policy explicit in the registry/spec so future cleanup or validation expansion does not treat the 5 blocked cells and 30 skipped cells as unexplained failures.",
+  "next_action": "Use registry/version_boundaries.json plus focused coverage-axis queries as the version-matrix total/detail/total interface. Next useful increment is to compare the boundary contract against generated coverage totals automatically instead of reviewing the two JSON reports by hand.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

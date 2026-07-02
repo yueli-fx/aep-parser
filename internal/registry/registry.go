@@ -16,10 +16,11 @@ const (
 )
 
 type Registry struct {
-	Locations       []Location
-	Workflows       []Workflow
-	CapabilityAtoms []CapabilityAtom
-	EvidenceSets    []EvidenceSet
+	Locations         []Location
+	Workflows         []Workflow
+	CapabilityAtoms   []CapabilityAtom
+	EvidenceSets      []EvidenceSet
+	VersionBoundaries []VersionBoundary
 }
 
 type Location struct {
@@ -74,6 +75,32 @@ type EvidenceSet struct {
 	Workflows    []string `json:"workflows"`
 }
 
+type VersionBoundary struct {
+	ID              string                        `json:"id"`
+	AtomID          string                        `json:"atom_id"`
+	Recipe          string                        `json:"recipe"`
+	Feature         string                        `json:"feature"`
+	Policy          string                        `json:"policy"`
+	SourceContract  VersionBoundarySourceContract `json:"source_contract"`
+	TargetContract  VersionBoundaryTargetContract `json:"target_contract"`
+	ExpectedCells   CoverageTotals                `json:"expected_cells"`
+	Evidence        []Dependency                  `json:"evidence"`
+	CleanupPolicy   string                        `json:"cleanup_policy,omitempty"`
+	ExpansionPolicy string                        `json:"expansion_policy,omitempty"`
+	Notes           []string                      `json:"notes,omitempty"`
+}
+
+type VersionBoundarySourceContract struct {
+	MinSourceVersion          string   `json:"min_source_version"`
+	AvailableSourceVersions   []string `json:"available_source_versions"`
+	UnavailableSourceVersions []string `json:"unavailable_source_versions"`
+}
+
+type VersionBoundaryTargetContract struct {
+	SupportedTargets        []string `json:"supported_targets"`
+	BlockedDowngradeTargets []string `json:"blocked_downgrade_targets"`
+}
+
 type AuditReport struct {
 	SchemaVersion int          `json:"schema_version"`
 	Status        string       `json:"status"`
@@ -82,20 +109,22 @@ type AuditReport struct {
 }
 
 type AuditSummary struct {
-	Locations       int `json:"locations"`
-	Workflows       int `json:"workflows"`
-	CapabilityAtoms int `json:"capability_atoms"`
-	EvidenceSets    int `json:"evidence_sets"`
-	Errors          int `json:"errors"`
-	Warnings        int `json:"warnings"`
+	Locations         int `json:"locations"`
+	Workflows         int `json:"workflows"`
+	CapabilityAtoms   int `json:"capability_atoms"`
+	EvidenceSets      int `json:"evidence_sets"`
+	VersionBoundaries int `json:"version_boundaries"`
+	Errors            int `json:"errors"`
+	Warnings          int `json:"warnings"`
 }
 
 type AuditIssue struct {
-	Code     string `json:"code"`
-	Severity string `json:"severity"`
-	Path     string `json:"path,omitempty"`
-	AtomID   string `json:"atom_id,omitempty"`
-	Message  string `json:"message"`
+	Code       string `json:"code"`
+	Severity   string `json:"severity"`
+	Path       string `json:"path,omitempty"`
+	AtomID     string `json:"atom_id,omitempty"`
+	BoundaryID string `json:"boundary_id,omitempty"`
+	Message    string `json:"message"`
 }
 
 type locationsFile struct {
@@ -118,6 +147,11 @@ type evidenceFile struct {
 	EvidenceSets  []EvidenceSet `json:"evidence_sets"`
 }
 
+type versionBoundariesFile struct {
+	SchemaVersion     int               `json:"schema_version"`
+	VersionBoundaries []VersionBoundary `json:"version_boundaries"`
+}
+
 func AuditRepository(root string) (AuditReport, error) {
 	reg, err := Load(root)
 	if err != nil {
@@ -128,10 +162,11 @@ func AuditRepository(root string) (AuditReport, error) {
 
 func Load(root string) (Registry, error) {
 	var (
-		locations locationsFile
-		workflows workflowsFile
-		atoms     atomsFile
-		evidence  evidenceFile
+		locations  locationsFile
+		workflows  workflowsFile
+		atoms      atomsFile
+		evidence   evidenceFile
+		boundaries versionBoundariesFile
 	)
 	if err := readJSON(root, "registry/locations.json", &locations); err != nil {
 		return Registry{}, err
@@ -145,11 +180,15 @@ func Load(root string) (Registry, error) {
 	if err := readJSON(root, "registry/evidence.json", &evidence); err != nil {
 		return Registry{}, err
 	}
+	if err := readOptionalJSON(root, "registry/version_boundaries.json", &boundaries); err != nil {
+		return Registry{}, err
+	}
 	return Registry{
-		Locations:       locations.Locations,
-		Workflows:       workflows.Workflows,
-		CapabilityAtoms: atoms.CapabilityAtoms,
-		EvidenceSets:    evidence.EvidenceSets,
+		Locations:         locations.Locations,
+		Workflows:         workflows.Workflows,
+		CapabilityAtoms:   atoms.CapabilityAtoms,
+		EvidenceSets:      evidence.EvidenceSets,
+		VersionBoundaries: boundaries.VersionBoundaries,
 	}, nil
 }
 
@@ -158,10 +197,11 @@ func Audit(root string, reg Registry) AuditReport {
 		SchemaVersion: 1,
 		Status:        StatusPass,
 		Summary: AuditSummary{
-			Locations:       len(reg.Locations),
-			Workflows:       len(reg.Workflows),
-			CapabilityAtoms: len(reg.CapabilityAtoms),
-			EvidenceSets:    len(reg.EvidenceSets),
+			Locations:         len(reg.Locations),
+			Workflows:         len(reg.Workflows),
+			CapabilityAtoms:   len(reg.CapabilityAtoms),
+			EvidenceSets:      len(reg.EvidenceSets),
+			VersionBoundaries: len(reg.VersionBoundaries),
 		},
 	}
 
@@ -251,6 +291,11 @@ func Audit(root string, reg Registry) AuditReport {
 		}
 	}
 
+	boundaryIDs := map[string]bool{}
+	for _, boundary := range reg.VersionBoundaries {
+		auditVersionBoundary(root, boundary, boundaryIDs, atomIDs, coverage, &report)
+	}
+
 	report.finish()
 	return report
 }
@@ -307,6 +352,63 @@ func auditAtom(root string, atom CapabilityAtom, workflowIDs map[string]bool, co
 	}
 }
 
+func auditVersionBoundary(root string, boundary VersionBoundary, boundaryIDs, atomIDs map[string]bool, coverage locationCoverage, report *AuditReport) {
+	if boundary.ID == "" {
+		report.addBoundaryIssue("missing_version_boundary_id", SeverityError, "", boundary.AtomID, "", "version boundary id is required")
+		return
+	}
+	if boundaryIDs[boundary.ID] {
+		report.addBoundaryIssue("duplicate_version_boundary", SeverityError, "", boundary.AtomID, boundary.ID, "version boundary id must be unique")
+	}
+	boundaryIDs[boundary.ID] = true
+	if boundary.AtomID == "" {
+		report.addBoundaryIssue("missing_version_boundary_atom", SeverityError, "", "", boundary.ID, "version boundary atom_id is required")
+	} else if !atomIDs[boundary.AtomID] {
+		report.addBoundaryIssue("unknown_version_boundary_atom", SeverityError, "", boundary.AtomID, boundary.ID, "version boundary references an unknown capability atom")
+	}
+	if boundary.Recipe == "" {
+		report.addBoundaryIssue("missing_version_boundary_recipe", SeverityError, "", boundary.AtomID, boundary.ID, "version boundary recipe is required")
+	}
+	if boundary.Feature == "" {
+		report.addBoundaryIssue("missing_version_boundary_feature", SeverityError, "", boundary.AtomID, boundary.ID, "version boundary feature is required")
+	}
+	if boundary.Policy == "" {
+		report.addBoundaryIssue("missing_version_boundary_policy", SeverityError, "", boundary.AtomID, boundary.ID, "version boundary policy is required")
+	}
+	if boundary.SourceContract.MinSourceVersion == "" {
+		report.addBoundaryIssue("missing_version_boundary_min_source", SeverityError, "", boundary.AtomID, boundary.ID, "version boundary source_contract.min_source_version is required")
+	}
+	if len(boundary.SourceContract.AvailableSourceVersions) == 0 {
+		report.addBoundaryIssue("missing_version_boundary_available_sources", SeverityError, "", boundary.AtomID, boundary.ID, "version boundary source_contract.available_source_versions is required")
+	}
+	if len(boundary.TargetContract.SupportedTargets) == 0 {
+		report.addBoundaryIssue("missing_version_boundary_supported_targets", SeverityError, "", boundary.AtomID, boundary.ID, "version boundary target_contract.supported_targets is required")
+	}
+	for _, dep := range boundary.Evidence {
+		auditBoundaryDependency(root, boundary, dep, coverage, report)
+	}
+}
+
+func auditBoundaryDependency(root string, boundary VersionBoundary, dep Dependency, coverage locationCoverage, report *AuditReport) {
+	if dep.Path == "" {
+		report.addBoundaryIssue("missing_version_boundary_evidence_path", SeverityError, "", boundary.AtomID, boundary.ID, "version boundary evidence path is required")
+		return
+	}
+	if !relPathOK(dep.Path) {
+		report.addBoundaryIssue("invalid_version_boundary_evidence_path", SeverityError, dep.Path, boundary.AtomID, boundary.ID, "version boundary evidence path must be repository relative")
+		return
+	}
+	if !coverage.covers(dep.Path) {
+		report.addBoundaryIssue("unregistered_version_boundary_evidence_location", SeverityError, dep.Path, boundary.AtomID, boundary.ID, "version boundary evidence path is not covered by any registered location")
+	}
+	if dependencyExists(root, dep) {
+		return
+	}
+	if dep.Required {
+		report.addBoundaryIssue("missing_version_boundary_evidence", SeverityError, dep.Path, boundary.AtomID, boundary.ID, fmt.Sprintf("%s evidence does not exist", valueOr(dep.Kind, "registered")))
+	}
+}
+
 func (r *AuditReport) addIssue(code, severity, path, atomID, message string) {
 	r.Issues = append(r.Issues, AuditIssue{
 		Code:     code,
@@ -314,6 +416,24 @@ func (r *AuditReport) addIssue(code, severity, path, atomID, message string) {
 		Path:     path,
 		AtomID:   atomID,
 		Message:  message,
+	})
+	if severity == SeverityError {
+		r.Summary.Errors++
+		return
+	}
+	if severity == SeverityWarning {
+		r.Summary.Warnings++
+	}
+}
+
+func (r *AuditReport) addBoundaryIssue(code, severity, path, atomID, boundaryID, message string) {
+	r.Issues = append(r.Issues, AuditIssue{
+		Code:       code,
+		Severity:   severity,
+		Path:       path,
+		AtomID:     atomID,
+		BoundaryID: boundaryID,
+		Message:    message,
 	})
 	if severity == SeverityError {
 		r.Summary.Errors++
@@ -336,6 +456,21 @@ func readJSON(root, rel string, v any) error {
 	path := filepath.Join(root, filepath.FromSlash(rel))
 	data, err := os.ReadFile(path)
 	if err != nil {
+		return fmt.Errorf("read %s: %w", rel, err)
+	}
+	if err := json.Unmarshal(data, v); err != nil {
+		return fmt.Errorf("decode %s: %w", rel, err)
+	}
+	return nil
+}
+
+func readOptionalJSON(root, rel string, v any) error {
+	path := filepath.Join(root, filepath.FromSlash(rel))
+	data, err := os.ReadFile(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
 		return fmt.Errorf("read %s: %w", rel, err)
 	}
 	if err := json.Unmarshal(data, v); err != nil {
