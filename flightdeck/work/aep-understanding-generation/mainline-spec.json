@@ -791,17 +791,17 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "convert_scope_support_split",
-      "reason": "Reduce convert_scope.go growth risk by separating migration scope entry generation from layer support-surface predicates while preserving behavior.",
+      "group": "convert_layer_surface_split",
+      "reason": "Reduce convert_layer.go growth risk by separating layer switch, transform, and timing materialization from refs, metadata, null, camera, and light helpers while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_scope.go",
-          "internal/aepmigrate/convert_scope_support.go"
+          "internal/aepmigrate/convert_layer.go",
+          "internal/aepmigrate/convert_layer_surface.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "convert_scope support predicates have been split from scope entry generation. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_layer.go, convert_rebuild.go, matrix.go, or text style enum/run/paragraph helpers without changing behavior.",
+    "next_action": "Layer switch, transform, and timing materialization has been split from convert_layer.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_rebuild.go, matrix.go, convert_text_animator.go, or remaining layer camera/light helpers without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
