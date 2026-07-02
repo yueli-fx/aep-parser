@@ -791,18 +791,18 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "profile_value_helper_split",
-      "reason": "Reduce convert_profile_values.go growth risk by separating property lookup, static profile value decoding, and profile color conversion helpers while preserving behavior.",
+      "group": "effect_param_helper_split",
+      "reason": "Reduce convert_effect_params.go growth risk by separating effect parameter static value decoding, keyframe materialization, and layer reference matching while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_property_lookup.go",
-          "internal/aepmigrate/convert_profile_static_values.go",
-          "internal/aepmigrate/convert_profile_color.go"
+          "internal/aepmigrate/convert_effect_param_values.go",
+          "internal/aepmigrate/convert_effect_param_keyframes.go",
+          "internal/aepmigrate/convert_effect_param_layerref.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Profile conversion helpers now separate property lookup, static value decoding, and color conversion. Next useful increment is to continue reducing remaining dense conversion support files or high-signal tests into coherent modules without changing behavior.",
+    "next_action": "Effect parameter helpers now separate static value decoding, keyframe materialization, and layer reference matching. Next useful increment is to continue reducing remaining dense conversion support files or high-signal tests into coherent modules without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
