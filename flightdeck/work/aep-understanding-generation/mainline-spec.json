@@ -791,19 +791,19 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "text_run_materializer_split",
-      "reason": "Reduce convert_text_runs.go growth risk by separating text run metrics, option enum materialization, and stroke materialization while preserving behavior.",
+      "group": "shape_stroke_materializer_split",
+      "reason": "Reduce convert_shape_stroke_style.go growth risk by separating base stroke style, dash, taper, and wave materialization while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_text_runs.go",
-          "internal/aepmigrate/convert_text_run_metrics.go",
-          "internal/aepmigrate/convert_text_run_options.go",
-          "internal/aepmigrate/convert_text_run_stroke.go"
+          "internal/aepmigrate/convert_shape_stroke_style.go",
+          "internal/aepmigrate/convert_shape_stroke_dashes.go",
+          "internal/aepmigrate/convert_shape_stroke_taper.go",
+          "internal/aepmigrate/convert_shape_stroke_wave.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Text run materialization now separates metrics, enum-backed options, and stroke fields. Next useful increment is to continue reducing remaining dense conversion support files or high-signal tests into coherent modules without changing behavior.",
+    "next_action": "Shape stroke materialization now separates base style, dash, taper, and wave fields. Next useful increment is to continue reducing remaining dense conversion support files or high-signal tests into coherent modules without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

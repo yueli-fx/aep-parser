@@ -10,6 +10,19 @@ func materializeShapeStroke(shapeLayer *aep.ShapeLayer, source profile.Layer) er
 	if err != nil {
 		return err
 	}
+	if err := materializeShapeStrokeBase(stroke, source); err != nil {
+		return err
+	}
+	if err := materializeShapeStrokeDashes(stroke, source); err != nil {
+		return err
+	}
+	if err := materializeShapeStrokeTaper(stroke, source); err != nil {
+		return err
+	}
+	return materializeShapeStrokeWave(stroke, source)
+}
+
+func materializeShapeStrokeBase(stroke *aep.StrokeNode, source profile.Layer) error {
 	if value, ok := propertyVector(source.Properties, "ADBE Vector Stroke Color", 4); ok {
 		if err := stroke.SetColor(profileARGBToRGBA(value)); err != nil {
 			return err
@@ -47,61 +60,6 @@ func materializeShapeStroke(shapeLayer *aep.ShapeLayer, source profile.Layer) er
 	}
 	if value, ok := propertyFloat(source.Properties, "ADBE Vector Composite Order"); ok {
 		if err := stroke.SetCompositeOrder(aep.ShapeCompositeOrder(int(value))); err != nil {
-			return err
-		}
-	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Stroke Dash 1"); ok {
-		if err := stroke.Dashes().SetDash(value); err != nil {
-			return err
-		}
-	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Stroke Gap 1"); ok {
-		if err := stroke.Dashes().SetGap(value); err != nil {
-			return err
-		}
-	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper Start Length"); ok {
-		if err := stroke.Taper().SetStartLength(value); err != nil {
-			return err
-		}
-	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper End Length"); ok {
-		if err := stroke.Taper().SetEndLength(value); err != nil {
-			return err
-		}
-	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper Start Width"); ok {
-		if err := stroke.Taper().SetStartWidth(value); err != nil {
-			return err
-		}
-	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper End Width"); ok {
-		if err := stroke.Taper().SetEndWidth(value); err != nil {
-			return err
-		}
-	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper Start Ease"); ok {
-		if err := stroke.Taper().SetStartEase(value); err != nil {
-			return err
-		}
-	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper End Ease"); ok {
-		if err := stroke.Taper().SetEndEase(value); err != nil {
-			return err
-		}
-	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper Wave Amount"); ok {
-		if err := stroke.Wave().SetAmount(value); err != nil {
-			return err
-		}
-	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper Wavelength"); ok {
-		if err := stroke.Wave().SetWavelength(value); err != nil {
-			return err
-		}
-	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper Wave Phase"); ok {
-		if err := stroke.Wave().SetPhase(value); err != nil {
 			return err
 		}
 	}
