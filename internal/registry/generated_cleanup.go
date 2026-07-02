@@ -20,23 +20,25 @@ type GeneratedCleanupReport struct {
 }
 
 type GeneratedCleanupSummary struct {
-	Locations             int                    `json:"locations"`
-	Groups                int                    `json:"groups"`
-	Files                 int                    `json:"files"`
-	Bytes                 int64                  `json:"bytes"`
-	ReferencedFiles       int                    `json:"referenced_files"`
-	UnreferencedFiles     int                    `json:"unreferenced_files"`
-	CleanupCandidateFiles int                    `json:"cleanup_candidate_files"`
-	RetainRegisteredFiles int                    `json:"retain_registered_files"`
-	StateReferencedFiles  int                    `json:"state_referenced_files"`
-	MixedGroups           int                    `json:"mixed_groups"`
-	StateReferencedGroups int                    `json:"state_referenced_groups"`
-	RegistryReportGroups  int                    `json:"registry_report_groups"`
-	RegistryReportFiles   int                    `json:"registry_report_files"`
-	UnknownProducerGroups int                    `json:"unknown_producer_groups"`
-	SampleLimit           int                    `json:"sample_limit"`
-	ActionBuckets         []GeneratedGroupBucket `json:"action_buckets,omitempty"`
-	ProducerBuckets       []GeneratedGroupBucket `json:"producer_buckets,omitempty"`
+	Locations                   int                    `json:"locations"`
+	Groups                      int                    `json:"groups"`
+	Files                       int                    `json:"files"`
+	Bytes                       int64                  `json:"bytes"`
+	ReferencedFiles             int                    `json:"referenced_files"`
+	UnreferencedFiles           int                    `json:"unreferenced_files"`
+	CleanupCandidateFiles       int                    `json:"cleanup_candidate_files"`
+	DirectCleanupCandidateFiles int                    `json:"direct_cleanup_candidate_files"`
+	ReviewPrunableFiles         int                    `json:"review_prunable_files"`
+	RetainRegisteredFiles       int                    `json:"retain_registered_files"`
+	StateReferencedFiles        int                    `json:"state_referenced_files"`
+	MixedGroups                 int                    `json:"mixed_groups"`
+	StateReferencedGroups       int                    `json:"state_referenced_groups"`
+	RegistryReportGroups        int                    `json:"registry_report_groups"`
+	RegistryReportFiles         int                    `json:"registry_report_files"`
+	UnknownProducerGroups       int                    `json:"unknown_producer_groups"`
+	SampleLimit                 int                    `json:"sample_limit"`
+	ActionBuckets               []GeneratedGroupBucket `json:"action_buckets,omitempty"`
+	ProducerBuckets             []GeneratedGroupBucket `json:"producer_buckets,omitempty"`
 }
 
 type GeneratedCleanupLocation struct {
@@ -122,14 +124,17 @@ func GeneratedCleanup(root string, reg Registry, opts GeneratedCleanupOptions) (
 			switch group.Action {
 			case "cleanup_candidate":
 				report.Summary.CleanupCandidateFiles += group.UnreferencedFiles
+				report.Summary.DirectCleanupCandidateFiles += group.UnreferencedFiles
 			case "retain_registered_evidence":
 				report.Summary.RetainRegisteredFiles += group.ReferencedFiles
 			case "review_mixed_registered_generated":
 				report.Summary.RetainRegisteredFiles += group.ReferencedFiles
 				report.Summary.CleanupCandidateFiles += group.UnreferencedFiles
+				report.Summary.ReviewPrunableFiles += group.UnreferencedFiles
 				report.Summary.MixedGroups++
 			case "review_state_referenced_generated":
 				report.Summary.CleanupCandidateFiles += group.UnreferencedFiles
+				report.Summary.ReviewPrunableFiles += group.UnreferencedFiles
 				report.Summary.StateReferencedGroups++
 			case "retain_state_referenced_generated":
 				report.Summary.StateReferencedGroups++

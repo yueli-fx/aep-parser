@@ -1031,23 +1031,18 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/registry",
-      "group": "ownership_generated_matrix_units",
-      "reason": "Reduce tmp evidence ambiguity without moving or deleting data. Registered matrix.json artifacts now make their generated case-output directory visible as one owned evidence unit in ownership reports, while cleanup keeps exact-file review semantics.",
+      "group": "generated_cleanup_summary_split",
+      "reason": "Make generated cleanup planning safer by separating direct cleanup candidates from files that require explicit review/prune handling.",
       "result": {
         "files": [
-          "internal/registry/ownership.go",
-          "internal/registry/ownership_test.go"
+          "internal/registry/generated_cleanup.go",
+          "internal/registry/generated_cleanup_test.go"
         ],
-        "behavior": "OwnershipRepository uses repository-ownership refs that treat a registered generated matrix.json parent directory as the owned evidence unit. GeneratedCleanup still uses exact registered refs so review/prune behavior remains explicit.",
-        "ownership_delta": {
-          "before": {
-            "owned_files": 1047,
-            "unowned_files": 755
-          },
-          "after": {
-            "owned_files": 1352,
-            "unowned_files": 450
-          }
+        "behavior": "GeneratedCleanupSummary keeps cleanup_candidate_files as the total compatibility field and adds direct_cleanup_candidate_files plus review_prunable_files so disposable tmp cleanup can be planned without confusing direct deletes with protected sibling pruning.",
+        "cleanup_summary": {
+          "cleanup_candidate_files": 344,
+          "direct_cleanup_candidate_files": 0,
+          "review_prunable_files": 344
         }
       }
     },
@@ -1078,7 +1073,7 @@
         }
       }
     },
-    "next_action": "Ownership now explains registered generated matrix output directories without hiding cleanup candidates. Continue with either the next scoped capability family or a cleanup-policy tightening pass, using the same JSON source-of-truth pattern.",
+    "next_action": "Generated cleanup summary now distinguishes direct deletes from review-prunable siblings. Continue with either an explicit dry-run prune report gate or the next scoped capability family, using the same JSON source-of-truth pattern.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

@@ -51,6 +51,9 @@ func TestGeneratedCleanupClassifiesReferencedMixedAndUnreferencedGroups(t *testi
 	if report.Summary.ReferencedFiles != 1 || report.Summary.UnreferencedFiles != 4 || report.Summary.CleanupCandidateFiles != 4 || report.Summary.MixedGroups != 1 {
 		t.Fatalf("summary refs = %+v, want one referenced, four cleanup candidates, one mixed group", report.Summary)
 	}
+	if report.Summary.DirectCleanupCandidateFiles != 3 || report.Summary.ReviewPrunableFiles != 1 {
+		t.Fatalf("summary cleanup split = %+v, want three direct candidates and one review-prunable sibling", report.Summary)
+	}
 
 	matrix := findGeneratedGroup(t, report, "tmp_evidence", "migration_matrix_text")
 	if matrix.Action != "review_mixed_registered_generated" || matrix.ProducerCategory != "version_matrix" {
@@ -125,6 +128,9 @@ func TestGeneratedCleanupProtectsStateReferencedGeneratedFiles(t *testing.T) {
 	}
 	if group.StateReferencedFiles != 1 || group.ReferencedFiles != 1 || group.UnreferencedFiles != 1 {
 		t.Fatalf("state refs = %+v, want one state-referenced file and one unreferenced sibling", group)
+	}
+	if report.Summary.DirectCleanupCandidateFiles != 0 || report.Summary.ReviewPrunableFiles != 1 {
+		t.Fatalf("summary cleanup split = %+v, want one review-prunable sibling and no direct cleanup candidates", report.Summary)
 	}
 	if len(group.StateReferencePaths) != 1 || group.StateReferencePaths[0] != "tmp/migration_matrix_old/matrix.json" {
 		t.Fatalf("state reference paths = %+v", group.StateReferencePaths)
