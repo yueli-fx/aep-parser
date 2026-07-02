@@ -79,40 +79,72 @@ func runCoverage(args []string) int {
 	outPath := fs.String("out", "tmp/registry_coverage.json", "coverage validation report JSON path")
 	summaryOut := fs.Bool("summary", false, "write summary JSON instead of full coverage validation report")
 	rowsOut := fs.Bool("rows", false, "write filtered atom rows JSON instead of full coverage validation report")
-	recordFilter := fs.String("record", "", "filter atom rows by coverage record id")
-	atomFilter := fs.String("atom", "", "filter atom rows by atom id")
-	writerStatusFilter := fs.String("writer-status", "", "filter atom rows by writer status")
-	hostLevelFilter := fs.String("host-level", "", "filter atom rows by host-open evidence level")
-	boundaryStatusFilter := fs.String("boundary-status", "", "filter atom rows by boundary status")
+	cellsOut := fs.Bool("cells", false, "write filtered source-target matrix cells JSON instead of full coverage validation report")
+	recordFilter := fs.String("record", "", "filter rows or cells by coverage record id")
+	atomFilter := fs.String("atom", "", "filter rows or cells by atom id")
+	recipeFilter := fs.String("recipe", "", "filter cells by recipe id")
+	caseStatusFilter := fs.String("case-status", "", "filter cells by matrix case status")
+	writerStatusFilter := fs.String("writer-status", "", "filter rows or cells by writer status")
+	hostLevelFilter := fs.String("host-level", "", "filter rows or cells by host-open evidence level")
+	boundaryStatusFilter := fs.String("boundary-status", "", "filter rows or cells by boundary status")
 	jsonOut := fs.Bool("json", false, "print JSON report")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage [-root .] [-coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json] [-out tmp/registry_coverage.json] [-summary|-rows] [-record id] [-atom id] [-writer-status status] [-host-level level] [-boundary-status status] [-json]")
+		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage [-root .] [-coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json] [-out tmp/registry_coverage.json] [-summary|-rows|-cells] [-record id] [-atom id] [-recipe id] [-case-status status] [-writer-status status] [-host-level level] [-boundary-status status] [-json]")
 		return 2
 	}
-	if *summaryOut && *rowsOut {
-		fmt.Fprintln(os.Stderr, "coverage: choose only one of -summary or -rows")
+	modes := 0
+	for _, enabled := range []bool{*summaryOut, *rowsOut, *cellsOut} {
+		if enabled {
+			modes++
+		}
+	}
+	if modes > 1 {
+		fmt.Fprintln(os.Stderr, "coverage: choose only one of -summary, -rows, or -cells")
 		return 2
 	}
 
-	report, err := registry.ValidateCoverage(*root, *coveragePath)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "coverage:", err)
-		return 2
-	}
-	output := any(report)
-	if *summaryOut {
-		output = registry.SummarizeCoverage(report)
-	} else if *rowsOut {
-		output = registry.CoverageRows(report, registry.CoverageRowFilter{
+	var status string
+	var report registry.CoverageReport
+	var output any
+	if *cellsOut {
+		cells, err := registry.CoverageCells(*root, *coveragePath, registry.CoverageCellFilter{
 			RecordID:              *recordFilter,
 			AtomID:                *atomFilter,
+			Recipe:                *recipeFilter,
+			CaseStatus:            *caseStatusFilter,
 			WriterStatus:          *writerStatusFilter,
 			HostOpenEvidenceLevel: *hostLevelFilter,
 			BoundaryStatus:        *boundaryStatusFilter,
 		})
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "coverage:", err)
+			return 2
+		}
+		output = cells
+		status = cells.Status
+	} else {
+		var err error
+		report, err = registry.ValidateCoverage(*root, *coveragePath)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "coverage:", err)
+			return 2
+		}
+		output = report
+		status = report.Status
+		if *summaryOut {
+			output = registry.SummarizeCoverage(report)
+		} else if *rowsOut {
+			output = registry.CoverageRows(report, registry.CoverageRowFilter{
+				RecordID:              *recordFilter,
+				AtomID:                *atomFilter,
+				WriterStatus:          *writerStatusFilter,
+				HostOpenEvidenceLevel: *hostLevelFilter,
+				BoundaryStatus:        *boundaryStatusFilter,
+			})
+		}
 	}
 	if err := writeJSONFile(*outPath, output); err != nil {
 		fmt.Fprintln(os.Stderr, "write:", err)
@@ -130,11 +162,14 @@ func runCoverage(args []string) int {
 		} else if *rowsOut {
 			rows := output.(registry.CoverageRowsReport)
 			fmt.Printf("registry coverage rows: %s (%d rows)\n", rows.Status, rows.Count)
+		} else if *cellsOut {
+			cells := output.(registry.CoverageCellsReport)
+			fmt.Printf("registry coverage cells: %s (%d cells)\n", cells.Status, cells.Count)
 		} else {
 			fmt.Printf("registry coverage: %s (%d artifacts, %d errors)\n", report.Status, report.Summary.Artifacts, report.Summary.Errors)
 		}
 	}
-	if report.Status == registry.StatusFail {
+	if status == registry.StatusFail {
 		return 1
 	}
 	return 0

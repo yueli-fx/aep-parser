@@ -238,6 +238,84 @@ func TestValidateCoverageReportsAtomRowBoundaryLabels(t *testing.T) {
 	}
 }
 
+func TestCoverageCellsReportsSourceTargetCasesWithBoundaryLabels(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+		"schema_version": 1,
+		"coverage": []map[string]any{
+			{
+				"id":            "layer",
+				"artifact":      "tmp/matrix/layer/matrix.json",
+				"recipes":       []string{"minimal-layer-explicit-matte"},
+				"writer_status": "boundary",
+				"boundary": map[string]any{
+					"status":             "known_matte_contract_boundary",
+					"blocked_recipe_ids": []string{"minimal-layer-explicit-matte"},
+					"details": []map[string]any{
+						{
+							"recipe": "minimal-layer-explicit-matte",
+							"reason": "AE2025-only explicit matte source contract",
+						},
+					},
+				},
+				"totals": map[string]any{"total": 3, "pass": 1, "blocked": 1, "failed": 0, "skipped": 1},
+			},
+		},
+	})
+	writeMatrixFixtureWithCases(t, root, "tmp/matrix/layer/matrix.json", []map[string]any{
+		{"recipe_name": "minimal-layer-explicit-matte", "source_version": "AE2025", "target_version": "AE2025", "status": "pass"},
+		{"recipe_name": "minimal-layer-explicit-matte", "source_version": "AE2025", "target_version": "AE2024", "status": "blocked", "reason": "cannot downgrade explicit matte source"},
+		{"recipe_name": "minimal-layer-explicit-matte", "source_version": "AE2020", "target_version": "AE2020", "status": "skipped", "reason": "source contract unavailable before AE2025"},
+	})
+	writeJSON(t, root, "registry/capability_atoms.json", map[string]any{
+		"schema_version": 1,
+		"capability_atoms": []map[string]any{
+			{
+				"id":           "layer.track_matte.explicit_source",
+				"domain":       "layer",
+				"tier":         "atom",
+				"status":       "boundary",
+				"workflows":    []string{"migrate"},
+				"dependencies": []map[string]any{{"kind": "recipe", "path": "examples/recipes/minimal-layer-explicit-matte.json", "required": true}},
+			},
+		},
+	})
+
+	report, err := CoverageCells(root, "flightdeck/work/aep-understanding-generation/coverage.json", CoverageCellFilter{
+		AtomID: "layer.track_matte.explicit_source",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != StatusPass || report.Count != 3 {
+		t.Fatalf("cells status/count = %q/%d, want pass/3", report.Status, report.Count)
+	}
+	blocked := findCoverageCell(t, report.Cells, "blocked")
+	if blocked.RecordID != "layer" || blocked.Recipe != "minimal-layer-explicit-matte" {
+		t.Fatalf("blocked cell identity = %+v", blocked)
+	}
+	if blocked.BoundaryStatus != "known_matte_contract_boundary" || blocked.BoundaryReason != "AE2025-only explicit matte source contract" {
+		t.Fatalf("blocked boundary labels = %+v", blocked)
+	}
+	if blocked.SourceVersion != "AE2025" || blocked.TargetVersion != "AE2024" {
+		t.Fatalf("blocked versions = %+v", blocked)
+	}
+	if blocked.Reason != "cannot downgrade explicit matte source" {
+		t.Fatalf("blocked reason = %q", blocked.Reason)
+	}
+
+	filtered, err := CoverageCells(root, "flightdeck/work/aep-understanding-generation/coverage.json", CoverageCellFilter{
+		AtomID:     "layer.track_matte.explicit_source",
+		CaseStatus: "skipped",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if filtered.Count != 1 || filtered.Cells[0].Status != "skipped" {
+		t.Fatalf("filtered cells = %+v, want one skipped cell", filtered.Cells)
+	}
+}
+
 func TestSummarizeCoverageGroupsAtomRowsForQuickQueries(t *testing.T) {
 	report := CoverageReport{
 		Status: StatusPass,
@@ -293,6 +371,17 @@ func TestSummarizeCoverageGroupsAtomRowsForQuickQueries(t *testing.T) {
 	if summary.DirectHostAtoms != 1 || summary.InferredHostAtoms != 1 {
 		t.Fatalf("host atoms = direct %d inferred %d", summary.DirectHostAtoms, summary.InferredHostAtoms)
 	}
+}
+
+func findCoverageCell(t *testing.T, cells []CoverageCell, status string) CoverageCell {
+	t.Helper()
+	for _, cell := range cells {
+		if cell.Status == status {
+			return cell
+		}
+	}
+	t.Fatalf("coverage cell with status %q not found in %+v", status, cells)
+	return CoverageCell{}
 }
 
 func TestFilterCoverageRowsSelectsAtomRowsForFocusedQueries(t *testing.T) {

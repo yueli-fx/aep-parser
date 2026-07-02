@@ -203,6 +203,56 @@ func TestRunCoverageCanWriteFilteredAtomRows(t *testing.T) {
 	}
 }
 
+func TestRunCoverageCanWriteFilteredMatrixCells(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+		"schema_version": 1,
+		"coverage": []map[string]any{
+			{
+				"id":            "text",
+				"artifact":      "tmp/matrix/text/matrix.json",
+				"recipes":       []string{"text-basic"},
+				"writer_status": "PD-6x6",
+				"totals":        map[string]any{"total": 2, "pass": 1, "blocked": 1, "failed": 0, "skipped": 0},
+			},
+		},
+	})
+	writeJSON(t, root, "tmp/matrix/text/matrix.json", map[string]any{
+		"schema_version": 1,
+		"summary":        map[string]any{"total": 2, "passed": 1, "blocked": 1, "failed": 0, "skipped": 0},
+		"cases": []map[string]any{
+			{"recipe_name": "text-basic", "source_version": "AE2020", "target_version": "AE2025", "status": "pass"},
+			{"recipe_name": "text-basic", "source_version": "AE2025", "target_version": "AE2020", "status": "blocked", "reason": "blocked fixture"},
+		},
+	})
+	out := filepath.Join(root, "tmp", "registry_coverage_cells.json")
+
+	code := run([]string{
+		"coverage",
+		"-root", root,
+		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-out", out,
+		"-cells",
+		"-atom", "text.source.default",
+		"-case-status", "blocked",
+	})
+	if code != 0 {
+		t.Fatalf("run(coverage -cells) = %d, want 0", code)
+	}
+
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var report registry.CoverageCellsReport
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Count != 1 || report.Cells[0].Status != "blocked" || report.Cells[0].Reason != "blocked fixture" {
+		t.Fatalf("cells report = %+v, want one blocked fixture cell", report)
+	}
+}
+
 func newRegistryRoot(t *testing.T) string {
 	t.Helper()
 	root := t.TempDir()

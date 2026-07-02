@@ -54,9 +54,27 @@ type CoverageRowsReport struct {
 	Rows          []AtomCoverageRow `json:"rows"`
 }
 
+type CoverageCellsReport struct {
+	SchemaVersion int                `json:"schema_version"`
+	Status        string             `json:"status"`
+	Count         int                `json:"count"`
+	Filter        CoverageCellFilter `json:"filter"`
+	Cells         []CoverageCell     `json:"cells"`
+}
+
 type CoverageRowFilter struct {
 	RecordID              string `json:"record_id,omitempty"`
 	AtomID                string `json:"atom_id,omitempty"`
+	WriterStatus          string `json:"writer_status,omitempty"`
+	HostOpenEvidenceLevel string `json:"host_open_evidence_level,omitempty"`
+	BoundaryStatus        string `json:"boundary_status,omitempty"`
+}
+
+type CoverageCellFilter struct {
+	RecordID              string `json:"record_id,omitempty"`
+	AtomID                string `json:"atom_id,omitempty"`
+	Recipe                string `json:"recipe,omitempty"`
+	CaseStatus            string `json:"case_status,omitempty"`
 	WriterStatus          string `json:"writer_status,omitempty"`
 	HostOpenEvidenceLevel string `json:"host_open_evidence_level,omitempty"`
 	BoundaryStatus        string `json:"boundary_status,omitempty"`
@@ -105,6 +123,22 @@ type AtomCoverageRow struct {
 	DirectHostVersions    []string       `json:"direct_host_versions,omitempty"`
 	InferredHostVersions  []string       `json:"inferred_host_versions,omitempty"`
 	Totals                CoverageTotals `json:"totals"`
+}
+
+type CoverageCell struct {
+	AtomID                string `json:"atom_id"`
+	RecordID              string `json:"record_id"`
+	Recipe                string `json:"recipe,omitempty"`
+	Artifact              string `json:"artifact"`
+	WriterStatus          string `json:"writer_status,omitempty"`
+	BoundaryStatus        string `json:"boundary_status,omitempty"`
+	BoundaryReason        string `json:"boundary_reason,omitempty"`
+	HostOpenEvidenceLevel string `json:"host_open_evidence_level,omitempty"`
+	SourceVersion         string `json:"source_version,omitempty"`
+	TargetVersion         string `json:"target_version,omitempty"`
+	AEOpenVersion         string `json:"ae_open_version,omitempty"`
+	Status                string `json:"status"`
+	Reason                string `json:"reason,omitempty"`
 }
 
 type coverageFile struct {
@@ -171,6 +205,7 @@ type matrixCase struct {
 	TargetVersion string `json:"target_version"`
 	AEOpenVersion string `json:"ae_open_version"`
 	Status        string `json:"status"`
+	Reason        string `json:"reason,omitempty"`
 }
 
 type coverageArtifactRef struct {
@@ -272,6 +307,116 @@ func CoverageRows(report CoverageReport, filter CoverageRowFilter) CoverageRowsR
 		Count:         len(rows),
 		Filter:        filter,
 		Rows:          rows,
+	}
+}
+
+func CoverageCells(root, coveragePath string, filter CoverageCellFilter) (CoverageCellsReport, error) {
+	report, err := ValidateCoverage(root, coveragePath)
+	if err != nil {
+		return CoverageCellsReport{}, err
+	}
+	var coverage coverageFile
+	if err := readJSONPath(root, coveragePath, &coverage); err != nil {
+		return CoverageCellsReport{}, err
+	}
+	refs := loadCoverageAtomRefs(root)
+	cells := coverageCellsForRecords(root, coverage.Coverage, refs, filter)
+	return CoverageCellsReport{
+		SchemaVersion: 1,
+		Status:        report.Status,
+		Count:         len(cells),
+		Filter:        filter,
+		Cells:         cells,
+	}, nil
+}
+
+func coverageCellsForRecords(root string, records []coverageRecord, refs coverageAtomRefs, filter CoverageCellFilter) []CoverageCell {
+	var cells []CoverageCell
+	for _, record := range records {
+		if record.Artifact == "" {
+			continue
+		}
+		var matrix matrixFile
+		if err := readJSONPath(root, record.Artifact, &matrix); err != nil {
+			continue
+		}
+		for _, c := range matrix.Cases {
+			if c.RecipeName == "" {
+				continue
+			}
+			atomIDs := refs.byRecipe[c.RecipeName]
+			if len(atomIDs) == 0 {
+				atomIDs = refs.byEvidence[filepath.ToSlash(record.Artifact)]
+			}
+			for _, atomID := range atomIDs {
+				cell := CoverageCell{
+					AtomID:                atomID,
+					RecordID:              record.ID,
+					Recipe:                c.RecipeName,
+					Artifact:              filepath.ToSlash(record.Artifact),
+					WriterStatus:          record.WriterStatus,
+					BoundaryStatus:        boundaryStatus(record, c.RecipeName),
+					BoundaryReason:        boundaryReason(record, c.RecipeName),
+					HostOpenEvidenceLevel: hostOpenEvidenceLevel(record, c.RecipeName),
+					SourceVersion:         c.SourceVersion,
+					TargetVersion:         c.TargetVersion,
+					AEOpenVersion:         c.AEOpenVersion,
+					Status:                c.Status,
+					Reason:                c.Reason,
+				}
+				if coverageCellMatches(cell, filter) {
+					cells = append(cells, cell)
+				}
+			}
+		}
+	}
+	sort.Slice(cells, func(i, j int) bool {
+		left := coverageCellSortKey(cells[i])
+		right := coverageCellSortKey(cells[j])
+		for idx := range left {
+			if left[idx] != right[idx] {
+				return left[idx] < right[idx]
+			}
+		}
+		return false
+	})
+	return cells
+}
+
+func coverageCellMatches(cell CoverageCell, filter CoverageCellFilter) bool {
+	if filter.RecordID != "" && cell.RecordID != filter.RecordID {
+		return false
+	}
+	if filter.AtomID != "" && cell.AtomID != filter.AtomID {
+		return false
+	}
+	if filter.Recipe != "" && cell.Recipe != filter.Recipe {
+		return false
+	}
+	if filter.CaseStatus != "" && cell.Status != filter.CaseStatus {
+		return false
+	}
+	if filter.WriterStatus != "" && cell.WriterStatus != filter.WriterStatus {
+		return false
+	}
+	if filter.HostOpenEvidenceLevel != "" && cell.HostOpenEvidenceLevel != filter.HostOpenEvidenceLevel {
+		return false
+	}
+	if filter.BoundaryStatus != "" && cell.BoundaryStatus != filter.BoundaryStatus {
+		return false
+	}
+	return true
+}
+
+func coverageCellSortKey(cell CoverageCell) [7]string {
+	return [7]string{
+		cell.AtomID,
+		cell.RecordID,
+		cell.Recipe,
+		cell.SourceVersion,
+		cell.TargetVersion,
+		cell.AEOpenVersion,
+		cell.Status,
 	}
 }
 
