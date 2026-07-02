@@ -204,6 +204,34 @@ func TestOwnershipRepositoryTreatsVersionBoundaryEvidenceAsOwned(t *testing.T) {
 	}
 }
 
+func TestOwnershipRepositoryTreatsRegisteredGeneratedMatrixRootAsOwnedUnit(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeFile(t, root, "tmp/migration_matrix_text/matrix.json", "{}\n")
+	writeFile(t, root, "tmp/migration_matrix_text/minimal-text/AE2020_to_AE2025/output.aep", "aep\n")
+	writeFile(t, root, "tmp/migration_matrix_text/minimal-text/AE2020_to_AE2025/report.json", "{}\n")
+	writeFile(t, root, "tmp/unregistered_matrix/matrix.json", "{}\n")
+	writeFile(t, root, "tmp/unregistered_matrix/case/output.aep", "aep\n")
+	writeValidRegistry(t, root, nil)
+	writeJSON(t, root, "registry/evidence.json", map[string]any{
+		"schema_version": 1,
+		"evidence_sets": []map[string]any{
+			{"id": "matrix.text", "class": "generated_evidence", "artifact_path": "tmp/migration_matrix_text/matrix.json", "required": true, "workflows": []string{"generate"}},
+		},
+	})
+
+	report, err := OwnershipRepository(root, OwnershipOptions{SampleLimit: 5})
+	if err != nil {
+		t.Fatal(err)
+	}
+	tmp := findOwnershipLocation(t, report, "tmp")
+	if tmp.Files != 5 || tmp.OwnedFiles != 3 || tmp.UnownedFiles != 2 {
+		t.Fatalf("tmp files/owned/unowned = %d/%d/%d, want 5/3/2", tmp.Files, tmp.OwnedFiles, tmp.UnownedFiles)
+	}
+	if len(tmp.UnownedGroups) != 1 || tmp.UnownedGroups[0].Name != "unregistered_matrix" || tmp.UnownedGroups[0].Files != 2 {
+		t.Fatalf("tmp unowned groups = %+v", tmp.UnownedGroups)
+	}
+}
+
 func findOwnershipLocation(t *testing.T, report OwnershipReport, id string) LocationOwnership {
 	t.Helper()
 	for _, location := range report.Locations {

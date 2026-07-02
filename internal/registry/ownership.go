@@ -52,7 +52,7 @@ func Ownership(root string, reg Registry, opts OwnershipOptions) (OwnershipRepor
 	if opts.SampleLimit < 0 {
 		opts.SampleLimit = 0
 	}
-	refs := collectOwnershipRefs(root, reg)
+	refs := collectRepositoryOwnershipRefs(root, reg)
 	report := OwnershipReport{
 		SchemaVersion: 1,
 		Summary: OwnershipSummary{
@@ -98,6 +98,17 @@ func collectOwnershipRefs(root string, reg Registry) ownershipRefs {
 	return refs
 }
 
+func collectRepositoryOwnershipRefs(root string, reg Registry) ownershipRefs {
+	refs := collectOwnershipRefs(root, reg)
+	for path := range refs.files {
+		if dir, ok := registeredGeneratedMatrixRoot(path, reg.Locations); ok {
+			refs.addExistingRoot(root, dir)
+		}
+	}
+	sort.Strings(refs.roots)
+	return refs
+}
+
 func (r *ownershipRefs) addDependency(root string, dep Dependency) {
 	if dep.Kind != "glob" {
 		r.add(root, dep.Path)
@@ -123,6 +134,39 @@ func (r *ownershipRefs) add(root, rel string) {
 		return
 	}
 	r.files[clean] = true
+}
+
+func (r *ownershipRefs) addExistingRoot(root, rel string) {
+	if rel == "" || !relPathOK(rel) {
+		return
+	}
+	clean := cleanRel(rel)
+	info, err := os.Stat(filepath.Join(root, filepath.FromSlash(clean)))
+	if err != nil || !info.IsDir() {
+		return
+	}
+	r.roots = append(r.roots, clean)
+}
+
+func registeredGeneratedMatrixRoot(path string, locations []Location) (string, bool) {
+	clean := cleanRel(path)
+	if filepath.Base(clean) != "matrix.json" {
+		return "", false
+	}
+	dir := cleanRel(filepath.Dir(clean))
+	if dir == "." || dir == clean {
+		return "", false
+	}
+	for _, location := range locations {
+		if location.Tracked || location.Class != "generated_evidence" {
+			continue
+		}
+		root := cleanRel(location.Path)
+		if dir == root || hasPathPrefix(dir, root) {
+			return dir, true
+		}
+	}
+	return "", false
 }
 
 func ownershipLocation(root string, location Location, refs ownershipRefs, sampleLimit int) (LocationOwnership, error) {

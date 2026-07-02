@@ -1030,19 +1030,24 @@
       }
     },
     "last_code_maintenance_target": {
-      "location": "internal/aepmigrate",
-      "group": "convert_materialization_pipeline",
-      "reason": "Keep Convert as a small orchestration entry point before adding more capability families. The materialization sequence is now an explicit ordered pipeline so future comp/text/mask/effect/shape steps do not keep expanding convert.go.",
+      "location": "internal/registry",
+      "group": "ownership_generated_matrix_units",
+      "reason": "Reduce tmp evidence ambiguity without moving or deleting data. Registered matrix.json artifacts now make their generated case-output directory visible as one owned evidence unit in ownership reports, while cleanup keeps exact-file review semantics.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert.go",
-          "internal/aepmigrate/convert_materialize.go",
-          "internal/aepmigrate/convert_materialize_test.go"
+          "internal/registry/ownership.go",
+          "internal/registry/ownership_test.go"
         ],
-        "behavior": "Convert delegates rebuilt-project materialization to materializeRebuiltProject; convertProjectMaterializers exposes the ordered comp_metadata, transform_expressions, text_animators, masks, effects pipeline and is covered by an ordering test",
-        "line_counts_after": {
-          "convert_go": 86,
-          "convert_materialize_go": 28
+        "behavior": "OwnershipRepository uses repository-ownership refs that treat a registered generated matrix.json parent directory as the owned evidence unit. GeneratedCleanup still uses exact registered refs so review/prune behavior remains explicit.",
+        "ownership_delta": {
+          "before": {
+            "owned_files": 1047,
+            "unowned_files": 755
+          },
+          "after": {
+            "owned_files": 1352,
+            "unowned_files": 450
+          }
         }
       }
     },
@@ -1073,7 +1078,7 @@
         }
       }
     },
-    "next_action": "shape.primitive.ellipse now has writer 6x6 and endpoint host-open evidence. Continue with the next scoped capability family using the same recipe -> atom -> coverage -> axis pattern.",
+    "next_action": "Ownership now explains registered generated matrix output directories without hiding cleanup candidates. Continue with either the next scoped capability family or a cleanup-policy tightening pass, using the same JSON source-of-truth pattern.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
