@@ -96,6 +96,35 @@ func TestRunOwnershipWritesOwnershipSummary(t *testing.T) {
 	}
 }
 
+func TestRunCoverageWritesReportAndReturnsOneForDrift(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 3)
+	writeMatrixFixture(t, root, "tmp/matrix/text/matrix.json", 2)
+	out := filepath.Join(root, "tmp", "registry_coverage.json")
+
+	code := run([]string{
+		"coverage",
+		"-root", root,
+		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-out", out,
+	})
+	if code != 1 {
+		t.Fatalf("run(coverage) = %d, want 1", code)
+	}
+
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var report registry.CoverageReport
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != registry.StatusFail || report.Summary.Errors == 0 {
+		t.Fatalf("status/errors = %q/%d, want fail/>0", report.Status, report.Summary.Errors)
+	}
+}
+
 func newRegistryRoot(t *testing.T) string {
 	t.Helper()
 	root := t.TempDir()
@@ -176,6 +205,42 @@ func readReport(t *testing.T, path string) registry.AuditReport {
 		t.Fatal(err)
 	}
 	return report
+}
+
+func writeCoverageFixture(t *testing.T, root, rel string, total int) {
+	t.Helper()
+	writeJSON(t, root, rel, map[string]any{
+		"schema_version": 1,
+		"coverage": []map[string]any{
+			{
+				"id":       "text",
+				"artifact": "tmp/matrix/text/matrix.json",
+				"totals": map[string]any{
+					"total":   total,
+					"pass":    total,
+					"blocked": 0,
+					"failed":  0,
+					"skipped": 0,
+				},
+			},
+		},
+	})
+}
+
+func writeMatrixFixture(t *testing.T, root, rel string, total int) {
+	t.Helper()
+	writeJSON(t, root, rel, map[string]any{
+		"schema_version": 1,
+		"out_root":       filepath.Dir(rel),
+		"summary": map[string]any{
+			"total":   total,
+			"passed":  total,
+			"blocked": 0,
+			"failed":  0,
+			"skipped": 0,
+		},
+		"cases": []map[string]any{},
+	})
 }
 
 func hasInventoryLocation(report registry.InventoryReport, id string) bool {

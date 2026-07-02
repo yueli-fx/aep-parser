@@ -81,6 +81,11 @@
       "path": "tmp/registry_ownership.json",
       "role": "generated_report",
       "description": "Read-only ownership/unowned output; ignored by git."
+    },
+    {
+      "path": "tmp/registry_coverage.json",
+      "role": "generated_report",
+      "description": "Read-only coverage ledger validation output; ignored by git."
     }
   ],
   "phases": [
@@ -135,7 +140,7 @@
     },
     {
       "id": "version_matrix_totalization",
-      "status": "planned",
+      "status": "active",
       "objective": "Bring AE2020-AE2025 migration validation into a total/detail/total JSON ledger by atom and version axis.",
       "entry_criteria": [
         "Atom taxonomy exists for the selected validation domain.",
@@ -160,31 +165,23 @@
     }
   ],
   "current_execution": {
-    "phase": "atom_taxonomy_expansion",
+    "phase": "version_matrix_totalization",
     "last_completed_target": {
-      "location": "recipe_atoms",
-      "group": "remaining_evidence_complete_recipes",
-      "reason": "After shape, text, comp, camera, and layer were registered, the ownership report showed 38 unowned recipe atoms. This batch registered every remaining recipe with complete all_6x6 migration evidence and left only the two recipes that currently have partial/non-6x6 evidence.",
-      "source_report": "tmp/registry_ownership.json",
-      "source_matrices": [
-        "tmp/migration_matrix_light_all_6x6/matrix.json",
-        "tmp/migration_matrix_project_all_6x6/matrix.json",
-        "tmp/migration_matrix_transform_all_6x6/matrix.json",
-        "tmp/migration_matrix_effect_params_all_6x6/matrix.json",
-        "tmp/migration_matrix_precomp_all_6x6/matrix.json",
-        "tmp/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json"
-      ],
-      "observed_counts": {
-        "files": 141,
-        "owned_files_before": 103,
-        "unowned_files_before": 38,
-        "selected_group_unowned_files": 36
-      },
+      "location": "coverage_ledger",
+      "group": "coverage_totals_validator",
+      "reason": "Move the version matrix total/detail/total ledger from manual JSON edits toward a Go-verifiable source of truth. The new aepregistry coverage gate checks declared coverage totals against each referenced matrix.json artifact.",
+      "source_report": "tmp/registry_coverage.json",
       "result": {
+        "command_added": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage.json",
+        "artifacts_checked": 45,
+        "coverage_errors": 0
+      },
+      "previous_target": {
+        "location": "recipe_atoms",
+        "group": "remaining_evidence_complete_recipes",
         "capability_atoms_added": 36,
         "recipe_atoms_owned_files_after": 139,
-        "recipe_atoms_unowned_files_after": 2,
-        "selected_group_remaining_unowned_files": 0
+        "recipe_atoms_unowned_files_after": 2
       },
       "boundary_notes": [
         "minimal-adjustment-layer remains unowned because only tmp/migration_matrix_adjustment_effect/matrix.json exists, with 3 total rows rather than full AE2020-AE2025 all_6x6 evidence.",
@@ -192,7 +189,7 @@
         "minimal-layer-explicit-matte remains covered by layer.track_matte.explicit_source as a version-boundary atom, not a pass-complete layer atom."
       ]
     },
-    "next_action": "Decide policy for the two remaining recipe_atoms entries: generate full all_6x6 evidence for adjustment/text-effect, or register explicit boundary/pending atoms without marking them verified.",
+    "next_action": "Use the coverage validator as the recurring total gate, then extend it from totals-only validation toward recipe/atom/version coverage checks. Keep the two remaining recipe_atoms entries pending until full evidence or explicit boundary status is chosen.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
@@ -224,6 +221,13 @@
       "required_for": [
         "asset_visibility",
         "atom_taxonomy_expansion"
+      ]
+    },
+    {
+      "id": "registry_coverage",
+      "command": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage.json",
+      "required_for": [
+        "version_matrix_totalization"
       ]
     },
     {
