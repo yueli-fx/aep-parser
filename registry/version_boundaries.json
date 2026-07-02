@@ -8,6 +8,7 @@
       "recipe": "minimal-layer-explicit-matte",
       "feature": "AE2025 explicit track matte source references",
       "policy": "known_source_contract_boundary",
+      "coverage_boundary_status": "known_matte_contract_boundary",
       "source_contract": {
         "min_source_version": "AE2025",
         "available_source_versions": [

@@ -318,6 +318,52 @@ func TestRunCoverageAxisSupportsFocusedFilters(t *testing.T) {
 	}
 }
 
+func TestRunBoundariesWritesBoundaryCheckReport(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeBoundaryCommandFixture(t, root, map[string]any{"total": 2, "pass": 1, "blocked": 1, "failed": 0, "skipped": 0})
+	out := filepath.Join(root, "tmp", "registry_version_boundaries.json")
+
+	code := run([]string{
+		"boundaries",
+		"-root", root,
+		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-out", out,
+		"-versions", "AE2020,AE2025",
+	})
+	if code != 0 {
+		t.Fatalf("run(boundaries) = %d, want 0", code)
+	}
+
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var report registry.VersionBoundaryCheckReport
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != registry.StatusPass || report.Summary.Matched != 1 || len(report.Boundaries) != 1 {
+		t.Fatalf("boundary report = %+v", report)
+	}
+}
+
+func TestRunBoundariesReturnsOneForBoundaryDrift(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeBoundaryCommandFixture(t, root, map[string]any{"total": 2, "pass": 2, "blocked": 0, "failed": 0, "skipped": 0})
+	out := filepath.Join(root, "tmp", "registry_version_boundaries.json")
+
+	code := run([]string{
+		"boundaries",
+		"-root", root,
+		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-out", out,
+		"-versions", "AE2020,AE2025",
+	})
+	if code != 1 {
+		t.Fatalf("run(boundaries drift) = %d, want 1", code)
+	}
+}
+
 func TestRunCoverageCanWriteFilteredAtomRows(t *testing.T) {
 	root := newRegistryRoot(t)
 	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
@@ -531,6 +577,56 @@ func writeMatrixFixture(t *testing.T, root, rel string, total int) {
 			"skipped": 0,
 		},
 		"cases": []map[string]any{},
+	})
+}
+
+func writeBoundaryCommandFixture(t *testing.T, root string, expectedCells map[string]any) {
+	t.Helper()
+	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+		"schema_version": 1,
+		"coverage": []map[string]any{
+			{
+				"id":            "text",
+				"artifact":      "tmp/matrix/text/matrix.json",
+				"recipes":       []string{"text-basic"},
+				"writer_status": "boundary",
+				"boundary": map[string]any{
+					"status":             "known_text_boundary",
+					"blocked_recipe_ids": []string{"text-basic"},
+				},
+				"totals": map[string]any{"total": 2, "pass": 1, "blocked": 1, "failed": 0, "skipped": 0},
+			},
+		},
+	})
+	writeJSON(t, root, "tmp/matrix/text/matrix.json", map[string]any{
+		"schema_version": 1,
+		"summary":        map[string]any{"total": 2, "passed": 1, "blocked": 1, "failed": 0, "skipped": 0},
+		"cases": []map[string]any{
+			{"recipe_name": "text-basic", "source_version": "AE2020", "target_version": "AE2020", "status": "pass"},
+			{"recipe_name": "text-basic", "source_version": "AE2025", "target_version": "AE2020", "status": "blocked"},
+		},
+	})
+	writeJSON(t, root, "registry/version_boundaries.json", map[string]any{
+		"schema_version": 1,
+		"version_boundaries": []map[string]any{
+			{
+				"id":                       "text.boundary",
+				"atom_id":                  "text.source.default",
+				"recipe":                   "text-basic",
+				"feature":                  "test text boundary",
+				"policy":                   "known_source_contract_boundary",
+				"coverage_boundary_status": "known_text_boundary",
+				"source_contract": map[string]any{
+					"min_source_version":        "AE2025",
+					"available_source_versions": []string{"AE2025"},
+				},
+				"target_contract": map[string]any{
+					"supported_targets": []string{"AE2025"},
+				},
+				"expected_cells": expectedCells,
+				"evidence":       []map[string]any{{"kind": "matrix", "path": "tmp/matrix/text/matrix.json", "required": true}},
+			},
+		},
 	})
 }
 

@@ -76,18 +76,19 @@ type EvidenceSet struct {
 }
 
 type VersionBoundary struct {
-	ID              string                        `json:"id"`
-	AtomID          string                        `json:"atom_id"`
-	Recipe          string                        `json:"recipe"`
-	Feature         string                        `json:"feature"`
-	Policy          string                        `json:"policy"`
-	SourceContract  VersionBoundarySourceContract `json:"source_contract"`
-	TargetContract  VersionBoundaryTargetContract `json:"target_contract"`
-	ExpectedCells   CoverageTotals                `json:"expected_cells"`
-	Evidence        []Dependency                  `json:"evidence"`
-	CleanupPolicy   string                        `json:"cleanup_policy,omitempty"`
-	ExpansionPolicy string                        `json:"expansion_policy,omitempty"`
-	Notes           []string                      `json:"notes,omitempty"`
+	ID                     string                        `json:"id"`
+	AtomID                 string                        `json:"atom_id"`
+	Recipe                 string                        `json:"recipe"`
+	Feature                string                        `json:"feature"`
+	Policy                 string                        `json:"policy"`
+	CoverageBoundaryStatus string                        `json:"coverage_boundary_status,omitempty"`
+	SourceContract         VersionBoundarySourceContract `json:"source_contract"`
+	TargetContract         VersionBoundaryTargetContract `json:"target_contract"`
+	ExpectedCells          CoverageTotals                `json:"expected_cells"`
+	Evidence               []Dependency                  `json:"evidence"`
+	CleanupPolicy          string                        `json:"cleanup_policy,omitempty"`
+	ExpansionPolicy        string                        `json:"expansion_policy,omitempty"`
+	Notes                  []string                      `json:"notes,omitempty"`
 }
 
 type VersionBoundarySourceContract struct {

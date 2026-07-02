@@ -23,6 +23,8 @@ func run(args []string) int {
 	switch args[0] {
 	case "audit":
 		return runAudit(args[1:])
+	case "boundaries":
+		return runBoundaries(args[1:])
 	case "coverage":
 		return runCoverage(args[1:])
 	case "cleanup":
@@ -37,6 +39,46 @@ func run(args []string) int {
 		usage()
 		return 2
 	}
+}
+
+func runBoundaries(args []string) int {
+	fs := flag.NewFlagSet("aepregistry boundaries", flag.ContinueOnError)
+	fs.SetOutput(os.Stderr)
+	root := fs.String("root", ".", "repository root")
+	coveragePath := fs.String("coverage", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
+	outPath := fs.String("out", "tmp/registry_version_boundaries.json", "version boundary check report JSON path")
+	versions := fs.String("versions", "", "comma-separated AE versions; defaults to AE2020-AE2025")
+	jsonOut := fs.Bool("json", false, "print JSON report")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	if fs.NArg() != 0 {
+		fmt.Fprintln(os.Stderr, "usage: aepregistry boundaries [-root .] [-coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json] [-out tmp/registry_version_boundaries.json] [-versions AE2020,AE2021,...] [-json]")
+		return 2
+	}
+
+	report, err := registry.CheckVersionBoundaries(*root, *coveragePath, splitCSV(*versions))
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "boundaries:", err)
+		return 2
+	}
+	if err := writeJSONFile(*outPath, report); err != nil {
+		fmt.Fprintln(os.Stderr, "write:", err)
+		return 2
+	}
+	if *jsonOut {
+		if err := json.NewEncoder(os.Stdout).Encode(report); err != nil {
+			fmt.Fprintln(os.Stderr, "stdout:", err)
+			return 2
+		}
+	} else {
+		fmt.Printf("registry boundaries: %s (%d boundaries, %d matched, %d errors)\n",
+			report.Status, report.Summary.Boundaries, report.Summary.Matched, report.Summary.Errors)
+	}
+	if report.Status == registry.StatusFail {
+		return 1
+	}
+	return 0
 }
 
 func runCleanup(args []string) int {
@@ -392,5 +434,5 @@ func writeJSONFile(path string, value any) error {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: aepregistry <audit|cleanup|coverage|inventory|layout|ownership> [flags]")
+	fmt.Fprintln(os.Stderr, "usage: aepregistry <audit|boundaries|cleanup|coverage|inventory|layout|ownership> [flags]")
 }

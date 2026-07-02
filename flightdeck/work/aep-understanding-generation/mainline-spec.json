@@ -123,6 +123,11 @@
       "description": "Read-only filtered AE version-axis coverage summaries for focused atom, record, recipe, and status queries; ignored by git."
     },
     {
+      "path": "tmp/registry_version_boundaries.json",
+      "role": "generated_report",
+      "description": "Read-only version-boundary contract check comparing registry/version_boundaries.json against generated coverage-axis totals; ignored by git."
+    },
+    {
       "path": "tmp/registry_coverage_rows_*.json",
       "role": "generated_report",
       "description": "Read-only filtered coverage atom-row query outputs; ignored by git."
@@ -774,7 +779,7 @@
         }
       }
     },
-  "next_action": "Use registry/version_boundaries.json plus focused coverage-axis queries as the version-matrix total/detail/total interface. Next useful increment is to compare the boundary contract against generated coverage totals automatically instead of reviewing the two JSON reports by hand.",
+  "next_action": "Use registry/version_boundaries.json, tmp/registry_version_boundaries.json, and focused coverage-axis queries as the version-matrix total/detail/total interface. Next useful increment is to expand boundary checks from totals/status matching into source-target policy cell matching before adding another AE version.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
@@ -850,6 +855,13 @@
     {
       "id": "registry_coverage_axis",
       "command": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_axis.json -axis",
+      "required_for": [
+        "version_matrix_totalization"
+      ]
+    },
+    {
+      "id": "registry_version_boundaries",
+      "command": "go run ./cmd/aepregistry boundaries -root . -out tmp/registry_version_boundaries.json",
       "required_for": [
         "version_matrix_totalization"
       ]
