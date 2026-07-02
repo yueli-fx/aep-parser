@@ -789,7 +789,7 @@
         }
       }
     },
-  "next_action": "Use aepregistry gate -scope version-matrix and -scope asset-policy as the two main JSON gate entrypoints. Next useful increment is to reduce convert.go growth risk by extracting migration capability/policy helpers without changing behavior.",
+  "next_action": "Use aepregistry gate -scope version-matrix and -scope asset-policy as the two main JSON gate entrypoints. Migration capability policy has been separated from the top-level convert flow; next useful increment is to reduce growth risk in the larger materialization modules, starting with text or scope conversion helpers, without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
