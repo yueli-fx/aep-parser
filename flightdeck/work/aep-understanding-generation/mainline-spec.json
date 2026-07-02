@@ -791,18 +791,18 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "convert_index_lookup_split",
-      "reason": "Reduce convert_index.go growth risk by separating footage indexing and target lookup helpers from source/target composition indexes while preserving behavior.",
+      "group": "profile_value_helper_split",
+      "reason": "Reduce convert_profile_values.go growth risk by separating property lookup, static profile value decoding, and profile color conversion helpers while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_index.go",
-          "internal/aepmigrate/convert_footage_index.go",
-          "internal/aepmigrate/convert_target_lookup.go"
+          "internal/aepmigrate/convert_property_lookup.go",
+          "internal/aepmigrate/convert_profile_static_values.go",
+          "internal/aepmigrate/convert_profile_color.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Conversion indexes now separate composition indexes, footage indexes, and target lookup helpers. Next useful increment is to continue reducing remaining 3-4KB conversion support files or dense tests into coherent modules without changing behavior.",
+    "next_action": "Profile conversion helpers now separate property lookup, static value decoding, and color conversion. Next useful increment is to continue reducing remaining dense conversion support files or high-signal tests into coherent modules without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
