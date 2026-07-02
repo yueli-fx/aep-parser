@@ -791,20 +791,18 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "remaining_conversion_smoke_helper_extension",
-      "reason": "Finish the obvious conversion smoke helper migration for shape, matte, comp, and base convert tests while keeping blocked downgrade and specialized profile assertions local.",
+      "group": "property_predicate_dedup",
+      "reason": "Reduce production support predicate drift by centralizing repeated layer property any/all checks used by transform and shape graphic support.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_recipe_fixtures_test.go",
-          "internal/aepmigrate/convert_shape_test.go",
-          "internal/aepmigrate/convert_layer_matte_test.go",
-          "internal/aepmigrate/convert_comp_test.go",
-          "internal/aepmigrate/convert_test.go"
+          "internal/aepmigrate/convert_profile_properties.go",
+          "internal/aepmigrate/convert_shape_graphic_support.go",
+          "internal/aepmigrate/convert_shape_support.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Most conversion pass smoke tests now share source-level and recipe-level pass/output helpers. Next useful increment is to switch from smoke-test duplication to a dense production support file or inspect remaining non-pass tests for a different repeated assertion pattern.",
+    "next_action": "Layer property predicate checks now have shared any/all helpers for transform and shape graphic support. Next useful increment is to continue production support cleanup where repeated property groups still drive materialization dispatch, or inspect matrix/AE-open tests before touching higher-risk orchestration.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

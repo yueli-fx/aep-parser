@@ -3,60 +3,66 @@ package aepmigrate
 import "github.com/yueli-fx/aep-parser/internal/profile"
 
 func hasGradientFillGraphic(layer profile.Layer) bool {
-	return hasProperty(layer, "ADBE Vector Grad Colors") &&
-		hasProperty(layer, "ADBE Vector Grad Type") &&
+	return hasAllProperties(layer, "ADBE Vector Grad Colors", "ADBE Vector Grad Type") &&
 		!hasProperty(layer, "ADBE Vector Stroke Width")
 }
 
 func hasGradientStrokeGraphic(layer profile.Layer) bool {
-	return hasProperty(layer, "ADBE Vector Grad Colors") &&
-		hasProperty(layer, "ADBE Vector Grad Type") &&
+	return hasAllProperties(layer, "ADBE Vector Grad Colors", "ADBE Vector Grad Type") &&
 		hasProperty(layer, "ADBE Vector Stroke Width")
 }
 
 func hasSupportedShapeFilter(layer profile.Layer) bool {
-	return hasProperty(layer, "ADBE Vector RoundCorner Radius") ||
-		hasProperty(layer, "ADBE Vector Offset Amount") ||
-		hasProperty(layer, "ADBE Vector Trim Start") ||
-		hasProperty(layer, "ADBE Vector Trim End") ||
-		hasProperty(layer, "ADBE Vector Trim Offset") ||
-		hasProperty(layer, "ADBE Vector Zigzag Size") ||
-		hasProperty(layer, "ADBE Vector Zigzag Detail") ||
-		hasProperty(layer, "ADBE Vector Zigzag Points") ||
-		hasProperty(layer, "ADBE Vector PuckerBloat Amount") ||
-		hasProperty(layer, "ADBE Vector Twist Angle") ||
-		hasProperty(layer, "ADBE Vector Twist Center") ||
+	return hasAnyProperty(layer,
+		"ADBE Vector RoundCorner Radius",
+		"ADBE Vector Offset Amount",
+		"ADBE Vector Trim Start",
+		"ADBE Vector Trim End",
+		"ADBE Vector Trim Offset",
+		"ADBE Vector Zigzag Size",
+		"ADBE Vector Zigzag Detail",
+		"ADBE Vector Zigzag Points",
+		"ADBE Vector PuckerBloat Amount",
+		"ADBE Vector Twist Angle",
+		"ADBE Vector Twist Center",
+		"ADBE Vector Merge Type",
+	) ||
 		hasWigglePathsFilter(layer) ||
 		hasWiggleTransformFilter(layer) ||
-		hasRepeaterFilter(layer) ||
-		hasProperty(layer, "ADBE Vector Merge Type")
+		hasRepeaterFilter(layer)
 }
 
 func hasWigglePathsFilter(layer profile.Layer) bool {
-	return hasProperty(layer, "ADBE Vector Roughen Size") ||
-		hasProperty(layer, "ADBE Vector Roughen Detail") ||
-		hasProperty(layer, "ADBE Vector Temporal Freq") ||
-		hasProperty(layer, "ADBE Vector Roughen Points")
+	return hasAnyProperty(layer,
+		"ADBE Vector Roughen Size",
+		"ADBE Vector Roughen Detail",
+		"ADBE Vector Temporal Freq",
+		"ADBE Vector Roughen Points",
+	)
 }
 
 func hasWiggleTransformFilter(layer profile.Layer) bool {
-	return hasProperty(layer, "ADBE Vector Wiggler Anchor") ||
-		hasProperty(layer, "ADBE Vector Wiggler Position") ||
-		hasProperty(layer, "ADBE Vector Wiggler Scale") ||
-		hasProperty(layer, "ADBE Vector Wiggler Rotation") ||
-		hasProperty(layer, "ADBE Vector Xform Temporal Freq")
+	return hasAnyProperty(layer,
+		"ADBE Vector Wiggler Anchor",
+		"ADBE Vector Wiggler Position",
+		"ADBE Vector Wiggler Scale",
+		"ADBE Vector Wiggler Rotation",
+		"ADBE Vector Xform Temporal Freq",
+	)
 }
 
 func hasRepeaterFilter(layer profile.Layer) bool {
-	return hasProperty(layer, "ADBE Vector Repeater Copies") ||
-		hasProperty(layer, "ADBE Vector Repeater Offset") ||
-		hasProperty(layer, "ADBE Vector Repeater Order") ||
-		hasProperty(layer, "ADBE Vector Repeater Anchor") ||
-		hasProperty(layer, "ADBE Vector Repeater Position") ||
-		hasProperty(layer, "ADBE Vector Repeater Scale") ||
-		hasProperty(layer, "ADBE Vector Repeater Rotation") ||
-		hasProperty(layer, "ADBE Vector Repeater Opacity 1") ||
-		hasProperty(layer, "ADBE Vector Repeater Opacity 2")
+	return hasAnyProperty(layer,
+		"ADBE Vector Repeater Copies",
+		"ADBE Vector Repeater Offset",
+		"ADBE Vector Repeater Order",
+		"ADBE Vector Repeater Anchor",
+		"ADBE Vector Repeater Position",
+		"ADBE Vector Repeater Scale",
+		"ADBE Vector Repeater Rotation",
+		"ADBE Vector Repeater Opacity 1",
+		"ADBE Vector Repeater Opacity 2",
+	)
 }
 
 func isSupportedParametricGraphicShape(shape profile.Shape) bool {

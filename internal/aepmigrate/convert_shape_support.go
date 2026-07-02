@@ -39,11 +39,13 @@ func isSupportedRectGraphicShapeLayer(layer profile.Layer) bool {
 		return false
 	}
 	if (hasProperty(layer, "ADBE Vector Grad Colors") && !hasGradientFill && !hasGradientStroke) ||
-		hasProperty(layer, "ADBE Vector Stroke Dash 2") ||
-		hasProperty(layer, "ADBE Vector Stroke Gap 2") ||
-		hasProperty(layer, "ADBE Vector Stroke Offset") ||
-		hasProperty(layer, "ADBE Vector Taper Wave Units") ||
-		hasProperty(layer, "ADBE Vector Taper Wave Cycles") {
+		hasAnyProperty(layer,
+			"ADBE Vector Stroke Dash 2",
+			"ADBE Vector Stroke Gap 2",
+			"ADBE Vector Stroke Offset",
+			"ADBE Vector Taper Wave Units",
+			"ADBE Vector Taper Wave Cycles",
+		) {
 		return false
 	}
 	return true

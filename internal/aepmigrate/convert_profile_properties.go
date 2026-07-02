@@ -3,11 +3,13 @@ package aepmigrate
 import "github.com/yueli-fx/aep-parser/internal/profile"
 
 func hasTransformProperties(layer profile.Layer) bool {
-	return hasProperty(layer, "ADBE Anchor Point") ||
-		hasProperty(layer, "ADBE Position") ||
-		hasProperty(layer, "ADBE Scale") ||
-		hasProperty(layer, "ADBE Rotate Z") ||
-		hasProperty(layer, "ADBE Opacity")
+	return hasAnyProperty(layer,
+		"ADBE Anchor Point",
+		"ADBE Position",
+		"ADBE Scale",
+		"ADBE Rotate Z",
+		"ADBE Opacity",
+	)
 }
 
 func hasProperty(layer profile.Layer, matchName string) bool {
@@ -17,6 +19,24 @@ func hasProperty(layer profile.Layer, matchName string) bool {
 		}
 	}
 	return false
+}
+
+func hasAnyProperty(layer profile.Layer, matchNames ...string) bool {
+	for _, matchName := range matchNames {
+		if hasProperty(layer, matchName) {
+			return true
+		}
+	}
+	return false
+}
+
+func hasAllProperties(layer profile.Layer, matchNames ...string) bool {
+	for _, matchName := range matchNames {
+		if !hasProperty(layer, matchName) {
+			return false
+		}
+	}
+	return true
 }
 
 func hasStaticPropertyVector(layer profile.Layer, matchName string, want []float64) bool {
