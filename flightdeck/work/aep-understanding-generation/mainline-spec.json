@@ -791,17 +791,17 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "shape_gradient_styles_split",
-      "reason": "Reduce convert_shape_styles.go growth risk by separating gradient fill/stroke materialization from flat fill/stroke materialization while preserving behavior.",
+      "group": "comp_metadata_split",
+      "reason": "Reduce convert_index.go growth risk by separating comp settings and no-layer metadata replay from conversion indexes and target lookup helpers while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_shape_styles.go",
-          "internal/aepmigrate/convert_shape_gradient_styles.go"
+          "internal/aepmigrate/convert_index.go",
+          "internal/aepmigrate/convert_comp_metadata.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Shape gradient fill/stroke materialization has been split from convert_shape_styles.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_index.go, convert_mask.go, or convert_text_animator_materialize.go without changing behavior.",
+    "next_action": "Comp settings and no-layer metadata replay have been split from convert_index.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_mask.go, convert_text_animator_materialize.go, or convert_scope_support.go without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
