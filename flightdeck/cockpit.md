@@ -4,7 +4,7 @@ Focus: 当前 active execution 是 `work/versioned-aep-migration/index.md`：AE2
 
 ## In flight
 
-- **versioned-aep-migration** (`work/versioned-aep-migration/index.md`) — active mainline：AE2020-AE2025 migration matrix、coverage/current JSON、domain batch inventory、host-open planning、registry checkpoint。继续前读 `goal.md` / `current.md`，下一批是 `effect_controls_static_values`；不要把一次 package cycle 当成整条主线完成。
+- **versioned-aep-migration** (`work/versioned-aep-migration/index.md`) — active mainline：AE2020-AE2025 migration matrix、coverage/current JSON、domain batch inventory、host-open planning、registry checkpoint。继续前读 `goal.md` / `current.md`，下一批是 `text_domain_residuals`；不要把一次 package cycle 当成整条主线完成。
 - **asset-registry-cleanup** (`work/asset-registry-cleanup/index.md`) — parked governance arc：data/examples/test_data/tmp/registry ownership、generated-output cleanup policy、asset ledger normalization。
 - **booyah-glitch-replication** (`work/booyah-glitch-replication/index.md`) — 12-comp from-scratch 复刻已建成并通过 agent AE gate；按 showcase review-gate，只有用户真机确认后才算 complete。①②③⑧ 已 complete；④⑤⑥⑦⑨⑩⑪⑫ 仍待用户 review，下一批优先 ⑩⑪⑫。
 - **fx-technique-internalization** (`work/fx-technique-internalization/index.md`) — parked research arc：参考 `.aep` → 拆角色/技法/机制 → 技法库/现象配方；现在也拥有 technique facts/portrait/corpus/report 文件。火焰样本已验证；下次恢复需要先选新的参考现象。
@@ -12,7 +12,7 @@ Focus: 当前 active execution 是 `work/versioned-aep-migration/index.md`：AE2
 
 ## Next
 
-- **versioned AEP migration**：从 `work/versioned-aep-migration/goal.md` 执行一个 package cycle；下一批 `effect_controls_static_values`。不要默认跑全量 `-ae-open`，除非显式扩大/关闭 `-max-ae-open-cases`。
+- **versioned AEP migration**：从 `work/versioned-aep-migration/goal.md` 执行一个 package cycle；下一批 `text_domain_residuals`。不要默认跑全量 `-ae-open`，除非显式扩大/关闭 `-max-ae-open-cases`。
 - **Booyah 用户真机验收 ⑩⑪⑫**：用户确认后更新 `flightdeck/showcase/booyah-clone/INDEX.md`，再按 review-gate 翻 complete；未确认前不要关闭 Booyah topic。
 - **Technique research**：只有用户明确要继续学习/内化参考工程时才恢复；先选样本，不在主线自动推进。
 

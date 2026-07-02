@@ -397,6 +397,7 @@
       "host_open_status": "direct_endpoint_hosts_pass; AE2021-AE2024 inferred_by_endpoint",
       "id": "effects-control-static-values",
       "ledger": "tmp/migration_matrix_effect_control_static_values_all_6x6/ledger.md",
+      "recipe_count": 1,
       "recipes": [
         "minimal-effect-control-static-values"
       ],
@@ -408,7 +409,7 @@
         "skipped": 0,
         "total": 36
       },
-      "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
+      "writer_coverage": "AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 sources into AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 targets",
       "writer_status": "PD-6x6"
     },
     {

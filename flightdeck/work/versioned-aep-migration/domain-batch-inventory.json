@@ -23,8 +23,8 @@
     "unsupported_status": "boundary_pending_evidence"
   },
   "active_package": null,
-  "last_completed_package": "essential_graphics_controllers",
-  "next_package": "effect_controls_static_values",
+  "last_completed_package": "effect_controls_static_values",
+  "next_package": "text_domain_residuals",
   "mainline_status": "ready_for_next_batch",
   "packages": [
     {
@@ -106,7 +106,64 @@
       "id": "effect_controls_static_values",
       "domain": "effects",
       "scope": "Expression control effects and static values across scalar, angle, boolean, color, 2D point, 3D point, and slider.",
-      "execution_status": "candidate"
+      "execution_status": "complete",
+      "selection_rationale": "Existing recipe, parser/profile checks, effect parameter materialization, and matrix coverage already cover the whole static expression-control value family; this cycle re-ran and refreshed the package matrix instead of adding speculative binary support.",
+      "known_evidence": [
+        "examples/recipes/minimal-effect-control-static-values.json",
+        "internal/serializer/templates/effects/effect_adbe_slider_control.bin",
+        "internal/serializer/templates/effects/effect_adbe_angle_control.bin",
+        "internal/serializer/templates/effects/effect_adbe_checkbox_control.bin",
+        "internal/serializer/templates/effects/effect_adbe_color_control.bin",
+        "internal/serializer/templates/effects/effect_adbe_point_control.bin",
+        "internal/serializer/templates/effects/effect_adbe_point3d_control.bin",
+        "internal/serializer/templates/effects/effectparam_adbe_slider_control_0001.bin",
+        "internal/serializer/templates/effects/effectparam_adbe_angle_control_0001.bin",
+        "internal/serializer/templates/effects/effectparam_adbe_color_control_0001.bin",
+        "internal/serializer/templates/effects/effectparam_adbe_point_control_0001.bin",
+        "internal/serializer/templates/effects/effectparam_adbe_point3d_control_0001.bin",
+        "internal/aepmigrate/convert_effect_param_test.go",
+        "internal/aepmigrate/convert_effect_param_values.go"
+      ],
+      "member_status": {
+        "angle_control": "verified_in_this_batch",
+        "checkbox_control": "verified_in_this_batch",
+        "color_control": "verified_in_this_batch",
+        "point2d_control": "verified_in_this_batch",
+        "point3d_control": "verified_in_this_batch",
+        "slider_control": "verified_in_this_batch"
+      },
+      "recipes": [
+        "minimal-effect-control-static-values"
+      ],
+      "matrix": "tmp/migration_matrix_effect_control_static_values_all_6x6/matrix.json",
+      "ledger": "tmp/migration_matrix_effect_control_static_values_all_6x6/ledger.md",
+      "host_open_endpoint_evidence": "tmp/host_open_gaps/effects-control-static-values/chunk-1/matrix.json",
+      "totals": {
+        "matrix": {
+          "total": 36,
+          "pass": 36,
+          "blocked": 0,
+          "failed": 0,
+          "skipped": 0
+        },
+        "coverage_axis": {
+          "atom_rows": 1,
+          "cells": 36,
+          "pass": 36,
+          "blocked": 0,
+          "failed": 0,
+          "skipped": 0
+        }
+      },
+      "acceptance": {
+        "unit_tests": [
+          "go test ./internal/recipe -run Effect -count=1",
+          "go test ./internal/aepmigrate -run Effect -count=1",
+          "go test ./internal/aep_test -run Effect -count=1"
+        ],
+        "matrix": "AE2020-AE2025 6x6 for minimal-effect-control-static-values",
+        "coverage_axis": "effect.control.static_values has zero failed cells across AE2020-AE2025"
+      }
     },
     {
       "id": "text_domain_residuals",

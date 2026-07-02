@@ -1104,49 +1104,45 @@
       }
     },
     "last_capability_target": {
-      "location": "essential_graphics",
-      "group": "essential_graphics_controllers",
-      "reason": "Promote Essential Graphics controller coverage from mixed smoke into a dedicated package with point controller support, package inventory, AE2020-AE2025 matrix evidence, endpoint host-open evidence, and explicit boundaries for unsupported controller kinds.",
+      "location": "effects",
+      "group": "effect_controls_static_values",
+      "reason": "Promote expression-control static values into a completed mainline package using existing template-backed writer support, recipe/profile checks, refreshed AE2020-AE2025 matrix evidence, and existing endpoint host-open evidence.",
       "result": {
         "recipes": [
-          "examples/recipes/minimal-essential-graphics-controller.json",
-          "examples/recipes/minimal-essential-graphics-checkbox-controller.json",
-          "examples/recipes/minimal-essential-graphics-color-controller.json",
-          "examples/recipes/minimal-essential-graphics-point-controller.json"
+          "examples/recipes/minimal-effect-control-static-values.json"
         ],
         "atom_ids": [
-          "essential.graphics_controller",
-          "essential.graphics_checkbox_controller",
-          "essential.graphics_color_controller",
-          "essential.graphics_point_controller"
+          "effect.control.static_values"
         ],
-        "coverage_record": "essential-graphics-controllers",
-        "matrix": "tmp/migration_matrix_essential_graphics_controllers_all_6x6/matrix.json",
+        "coverage_record": "effects-control-static-values",
+        "matrix": "tmp/migration_matrix_effect_control_static_values_all_6x6/matrix.json",
         "totals": {
-          "total": 144,
-          "pass": 144,
+          "total": 36,
+          "pass": 36,
           "blocked": 0,
           "failed": 0,
           "skipped": 0
         },
         "coverage_axis": {
-          "atom_rows": 4,
-          "cells": 144,
-          "pass": 144,
+          "atom_rows": 1,
+          "cells": 36,
+          "pass": 36,
           "blocked": 0,
           "failed": 0,
           "skipped": 0
         },
         "host_open_status": "direct_endpoint_hosts_pass; AE2021-AE2024 inferred_by_endpoint",
-        "boundaries": {
-          "effect_param_point3d": "boundary_pending_evidence",
-          "effect_param_angle": "boundary_pending_evidence",
-          "source_text": "boundary_pending_evidence",
-          "dropdown": "boundary_pending_evidence"
+        "members": {
+          "angle_control": "verified_in_this_batch",
+          "checkbox_control": "verified_in_this_batch",
+          "color_control": "verified_in_this_batch",
+          "point2d_control": "verified_in_this_batch",
+          "point3d_control": "verified_in_this_batch",
+          "slider_control": "verified_in_this_batch"
         }
       }
     },
-    "next_action": "Stop after completing the essential_graphics_controllers package; next package is selected in domain-batch-inventory.json only and must not start until the next explicit goal run.",
+    "next_action": "Stop after completing the effect_controls_static_values package; next package is selected in domain-batch-inventory.json only and must not start until the next explicit goal run.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

@@ -13,8 +13,8 @@ Machine-readable truth sources:
 - `domain-batch-inventory.json`
 - `mainline-spec.json`
 
-The next selected batch is `effect_controls_static_values`; the last completed
-batch was `essential_graphics_controllers`.
+The next selected batch is `text_domain_residuals`; the last completed batch
+was `effect_controls_static_values`.
 
 ## Next
 
@@ -62,7 +62,10 @@ Done:
 Current:
 
 - Package cycle status is `ready_for_next_batch`.
-- Next candidate package is `effect_controls_static_values`.
+- Last completed package is `effect_controls_static_values`: the existing
+  expression-control static-values recipe was re-run through AE2020-AE2025
+  matrix coverage and refreshed in the coverage JSON.
+- Next candidate package is `text_domain_residuals`.
 - Do not start a full AE-open run unless explicitly expanding the host-open
   axis or closing a specific host-open gap.
 
