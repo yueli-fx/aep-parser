@@ -41,6 +41,50 @@
         "failed": 0,
         "skipped": 30
       },
+      "cell_policy": [
+        {
+          "source_versions": [
+            "AE2020",
+            "AE2021",
+            "AE2022",
+            "AE2023",
+            "AE2024"
+          ],
+          "target_versions": [
+            "AE2020",
+            "AE2021",
+            "AE2022",
+            "AE2023",
+            "AE2024",
+            "AE2025"
+          ],
+          "status": "skipped",
+          "reason": "source contract unavailable before AE2025"
+        },
+        {
+          "source_versions": [
+            "AE2025"
+          ],
+          "target_versions": [
+            "AE2025"
+          ],
+          "status": "pass"
+        },
+        {
+          "source_versions": [
+            "AE2025"
+          ],
+          "target_versions": [
+            "AE2020",
+            "AE2021",
+            "AE2022",
+            "AE2023",
+            "AE2024"
+          ],
+          "status": "blocked",
+          "reason": "explicit matte source cannot downgrade to older writer targets"
+        }
+      ],
       "evidence": [
         {
           "kind": "matrix",

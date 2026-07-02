@@ -85,6 +85,7 @@ type VersionBoundary struct {
 	SourceContract         VersionBoundarySourceContract `json:"source_contract"`
 	TargetContract         VersionBoundaryTargetContract `json:"target_contract"`
 	ExpectedCells          CoverageTotals                `json:"expected_cells"`
+	CellPolicy             []VersionBoundaryCellPolicy   `json:"cell_policy,omitempty"`
 	Evidence               []Dependency                  `json:"evidence"`
 	CleanupPolicy          string                        `json:"cleanup_policy,omitempty"`
 	ExpansionPolicy        string                        `json:"expansion_policy,omitempty"`
@@ -100,6 +101,13 @@ type VersionBoundarySourceContract struct {
 type VersionBoundaryTargetContract struct {
 	SupportedTargets        []string `json:"supported_targets"`
 	BlockedDowngradeTargets []string `json:"blocked_downgrade_targets"`
+}
+
+type VersionBoundaryCellPolicy struct {
+	SourceVersions []string `json:"source_versions"`
+	TargetVersions []string `json:"target_versions"`
+	Status         string   `json:"status"`
+	Reason         string   `json:"reason,omitempty"`
 }
 
 type AuditReport struct {
@@ -387,6 +395,21 @@ func auditVersionBoundary(root string, boundary VersionBoundary, boundaryIDs, at
 	}
 	for _, dep := range boundary.Evidence {
 		auditBoundaryDependency(root, boundary, dep, coverage, report)
+	}
+	for _, policy := range boundary.CellPolicy {
+		auditVersionBoundaryCellPolicy(boundary, policy, report)
+	}
+}
+
+func auditVersionBoundaryCellPolicy(boundary VersionBoundary, policy VersionBoundaryCellPolicy, report *AuditReport) {
+	if len(policy.SourceVersions) == 0 {
+		report.addBoundaryIssue("missing_version_boundary_cell_policy_sources", SeverityError, "", boundary.AtomID, boundary.ID, "version boundary cell_policy.source_versions is required")
+	}
+	if len(policy.TargetVersions) == 0 {
+		report.addBoundaryIssue("missing_version_boundary_cell_policy_targets", SeverityError, "", boundary.AtomID, boundary.ID, "version boundary cell_policy.target_versions is required")
+	}
+	if policy.Status == "" {
+		report.addBoundaryIssue("missing_version_boundary_cell_policy_status", SeverityError, "", boundary.AtomID, boundary.ID, "version boundary cell_policy.status is required")
 	}
 }
 

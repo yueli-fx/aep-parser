@@ -163,6 +163,55 @@ func TestAuditRepositoryReportsUnknownVersionBoundaryAtom(t *testing.T) {
 	assertBoundaryIssue(t, report, "unknown_version_boundary_atom", SeverityError, "ae2025.explicit_matte_source", "missing.atom", "")
 }
 
+func TestAuditRepositoryReportsInvalidVersionBoundaryCellPolicy(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeFile(t, root, "tmp/text-basic/matrix.json", "{}\n")
+	writeValidRegistry(t, root, []map[string]any{
+		{
+			"id":       "layer.track_matte.explicit_source",
+			"domain":   "layer",
+			"tier":     "boundary",
+			"status":   "boundary",
+			"platform": map[string]any{"host_required": true, "os": []string{"windows", "macos"}},
+			"version_axis": map[string]any{
+				"min_supported":    "AE2020",
+				"known_supported":  []string{"AE2020", "AE2025"},
+				"expansion_policy": "append_new_ae_versions",
+			},
+			"workflows": []string{"generate", "migrate"},
+		},
+	})
+	writeJSON(t, root, "registry/version_boundaries.json", map[string]any{
+		"schema_version": 1,
+		"version_boundaries": []map[string]any{
+			{
+				"id":      "ae2025.explicit_matte_source",
+				"atom_id": "layer.track_matte.explicit_source",
+				"recipe":  "minimal-layer-explicit-matte",
+				"feature": "AE2025 explicit matte source references",
+				"policy":  "known_source_contract_boundary",
+				"source_contract": map[string]any{
+					"min_source_version":        "AE2025",
+					"available_source_versions": []string{"AE2025"},
+				},
+				"target_contract": map[string]any{
+					"supported_targets": []string{"AE2025"},
+				},
+				"cell_policy": []map[string]any{
+					{"source_versions": []string{"AE2025"}, "target_versions": []string{"AE2025"}},
+				},
+				"evidence": []map[string]any{{"kind": "matrix", "path": "tmp/text-basic/matrix.json", "required": true}},
+			},
+		},
+	})
+
+	report, err := AuditRepository(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertBoundaryIssue(t, report, "missing_version_boundary_cell_policy_status", SeverityError, "ae2025.explicit_matte_source", "layer.track_matte.explicit_source", "")
+}
+
 func TestAuditRepositoryReportsUnknownWorkflowReferences(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeValidRegistry(t, root, []map[string]any{

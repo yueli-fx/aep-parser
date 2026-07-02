@@ -779,7 +779,7 @@
         }
       }
     },
-  "next_action": "Use registry/version_boundaries.json, tmp/registry_version_boundaries.json, and focused coverage-axis queries as the version-matrix total/detail/total interface. Next useful increment is to expand boundary checks from totals/status matching into source-target policy cell matching before adding another AE version.",
+  "next_action": "Use registry/version_boundaries.json, tmp/registry_version_boundaries.json, and focused coverage-axis queries as the version-matrix total/detail/total interface. Next useful increment is to make registry_version_boundaries part of the recurring version-matrix gate so boundary policy drift fails the same way coverage drift fails.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

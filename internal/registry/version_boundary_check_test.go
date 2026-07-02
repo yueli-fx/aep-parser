@@ -4,7 +4,7 @@ import "testing"
 
 func TestCheckVersionBoundariesMatchesCoverageAxisTotals(t *testing.T) {
 	root := newTestRegistryRoot(t)
-	writeBoundaryCheckFixture(t, root, CoverageTotals{Total: 3, Pass: 1, Blocked: 1, Failed: 0, Skipped: 1})
+	writeBoundaryCheckFixture(t, root, CoverageTotals{Total: 3, Pass: 1, Blocked: 1, Failed: 0, Skipped: 1}, boundaryCheckCases("blocked"))
 
 	report, err := CheckVersionBoundaries(root, "flightdeck/work/aep-understanding-generation/coverage.json", []string{"AE2020", "AE2024", "AE2025"})
 	if err != nil {
@@ -19,11 +19,14 @@ func TestCheckVersionBoundariesMatchesCoverageAxisTotals(t *testing.T) {
 	if !report.Boundaries[0].Match || report.Boundaries[0].ActualBoundaryStatus != "known_matte_contract_boundary" {
 		t.Fatalf("boundary check = %+v", report.Boundaries[0])
 	}
+	if report.Summary.CheckedCells != 3 || report.Boundaries[0].CheckedCells != 3 {
+		t.Fatalf("checked cells summary/boundary = %d/%d, want 3/3", report.Summary.CheckedCells, report.Boundaries[0].CheckedCells)
+	}
 }
 
 func TestCheckVersionBoundariesReportsCoverageDrift(t *testing.T) {
 	root := newTestRegistryRoot(t)
-	writeBoundaryCheckFixture(t, root, CoverageTotals{Total: 3, Pass: 1, Blocked: 0, Failed: 0, Skipped: 2})
+	writeBoundaryCheckFixture(t, root, CoverageTotals{Total: 3, Pass: 1, Blocked: 0, Failed: 0, Skipped: 2}, boundaryCheckCases("blocked"))
 
 	report, err := CheckVersionBoundaries(root, "flightdeck/work/aep-understanding-generation/coverage.json", []string{"AE2020", "AE2024", "AE2025"})
 	if err != nil {
@@ -40,7 +43,30 @@ func TestCheckVersionBoundariesReportsCoverageDrift(t *testing.T) {
 	}
 }
 
-func writeBoundaryCheckFixture(t *testing.T, root string, expected CoverageTotals) {
+func TestCheckVersionBoundariesReportsCellPolicyDrift(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeBoundaryCheckFixture(t, root, CoverageTotals{Total: 3, Pass: 2, Blocked: 0, Failed: 0, Skipped: 1}, boundaryCheckCases("pass"))
+
+	report, err := CheckVersionBoundaries(root, "flightdeck/work/aep-understanding-generation/coverage.json", []string{"AE2020", "AE2024", "AE2025"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != StatusFail {
+		t.Fatalf("status = %q, want %q", report.Status, StatusFail)
+	}
+	if report.Summary.MismatchedCells != 1 || report.Summary.MismatchedTotals != 0 {
+		t.Fatalf("summary = %+v, want one cell mismatch and no totals mismatch", report.Summary)
+	}
+	if len(report.Boundaries) != 1 || len(report.Boundaries[0].CellMismatches) != 1 {
+		t.Fatalf("boundary mismatches = %+v", report.Boundaries)
+	}
+	mismatch := report.Boundaries[0].CellMismatches[0]
+	if mismatch.SourceVersion != "AE2025" || mismatch.TargetVersion != "AE2024" || mismatch.ExpectedStatus != "blocked" || mismatch.ActualStatus != "pass" {
+		t.Fatalf("cell mismatch = %+v", mismatch)
+	}
+}
+
+func writeBoundaryCheckFixture(t *testing.T, root string, expected CoverageTotals, cases []map[string]any) {
 	t.Helper()
 	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
 		"schema_version": 1,
@@ -67,11 +93,7 @@ func writeBoundaryCheckFixture(t *testing.T, root string, expected CoverageTotal
 			},
 		},
 	})
-	writeMatrixFixtureWithCases(t, root, "tmp/matrix/layer/matrix.json", []map[string]any{
-		{"recipe_name": "minimal-layer-explicit-matte", "source_version": "AE2025", "target_version": "AE2025", "status": "pass"},
-		{"recipe_name": "minimal-layer-explicit-matte", "source_version": "AE2025", "target_version": "AE2024", "status": "blocked"},
-		{"recipe_name": "minimal-layer-explicit-matte", "source_version": "AE2020", "target_version": "AE2020", "status": "skipped"},
-	})
+	writeMatrixFixtureWithCases(t, root, "tmp/matrix/layer/matrix.json", cases)
 	writeValidRegistry(t, root, []map[string]any{
 		{
 			"id":           "layer.track_matte.explicit_source",
@@ -100,8 +122,33 @@ func writeBoundaryCheckFixture(t *testing.T, root string, expected CoverageTotal
 					"supported_targets": []string{"AE2025"},
 				},
 				"expected_cells": expected,
-				"evidence":       []map[string]any{{"kind": "matrix", "path": "tmp/matrix/layer/matrix.json", "required": true}},
+				"cell_policy": []map[string]any{
+					{
+						"source_versions": []string{"AE2020"},
+						"target_versions": []string{"AE2020"},
+						"status":          "skipped",
+					},
+					{
+						"source_versions": []string{"AE2025"},
+						"target_versions": []string{"AE2025"},
+						"status":          "pass",
+					},
+					{
+						"source_versions": []string{"AE2025"},
+						"target_versions": []string{"AE2024"},
+						"status":          "blocked",
+					},
+				},
+				"evidence": []map[string]any{{"kind": "matrix", "path": "tmp/matrix/layer/matrix.json", "required": true}},
 			},
 		},
 	})
+}
+
+func boundaryCheckCases(ae2025ToAE2024Status string) []map[string]any {
+	return []map[string]any{
+		{"recipe_name": "minimal-layer-explicit-matte", "source_version": "AE2025", "target_version": "AE2025", "status": "pass"},
+		{"recipe_name": "minimal-layer-explicit-matte", "source_version": "AE2025", "target_version": "AE2024", "status": ae2025ToAE2024Status},
+		{"recipe_name": "minimal-layer-explicit-matte", "source_version": "AE2020", "target_version": "AE2020", "status": "skipped"},
+	}
 }
