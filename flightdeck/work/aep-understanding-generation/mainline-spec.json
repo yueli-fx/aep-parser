@@ -791,20 +791,18 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "convert_fixture_helper_split",
-      "reason": "Reduce convert_fixtures_test.go growth risk by separating common project writers, no-layer comp fixtures, layer fixtures, recipe fixtures, and profile assertions while preserving test behavior.",
+      "group": "matrix_test_topic_split",
+      "reason": "Reduce matrix_test.go growth risk by separating ordinary matrix tests from AE-open matrix tests and shared matrix fixtures while preserving test behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_fixtures_test.go",
-          "internal/aepmigrate/convert_comp_fixtures_test.go",
-          "internal/aepmigrate/convert_layer_fixtures_test.go",
-          "internal/aepmigrate/convert_recipe_fixtures_test.go",
-          "internal/aepmigrate/convert_profile_assertions_test.go"
+          "internal/aepmigrate/matrix_test.go",
+          "internal/aepmigrate/matrix_aeopen_test.go",
+          "internal/aepmigrate/matrix_fixtures_test.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Common project writers, no-layer comp fixtures, layer fixtures, recipe fixtures, and profile assertions have been split from convert_fixtures_test.go. Next useful increment is to continue reducing large aepmigrate test files by splitting matrix_test.go or convert_test.go into coherent topic files without changing behavior.",
+    "next_action": "AE-open matrix tests and shared matrix fixtures have been split from matrix_test.go. Next useful increment is to continue reducing large aepmigrate test files or remaining 4-5KB conversion support files into coherent topic files without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
