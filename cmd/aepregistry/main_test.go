@@ -639,6 +639,118 @@ func TestRunCoverageBatchSyncUpdatesCoverageCandidate(t *testing.T) {
 	}
 }
 
+func TestRunCheckpointWritesOrderedReport(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeCheckpointCommandFixture(t, root, 2)
+	out := filepath.Join(root, "tmp", "registry_checkpoint.json")
+
+	code := run([]string{
+		"checkpoint",
+		"-root", root,
+		"-current", "flightdeck/work/aep-understanding-generation/current.json",
+		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-summary", "tmp/migration_coverage_summary.json",
+		"-out", out,
+		"-skip-diff-check",
+	})
+	if code != 0 {
+		t.Fatalf("run(checkpoint) = %d, want 0", code)
+	}
+	var report checkpointReport
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != registry.StatusPass || report.Summary.Steps != 4 || report.Summary.Failed != 0 {
+		t.Fatalf("checkpoint report = %+v, want four passing steps", report)
+	}
+	if _, err := os.Stat(filepath.Join(root, filepath.FromSlash("tmp/migration_coverage_summary.json"))); err != nil {
+		t.Fatalf("summary was not written: %v", err)
+	}
+}
+
+func TestRunCheckpointCanReplayCoverageBatchWithGoSync(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeCheckpointCommandFixture(t, root, 2)
+	out := filepath.Join(root, "tmp", "registry_checkpoint.json")
+
+	code := run([]string{
+		"checkpoint",
+		"-root", root,
+		"-current", "flightdeck/work/aep-understanding-generation/current.json",
+		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-summary", "tmp/migration_coverage_summary.json",
+		"-out", out,
+		"-include-coverage-batch",
+		"-skip-diff-check",
+	})
+	if code != 0 {
+		t.Fatalf("run(checkpoint -include-coverage-batch) = %d, want 0", code)
+	}
+	var report checkpointReport
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != registry.StatusPass || report.Summary.Steps != 5 || report.Summary.Failed != 0 {
+		t.Fatalf("checkpoint report = %+v, want five passing steps", report)
+	}
+	if report.Steps[4].ID != "coverage_batch_replay" || report.Steps[4].Status != registry.StatusPass {
+		t.Fatalf("coverage batch step = %+v", report.Steps[4])
+	}
+}
+
+func TestRunCheckpointTreatsHostOpenGapsAsPlannedWork(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeCheckpointCommandFixture(t, root, 2)
+	currentPath := "flightdeck/work/aep-understanding-generation/current.json"
+	coveragePath := "flightdeck/work/aep-understanding-generation/coverage.json"
+	var current map[string]any
+	if err := readJSONFile(filepath.Join(root, filepath.FromSlash(currentPath)), &current); err != nil {
+		t.Fatal(err)
+	}
+	current["current_state"].(map[string]any)["ae_install_root"] = "E:/adobe"
+	writeJSON(t, root, currentPath, current)
+	var coverage map[string]any
+	if err := readJSONFile(filepath.Join(root, filepath.FromSlash(coveragePath)), &coverage); err != nil {
+		t.Fatal(err)
+	}
+	record := coverage["coverage"].([]any)[0].(map[string]any)
+	record["host_open_status"] = "pending_per_capability"
+	writeJSON(t, root, coveragePath, coverage)
+	out := filepath.Join(root, "tmp", "registry_checkpoint.json")
+
+	code := run([]string{
+		"checkpoint",
+		"-root", root,
+		"-current", currentPath,
+		"-coverage", coveragePath,
+		"-summary", "tmp/migration_coverage_summary.json",
+		"-out", out,
+		"-skip-diff-check",
+	})
+	if code != 0 {
+		t.Fatalf("run(checkpoint with host-open gaps) = %d, want 0", code)
+	}
+	var report checkpointReport
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != registry.StatusPass || report.Summary.Steps != 5 || report.Steps[4].ID != "host_open_gaps" {
+		t.Fatalf("checkpoint report = %+v, want passing host-open gap step", report)
+	}
+}
+
 func TestRunCoverageCanWriteSummaryReport(t *testing.T) {
 	root := newRegistryRoot(t)
 	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 2)
@@ -1815,6 +1927,72 @@ func writeCoverageBatchCommandFixture(t *testing.T, root string, coverageTotal i
 				},
 			},
 		},
+	})
+}
+
+func writeCheckpointCommandFixture(t *testing.T, root string, coverageTotal int) {
+	t.Helper()
+	currentPath := "flightdeck/work/aep-understanding-generation/current.json"
+	coveragePath := "flightdeck/work/aep-understanding-generation/coverage.json"
+	writeFile(t, root, "examples/recipes/text-basic.json", "{}\n")
+	writeJSON(t, root, coveragePath, map[string]any{
+		"schema_version":   1,
+		"host_open_policy": validHostOpenPolicyFixture(),
+		"coverage": []map[string]any{
+			{
+				"id":               "text",
+				"domain":           "text",
+				"scope":            "text smoke",
+				"artifact":         "tmp/matrix/text/matrix.json",
+				"ledger":           "tmp/matrix/text/ledger.md",
+				"recipes":          []string{"text-basic"},
+				"writer_status":    "PD-1x1",
+				"writer_coverage":  "AE2020 sources into AE2020 targets",
+				"host_open_status": "OPEN-ALL-HOSTS representative",
+				"totals":           map[string]any{"total": coverageTotal, "pass": coverageTotal, "blocked": 0, "failed": 0, "skipped": 0},
+			},
+		},
+	})
+	writeJSON(t, root, "tmp/matrix/text/matrix.json", map[string]any{
+		"schema_version": 1,
+		"summary":        map[string]any{"total": 2, "passed": 2, "blocked": 0, "failed": 0, "skipped": 0},
+		"cases": []map[string]any{
+			{"recipe_name": "text-basic", "source_version": "AE2020", "target_version": "AE2020", "status": "pass"},
+			{"recipe_name": "text-basic", "source_version": "AE2020", "target_version": "AE2020", "status": "pass"},
+		},
+	})
+	writeFile(t, root, "tmp/matrix/text/ledger.md", "# ledger\n")
+	writeFile(t, root, "scripts/migration/tool.ps1", "")
+	writeFile(t, root, "flightdeck/work/aep-understanding-generation/frozen.md", "# frozen\n")
+	writeJSON(t, root, currentPath, map[string]any{
+		"truth_sources": map[string]any{
+			"current":  currentPath,
+			"coverage": coveragePath,
+		},
+		"current_state": map[string]any{
+			"latest_recurring_gate": map[string]any{
+				"artifact": "tmp/matrix/text/matrix.json",
+				"totals":   map[string]any{"total": 2, "pass": 2, "blocked": 0, "failed": 0, "skipped": 0},
+			},
+		},
+		"frozen_markdown": []map[string]any{{"path": "flightdeck/work/aep-understanding-generation/frozen.md"}},
+		"tooling":         []map[string]any{{"id": "tool", "script": "scripts/migration/tool.ps1"}},
+		"coverage_batches": []map[string]any{
+			{
+				"id":          "all",
+				"description": "all current coverage",
+				"entries": []map[string]any{
+					{
+						"coverage_id":  "text",
+						"out":          "tmp/matrix/text",
+						"matrix":       "tmp/matrix/text/matrix.json",
+						"ledger":       "tmp/matrix/text/ledger.md",
+						"recipe_paths": []string{"examples/recipes/text-basic.json"},
+					},
+				},
+			},
+		},
+		"canonical_coverage_batch": "all",
 	})
 }
 

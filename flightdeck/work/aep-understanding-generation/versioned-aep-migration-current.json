@@ -511,9 +511,11 @@
     {
       "id": "migration-checkpoint-validator",
       "status": "available_verified",
-      "purpose": "Run the JSON-first migration checkpoint: current JSON, coverage JSON, rendered summary JSON, summary validation, host-open gap audit, and diff check. IncludeCoverageBatch now uses Go coverage-batch sync for skip-run replay; RunCoverageBatchMatrices keeps the legacy PowerShell matrix rerun path.",
+      "purpose": "Run the JSON-first migration checkpoint: current JSON, coverage JSON, rendered summary JSON, summary validation, host-open gap audit, optional Go coverage-batch sync replay, and diff check. Go command is primary; the PowerShell script remains as legacy compatibility and for legacy matrix-rerun orchestration.",
+      "command": "go run ./cmd/aepregistry checkpoint -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -summary tmp/migration_coverage_summary.json -out tmp/registry_checkpoint.json",
+      "include_coverage_batch_command": "go run ./cmd/aepregistry checkpoint -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -summary tmp/migration_coverage_summary.json -out tmp/registry_checkpoint_with_batch.json -include-coverage-batch",
       "script": "scripts/migration/validate_checkpoint.ps1",
-      "command": "pwsh -File scripts/migration/validate_checkpoint.ps1 [-IncludeCoverageBatch] [-CoverageBatchId id] [-RunCoverageBatchMatrices] [-IncludeMatrix] [-IncludeGo]"
+      "legacy_command": "pwsh -File scripts/migration/validate_checkpoint.ps1 [-IncludeCoverageBatch] [-CoverageBatchId id] [-RunCoverageBatchMatrices] [-IncludeMatrix] [-IncludeGo]"
     },
     {
       "id": "coverage-batch-runner",

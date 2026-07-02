@@ -35,6 +35,8 @@ func run(args []string) int {
 		return runCoverageMD(args[1:])
 	case "coverage-update":
 		return runCoverageUpdate(args[1:])
+	case "checkpoint":
+		return runCheckpoint(args[1:])
 	case "current":
 		return runCurrent(args[1:])
 	case "gate":
@@ -207,6 +209,229 @@ func runCoverageBatch(args []string) int {
 		return 1
 	}
 	return 0
+}
+
+type checkpointReport struct {
+	SchemaVersion int                    `json:"schema_version"`
+	Status        string                 `json:"status"`
+	Root          string                 `json:"root"`
+	CurrentPath   string                 `json:"current_path"`
+	CoveragePath  string                 `json:"coverage_path"`
+	SummaryPath   string                 `json:"summary_path"`
+	Summary       checkpointSummary      `json:"summary"`
+	Steps         []checkpointStepReport `json:"steps"`
+}
+
+type checkpointSummary struct {
+	Steps  int `json:"steps"`
+	Passed int `json:"passed"`
+	Failed int `json:"failed"`
+	Errors int `json:"errors"`
+}
+
+type checkpointStepReport struct {
+	ID      string `json:"id"`
+	Command string `json:"command"`
+	Output  string `json:"output,omitempty"`
+	Status  string `json:"status"`
+	Errors  int    `json:"errors,omitempty"`
+	Message string `json:"message,omitempty"`
+}
+
+type checkpointCurrentState struct {
+	TruthSources struct {
+		Coverage string `json:"coverage"`
+	} `json:"truth_sources"`
+	CurrentState struct {
+		AEInstallRoot string `json:"ae_install_root"`
+	} `json:"current_state"`
+	CanonicalCoverageBatch string `json:"canonical_coverage_batch"`
+}
+
+func runCheckpoint(args []string) int {
+	fs := flag.NewFlagSet("aepregistry checkpoint", flag.ContinueOnError)
+	fs.SetOutput(os.Stderr)
+	root := fs.String("root", ".", "repository root")
+	currentPath := fs.String("current", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json", "current state JSON path")
+	coveragePath := fs.String("coverage", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
+	summaryPath := fs.String("summary", "tmp/migration_coverage_summary.json", "migration coverage summary JSON path")
+	outPath := fs.String("out", "tmp/registry_checkpoint.json", "checkpoint report JSON path")
+	coverageBatchID := fs.String("coverage-batch-id", "", "coverage batch id for -include-coverage-batch; defaults to current canonical_coverage_batch")
+	includeCoverageBatch := fs.Bool("include-coverage-batch", false, "replay the coverage batch into a temporary coverage candidate using Go sync")
+	skipDiffCheck := fs.Bool("skip-diff-check", false, "skip git diff --check; intended for non-git test fixtures")
+	jsonOut := fs.Bool("json", false, "print JSON report")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	if fs.NArg() != 0 {
+		fmt.Fprintln(os.Stderr, "usage: aepregistry checkpoint [-root .] [-current path] [-coverage path] [-summary tmp/migration_coverage_summary.json] [-out tmp/registry_checkpoint.json] [-include-coverage-batch] [-coverage-batch-id id] [-skip-diff-check] [-json]")
+		return 2
+	}
+
+	report := checkpointReport{
+		SchemaVersion: 1,
+		Status:        registry.StatusPass,
+		Root:          filepath.ToSlash(*root),
+		CurrentPath:   filepath.ToSlash(*currentPath),
+		CoveragePath:  filepath.ToSlash(*coveragePath),
+		SummaryPath:   filepath.ToSlash(*summaryPath),
+	}
+	current, err := readCheckpointCurrent(resolveRootPath(*root, *currentPath))
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "checkpoint:", err)
+		return 2
+	}
+	if *coveragePath == "" && current.TruthSources.Coverage != "" {
+		*coveragePath = current.TruthSources.Coverage
+		report.CoveragePath = filepath.ToSlash(*coveragePath)
+	}
+	if *coverageBatchID == "" {
+		*coverageBatchID = current.CanonicalCoverageBatch
+	}
+
+	addStep := func(step checkpointStepReport) {
+		report.Steps = append(report.Steps, step)
+		report.Summary.Steps++
+		if step.Status == registry.StatusFail || step.Errors > 0 {
+			report.Status = registry.StatusFail
+			report.Summary.Failed++
+			report.Summary.Errors += max(1, step.Errors)
+			return
+		}
+		report.Summary.Passed++
+	}
+	stopIfFailed := func() bool {
+		return report.Status == registry.StatusFail
+	}
+
+	currentReport, err := registry.ValidateCurrent(*root, *currentPath)
+	addStep(checkpointStep("current", "go run ./cmd/aepregistry current -root . -current "+*currentPath+" -out tmp/registry_current.json", "tmp/registry_current.json", currentReport.Status, currentReport.Summary.Errors, err))
+	if err == nil {
+		if writeErr := writeJSONFile(resolveRootPath(*root, "tmp/registry_current.json"), currentReport); writeErr != nil {
+			addStep(checkpointStep("current_write", "write tmp/registry_current.json", "tmp/registry_current.json", registry.StatusFail, 1, writeErr))
+		}
+	}
+	if !stopIfFailed() {
+		coverageReport, err := registry.ValidateCoverageWithOptions(*root, *coveragePath, registry.CoverageValidationOptions{RequireLedgers: true, RequireAllRecipes: true})
+		addStep(checkpointStep("coverage", "go run ./cmd/aepregistry coverage -root . -coverage "+*coveragePath+" -out tmp/registry_coverage.json -require-ledgers", "tmp/registry_coverage.json", coverageReport.Status, coverageReport.Summary.Errors, err))
+		if err == nil {
+			if writeErr := writeJSONFile(resolveRootPath(*root, "tmp/registry_coverage.json"), coverageReport); writeErr != nil {
+				addStep(checkpointStep("coverage_write", "write tmp/registry_coverage.json", "tmp/registry_coverage.json", registry.StatusFail, 1, writeErr))
+			}
+		}
+	}
+	if !stopIfFailed() {
+		summary, err := registry.BuildMigrationCoverageSummary(*root, *coveragePath)
+		addStep(checkpointStep("coverage_summary_render", "go run ./cmd/aepregistry migration-summary -root . -coverage "+*coveragePath+" -out "+*summaryPath, *summaryPath, registry.StatusPass, 0, err))
+		if err == nil {
+			if writeErr := writeJSONFile(resolveRootPath(*root, *summaryPath), summary); writeErr != nil {
+				addStep(checkpointStep("coverage_summary_write", "write "+*summaryPath, *summaryPath, registry.StatusFail, 1, writeErr))
+			}
+		}
+	}
+	if !stopIfFailed() {
+		summaryCheck, err := registry.CheckMigrationCoverageSummary(*root, *coveragePath, *summaryPath)
+		addStep(checkpointStep("coverage_summary_check", "go run ./cmd/aepregistry migration-summary -root . -coverage "+*coveragePath+" -out "+*summaryPath+" -check", *summaryPath, summaryCheck.Status, summaryCheck.Errors, err))
+	}
+	if !stopIfFailed() && current.CurrentState.AEInstallRoot != "" {
+		hostOpen, err := registry.PlanHostOpenGaps(*root, *coveragePath, registry.HostOpenGapPlanOptions{AERoot: current.CurrentState.AEInstallRoot, MaxAEOpenCases: 24})
+		addStep(checkpointStep("host_open_gaps", "go run ./cmd/aepregistry host-open-gaps -root . -coverage "+*coveragePath+" -out tmp/host_open_gap_audit_go.json -ae-root "+current.CurrentState.AEInstallRoot, "tmp/host_open_gap_audit_go.json", hostOpen.Status, 0, err))
+		if err == nil {
+			if writeErr := writeJSONFile(resolveRootPath(*root, "tmp/host_open_gap_audit_go.json"), hostOpen); writeErr != nil {
+				addStep(checkpointStep("host_open_gaps_write", "write tmp/host_open_gap_audit_go.json", "tmp/host_open_gap_audit_go.json", registry.StatusFail, 1, writeErr))
+			}
+		}
+	}
+	if !stopIfFailed() && *includeCoverageBatch {
+		if *coverageBatchID == "" {
+			addStep(checkpointStep("coverage_batch_replay", "go run ./cmd/aepregistry coverage-batch -skip-run -sync", "tmp/registry_coverage_batch.json", registry.StatusFail, 1, fmt.Errorf("coverage batch id is required")))
+		} else {
+			tempCoverage, cleanup, err := copyCoverageCandidate(*root, *coveragePath)
+			if err != nil {
+				addStep(checkpointStep("coverage_batch_replay", "copy temporary coverage candidate", "", registry.StatusFail, 1, err))
+			} else {
+				defer cleanup()
+				batch, err := registry.SyncCoverageBatchFromMatrices(*root, *currentPath, tempCoverage, *coverageBatchID)
+				addStep(checkpointStep("coverage_batch_replay", "go run ./cmd/aepregistry coverage-batch -root . -current "+*currentPath+" -coverage <temp coverage copy> -out tmp/registry_coverage_batch.json -batch-id "+*coverageBatchID+" -skip-run -sync", "tmp/registry_coverage_batch.json", batch.Status, batch.Summary.Errors, err))
+				if err == nil {
+					if writeErr := writeJSONFile(resolveRootPath(*root, "tmp/registry_coverage_batch.json"), batch); writeErr != nil {
+						addStep(checkpointStep("coverage_batch_replay_write", "write tmp/registry_coverage_batch.json", "tmp/registry_coverage_batch.json", registry.StatusFail, 1, writeErr))
+					}
+				}
+			}
+		}
+	}
+	if !stopIfFailed() && !*skipDiffCheck {
+		err := runGitDiffCheck(*root)
+		addStep(checkpointStep("diff_check", "git diff --check", "", registry.StatusPass, 0, err))
+	}
+
+	if err := writeJSONFile(resolveRootPath(*root, *outPath), report); err != nil {
+		fmt.Fprintln(os.Stderr, "write:", err)
+		return 2
+	}
+	if *jsonOut {
+		if err := json.NewEncoder(os.Stdout).Encode(report); err != nil {
+			fmt.Fprintln(os.Stderr, "stdout:", err)
+			return 2
+		}
+	} else {
+		fmt.Printf("checkpoint: %s (%d steps, %d failed)\n", report.Status, report.Summary.Steps, report.Summary.Failed)
+	}
+	if report.Status == registry.StatusFail {
+		return 1
+	}
+	return 0
+}
+
+func checkpointStep(id, command, output, status string, errors int, err error) checkpointStepReport {
+	if err != nil {
+		return checkpointStepReport{ID: id, Command: command, Output: output, Status: registry.StatusFail, Errors: max(1, errors), Message: err.Error()}
+	}
+	if status == "" {
+		status = registry.StatusPass
+	}
+	return checkpointStepReport{ID: id, Command: command, Output: output, Status: status, Errors: errors}
+}
+
+func readCheckpointCurrent(path string) (checkpointCurrentState, error) {
+	var current checkpointCurrentState
+	if err := readJSONFile(path, &current); err != nil {
+		return checkpointCurrentState{}, err
+	}
+	return current, nil
+}
+
+func copyCoverageCandidate(root, coveragePath string) (string, func(), error) {
+	data, err := os.ReadFile(resolveRootPath(root, coveragePath))
+	if err != nil {
+		return "", nil, err
+	}
+	file, err := os.CreateTemp("", "aep-coverage-candidate-*.json")
+	if err != nil {
+		return "", nil, err
+	}
+	path := file.Name()
+	if _, err := file.Write(data); err != nil {
+		file.Close()
+		os.Remove(path)
+		return "", nil, err
+	}
+	if err := file.Close(); err != nil {
+		os.Remove(path)
+		return "", nil, err
+	}
+	return path, func() { _ = os.Remove(path) }, nil
+}
+
+func runGitDiffCheck(root string) error {
+	cmd := exec.Command("git", "diff", "--check")
+	cmd.Dir = root
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("%w: %s", err, strings.TrimSpace(string(out)))
+	}
+	return nil
 }
 
 func runCurrent(args []string) int {
@@ -1467,5 +1692,5 @@ func writeTextFile(path, value string) error {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: aepregistry <audit|boundaries|cleanup|coverage|coverage-batch|coverage-md|coverage-update|current|gate|host-open-gaps|inventory|layout|migration-summary|ownership|recurring-matrix> [flags]")
+	fmt.Fprintln(os.Stderr, "usage: aepregistry <audit|boundaries|checkpoint|cleanup|coverage|coverage-batch|coverage-md|coverage-update|current|gate|host-open-gaps|inventory|layout|migration-summary|ownership|recurring-matrix> [flags]")
 }

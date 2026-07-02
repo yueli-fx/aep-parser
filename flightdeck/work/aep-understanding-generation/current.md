@@ -10,6 +10,7 @@ Read:
 Use:
 
 ```powershell
+go run ./cmd/aepregistry checkpoint -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -summary tmp/migration_coverage_summary.json -out tmp/registry_checkpoint.json
 go run ./cmd/aepregistry current -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -out tmp/registry_current.json
 go run ./cmd/aepregistry migration-summary -root . -out tmp/migration_coverage_summary.json
 go run ./cmd/aepregistry migration-summary -root . -out tmp/migration_coverage_summary.json -check
