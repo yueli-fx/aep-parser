@@ -5,18 +5,22 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
+	"strings"
 )
 
 type CoverageReport struct {
-	SchemaVersion int             `json:"schema_version"`
-	Status        string          `json:"status"`
-	Summary       CoverageSummary `json:"summary"`
-	Issues        []CoverageIssue `json:"issues"`
+	SchemaVersion int                    `json:"schema_version"`
+	Status        string                 `json:"status"`
+	Summary       CoverageSummary        `json:"summary"`
+	Records       []CoverageRecordReport `json:"records,omitempty"`
+	Issues        []CoverageIssue        `json:"issues"`
 }
 
 type CoverageSummary struct {
 	Records   int `json:"records"`
 	Artifacts int `json:"artifacts"`
+	Atoms     int `json:"atoms"`
 	Errors    int `json:"errors"`
 }
 
@@ -36,6 +40,18 @@ type CoverageTotals struct {
 	Skipped int `json:"skipped"`
 }
 
+type CoverageRecordReport struct {
+	ID              string         `json:"id"`
+	Artifact        string         `json:"artifact"`
+	DeclaredRecipes []string       `json:"declared_recipes,omitempty"`
+	ObservedRecipes []string       `json:"observed_recipes,omitempty"`
+	SourceVersions  []string       `json:"source_versions,omitempty"`
+	TargetVersions  []string       `json:"target_versions,omitempty"`
+	AEOpenVersions  []string       `json:"ae_open_versions,omitempty"`
+	AtomIDs         []string       `json:"atom_ids,omitempty"`
+	Totals          CoverageTotals `json:"totals"`
+}
+
 type coverageFile struct {
 	SchemaVersion  int                `json:"schema_version"`
 	RecurringGates []coverageArtifact `json:"recurring_gates"`
@@ -45,6 +61,7 @@ type coverageFile struct {
 type coverageRecord struct {
 	ID                       string           `json:"id"`
 	Artifact                 string           `json:"artifact"`
+	Recipes                  []string         `json:"recipes"`
 	Totals                   CoverageTotals   `json:"totals"`
 	HostOpenEndpointEvidence coverageEndpoint `json:"host_open_endpoint_evidence"`
 }
@@ -64,6 +81,7 @@ type coverageArtifact struct {
 
 type matrixFile struct {
 	Summary matrixSummary `json:"summary"`
+	Cases   []matrixCase  `json:"cases"`
 }
 
 type matrixSummary struct {
@@ -72,6 +90,14 @@ type matrixSummary struct {
 	Blocked int `json:"blocked"`
 	Failed  int `json:"failed"`
 	Skipped int `json:"skipped"`
+}
+
+type matrixCase struct {
+	RecipeName    string `json:"recipe_name"`
+	SourceVersion string `json:"source_version"`
+	TargetVersion string `json:"target_version"`
+	AEOpenVersion string `json:"ae_open_version"`
+	Status        string `json:"status"`
 }
 
 type coverageArtifactRef struct {
@@ -85,6 +111,7 @@ func ValidateCoverage(root, coveragePath string) (CoverageReport, error) {
 	if err := readJSONPath(root, coveragePath, &coverage); err != nil {
 		return CoverageReport{}, err
 	}
+	atomRefs := loadCoverageAtomRefs(root)
 
 	refs := collectCoverageArtifactRefs(coverage)
 	report := CoverageReport{
@@ -98,6 +125,10 @@ func ValidateCoverage(root, coveragePath string) (CoverageReport, error) {
 	for _, ref := range refs {
 		report.checkArtifact(root, ref)
 	}
+	for _, record := range coverage.Coverage {
+		report.checkCoverageRecord(root, record, atomRefs)
+	}
+	report.Summary.Atoms = countUniqueAtoms(report.Records)
 	if report.Summary.Errors > 0 {
 		report.Status = StatusFail
 	}
@@ -147,6 +178,47 @@ func (r *CoverageReport) checkArtifact(root string, ref coverageArtifactRef) {
 	}
 }
 
+func (r *CoverageReport) checkCoverageRecord(root string, record coverageRecord, atomRefs coverageAtomRefs) {
+	if record.Artifact == "" {
+		return
+	}
+	var matrix matrixFile
+	if err := readJSONPath(root, record.Artifact, &matrix); err != nil {
+		return
+	}
+	detail := CoverageRecordReport{
+		ID:              record.ID,
+		Artifact:        filepath.ToSlash(record.Artifact),
+		DeclaredRecipes: sortedStrings(record.Recipes),
+		ObservedRecipes: matrixRecipes(matrix),
+		SourceVersions:  matrixSourceVersions(matrix),
+		TargetVersions:  matrixTargetVersions(matrix),
+		AEOpenVersions:  matrixAEOpenVersions(matrix),
+		Totals:          record.Totals,
+	}
+	detail.AtomIDs = atomRefs.atomIDsForRecord(detail.Artifact, detail.ObservedRecipes)
+	r.Records = append(r.Records, detail)
+	r.checkDeclaredRecipes(record.ID, detail.Artifact, detail.DeclaredRecipes, detail.ObservedRecipes)
+}
+
+func (r *CoverageReport) checkDeclaredRecipes(recordID, artifact string, declared, observed []string) {
+	if len(declared) == 0 {
+		return
+	}
+	declaredSet := stringSet(declared)
+	observedSet := stringSet(observed)
+	for _, recipe := range declared {
+		if !observedSet[recipe] {
+			r.addError("matrix_missing_declared_recipe", recordID, artifact, fmt.Sprintf("declared recipe %q was not found in matrix cases", recipe))
+		}
+	}
+	for _, recipe := range observed {
+		if !declaredSet[recipe] {
+			r.addError("matrix_unexpected_recipe", recordID, artifact, fmt.Sprintf("matrix recipe %q is not declared by the coverage record", recipe))
+		}
+	}
+}
+
 func (r *CoverageReport) addError(code, recordID, path, message string) {
 	r.Summary.Errors++
 	r.Issues = append(r.Issues, CoverageIssue{
@@ -156,6 +228,124 @@ func (r *CoverageReport) addError(code, recordID, path, message string) {
 		Path:     filepath.ToSlash(path),
 		Message:  message,
 	})
+}
+
+type coverageAtomRefs struct {
+	byRecipe   map[string][]string
+	byEvidence map[string][]string
+}
+
+func loadCoverageAtomRefs(root string) coverageAtomRefs {
+	var atoms atomsFile
+	if err := readJSONPath(root, "registry/capability_atoms.json", &atoms); err != nil {
+		return coverageAtomRefs{byRecipe: map[string][]string{}, byEvidence: map[string][]string{}}
+	}
+	refs := coverageAtomRefs{byRecipe: map[string][]string{}, byEvidence: map[string][]string{}}
+	for _, atom := range atoms.CapabilityAtoms {
+		for _, dependency := range atom.Dependencies {
+			path := filepath.ToSlash(dependency.Path)
+			switch dependency.Kind {
+			case "recipe":
+				recipe := strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
+				refs.byRecipe[recipe] = append(refs.byRecipe[recipe], atom.ID)
+			case "evidence":
+				refs.byEvidence[path] = append(refs.byEvidence[path], atom.ID)
+			}
+		}
+	}
+	for recipe := range refs.byRecipe {
+		sort.Strings(refs.byRecipe[recipe])
+	}
+	for evidence := range refs.byEvidence {
+		sort.Strings(refs.byEvidence[evidence])
+	}
+	return refs
+}
+
+func (r coverageAtomRefs) atomIDsForRecord(artifact string, recipes []string) []string {
+	ids := map[string]bool{}
+	for _, id := range r.byEvidence[filepath.ToSlash(artifact)] {
+		ids[id] = true
+	}
+	for _, recipe := range recipes {
+		for _, id := range r.byRecipe[recipe] {
+			ids[id] = true
+		}
+	}
+	return sortedKeys(ids)
+}
+
+func countUniqueAtoms(records []CoverageRecordReport) int {
+	ids := map[string]bool{}
+	for _, record := range records {
+		for _, id := range record.AtomIDs {
+			ids[id] = true
+		}
+	}
+	return len(ids)
+}
+
+func matrixRecipes(matrix matrixFile) []string {
+	values := map[string]bool{}
+	for _, c := range matrix.Cases {
+		if c.RecipeName != "" {
+			values[c.RecipeName] = true
+		}
+	}
+	return sortedKeys(values)
+}
+
+func matrixSourceVersions(matrix matrixFile) []string {
+	values := map[string]bool{}
+	for _, c := range matrix.Cases {
+		if c.SourceVersion != "" {
+			values[c.SourceVersion] = true
+		}
+	}
+	return sortedKeys(values)
+}
+
+func matrixTargetVersions(matrix matrixFile) []string {
+	values := map[string]bool{}
+	for _, c := range matrix.Cases {
+		if c.TargetVersion != "" {
+			values[c.TargetVersion] = true
+		}
+	}
+	return sortedKeys(values)
+}
+
+func matrixAEOpenVersions(matrix matrixFile) []string {
+	values := map[string]bool{}
+	for _, c := range matrix.Cases {
+		if c.AEOpenVersion != "" {
+			values[c.AEOpenVersion] = true
+		}
+	}
+	return sortedKeys(values)
+}
+
+func stringSet(values []string) map[string]bool {
+	set := map[string]bool{}
+	for _, value := range values {
+		set[value] = true
+	}
+	return set
+}
+
+func sortedStrings(values []string) []string {
+	out := append([]string(nil), values...)
+	sort.Strings(out)
+	return out
+}
+
+func sortedKeys(values map[string]bool) []string {
+	out := make([]string, 0, len(values))
+	for value := range values {
+		out = append(out, value)
+	}
+	sort.Strings(out)
+	return out
 }
 
 func readJSONPath(root, path string, value any) error {

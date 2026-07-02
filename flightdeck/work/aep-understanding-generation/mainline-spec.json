@@ -168,15 +168,23 @@
     "phase": "version_matrix_totalization",
     "last_completed_target": {
       "location": "coverage_ledger",
-      "group": "coverage_totals_validator",
-      "reason": "Move the version matrix total/detail/total ledger from manual JSON edits toward a Go-verifiable source of truth. The new aepregistry coverage gate checks declared coverage totals against each referenced matrix.json artifact.",
+      "group": "coverage_recipe_atom_version_validator",
+      "reason": "Extend the Go coverage gate from totals-only checking toward the total/detail/total contract. The report now extracts per-record recipes, source/target writer versions, AE host-open versions when present, and atom IDs linked through recipe/evidence dependencies.",
       "source_report": "tmp/registry_coverage.json",
       "result": {
-        "command_added": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage.json",
+        "command": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage.json",
+        "records_checked": 16,
         "artifacts_checked": 45,
+        "atoms_linked": 139,
         "coverage_errors": 0
       },
       "previous_target": {
+        "location": "coverage_ledger",
+        "group": "coverage_totals_validator",
+        "artifacts_checked": 45,
+        "coverage_errors": 0
+      },
+      "previous_atom_target": {
         "location": "recipe_atoms",
         "group": "remaining_evidence_complete_recipes",
         "capability_atoms_added": 36,
@@ -189,7 +197,7 @@
         "minimal-layer-explicit-matte remains covered by layer.track_matte.explicit_source as a version-boundary atom, not a pass-complete layer atom."
       ]
     },
-    "next_action": "Use the coverage validator as the recurring total gate, then extend it from totals-only validation toward recipe/atom/version coverage checks. Keep the two remaining recipe_atoms entries pending until full evidence or explicit boundary status is chosen.",
+    "next_action": "Extend the coverage validator from record-level axis summaries to per-atom status rows, including direct versus inferred host-open labels and known boundary labels. Keep the two remaining recipe_atoms entries pending until full evidence or explicit boundary status is chosen.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
