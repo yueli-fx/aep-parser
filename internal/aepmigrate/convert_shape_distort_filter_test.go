@@ -6,8 +6,8 @@ import (
 	"testing"
 )
 
-func TestConvertWritesRecipeRectRoundCornersShapeLayerProject(t *testing.T) {
-	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-shape-round-corners.json"))
+func TestConvertWritesRecipeRectZigZagShapeLayerProject(t *testing.T) {
+	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-shape-zigzag.json"))
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
 
 	report, err := Convert(ConvertOptions{
@@ -29,8 +29,8 @@ func TestConvertWritesRecipeRectRoundCornersShapeLayerProject(t *testing.T) {
 	}
 }
 
-func TestConvertWritesRecipeRectOffsetPathsShapeLayerProject(t *testing.T) {
-	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-shape-offset-paths.json"))
+func TestConvertWritesRecipeRectPuckerBloatShapeLayerProject(t *testing.T) {
+	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-shape-pucker-bloat.json"))
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
 
 	report, err := Convert(ConvertOptions{
@@ -52,8 +52,8 @@ func TestConvertWritesRecipeRectOffsetPathsShapeLayerProject(t *testing.T) {
 	}
 }
 
-func TestConvertWritesRecipeRectTrimPathsShapeLayerProject(t *testing.T) {
-	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-shape-trim.json"))
+func TestConvertWritesRecipeRectTwistShapeLayerProject(t *testing.T) {
+	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-shape-twist.json"))
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
 
 	report, err := Convert(ConvertOptions{

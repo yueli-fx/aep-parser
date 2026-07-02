@@ -791,19 +791,19 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "convert_layer_surface_switch_test_split",
-      "reason": "Reduce layer test-file growth risk by separating solid/adjustment surface layer tests from null layer tests and layer switch tests from metadata/parent attribute tests while preserving behavior.",
+      "group": "verify_report_shape_distort_test_split",
+      "reason": "Reduce remaining 5KB test-file growth risk by separating migration-report verify tests and shape distort filter conversion tests from their broader test files while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_layer_test.go",
-          "internal/aepmigrate/convert_layer_surface_test.go",
-          "internal/aepmigrate/convert_layer_attributes_test.go",
-          "internal/aepmigrate/convert_layer_switches_test.go"
+          "internal/aepmigrate/verify_test.go",
+          "internal/aepmigrate/verify_report_test.go",
+          "internal/aepmigrate/convert_shape_filter_test.go",
+          "internal/aepmigrate/convert_shape_distort_filter_test.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Layer surface and switch conversion tests have been split from broad layer test files. Next useful increment is to continue reducing remaining 5-6KB aepmigrate tests or 4-5KB conversion support files into coherent topic files without changing behavior.",
+    "next_action": "Migration-report verify tests and shape distort filter tests have been split from broader files. Next useful increment is to continue reducing 5KB conversion support files into coherent implementation modules without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
