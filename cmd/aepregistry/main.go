@@ -307,19 +307,23 @@ func runCleanup(args []string) int {
 	apply := fs.Bool("apply", false, "apply deletion for cleanup_candidate groups; default is dry-run only")
 	producers := fs.String("producer", "", "comma-separated producer categories to include in execution report")
 	excludeProducers := fs.String("exclude-producer", "registry_report", "comma-separated producer categories to exclude from execution report")
+	stateRefs := fs.String("state-ref", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json", "comma-separated JSON state files whose tmp references protect generated cleanup groups")
 	jsonOut := fs.Bool("json", false, "print JSON report")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(os.Stderr, "usage: aepregistry cleanup [-root .] [-out tmp/registry_generated_cleanup.json] [-exec-out tmp/registry_generated_cleanup_execution.json] [-apply] [-producer categories] [-exclude-producer categories] [-sample-limit 5] [-json]")
+		fmt.Fprintln(os.Stderr, "usage: aepregistry cleanup [-root .] [-out tmp/registry_generated_cleanup.json] [-exec-out tmp/registry_generated_cleanup_execution.json] [-apply] [-producer categories] [-exclude-producer categories] [-state-ref json[,json...]] [-sample-limit 5] [-json]")
 		return 2
 	}
 	if *apply && *execOutPath == "" {
 		*execOutPath = "tmp/registry_generated_cleanup_execution.json"
 	}
 
-	report, err := registry.GeneratedCleanupRepository(*root, registry.GeneratedCleanupOptions{SampleLimit: *sampleLimit})
+	report, err := registry.GeneratedCleanupRepository(*root, registry.GeneratedCleanupOptions{
+		SampleLimit:         *sampleLimit,
+		StateReferenceFiles: splitCSV(*stateRefs),
+	})
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "cleanup:", err)
 		return 2

@@ -3,12 +3,14 @@ package registry
 import (
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 )
 
 type GeneratedCleanupOptions struct {
-	SampleLimit int
+	SampleLimit         int
+	StateReferenceFiles []string
 }
 
 type GeneratedCleanupReport struct {
@@ -26,7 +28,9 @@ type GeneratedCleanupSummary struct {
 	UnreferencedFiles     int                    `json:"unreferenced_files"`
 	CleanupCandidateFiles int                    `json:"cleanup_candidate_files"`
 	RetainRegisteredFiles int                    `json:"retain_registered_files"`
+	StateReferencedFiles  int                    `json:"state_referenced_files"`
 	MixedGroups           int                    `json:"mixed_groups"`
+	StateReferencedGroups int                    `json:"state_referenced_groups"`
 	UnknownProducerGroups int                    `json:"unknown_producer_groups"`
 	SampleLimit           int                    `json:"sample_limit"`
 	ActionBuckets         []GeneratedGroupBucket `json:"action_buckets,omitempty"`
@@ -45,24 +49,26 @@ type GeneratedCleanupLocation struct {
 }
 
 type GeneratedCleanupGroup struct {
-	LocationID        string   `json:"location_id"`
-	Group             string   `json:"group"`
-	PathPrefix        string   `json:"path_prefix"`
-	ProducerCategory  string   `json:"producer_category"`
-	ProducerWorkflows []string `json:"producer_workflows,omitempty"`
-	Action            string   `json:"action"`
-	CleanupSafety     string   `json:"cleanup_safety"`
-	CleanupOperation  string   `json:"cleanup_operation"`
-	CleanupTarget     string   `json:"cleanup_target,omitempty"`
-	Reason            string   `json:"reason"`
-	Files             int      `json:"files"`
-	Bytes             int64    `json:"bytes"`
-	ReferencedFiles   int      `json:"referenced_files"`
-	UnreferencedFiles int      `json:"unreferenced_files"`
-	EvidenceIDs       []string `json:"evidence_ids,omitempty"`
-	PreservePaths     []string `json:"preserve_paths,omitempty"`
-	Samples           []string `json:"samples,omitempty"`
-	DeleteSamples     []string `json:"delete_samples,omitempty"`
+	LocationID           string   `json:"location_id"`
+	Group                string   `json:"group"`
+	PathPrefix           string   `json:"path_prefix"`
+	ProducerCategory     string   `json:"producer_category"`
+	ProducerWorkflows    []string `json:"producer_workflows,omitempty"`
+	Action               string   `json:"action"`
+	CleanupSafety        string   `json:"cleanup_safety"`
+	CleanupOperation     string   `json:"cleanup_operation"`
+	CleanupTarget        string   `json:"cleanup_target,omitempty"`
+	Reason               string   `json:"reason"`
+	Files                int      `json:"files"`
+	Bytes                int64    `json:"bytes"`
+	ReferencedFiles      int      `json:"referenced_files"`
+	UnreferencedFiles    int      `json:"unreferenced_files"`
+	StateReferencedFiles int      `json:"state_referenced_files,omitempty"`
+	EvidenceIDs          []string `json:"evidence_ids,omitempty"`
+	StateReferencePaths  []string `json:"state_reference_paths,omitempty"`
+	PreservePaths        []string `json:"preserve_paths,omitempty"`
+	Samples              []string `json:"samples,omitempty"`
+	DeleteSamples        []string `json:"delete_samples,omitempty"`
 }
 
 type GeneratedGroupBucket struct {
@@ -84,6 +90,7 @@ func GeneratedCleanup(root string, reg Registry, opts GeneratedCleanupOptions) (
 		opts.SampleLimit = 0
 	}
 	refs := collectOwnershipRefs(root, reg)
+	stateRefs := collectGeneratedStateRefs(root, opts.StateReferenceFiles)
 	evidenceByGroup := generatedEvidenceByGroup(reg)
 	report := GeneratedCleanupReport{
 		SchemaVersion: 1,
@@ -97,7 +104,7 @@ func GeneratedCleanup(root string, reg Registry, opts GeneratedCleanupOptions) (
 		if !isGeneratedCleanupLocation(location) {
 			continue
 		}
-		entry, err := generatedCleanupLocation(root, location, refs, evidenceByGroup, opts.SampleLimit)
+		entry, err := generatedCleanupLocation(root, location, refs, stateRefs, evidenceByGroup, opts.SampleLimit)
 		if err != nil {
 			return GeneratedCleanupReport{}, err
 		}
@@ -109,6 +116,7 @@ func GeneratedCleanup(root string, reg Registry, opts GeneratedCleanupOptions) (
 			report.Summary.Groups++
 			report.Summary.ReferencedFiles += group.ReferencedFiles
 			report.Summary.UnreferencedFiles += group.UnreferencedFiles
+			report.Summary.StateReferencedFiles += group.StateReferencedFiles
 			switch group.Action {
 			case "cleanup_candidate":
 				report.Summary.CleanupCandidateFiles += group.UnreferencedFiles
@@ -118,6 +126,11 @@ func GeneratedCleanup(root string, reg Registry, opts GeneratedCleanupOptions) (
 				report.Summary.RetainRegisteredFiles += group.ReferencedFiles
 				report.Summary.CleanupCandidateFiles += group.UnreferencedFiles
 				report.Summary.MixedGroups++
+			case "review_state_referenced_generated":
+				report.Summary.CleanupCandidateFiles += group.UnreferencedFiles
+				report.Summary.StateReferencedGroups++
+			case "retain_state_referenced_generated":
+				report.Summary.StateReferencedGroups++
 			}
 			if group.ProducerCategory == "unknown_generated" {
 				report.Summary.UnknownProducerGroups++
@@ -135,7 +148,7 @@ func isGeneratedCleanupLocation(location Location) bool {
 	return !location.Tracked && location.Class == "generated_evidence"
 }
 
-func generatedCleanupLocation(root string, location Location, refs ownershipRefs, evidence map[string][]string, sampleLimit int) (GeneratedCleanupLocation, error) {
+func generatedCleanupLocation(root string, location Location, refs ownershipRefs, stateRefs generatedStateRefs, evidence map[string][]string, sampleLimit int) (GeneratedCleanupLocation, error) {
 	entry := GeneratedCleanupLocation{
 		ID:        location.ID,
 		Path:      location.Path,
@@ -170,9 +183,15 @@ func generatedCleanupLocation(root string, location Location, refs ownershipRefs
 		}
 		group.Files++
 		group.Bytes += size
-		if refs.owns(clean) {
+		registeredRef := refs.owns(clean)
+		stateRef := stateRefs.owns(clean)
+		if registeredRef || stateRef {
 			group.ReferencedFiles++
 			group.PreservePaths = append(group.PreservePaths, clean)
+			if stateRef {
+				group.StateReferencedFiles++
+				group.StateReferencePaths = append(group.StateReferencePaths, clean)
+			}
 		} else {
 			group.UnreferencedFiles++
 			if sampleLimit != 0 && len(group.DeleteSamples) < sampleLimit {
@@ -265,6 +284,7 @@ func finalizeGeneratedGroups(groups map[string]*GeneratedCleanupGroup) []Generat
 	for _, group := range groups {
 		group.Action, group.CleanupSafety, group.Reason = generatedCleanupDecision(*group)
 		sort.Strings(group.PreservePaths)
+		sort.Strings(group.StateReferencePaths)
 		group.CleanupOperation, group.CleanupTarget = generatedCleanupOperation(*group)
 		out = append(out, *group)
 	}
@@ -282,9 +302,15 @@ func finalizeGeneratedGroups(groups map[string]*GeneratedCleanupGroup) []Generat
 
 func generatedCleanupDecision(group GeneratedCleanupGroup) (action, safety, reason string) {
 	if group.ReferencedFiles > 0 && group.UnreferencedFiles > 0 {
+		if group.StateReferencedFiles > 0 && len(group.EvidenceIDs) == 0 {
+			return "review_state_referenced_generated", "mixed_state_referenced_generated", "group contains state-file references plus unreferenced generated siblings"
+		}
 		return "review_mixed_registered_generated", "mixed_registered_generated", "group contains registered evidence plus unreferenced generated siblings"
 	}
 	if group.ReferencedFiles > 0 {
+		if group.StateReferencedFiles > 0 && len(group.EvidenceIDs) == 0 {
+			return "retain_state_referenced_generated", "state_referenced_generated", "all files in group are referenced by state files"
+		}
 		return "retain_registered_evidence", "registered_generated_evidence", "all files in group are referenced by registry evidence or atom dependencies"
 	}
 	return "cleanup_candidate", "unreferenced_rebuildable_generated", "no registry evidence or atom dependency references this generated group"
@@ -299,11 +325,70 @@ func generatedCleanupOperation(group GeneratedCleanupGroup) (operation, target s
 		return "delete_directory_tree", group.PathPrefix
 	case "review_mixed_registered_generated":
 		return "preserve_paths_then_review_unreferenced_siblings", group.PathPrefix
+	case "review_state_referenced_generated":
+		return "preserve_paths_then_review_unreferenced_siblings", group.PathPrefix
 	case "retain_registered_evidence":
 		return "no_delete_registered_evidence", ""
+	case "retain_state_referenced_generated":
+		return "no_delete_state_referenced", ""
 	default:
 		return "review_unknown", group.PathPrefix
 	}
+}
+
+type generatedStateRefs struct {
+	files map[string]bool
+}
+
+func collectGeneratedStateRefs(root string, stateReferenceFiles []string) generatedStateRefs {
+	refs := generatedStateRefs{files: map[string]bool{}}
+	for _, stateFile := range stateReferenceFiles {
+		if stateFile == "" || !relPathOK(stateFile) {
+			continue
+		}
+		data, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(stateFile)))
+		if err != nil {
+			continue
+		}
+		for _, path := range extractGeneratedStatePaths(string(data)) {
+			refs.addExistingFile(root, path)
+		}
+	}
+	return refs
+}
+
+var generatedStatePathPattern = regexp.MustCompile(`tmp/[A-Za-z0-9_./-]+`)
+
+func extractGeneratedStatePaths(value string) []string {
+	matches := generatedStatePathPattern.FindAllString(value, -1)
+	seen := map[string]bool{}
+	var out []string
+	for _, match := range matches {
+		clean := cleanRel(strings.TrimRight(match, `".,]}`))
+		if clean == "tmp" || clean == "tmp/." || seen[clean] {
+			continue
+		}
+		seen[clean] = true
+		out = append(out, clean)
+	}
+	sort.Strings(out)
+	return out
+}
+
+func (r generatedStateRefs) addExistingFile(root, rel string) {
+	clean := cleanRel(rel)
+	if !relPathOK(clean) {
+		return
+	}
+	info, err := os.Stat(filepath.Join(root, filepath.FromSlash(clean)))
+	if err != nil || info.IsDir() {
+		return
+	}
+	r.files[clean] = true
+}
+
+func (r generatedStateRefs) owns(path string) bool {
+	return r.files[cleanRel(path)]
 }
 
 func inferGeneratedProducer(locationID, group string) (string, []string) {

@@ -88,6 +88,49 @@ func TestGeneratedCleanupClassifiesReferencedMixedAndUnreferencedGroups(t *testi
 	}
 }
 
+func TestGeneratedCleanupProtectsStateReferencedGeneratedFiles(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeFile(t, root, "tmp/migration_matrix_old/matrix.json", "{}\n")
+	writeFile(t, root, "tmp/migration_matrix_old/log.txt", "log\n")
+	writeFile(t, root, "flightdeck/work/aep-understanding-generation/current.json", `{"matrix":"tmp/migration_matrix_old/matrix.json","out":"tmp/migration_matrix_old"}`)
+	writeJSON(t, root, "registry/locations.json", map[string]any{
+		"schema_version": 1,
+		"locations": []map[string]any{
+			{"id": "tmp_evidence", "path": "tmp", "class": "generated_evidence", "tracked": false, "required": false, "lifecycle": "disposable"},
+		},
+	})
+	writeJSON(t, root, "registry/workflows.json", map[string]any{
+		"schema_version": 1,
+		"workflows":      []map[string]any{{"id": "migrate", "summary": "Migrate", "cross_platform": "go"}},
+	})
+	writeJSON(t, root, "registry/capability_atoms.json", map[string]any{
+		"schema_version":   1,
+		"capability_atoms": []map[string]any{},
+	})
+	writeJSON(t, root, "registry/evidence.json", map[string]any{
+		"schema_version": 1,
+		"evidence_sets":  []map[string]any{},
+	})
+
+	report, err := GeneratedCleanupRepository(root, GeneratedCleanupOptions{
+		SampleLimit:         2,
+		StateReferenceFiles: []string{"flightdeck/work/aep-understanding-generation/current.json"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	group := findGeneratedGroup(t, report, "tmp_evidence", "migration_matrix_old")
+	if group.Action != "review_state_referenced_generated" || group.CleanupOperation != "preserve_paths_then_review_unreferenced_siblings" {
+		t.Fatalf("state-referenced group action/operation = %q/%q", group.Action, group.CleanupOperation)
+	}
+	if group.StateReferencedFiles != 1 || group.ReferencedFiles != 1 || group.UnreferencedFiles != 1 {
+		t.Fatalf("state refs = %+v, want one state-referenced file and one unreferenced sibling", group)
+	}
+	if len(group.StateReferencePaths) != 1 || group.StateReferencePaths[0] != "tmp/migration_matrix_old/matrix.json" {
+		t.Fatalf("state reference paths = %+v", group.StateReferencePaths)
+	}
+}
+
 func findGeneratedGroup(t *testing.T, report GeneratedCleanupReport, locationID, groupName string) GeneratedCleanupGroup {
 	t.Helper()
 	for _, location := range report.Locations {
