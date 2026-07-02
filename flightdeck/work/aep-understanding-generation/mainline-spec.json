@@ -83,6 +83,11 @@
       "description": "Read-only location layout cleanup guardrail output; ignored by git."
     },
     {
+      "path": "tmp/registry_generated_cleanup.json",
+      "role": "generated_report",
+      "description": "Read-only generated-evidence cleanup classification by location, producer, and safety action; ignored by git."
+    },
+    {
       "path": "tmp/registry_ownership.json",
       "role": "generated_report",
       "description": "Read-only ownership/unowned output; ignored by git."
@@ -187,117 +192,224 @@
   "current_execution": {
     "phase": "atom_taxonomy_expansion",
     "last_completed_target": {
-      "location": "tracked_required_blockers",
-      "group": "remaining_tracked_blockers_complete",
-      "reason": "Register the remaining tracked/required blockers so layout cleanup guardrails no longer report any atomize-or-register work before generated cleanup review.",
-      "source_report": "tmp/registry_layout.json",
+      "location": "generated_evidence",
+      "group": "cleanup_classification_by_producer",
+      "reason": "Add a Go-generated JSON cleanup classification for tmp_evidence and generated_test_data so disposable generated outputs are grouped by producer and safety action before any deletion or move.",
+      "source_report": "tmp/registry_generated_cleanup.json",
       "result": {
-        "capability_atoms_added": 3,
-        "atoms_added": [
-          "registry.asset_map",
-          "effect.dictionary.versioned_locales",
-          "reference.reverse_engineering_corpus"
-        ],
-        "workflow_dependencies_extended": [
-          "migration.version_matrix",
-          "learning.technique_portrait",
-          "ai.workflow_generation"
-        ],
-        "tracked_required_blocked_unowned_after": 0,
-        "locations": 17,
-        "files": 49150,
-        "owned_files": 930,
-        "unowned_files": 48220,
-        "cleanup_candidate_files": 47934,
-        "blocked_unowned_files": 0,
-        "local_only_files": 286,
+        "command_added": "go run ./cmd/aepregistry cleanup -root . -out tmp/registry_generated_cleanup.json -sample-limit 3",
+        "cleanup_report_locations": 2,
+        "cleanup_report_groups": 287,
+        "cleanup_report_files": 47953,
+        "cleanup_report_bytes": 3346417247,
+        "referenced_files": 18,
+        "unreferenced_files": 47935,
+        "cleanup_candidate_files": 47935,
+        "retain_registered_files": 18,
+        "mixed_groups": 18,
+        "unknown_producer_groups": 0,
         "action_distribution": [
           {
-            "action": "review_generated_cleanup",
-            "locations": 2,
-            "files": 47952,
-            "unowned_files": 47934,
-            "cleanup_candidate_files": 47934
+            "action": "review_mixed_registered_generated",
+            "groups": 18,
+            "files": 23977
           },
           {
-            "action": "keep_registered",
-            "locations": 14,
-            "files": 912,
-            "unowned_files": 0
-          },
-          {
-            "action": "exclude_local_only",
-            "locations": 1,
-            "files": 286,
-            "unowned_files": 286,
-            "local_only_files": 286
+            "action": "cleanup_candidate",
+            "groups": 269,
+            "files": 23976
           }
         ],
-        "remaining_unowned_by_action": [
+        "producer_distribution": [
           {
-            "action": "review_generated_cleanup",
-            "files": 47934,
-            "locations": [
-              "tmp_evidence",
-              "generated_test_data"
-            ]
+            "producer": "version_matrix",
+            "groups": 81,
+            "files": 31256
           },
           {
-            "action": "exclude_local_only",
-            "files": 286,
-            "locations": [
-              "local_samples"
-            ]
+            "producer": "technique_learning",
+            "groups": 125,
+            "files": 11197
+          },
+          {
+            "producer": "host_open_gap",
+            "groups": 2,
+            "files": 3699
+          },
+          {
+            "producer": "selfhost_learning",
+            "groups": 29,
+            "files": 1438
+          },
+          {
+            "producer": "migration_probe",
+            "groups": 42,
+            "files": 256
+          },
+          {
+            "producer": "generated_reverse_fixtures",
+            "groups": 1,
+            "files": 54
+          },
+          {
+            "producer": "ship_gate_fixtures",
+            "groups": 1,
+            "files": 19
+          },
+          {
+            "producer": "coverage_scratch",
+            "groups": 2,
+            "files": 13
+          },
+          {
+            "producer": "registry_report",
+            "groups": 1,
+            "files": 12
+          },
+          {
+            "producer": "migration_report",
+            "groups": 1,
+            "files": 7
+          },
+          {
+            "producer": "host_open_args",
+            "groups": 1,
+            "files": 1
+          },
+          {
+            "producer": "profile_probe",
+            "groups": 1,
+            "files": 1
           }
+        ],
+        "layout_after_cleanup_report": {
+          "locations": 17,
+          "files": 49151,
+          "owned_files": 930,
+          "unowned_files": 48221,
+          "cleanup_candidate_files": 47935,
+          "blocked_unowned_files": 0,
+          "local_only_files": 286
+        },
+        "notes": [
+          "tmp/registry_generated_cleanup.json is itself a disposable registry_report output under tmp and is counted as one cleanup candidate while it exists.",
+          "review_mixed_registered_generated groups contain registered evidence files plus unreferenced siblings; cleanup must preserve the registered evidence path or regenerate it afterward."
         ]
       },
       "previous_target": {
-        "location": "fixture_generators",
-        "group": "fixture_generator_family_atoms",
-        "reason": "Add registry glob dependency support and register JSX generator families so tracked AE fixture generator scripts are owned by purpose without listing 239 files individually.",
+        "location": "tracked_required_blockers",
+        "group": "remaining_tracked_blockers_complete",
+        "reason": "Register the remaining tracked/required blockers so layout cleanup guardrails no longer report any atomize-or-register work before generated cleanup review.",
         "source_report": "tmp/registry_layout.json",
         "result": {
-          "registry_dependency_support_added": [
-            "glob"
-          ],
-          "capability_atoms_added": 8,
+          "capability_atoms_added": 3,
           "atoms_added": [
-            "fixture_generators.verify_shipgates",
-            "fixture_generators.reverse_engineering_sources",
-            "fixture_generators.probe_scripts",
-            "fixture_generators.build_sources",
-            "fixture_generators.template_extraction",
-            "fixture_generators.fdta_probes",
-            "fixture_generators.ship_gate_helpers",
-            "fixture_generators.smoke_helpers"
+            "registry.asset_map",
+            "effect.dictionary.versioned_locales",
+            "reference.reverse_engineering_corpus"
           ],
-          "fixture_generators_files": 239,
-          "fixture_generators_owned_files_after": 239,
-          "fixture_generators_unowned_files_after": 0,
+          "workflow_dependencies_extended": [
+            "migration.version_matrix",
+            "learning.technique_portrait",
+            "ai.workflow_generation"
+          ],
+          "tracked_required_blocked_unowned_after": 0,
           "locations": 17,
           "files": 49150,
-          "owned_files": 894,
-          "unowned_files": 48256,
+          "owned_files": 930,
+          "unowned_files": 48220,
           "cleanup_candidate_files": 47934,
-          "blocked_unowned_files": 36,
-          "local_only_files": 286
-        }
-      },
-      "previous_atom_target": {
-        "location": "recipe_atoms",
-        "group": "remaining_evidence_complete_recipes",
-        "capability_atoms_added": 36,
-        "recipe_atoms_owned_files_after": 139,
-        "recipe_atoms_unowned_files_after": 2
-      },
-      "boundary_notes": [
-        "minimal-layer-explicit-matte remains covered by layer.track_matte.explicit_source as a version-boundary atom, not a pass-complete layer atom."
-      ]
+          "blocked_unowned_files": 0,
+          "local_only_files": 286,
+          "action_distribution": [
+            {
+              "action": "review_generated_cleanup",
+              "locations": 2,
+              "files": 47952,
+              "unowned_files": 47934,
+              "cleanup_candidate_files": 47934
+            },
+            {
+              "action": "keep_registered",
+              "locations": 14,
+              "files": 912,
+              "unowned_files": 0
+            },
+            {
+              "action": "exclude_local_only",
+              "locations": 1,
+              "files": 286,
+              "unowned_files": 286,
+              "local_only_files": 286
+            }
+          ],
+          "remaining_unowned_by_action": [
+            {
+              "action": "review_generated_cleanup",
+              "files": 47934,
+              "locations": [
+                "tmp_evidence",
+                "generated_test_data"
+              ]
+            },
+            {
+              "action": "exclude_local_only",
+              "files": 286,
+              "locations": [
+                "local_samples"
+              ]
+            }
+          ]
+        },
+        "previous_target": {
+          "location": "fixture_generators",
+          "group": "fixture_generator_family_atoms",
+          "reason": "Add registry glob dependency support and register JSX generator families so tracked AE fixture generator scripts are owned by purpose without listing 239 files individually.",
+          "source_report": "tmp/registry_layout.json",
+          "result": {
+            "registry_dependency_support_added": [
+              "glob"
+            ],
+            "capability_atoms_added": 8,
+            "atoms_added": [
+              "fixture_generators.verify_shipgates",
+              "fixture_generators.reverse_engineering_sources",
+              "fixture_generators.probe_scripts",
+              "fixture_generators.build_sources",
+              "fixture_generators.template_extraction",
+              "fixture_generators.fdta_probes",
+              "fixture_generators.ship_gate_helpers",
+              "fixture_generators.smoke_helpers"
+            ],
+            "fixture_generators_files": 239,
+            "fixture_generators_owned_files_after": 239,
+            "fixture_generators_unowned_files_after": 0,
+            "locations": 17,
+            "files": 49150,
+            "owned_files": 894,
+            "unowned_files": 48256,
+            "cleanup_candidate_files": 47934,
+            "blocked_unowned_files": 36,
+            "local_only_files": 286
+          }
+        },
+        "previous_atom_target": {
+          "location": "recipe_atoms",
+          "group": "remaining_evidence_complete_recipes",
+          "capability_atoms_added": 36,
+          "recipe_atoms_owned_files_after": 139,
+          "recipe_atoms_unowned_files_after": 2
+        },
+        "boundary_notes": [
+          "minimal-layer-explicit-matte remains covered by layer.track_matte.explicit_source as a version-boundary atom, not a pass-complete layer atom."
+        ]
+      }
     },
-    "next_action": "Tracked/required atomization blockers are now zero. Next useful increment is generated cleanup review: classify tmp_evidence and generated_test_data by producing workflow so disposable outputs can be cleaned without touching local_samples or source contracts.",
+    "next_action": "Use tmp/registry_generated_cleanup.json to decide the first cleanup policy batch: keep or regenerate registered evidence inside the 18 mixed groups, then clean pure cleanup_candidate groups by producer category without touching local_samples or tracked source contracts.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
+      "Run registry cleanup after generated evidence cleanup policy or command changes.",
       "Run focused Go tests for internal/registry and cmd/aepregistry.",
       "Run full go test ./... before claiming completion of a committed Go change."
     ]
@@ -323,6 +435,14 @@
     {
       "id": "registry_layout",
       "command": "go run ./cmd/aepregistry layout -root . -out tmp/registry_layout.json -sample-limit 20",
+      "required_for": [
+        "asset_visibility",
+        "atom_taxonomy_expansion"
+      ]
+    },
+    {
+      "id": "registry_generated_cleanup",
+      "command": "go run ./cmd/aepregistry cleanup -root . -out tmp/registry_generated_cleanup.json -sample-limit 3",
       "required_for": [
         "asset_visibility",
         "atom_taxonomy_expansion"

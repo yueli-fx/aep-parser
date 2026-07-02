@@ -120,6 +120,29 @@ func TestRunLayoutWritesCleanupGuardrailReport(t *testing.T) {
 	}
 }
 
+func TestRunCleanupWritesGeneratedCleanupReport(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeFile(t, root, "tmp/orphan/matrix.json", "{}\n")
+	out := filepath.Join(root, "tmp", "registry_generated_cleanup.json")
+
+	code := run([]string{"cleanup", "-root", root, "-out", out, "-sample-limit", "1"})
+	if code != 0 {
+		t.Fatalf("run(cleanup) = %d, want 0", code)
+	}
+
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var report registry.GeneratedCleanupReport
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Summary.Locations == 0 || report.Summary.Groups == 0 || report.Summary.CleanupCandidateFiles == 0 {
+		t.Fatalf("cleanup summary = %+v, want generated cleanup candidates", report.Summary)
+	}
+}
+
 func TestRunCoverageWritesReportAndReturnsOneForDrift(t *testing.T) {
 	root := newRegistryRoot(t)
 	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 3)

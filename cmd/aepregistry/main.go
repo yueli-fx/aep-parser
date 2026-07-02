@@ -24,6 +24,8 @@ func run(args []string) int {
 		return runAudit(args[1:])
 	case "coverage":
 		return runCoverage(args[1:])
+	case "cleanup":
+		return runCleanup(args[1:])
 	case "inventory":
 		return runInventory(args[1:])
 	case "layout":
@@ -34,6 +36,42 @@ func run(args []string) int {
 		usage()
 		return 2
 	}
+}
+
+func runCleanup(args []string) int {
+	fs := flag.NewFlagSet("aepregistry cleanup", flag.ContinueOnError)
+	fs.SetOutput(os.Stderr)
+	root := fs.String("root", ".", "repository root")
+	outPath := fs.String("out", "tmp/registry_generated_cleanup.json", "generated cleanup classification JSON path")
+	sampleLimit := fs.Int("sample-limit", 5, "maximum file samples per generated group")
+	jsonOut := fs.Bool("json", false, "print JSON report")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	if fs.NArg() != 0 {
+		fmt.Fprintln(os.Stderr, "usage: aepregistry cleanup [-root .] [-out tmp/registry_generated_cleanup.json] [-sample-limit 5] [-json]")
+		return 2
+	}
+
+	report, err := registry.GeneratedCleanupRepository(*root, registry.GeneratedCleanupOptions{SampleLimit: *sampleLimit})
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "cleanup:", err)
+		return 2
+	}
+	if err := writeJSONFile(*outPath, report); err != nil {
+		fmt.Fprintln(os.Stderr, "write:", err)
+		return 2
+	}
+	if *jsonOut {
+		if err := json.NewEncoder(os.Stdout).Encode(report); err != nil {
+			fmt.Fprintln(os.Stderr, "stdout:", err)
+			return 2
+		}
+	} else {
+		fmt.Printf("registry cleanup: %d locations, %d groups, %d cleanup candidates\n",
+			report.Summary.Locations, report.Summary.Groups, report.Summary.CleanupCandidateFiles)
+	}
+	return 0
 }
 
 func runAudit(args []string) int {
@@ -299,5 +337,5 @@ func writeJSONFile(path string, value any) error {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: aepregistry <audit|coverage|inventory|layout|ownership> [flags]")
+	fmt.Fprintln(os.Stderr, "usage: aepregistry <audit|cleanup|coverage|inventory|layout|ownership> [flags]")
 }
