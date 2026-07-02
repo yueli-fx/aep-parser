@@ -791,17 +791,19 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "convert_shape_stroke_test_split",
-      "reason": "Reduce convert_shape_test.go growth risk by separating stroke, dash, taper, and wave conversion tests from basic shape and fill tests while preserving test behavior.",
+      "group": "convert_verify_topic_test_split",
+      "reason": "Reduce broad test-file growth risk by separating no-layer comp preservation tests from convert_test.go and AE open gate verification from verify_test.go while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_shape_test.go",
-          "internal/aepmigrate/convert_shape_stroke_test.go"
+          "internal/aepmigrate/convert_test.go",
+          "internal/aepmigrate/convert_comp_test.go",
+          "internal/aepmigrate/verify_test.go",
+          "internal/aepmigrate/verify_ae_open_test.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Shape stroke conversion tests have been split from convert_shape_test.go. Next useful increment is to continue reducing remaining 5-7KB aepmigrate tests or 4-5KB conversion support files into coherent topic files without changing behavior.",
+    "next_action": "No-layer comp preservation tests and AE open gate verification tests have been split from broad test files. Next useful increment is to continue reducing remaining 5-7KB aepmigrate tests or 4-5KB conversion support files into coherent topic files without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
