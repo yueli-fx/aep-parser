@@ -85,7 +85,7 @@
     {
       "path": "tmp/registry_layout.json",
       "role": "generated_report",
-      "description": "Read-only location layout cleanup guardrail output; ignored by git."
+      "description": "Read-only location layout cleanup guardrail output with generated cleanup direct/review-prunable split; ignored by git."
     },
     {
       "path": "tmp/registry_generated_cleanup.json",
@@ -1035,39 +1035,38 @@
       }
     },
     "last_code_maintenance_target": {
-      "location": "cmd/aepregistry",
-      "group": "mainline_spec_coverage_axis_consistency",
-      "reason": "Make version-matrix gate fail when mainline-spec current coverage-axis totals drift from regenerated coverage-axis evidence.",
+      "location": "internal/registry",
+      "group": "layout_generated_cleanup_classification",
+      "reason": "Align layout cleanup candidate totals with generated cleanup classification so asset-policy reports do not show conflicting cleanup counts.",
       "result": {
         "files": [
           "cmd/aepregistry/main.go",
           "cmd/aepregistry/main_test.go",
+          "internal/registry/layout.go",
+          "internal/registry/layout_test.go",
           "flightdeck/work/aep-understanding-generation/mainline-spec.json"
         ],
-        "behavior": "aepregistry gate -scope version-matrix now writes tmp/registry_mainline_spec_coverage_axis.json when mainline-spec exists, compares current_execution.last_completed_target.result.summary against regenerated coverage-axis totals, and fails the gate on drift.",
+        "behavior": "aepregistry layout now uses generated cleanup classification for generated_evidence locations, including state-ref protected paths, and exposes direct_cleanup_candidate_files, review_prunable_files, and registry_report_files.",
         "queries": {
-          "mainline_spec_coverage_axis": {
-            "command": "go run ./cmd/aepregistry gate -root . -out tmp/registry_gate.json -scope version-matrix",
-            "steps": 7,
-            "failed": 0,
-            "checked_fields": [
-              "atom_rows",
-              "writer_full_axis_rows",
-              "writer_partial_rows",
-              "boundary_rows",
-              "host_full_axis_rows",
-              "host_missing_rows",
-              "source_target_pairs",
-              "cells",
-              "pass",
-              "blocked",
-              "failed",
-              "skipped"
-            ]
+          "layout_cleanup_split": {
+            "command": "go run ./cmd/aepregistry layout -root . -out tmp/registry_layout.json -sample-limit 20",
+            "cleanup_candidate_files": 344,
+            "direct_cleanup_candidate_files": 0,
+            "review_prunable_files": 344,
+            "registry_report_files": 54,
+            "blocked_unowned_files": 0
+          },
+          "cleanup_classification": {
+            "command": "go run ./cmd/aepregistry cleanup -root . -out tmp/registry_generated_cleanup.json -exec-out tmp/registry_generated_cleanup_execution.json -sample-limit 10",
+            "cleanup_candidate_files": 344,
+            "direct_cleanup_candidate_files": 0,
+            "review_prunable_files": 344
           }
         },
-        "new_report": [
-          "tmp/registry_mainline_spec_coverage_axis.json"
+        "new_report_fields": [
+          "direct_cleanup_candidate_files",
+          "review_prunable_files",
+          "registry_report_files"
         ]
       }
     },

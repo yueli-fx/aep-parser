@@ -71,6 +71,46 @@ func TestLayoutRepositoryClassifiesCleanupAndAtomizationActions(t *testing.T) {
 	}
 }
 
+func TestLayoutUsesGeneratedCleanupClassificationForStateReferencedGroups(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeFile(t, root, "tmp/migration_matrix_old/matrix.json", "{}\n")
+	writeFile(t, root, "tmp/migration_matrix_old/log.txt", "log\n")
+	writeFile(t, root, "flightdeck/work/aep-understanding-generation/current.json", `{"matrix":"tmp/migration_matrix_old/matrix.json"}`)
+	writeJSON(t, root, "registry/locations.json", map[string]any{
+		"schema_version": 1,
+		"locations": []map[string]any{
+			{"id": "tmp", "path": "tmp", "class": "generated_evidence", "tracked": false, "required": false, "lifecycle": "disposable"},
+		},
+	})
+	writeJSON(t, root, "registry/workflows.json", map[string]any{
+		"schema_version": 1,
+		"workflows":      []map[string]any{{"id": "migrate", "summary": "Migrate", "cross_platform": "go"}},
+	})
+	writeJSON(t, root, "registry/capability_atoms.json", map[string]any{
+		"schema_version":   1,
+		"capability_atoms": []map[string]any{},
+	})
+	writeJSON(t, root, "registry/evidence.json", map[string]any{
+		"schema_version": 1,
+		"evidence_sets":  []map[string]any{},
+	})
+
+	report, err := LayoutRepository(root, LayoutOptions{
+		SampleLimit:         1,
+		StateReferenceFiles: []string{"flightdeck/work/aep-understanding-generation/current.json"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Summary.CleanupCandidateFiles != 1 || report.Summary.ReviewPrunableFiles != 1 || report.Summary.DirectCleanupCandidateFiles != 0 {
+		t.Fatalf("summary cleanup split = %+v, want one review-prunable sibling only", report.Summary)
+	}
+	tmp := findLayoutLocation(t, report, "tmp")
+	if tmp.CleanupCandidateFiles != 1 || tmp.ReviewPrunableFiles != 1 || tmp.DirectCleanupCandidateFiles != 0 {
+		t.Fatalf("tmp cleanup split = %+v", tmp)
+	}
+}
+
 func findLayoutLocation(t *testing.T, report LayoutReport, id string) LayoutLocation {
 	t.Helper()
 	for _, location := range report.Locations {

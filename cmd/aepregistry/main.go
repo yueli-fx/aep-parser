@@ -337,7 +337,10 @@ func runAssetPolicyGate(root string, addStep func(gateStepReport)) error {
 	addStep(gateStepReport{ID: "registry_ownership", Command: "go run ./cmd/aepregistry ownership -root . -out " + ownershipOut + " -sample-limit 20", Output: ownershipOut, Status: registry.StatusPass})
 
 	layoutOut := "tmp/registry_layout.json"
-	layout, err := registry.LayoutRepository(root, registry.LayoutOptions{SampleLimit: 20})
+	layout, err := registry.LayoutRepository(root, registry.LayoutOptions{
+		SampleLimit:         20,
+		StateReferenceFiles: defaultCleanupStateReferenceFiles(),
+	})
 	if err != nil {
 		return fmt.Errorf("layout: %w", err)
 	}
@@ -730,16 +733,20 @@ func runLayout(args []string) int {
 	root := fs.String("root", ".", "repository root")
 	outPath := fs.String("out", "tmp/registry_layout.json", "layout cleanup guardrail JSON path")
 	sampleLimit := fs.Int("sample-limit", 20, "maximum unowned samples per location")
+	stateRefs := fs.String("state-ref", strings.Join(defaultCleanupStateReferenceFiles(), ","), "comma-separated JSON state files whose tmp references protect generated cleanup groups")
 	jsonOut := fs.Bool("json", false, "print JSON report")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(os.Stderr, "usage: aepregistry layout [-root .] [-out tmp/registry_layout.json] [-sample-limit 20] [-json]")
+		fmt.Fprintln(os.Stderr, "usage: aepregistry layout [-root .] [-out tmp/registry_layout.json] [-state-ref json[,json...]] [-sample-limit 20] [-json]")
 		return 2
 	}
 
-	report, err := registry.LayoutRepository(*root, registry.LayoutOptions{SampleLimit: *sampleLimit})
+	report, err := registry.LayoutRepository(*root, registry.LayoutOptions{
+		SampleLimit:         *sampleLimit,
+		StateReferenceFiles: splitCSV(*stateRefs),
+	})
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "layout:", err)
 		return 2

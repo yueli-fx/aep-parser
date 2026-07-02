@@ -101,9 +101,17 @@ func TestRunLayoutWritesCleanupGuardrailReport(t *testing.T) {
 	root := newRegistryRoot(t)
 	writeFile(t, root, "examples/recipes/unowned.json", "{}\n")
 	writeFile(t, root, "tmp/orphan/matrix.json", "{}\n")
+	writeFile(t, root, "tmp/orphan/log.txt", "log\n")
+	writeFile(t, root, "flightdeck/work/aep-understanding-generation/current.json", `{"matrix":"tmp/orphan/matrix.json"}`)
 	out := filepath.Join(root, "tmp", "registry_layout.json")
 
-	code := run([]string{"layout", "-root", root, "-out", out, "-sample-limit", "1"})
+	code := run([]string{
+		"layout",
+		"-root", root,
+		"-out", out,
+		"-state-ref", "flightdeck/work/aep-understanding-generation/current.json",
+		"-sample-limit", "1",
+	})
 	if code != 0 {
 		t.Fatalf("run(layout) = %d, want 0", code)
 	}
@@ -118,6 +126,9 @@ func TestRunLayoutWritesCleanupGuardrailReport(t *testing.T) {
 	}
 	if report.Summary.Locations == 0 || report.Summary.CleanupCandidateFiles == 0 || report.Summary.BlockedUnownedFiles == 0 {
 		t.Fatalf("layout summary = %+v, want cleanup candidates and blocked unowned files", report.Summary)
+	}
+	if report.Summary.ReviewPrunableFiles != 1 || report.Summary.DirectCleanupCandidateFiles != 0 {
+		t.Fatalf("layout cleanup split = %+v, want one review-prunable sibling", report.Summary)
 	}
 }
 
