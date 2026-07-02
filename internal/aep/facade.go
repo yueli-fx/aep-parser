@@ -1505,6 +1505,27 @@ func AnimateTextOpacity(layer *Layer, tickRate float64, kfs []ScalarKeyframe) er
 	return serializer.AnimateTextOpacity(layer, tickRate, kfs)
 }
 
+// @summary    Keyframe a text animator's per-character Fill Opacity
+// @description Keyframes the per-character Fill Opacity leaf of a text layer's
+//   first animator (added via AddTextFillOpacityAnimator) — animating the driven
+//   fill-alpha value itself, so every selected character shares the same fill
+//   fade curve while stroke opacity remains separate. Needs >= 2 keyframes;
+//   tickRate <= 0 uses the comp's. Refused on non-text layers, layers without a
+//   Fill Opacity animator leaf, and an already-animated Fill Opacity leaf.
+// @param      layer     the parsed text layer whose animator to keyframe
+// @param      tickRate  keyframe time base (<= 0 uses the comp's)
+// @param      kfs       the scalar keyframes (>= 2) for the Fill Opacity leaf
+// @domain     text
+// @stability  alpha
+// @verify     roundtrip
+// @since      AE2020
+// @boundary   the shared 1D scalar leaf path is render-gated via AnimateTextRangeOffset / AnimateTextRotation; this function itself is round-trip-verified only
+// @incident   text-animator-create-re
+// @alias      animate text fill opacity,文字填充不透明度关键帧,fill fade
+func AnimateTextFillOpacity(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
+	return serializer.AnimateTextFillOpacity(layer, tickRate, kfs)
+}
+
 // @summary    Keyframe a text animator's per-character Rotation
 // @description Keyframes the per-character Rotation leaf of a text layer's first
 //   animator (added via AddTextRotationAnimator) — animating the driven angle

@@ -2146,6 +2146,44 @@
       ]
     },
     {
+      "id": "text.animator.fill_opacity_keyframes",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-fill-opacity-value-keyframes.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_fillopacity_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
       "id": "text.animator.opacity",
       "domain": "text",
       "tier": "atom",

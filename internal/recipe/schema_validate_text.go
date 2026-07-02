@@ -428,6 +428,9 @@ func validateTextAnimator(animator TextAnimatorSpec, path string, recordCapabili
 		case "opacity":
 			recordCapability("AnimateTextOpacity", path+".value_keyframes")
 			validateValueKeyframes(animator.ValueKeyframes, path+".value_keyframes", "scalar", 0, addRefusal)
+		case "fill_opacity":
+			recordCapability("AnimateTextFillOpacity", path+".value_keyframes")
+			validateValueKeyframes(animator.ValueKeyframes, path+".value_keyframes", "scalar", 0, addRefusal)
 		case "position":
 			recordCapability("AnimateTextPosition", path+".value_keyframes")
 			validateValueKeyframes(animator.ValueKeyframes, path+".value_keyframes", "vector", 3, addRefusal)
@@ -447,7 +450,7 @@ func validateTextAnimator(animator TextAnimatorSpec, path string, recordCapabili
 			recordCapability("AnimateTextCharacterOffset", path+".value_keyframes")
 			validateValueKeyframes(animator.ValueKeyframes, path+".value_keyframes", "scalar", 0, addRefusal)
 		default:
-			addRefusal("unsupported_text_animator_value_keyframes", path+".value_keyframes", "value_keyframes currently support opacity, position, scale, rotation, color, tracking, and character_offset text animators")
+			addRefusal("unsupported_text_animator_value_keyframes", path+".value_keyframes", "value_keyframes currently support opacity, fill_opacity, position, scale, rotation, color, tracking, and character_offset text animators")
 			validateValueKeyframes(animator.ValueKeyframes, path+".value_keyframes", "any", 0, addRefusal)
 		}
 	}

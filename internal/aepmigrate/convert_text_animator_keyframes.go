@@ -23,6 +23,12 @@ func materializeTextAnimatorValueKeyframes(targetLayer *aep.Layer, property prof
 			return err
 		}
 		return aep.AnimateTextOpacity(targetLayer, 0, keyframes)
+	case "ADBE Text Fill Opacity":
+		keyframes, err := textAnimatorScalarKeyframes(property)
+		if err != nil {
+			return err
+		}
+		return aep.AnimateTextFillOpacity(targetLayer, 0, keyframes)
 	case "ADBE Text Position 3D":
 		keyframes, err := textAnimatorVectorKeyframes(property, 3)
 		if err != nil {

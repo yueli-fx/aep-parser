@@ -85,34 +85,16 @@
     }
   },
   "last_batch": {
-    "id": "layer-shape-precomp-writer-coverage",
-    "commit": "94e55a4",
+    "id": "text-animator-fill-opacity-keyframes",
+    "commit": null,
     "artifacts": [
-      "tmp/migration_matrix_precomp_all_6x6/matrix.json",
-      "tmp/migration_matrix_layer_all_6x6/matrix.json",
-      "tmp/migration_matrix_shape_all_6x6/matrix.json"
+      "tmp/migration_matrix_text_animators_all_6x6/matrix.json"
     ],
     "summary": [
       {
-        "domain": "precomp",
-        "total": 36,
-        "pass": 36,
-        "blocked": 0,
-        "failed": 0,
-        "skipped": 0
-      },
-      {
-        "domain": "layer",
-        "total": 576,
-        "pass": 541,
-        "blocked": 5,
-        "failed": 0,
-        "skipped": 30
-      },
-      {
-        "domain": "shape",
-        "total": 972,
-        "pass": 972,
+        "domain": "text-animators",
+        "total": 828,
+        "pass": 828,
         "blocked": 0,
         "failed": 0,
         "skipped": 0
@@ -618,12 +600,12 @@
       {
         "command": "go run ./cmd/aepregistry coverage -root . -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -out tmp/registry_coverage.json -require-ledgers",
         "status": "pass",
-        "evidence": "registry coverage: pass (49 artifacts, 0 errors); Go validator checks totals, host-open policy, declared ledgers, and 143 recipe coverage"
+        "evidence": "registry coverage: pass (49 artifacts, 0 errors); Go validator checks totals, host-open policy, declared ledgers, and 144 recipe coverage"
       },
       {
         "command": "go run ./cmd/aepregistry migration-summary -root . -out tmp/migration_coverage_summary.json",
         "status": "pass",
-        "evidence": "rendered coverage summary json: tmp/migration_coverage_summary.json; totals: 16 records, 11 domains, 143 recipes"
+        "evidence": "rendered coverage summary json: tmp/migration_coverage_summary.json; totals: 16 records, 11 domains, 144 recipes"
       },
       {
         "command": "go run ./cmd/aepregistry migration-summary -root . -out tmp/migration_coverage_summary.json -check",

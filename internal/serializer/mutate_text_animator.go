@@ -142,23 +142,23 @@ const matchNameTextExpressibleSelector = "ADBE Text Expressible Selector"
 const matchNameTextExpressibleAmount = "ADBE Text Expressible Amount"
 
 const (
-	matchNameTextAnimators     = "ADBE Text Animators"
-	matchNameTextAnimator      = "ADBE Text Animator"
-	matchNameTextPercentStart  = "ADBE Text Percent Start"
-	matchNameTextPercentEnd    = "ADBE Text Percent End"
-	matchNameTextPercentOffset = "ADBE Text Percent Offset"
-	matchNameTextOpacity       = "ADBE Text Opacity"
-	matchNameTextPosition3D    = "ADBE Text Position 3D"
-	matchNameTextScale3D       = "ADBE Text Scale 3D"
-	matchNameTextRotation      = "ADBE Text Rotation"
-	matchNameTextFillColor     = "ADBE Text Fill Color"
-	matchNameTextFillOpacity   = "ADBE Text Fill Opacity"
-	matchNameTextStrokeOpacity = "ADBE Text Stroke Opacity"
-	matchNameTextStrokeColor   = "ADBE Text Stroke Color"
-	matchNameTextStrokeWidth   = "ADBE Text Stroke Width"
-	matchNameTextSkew          = "ADBE Text Skew"
-	matchNameTextRotationX     = "ADBE Text Rotation X"
-	matchNameTextRotationY     = "ADBE Text Rotation Y"
+	matchNameTextAnimators       = "ADBE Text Animators"
+	matchNameTextAnimator        = "ADBE Text Animator"
+	matchNameTextPercentStart    = "ADBE Text Percent Start"
+	matchNameTextPercentEnd      = "ADBE Text Percent End"
+	matchNameTextPercentOffset   = "ADBE Text Percent Offset"
+	matchNameTextOpacity         = "ADBE Text Opacity"
+	matchNameTextPosition3D      = "ADBE Text Position 3D"
+	matchNameTextScale3D         = "ADBE Text Scale 3D"
+	matchNameTextRotation        = "ADBE Text Rotation"
+	matchNameTextFillColor       = "ADBE Text Fill Color"
+	matchNameTextFillOpacity     = "ADBE Text Fill Opacity"
+	matchNameTextStrokeOpacity   = "ADBE Text Stroke Opacity"
+	matchNameTextStrokeColor     = "ADBE Text Stroke Color"
+	matchNameTextStrokeWidth     = "ADBE Text Stroke Width"
+	matchNameTextSkew            = "ADBE Text Skew"
+	matchNameTextRotationX       = "ADBE Text Rotation X"
+	matchNameTextRotationY       = "ADBE Text Rotation Y"
 	matchNameTextTrackingAmount  = "ADBE Text Tracking Amount"
 	matchNameTextCharacterOffset = "ADBE Text Character Offset"
 
@@ -1085,6 +1085,14 @@ func animateTextScalarLeaf(layer *Layer, matchName, who string, tickRate float64
 // (Full contract lives on the aep.AnimateTextOpacity facade — docgen source.)
 func AnimateTextOpacity(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
 	return animateTextScalarLeaf(layer, matchNameTextOpacity, "AnimateTextOpacity", tickRate, kfs)
+}
+
+// AnimateTextFillOpacity keyframes the per-character Fill Opacity leaf of the
+// layer's first text animator (added via AddTextFillOpacityAnimator). Needs >= 2
+// keyframes; tickRate <= 0 uses the comp's.
+// (Full contract lives on the aep.AnimateTextFillOpacity facade.)
+func AnimateTextFillOpacity(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
+	return animateTextScalarLeaf(layer, matchNameTextFillOpacity, "AnimateTextFillOpacity", tickRate, kfs)
 }
 
 // AnimateTextRotation keyframes the per-character Rotation leaf of the layer's

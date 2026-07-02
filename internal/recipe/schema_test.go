@@ -2910,6 +2910,7 @@ func TestValidateReportsTextAnimatorScalarValueKeyframesCapabilities(t *testing.
 		{"rotation", "AnimateTextRotation"},
 		{"tracking", "AnimateTextTracking"},
 		{"character_offset", "AnimateTextCharacterOffset"},
+		{"fill_opacity", "AnimateTextFillOpacity"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.property, func(t *testing.T) {

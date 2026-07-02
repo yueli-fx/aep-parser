@@ -15,6 +15,7 @@ import (
 	"testing"
 
 	"github.com/yueli-fx/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/profile"
 	"github.com/yueli-fx/aep-parser/internal/rifx"
 )
 
@@ -628,6 +629,51 @@ func TestAnimateTextOpacity_LeafBecomesKeyframed(t *testing.T) {
 	}
 }
 
+func TestAnimateTextFillOpacity_LeafBecomesKeyframed(t *testing.T) {
+	p := aep.NewProject()
+	comp, err := aep.NewComposition(p, "T", 1280, 720, 24, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tl, err := aep.NewTextLayer(comp, "TXT")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := tl.SetText("ABCDEF"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := aep.AddTextFillOpacityAnimator(tl, 100, 0, 100, 0); err != nil {
+		t.Fatalf("AddTextFillOpacityAnimator: %v", err)
+	}
+	if err := aep.AnimateTextFillOpacity(tl, 0, []aep.ScalarKeyframe{{Time: 0, Value: 100}, {Time: 2, Value: 25}}); err != nil {
+		t.Fatalf("AnimateTextFillOpacity: %v", err)
+	}
+
+	reopened, root := writeReopen(t, p, "txfillopleafanim.aep")
+
+	fillOpacityKfl := findShipList(root, "ADBE Text Fill Opacity")
+	if fillOpacityKfl == nil {
+		t.Fatal("Fill Opacity list not found (leaf not animated)")
+	}
+	lhd3 := findShipChunk(fillOpacityKfl, rifx.IDLhd3)
+	if lhd3 == nil {
+		t.Fatal("Fill Opacity lhd3 missing (not animated)")
+	}
+	if n := binary.BigEndian.Uint32(lhd3.Data[0x08:0x0C]); n != 2 {
+		t.Errorf("Fill Opacity numKf = %d, want 2", n)
+	}
+	if offKfl := findShipList(root, "ADBE Text Percent Offset"); offKfl != nil {
+		t.Error("Range Offset unexpectedly animated; this path keyframes the leaf, not the selector")
+	}
+	prof, err := profile.Build(reopened, profile.Options{Path: "txfillopleafanim.aep"})
+	if err != nil {
+		t.Fatalf("profile.Build: %v", err)
+	}
+	if prop := profileLayerPropertyWithKeyframes(prof, "ADBE Text Fill Opacity"); prop == nil || len(prop.Keyframes) != 2 {
+		t.Fatalf("profile Fill Opacity keyframes = %+v, want two keyframes", prop)
+	}
+}
+
 func TestAnimateTextRotation_LeafBecomesKeyframed(t *testing.T) {
 	p := aep.NewProject()
 	comp, err := aep.NewComposition(p, "T", 1280, 720, 24, 5)
@@ -661,6 +707,23 @@ func TestAnimateTextRotation_LeafBecomesKeyframed(t *testing.T) {
 	if offKfl := findShipList(root, "ADBE Text Percent Offset"); offKfl != nil {
 		t.Error("Range Offset unexpectedly animated")
 	}
+}
+
+func profileLayerPropertyWithKeyframes(prof *profile.Profile, matchName string) *profile.Property {
+	if prof == nil {
+		return nil
+	}
+	for ci := range prof.Comps {
+		for li := range prof.Comps[ci].Layers {
+			for pi := range prof.Comps[ci].Layers[li].Properties {
+				prop := &prof.Comps[ci].Layers[li].Properties[pi]
+				if prop.MatchName == matchName && len(prop.Keyframes) > 0 {
+					return prop
+				}
+			}
+		}
+	}
+	return nil
 }
 
 func TestAnimateTextOpacity_RefusesWithoutAnimator(t *testing.T) {

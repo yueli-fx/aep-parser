@@ -601,7 +601,7 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 	}
 	for i, expectedKeyframes := range expected.Keyframes {
 		kfPropPath := fmt.Sprintf("expected_profile.keyframes[%d]", i)
-		prop := findProfileLayerProperty(prof, expectedKeyframes.LayerName, expectedKeyframes.MatchName)
+		prop := findProfileLayerKeyframedProperty(prof, expectedKeyframes.LayerName, expectedKeyframes.MatchName)
 		if prop == nil {
 			add(kfPropPath, expectedKeyframes.MatchName, nil, false)
 			continue
@@ -1083,6 +1083,36 @@ func findProfileLayerProperty(prof *profile.Profile, layerName, matchName string
 	for i := range layer.Shapes {
 		if prop := findProfileParam(layer.Shapes[i].Properties, matchName); prop != nil {
 			return prop
+		}
+	}
+	return nil
+}
+
+func findProfileLayerKeyframedProperty(prof *profile.Profile, layerName, matchName string) *profile.Property {
+	layer := findProfileLayer(prof, layerName)
+	if layer == nil {
+		return nil
+	}
+	if prop := findProfileKeyframedParam(layer.Properties, matchName); prop != nil {
+		return prop
+	}
+	for i := range layer.Effects {
+		if prop := findProfileKeyframedParam(layer.Effects[i].Params, matchName); prop != nil {
+			return prop
+		}
+	}
+	for i := range layer.Shapes {
+		if prop := findProfileKeyframedParam(layer.Shapes[i].Properties, matchName); prop != nil {
+			return prop
+		}
+	}
+	return findProfileLayerProperty(prof, layerName, matchName)
+}
+
+func findProfileKeyframedParam(params []profile.Property, matchName string) *profile.Property {
+	for i := range params {
+		if params[i].MatchName == matchName && len(params[i].Keyframes) > 0 {
+			return &params[i]
 		}
 	}
 	return nil

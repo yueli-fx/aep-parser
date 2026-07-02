@@ -786,6 +786,9 @@ func applyTextAnimators(layer *aep.Layer, animators []TextAnimatorSpec) error {
 			if err := applyTextRangeOffsetKeyframes(layer, animator); err != nil {
 				return err
 			}
+			if err := applyTextValueKeyframes(layer, animator); err != nil {
+				return err
+			}
 		case "stroke_opacity":
 			value, ok := animator.Value.(float64)
 			if !ok {
@@ -890,6 +893,12 @@ func applyTextValueKeyframes(layer *aep.Layer, animator TextAnimatorSpec) error 
 			return err
 		}
 		return aep.AnimateTextOpacity(layer, 0, keyframes)
+	case "fill_opacity":
+		keyframes, err := scalarValueKeyframes(animator.ValueKeyframes)
+		if err != nil {
+			return err
+		}
+		return aep.AnimateTextFillOpacity(layer, 0, keyframes)
 	case "position":
 		keyframes, err := vectorValueKeyframes(animator.ValueKeyframes, 3)
 		if err != nil {

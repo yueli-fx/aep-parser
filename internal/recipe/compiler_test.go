@@ -1233,6 +1233,7 @@ func TestCompileToFileChecksTextAnimatorScalarValueKeyframesExamples(t *testing.
 		"minimal-text-animator-rotation-value-keyframes.json",
 		"minimal-text-animator-tracking-value-keyframes.json",
 		"minimal-text-animator-character-offset-value-keyframes.json",
+		"minimal-text-animator-fill-opacity-value-keyframes.json",
 		"minimal-text-animator-position-value-keyframes.json",
 		"minimal-text-animator-scale-value-keyframes.json",
 		"minimal-text-animator-color-value-keyframes.json",
