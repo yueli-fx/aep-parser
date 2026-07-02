@@ -791,18 +791,17 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "effect_param_support_split",
-      "reason": "Reduce convert_effect.go growth risk by separating effect param value/keyframe helpers and support predicates from project/effect replay while preserving behavior.",
+      "group": "shape_gradient_styles_split",
+      "reason": "Reduce convert_shape_styles.go growth risk by separating gradient fill/stroke materialization from flat fill/stroke materialization while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_effect.go",
-          "internal/aepmigrate/convert_effect_params.go",
-          "internal/aepmigrate/convert_effect_support.go"
+          "internal/aepmigrate/convert_shape_styles.go",
+          "internal/aepmigrate/convert_shape_gradient_styles.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Effect param value/keyframe helpers and support predicates have been split from convert_effect.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_shape_styles.go, convert_index.go, or convert_mask.go without changing behavior.",
+    "next_action": "Shape gradient fill/stroke materialization has been split from convert_shape_styles.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_index.go, convert_mask.go, or convert_text_animator_materialize.go without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
