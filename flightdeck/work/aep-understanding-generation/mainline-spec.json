@@ -791,17 +791,17 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "convert_scope_layer_split",
-      "reason": "Reduce convert_scope.go growth risk by separating comp/layer scope entry construction from top-level convert scope traversal while preserving behavior.",
+      "group": "rebuild_text_layer_materialize_split",
+      "reason": "Reduce convert_rebuild_layer_materialize.go growth risk by separating text-layer rebuild materialization from default null/solid/adjustment layer materialization while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_scope.go",
-          "internal/aepmigrate/convert_scope_layer.go"
+          "internal/aepmigrate/convert_rebuild_layer_materialize.go",
+          "internal/aepmigrate/convert_rebuild_text_materialize.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Convert scope traversal now delegates comp/layer entry construction to focused helpers. Next useful increment is to continue reducing remaining 4-5KB conversion support files or dense tests into coherent modules without changing behavior.",
+    "next_action": "Text-layer rebuild materialization now lives beside other text rebuild code instead of in the default AV-layer materializer. Next useful increment is to continue reducing remaining 4-5KB conversion support files or dense tests into coherent modules without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
