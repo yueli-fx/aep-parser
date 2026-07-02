@@ -161,11 +161,6 @@ func generatedCleanupExecutionOp(root string, locations []string, group Generate
 		group.UnreferencedFiles > 0 &&
 		len(group.PreservePaths) > 0 &&
 		!strings.HasSuffix(group.CleanupTarget, "*")
-	if group.Action != "cleanup_candidate" && !reviewPrune {
-		op.Status = "skipped"
-		op.Reason = "not_cleanup_candidate"
-		return op
-	}
 	if len(include) > 0 && !include[group.ProducerCategory] {
 		op.Status = "skipped"
 		op.Reason = "producer_not_included"
@@ -174,6 +169,11 @@ func generatedCleanupExecutionOp(root string, locations []string, group Generate
 	if exclude[group.ProducerCategory] {
 		op.Status = "skipped"
 		op.Reason = "producer_excluded"
+		return op
+	}
+	if group.Action != "cleanup_candidate" && !reviewPrune {
+		op.Status = "skipped"
+		op.Reason = "not_cleanup_candidate"
 		return op
 	}
 	if group.CleanupOperation != "delete_directory_tree" &&

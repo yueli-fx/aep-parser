@@ -31,6 +31,8 @@ type GeneratedCleanupSummary struct {
 	StateReferencedFiles  int                    `json:"state_referenced_files"`
 	MixedGroups           int                    `json:"mixed_groups"`
 	StateReferencedGroups int                    `json:"state_referenced_groups"`
+	RegistryReportGroups  int                    `json:"registry_report_groups"`
+	RegistryReportFiles   int                    `json:"registry_report_files"`
 	UnknownProducerGroups int                    `json:"unknown_producer_groups"`
 	SampleLimit           int                    `json:"sample_limit"`
 	ActionBuckets         []GeneratedGroupBucket `json:"action_buckets,omitempty"`
@@ -131,6 +133,9 @@ func GeneratedCleanup(root string, reg Registry, opts GeneratedCleanupOptions) (
 				report.Summary.StateReferencedGroups++
 			case "retain_state_referenced_generated":
 				report.Summary.StateReferencedGroups++
+			case "retain_registry_report_outputs":
+				report.Summary.RegistryReportGroups++
+				report.Summary.RegistryReportFiles += group.Files
 			}
 			if group.ProducerCategory == "unknown_generated" {
 				report.Summary.UnknownProducerGroups++
@@ -301,6 +306,9 @@ func finalizeGeneratedGroups(groups map[string]*GeneratedCleanupGroup) []Generat
 }
 
 func generatedCleanupDecision(group GeneratedCleanupGroup) (action, safety, reason string) {
+	if group.ProducerCategory == "registry_report" {
+		return "retain_registry_report_outputs", "registry_report_self_noise", "registry report outputs are self-generated diagnostics excluded from cleanup candidate totals"
+	}
 	if group.ReferencedFiles > 0 && group.UnreferencedFiles > 0 {
 		if group.StateReferencedFiles > 0 && len(group.EvidenceIDs) == 0 {
 			return "review_state_referenced_generated", "mixed_state_referenced_generated", "group contains state-file references plus unreferenced generated siblings"
@@ -331,6 +339,8 @@ func generatedCleanupOperation(group GeneratedCleanupGroup) (operation, target s
 		return "no_delete_registered_evidence", ""
 	case "retain_state_referenced_generated":
 		return "no_delete_state_referenced", ""
+	case "retain_registry_report_outputs":
+		return "no_delete_registry_report", ""
 	default:
 		return "review_unknown", group.PathPrefix
 	}

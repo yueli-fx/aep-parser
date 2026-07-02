@@ -228,6 +228,46 @@
     "phase": "version_matrix_totalization",
     "last_completed_target": {
       "location": "generated_evidence",
+      "group": "registry_report_self_noise_policy",
+      "reason": "Classify registry_report outputs as self-generated diagnostics instead of cleanup candidates so generated cleanup totals can reach zero after real generated evidence is reduced to preserved evidence.",
+      "source_report": "tmp/registry_generated_cleanup.json",
+      "result": {
+        "classification": "retain_registry_report_outputs",
+        "cleanup_operation": "no_delete_registry_report",
+        "registry_report_groups": 1,
+        "registry_report_files": 36,
+        "post_cleanup_report": {
+          "groups": 21,
+          "files": 134,
+          "cleanup_candidate_files": 0,
+          "referenced_files": 99,
+          "unreferenced_files": 35,
+          "state_referenced_files": 97,
+          "retain_registered_files": 66,
+          "mixed_groups": 0,
+          "state_referenced_groups": 14,
+          "registry_report_groups": 1,
+          "registry_report_files": 36,
+          "unknown_producer_groups": 0,
+          "remaining_producers": [
+            "version_matrix",
+            "host_open_gap",
+            "registry_report"
+          ]
+        },
+        "post_execution_report": {
+          "planned_groups": 0,
+          "planned_files": 0,
+          "skipped_groups": 21,
+          "errors": 0
+        },
+        "post_gate_status": {
+          "asset_policy": "pass"
+        },
+        "note": "registry_report outputs remain disposable generated diagnostics, but they are now reported separately from actionable cleanup candidates because registry gates recreate them by design."
+      },
+      "previous_target": {
+      "location": "generated_evidence",
       "group": "preserve_aware_review_sibling_prune",
       "reason": "Add and execute an explicit preserve-aware cleanup mode for remaining review groups. The mode deletes only unreferenced generated siblings while preserving registry evidence paths and state-file referenced paths, replacing manual cleanup scripts with a Go-first JSON-reported operation.",
       "source_report": "tmp/registry_generated_cleanup_execution_prune_review_apply.json",
@@ -898,22 +938,22 @@
       }
       }
       }
+      }
     },
     "last_code_maintenance_target": {
       "location": "internal/registry",
-      "group": "preserve_aware_review_sibling_prune",
-      "reason": "Teach generated cleanup execution to optionally prune unreferenced siblings from review groups while preserving registry and state-referenced paths, with accurate execution file totals based on affected unreferenced files.",
+      "group": "registry_report_self_noise_policy",
+      "reason": "Teach generated cleanup classification to separate registry_report self-noise from actionable cleanup candidates while preserving registry/state referenced generated evidence.",
       "result": {
         "files": [
-          "internal/registry/generated_cleanup_execute.go",
-          "internal/registry/generated_cleanup_execute_test.go",
-          "cmd/aepregistry/main_test.go",
-          "cmd/aepregistry/main.go"
+          "internal/registry/generated_cleanup.go",
+          "internal/registry/generated_cleanup_test.go",
+          "internal/registry/generated_cleanup_execute.go"
         ],
-        "behavior": "cleanup CLI exposes -prune-review-siblings; executor dry-run/apply can plan and delete only unreferenced siblings for preserve_paths_then_review_unreferenced_siblings groups; execution summary file totals now match affected unreferenced files"
+        "behavior": "registry_report groups now use retain_registry_report_outputs/no_delete_registry_report and contribute registry_report_groups/files instead of cleanup_candidate_files; execution producer filters still run before action eligibility"
       }
     },
-    "next_action": "Generated cleanup is now reduced to preserved evidence plus registry_report self-noise: 21 generated groups, 133 files, 99 referenced files, 34 cleanup-candidate files, 0 mixed groups, 0 unknown producer groups. Next useful increment is to decide whether registry_report outputs should remain disposable self-noise, be excluded from candidate totals, or get a separate report-retention policy.",
+    "next_action": "Generated cleanup candidate totals are now zero. Remaining generated evidence is preserved matrix/host-open evidence plus separately counted registry_report diagnostics. Next useful increment is to return from cleanup infrastructure to version_matrix_totalization: refresh coverage-axis/current summaries after the cleanup reduction and confirm AE2020-AE2025 atom/version totals still answer the text and remaining matrix questions.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

@@ -131,6 +131,50 @@ func TestGeneratedCleanupProtectsStateReferencedGeneratedFiles(t *testing.T) {
 	}
 }
 
+func TestGeneratedCleanupSeparatesRegistryReportSelfNoise(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeFile(t, root, "tmp/registry_audit.json", "{}\n")
+	writeFile(t, root, "tmp/registry_gate.json", "{}\n")
+	writeFile(t, root, "tmp/registry_version_boundaries.json", "{}\n")
+	writeFile(t, root, "flightdeck/work/aep-understanding-generation/current.json", `{"boundary":"tmp/registry_version_boundaries.json"}`)
+	writeJSON(t, root, "registry/locations.json", map[string]any{
+		"schema_version": 1,
+		"locations": []map[string]any{
+			{"id": "tmp_evidence", "path": "tmp", "class": "generated_evidence", "tracked": false, "required": false, "lifecycle": "disposable"},
+		},
+	})
+	writeJSON(t, root, "registry/workflows.json", map[string]any{
+		"schema_version": 1,
+		"workflows":      []map[string]any{},
+	})
+	writeJSON(t, root, "registry/capability_atoms.json", map[string]any{
+		"schema_version":   1,
+		"capability_atoms": []map[string]any{},
+	})
+	writeJSON(t, root, "registry/evidence.json", map[string]any{
+		"schema_version": 1,
+		"evidence_sets":  []map[string]any{},
+	})
+
+	report, err := GeneratedCleanupRepository(root, GeneratedCleanupOptions{
+		SampleLimit:         2,
+		StateReferenceFiles: []string{"flightdeck/work/aep-understanding-generation/current.json"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Summary.CleanupCandidateFiles != 0 || report.Summary.RegistryReportFiles != 3 || report.Summary.RegistryReportGroups != 1 {
+		t.Fatalf("summary = %+v, want registry reports separated from cleanup candidates", report.Summary)
+	}
+	group := findGeneratedGroup(t, report, "tmp_evidence", "registry")
+	if group.Action != "retain_registry_report_outputs" || group.CleanupOperation != "no_delete_registry_report" {
+		t.Fatalf("registry report group action/operation = %q/%q", group.Action, group.CleanupOperation)
+	}
+	if group.UnreferencedFiles != 2 || group.StateReferencedFiles != 1 {
+		t.Fatalf("registry report refs = %+v, want two unreferenced report files and one state ref", group)
+	}
+}
+
 func findGeneratedGroup(t *testing.T, report GeneratedCleanupReport, locationID, groupName string) GeneratedCleanupGroup {
 	t.Helper()
 	for _, location := range report.Locations {
