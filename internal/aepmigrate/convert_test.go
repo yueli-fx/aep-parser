@@ -2,7 +2,6 @@ package aepmigrate
 
 import (
 	"math"
-	"path/filepath"
 	"testing"
 
 	"github.com/yueli-fx/aep-parser/internal/aep"
@@ -11,16 +10,7 @@ import (
 
 func TestConvertWritesTargetVersionNoLayerProject(t *testing.T) {
 	source := writeTempProjectWithOneComp(t, aep.TargetAE2020)
-	outPath := filepath.Join(t.TempDir(), "converted.aep")
-
-	report, err := Convert(ConvertOptions{
-		InputPath:  source,
-		OutputPath: outPath,
-		Target:     VersionAE2025,
-	})
-	if err != nil {
-		t.Fatalf("Convert: %v", err)
-	}
+	report, outPath := assertSourceConvertsPass(t, source)
 	if report.Summary.Status != StatusPass {
 		t.Fatalf("status = %q, entries=%+v", report.Summary.Status, report.Entries)
 	}
@@ -53,16 +43,7 @@ func TestConvertWritesTargetVersionNoLayerProject(t *testing.T) {
 
 func TestConvertRunsProfileDiffVerification(t *testing.T) {
 	source := writeTempProjectWithConfiguredNoLayerComp(t)
-	outPath := filepath.Join(t.TempDir(), "converted.aep")
-
-	report, err := Convert(ConvertOptions{
-		InputPath:  source,
-		OutputPath: outPath,
-		Target:     VersionAE2025,
-	})
-	if err != nil {
-		t.Fatalf("Convert: %v", err)
-	}
+	report, _ := assertSourceConvertsPass(t, source)
 	if report.Verification.ProfileDiffStatus != "pass" {
 		t.Fatalf("profile diff status = %q, want pass; verification=%+v", report.Verification.ProfileDiffStatus, report.Verification)
 	}

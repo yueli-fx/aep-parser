@@ -67,11 +67,16 @@ func assertRecipeConvertsPass(t *testing.T, recipeName string) string {
 
 func assertSourceConvertsPass(t *testing.T, source string) (Report, string) {
 	t.Helper()
+	return assertSourceConvertsPassToTarget(t, source, VersionAE2025)
+}
+
+func assertSourceConvertsPassToTarget(t *testing.T, source string, target VersionLabel) (Report, string) {
+	t.Helper()
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
 	report, err := Convert(ConvertOptions{
 		InputPath:  source,
 		OutputPath: outPath,
-		Target:     VersionAE2025,
+		Target:     target,
 	})
 	if err != nil {
 		t.Fatalf("Convert: %v", err)

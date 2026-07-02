@@ -2,7 +2,6 @@ package aepmigrate
 
 import (
 	"math"
-	"path/filepath"
 	"testing"
 
 	"github.com/yueli-fx/aep-parser/internal/aep"
@@ -11,19 +10,7 @@ import (
 
 func TestConvertPreservesNoLayerCompSettings(t *testing.T) {
 	source := writeTempProjectWithConfiguredNoLayerComp(t)
-	outPath := filepath.Join(t.TempDir(), "converted.aep")
-
-	report, err := Convert(ConvertOptions{
-		InputPath:  source,
-		OutputPath: outPath,
-		Target:     VersionAE2025,
-	})
-	if err != nil {
-		t.Fatalf("Convert: %v", err)
-	}
-	if report.Summary.Status != StatusPass {
-		t.Fatalf("status = %q, entries=%+v", report.Summary.Status, report.Entries)
-	}
+	_, outPath := assertSourceConvertsPass(t, source)
 	converted, err := aep.Open(outPath)
 	if err != nil {
 		t.Fatalf("Open converted: %v", err)
@@ -66,19 +53,7 @@ func TestConvertPreservesNoLayerCompSettings(t *testing.T) {
 
 func TestConvertPreservesNoLayerCompMetadata(t *testing.T) {
 	source := writeTempProjectWithMetadataNoLayerComp(t)
-	outPath := filepath.Join(t.TempDir(), "converted.aep")
-
-	report, err := Convert(ConvertOptions{
-		InputPath:  source,
-		OutputPath: outPath,
-		Target:     VersionAE2025,
-	})
-	if err != nil {
-		t.Fatalf("Convert: %v", err)
-	}
-	if report.Summary.Status != StatusPass {
-		t.Fatalf("status = %q, entries=%+v", report.Summary.Status, report.Entries)
-	}
+	_, outPath := assertSourceConvertsPass(t, source)
 	converted, err := aep.Open(outPath)
 	if err != nil {
 		t.Fatalf("Open converted: %v", err)
@@ -98,19 +73,7 @@ func TestConvertPreservesNoLayerCompMetadata(t *testing.T) {
 
 func TestConvertPreservesNoLayerCompRendererAndTemplateName(t *testing.T) {
 	source := writeTempProjectWithRendererNoLayerComp(t)
-	outPath := filepath.Join(t.TempDir(), "converted.aep")
-
-	report, err := Convert(ConvertOptions{
-		InputPath:  source,
-		OutputPath: outPath,
-		Target:     VersionAE2025,
-	})
-	if err != nil {
-		t.Fatalf("Convert: %v", err)
-	}
-	if report.Summary.Status != StatusPass {
-		t.Fatalf("status = %q, entries=%+v", report.Summary.Status, report.Entries)
-	}
+	_, outPath := assertSourceConvertsPass(t, source)
 	converted, err := aep.Open(outPath)
 	if err != nil {
 		t.Fatalf("Open converted: %v", err)

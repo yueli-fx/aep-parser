@@ -791,27 +791,20 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "source_conversion_smoke_helper_extension",
-      "reason": "Extend conversion smoke test helper coverage from recipe-only cases to source AEP fixture cases, keeping specialized profile assertions local while centralizing convert/pass/profile-diff/output checks.",
+      "group": "remaining_conversion_smoke_helper_extension",
+      "reason": "Finish the obvious conversion smoke helper migration for shape, matte, comp, and base convert tests while keeping blocked downgrade and specialized profile assertions local.",
       "result": {
         "files": [
           "internal/aepmigrate/convert_recipe_fixtures_test.go",
-          "internal/aepmigrate/convert_layer_attributes_test.go",
-          "internal/aepmigrate/convert_layer_camera_light_test.go",
-          "internal/aepmigrate/convert_layer_light_test.go",
-          "internal/aepmigrate/convert_layer_object_test.go",
-          "internal/aepmigrate/convert_layer_special_test.go",
-          "internal/aepmigrate/convert_layer_surface_test.go",
-          "internal/aepmigrate/convert_layer_switches_test.go",
-          "internal/aepmigrate/convert_layer_test.go",
-          "internal/aepmigrate/convert_layer_timing_test.go",
-          "internal/aepmigrate/convert_text_test.go",
-          "internal/aepmigrate/convert_transform_test.go"
+          "internal/aepmigrate/convert_shape_test.go",
+          "internal/aepmigrate/convert_layer_matte_test.go",
+          "internal/aepmigrate/convert_comp_test.go",
+          "internal/aepmigrate/convert_test.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Conversion smoke tests now share source-level and recipe-level pass/output helpers across layer, text, transform, effect, text animator, and shape families. Next useful increment is to inspect remaining conversion tests for non-helper duplication or switch to a dense production support file if test duplication is mostly exhausted.",
+    "next_action": "Most conversion pass smoke tests now share source-level and recipe-level pass/output helpers. Next useful increment is to switch from smoke-test duplication to a dense production support file or inspect remaining non-pass tests for a different repeated assertion pattern.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
