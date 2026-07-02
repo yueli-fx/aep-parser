@@ -227,6 +227,94 @@
   "current_execution": {
     "phase": "version_matrix_totalization",
     "last_completed_target": {
+      "location": "version_matrix_coverage",
+      "group": "post_cleanup_axis_refresh",
+      "reason": "Refresh registry coverage, coverage-summary, coverage-axis, and version-boundary reports after generated cleanup reduction to prove preserved matrix evidence still answers the AE2020-AE2025 total/detail/total coverage questions.",
+      "source_report": "tmp/registry_coverage_axis.json",
+      "result": {
+        "commands": [
+          "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage.json",
+          "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_summary.json -summary",
+          "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_axis.json -axis",
+          "go run ./cmd/aepregistry boundaries -root . -out tmp/registry_version_boundaries.json"
+        ],
+        "version_axis": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "summary": {
+          "atom_rows": 141,
+          "writer_full_axis_rows": 140,
+          "writer_partial_rows": 0,
+          "boundary_rows": 1,
+          "host_full_axis_rows": 140,
+          "host_missing_rows": 0,
+          "source_target_pairs": 36,
+          "cells": 5076,
+          "pass": 5041,
+          "blocked": 5,
+          "failed": 0,
+          "skipped": 30
+        },
+        "focused_queries": [
+          {
+            "query": "text-animators",
+            "command": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_axis_text_animators.json -axis -record text-animators",
+            "atom_rows": 22,
+            "cells": 792,
+            "pass": 792,
+            "blocked": 0,
+            "failed": 0,
+            "skipped": 0
+          },
+          {
+            "query": "text-baseline",
+            "command": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_axis_text_baseline.json -axis -record text-baseline",
+            "atom_rows": 2,
+            "cells": 72,
+            "pass": 72,
+            "blocked": 0,
+            "failed": 0,
+            "skipped": 0
+          },
+          {
+            "query": "explicit-matte-boundary",
+            "command": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_axis_boundary.json -axis -atom layer.track_matte.explicit_source",
+            "atom_rows": 1,
+            "cells": 36,
+            "pass": 1,
+            "blocked": 5,
+            "failed": 0,
+            "skipped": 30
+          },
+          {
+            "query": "blocked-cells",
+            "command": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_axis_blocked.json -axis -case-status blocked",
+            "atom_rows": 1,
+            "cells": 5,
+            "pass": 0,
+            "blocked": 5,
+            "failed": 0,
+            "skipped": 0
+          }
+        ],
+        "version_boundaries": {
+          "boundaries": 1,
+          "matched": 1,
+          "checked_cells": 36,
+          "errors": 0
+        },
+        "post_gate_status": {
+          "version_matrix": "pass",
+          "asset_policy": "pass"
+        },
+        "note": "Cleanup reduced raw tmp evidence to preserved matrix/ledger/state paths only; coverage-axis totals remain unchanged and queryable by record, atom, and case status."
+      },
+      "previous_target": {
       "location": "generated_evidence",
       "group": "registry_report_self_noise_policy",
       "reason": "Classify registry_report outputs as self-generated diagnostics instead of cleanup candidates so generated cleanup totals can reach zero after real generated evidence is reduced to preserved evidence.",
@@ -235,7 +323,7 @@
         "classification": "retain_registry_report_outputs",
         "cleanup_operation": "no_delete_registry_report",
         "registry_report_groups": 1,
-        "registry_report_files": 36,
+        "registry_report_files": "volatile_self_noise",
         "post_cleanup_report": {
           "groups": 21,
           "files": 134,
@@ -247,7 +335,7 @@
           "mixed_groups": 0,
           "state_referenced_groups": 14,
           "registry_report_groups": 1,
-          "registry_report_files": 36,
+          "registry_report_files": "volatile_self_noise",
           "unknown_producer_groups": 0,
           "remaining_producers": [
             "version_matrix",
@@ -939,6 +1027,7 @@
       }
       }
       }
+      }
     },
     "last_code_maintenance_target": {
       "location": "internal/registry",
@@ -953,7 +1042,7 @@
         "behavior": "registry_report groups now use retain_registry_report_outputs/no_delete_registry_report and contribute registry_report_groups/files instead of cleanup_candidate_files; execution producer filters still run before action eligibility"
       }
     },
-    "next_action": "Generated cleanup candidate totals are now zero. Remaining generated evidence is preserved matrix/host-open evidence plus separately counted registry_report diagnostics. Next useful increment is to return from cleanup infrastructure to version_matrix_totalization: refresh coverage-axis/current summaries after the cleanup reduction and confirm AE2020-AE2025 atom/version totals still answer the text and remaining matrix questions.",
+    "next_action": "Coverage-axis reports are refreshed after cleanup and still prove AE2020-AE2025 total/detail/total coverage: 141 atom rows, 5076 cells, 5041 pass, 5 known blocked boundary cells, 0 failed. Next useful increment is to inspect convert/aepmigrate architecture size risks, especially internal/aepmigrate/convert.go growth, before adding the next capability family.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
