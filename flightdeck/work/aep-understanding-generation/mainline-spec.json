@@ -791,18 +791,18 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "property_predicate_dedup",
-      "reason": "Reduce production support predicate drift by centralizing repeated layer property any/all checks used by transform and shape graphic support.",
+      "group": "property_dispatch_predicate_dedup",
+      "reason": "Keep shape materialization dispatch aligned with shape support predicates by naming shared trim, zigzag, and twist filter property groups; also reuse the property helper for implicit text rotation checks.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_profile_properties.go",
+          "internal/aepmigrate/convert_shape.go",
           "internal/aepmigrate/convert_shape_graphic_support.go",
-          "internal/aepmigrate/convert_shape_support.go"
+          "internal/aepmigrate/convert_text_animator_layer.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Layer property predicate checks now have shared any/all helpers for transform and shape graphic support. Next useful increment is to continue production support cleanup where repeated property groups still drive materialization dispatch, or inspect matrix/AE-open tests before touching higher-risk orchestration.",
+    "next_action": "Shape materialization dispatch now shares named property-group predicates with shape support checks. Next useful increment is to inspect remaining production support for repeated match-name groups, or move to matrix/AE-open tests with extra care because those cover orchestration behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

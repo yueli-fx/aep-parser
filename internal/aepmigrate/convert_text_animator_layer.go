@@ -46,5 +46,5 @@ func isImplicitTextRotationZProperty(layer profile.Layer, property profile.Prope
 	if !ok || value != 0 {
 		return false
 	}
-	return hasProperty(layer, "ADBE Text Rotation X") || hasProperty(layer, "ADBE Text Rotation Y")
+	return hasAnyProperty(layer, "ADBE Text Rotation X", "ADBE Text Rotation Y")
 }

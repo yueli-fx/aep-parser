@@ -16,20 +16,38 @@ func hasSupportedShapeFilter(layer profile.Layer) bool {
 	return hasAnyProperty(layer,
 		"ADBE Vector RoundCorner Radius",
 		"ADBE Vector Offset Amount",
-		"ADBE Vector Trim Start",
-		"ADBE Vector Trim End",
-		"ADBE Vector Trim Offset",
-		"ADBE Vector Zigzag Size",
-		"ADBE Vector Zigzag Detail",
-		"ADBE Vector Zigzag Points",
 		"ADBE Vector PuckerBloat Amount",
-		"ADBE Vector Twist Angle",
-		"ADBE Vector Twist Center",
 		"ADBE Vector Merge Type",
 	) ||
+		hasTrimFilter(layer) ||
+		hasZigZagFilter(layer) ||
+		hasTwistFilter(layer) ||
 		hasWigglePathsFilter(layer) ||
 		hasWiggleTransformFilter(layer) ||
 		hasRepeaterFilter(layer)
+}
+
+func hasTrimFilter(layer profile.Layer) bool {
+	return hasAnyProperty(layer,
+		"ADBE Vector Trim Start",
+		"ADBE Vector Trim End",
+		"ADBE Vector Trim Offset",
+	)
+}
+
+func hasZigZagFilter(layer profile.Layer) bool {
+	return hasAnyProperty(layer,
+		"ADBE Vector Zigzag Size",
+		"ADBE Vector Zigzag Detail",
+		"ADBE Vector Zigzag Points",
+	)
+}
+
+func hasTwistFilter(layer profile.Layer) bool {
+	return hasAnyProperty(layer,
+		"ADBE Vector Twist Angle",
+		"ADBE Vector Twist Center",
+	)
 }
 
 func hasWigglePathsFilter(layer profile.Layer) bool {
