@@ -306,6 +306,17 @@ type checkpointCurrentState struct {
 	CanonicalCoverageBatch string `json:"canonical_coverage_batch"`
 }
 
+type checkpointCoverageContractFile struct {
+	ContractGates []checkpointCoverageContractGate `json:"contract_gates"`
+}
+
+type checkpointCoverageContractGate struct {
+	ID       string `json:"id"`
+	Kind     string `json:"kind"`
+	Command  string `json:"command"`
+	Artifact string `json:"artifact"`
+}
+
 func runCheckpoint(args []string) int {
 	fs := flag.NewFlagSet("aepregistry checkpoint", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
@@ -368,6 +379,22 @@ func runCheckpoint(args []string) int {
 	if err == nil {
 		if writeErr := writeJSONFile(resolveRootPath(*root, "tmp/registry_current.json"), currentReport); writeErr != nil {
 			addStep(checkpointStep("current_write", "write tmp/registry_current.json", "tmp/registry_current.json", registry.StatusFail, 1, writeErr))
+		}
+	}
+	if !stopIfFailed() {
+		for _, gate := range checkpointVersionBoundaryGates(*root, *coveragePath) {
+			out := checkpointValueOr(gate.Artifact, "tmp/registry_version_boundaries.json")
+			command := checkpointValueOr(gate.Command, "go run ./cmd/aepregistry boundaries -root . -coverage "+*coveragePath+" -out "+out)
+			boundaries, err := registry.CheckVersionBoundaries(*root, *coveragePath, nil)
+			addStep(checkpointStep("version_boundaries", command, out, boundaries.Status, boundaries.Summary.Errors, err))
+			if err == nil {
+				if writeErr := writeJSONFile(resolveRootPath(*root, out), boundaries); writeErr != nil {
+					addStep(checkpointStep("version_boundaries_write", "write "+out, out, registry.StatusFail, 1, writeErr))
+				}
+			}
+			if stopIfFailed() {
+				break
+			}
 		}
 	}
 	if !stopIfFailed() {
@@ -447,6 +474,27 @@ func runCheckpoint(args []string) int {
 		return 1
 	}
 	return 0
+}
+
+func checkpointValueOr(value, fallback string) string {
+	if value != "" {
+		return value
+	}
+	return fallback
+}
+
+func checkpointVersionBoundaryGates(root, coveragePath string) []checkpointCoverageContractGate {
+	var coverage checkpointCoverageContractFile
+	if err := readJSONFile(resolveRootPath(root, coveragePath), &coverage); err != nil {
+		return nil
+	}
+	var gates []checkpointCoverageContractGate
+	for _, gate := range coverage.ContractGates {
+		if gate.Kind == "version_boundaries" {
+			gates = append(gates, gate)
+		}
+	}
+	return gates
 }
 
 func checkpointStep(id, command, output, status string, errors int, err error) checkpointStepReport {

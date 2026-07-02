@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-02",
+  "updated_at": "2026-07-03",
   "status": "validated_checkpoint_ready",
   "goal": "Continue versioned AEP migration validation using JSON truth sources and batched matrix runs.",
   "truth_sources": {
@@ -591,8 +591,8 @@
   ],
   "acceptance_audit": {
     "status": "pass",
-    "verified_at": "2026-07-02",
-    "summary": "JSON-first versioned migration validation is internally consistent, host-open gap audit is complete, recurring matrix gates pass, and Go package checks pass.",
+    "verified_at": "2026-07-03",
+    "summary": "JSON-first versioned migration validation is internally consistent, version-boundary gate is covered by Go checkpoint, host-open gap audit is complete, recurring matrix gates pass, and Go package checks pass.",
     "remaining_active_items": [],
     "commands": [
       {
@@ -601,14 +601,14 @@
         "evidence": "current validation: pass (2 coverage batches, 11 tooling entries, 0 errors)"
       },
       {
-        "command": "pwsh -File scripts/migration/validate_checkpoint.ps1",
+        "command": "go run ./cmd/aepregistry checkpoint -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -summary tmp/migration_coverage_summary.json -out tmp/registry_checkpoint.json",
         "status": "pass",
-        "evidence": "checkpoint ok: current JSON, coverage JSON, summary render/validate, host-open gap audit, and diff check passed"
+        "evidence": "checkpoint pass: 7 steps, 0 failed; steps include current, version_boundaries, coverage, summary render/check, host-open gaps, and diff check"
       },
       {
-        "command": "pwsh -File scripts/migration/validate_checkpoint.ps1 -IncludeCoverageBatch",
+        "command": "go run ./cmd/aepregistry checkpoint -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -summary tmp/migration_coverage_summary.json -out tmp/registry_checkpoint_with_batch.json -include-coverage-batch",
         "status": "pass",
-        "evidence": "checkpoint ok: canonical all-current-writer-coverage replayed into a temporary coverage file from 16 matrix artifacts and validated 143 recipes"
+        "evidence": "checkpoint pass: 8 steps, 0 failed; canonical all-current-writer-coverage replayed into a temporary coverage candidate by Go sync"
       },
       {
         "command": "go run ./cmd/aepregistry coverage-batch -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -out tmp/registry_coverage_batch.json -batch-id all-current-writer-coverage -skip-run",

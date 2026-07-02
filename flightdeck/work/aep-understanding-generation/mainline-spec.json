@@ -1130,7 +1130,7 @@
         }
       }
     },
-    "next_action": "Coverage batch matrix rerun orchestration now has an explicit Go path. Continue mainline by selecting a real unsupported conversion surface or by retiring remaining compatibility-only PowerShell references after another pass.",
+    "next_action": "Go checkpoint now generates and validates the version-boundary contract gate before coverage validation, and acceptance audit points at Go checkpoint evidence. Continue mainline by selecting the next real unsupported conversion surface; remaining PowerShell entries are compatibility references only.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

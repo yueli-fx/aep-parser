@@ -731,6 +731,40 @@ func TestRunCheckpointWritesOrderedReport(t *testing.T) {
 	}
 }
 
+func TestRunCheckpointWritesVersionBoundaryGateBeforeCoverageValidation(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeCheckpointCommandFixture(t, root, 2)
+	addCheckpointBoundaryContractGate(t, root)
+	out := filepath.Join(root, "tmp", "registry_checkpoint.json")
+
+	code := run([]string{
+		"checkpoint",
+		"-root", root,
+		"-current", "flightdeck/work/aep-understanding-generation/current.json",
+		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-summary", "tmp/migration_coverage_summary.json",
+		"-out", out,
+		"-skip-diff-check",
+	})
+	if code != 0 {
+		t.Fatalf("run(checkpoint with boundary gate) = %d, want 0", code)
+	}
+	var report checkpointReport
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != registry.StatusPass || report.Summary.Steps != 5 || report.Steps[1].ID != "version_boundaries" {
+		t.Fatalf("checkpoint report = %+v, want boundary gate before coverage validation", report)
+	}
+	if _, err := os.Stat(filepath.Join(root, filepath.FromSlash("tmp/registry_version_boundaries.json"))); err != nil {
+		t.Fatalf("boundary gate report was not written: %v", err)
+	}
+}
+
 func TestRunCheckpointCanReplayCoverageBatchWithGoSync(t *testing.T) {
 	root := newRegistryRoot(t)
 	writeCheckpointCommandFixture(t, root, 2)
@@ -2094,6 +2128,81 @@ func writeCheckpointCommandFixture(t *testing.T, root string, coverageTotal int)
 			},
 		},
 		"canonical_coverage_batch": "all",
+	})
+}
+
+func addCheckpointBoundaryContractGate(t *testing.T, root string) {
+	t.Helper()
+	currentPath := "flightdeck/work/aep-understanding-generation/current.json"
+	coveragePath := "flightdeck/work/aep-understanding-generation/coverage.json"
+	var current map[string]any
+	if err := readJSONFile(filepath.Join(root, filepath.FromSlash(currentPath)), &current); err != nil {
+		t.Fatal(err)
+	}
+	current["current_state"].(map[string]any)["latest_recurring_gate"].(map[string]any)["totals"] = map[string]any{"total": 2, "pass": 1, "blocked": 1, "failed": 0, "skipped": 0}
+	writeJSON(t, root, currentPath, current)
+	var coverage map[string]any
+	if err := readJSONFile(filepath.Join(root, filepath.FromSlash(coveragePath)), &coverage); err != nil {
+		t.Fatal(err)
+	}
+	coverage["contract_gates"] = []map[string]any{
+		{
+			"id":       "registry-version-boundaries",
+			"kind":     "version_boundaries",
+			"command":  "go run ./cmd/aepregistry boundaries -root . -out tmp/registry_version_boundaries.json",
+			"artifact": "tmp/registry_version_boundaries.json",
+			"status":   registry.StatusPass,
+			"summary": map[string]any{
+				"boundaries":        1,
+				"matched":           1,
+				"missing_rows":      0,
+				"duplicate_rows":    0,
+				"mismatched_totals": 0,
+				"mismatched_status": 0,
+				"checked_cells":     0,
+				"missing_cells":     0,
+				"mismatched_cells":  0,
+				"errors":            0,
+			},
+		},
+	}
+	record := coverage["coverage"].([]any)[0].(map[string]any)
+	record["writer_status"] = "boundary"
+	record["boundary"] = map[string]any{
+		"status":             "known_text_boundary",
+		"blocked_recipe_ids": []string{"text-basic"},
+	}
+	record["totals"] = map[string]any{"total": 2, "pass": 1, "blocked": 1, "failed": 0, "skipped": 0}
+	writeJSON(t, root, coveragePath, coverage)
+	writeJSON(t, root, "tmp/matrix/text/matrix.json", map[string]any{
+		"schema_version": 1,
+		"summary":        map[string]any{"total": 2, "passed": 1, "blocked": 1, "failed": 0, "skipped": 0},
+		"cases": []map[string]any{
+			{"recipe_name": "text-basic", "source_version": "AE2020", "target_version": "AE2020", "status": "pass"},
+			{"recipe_name": "text-basic", "source_version": "AE2025", "target_version": "AE2020", "status": "blocked"},
+		},
+	})
+	writeJSON(t, root, "registry/version_boundaries.json", map[string]any{
+		"schema_version": 1,
+		"version_boundaries": []map[string]any{
+			{
+				"id":                       "text.boundary",
+				"atom_id":                  "text.source.default",
+				"recipe":                   "text-basic",
+				"feature":                  "test text boundary",
+				"policy":                   "known_source_contract_boundary",
+				"coverage_boundary_status": "known_text_boundary",
+				"source_contract": map[string]any{
+					"min_source_version":        "AE2025",
+					"available_source_versions": []string{"AE2025"},
+				},
+				"target_contract": map[string]any{
+					"supported_targets": []string{"AE2025"},
+				},
+				"expected_cells": map[string]any{"total": 2, "pass": 1, "blocked": 1, "failed": 0, "skipped": 0},
+				"evidence":       []map[string]any{{"kind": "matrix", "path": "tmp/matrix/text/matrix.json", "required": true}},
+			},
+		},
 	})
 }
 
