@@ -791,20 +791,19 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "implementation_surface_motion_split",
-      "reason": "Reduce 5KB implementation-file growth risk by separating shape repeater materialization from wiggle filters, and layer switch/timing surfaces from transform surface logic while preserving behavior.",
+      "group": "effect_param_matrix_render_test_split",
+      "reason": "Reduce remaining 4-5KB test-file growth risk by separating effect parameter conversion tests and matrix ledger markdown rendering tests from broader test files while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_shape_motion_filters.go",
-          "internal/aepmigrate/convert_shape_repeater_filter.go",
-          "internal/aepmigrate/convert_layer_surface.go",
-          "internal/aepmigrate/convert_layer_switch_surface.go",
-          "internal/aepmigrate/convert_layer_timing_surface.go"
+          "internal/aepmigrate/convert_effect_test.go",
+          "internal/aepmigrate/convert_effect_param_test.go",
+          "internal/aepmigrate/matrix_ledger_test.go",
+          "internal/aepmigrate/matrix_ledger_render_test.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Shape repeater materialization and layer switch/timing surfaces have been split from broader implementation files. Next useful increment is to continue reducing remaining 4-5KB conversion support files into coherent implementation modules without changing behavior.",
+    "next_action": "Effect parameter tests and matrix ledger markdown rendering tests have been split from broader files. Next useful increment is to continue reducing remaining 4-5KB conversion support files or dense tests into coherent modules without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
