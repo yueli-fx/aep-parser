@@ -266,6 +266,251 @@
       ]
     },
     {
+      "id": "effect.templates.builtin_library",
+      "domain": "effect",
+      "tier": "template_library",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "template_dir",
+          "path": "internal/serializer/templates/effects",
+          "required": true
+        },
+        {
+          "kind": "dictionary",
+          "path": "data/effects-dict/effects_en_US_25.1x68.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Owns the embedded built-in effect and effect-parameter template directory as a serializer source contract used by mutate_effect_add.go and mutate_effect_param.go; individual effect behaviors remain covered by recipe and matrix atoms."
+      ]
+    },
+    {
+      "id": "project.templates.version_skeletons",
+      "domain": "project",
+      "tier": "template_library",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "template_dir",
+          "path": "internal/serializer/templates/project",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Owns embedded project skeleton templates, including version-specific new-project seeds; detailed version behavior remains covered by project and migration matrix atoms."
+      ]
+    },
+    {
+      "id": "layer.templates.layer_kinds",
+      "domain": "layer",
+      "tier": "template_library",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "template_dir",
+          "path": "internal/serializer/templates/layers",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Owns embedded layer-kind body templates as serializer source contracts; per-layer behavior remains covered by layer recipe and matrix atoms."
+      ]
+    },
+    {
+      "id": "layer.templates.option_leaves",
+      "domain": "layer",
+      "tier": "template_library",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "template_dir",
+          "path": "internal/serializer/templates/options",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Owns embedded option-leaf templates for camera, light, mask, and material serialization; feature-level behavior remains covered by layer, mask, and material atoms."
+      ]
+    },
+    {
+      "id": "shape.templates.vector_library",
+      "domain": "shape",
+      "tier": "template_library",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "template_dir",
+          "path": "internal/serializer/templates/shapes",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Owns embedded vector shape body and leaf templates as serializer source contracts; individual shape primitives and filters remain covered by recipe and matrix atoms."
+      ]
+    },
+    {
+      "id": "text.templates.animator_library",
+      "domain": "text",
+      "tier": "template_library",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "template_dir",
+          "path": "internal/serializer/templates/text",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Owns embedded text animator and selector templates as serializer source contracts; individual text animator behavior remains covered by recipe and matrix atoms."
+      ]
+    },
+    {
       "id": "layer.track_matte.explicit_source",
       "domain": "layer",
       "tier": "boundary",

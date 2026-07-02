@@ -187,26 +187,37 @@
   "current_execution": {
     "phase": "atom_taxonomy_expansion",
     "last_completed_target": {
-      "location": "registry_layout",
-      "group": "data_layout_cleanup_guardrail",
-      "reason": "Add a generated JSON report that combines location inventory and ownership into cleanup actions, so generated/untracked cleanup candidates are separated from tracked/required files that must be atomized or registered first.",
+      "location": "serializer_templates",
+      "group": "serializer_template_library_atoms",
+      "reason": "Register directory-level template-library atoms for serializer template source contracts so tracked template files are owned before any cleanup or migration planning.",
       "source_report": "tmp/registry_layout.json",
       "result": {
-        "command_added": "go run ./cmd/aepregistry layout -root . -out tmp/registry_layout.json -sample-limit 20",
+        "capability_atoms_added": 6,
+        "atoms_added": [
+          "effect.templates.builtin_library",
+          "project.templates.version_skeletons",
+          "layer.templates.layer_kinds",
+          "layer.templates.option_leaves",
+          "shape.templates.vector_library",
+          "text.templates.animator_library"
+        ],
+        "serializer_templates_files": 291,
+        "serializer_templates_owned_files_after": 291,
+        "serializer_templates_unowned_files_after": 0,
         "locations": 17,
         "files": 49150,
-        "owned_files": 398,
-        "unowned_files": 48752,
+        "owned_files": 655,
+        "unowned_files": 48495,
         "cleanup_candidate_files": 47934,
-        "blocked_unowned_files": 532,
+        "blocked_unowned_files": 275,
         "local_only_files": 286,
         "action_distribution": [
           {
             "action": "atomize_or_register_unowned",
-            "locations": 9,
-            "files": 573,
-            "unowned_files": 532,
-            "blocked_unowned_files": 532
+            "locations": 8,
+            "files": 282,
+            "unowned_files": 275,
+            "blocked_unowned_files": 275
           },
           {
             "action": "review_generated_cleanup",
@@ -224,17 +235,12 @@
           },
           {
             "action": "keep_registered",
-            "locations": 5,
-            "files": 339,
+            "locations": 6,
+            "files": 630,
             "unowned_files": 0
           }
         ],
         "top_blocked_unowned_locations": [
-          {
-            "id": "serializer_templates",
-            "path": "internal/serializer/templates",
-            "blocked_unowned_files": 257
-          },
           {
             "id": "fixture_generators",
             "path": "test_data/generators",
@@ -258,27 +264,19 @@
         ]
       },
       "previous_target": {
-        "location": "coverage_ledger",
-        "group": "coverage_cells_query",
-        "reason": "Add filtered source-target matrix cell output so atoms with pass/blocked/skipped totals can expose the exact source version, target version, AE-open version, status, and reason as JSON.",
-        "source_report": "tmp/registry_coverage_cells_explicit_matte.json",
+        "location": "registry_layout",
+        "group": "data_layout_cleanup_guardrail",
+        "reason": "Add a generated JSON report that combines location inventory and ownership into cleanup actions, so generated/untracked cleanup candidates are separated from tracked/required files that must be atomized or registered first.",
+        "source_report": "tmp/registry_layout.json",
         "result": {
-          "command_added": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_cells_explicit_matte.json -cells -atom layer.track_matte.explicit_source",
-          "supported_filters": [
-            "record",
-            "atom",
-            "recipe",
-            "case-status",
-            "writer-status",
-            "host-level",
-            "boundary-status"
-          ],
-          "example_explicit_matte_cells": 36,
-          "example_explicit_matte_pass": 1,
-          "example_explicit_matte_blocked": 5,
-          "example_explicit_matte_skipped": 30,
-          "example_explicit_matte_blocked_report": "tmp/registry_coverage_cells_explicit_matte_blocked.json",
-          "coverage_errors": 0
+          "command_added": "go run ./cmd/aepregistry layout -root . -out tmp/registry_layout.json -sample-limit 20",
+          "locations": 17,
+          "files": 49150,
+          "owned_files": 398,
+          "unowned_files": 48752,
+          "cleanup_candidate_files": 47934,
+          "blocked_unowned_files": 532,
+          "local_only_files": 286
         }
       },
       "previous_atom_target": {
@@ -292,7 +290,7 @@
         "minimal-layer-explicit-matte remains covered by layer.track_matte.explicit_source as a version-boundary atom, not a pass-complete layer atom."
       ]
     },
-    "next_action": "Use tmp/registry_layout.json to pick the next cleanup-safe atomization target. The highest-impact tracked blockers are serializer_templates and fixture_generators; generated cleanup candidates must stay review-only until their producing workflows are identified.",
+    "next_action": "Use tmp/registry_layout.json to pick the next cleanup-safe atomization target. serializer_templates is now fully owned; the next highest-impact tracked blocker is fixture_generators with 239 unowned files. Generated cleanup candidates must stay review-only until their producing workflows are identified.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
