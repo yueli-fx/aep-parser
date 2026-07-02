@@ -5,8 +5,8 @@ import (
 	"testing"
 )
 
-func TestConvertWritesRecipeLayerNullFlagProject(t *testing.T) {
-	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-layer-null-flag.json"))
+func TestConvertWritesDefaultCameraLayerProject(t *testing.T) {
+	source := writeTempProjectWithOneCameraLayer(t)
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
 
 	report, err := Convert(ConvertOptions{
@@ -25,8 +25,8 @@ func TestConvertWritesRecipeLayerNullFlagProject(t *testing.T) {
 	}
 }
 
-func TestConvertWritesRecipeLayerAdvancedSwitchesProject(t *testing.T) {
-	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-layer-advanced-switches.json"))
+func TestConvertWritesRecipeDefaultCameraLayerProject(t *testing.T) {
+	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-default-camera-layer.json"))
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
 
 	report, err := Convert(ConvertOptions{
@@ -45,8 +45,8 @@ func TestConvertWritesRecipeLayerAdvancedSwitchesProject(t *testing.T) {
 	}
 }
 
-func TestConvertWritesRecipeLayerObjectProfile(t *testing.T) {
-	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-layer-object-profile.json"))
+func TestConvertWritesRecipeCameraObjectProfile(t *testing.T) {
+	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-camera-object-profile.json"))
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
 
 	report, err := Convert(ConvertOptions{
