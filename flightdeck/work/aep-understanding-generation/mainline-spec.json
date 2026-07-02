@@ -187,43 +187,31 @@
   "current_execution": {
     "phase": "atom_taxonomy_expansion",
     "last_completed_target": {
-      "location": "fixture_generators",
-      "group": "fixture_generator_family_atoms",
-      "reason": "Add registry glob dependency support and register JSX generator families so tracked AE fixture generator scripts are owned by purpose without listing 239 files individually.",
+      "location": "tracked_required_blockers",
+      "group": "remaining_tracked_blockers_complete",
+      "reason": "Register the remaining tracked/required blockers so layout cleanup guardrails no longer report any atomize-or-register work before generated cleanup review.",
       "source_report": "tmp/registry_layout.json",
       "result": {
-        "registry_dependency_support_added": [
-          "glob"
-        ],
-        "capability_atoms_added": 8,
+        "capability_atoms_added": 3,
         "atoms_added": [
-          "fixture_generators.verify_shipgates",
-          "fixture_generators.reverse_engineering_sources",
-          "fixture_generators.probe_scripts",
-          "fixture_generators.build_sources",
-          "fixture_generators.template_extraction",
-          "fixture_generators.fdta_probes",
-          "fixture_generators.ship_gate_helpers",
-          "fixture_generators.smoke_helpers"
+          "registry.asset_map",
+          "effect.dictionary.versioned_locales",
+          "reference.reverse_engineering_corpus"
         ],
-        "fixture_generators_files": 239,
-        "fixture_generators_owned_files_after": 239,
-        "fixture_generators_unowned_files_after": 0,
+        "workflow_dependencies_extended": [
+          "migration.version_matrix",
+          "learning.technique_portrait",
+          "ai.workflow_generation"
+        ],
+        "tracked_required_blocked_unowned_after": 0,
         "locations": 17,
         "files": 49150,
-        "owned_files": 894,
-        "unowned_files": 48256,
+        "owned_files": 930,
+        "unowned_files": 48220,
         "cleanup_candidate_files": 47934,
-        "blocked_unowned_files": 36,
+        "blocked_unowned_files": 0,
         "local_only_files": 286,
         "action_distribution": [
-          {
-            "action": "atomize_or_register_unowned",
-            "locations": 7,
-            "files": 43,
-            "unowned_files": 36,
-            "blocked_unowned_files": 36
-          },
           {
             "action": "review_generated_cleanup",
             "locations": 2,
@@ -232,61 +220,66 @@
             "cleanup_candidate_files": 47934
           },
           {
+            "action": "keep_registered",
+            "locations": 14,
+            "files": 912,
+            "unowned_files": 0
+          },
+          {
             "action": "exclude_local_only",
             "locations": 1,
             "files": 286,
             "unowned_files": 286,
             "local_only_files": 286
-          },
-          {
-            "action": "keep_registered",
-            "locations": 7,
-            "files": 869,
-            "unowned_files": 0
           }
         ],
-        "top_blocked_unowned_locations": [
+        "remaining_unowned_by_action": [
           {
-            "id": "reverse_reference_notes",
-            "path": "data/reference",
-            "blocked_unowned_files": 12
+            "action": "review_generated_cleanup",
+            "files": 47934,
+            "locations": [
+              "tmp_evidence",
+              "generated_test_data"
+            ]
           },
           {
-            "id": "migration_scripts",
-            "path": "scripts/migration",
-            "blocked_unowned_files": 11
-          },
-          {
-            "id": "effects_dictionary",
-            "path": "data/effects-dict",
-            "blocked_unowned_files": 8
+            "action": "exclude_local_only",
+            "files": 286,
+            "locations": [
+              "local_samples"
+            ]
           }
         ]
       },
       "previous_target": {
-        "location": "serializer_templates",
-        "group": "serializer_template_library_atoms",
-        "reason": "Register directory-level template-library atoms for serializer template source contracts so tracked template files are owned before any cleanup or migration planning.",
+        "location": "fixture_generators",
+        "group": "fixture_generator_family_atoms",
+        "reason": "Add registry glob dependency support and register JSX generator families so tracked AE fixture generator scripts are owned by purpose without listing 239 files individually.",
         "source_report": "tmp/registry_layout.json",
         "result": {
-          "capability_atoms_added": 6,
-          "atoms_added": [
-            "effect.templates.builtin_library",
-            "project.templates.version_skeletons",
-            "layer.templates.layer_kinds",
-            "layer.templates.option_leaves",
-            "shape.templates.vector_library",
-            "text.templates.animator_library"
+          "registry_dependency_support_added": [
+            "glob"
           ],
-          "serializer_templates_files": 291,
-          "serializer_templates_owned_files_after": 291,
-          "serializer_templates_unowned_files_after": 0,
+          "capability_atoms_added": 8,
+          "atoms_added": [
+            "fixture_generators.verify_shipgates",
+            "fixture_generators.reverse_engineering_sources",
+            "fixture_generators.probe_scripts",
+            "fixture_generators.build_sources",
+            "fixture_generators.template_extraction",
+            "fixture_generators.fdta_probes",
+            "fixture_generators.ship_gate_helpers",
+            "fixture_generators.smoke_helpers"
+          ],
+          "fixture_generators_files": 239,
+          "fixture_generators_owned_files_after": 239,
+          "fixture_generators_unowned_files_after": 0,
           "locations": 17,
           "files": 49150,
-          "owned_files": 655,
-          "unowned_files": 48495,
+          "owned_files": 894,
+          "unowned_files": 48256,
           "cleanup_candidate_files": 47934,
-          "blocked_unowned_files": 275,
+          "blocked_unowned_files": 36,
           "local_only_files": 286
         }
       },
@@ -301,7 +294,7 @@
         "minimal-layer-explicit-matte remains covered by layer.track_matte.explicit_source as a version-boundary atom, not a pass-complete layer atom."
       ]
     },
-    "next_action": "Use tmp/registry_layout.json to pick the next cleanup-safe atomization target. serializer_templates and fixture_generators are now fully owned; the next tracked blockers are reverse_reference_notes (12), migration_scripts (11), and effects_dictionary (8). Generated cleanup candidates must stay review-only until their producing workflows are identified.",
+    "next_action": "Tracked/required atomization blockers are now zero. Next useful increment is generated cleanup review: classify tmp_evidence and generated_test_data by producing workflow so disposable outputs can be cleaned without touching local_samples or source contracts.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

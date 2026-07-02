@@ -109,6 +109,51 @@
       ]
     },
     {
+      "id": "registry.asset_map",
+      "domain": "registry",
+      "tier": "source_contract",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "learn",
+        "ai_generate"
+      ],
+      "dependencies": [
+        {
+          "kind": "registry",
+          "path": "registry/locations.json",
+          "required": true
+        },
+        {
+          "kind": "registry",
+          "path": "registry/evidence.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Owns the machine-readable asset map and evidence pointer registry used before cleanup, atomization, and generated-report decisions."
+      ]
+    },
+    {
       "id": "text.animator.tracking",
       "domain": "text",
       "tier": "atom",
@@ -308,6 +353,47 @@
       ],
       "boundaries": [
         "Owns the embedded built-in effect and effect-parameter template directory as a serializer source contract used by mutate_effect_add.go and mutate_effect_param.go; individual effect behaviors remain covered by recipe and matrix atoms."
+      ]
+    },
+    {
+      "id": "effect.dictionary.versioned_locales",
+      "domain": "effect",
+      "tier": "source_contract",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "profile",
+        "generate",
+        "learn"
+      ],
+      "dependencies": [
+        {
+          "kind": "dictionary_dir",
+          "path": "data/effects-dict",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Owns versioned and localized effect dictionaries as source contracts; generated effect behavior still needs recipe, fixture, or host-open evidence."
       ]
     },
     {
@@ -821,6 +907,67 @@
       ]
     },
     {
+      "id": "reference.reverse_engineering_corpus",
+      "domain": "reference",
+      "tier": "source_corpus",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "parse",
+        "profile",
+        "learn"
+      ],
+      "dependencies": [
+        {
+          "kind": "reference",
+          "path": "data/reference/README.md",
+          "required": true
+        },
+        {
+          "kind": "reference_dir",
+          "path": "data/reference/booyah-glitch",
+          "required": true
+        },
+        {
+          "kind": "reference_dir",
+          "path": "data/reference/pseudo-effect",
+          "required": true
+        },
+        {
+          "kind": "reference_dir",
+          "path": "data/reference/shape",
+          "required": true
+        },
+        {
+          "kind": "reference_dir",
+          "path": "data/reference/text-animator",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Owns compact reverse-engineering reference artifacts; large local project corpora remain excluded under data/samples."
+      ]
+    },
+    {
       "id": "layer.track_matte.explicit_source",
       "domain": "layer",
       "tier": "boundary",
@@ -906,8 +1053,18 @@
           "required": true
         },
         {
+          "kind": "test",
+          "path": "cmd/aepmigrate/main_test.go",
+          "required": true
+        },
+        {
           "kind": "state",
           "path": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json",
+          "required": true
+        },
+        {
+          "kind": "script_dir",
+          "path": "scripts/migration",
           "required": true
         },
         {
@@ -954,6 +1111,11 @@
         {
           "kind": "command",
           "path": "cmd/aeptechnique/main.go",
+          "required": true
+        },
+        {
+          "kind": "test",
+          "path": "cmd/aeptechnique/main_test.go",
           "required": true
         },
         {
@@ -1010,6 +1172,11 @@
         {
           "kind": "command",
           "path": "cmd/aeprecipe/main.go",
+          "required": true
+        },
+        {
+          "kind": "test",
+          "path": "cmd/aeprecipe/main_test.go",
           "required": true
         }
       ],
