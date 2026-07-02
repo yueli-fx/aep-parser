@@ -1130,7 +1130,6 @@
       "id": "shape-all-family",
       "domain": "shape",
       "scope": "27 established shape recipes before focused post-ledger additions",
-      "recipe_pattern": "minimal-shape-* established set",
       "recipe_count": 27,
       "recipes": [
         "minimal-shape-fill-blend-mode",

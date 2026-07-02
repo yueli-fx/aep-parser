@@ -177,13 +177,28 @@ type CoverageCell struct {
 
 type coverageFile struct {
 	SchemaVersion  int                    `json:"schema_version"`
+	HostOpenPolicy coverageHostOpenPolicy `json:"host_open_policy"`
 	RecurringGates []coverageArtifact     `json:"recurring_gates"`
 	ContractGates  []coverageContractGate `json:"contract_gates"`
 	Coverage       []coverageRecord       `json:"coverage"`
 }
 
+type coverageHostOpenPolicy struct {
+	MatrixCommandStatus string                    `json:"matrix_command_status"`
+	DefaultStrategy     string                    `json:"default_strategy"`
+	BroadFanoutStatus   string                    `json:"broad_fanout_status"`
+	EndpointInference   coverageEndpointInference `json:"endpoint_inference"`
+}
+
+type coverageEndpointInference struct {
+	Label         string   `json:"label"`
+	DirectHosts   []string `json:"direct_hosts"`
+	InferredHosts []string `json:"inferred_hosts"`
+}
+
 type coverageRecord struct {
 	ID                       string           `json:"id"`
+	Domain                   string           `json:"domain"`
 	Artifact                 string           `json:"artifact"`
 	Recipes                  []string         `json:"recipes"`
 	WriterStatus             string           `json:"writer_status"`

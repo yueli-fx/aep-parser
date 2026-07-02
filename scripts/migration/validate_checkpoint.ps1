@@ -49,7 +49,7 @@ Invoke-Step "validate coverage summary JSON" {
 
 if ($aeRoot) {
   Invoke-Step "plan host-open gaps" {
-    pwsh -File (Join-Path $repoRoot "scripts/migration/plan_host_open_gaps.ps1") -AERoot $aeRoot
+    go run ./cmd/aepregistry host-open-gaps -root . -coverage $CoveragePath -out tmp/host_open_gap_audit_go.json -ae-root $aeRoot
   }
 }
 

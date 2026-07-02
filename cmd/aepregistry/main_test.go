@@ -68,6 +68,54 @@ func TestRunInventoryWritesLocationSummary(t *testing.T) {
 	}
 }
 
+func TestRunHostOpenGapsWritesPlannerReport(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+		"schema_version": 1,
+		"host_open_policy": map[string]any{
+			"endpoint_inference": map[string]any{
+				"label":        "endpoint",
+				"direct_hosts": []string{"AE2020", "AE2025"},
+			},
+		},
+		"coverage": []map[string]any{
+			{
+				"id":               "text",
+				"domain":           "text",
+				"recipes":          []string{"minimal-text-a", "minimal-text-b"},
+				"host_open_status": "pending_per_capability",
+			},
+		},
+	})
+	out := filepath.Join(root, "tmp", "host_open_gap_audit.json")
+
+	code := run([]string{
+		"host-open-gaps",
+		"-root", root,
+		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-out", out,
+		"-ae-root", "E:/adobe",
+		"-max-ae-open-cases", "8",
+	})
+	if code != 0 {
+		t.Fatalf("run(host-open-gaps) = %d, want 0", code)
+	}
+	var report registry.HostOpenGapPlanReport
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Summary.GapGroups != 1 || report.Summary.GapRecipes != 2 || report.Summary.Chunks != 1 {
+		t.Fatalf("summary = %+v, want one two-recipe chunk", report.Summary)
+	}
+	if len(report.Gaps) != 1 || report.Gaps[0].Chunks[0].Command == "" {
+		t.Fatalf("gaps = %+v, want command-bearing chunk", report.Gaps)
+	}
+}
+
 func TestRunOwnershipWritesOwnershipSummary(t *testing.T) {
 	root := newRegistryRoot(t)
 	writeFile(t, root, "examples/recipes/unowned.json", "{}\n")

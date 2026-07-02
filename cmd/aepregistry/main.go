@@ -30,6 +30,8 @@ func run(args []string) int {
 		return runCoverage(args[1:])
 	case "gate":
 		return runGate(args[1:])
+	case "host-open-gaps":
+		return runHostOpenGaps(args[1:])
 	case "cleanup":
 		return runCleanup(args[1:])
 	case "inventory":
@@ -42,6 +44,45 @@ func run(args []string) int {
 		usage()
 		return 2
 	}
+}
+
+func runHostOpenGaps(args []string) int {
+	fs := flag.NewFlagSet("aepregistry host-open-gaps", flag.ContinueOnError)
+	fs.SetOutput(os.Stderr)
+	root := fs.String("root", ".", "repository root")
+	coveragePath := fs.String("coverage", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
+	outPath := fs.String("out", "tmp/host_open_gap_audit.json", "host-open gap planner JSON path")
+	aeRoot := fs.String("ae-root", "", "After Effects install root to include in generated matrix commands")
+	maxAEOpenCases := fs.Int("max-ae-open-cases", 24, "maximum AE-open cases per generated matrix chunk")
+	jsonOut := fs.Bool("json", false, "print JSON report")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	if fs.NArg() != 0 {
+		fmt.Fprintln(os.Stderr, "usage: aepregistry host-open-gaps [-root .] [-coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json] [-out tmp/host_open_gap_audit.json] [-ae-root E:/adobe] [-max-ae-open-cases 24] [-json]")
+		return 2
+	}
+	report, err := registry.PlanHostOpenGaps(*root, *coveragePath, registry.HostOpenGapPlanOptions{
+		AERoot:         *aeRoot,
+		MaxAEOpenCases: *maxAEOpenCases,
+	})
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "host-open-gaps:", err)
+		return 2
+	}
+	if err := writeJSONFile(*outPath, report); err != nil {
+		fmt.Fprintln(os.Stderr, "write:", err)
+		return 2
+	}
+	if *jsonOut {
+		if err := json.NewEncoder(os.Stdout).Encode(report); err != nil {
+			fmt.Fprintln(os.Stderr, "stdout:", err)
+			return 2
+		}
+	} else {
+		fmt.Printf("host-open gap audit: %s (%d groups, %d recipes, %d chunks)\n", report.Status, report.Summary.GapGroups, report.Summary.GapRecipes, report.Summary.Chunks)
+	}
+	return 0
 }
 
 type gateReport struct {
@@ -1002,5 +1043,5 @@ func writeJSONFile(path string, value any) error {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: aepregistry <audit|boundaries|cleanup|coverage|gate|inventory|layout|ownership> [flags]")
+	fmt.Fprintln(os.Stderr, "usage: aepregistry <audit|boundaries|cleanup|coverage|gate|host-open-gaps|inventory|layout|ownership> [flags]")
 }

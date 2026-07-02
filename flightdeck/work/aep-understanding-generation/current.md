@@ -11,7 +11,7 @@ Use:
 
 ```powershell
 pwsh -File scripts\migration\validate_current.ps1
-pwsh -File scripts\migration\plan_host_open_gaps.ps1 -AERoot E:\adobe
+go run ./cmd/aepregistry host-open-gaps -root . -out tmp/host_open_gap_audit_go.json -ae-root E:/adobe
 pwsh -File scripts\migration\run_coverage_batch.ps1 -List
 pwsh -File scripts\migration\run_coverage_batch.ps1 -BatchId all-current-writer-coverage -SkipRun
 pwsh -File scripts\migration\validate_coverage.ps1

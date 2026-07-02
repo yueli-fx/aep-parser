@@ -205,6 +205,15 @@
           "ledger": "tmp/migration_matrix_effect_params_all_6x6/ledger.md"
         },
         {
+          "coverage_id": "effects-control-static-values",
+          "recipe_paths": [
+            "examples/recipes/minimal-effect-control-static-values.json"
+          ],
+          "out": "tmp/migration_matrix_effect_control_static_values_all_6x6",
+          "matrix": "tmp/migration_matrix_effect_control_static_values_all_6x6/matrix.json",
+          "ledger": "tmp/migration_matrix_effect_control_static_values_all_6x6/ledger.md"
+        },
+        {
           "coverage_id": "transforms-dynamic",
           "recipe_paths": [
             "examples/recipes/minimal-transform-keyframes.json",
@@ -269,6 +278,15 @@
           "ledger": "tmp/migration_matrix_shape_all_6x6/ledger.md"
         },
         {
+          "coverage_id": "shape-ellipse-fill",
+          "recipe_paths": [
+            "examples/recipes/minimal-shape-ellipse-fill.json"
+          ],
+          "out": "tmp/migration_matrix_shape_ellipse_fill_all_6x6",
+          "matrix": "tmp/migration_matrix_shape_ellipse_fill_all_6x6/matrix.json",
+          "ledger": "tmp/migration_matrix_shape_ellipse_fill_all_6x6/ledger.md"
+        },
+        {
           "coverage_id": "default-and-mogrt-smoke",
           "recipe_paths": [
             "examples/recipes/minimal-default-adjustment-layer.json",
@@ -304,8 +322,9 @@
   "host_open_gap_audit": {
     "status": "completed",
     "script": "scripts/migration/plan_host_open_gaps.ps1",
-    "command": "pwsh -File scripts/migration/plan_host_open_gaps.ps1 -AERoot E:/adobe",
-    "artifact": "tmp/host_open_gap_audit.json",
+    "command": "go run ./cmd/aepregistry host-open-gaps -root . -out tmp/host_open_gap_audit_go.json -ae-root E:/adobe",
+    "legacy_command": "pwsh -File scripts/migration/plan_host_open_gaps.ps1 -AERoot E:/adobe",
+    "artifact": "tmp/host_open_gap_audit_go.json",
     "summary": {
       "gap_groups": 0,
       "gap_recipes": 0,
@@ -459,9 +478,11 @@
     {
       "id": "host-open-gap-planner",
       "status": "available_verified",
-      "purpose": "Read coverage JSON host_open_status values and generate a chunked endpoint host-open gap audit under tmp/.",
+      "purpose": "Read coverage JSON host_open_status values and generate a chunked endpoint host-open gap audit under tmp/. Go command is primary; the PowerShell script remains as legacy compatibility.",
+      "command": "go run ./cmd/aepregistry host-open-gaps -root . -out tmp/host_open_gap_audit_go.json -ae-root E:/adobe",
       "script": "scripts/migration/plan_host_open_gaps.ps1",
-      "output": "tmp/host_open_gap_audit.json"
+      "output": "tmp/host_open_gap_audit_go.json",
+      "legacy_output": "tmp/host_open_gap_audit.json"
     },
     {
       "id": "coverage-json-updater",
@@ -594,7 +615,7 @@
         "evidence": "host_open_evidence_levels recorded_status_only=0, representative_covered=0, and endpoint host-open cases=504/504 pass"
       },
       {
-        "command": "pwsh -File scripts/migration/plan_host_open_gaps.ps1 -AERoot E:/adobe",
+        "command": "go run ./cmd/aepregistry host-open-gaps -root . -out tmp/host_open_gap_audit_go.json -ae-root E:/adobe",
         "status": "pass",
         "evidence": "gap groups=0 gap recipes=0 chunks=0"
       },
