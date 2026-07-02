@@ -1,7 +1,6 @@
 package aepmigrate
 
 import (
-	"fmt"
 	"path/filepath"
 
 	"github.com/yueli-fx/aep-parser/internal/aehost"
@@ -78,53 +77,16 @@ var matrixWriterLabels = []string{
 var matrixAEHostLabels = []string{"AE2020", "AE2021", "AE2022", "AE2023", "AE2024", "AE2025"}
 
 func RunMatrix(opts MatrixOptions) (MatrixReport, error) {
-	if opts.OutRoot == "" {
-		return MatrixReport{}, fmt.Errorf("matrix out root is required")
-	}
-	recipePaths, err := matrixRecipePaths(opts)
+	plan, err := prepareMatrixRun(opts)
 	if err != nil {
 		return MatrixReport{}, err
 	}
-	if len(recipePaths) == 0 {
-		return MatrixReport{}, fmt.Errorf("matrix requires at least one recipe")
-	}
-	sourceLabels := expandMatrixSourceLabels(opts.SourceLabels)
-	if len(sourceLabels) == 0 {
-		sourceLabels = []string{"recipe"}
-	}
-	targetLabels := expandMatrixTargetLabels(opts.TargetLabels)
-	if len(targetLabels) == 0 {
-		targetLabels = []string{string(VersionAE2025)}
-	}
-	aeOpenLabels := matrixAEOpenLabels(opts.AEOpenLabels)
-	caseCount := len(recipePaths) * len(sourceLabels) * len(targetLabels)
-	if opts.AEOpen && len(aeOpenLabels) > 0 {
-		caseCount *= len(aeOpenLabels)
-	}
-	if opts.AEOpen && opts.MaxAEOpenCases > 0 && caseCount > opts.MaxAEOpenCases {
-		return MatrixReport{}, fmt.Errorf("AE open matrix would run %d cases, above limit %d; narrow recipes/targets or set a higher -max-ae-open-cases", caseCount, opts.MaxAEOpenCases)
-	}
-	hosts := mergeHostMaps(BuildAEHostMap(opts.AEInstallRoot), opts.AEHosts)
 	report := MatrixReport{
 		SchemaVersion: SchemaVersion,
 		OutRoot:       opts.OutRoot,
-		AEHosts:       hosts,
+		AEHosts:       plan.hosts,
 	}
-	for _, recipePath := range recipePaths {
-		for _, sourceLabel := range sourceLabels {
-			for _, targetLabel := range targetLabels {
-				if opts.AEOpen && len(aeOpenLabels) > 0 {
-					for _, aeOpenLabel := range aeOpenLabels {
-						c := runMatrixCase(opts, hosts, recipePath, sourceLabel, targetLabel, aeOpenLabel, true)
-						report.Cases = append(report.Cases, c)
-					}
-					continue
-				}
-				c := runMatrixCase(opts, hosts, recipePath, sourceLabel, targetLabel, "", false)
-				report.Cases = append(report.Cases, c)
-			}
-		}
-	}
+	report.Cases = runMatrixCases(opts, plan)
 	report.Summary = summarizeMatrix(report.Cases)
 	if err := writeMatrixReport(filepath.Join(opts.OutRoot, "matrix.json"), report); err != nil {
 		return MatrixReport{}, err
