@@ -791,17 +791,19 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "shape_wiggle_filter_split",
-      "reason": "Reduce convert_shape_motion_filters.go growth risk by separating wiggle paths and wiggle transform materializers while preserving behavior.",
+      "group": "scope_flag_predicate_dedup",
+      "reason": "Reduce scope support drift risk by centralizing repeated advanced layer switch rejection predicates while preserving layer-specific visible, blend, track matte, adjustment, null, and collapse constraints.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_shape_wiggle_paths_filter.go",
-          "internal/aepmigrate/convert_shape_wiggle_transform_filter.go"
+          "internal/aepmigrate/convert_scope_flags.go",
+          "internal/aepmigrate/convert_scope_support.go",
+          "internal/aepmigrate/convert_scope_special_support.go",
+          "internal/aepmigrate/convert_shape_support.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Shape wiggle filter materialization now separates wiggle paths and wiggle transform handling. Next useful increment is to continue reducing remaining dense conversion support files or high-signal tests into coherent modules without changing behavior.",
+    "next_action": "Scope support now centralizes repeated advanced layer switch rejection predicates while keeping layer-specific constraints local. Next useful increment is to continue reducing remaining dense conversion support files or high-signal tests into coherent modules without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

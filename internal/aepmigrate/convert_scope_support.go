@@ -24,19 +24,9 @@ func isSupportedDefaultNullLayer(layer profile.Layer, footage convertFootageInde
 		flags.IsNull &&
 		flags.EffectsEnabled &&
 		flags.AudioEnabled &&
-		!flags.Is3D &&
-		!flags.Solo &&
-		!flags.Shy &&
-		!flags.Locked &&
 		!flags.IsAdjustment &&
-		!flags.IsGuide &&
-		!flags.MotionBlur &&
-		!flags.FrameBlendEnabled &&
-		!flags.MarkersLocked &&
-		!flags.FrameBlendPixelMotion &&
 		!flags.CollapseTransform &&
-		!flags.SamplingBicubic &&
-		!flags.PreserveTransparency
+		!hasUnsupportedAdvancedLayerSwitches(flags)
 }
 
 func isSupportedTrackMatteMode(mode uint8) bool {
@@ -67,19 +57,9 @@ func isSupportedDefaultSolidLayer(layer profile.Layer, footage convertFootageInd
 		!flags.IsNull &&
 		flags.EffectsEnabled &&
 		flags.AudioEnabled &&
-		!flags.Is3D &&
-		!flags.Solo &&
-		!flags.Shy &&
-		!flags.Locked &&
 		!flags.IsAdjustment &&
-		!flags.IsGuide &&
-		!flags.MotionBlur &&
-		!flags.FrameBlendEnabled &&
-		!flags.MarkersLocked &&
-		!flags.FrameBlendPixelMotion &&
 		!flags.CollapseTransform &&
-		!flags.SamplingBicubic &&
-		!flags.PreserveTransparency
+		!hasUnsupportedAdvancedLayerSwitches(flags)
 }
 
 func isSupportedDefaultAdjustmentLayer(layer profile.Layer, footage convertFootageIndex) bool {
@@ -107,16 +87,6 @@ func isSupportedDefaultAdjustmentLayer(layer profile.Layer, footage convertFoota
 		flags.IsAdjustment &&
 		flags.EffectsEnabled &&
 		flags.AudioEnabled &&
-		!flags.Is3D &&
-		!flags.Solo &&
-		!flags.Shy &&
-		!flags.Locked &&
-		!flags.IsGuide &&
-		!flags.MotionBlur &&
-		!flags.FrameBlendEnabled &&
-		!flags.MarkersLocked &&
-		!flags.FrameBlendPixelMotion &&
 		!flags.CollapseTransform &&
-		!flags.SamplingBicubic &&
-		!flags.PreserveTransparency
+		!hasUnsupportedAdvancedLayerSwitches(flags)
 }

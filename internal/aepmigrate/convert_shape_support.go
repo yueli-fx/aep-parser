@@ -19,19 +19,9 @@ func isSupportedDefaultShapeLayer(layer profile.Layer) bool {
 		!flags.IsNull &&
 		flags.EffectsEnabled &&
 		flags.AudioEnabled &&
-		!flags.Is3D &&
-		!flags.Solo &&
-		!flags.Shy &&
-		!flags.Locked &&
 		!flags.IsAdjustment &&
-		!flags.IsGuide &&
-		!flags.MotionBlur &&
-		!flags.FrameBlendEnabled &&
-		!flags.MarkersLocked &&
-		!flags.FrameBlendPixelMotion &&
 		flags.CollapseTransform &&
-		!flags.SamplingBicubic &&
-		!flags.PreserveTransparency
+		!hasUnsupportedAdvancedLayerSwitches(flags)
 }
 
 func isSupportedRectGraphicShapeLayer(layer profile.Layer) bool {
@@ -76,17 +66,7 @@ func isSupportedShapeLayerBase(layer profile.Layer) bool {
 		!flags.IsNull &&
 		flags.EffectsEnabled &&
 		flags.AudioEnabled &&
-		!flags.Is3D &&
-		!flags.Solo &&
-		!flags.Shy &&
-		!flags.Locked &&
 		!flags.IsAdjustment &&
-		!flags.IsGuide &&
-		!flags.MotionBlur &&
-		!flags.FrameBlendEnabled &&
-		!flags.MarkersLocked &&
-		!flags.FrameBlendPixelMotion &&
 		flags.CollapseTransform &&
-		!flags.SamplingBicubic &&
-		!flags.PreserveTransparency
+		!hasUnsupportedAdvancedLayerSwitches(flags)
 }

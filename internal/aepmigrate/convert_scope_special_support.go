@@ -28,17 +28,8 @@ func isSupportedDefaultCameraOrLightLayer(layer profile.Layer, typ string) bool 
 		flags.TrackMatte == 0 &&
 		!flags.IsNull &&
 		!flags.IsAdjustment &&
-		!flags.Solo &&
-		!flags.Shy &&
-		!flags.Locked &&
-		!flags.IsGuide &&
-		!flags.MotionBlur &&
-		!flags.FrameBlendEnabled &&
-		!flags.MarkersLocked &&
-		!flags.FrameBlendPixelMotion &&
 		!flags.CollapseTransform &&
-		!flags.SamplingBicubic &&
-		!flags.PreserveTransparency
+		!hasUnsupportedAdvancedLayerSwitchesAllowing3D(flags)
 }
 
 func isSupportedDefaultTextLayer(layer profile.Layer) bool {
@@ -84,17 +75,7 @@ func isSupportedDefaultPrecompLayer(layer profile.Layer, comps convertCompIndex)
 		!flags.IsNull &&
 		flags.EffectsEnabled &&
 		flags.AudioEnabled &&
-		!flags.Is3D &&
-		!flags.Solo &&
-		!flags.Shy &&
-		!flags.Locked &&
 		!flags.IsAdjustment &&
-		!flags.IsGuide &&
-		!flags.MotionBlur &&
-		!flags.FrameBlendEnabled &&
-		!flags.MarkersLocked &&
-		!flags.FrameBlendPixelMotion &&
 		!flags.CollapseTransform &&
-		!flags.SamplingBicubic &&
-		!flags.PreserveTransparency
+		!hasUnsupportedAdvancedLayerSwitches(flags)
 }
