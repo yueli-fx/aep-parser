@@ -365,6 +365,31 @@ func TestRunCoverageAxisSupportsFocusedFilters(t *testing.T) {
 	if report.Summary.AtomRows != 1 || report.Summary.Cells != 1 || report.Summary.Blocked != 1 || report.Filter.CaseStatus != "blocked" {
 		t.Fatalf("filtered axis report = %+v filter=%+v", report.Summary, report.Filter)
 	}
+
+	axisStatusOut := filepath.Join(root, "tmp", "registry_coverage_axis_status.json")
+	code = run([]string{
+		"coverage",
+		"-root", root,
+		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-out", axisStatusOut,
+		"-axis",
+		"-writer-axis-status", "partial_source_target_axis",
+		"-host-axis-status", "missing_host_axis",
+		"-versions", "AE2020,AE2024,AE2025",
+	})
+	if code != 0 {
+		t.Fatalf("run(coverage -axis axis-status filters) = %d, want 0", code)
+	}
+	data, err = os.ReadFile(axisStatusOut)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Summary.AtomRows != 1 || report.Filter.WriterAxisStatus != "partial_source_target_axis" || report.Filter.HostAxisStatus != "missing_host_axis" {
+		t.Fatalf("axis-status report = %+v filter=%+v", report.Summary, report.Filter)
+	}
 }
 
 func TestRunBoundariesWritesBoundaryCheckReport(t *testing.T) {

@@ -26,7 +26,9 @@ type CoverageAxisFilter struct {
 	Recipe                string `json:"recipe,omitempty"`
 	CaseStatus            string `json:"case_status,omitempty"`
 	WriterStatus          string `json:"writer_status,omitempty"`
+	WriterAxisStatus      string `json:"writer_axis_status,omitempty"`
 	HostOpenEvidenceLevel string `json:"host_open_evidence_level,omitempty"`
+	HostAxisStatus        string `json:"host_axis_status,omitempty"`
 	BoundaryStatus        string `json:"boundary_status,omitempty"`
 }
 
@@ -128,6 +130,12 @@ func coverageAxisWithFilter(root, coveragePath string, versionAxis []string, fil
 			continue
 		}
 		axisRow := coverageAxisRow(row, versionAxis)
+		if filter.WriterAxisStatus != "" && axisRow.WriterAxisStatus != filter.WriterAxisStatus {
+			continue
+		}
+		if filter.HostAxisStatus != "" && axisRow.HostAxisStatus != filter.HostAxisStatus {
+			continue
+		}
 		axis.Rows = append(axis.Rows, axisRow)
 		axis.Summary.AtomRows++
 		switch axisRow.WriterAxisStatus {
@@ -151,7 +159,20 @@ func coverageAxisWithFilter(root, coveragePath string, versionAxis []string, fil
 			axis.Summary.HostMissingRows++
 		}
 	}
-	axis.ByVersionPair = coverageAxisPairSummaries(cells.Cells, versionAxis)
+	axisCells := cells.Cells
+	if filter.WriterAxisStatus != "" || filter.HostAxisStatus != "" {
+		rowKeys := map[string]bool{}
+		for _, row := range axis.Rows {
+			rowKeys[coverageAxisIdentity(row.AtomID, row.RecordID, row.Recipe)] = true
+		}
+		axisCells = axisCells[:0]
+		for _, cell := range cells.Cells {
+			if rowKeys[coverageAxisIdentity(cell.AtomID, cell.RecordID, cell.Recipe)] {
+				axisCells = append(axisCells, cell)
+			}
+		}
+	}
+	axis.ByVersionPair = coverageAxisPairSummaries(axisCells, versionAxis)
 	axis.Summary.SourceTargetPairs = len(axis.ByVersionPair)
 	for _, pair := range axis.ByVersionPair {
 		if pair.Total > 0 {

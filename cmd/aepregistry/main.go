@@ -450,14 +450,16 @@ func runCoverage(args []string) int {
 	recipeFilter := fs.String("recipe", "", "filter cells by recipe id")
 	caseStatusFilter := fs.String("case-status", "", "filter cells by matrix case status")
 	writerStatusFilter := fs.String("writer-status", "", "filter rows or cells by writer status")
+	writerAxisStatusFilter := fs.String("writer-axis-status", "", "filter axis rows by writer axis status")
 	hostLevelFilter := fs.String("host-level", "", "filter rows or cells by host-open evidence level")
+	hostAxisStatusFilter := fs.String("host-axis-status", "", "filter axis rows by host axis status")
 	boundaryStatusFilter := fs.String("boundary-status", "", "filter rows or cells by boundary status")
 	jsonOut := fs.Bool("json", false, "print JSON report")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage [-root .] [-coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json] [-out tmp/registry_coverage.json] [-summary|-rows|-cells|-axis] [-versions AE2020,AE2021,...] [-record id] [-atom id] [-recipe id] [-case-status status] [-writer-status status] [-host-level level] [-boundary-status status] [-json]")
+		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage [-root .] [-coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json] [-out tmp/registry_coverage.json] [-summary|-rows|-cells|-axis] [-versions AE2020,AE2021,...] [-record id] [-atom id] [-recipe id] [-case-status status] [-writer-status status] [-writer-axis-status status] [-host-level level] [-host-axis-status status] [-boundary-status status] [-json]")
 		return 2
 	}
 	modes := 0
@@ -481,7 +483,9 @@ func runCoverage(args []string) int {
 			Recipe:                *recipeFilter,
 			CaseStatus:            *caseStatusFilter,
 			WriterStatus:          *writerStatusFilter,
+			WriterAxisStatus:      *writerAxisStatusFilter,
 			HostOpenEvidenceLevel: *hostLevelFilter,
+			HostAxisStatus:        *hostAxisStatusFilter,
 			BoundaryStatus:        *boundaryStatusFilter,
 		})
 		if err != nil {

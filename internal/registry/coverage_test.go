@@ -597,6 +597,29 @@ func TestCoverageAxisWithFilterNarrowsRowsAndCells(t *testing.T) {
 	if blockedOnly.Summary.AtomRows != 1 || len(blockedOnly.Rows) != 1 || blockedOnly.Summary.Cells != 1 || blockedOnly.Summary.Blocked != 1 || blockedOnly.Summary.Pass != 0 {
 		t.Fatalf("blocked-only summary = %+v", blockedOnly.Summary)
 	}
+
+	boundaryAxisOnly, err := CoverageAxisWithFilter(root, "flightdeck/work/aep-understanding-generation/coverage.json", []string{"AE2024", "AE2025"}, CoverageAxisFilter{
+		WriterAxisStatus: "boundary_source_contract",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if boundaryAxisOnly.Summary.AtomRows != 1 || len(boundaryAxisOnly.Rows) != 1 || boundaryAxisOnly.Rows[0].AtomID != "layer.track_matte.explicit_source" {
+		t.Fatalf("boundary-axis rows = %+v summary=%+v", boundaryAxisOnly.Rows, boundaryAxisOnly.Summary)
+	}
+	if boundaryAxisOnly.Summary.Cells != 2 || boundaryAxisOnly.Summary.Blocked != 1 || boundaryAxisOnly.Summary.Pass != 1 {
+		t.Fatalf("boundary-axis cell summary = %+v", boundaryAxisOnly.Summary)
+	}
+
+	missingHostOnly, err := CoverageAxisWithFilter(root, "flightdeck/work/aep-understanding-generation/coverage.json", []string{"AE2024", "AE2025"}, CoverageAxisFilter{
+		HostAxisStatus: "missing_host_axis",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if missingHostOnly.Summary.AtomRows != 1 || missingHostOnly.Summary.HostMissingRows != 1 {
+		t.Fatalf("missing-host summary = %+v", missingHostOnly.Summary)
+	}
 }
 
 func findCoverageCell(t *testing.T, cells []CoverageCell, status string) CoverageCell {
