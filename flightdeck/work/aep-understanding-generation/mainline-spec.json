@@ -1045,44 +1045,31 @@
       }
     },
     "last_code_maintenance_target": {
-      "location": "coverage_ledger",
-      "group": "remaining_recipe_declarations",
-      "reason": "Declare the remaining observed writer-matrix recipes in the coverage ledger so observed recipes and declared recipes are fully aligned.",
+      "location": "convert_regression_tests",
+      "group": "default_mogrt_smoke_convert_guard",
+      "reason": "Lock the default-layer, Essential Graphics, MOGRT template-name, and null-parent smoke recipes into explicit convert regression tests after the coverage ledger reached 143/143 declared recipes.",
       "result": {
         "commands": {
-          "summary_refresh": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_summary.json -summary",
-          "version_gate": "go run ./cmd/aepregistry gate -root . -out tmp/registry_gate.json -scope version-matrix"
+          "focused_convert_tests": "go test ./internal/aepmigrate -run 'TestConvertWritesRecipe(Default(Adjustment|Camera|Light|Precomp|Shape)|NullParent|MotionGraphicsTemplateName|EssentialGraphics)'",
+          "version_gate": "go run ./cmd/aepregistry gate -root . -out tmp/registry_gate.json -scope version-matrix",
+          "asset_gate": "go run ./cmd/aepregistry gate -root . -out tmp/registry_asset_gate.json -scope asset-policy"
         },
         "files": [
-          "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json",
+          "internal/aepmigrate/convert_essential_graphics_test.go",
+          "internal/aepmigrate/convert_layer_special_test.go",
           "flightdeck/work/aep-understanding-generation/mainline-spec.json"
         ],
-        "declared_records": [
-          {
-            "record": "layer-all-family",
-            "recipe_count": 16,
-            "recipe_source": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json"
-          },
-          {
-            "record": "comp",
-            "recipe_count": 18,
-            "recipe_source": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json"
-          },
-          {
-            "record": "text-animators",
-            "recipe_count": 22,
-            "recipe_source": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json"
-          },
-          {
-            "record": "shape-all-family",
-            "recipe_count": 27,
-            "recipe_source": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json"
-          }
+        "guarded_recipes": [
+          "minimal-motion-graphics-template-name",
+          "minimal-essential-graphics-controller",
+          "minimal-essential-graphics-color-controller",
+          "minimal-essential-graphics-checkbox-controller",
+          "minimal-null-layer"
         ],
-        "gap_delta": {
-          "declared_recipes": "+83",
-          "observed_recipes_without_declaration": "-83",
-          "records_with_undeclared_recipes": "-4"
+        "coverage_delta": {
+          "declared_recipes": "+0",
+          "observed_recipes_without_declaration": "+0",
+          "records_with_undeclared_recipes": "+0"
         },
         "current_totals": {
           "records": 18,
@@ -1139,7 +1126,7 @@
         }
       }
     },
-    "next_action": "Coverage ledger observed recipe declarations are aligned at 143/143 with zero undeclared records. Return to the AE-understanding mainline by selecting the next matrix-backed capability or architecture cleanup from the spec rather than adding more declaration-only batches.",
+    "next_action": "Default/MOGRT smoke conversion is now explicitly guarded in Go tests while coverage remains aligned at 143/143. Continue mainline by selecting the next unsupported conversion surface or by adding a Go-first query/planning tool for migration evidence instead of new PowerShell-only workflow.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

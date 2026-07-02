@@ -10,3 +10,7 @@ func TestConvertWritesDefaultPrecompLayerProject(t *testing.T) {
 func TestConvertWritesRecipeDefaultPrecompLayerProject(t *testing.T) {
 	assertRecipeConvertsPass(t, "minimal-default-precomp-layer.json")
 }
+
+func TestConvertWritesRecipeNullParentLayerProject(t *testing.T) {
+	assertRecipeConvertsPass(t, "minimal-null-layer.json")
+}
