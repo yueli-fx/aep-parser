@@ -791,17 +791,17 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "shape_star_primitive_split",
-      "reason": "Reduce convert_shape_primitives.go growth risk by separating star primitive materialization from rect/ellipse primitive materialization while preserving behavior.",
+      "group": "shape_gradient_stroke_split",
+      "reason": "Reduce convert_shape_gradient_styles.go growth risk by separating gradient stroke materialization from gradient fill materialization while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_shape_primitives.go",
-          "internal/aepmigrate/convert_shape_star_primitive.go"
+          "internal/aepmigrate/convert_shape_gradient_styles.go",
+          "internal/aepmigrate/convert_shape_gradient_stroke.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Shape primitive materialization now separates star-specific properties from rect/ellipse primitive handling. Next useful increment is to continue reducing remaining 4KB conversion support files or dense tests into coherent modules without changing behavior.",
+    "next_action": "Shape gradient materialization now separates gradient fill and gradient stroke handling. Next useful increment is to continue reducing remaining 4KB conversion support files or dense tests into coherent modules without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
