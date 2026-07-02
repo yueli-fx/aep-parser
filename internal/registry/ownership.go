@@ -83,7 +83,7 @@ func collectOwnershipRefs(root string, reg Registry) ownershipRefs {
 	refs := ownershipRefs{files: map[string]bool{}}
 	for _, atom := range reg.CapabilityAtoms {
 		for _, dep := range atom.Dependencies {
-			refs.add(root, dep.Path)
+			refs.addDependency(root, dep)
 		}
 	}
 	for _, evidence := range reg.EvidenceSets {
@@ -91,6 +91,20 @@ func collectOwnershipRefs(root string, reg Registry) ownershipRefs {
 	}
 	sort.Strings(refs.roots)
 	return refs
+}
+
+func (r *ownershipRefs) addDependency(root string, dep Dependency) {
+	if dep.Kind != "glob" {
+		r.add(root, dep.Path)
+		return
+	}
+	matches, err := dependencyGlobMatches(root, dep.Path)
+	if err != nil {
+		return
+	}
+	for _, match := range matches {
+		r.files[match] = true
+	}
 }
 
 func (r *ownershipRefs) add(root, rel string) {

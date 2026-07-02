@@ -187,37 +187,42 @@
   "current_execution": {
     "phase": "atom_taxonomy_expansion",
     "last_completed_target": {
-      "location": "serializer_templates",
-      "group": "serializer_template_library_atoms",
-      "reason": "Register directory-level template-library atoms for serializer template source contracts so tracked template files are owned before any cleanup or migration planning.",
+      "location": "fixture_generators",
+      "group": "fixture_generator_family_atoms",
+      "reason": "Add registry glob dependency support and register JSX generator families so tracked AE fixture generator scripts are owned by purpose without listing 239 files individually.",
       "source_report": "tmp/registry_layout.json",
       "result": {
-        "capability_atoms_added": 6,
-        "atoms_added": [
-          "effect.templates.builtin_library",
-          "project.templates.version_skeletons",
-          "layer.templates.layer_kinds",
-          "layer.templates.option_leaves",
-          "shape.templates.vector_library",
-          "text.templates.animator_library"
+        "registry_dependency_support_added": [
+          "glob"
         ],
-        "serializer_templates_files": 291,
-        "serializer_templates_owned_files_after": 291,
-        "serializer_templates_unowned_files_after": 0,
+        "capability_atoms_added": 8,
+        "atoms_added": [
+          "fixture_generators.verify_shipgates",
+          "fixture_generators.reverse_engineering_sources",
+          "fixture_generators.probe_scripts",
+          "fixture_generators.build_sources",
+          "fixture_generators.template_extraction",
+          "fixture_generators.fdta_probes",
+          "fixture_generators.ship_gate_helpers",
+          "fixture_generators.smoke_helpers"
+        ],
+        "fixture_generators_files": 239,
+        "fixture_generators_owned_files_after": 239,
+        "fixture_generators_unowned_files_after": 0,
         "locations": 17,
         "files": 49150,
-        "owned_files": 655,
-        "unowned_files": 48495,
+        "owned_files": 894,
+        "unowned_files": 48256,
         "cleanup_candidate_files": 47934,
-        "blocked_unowned_files": 275,
+        "blocked_unowned_files": 36,
         "local_only_files": 286,
         "action_distribution": [
           {
             "action": "atomize_or_register_unowned",
-            "locations": 8,
-            "files": 282,
-            "unowned_files": 275,
-            "blocked_unowned_files": 275
+            "locations": 7,
+            "files": 43,
+            "unowned_files": 36,
+            "blocked_unowned_files": 36
           },
           {
             "action": "review_generated_cleanup",
@@ -235,17 +240,12 @@
           },
           {
             "action": "keep_registered",
-            "locations": 6,
-            "files": 630,
+            "locations": 7,
+            "files": 869,
             "unowned_files": 0
           }
         ],
         "top_blocked_unowned_locations": [
-          {
-            "id": "fixture_generators",
-            "path": "test_data/generators",
-            "blocked_unowned_files": 239
-          },
           {
             "id": "reverse_reference_notes",
             "path": "data/reference",
@@ -264,18 +264,29 @@
         ]
       },
       "previous_target": {
-        "location": "registry_layout",
-        "group": "data_layout_cleanup_guardrail",
-        "reason": "Add a generated JSON report that combines location inventory and ownership into cleanup actions, so generated/untracked cleanup candidates are separated from tracked/required files that must be atomized or registered first.",
+        "location": "serializer_templates",
+        "group": "serializer_template_library_atoms",
+        "reason": "Register directory-level template-library atoms for serializer template source contracts so tracked template files are owned before any cleanup or migration planning.",
         "source_report": "tmp/registry_layout.json",
         "result": {
-          "command_added": "go run ./cmd/aepregistry layout -root . -out tmp/registry_layout.json -sample-limit 20",
+          "capability_atoms_added": 6,
+          "atoms_added": [
+            "effect.templates.builtin_library",
+            "project.templates.version_skeletons",
+            "layer.templates.layer_kinds",
+            "layer.templates.option_leaves",
+            "shape.templates.vector_library",
+            "text.templates.animator_library"
+          ],
+          "serializer_templates_files": 291,
+          "serializer_templates_owned_files_after": 291,
+          "serializer_templates_unowned_files_after": 0,
           "locations": 17,
           "files": 49150,
-          "owned_files": 398,
-          "unowned_files": 48752,
+          "owned_files": 655,
+          "unowned_files": 48495,
           "cleanup_candidate_files": 47934,
-          "blocked_unowned_files": 532,
+          "blocked_unowned_files": 275,
           "local_only_files": 286
         }
       },
@@ -290,7 +301,7 @@
         "minimal-layer-explicit-matte remains covered by layer.track_matte.explicit_source as a version-boundary atom, not a pass-complete layer atom."
       ]
     },
-    "next_action": "Use tmp/registry_layout.json to pick the next cleanup-safe atomization target. serializer_templates is now fully owned; the next highest-impact tracked blocker is fixture_generators with 239 unowned files. Generated cleanup candidates must stay review-only until their producing workflows are identified.",
+    "next_action": "Use tmp/registry_layout.json to pick the next cleanup-safe atomization target. serializer_templates and fixture_generators are now fully owned; the next tracked blockers are reverse_reference_notes (12), migration_scripts (11), and effects_dictionary (8). Generated cleanup candidates must stay review-only until their producing workflows are identified.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

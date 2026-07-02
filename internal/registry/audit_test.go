@@ -157,6 +157,70 @@ func TestAuditRepositoryReportsDependenciesOutsideRegisteredLocations(t *testing
 	assertIssue(t, report, "unregistered_dependency_location", SeverityError, "orphan.atom", "orphan/asset.json")
 }
 
+func TestAuditRepositoryAcceptsRequiredGlobDependencyWhenItMatches(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeFile(t, root, "test_data/generators/verify_text.jsx", "// jsx\n")
+	writeFile(t, root, "tmp/text-basic/matrix.json", "{}\n")
+	writeValidRegistryWithGeneratorLocation(t, root, []map[string]any{
+		{
+			"id":       "fixture_generators.verify",
+			"domain":   "fixture",
+			"tier":     "source_family",
+			"status":   "verified",
+			"platform": map[string]any{"host_required": true, "os": []string{"windows", "macos"}},
+			"version_axis": map[string]any{
+				"min_supported":    "AE2020",
+				"known_supported":  []string{"AE2020", "AE2025"},
+				"expansion_policy": "append_new_ae_versions",
+			},
+			"workflows": []string{"generate"},
+			"dependencies": []map[string]any{
+				{"kind": "glob", "path": "test_data/generators/verify_*.jsx", "required": true},
+			},
+		},
+	})
+
+	report, err := AuditRepository(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != StatusPass {
+		t.Fatalf("status = %q, want pass; issues: %+v", report.Status, report.Issues)
+	}
+}
+
+func TestAuditRepositoryReportsMissingRequiredGlobDependency(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeFile(t, root, "tmp/text-basic/matrix.json", "{}\n")
+	writeValidRegistryWithGeneratorLocation(t, root, []map[string]any{
+		{
+			"id":       "fixture_generators.verify",
+			"domain":   "fixture",
+			"tier":     "source_family",
+			"status":   "verified",
+			"platform": map[string]any{"host_required": true, "os": []string{"windows", "macos"}},
+			"version_axis": map[string]any{
+				"min_supported":    "AE2020",
+				"known_supported":  []string{"AE2020", "AE2025"},
+				"expansion_policy": "append_new_ae_versions",
+			},
+			"workflows": []string{"generate"},
+			"dependencies": []map[string]any{
+				{"kind": "glob", "path": "test_data/generators/verify_*.jsx", "required": true},
+			},
+		},
+	})
+
+	report, err := AuditRepository(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != StatusFail {
+		t.Fatalf("status = %q, want fail", report.Status)
+	}
+	assertIssue(t, report, "missing_dependency", SeverityError, "fixture_generators.verify", "test_data/generators/verify_*.jsx")
+}
+
 func TestAuditRepositoryReportsEvidenceOutsideRegisteredLocations(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeFile(t, root, "orphan/matrix.json", "{}\n")
@@ -232,6 +296,22 @@ func writeValidRegistry(t *testing.T, root string, atoms []map[string]any) {
 				"required":      true,
 				"workflows":     []string{"migrate"},
 			},
+		},
+	})
+}
+
+func writeValidRegistryWithGeneratorLocation(t *testing.T, root string, atoms []map[string]any) {
+	t.Helper()
+	writeValidRegistry(t, root, atoms)
+	writeJSON(t, root, "registry/locations.json", map[string]any{
+		"schema_version": 1,
+		"locations": []map[string]any{
+			{"id": "registry", "path": "registry", "class": "spec_registry", "tracked": true, "required": true, "lifecycle": "source_of_truth"},
+			{"id": "recipes", "path": "examples/recipes", "class": "atomic_fixtures", "tracked": true, "required": true, "lifecycle": "source_contract"},
+			{"id": "templates", "path": "internal/serializer/templates", "class": "source_contract", "tracked": true, "required": true, "lifecycle": "source_contract"},
+			{"id": "fixtures", "path": "test_data/fixtures", "class": "reverse_reference", "tracked": true, "required": true, "lifecycle": "regression_corpus"},
+			{"id": "fixture_generators", "path": "test_data/generators", "class": "reverse_reference", "tracked": true, "required": true, "lifecycle": "regression_source"},
+			{"id": "tmp", "path": "tmp", "class": "generated_evidence", "tracked": false, "required": false, "lifecycle": "disposable"},
 		},
 	})
 }

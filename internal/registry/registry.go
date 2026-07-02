@@ -294,7 +294,7 @@ func auditAtom(root string, atom CapabilityAtom, workflowIDs map[string]bool, co
 		if !coverage.covers(dep.Path) {
 			report.addIssue("unregistered_dependency_location", SeverityError, dep.Path, atom.ID, "dependency path is not covered by any registered location")
 		}
-		if exists(root, dep.Path) {
+		if dependencyExists(root, dep) {
 			continue
 		}
 		severity := SeverityWarning
@@ -348,6 +348,35 @@ func exists(root, rel string) bool {
 	path := filepath.Join(root, filepath.FromSlash(rel))
 	_, err := os.Stat(path)
 	return err == nil
+}
+
+func dependencyExists(root string, dep Dependency) bool {
+	if dep.Kind != "glob" {
+		return exists(root, dep.Path)
+	}
+	matches, err := dependencyGlobMatches(root, dep.Path)
+	return err == nil && len(matches) > 0
+}
+
+func dependencyGlobMatches(root, pattern string) ([]string, error) {
+	fullPattern := filepath.Join(root, filepath.FromSlash(pattern))
+	matches, err := filepath.Glob(fullPattern)
+	if err != nil {
+		return nil, err
+	}
+	var relMatches []string
+	for _, match := range matches {
+		info, err := os.Stat(match)
+		if err != nil || info.IsDir() {
+			continue
+		}
+		rel, err := filepath.Rel(root, match)
+		if err != nil {
+			continue
+		}
+		relMatches = append(relMatches, cleanRel(rel))
+	}
+	return relMatches, nil
 }
 
 func relPathOK(path string) bool {

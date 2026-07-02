@@ -511,6 +511,316 @@
       ]
     },
     {
+      "id": "fixture_generators.verify_shipgates",
+      "domain": "fixture",
+      "tier": "generator_family",
+      "status": "verified",
+      "platform": {
+        "host_required": true,
+        "os": [
+          "windows",
+          "macos"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "host_open",
+        "learn"
+      ],
+      "dependencies": [
+        {
+          "kind": "glob",
+          "path": "test_data/generators/verify_*.jsx",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Owns AE ship-gate verification JSX sources; generated outputs remain under test_data/generated unless explicitly promoted to stable fixtures."
+      ]
+    },
+    {
+      "id": "fixture_generators.reverse_engineering_sources",
+      "domain": "fixture",
+      "tier": "generator_family",
+      "status": "verified",
+      "platform": {
+        "host_required": true,
+        "os": [
+          "windows",
+          "macos"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "learn",
+        "profile"
+      ],
+      "dependencies": [
+        {
+          "kind": "glob",
+          "path": "test_data/generators/re_*.jsx",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Owns reverse-engineering fixture authoring scripts; stable fixture outputs are owned separately by fixture or capability atoms."
+      ]
+    },
+    {
+      "id": "fixture_generators.probe_scripts",
+      "domain": "fixture",
+      "tier": "generator_family",
+      "status": "verified",
+      "platform": {
+        "host_required": true,
+        "os": [
+          "windows",
+          "macos"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "learn",
+        "profile"
+      ],
+      "dependencies": [
+        {
+          "kind": "glob",
+          "path": "test_data/generators/probe_*.jsx",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Owns exploratory host probing scripts that document AE behavior before promotion into stable fixtures or serializer rules."
+      ]
+    },
+    {
+      "id": "fixture_generators.build_sources",
+      "domain": "fixture",
+      "tier": "generator_family",
+      "status": "verified",
+      "platform": {
+        "host_required": true,
+        "os": [
+          "windows",
+          "macos"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "learn"
+      ],
+      "dependencies": [
+        {
+          "kind": "glob",
+          "path": "test_data/generators/build_*.jsx",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Owns fixture build scripts listed by scripts/fixtures/fixtures_manifest.json or referenced by tests."
+      ]
+    },
+    {
+      "id": "fixture_generators.template_extraction",
+      "domain": "fixture",
+      "tier": "generator_family",
+      "status": "verified",
+      "platform": {
+        "host_required": true,
+        "os": [
+          "windows",
+          "macos"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "learn"
+      ],
+      "dependencies": [
+        {
+          "kind": "glob",
+          "path": "test_data/generators/gen_*.jsx",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Owns JSX sources used to extract or regenerate serializer templates; committed template bytes are owned by serializer template-library atoms."
+      ]
+    },
+    {
+      "id": "fixture_generators.fdta_probes",
+      "domain": "fixture",
+      "tier": "generator_family",
+      "status": "verified",
+      "platform": {
+        "host_required": true,
+        "os": [
+          "windows",
+          "macos"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "learn",
+        "profile"
+      ],
+      "dependencies": [
+        {
+          "kind": "glob",
+          "path": "test_data/generators/fdta_*.jsx",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Owns FDTA probe JSX sources for versioned fixture generation."
+      ]
+    },
+    {
+      "id": "fixture_generators.ship_gate_helpers",
+      "domain": "fixture",
+      "tier": "generator_family",
+      "status": "verified",
+      "platform": {
+        "host_required": true,
+        "os": [
+          "windows",
+          "macos"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "host_open"
+      ],
+      "dependencies": [
+        {
+          "kind": "glob",
+          "path": "test_data/generators/ship_*.jsx",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Owns legacy ship-gate helper JSX sources retained for host validation workflows."
+      ]
+    },
+    {
+      "id": "fixture_generators.smoke_helpers",
+      "domain": "fixture",
+      "tier": "generator_family",
+      "status": "verified",
+      "platform": {
+        "host_required": true,
+        "os": [
+          "windows",
+          "macos"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "host_open"
+      ],
+      "dependencies": [
+        {
+          "kind": "glob",
+          "path": "test_data/generators/smoke_*.jsx",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Owns smoke-test AE runner JSX sources that validate host orchestration behavior."
+      ]
+    },
+    {
       "id": "layer.track_matte.explicit_source",
       "domain": "layer",
       "tier": "boundary",

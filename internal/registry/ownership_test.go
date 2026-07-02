@@ -131,6 +131,43 @@ func TestOwnershipRepositoryTreatsDirectoryDependencyAsOwningSubtree(t *testing.
 	}
 }
 
+func TestOwnershipRepositoryTreatsGlobDependencyAsOwningMatches(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeFile(t, root, "test_data/generators/verify_text.jsx", "// verify\n")
+	writeFile(t, root, "test_data/generators/verify_shape.jsx", "// verify\n")
+	writeFile(t, root, "test_data/generators/re_text.jsx", "// re\n")
+	writeValidRegistryWithGeneratorLocation(t, root, []map[string]any{
+		{
+			"id":       "fixture_generators.verify",
+			"domain":   "fixture",
+			"tier":     "source_family",
+			"status":   "verified",
+			"platform": map[string]any{"host_required": true, "os": []string{"windows", "macos"}},
+			"version_axis": map[string]any{
+				"min_supported":    "AE2020",
+				"known_supported":  []string{"AE2020", "AE2025"},
+				"expansion_policy": "append_new_ae_versions",
+			},
+			"workflows": []string{"generate"},
+			"dependencies": []map[string]any{
+				{"kind": "glob", "path": "test_data/generators/verify_*.jsx", "required": true},
+			},
+		},
+	})
+
+	report, err := OwnershipRepository(root, OwnershipOptions{SampleLimit: 5})
+	if err != nil {
+		t.Fatal(err)
+	}
+	generators := findOwnershipLocation(t, report, "fixture_generators")
+	if generators.Files != 3 || generators.OwnedFiles != 2 || generators.UnownedFiles != 1 {
+		t.Fatalf("generators files/owned/unowned = %d/%d/%d, want 3/2/1", generators.Files, generators.OwnedFiles, generators.UnownedFiles)
+	}
+	if len(generators.UnownedSamples) != 1 || generators.UnownedSamples[0] != "test_data/generators/re_text.jsx" {
+		t.Fatalf("generators unowned samples = %+v", generators.UnownedSamples)
+	}
+}
+
 func findOwnershipLocation(t *testing.T, report OwnershipReport, id string) LocationOwnership {
 	t.Helper()
 	for _, location := range report.Locations {
