@@ -66,13 +66,13 @@ func runCoverageMD(args []string) int {
 	fs := flag.NewFlagSet("aepregistry coverage-md", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
 	root := fs.String("root", ".", "repository root")
-	coveragePath := fs.String("coverage", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
+	coveragePath := fs.String("coverage", "flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
 	outPath := fs.String("out", "tmp/migration_coverage.md", "coverage markdown output path")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage-md [-root .] [-coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json] [-out tmp/migration_coverage.md]")
+		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage-md [-root .] [-coverage flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json] [-out tmp/migration_coverage.md]")
 		return 2
 	}
 	md, err := registry.RenderCoverageMarkdown(*root, *coveragePath)
@@ -93,7 +93,7 @@ func runCoverageUpdate(args []string) int {
 	fs := flag.NewFlagSet("aepregistry coverage-update", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
 	root := fs.String("root", ".", "repository root")
-	coveragePath := fs.String("coverage", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
+	coveragePath := fs.String("coverage", "flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
 	id := fs.String("id", "", "coverage record id")
 	matrixPath := fs.String("matrix", "", "matrix JSON artifact path")
 	domain := fs.String("domain", "", "domain for a new or updated coverage record")
@@ -144,8 +144,8 @@ func runCoverageBatch(args []string) int {
 	fs := flag.NewFlagSet("aepregistry coverage-batch", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
 	root := fs.String("root", ".", "repository root")
-	currentPath := fs.String("current", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json", "current state JSON path")
-	coveragePath := fs.String("coverage", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
+	currentPath := fs.String("current", "flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json", "current state JSON path")
+	coveragePath := fs.String("coverage", "flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
 	outPath := fs.String("out", "tmp/registry_coverage_batch.json", "coverage batch report JSON path")
 	batchID := fs.String("batch-id", "", "coverage batch id")
 	list := fs.Bool("list", false, "list known coverage batches")
@@ -321,8 +321,8 @@ func runCheckpoint(args []string) int {
 	fs := flag.NewFlagSet("aepregistry checkpoint", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
 	root := fs.String("root", ".", "repository root")
-	currentPath := fs.String("current", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json", "current state JSON path")
-	coveragePath := fs.String("coverage", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
+	currentPath := fs.String("current", "flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json", "current state JSON path")
+	coveragePath := fs.String("coverage", "flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
 	summaryPath := fs.String("summary", "tmp/migration_coverage_summary.json", "migration coverage summary JSON path")
 	outPath := fs.String("out", "tmp/registry_checkpoint.json", "checkpoint report JSON path")
 	coverageBatchID := fs.String("coverage-batch-id", "", "coverage batch id for -include-coverage-batch; defaults to current canonical_coverage_batch")
@@ -551,14 +551,14 @@ func runCurrent(args []string) int {
 	fs := flag.NewFlagSet("aepregistry current", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
 	root := fs.String("root", ".", "repository root")
-	currentPath := fs.String("current", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json", "current state JSON path")
+	currentPath := fs.String("current", "flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json", "current state JSON path")
 	outPath := fs.String("out", "tmp/registry_current.json", "current validation report JSON path")
 	jsonOut := fs.Bool("json", false, "print JSON report")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(os.Stderr, "usage: aepregistry current [-root .] [-current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json] [-out tmp/registry_current.json] [-json]")
+		fmt.Fprintln(os.Stderr, "usage: aepregistry current [-root .] [-current flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json] [-out tmp/registry_current.json] [-json]")
 		return 2
 	}
 	report, err := registry.ValidateCurrent(*root, *currentPath)
@@ -682,7 +682,7 @@ func runMigrationSummary(args []string) int {
 	fs := flag.NewFlagSet("aepregistry migration-summary", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
 	root := fs.String("root", ".", "repository root")
-	coveragePath := fs.String("coverage", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
+	coveragePath := fs.String("coverage", "flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
 	outPath := fs.String("out", "tmp/migration_coverage_summary.json", "migration coverage summary JSON path")
 	check := fs.Bool("check", false, "validate the existing summary at -out instead of writing a new summary")
 	totalsQuery := fs.Bool("totals", false, "print only migration coverage summary totals")
@@ -695,7 +695,7 @@ func runMigrationSummary(args []string) int {
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(os.Stderr, "usage: aepregistry migration-summary [-root .] [-coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json] [-out tmp/migration_coverage_summary.json] [-check] [-totals|-domain name|-coverage-id id|-recipe name|-evidence-level level] [-json]")
+		fmt.Fprintln(os.Stderr, "usage: aepregistry migration-summary [-root .] [-coverage flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json] [-out tmp/migration_coverage_summary.json] [-check] [-totals|-domain name|-coverage-id id|-recipe name|-evidence-level level] [-json]")
 		return 2
 	}
 	queryModes := 0
@@ -801,7 +801,7 @@ func runHostOpenGaps(args []string) int {
 	fs := flag.NewFlagSet("aepregistry host-open-gaps", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
 	root := fs.String("root", ".", "repository root")
-	coveragePath := fs.String("coverage", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
+	coveragePath := fs.String("coverage", "flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
 	outPath := fs.String("out", "tmp/host_open_gap_audit.json", "host-open gap planner JSON path")
 	aeRoot := fs.String("ae-root", "", "After Effects install root to include in generated matrix commands")
 	maxAEOpenCases := fs.Int("max-ae-open-cases", 24, "maximum AE-open cases per generated matrix chunk")
@@ -810,7 +810,7 @@ func runHostOpenGaps(args []string) int {
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(os.Stderr, "usage: aepregistry host-open-gaps [-root .] [-coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json] [-out tmp/host_open_gap_audit.json] [-ae-root E:/adobe] [-max-ae-open-cases 24] [-json]")
+		fmt.Fprintln(os.Stderr, "usage: aepregistry host-open-gaps [-root .] [-coverage flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json] [-out tmp/host_open_gap_audit.json] [-ae-root E:/adobe] [-max-ae-open-cases 24] [-json]")
 		return 2
 	}
 	report, err := registry.PlanHostOpenGaps(*root, *coveragePath, registry.HostOpenGapPlanOptions{
@@ -913,7 +913,7 @@ func runGate(args []string) int {
 	fs := flag.NewFlagSet("aepregistry gate", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
 	root := fs.String("root", ".", "repository root")
-	coveragePath := fs.String("coverage", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
+	coveragePath := fs.String("coverage", "flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
 	outPath := fs.String("out", "tmp/registry_gate.json", "ordered registry gate report JSON path")
 	scope := fs.String("scope", "version-matrix", "gate scope: version-matrix, asset-policy, or all")
 	versions := fs.String("versions", "", "comma-separated AE versions; defaults to "+aeversion.SupportedRange())
@@ -922,7 +922,7 @@ func runGate(args []string) int {
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(os.Stderr, "usage: aepregistry gate [-root .] [-coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json] [-out tmp/registry_gate.json] [-scope version-matrix|asset-policy|all] [-versions AE2020,AE2021,...] [-json]")
+		fmt.Fprintln(os.Stderr, "usage: aepregistry gate [-root .] [-coverage flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json] [-out tmp/registry_gate.json] [-scope version-matrix|asset-policy|all] [-versions AE2020,AE2021,...] [-json]")
 		return 2
 	}
 	if *scope != "version-matrix" && *scope != "asset-policy" && *scope != "all" {
@@ -1077,7 +1077,7 @@ func runVersionMatrixGate(root, coveragePath string, axis []string, addStep func
 }
 
 func checkMainlineSpecCoverageSummary(root string, summary registry.CoverageSummaryReport) (mainlineSpecCoverageSummaryReport, bool, error) {
-	specPath := "flightdeck/work/aep-understanding-generation/mainline-spec.json"
+	specPath := "flightdeck/work/versioned-aep-migration/mainline-spec.json"
 	absPath := filepath.Join(root, filepath.FromSlash(specPath))
 	if _, err := os.Stat(absPath); err != nil {
 		if os.IsNotExist(err) {
@@ -1170,7 +1170,7 @@ func coverageSummaryTotalsMap(summary registry.CoverageSummaryTotals) map[string
 }
 
 func checkMainlineSpecCoverageAxis(root string, axisReport registry.CoverageAxisReport) (mainlineSpecCoverageAxisReport, bool, error) {
-	specPath := "flightdeck/work/aep-understanding-generation/mainline-spec.json"
+	specPath := "flightdeck/work/versioned-aep-migration/mainline-spec.json"
 	absPath := filepath.Join(root, filepath.FromSlash(specPath))
 	if _, err := os.Stat(absPath); err != nil {
 		if os.IsNotExist(err) {
@@ -1370,7 +1370,7 @@ func runBoundaries(args []string) int {
 	fs := flag.NewFlagSet("aepregistry boundaries", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
 	root := fs.String("root", ".", "repository root")
-	coveragePath := fs.String("coverage", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
+	coveragePath := fs.String("coverage", "flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
 	outPath := fs.String("out", "tmp/registry_version_boundaries.json", "version boundary check report JSON path")
 	versions := fs.String("versions", "", "comma-separated AE versions; defaults to "+aeversion.SupportedRange())
 	jsonOut := fs.Bool("json", false, "print JSON report")
@@ -1378,7 +1378,7 @@ func runBoundaries(args []string) int {
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(os.Stderr, "usage: aepregistry boundaries [-root .] [-coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json] [-out tmp/registry_version_boundaries.json] [-versions AE2020,AE2021,...] [-json]")
+		fmt.Fprintln(os.Stderr, "usage: aepregistry boundaries [-root .] [-coverage flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json] [-out tmp/registry_version_boundaries.json] [-versions AE2020,AE2021,...] [-json]")
 		return 2
 	}
 
@@ -1487,8 +1487,8 @@ func splitCSV(value string) []string {
 
 func defaultCleanupStateReferenceFiles() []string {
 	return []string{
-		"flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json",
-		"flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json",
+		"flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json",
+		"flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json",
 	}
 }
 
@@ -1533,7 +1533,7 @@ func runCoverage(args []string) int {
 	fs := flag.NewFlagSet("aepregistry coverage", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
 	root := fs.String("root", ".", "repository root")
-	coveragePath := fs.String("coverage", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
+	coveragePath := fs.String("coverage", "flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
 	outPath := fs.String("out", "tmp/registry_coverage.json", "coverage validation report JSON path")
 	summaryOut := fs.Bool("summary", false, "write summary JSON instead of full coverage validation report")
 	rowsOut := fs.Bool("rows", false, "write filtered atom rows JSON instead of full coverage validation report")
@@ -1559,7 +1559,7 @@ func runCoverage(args []string) int {
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage [-root .] [-coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json] [-out tmp/registry_coverage.json] [-summary|-rows|-cells|-axis] [-require-ledgers] [-versions AE2020,AE2021,...] [-record id] [-domain name] [-atom id] [-recipe id] [-case-status status] [-writer-status status] [-writer-axis-status status] [-host-level level] [-host-axis-status status] [-missing-source-version AE2025] [-missing-target-version AE2025] [-missing-host-version AE2025] [-boundary-status status] [-json]")
+		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage [-root .] [-coverage flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json] [-out tmp/registry_coverage.json] [-summary|-rows|-cells|-axis] [-require-ledgers] [-versions AE2020,AE2021,...] [-record id] [-domain name] [-atom id] [-recipe id] [-case-status status] [-writer-status status] [-writer-axis-status status] [-host-level level] [-host-axis-status status] [-missing-source-version AE2025] [-missing-target-version AE2025] [-missing-host-version AE2025] [-boundary-status status] [-json]")
 		return 2
 	}
 	modes := 0

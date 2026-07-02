@@ -1,6 +1,6 @@
 param(
-  [string]$CurrentPath = "flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json",
-  [string]$CoveragePath = "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json",
+  [string]$CurrentPath = "flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json",
+  [string]$CoveragePath = "flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json",
   [string]$SummaryPath = "tmp/migration_coverage_summary.json",
   [string]$CoverageBatchId = "",
   [switch]$IncludeCoverageBatch,

@@ -1785,7 +1785,7 @@ func writeFile(t *testing.T, root, rel, body string) {
 
 func writeMainlineSpecSummary(t *testing.T, root string, summary map[string]any) {
 	t.Helper()
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/mainline-spec.json", map[string]any{
+	writeJSON(t, root, "flightdeck/work/versioned-aep-migration/mainline-spec.json", map[string]any{
 		"schema_version": 1,
 		"current_execution": map[string]any{
 			"last_completed_target": map[string]any{
@@ -1803,7 +1803,7 @@ func writeMainlineSpecCoverageSummaryTotals(t *testing.T, root string, totals ma
 	if err != nil {
 		t.Fatal(err)
 	}
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/mainline-spec.json", map[string]any{
+	writeJSON(t, root, "flightdeck/work/versioned-aep-migration/mainline-spec.json", map[string]any{
 		"schema_version": 1,
 		"current_execution": map[string]any{
 			"last_completed_target": map[string]any{

@@ -5,7 +5,7 @@
     {
       "id": "migration.coverage.current",
       "class": "spec_registry",
-      "artifact_path": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json",
+      "artifact_path": "flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json",
       "required": true,
       "workflows": [
         "migrate",
@@ -15,7 +15,7 @@
     {
       "id": "migration.current_state",
       "class": "spec_registry",
-      "artifact_path": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json",
+      "artifact_path": "flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json",
       "required": true,
       "workflows": [
         "migrate",

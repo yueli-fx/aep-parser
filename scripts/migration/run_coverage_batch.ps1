@@ -1,8 +1,8 @@
 param(
   [string]$BatchId = "",
 
-  [string]$CurrentPath = "flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json",
-  [string]$CoveragePath = "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json",
+  [string]$CurrentPath = "flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json",
+  [string]$CoveragePath = "flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json",
   [switch]$SkipRun,
   [switch]$List
 )

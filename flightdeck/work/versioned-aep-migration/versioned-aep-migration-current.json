@@ -4,23 +4,23 @@
   "status": "validated_checkpoint_ready",
   "goal": "Continue versioned AEP migration validation using JSON truth sources and batched matrix runs.",
   "truth_sources": {
-    "current": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json",
-    "coverage": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json",
+    "current": "flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json",
+    "coverage": "flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json",
     "capability_ledger": "internal/aepmigrate/version_capability_ledger.json"
   },
   "frozen_markdown": [
     {
-      "path": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md",
+      "path": "flightdeck/work/versioned-aep-migration/versioned-aep-migration-remaining-blockers-plan.md",
       "replacement": "versioned-aep-migration-current.json",
       "reason": "Old per-task execution log is too verbose for fast matrix iteration."
     },
     {
-      "path": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-matrix-plan.md",
+      "path": "flightdeck/work/versioned-aep-migration/versioned-aep-migration-matrix-plan.md",
       "replacement": "versioned-aep-migration-current.json",
       "reason": "Original matrix implementation plan is historical; current matrix operation state lives in JSON."
     },
     {
-      "path": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md",
+      "path": "flightdeck/work/versioned-aep-migration/versioned-aep-migration-validation-summary.md",
       "replacement": "versioned-aep-migration-coverage.json",
       "reason": "Reviewed Markdown ledger is superseded by machine-readable coverage JSON."
     }
@@ -493,7 +493,7 @@
       "id": "coverage-json-updater",
       "status": "available_verified",
       "purpose": "Read a matrix JSON artifact and update one coverage record in versioned-aep-migration-coverage.json. Go command is primary and preserves unknown coverage record fields; the PowerShell script remains as legacy compatibility.",
-      "command": "go run ./cmd/aepregistry coverage-update -root . -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -id text-baseline -matrix tmp/migration_matrix_text_baseline_all_6x6/matrix.json",
+      "command": "go run ./cmd/aepregistry coverage-update -root . -coverage flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json -id text-baseline -matrix tmp/migration_matrix_text_baseline_all_6x6/matrix.json",
       "script": "scripts/migration/update_coverage.ps1",
       "legacy_command": "pwsh -File scripts/migration/update_coverage.ps1 -Id text-baseline -MatrixPath tmp/migration_matrix_text_baseline_all_6x6/matrix.json"
     },
@@ -501,7 +501,7 @@
       "id": "coverage-json-validator",
       "status": "available_verified",
       "purpose": "Validate coverage JSON totals, host-open policy, declared ledgers, and recipe coverage against referenced matrix artifacts. Go command is primary; the PowerShell script remains as legacy compatibility.",
-      "command": "go run ./cmd/aepregistry coverage -root . -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -out tmp/registry_coverage.json -require-ledgers",
+      "command": "go run ./cmd/aepregistry coverage -root . -coverage flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json -out tmp/registry_coverage.json -require-ledgers",
       "script": "scripts/migration/validate_coverage.ps1",
       "legacy_command": "pwsh -File scripts/migration/validate_coverage.ps1"
     },
@@ -509,7 +509,7 @@
       "id": "current-json-validator",
       "status": "available_verified",
       "purpose": "Validate current JSON references, frozen Markdown paths, tooling scripts, matrix gates, standalone verify gate, host-open gap audit, and coverage batch entries. Go command is primary; the PowerShell script remains as legacy compatibility.",
-      "command": "go run ./cmd/aepregistry current -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -out tmp/registry_current.json",
+      "command": "go run ./cmd/aepregistry current -root . -current flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json -out tmp/registry_current.json",
       "script": "scripts/migration/validate_current.ps1",
       "legacy_command": "pwsh -File scripts/migration/validate_current.ps1"
     },
@@ -517,9 +517,9 @@
       "id": "migration-checkpoint-validator",
       "status": "available_verified",
       "purpose": "Run the JSON-first migration checkpoint: current JSON, coverage JSON, rendered summary JSON, summary validation, host-open gap audit, optional Go coverage-batch sync replay, and diff check. Go command is primary; the PowerShell script remains as legacy compatibility and for legacy matrix-rerun orchestration.",
-      "command": "go run ./cmd/aepregistry checkpoint -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -summary tmp/migration_coverage_summary.json -out tmp/registry_checkpoint.json",
-      "include_coverage_batch_command": "go run ./cmd/aepregistry checkpoint -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -summary tmp/migration_coverage_summary.json -out tmp/registry_checkpoint_with_batch.json -include-coverage-batch",
-      "run_coverage_batch_matrices_command": "go run ./cmd/aepregistry checkpoint -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -coverage <temp coverage copy> -summary tmp/migration_coverage_summary.json -out tmp/registry_checkpoint_with_batch.json -include-coverage-batch -run-coverage-batch-matrices",
+      "command": "go run ./cmd/aepregistry checkpoint -root . -current flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json -coverage flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json -summary tmp/migration_coverage_summary.json -out tmp/registry_checkpoint.json",
+      "include_coverage_batch_command": "go run ./cmd/aepregistry checkpoint -root . -current flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json -coverage flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json -summary tmp/migration_coverage_summary.json -out tmp/registry_checkpoint_with_batch.json -include-coverage-batch",
+      "run_coverage_batch_matrices_command": "go run ./cmd/aepregistry checkpoint -root . -current flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json -coverage <temp coverage copy> -summary tmp/migration_coverage_summary.json -out tmp/registry_checkpoint_with_batch.json -include-coverage-batch -run-coverage-batch-matrices",
       "script": "scripts/migration/validate_checkpoint.ps1",
       "legacy_command": "pwsh -File scripts/migration/validate_checkpoint.ps1 [-IncludeCoverageBatch] [-CoverageBatchId id] [-RunCoverageBatchMatrices] [-IncludeMatrix] [-IncludeGo]"
     },
@@ -527,10 +527,10 @@
       "id": "coverage-batch-runner",
       "status": "available_verified",
       "purpose": "List coverage batches, validate existing batch artifacts, optionally sync an explicit coverage candidate, and explicitly rerun batch matrices from current JSON. Go command is primary; the PowerShell script remains as legacy compatibility.",
-      "command": "go run ./cmd/aepregistry coverage-batch -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -out tmp/registry_coverage_batch.json -batch-id all-current-writer-coverage -skip-run",
-      "sync_command": "go run ./cmd/aepregistry coverage-batch -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -coverage <temp coverage copy> -out tmp/registry_coverage_batch.json -batch-id all-current-writer-coverage -skip-run -sync",
-      "run_command": "go run ./cmd/aepregistry coverage-batch -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -coverage <temp coverage copy> -out tmp/registry_coverage_batch.json -batch-id all-current-writer-coverage -run-matrices",
-      "list_command": "go run ./cmd/aepregistry coverage-batch -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -out tmp/registry_coverage_batches.json -list",
+      "command": "go run ./cmd/aepregistry coverage-batch -root . -current flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json -coverage flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json -out tmp/registry_coverage_batch.json -batch-id all-current-writer-coverage -skip-run",
+      "sync_command": "go run ./cmd/aepregistry coverage-batch -root . -current flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json -coverage <temp coverage copy> -out tmp/registry_coverage_batch.json -batch-id all-current-writer-coverage -skip-run -sync",
+      "run_command": "go run ./cmd/aepregistry coverage-batch -root . -current flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json -coverage <temp coverage copy> -out tmp/registry_coverage_batch.json -batch-id all-current-writer-coverage -run-matrices",
+      "list_command": "go run ./cmd/aepregistry coverage-batch -root . -current flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json -out tmp/registry_coverage_batches.json -list",
       "script": "scripts/migration/run_coverage_batch.ps1",
       "legacy_command": "pwsh -File scripts/migration/run_coverage_batch.ps1 -BatchId all-current-writer-coverage -SkipRun"
     },
@@ -538,7 +538,7 @@
       "id": "coverage-md-renderer",
       "status": "available_verified",
       "purpose": "Generate a temporary human-readable Markdown table from coverage JSON when needed. Go command is primary; the PowerShell script remains as legacy compatibility.",
-      "command": "go run ./cmd/aepregistry coverage-md -root . -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -out tmp/migration_coverage.md",
+      "command": "go run ./cmd/aepregistry coverage-md -root . -coverage flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json -out tmp/migration_coverage.md",
       "script": "scripts/migration/render_coverage_md.ps1",
       "legacy_command": "pwsh -File scripts/migration/render_coverage_md.ps1",
       "output": "tmp/migration_coverage.md"
@@ -601,27 +601,27 @@
     "remaining_active_items": [],
     "commands": [
       {
-        "command": "go run ./cmd/aepregistry current -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -out tmp/registry_current.json",
+        "command": "go run ./cmd/aepregistry current -root . -current flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json -out tmp/registry_current.json",
         "status": "pass",
         "evidence": "current validation: pass (2 coverage batches, 11 tooling entries, 0 errors)"
       },
       {
-        "command": "go run ./cmd/aepregistry checkpoint -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -summary tmp/migration_coverage_summary.json -out tmp/registry_checkpoint.json",
+        "command": "go run ./cmd/aepregistry checkpoint -root . -current flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json -coverage flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json -summary tmp/migration_coverage_summary.json -out tmp/registry_checkpoint.json",
         "status": "pass",
         "evidence": "checkpoint pass: 7 steps, 0 failed; steps include current, version_boundaries, coverage, summary render/check, host-open gaps, and diff check"
       },
       {
-        "command": "go run ./cmd/aepregistry checkpoint -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -summary tmp/migration_coverage_summary.json -out tmp/registry_checkpoint_with_batch.json -include-coverage-batch",
+        "command": "go run ./cmd/aepregistry checkpoint -root . -current flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json -coverage flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json -summary tmp/migration_coverage_summary.json -out tmp/registry_checkpoint_with_batch.json -include-coverage-batch",
         "status": "pass",
         "evidence": "checkpoint pass: 8 steps, 0 failed; canonical all-current-writer-coverage replayed into a temporary coverage candidate by Go sync"
       },
       {
-        "command": "go run ./cmd/aepregistry coverage-batch -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -out tmp/registry_coverage_batch.json -batch-id all-current-writer-coverage -skip-run",
+        "command": "go run ./cmd/aepregistry coverage-batch -root . -current flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json -coverage flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json -out tmp/registry_coverage_batch.json -batch-id all-current-writer-coverage -skip-run",
         "status": "pass",
         "evidence": "coverage batch all-current-writer-coverage: pass (16 entries, 0 errors)"
       },
       {
-        "command": "go run ./cmd/aepregistry coverage -root . -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -out tmp/registry_coverage.json -require-ledgers",
+        "command": "go run ./cmd/aepregistry coverage -root . -coverage flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json -out tmp/registry_coverage.json -require-ledgers",
         "status": "pass",
         "evidence": "registry coverage: pass (49 artifacts, 0 errors); Go validator checks totals, host-open policy, declared ledgers, and 150 recipe coverage"
       },

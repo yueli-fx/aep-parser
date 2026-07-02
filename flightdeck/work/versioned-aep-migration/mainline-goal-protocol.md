@@ -75,7 +75,7 @@ call that a mainline goal
 ## 4. Batch Package Record
 
 Every upgrade package needs a machine-readable record. Use
-`flightdeck/work/aep-understanding-generation/domain-batch-inventory.json` when
+`flightdeck/work/versioned-aep-migration/domain-batch-inventory.json` when
 available.
 
 Minimum package shape:
@@ -141,10 +141,10 @@ Forbidden:
 Default changed files should be limited to:
 
 - Source, test, and recipe files
-- `flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json`
-- `flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json`
-- `flightdeck/work/aep-understanding-generation/mainline-spec.json` when the mainline pointer changes
-- `flightdeck/work/aep-understanding-generation/domain-batch-inventory.json` when package state changes
+- `flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json`
+- `flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json`
+- `flightdeck/work/versioned-aep-migration/mainline-spec.json` when the mainline pointer changes
+- `flightdeck/work/versioned-aep-migration/domain-batch-inventory.json` when package state changes
 
 ## 7. Completion Definition
 

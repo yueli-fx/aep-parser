@@ -29,11 +29,11 @@ rewrite the goal instead of making source changes.
 
 ## Source Of Truth Files
 
-- Read: `flightdeck/work/aep-understanding-generation/mainline-spec.json`
-- Read/modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json`
-- Read/modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json`
+- Read: `flightdeck/work/versioned-aep-migration/mainline-spec.json`
+- Read/modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json`
+- Read/modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json`
 - Read/modify as needed: `internal/aepmigrate/version_capability_ledger.json`
-- Create/modify during execution: `flightdeck/work/aep-understanding-generation/domain-batch-inventory.json`
+- Create/modify during execution: `flightdeck/work/versioned-aep-migration/domain-batch-inventory.json`
 - Rebuildable reports: `tmp/registry_coverage*.json`, `tmp/migration_matrix_*`, `tmp/host_open_gaps/*`
 
 ## Current Baseline
@@ -94,13 +94,13 @@ Expected: either clean, or only intentional files for the selected package are d
 ## Task 2: Create The Domain Batch Inventory JSON
 
 **Files:**
-- Create/modify: `flightdeck/work/aep-understanding-generation/domain-batch-inventory.json`
-- Read: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json`
-- Read: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json`
+- Create/modify: `flightdeck/work/versioned-aep-migration/domain-batch-inventory.json`
+- Read: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json`
+- Read: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json`
 
 - [ ] **Step 1: Create the inventory skeleton**
 
-Create `flightdeck/work/aep-understanding-generation/domain-batch-inventory.json` with this shape:
+Create `flightdeck/work/versioned-aep-migration/domain-batch-inventory.json` with this shape:
 
 ```json
 {
@@ -175,7 +175,7 @@ Also add package candidates for:
 Run:
 
 ```powershell
-Get-Content -Raw flightdeck/work/aep-understanding-generation/domain-batch-inventory.json | ConvertFrom-Json | Out-Null
+Get-Content -Raw flightdeck/work/versioned-aep-migration/domain-batch-inventory.json | ConvertFrom-Json | Out-Null
 ```
 
 Expected: command exits with code 0.
@@ -185,7 +185,7 @@ Expected: command exits with code 0.
 ## Task 3: Select One Active Package By Evidence And Blast Radius
 
 **Files:**
-- Modify: `flightdeck/work/aep-understanding-generation/domain-batch-inventory.json`
+- Modify: `flightdeck/work/versioned-aep-migration/domain-batch-inventory.json`
 
 - [ ] **Step 1: Query current coverage by domain**
 
@@ -226,7 +226,7 @@ In `domain-batch-inventory.json`, update the chosen package:
 ## Task 4: Inventory The Entire Active Package Before Implementation
 
 **Files:**
-- Modify: `flightdeck/work/aep-understanding-generation/domain-batch-inventory.json`
+- Modify: `flightdeck/work/versioned-aep-migration/domain-batch-inventory.json`
 - Read: active package source files and tests
 
 - [ ] **Step 1: List source files for the active package**
@@ -365,10 +365,10 @@ Expected: all pass.
 ## Task 6: Run The Package Matrix And Update JSON Once
 
 **Files:**
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json`
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json`
-- Modify: `flightdeck/work/aep-understanding-generation/mainline-spec.json`
-- Modify: `flightdeck/work/aep-understanding-generation/domain-batch-inventory.json`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json`
+- Modify: `flightdeck/work/versioned-aep-migration/mainline-spec.json`
+- Modify: `flightdeck/work/versioned-aep-migration/domain-batch-inventory.json`
 
 - [ ] **Step 1: Run one package matrix**
 
@@ -449,7 +449,7 @@ Set the package `execution_status` to `complete` only if unit tests, matrix, and
 Run:
 
 ```powershell
-go run ./cmd/aepregistry checkpoint -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -summary tmp/migration_coverage_summary.json -include-coverage-batch
+go run ./cmd/aepregistry checkpoint -root . -current flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json -coverage flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json -summary tmp/migration_coverage_summary.json -include-coverage-batch
 go test ./...
 ```
 
@@ -462,7 +462,7 @@ Run:
 ```powershell
 git status --short
 git diff --stat
-git diff -- flightdeck/work/aep-understanding-generation/domain-batch-inventory.json flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json
+git diff -- flightdeck/work/versioned-aep-migration/domain-batch-inventory.json flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json
 ```
 
 Expected: diff shows one coherent package, not scattered unrelated churn.
@@ -472,7 +472,7 @@ Expected: diff shows one coherent package, not scattered unrelated churn.
 For the Essential Graphics package:
 
 ```powershell
-git add examples/recipes internal flightdeck/work/aep-understanding-generation/domain-batch-inventory.json flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json flightdeck/work/aep-understanding-generation/mainline-spec.json
+git add examples/recipes internal flightdeck/work/versioned-aep-migration/domain-batch-inventory.json flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json flightdeck/work/versioned-aep-migration/mainline-spec.json
 git commit -m "feat(eg): batch essential graphics controller coverage"
 ```
 
@@ -483,7 +483,7 @@ Expected: one commit contains the domain implementation, tests, recipes, and JSO
 ## Task 8: Select The Next Batch, Do Not Start It Automatically
 
 **Files:**
-- Modify: `flightdeck/work/aep-understanding-generation/domain-batch-inventory.json`
+- Modify: `flightdeck/work/versioned-aep-migration/domain-batch-inventory.json`
 
 - [ ] **Step 1: Record next candidate**
 

@@ -68,7 +68,7 @@
       "description": "Defines known AE version feature boundaries that explain expected blocked or skipped matrix cells."
     },
     {
-      "path": "flightdeck/work/aep-understanding-generation/mainline-spec.json",
+      "path": "flightdeck/work/versioned-aep-migration/mainline-spec.json",
       "role": "source_of_truth",
       "description": "Defines this mainline scope, phases, gates, and current execution pointer."
     },
@@ -1060,8 +1060,8 @@
           "cmd/aepregistry/main_test.go",
           "internal/registry/coverage_batch.go",
           "internal/registry/coverage_batch_test.go",
-          "flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json",
-          "flightdeck/work/aep-understanding-generation/mainline-spec.json"
+          "flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json",
+          "flightdeck/work/versioned-aep-migration/mainline-spec.json"
         ],
         "coverage_batch_matrix_rerun_result": {
           "candidate_current": "tmp/current_batch_run_candidate.json",

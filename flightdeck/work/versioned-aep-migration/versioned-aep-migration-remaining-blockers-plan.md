@@ -28,7 +28,7 @@ Do not claim these numbers until the matrix is rerun and the result is written t
 
 ## Files
 
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-validation-summary.md`
   - Record the refreshed full matrix boundary and remaining blocker groups.
 - Modify: `flightdeck/work/aep-understanding-generation/history.md`
   - Append a concise progress note after the slice is verified.
@@ -482,7 +482,7 @@ Files:
 - Create: `internal/aepmigrate/matrix_ledger_test.go`
 - Modify: `cmd/aepmigrate/main.go`
 - Modify: `cmd/aepmigrate/main_test.go`
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-validation-summary.md`
 - Modify: `flightdeck/work/aep-understanding-generation/history.md`
 
 - [x] **Step 2: Keep domain inference conservative**
@@ -879,8 +879,8 @@ writer contract. Classify compile reports whose only refusal is
 **Files:**
 - Modify: `internal/aepmigrate/matrix.go`
 - Modify/Test: `internal/aepmigrate/matrix_test.go`
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-remaining-blockers-plan.md`
 - Possibly modify: `flightdeck/work/aep-understanding-generation/index.md`
 - Possibly modify: `flightdeck/work/aep-understanding-generation/history.md`
 
@@ -1038,10 +1038,10 @@ fails if totals drift from the reviewed boundary.
 - Create: `scripts/migration/verify_matrix.ps1`
 - Modify: `flightdeck/knowledge/workflow/verify.md`
 - Modify: `flightdeck/work/aep-understanding-generation/index.md`
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-plan.md`
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-validation-plan.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-validation-summary.md`
 - Modify: `flightdeck/work/aep-understanding-generation/history.md`
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-remaining-blockers-plan.md`
 
 - [x] **Step 1: Add the recurring verification script**
 
@@ -1110,10 +1110,10 @@ same target writer output in every installed AE host from 2020 through 2025.
 Keep the AE-open case count explicit at 30.
 
 **Files:**
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-validation-summary.md`
 - Modify: `flightdeck/work/aep-understanding-generation/index.md`
 - Modify: `flightdeck/work/aep-understanding-generation/history.md`
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-remaining-blockers-plan.md`
 
 - [x] **Step 1: Run the structural all-host representative matrix**
 
@@ -1192,10 +1192,10 @@ record the reviewed result as `PD-6x6` evidence. Do not infer host-open coverage
 from this profile-diff matrix.
 
 **Files:**
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-validation-summary.md`
 - Modify: `flightdeck/work/aep-understanding-generation/index.md`
 - Modify: `flightdeck/work/aep-understanding-generation/history.md`
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-remaining-blockers-plan.md`
 
 - [x] **Step 1: Run the text animator all-writer matrix**
 
@@ -1253,10 +1253,10 @@ reviewed result as `PD-6x6` evidence. Keep host-open coverage separate: the
 existing transform-ease representative already has `OPEN-ALL-HOSTS`.
 
 **Files:**
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-validation-summary.md`
 - Modify: `flightdeck/work/aep-understanding-generation/index.md`
 - Modify: `flightdeck/work/aep-understanding-generation/history.md`
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-remaining-blockers-plan.md`
 
 - [x] **Step 1: Run the dynamic transform all-writer matrix**
 
@@ -1320,10 +1320,10 @@ as `PD-6x6` evidence. Keep host-open coverage separate: the vector-keyframe
 representative already has `OPEN-ALL-HOSTS`.
 
 **Files:**
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-validation-summary.md`
 - Modify: `flightdeck/work/aep-understanding-generation/index.md`
 - Modify: `flightdeck/work/aep-understanding-generation/history.md`
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-remaining-blockers-plan.md`
 
 - [x] **Step 1: Run the dynamic effect all-writer matrix**
 
@@ -1388,10 +1388,10 @@ result as `PD-6x6` evidence. Keep host-open coverage separate: the existing
 `minimal-text-style` W2020 representative already has `OPEN-ALL-HOSTS`.
 
 **Files:**
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-validation-summary.md`
 - Modify: `flightdeck/work/aep-understanding-generation/index.md`
 - Modify: `flightdeck/work/aep-understanding-generation/history.md`
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-remaining-blockers-plan.md`
 
 - [x] **Step 1: Run the text style all-writer matrix**
 
@@ -1454,10 +1454,10 @@ reviewed result as `PD-6x6` evidence. Keep host-open coverage separate: the
 existing W2020 representative already has `OPEN-ALL-HOSTS`.
 
 **Files:**
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-validation-summary.md`
 - Modify: `flightdeck/work/aep-understanding-generation/index.md`
 - Modify: `flightdeck/work/aep-understanding-generation/history.md`
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-remaining-blockers-plan.md`
 - Modify: `flightdeck/cockpit.md`
 
 - [x] **Step 1: Run the layer mask all-writer matrix**
@@ -1522,10 +1522,10 @@ an explicit matte source in the profile; lower targets must remain blocked if
 the conversion cannot preserve that source binding.
 
 **Files:**
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-validation-summary.md`
 - Modify: `flightdeck/work/aep-understanding-generation/index.md`
 - Modify: `flightdeck/work/aep-understanding-generation/history.md`
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-remaining-blockers-plan.md`
 - Modify: `flightdeck/cockpit.md`
 
 - [x] **Step 1: Run the classic track matte all-writer matrix**
@@ -1592,10 +1592,10 @@ the existing all-host matrix already opens every current W2020 gradient-stroke
 variant in H2020-H2025.
 
 **Files:**
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-validation-summary.md`
 - Modify: `flightdeck/work/aep-understanding-generation/index.md`
 - Modify: `flightdeck/work/aep-understanding-generation/history.md`
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-remaining-blockers-plan.md`
 - Modify: `flightdeck/cockpit.md`
 
 - [x] **Step 1: Run the gradient stroke all-writer matrix**
@@ -1664,10 +1664,10 @@ effect recipes that actually materialize effects and static params:
 adjustment-layer creation without effect params.
 
 **Files:**
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-validation-summary.md`
 - Modify: `flightdeck/work/aep-understanding-generation/index.md`
 - Modify: `flightdeck/work/aep-understanding-generation/history.md`
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-remaining-blockers-plan.md`
 - Modify: `flightdeck/cockpit.md`
 
 - [x] **Step 1: Run the static effect all-writer matrix**
@@ -1731,10 +1731,10 @@ reviewed result as `PD-6x6` evidence. This remains separate from the dynamic
 transform 6x6 matrix because the recipe also validates layer auto-orient state.
 
 **Files:**
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-validation-summary.md`
 - Modify: `flightdeck/work/aep-understanding-generation/index.md`
 - Modify: `flightdeck/work/aep-understanding-generation/history.md`
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-remaining-blockers-plan.md`
 - Modify: `flightdeck/cockpit.md`
 
 - [x] **Step 1: Run the auto-orient all-writer matrix**
@@ -1798,10 +1798,10 @@ evidence. Keep this separate from text style and text animator matrices, which
 already have focused `PD-6x6` evidence.
 
 **Files:**
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-validation-summary.md`
 - Modify: `flightdeck/work/aep-understanding-generation/index.md`
 - Modify: `flightdeck/work/aep-understanding-generation/history.md`
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-remaining-blockers-plan.md`
 - Modify: `flightdeck/cockpit.md`
 
 - [x] **Step 1: Run the text baseline all-writer matrix**
@@ -1868,10 +1868,10 @@ representative `PD-6x6` evidence, not as exhaustive project/comp/camera/light
 coverage.
 
 **Files:**
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-validation-summary.md`
 - Modify: `flightdeck/work/aep-understanding-generation/index.md`
 - Modify: `flightdeck/work/aep-understanding-generation/history.md`
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-remaining-blockers-plan.md`
 - Modify: `flightdeck/cockpit.md`
 
 - [x] **Step 1: Run the structural representative all-writer matrix**
@@ -1942,10 +1942,10 @@ broaden AE host-open claims beyond the existing `minimal-camera-object-profile`
 representative.
 
 **Files:**
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-validation-summary.md`
 - Modify: `flightdeck/work/aep-understanding-generation/index.md`
 - Modify: `flightdeck/work/aep-understanding-generation/history.md`
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-remaining-blockers-plan.md`
 - Modify: `flightdeck/cockpit.md`
 
 - [x] **Step 1: Run the camera all-writer matrix**
@@ -2010,10 +2010,10 @@ broaden AE host-open claims beyond the existing `minimal-light-object-profile`
 representative.
 
 **Files:**
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-validation-summary.md`
 - Modify: `flightdeck/work/aep-understanding-generation/index.md`
 - Modify: `flightdeck/work/aep-understanding-generation/history.md`
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-remaining-blockers-plan.md`
 - Modify: `flightdeck/cockpit.md`
 
 - [x] **Step 1: Run the light all-writer matrix**
@@ -2078,10 +2078,10 @@ project `PD-6x6` evidence while keeping AE host-open scope at the existing
 `minimal-project-display-settings` representative.
 
 **Files:**
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-validation-summary.md`
 - Modify: `flightdeck/work/aep-understanding-generation/index.md`
 - Modify: `flightdeck/work/aep-understanding-generation/history.md`
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-remaining-blockers-plan.md`
 - Modify: `flightdeck/cockpit.md`
 
 - [x] **Step 1: Run the project all-writer matrix**
@@ -2148,10 +2148,10 @@ comp recipes across `-sources all -targets all`. Record the result as comp
 `minimal-comp-object-profile` representative.
 
 **Files:**
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-validation-summary.md`
 - Modify: `flightdeck/work/aep-understanding-generation/index.md`
 - Modify: `flightdeck/work/aep-understanding-generation/history.md`
-- Modify: `flightdeck/work/aep-understanding-generation/versioned-aep-migration-remaining-blockers-plan.md`
+- Modify: `flightdeck/work/versioned-aep-migration/versioned-aep-migration-remaining-blockers-plan.md`
 - Modify: `flightdeck/cockpit.md`
 
 - [x] **Step 1: Run the comp all-writer matrix**

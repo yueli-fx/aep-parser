@@ -1,5 +1,5 @@
 param(
-  [string]$CurrentPath = "flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json"
+  [string]$CurrentPath = "flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json"
 )
 
 $ErrorActionPreference = "Stop"

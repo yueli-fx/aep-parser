@@ -5,7 +5,7 @@ Use this file as the direct goal target for AE understanding mainline work.
 Suggested user command:
 
 ```text
-/goal execute flightdeck/work/aep-understanding-generation/goal.md
+/goal execute flightdeck/work/versioned-aep-migration/goal.md
 ```
 
 ## Objective
@@ -39,9 +39,9 @@ Before making source changes, read these files:
    skill/protocol and reread the project Flightdeck state before continuing.
 1. `flightdeck/work/aep-understanding-generation/mainline-goal-protocol.md`
 2. `flightdeck/work/aep-understanding-generation/2026-07-03-mainline-domain-batch-execution-plan.md`
-3. `flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json`
-4. `flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json`
-5. `flightdeck/work/aep-understanding-generation/mainline-spec.json`
+3. `flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json`
+4. `flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json`
+5. `flightdeck/work/versioned-aep-migration/mainline-spec.json`
 
 If the requested work conflicts with the protocol, stop and rewrite the goal
 instead of coding.
@@ -99,7 +99,7 @@ RED-only changes first.
 Create or update:
 
 ```text
-flightdeck/work/aep-understanding-generation/domain-batch-inventory.json
+flightdeck/work/versioned-aep-migration/domain-batch-inventory.json
 ```
 
 The active package must include:
@@ -151,7 +151,7 @@ go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage.json
 go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_summary.json -summary
 go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_axis.json -axis
 go run ./cmd/aepregistry boundaries -root . -out tmp/registry_version_boundaries.json
-go run ./cmd/aepregistry checkpoint -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -summary tmp/migration_coverage_summary.json -include-coverage-batch
+go run ./cmd/aepregistry checkpoint -root . -current flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json -coverage flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json -summary tmp/migration_coverage_summary.json -include-coverage-batch
 go test ./...
 ```
 
@@ -164,10 +164,10 @@ Update JSON once after package matrix evidence exists.
 
 Allowed JSON targets:
 
-- `flightdeck/work/aep-understanding-generation/domain-batch-inventory.json`
-- `flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json`
-- `flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json`
-- `flightdeck/work/aep-understanding-generation/mainline-spec.json`
+- `flightdeck/work/versioned-aep-migration/domain-batch-inventory.json`
+- `flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json`
+- `flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json`
+- `flightdeck/work/versioned-aep-migration/mainline-spec.json`
 
 Do not update `history.md`, `index.md`, or `cockpit.md` during the package run
 unless the user explicitly asks.

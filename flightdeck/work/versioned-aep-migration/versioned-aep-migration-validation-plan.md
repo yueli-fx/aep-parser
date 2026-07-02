@@ -56,7 +56,7 @@ Host validation answers compatibility: "Can this produced AEP open in AE version
 
 Reviewed validation results must be recorded in:
 
-- `flightdeck/work/aep-understanding-generation/versioned-aep-migration-validation-summary.md`
+- `flightdeck/work/versioned-aep-migration/versioned-aep-migration-validation-summary.md`
 
 Raw matrix artifacts may live under `tmp/`, but `tmp/` is not the project memory. A result is not considered reported until the summary includes:
 

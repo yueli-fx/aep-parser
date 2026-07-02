@@ -1,17 +1,21 @@
 # Cockpit — aep-parser
 
-Focus: 当前主线是 `work/aep-understanding-generation/index.md` 下的 AEP 理解/诊断/生成流水线，当前工作树正在推进 versioned AEP migration matrix。Booyah 复刻仍是压力测试与用户验收基准。2026-07-01 看板清理已把完成 arc 移入 cold archive：`apidoc-tag-schema`、`cross-platform-architecture`、`project-index`、`recipe-docgen`、`scene-architecture`。
+Focus: 当前主线已从旧的 `work/aep-understanding-generation/` 大包拆成多个主题包。当前 active execution 是 `work/versioned-aep-migration/index.md`：AE2020-AE2025 versioned migration matrix、coverage JSON、batch inventory 和 registry gates。Booyah 复刻仍是压力测试与用户验收基准。2026-07-01 看板清理已把完成 arc 移入 cold archive：`apidoc-tag-schema`、`cross-platform-architecture`、`project-index`、`recipe-docgen`、`scene-architecture`。
 
 ## In flight
 
-- **aep-understanding-generation** (`work/aep-understanding-generation/index.md`) — 长期流水线：profile → diff → render oracle → gap ledger → slice workflow → recipe IR → technique facts/portrait/report → versioned AEP migration。当前恢复点改为 `work/aep-understanding-generation/current.md`：versioned migration 状态和覆盖结果以 `versioned-aep-migration-current.json` / `versioned-aep-migration-coverage.json` 为真相源，长 matrix/blocker 计划已冻结为历史上下文；继续前读 `current.md`，用 `scripts/migration/run_coverage_batch.ps1` / `validate_coverage.ps1` 更新和校验 JSON。
+- **versioned-aep-migration** (`work/versioned-aep-migration/index.md`) — active mainline：AE2020-AE2025 migration matrix、coverage/current JSON、domain batch inventory、host-open planning、registry checkpoint。继续前读 `goal.md` / `current.md`，下一批是 `effect_controls_static_values`；不要把一次 package cycle 当成整条主线完成。
+- **aep-understanding-generation** (`work/aep-understanding-generation/index.md`) — umbrella/router only：旧大包历史留在 `history.md`，不再作为 active execution 入口。
+- **aep-profile-understanding** (`work/aep-profile-understanding/index.md`) — parked foundation：profile contract、structural diff、render oracle、gap ledger、early slice workflow。
+- **recipe-generation-workflow** (`work/recipe-generation-workflow/index.md`) — parked generation arc：recipe IR、comp/layer execution strategy、from-scratch generation、render compare。
+- **asset-registry-cleanup** (`work/asset-registry-cleanup/index.md`) — parked governance arc：data/examples/test_data/tmp/registry ownership、generated-output cleanup policy、asset ledger normalization。
 - **booyah-glitch-replication** (`work/booyah-glitch-replication/index.md`) — 12-comp from-scratch 复刻已建成并通过 agent AE gate；按 showcase review-gate，只有用户真机确认后才算 complete。①②③⑧ 已 complete；④⑤⑥⑦⑨⑩⑪⑫ 仍待用户 review，下一批优先 ⑩⑪⑫。
-- **fx-technique-internalization** (`work/fx-technique-internalization/index.md`) — parked research arc：参考 `.aep` → 拆角色/技法/机制 → 技法库/现象配方。火焰样本已验证；下次恢复需要先选新的参考现象。
+- **fx-technique-internalization** (`work/fx-technique-internalization/index.md`) — parked research arc：参考 `.aep` → 拆角色/技法/机制 → 技法库/现象配方；现在也拥有 technique facts/portrait/corpus/report 文件。火焰样本已验证；下次恢复需要先选新的参考现象。
 - **technique-ontology** (`work/technique-ontology/index.md`) — parked research companion：角色/技法/机制三轴 ontology + schema v2。火焰/闪电/控制器样本已压测；大规模词表稳定性未验证。
 
 ## Next
 
-- **versioned AEP migration**：下一刀继续扩 supported convert surface，或把有用的矩阵边界固化成 recurring verification；不要默认跑全量 `-ae-open`，除非显式扩大/关闭 `-max-ae-open-cases`。
+- **versioned AEP migration**：从 `work/versioned-aep-migration/goal.md` 执行一个 package cycle；下一批 `effect_controls_static_values`。不要默认跑全量 `-ae-open`，除非显式扩大/关闭 `-max-ae-open-cases`。
 - **Booyah 用户真机验收 ⑩⑪⑫**：用户确认后更新 `flightdeck/showcase/booyah-clone/INDEX.md`，再按 review-gate 翻 complete；未确认前不要关闭 Booyah topic。
 - **Technique research**：只有用户明确要继续学习/内化参考工程时才恢复；先选样本，不在主线自动推进。
 

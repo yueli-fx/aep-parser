@@ -44,7 +44,7 @@
         },
         {
           "kind": "state",
-          "path": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json",
+          "path": "flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json",
           "required": true
         }
       ],
@@ -779,7 +779,7 @@
         },
         {
           "kind": "state",
-          "path": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json",
+          "path": "flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json",
           "required": true
         },
         {
