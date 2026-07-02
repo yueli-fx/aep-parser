@@ -791,17 +791,17 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "matrix_case_split",
-      "reason": "Reduce matrix.go growth risk by separating single-case execution and compile-block classification from matrix planning and report aggregation while preserving behavior.",
+      "group": "text_animator_materialize_split",
+      "reason": "Reduce convert_text_animator.go growth risk by separating animator creation and keyframe application from project/layer traversal and range extraction while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/matrix.go",
-          "internal/aepmigrate/matrix_case.go"
+          "internal/aepmigrate/convert_text_animator.go",
+          "internal/aepmigrate/convert_text_animator_materialize.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Single-case matrix execution and compile-block classification have been split from matrix.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_rebuild_layers.go or convert_text_animator.go without changing behavior.",
+    "next_action": "Text animator creation and keyframe application have been split from convert_text_animator.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_rebuild_layers.go or convert_transform.go without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
