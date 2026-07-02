@@ -38,13 +38,63 @@ func TestOwnershipRepositoryReportsOwnedAndUnownedFiles(t *testing.T) {
 	if len(recipes.UnownedSamples) != 1 || recipes.UnownedSamples[0] != "examples/recipes/text-extra.json" {
 		t.Fatalf("recipes unowned samples = %+v", recipes.UnownedSamples)
 	}
+	if len(recipes.UnownedGroups) != 1 || recipes.UnownedGroups[0].Name != "text" || recipes.UnownedGroups[0].Files != 1 {
+		t.Fatalf("recipes unowned groups = %+v", recipes.UnownedGroups)
+	}
 
 	tmp := findOwnershipLocation(t, report, "tmp")
 	if tmp.Files != 2 || tmp.OwnedFiles != 1 || tmp.UnownedFiles != 1 {
 		t.Fatalf("tmp files/owned/unowned = %d/%d/%d, want 2/1/1", tmp.Files, tmp.OwnedFiles, tmp.UnownedFiles)
 	}
+	if len(tmp.UnownedGroups) != 1 || tmp.UnownedGroups[0].Name != "unused" || tmp.UnownedGroups[0].Files != 1 {
+		t.Fatalf("tmp unowned groups = %+v", tmp.UnownedGroups)
+	}
 	if report.Summary.UnownedFiles < 2 {
 		t.Fatalf("summary unowned = %d, want at least 2", report.Summary.UnownedFiles)
+	}
+}
+
+func TestOwnershipRepositoryGroupsUnownedFlatRecipeFilesByDomain(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeFile(t, root, "examples/recipes/minimal-camera-zoom.json", "{}\n")
+	writeFile(t, root, "examples/recipes/minimal-camera-focus-distance.json", "{}\n")
+	writeFile(t, root, "examples/recipes/minimal-comp-label.json", "{}\n")
+	writeFile(t, root, "examples/recipes/minimal-text-style.json", "{}\n")
+	writeValidRegistry(t, root, nil)
+
+	report, err := OwnershipRepository(root, OwnershipOptions{SampleLimit: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	recipes := findOwnershipLocation(t, report, "recipes")
+	want := []UnownedGroup{
+		{Name: "camera", Files: 2},
+		{Name: "comp", Files: 1},
+		{Name: "text", Files: 1},
+	}
+	if !sameGroups(recipes.UnownedGroups, want) {
+		t.Fatalf("recipe groups = %+v, want %+v", recipes.UnownedGroups, want)
+	}
+}
+
+func TestOwnershipRepositoryGroupsUnownedNestedFilesByFirstChild(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeFile(t, root, "internal/serializer/templates/effects/a.bin", "a")
+	writeFile(t, root, "internal/serializer/templates/effects/b.bin", "b")
+	writeFile(t, root, "internal/serializer/templates/text/a.bin", "a")
+	writeValidRegistry(t, root, nil)
+
+	report, err := OwnershipRepository(root, OwnershipOptions{SampleLimit: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	templates := findOwnershipLocation(t, report, "templates")
+	want := []UnownedGroup{
+		{Name: "effects", Files: 2},
+		{Name: "text", Files: 1},
+	}
+	if !sameGroups(templates.UnownedGroups, want) {
+		t.Fatalf("template groups = %+v, want %+v", templates.UnownedGroups, want)
 	}
 }
 
@@ -90,4 +140,16 @@ func findOwnershipLocation(t *testing.T, report OwnershipReport, id string) Loca
 	}
 	t.Fatalf("ownership location %q not found in %+v", id, report.Locations)
 	return LocationOwnership{}
+}
+
+func sameGroups(got, want []UnownedGroup) bool {
+	if len(got) != len(want) {
+		return false
+	}
+	for i := range got {
+		if got[i] != want[i] {
+			return false
+		}
+	}
+	return true
 }

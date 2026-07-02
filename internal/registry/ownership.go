@@ -25,13 +25,19 @@ type OwnershipSummary struct {
 }
 
 type LocationOwnership struct {
-	ID             string   `json:"id"`
-	Path           string   `json:"path"`
-	Class          string   `json:"class"`
-	Files          int      `json:"files"`
-	OwnedFiles     int      `json:"owned_files"`
-	UnownedFiles   int      `json:"unowned_files"`
-	UnownedSamples []string `json:"unowned_samples,omitempty"`
+	ID             string         `json:"id"`
+	Path           string         `json:"path"`
+	Class          string         `json:"class"`
+	Files          int            `json:"files"`
+	OwnedFiles     int            `json:"owned_files"`
+	UnownedFiles   int            `json:"unowned_files"`
+	UnownedSamples []string       `json:"unowned_samples,omitempty"`
+	UnownedGroups  []UnownedGroup `json:"unowned_groups,omitempty"`
+}
+
+type UnownedGroup struct {
+	Name  string `json:"name"`
+	Files int    `json:"files"`
 }
 
 func OwnershipRepository(root string, opts OwnershipOptions) (OwnershipReport, error) {
@@ -106,6 +112,7 @@ func ownershipLocation(root string, location Location, refs ownershipRefs, sampl
 		Path:  location.Path,
 		Class: location.Class,
 	}
+	groups := map[string]int{}
 	path := filepath.Join(root, filepath.FromSlash(location.Path))
 	info, err := os.Stat(path)
 	if err != nil {
@@ -121,7 +128,9 @@ func ownershipLocation(root string, location Location, refs ownershipRefs, sampl
 		} else {
 			entry.UnownedFiles = 1
 			entry.addUnownedSample(cleanRel(location.Path), sampleLimit)
+			groups[groupName(location.Path, location.Path)]++
 		}
+		entry.UnownedGroups = sortedUnownedGroups(groups)
 		return entry, nil
 	}
 	err = filepath.WalkDir(path, func(path string, d os.DirEntry, err error) error {
@@ -143,11 +152,13 @@ func ownershipLocation(root string, location Location, refs ownershipRefs, sampl
 		}
 		entry.UnownedFiles++
 		entry.addUnownedSample(clean, sampleLimit)
+		groups[groupName(clean, location.Path)]++
 		return nil
 	})
 	if err != nil {
 		return LocationOwnership{}, err
 	}
+	entry.UnownedGroups = sortedUnownedGroups(groups)
 	return entry, nil
 }
 
@@ -169,4 +180,75 @@ func (l *LocationOwnership) addUnownedSample(path string, limit int) {
 		return
 	}
 	l.UnownedSamples = append(l.UnownedSamples, path)
+}
+
+func groupName(path, locationPath string) string {
+	cleanPath := cleanRel(path)
+	cleanLocation := cleanRel(locationPath)
+	rel := cleanPath
+	if cleanPath == cleanLocation {
+		rel = filepath.Base(cleanPath)
+	} else if hasPathPrefix(cleanPath, cleanLocation) {
+		rel = cleanPath[len(cleanLocation)+1:]
+	}
+	parts := splitSlash(rel)
+	if len(parts) > 1 {
+		return parts[0]
+	}
+	name := parts[0]
+	ext := filepath.Ext(name)
+	if ext != "" {
+		name = name[:len(name)-len(ext)]
+	}
+	if len(name) > len("minimal-") && name[:len("minimal-")] == "minimal-" {
+		name = name[len("minimal-"):]
+	}
+	for i, r := range name {
+		if r == '-' || r == '_' {
+			if i > 0 {
+				return name[:i]
+			}
+		}
+	}
+	if name == "" {
+		return "."
+	}
+	return name
+}
+
+func splitSlash(path string) []string {
+	var parts []string
+	start := 0
+	for i, r := range path {
+		if r == '/' {
+			if start < i {
+				parts = append(parts, path[start:i])
+			}
+			start = i + 1
+		}
+	}
+	if start < len(path) {
+		parts = append(parts, path[start:])
+	}
+	if len(parts) == 0 {
+		return []string{"."}
+	}
+	return parts
+}
+
+func sortedUnownedGroups(counts map[string]int) []UnownedGroup {
+	if len(counts) == 0 {
+		return nil
+	}
+	groups := make([]UnownedGroup, 0, len(counts))
+	for name, files := range counts {
+		groups = append(groups, UnownedGroup{Name: name, Files: files})
+	}
+	sort.Slice(groups, func(i, j int) bool {
+		if groups[i].Files != groups[j].Files {
+			return groups[i].Files > groups[j].Files
+		}
+		return groups[i].Name < groups[j].Name
+	})
+	return groups
 }
