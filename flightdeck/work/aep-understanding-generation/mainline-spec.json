@@ -1046,8 +1046,8 @@
     },
     "last_code_maintenance_target": {
       "location": "coverage_ledger",
-      "group": "project_precomp_recipe_declarations",
-      "reason": "Declare the observed project and precomp writer-matrix recipes in the coverage ledger to reduce observed-but-undeclared recipe gaps before larger family batches.",
+      "group": "light_recipe_declarations",
+      "reason": "Declare the observed light writer-matrix recipes in the coverage ledger to reduce observed-but-undeclared recipe gaps before larger family batches.",
       "result": {
         "commands": {
           "summary_refresh": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_summary.json -summary",
@@ -1059,25 +1059,29 @@
         ],
         "declared_records": [
           {
-            "record": "project",
+            "record": "light",
             "recipes": [
-              "minimal-project-bits-per-channel",
-              "minimal-project-display-settings",
-              "minimal-project-linear-color",
-              "minimal-project-preferences"
-            ]
-          },
-          {
-            "record": "precomp",
-            "recipes": [
-              "minimal-precomp-layer"
+              "minimal-light-casts-shadows",
+              "minimal-light-color",
+              "minimal-light-cone-angle",
+              "minimal-light-cone-feather",
+              "minimal-light-falloff-distance",
+              "minimal-light-falloff-start",
+              "minimal-light-falloff-type",
+              "minimal-light-intensity",
+              "minimal-light-kind",
+              "minimal-light-layer",
+              "minimal-light-object-profile",
+              "minimal-light-shadow-darkness",
+              "minimal-light-shadow-diffusion",
+              "minimal-light-source"
             ]
           }
         ],
         "gap_delta": {
-          "declared_recipes": "+5",
-          "observed_recipes_without_declaration": "-5",
-          "records_with_undeclared_recipes": "-2"
+          "declared_recipes": "+14",
+          "observed_recipes_without_declaration": "-14",
+          "records_with_undeclared_recipes": "-1"
         },
         "current_totals": {
           "records": 18,
@@ -1088,26 +1092,28 @@
           "errors": 0,
           "direct_host_atoms": 128,
           "inferred_host_atoms": 128,
-          "declared_recipes": 31,
+          "declared_recipes": 45,
           "observed_recipes": 143,
           "atom_row_recipes": 143,
           "recipes_without_atom_rows": 0,
           "atom_rows_without_recipes": 0,
-          "observed_recipes_without_declaration": 112,
-          "records_with_undeclared_recipes": 6
+          "observed_recipes_without_declaration": 98,
+          "records_with_undeclared_recipes": 5
         },
         "remaining_undeclared_records": [
           "shape-all-family",
           "text-animators",
           "comp",
           "layer-all-family",
-          "camera",
-          "light"
+          "camera"
         ],
         "post_gate_status": {
-          "version_matrix": "pending_final_verification",
+          "version_matrix": "pass",
           "version_matrix_steps": 8,
-          "version_matrix_failed": "pending_final_verification"
+          "version_matrix_failed": 0,
+          "asset_policy": "pass",
+          "asset_policy_steps": 7,
+          "asset_policy_failed": 0
         }
       }
     },
@@ -1138,7 +1144,7 @@
         }
       }
     },
-    "next_action": "Coverage ledger undeclared recipe gaps are down to 112 observed recipes across 6 records. Continue reducing by declaring the next scoped family, preferably light or camera before the larger comp/text/shape families.",
+    "next_action": "Coverage ledger undeclared recipe gaps are down to 98 observed recipes across 5 records. Continue reducing by declaring the next scoped family, preferably camera before the larger comp/text/shape/layer families.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
