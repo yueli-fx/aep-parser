@@ -791,17 +791,18 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "comp_metadata_reopen_split",
-      "reason": "Reduce convert_comp_metadata.go growth risk by separating no-layer composition label/comment reopen handling from stable composition setting materialization while preserving behavior.",
+      "group": "matrix_helper_family_split",
+      "reason": "Reduce matrix_helpers.go growth risk by separating matrix label normalization/expansion and matrix JSON IO from generic matrix summary and naming helpers while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_comp_metadata.go",
-          "internal/aepmigrate/convert_comp_metadata_reopen.go"
+          "internal/aepmigrate/matrix_helpers.go",
+          "internal/aepmigrate/matrix_labels.go",
+          "internal/aepmigrate/matrix_io.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Composition stable setting materialization is now separated from the no-layer label/comment reopen path. Next useful increment is to continue reducing remaining 4KB conversion support files or dense tests into coherent modules without changing behavior.",
+    "next_action": "Matrix helper responsibilities now separate label expansion, JSON IO, and generic summary/name helpers. Next useful increment is to continue reducing remaining 4KB conversion support files or dense tests into coherent modules without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
