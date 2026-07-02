@@ -791,18 +791,17 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "matrix_helper_family_split",
-      "reason": "Reduce matrix_helpers.go growth risk by separating matrix label normalization/expansion and matrix JSON IO from generic matrix summary and naming helpers while preserving behavior.",
+      "group": "shape_star_primitive_split",
+      "reason": "Reduce convert_shape_primitives.go growth risk by separating star primitive materialization from rect/ellipse primitive materialization while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/matrix_helpers.go",
-          "internal/aepmigrate/matrix_labels.go",
-          "internal/aepmigrate/matrix_io.go"
+          "internal/aepmigrate/convert_shape_primitives.go",
+          "internal/aepmigrate/convert_shape_star_primitive.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Matrix helper responsibilities now separate label expansion, JSON IO, and generic summary/name helpers. Next useful increment is to continue reducing remaining 4KB conversion support files or dense tests into coherent modules without changing behavior.",
+    "next_action": "Shape primitive materialization now separates star-specific properties from rect/ellipse primitive handling. Next useful increment is to continue reducing remaining 4KB conversion support files or dense tests into coherent modules without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
