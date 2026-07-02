@@ -537,6 +537,12 @@
       "scope": "all 4 current project setting recipes",
       "recipe_pattern": "minimal-project-*",
       "recipe_count": 4,
+      "recipes": [
+        "minimal-project-bits-per-channel",
+        "minimal-project-display-settings",
+        "minimal-project-linear-color",
+        "minimal-project-preferences"
+      ],
       "writer_status": "PD-6x6",
       "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
       "host_open_status": "OPEN-ALL-HOSTS representative plus direct_endpoint_hosts_pass for non-representative recipes; AE2021-AE2024 inferred_by_endpoint",
@@ -687,6 +693,9 @@
       "scope": "all 1 current precomp recipe",
       "recipe_pattern": "minimal-precomp-*",
       "recipe_count": 1,
+      "recipes": [
+        "minimal-precomp-layer"
+      ],
       "writer_status": "PD-6x6",
       "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
       "host_open_status": "OPEN-ALL-HOSTS for current recipe",

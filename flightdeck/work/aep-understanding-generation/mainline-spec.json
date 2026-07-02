@@ -1045,29 +1045,39 @@
       }
     },
     "last_code_maintenance_target": {
-      "location": "cmd/aepregistry",
-      "group": "coverage_summary_undeclared_recipe_gaps",
-      "reason": "Expose coverage records whose writer matrices contain observed recipes that the coverage ledger does not explicitly declare, before mutating the large coverage ledger.",
+      "location": "coverage_ledger",
+      "group": "project_precomp_recipe_declarations",
+      "reason": "Declare the observed project and precomp writer-matrix recipes in the coverage ledger to reduce observed-but-undeclared recipe gaps before larger family batches.",
       "result": {
         "commands": {
           "summary_refresh": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_summary.json -summary",
           "version_gate": "go run ./cmd/aepregistry gate -root . -out tmp/registry_gate.json -scope version-matrix"
         },
         "files": [
-          "internal/registry/coverage.go",
-          "internal/registry/coverage_test.go",
-          "cmd/aepregistry/main.go",
-          "cmd/aepregistry/main_test.go",
+          "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json",
           "flightdeck/work/aep-understanding-generation/mainline-spec.json"
         ],
-        "gate_change": {
-          "step": "registry_mainline_spec_coverage_summary",
-          "output": "tmp/registry_mainline_spec_coverage_summary.json",
-          "new_drift_fields": [
-            "observed_recipes_without_declaration",
-            "records_with_undeclared_recipes"
-          ],
-          "test": "TestRunGateReturnsOneForStaleMainlineSpecUndeclaredRecipeTotals"
+        "declared_records": [
+          {
+            "record": "project",
+            "recipes": [
+              "minimal-project-bits-per-channel",
+              "minimal-project-display-settings",
+              "minimal-project-linear-color",
+              "minimal-project-preferences"
+            ]
+          },
+          {
+            "record": "precomp",
+            "recipes": [
+              "minimal-precomp-layer"
+            ]
+          }
+        ],
+        "gap_delta": {
+          "declared_recipes": "+5",
+          "observed_recipes_without_declaration": "-5",
+          "records_with_undeclared_recipes": "-2"
         },
         "current_totals": {
           "records": 18,
@@ -1078,28 +1088,26 @@
           "errors": 0,
           "direct_host_atoms": 128,
           "inferred_host_atoms": 128,
-          "declared_recipes": 26,
+          "declared_recipes": 31,
           "observed_recipes": 143,
           "atom_row_recipes": 143,
           "recipes_without_atom_rows": 0,
           "atom_rows_without_recipes": 0,
-          "observed_recipes_without_declaration": 117,
-          "records_with_undeclared_recipes": 8
+          "observed_recipes_without_declaration": 112,
+          "records_with_undeclared_recipes": 6
         },
-        "largest_undeclared_records": [
+        "remaining_undeclared_records": [
           "shape-all-family",
           "text-animators",
           "comp",
           "layer-all-family",
           "camera",
-          "light",
-          "project",
-          "precomp"
+          "light"
         ],
         "post_gate_status": {
-          "version_matrix": "pass",
+          "version_matrix": "pending_final_verification",
           "version_matrix_steps": 8,
-          "version_matrix_failed": 0
+          "version_matrix_failed": "pending_final_verification"
         }
       }
     },
@@ -1130,7 +1138,7 @@
         }
       }
     },
-    "next_action": "Coverage summary now reports 117 observed-but-undeclared recipes across 8 records. Next reduce that gap by declaring observed writer-matrix recipes in the coverage ledger one scoped record family at a time.",
+    "next_action": "Coverage ledger undeclared recipe gaps are down to 112 observed recipes across 6 records. Continue reducing by declaring the next scoped family, preferably light or camera before the larger comp/text/shape families.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
