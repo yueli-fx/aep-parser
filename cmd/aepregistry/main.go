@@ -86,6 +86,22 @@ type mainlineSpecCoverageAxisIssue struct {
 	Message  string `json:"message"`
 }
 
+type mainlineSpecCoverageSummaryReport struct {
+	SchemaVersion int                                `json:"schema_version"`
+	Status        string                             `json:"status"`
+	SpecPath      string                             `json:"spec_path"`
+	Expected      map[string]int                     `json:"expected"`
+	Actual        map[string]int                     `json:"actual"`
+	Issues        []mainlineSpecCoverageSummaryIssue `json:"issues,omitempty"`
+}
+
+type mainlineSpecCoverageSummaryIssue struct {
+	Field    string `json:"field"`
+	Expected int    `json:"expected"`
+	Actual   int    `json:"actual"`
+	Message  string `json:"message"`
+}
+
 type layoutCleanupConsistencyReport struct {
 	SchemaVersion int                             `json:"schema_version"`
 	Status        string                          `json:"status"`
@@ -222,6 +238,18 @@ func runVersionMatrixGate(root, coveragePath string, axis []string, addStep func
 	}
 	addStep(gateStepReport{ID: "registry_coverage_summary", Command: "go run ./cmd/aepregistry coverage -root . -out " + summaryOut + " -summary", Output: summaryOut, Status: summaryStatus, Errors: summaryErrors})
 
+	specSummaryOut := "tmp/registry_mainline_spec_coverage_summary.json"
+	specSummary, exists, err := checkMainlineSpecCoverageSummary(root, summary)
+	if err != nil {
+		return fmt.Errorf("mainline spec coverage summary: %w", err)
+	}
+	if exists {
+		if err := writeJSONFile(filepath.Join(root, filepath.FromSlash(specSummaryOut)), specSummary); err != nil {
+			return fmt.Errorf("write mainline spec coverage summary: %w", err)
+		}
+		addStep(gateStepReport{ID: "registry_mainline_spec_coverage_summary", Command: "go run ./cmd/aepregistry gate -root . -out tmp/registry_gate.json -scope version-matrix", Output: specSummaryOut, Status: specSummary.Status, Errors: len(specSummary.Issues)})
+	}
+
 	axisOut := "tmp/registry_coverage_axis.json"
 	axisReport, err := registry.CoverageAxisWithFilter(root, coveragePath, axis, registry.CoverageAxisFilter{})
 	if err != nil {
@@ -254,6 +282,95 @@ func runVersionMatrixGate(root, coveragePath string, axis []string, addStep func
 	}
 	addStep(gateStepReport{ID: "registry_coverage_axis_boundary", Command: "go run ./cmd/aepregistry coverage -root . -out " + boundaryAxisOut + " -axis -atom layer.track_matte.explicit_source", Output: boundaryAxisOut, Status: boundaryAxis.Status})
 	return nil
+}
+
+func checkMainlineSpecCoverageSummary(root string, summary registry.CoverageSummaryReport) (mainlineSpecCoverageSummaryReport, bool, error) {
+	specPath := "flightdeck/work/aep-understanding-generation/mainline-spec.json"
+	absPath := filepath.Join(root, filepath.FromSlash(specPath))
+	if _, err := os.Stat(absPath); err != nil {
+		if os.IsNotExist(err) {
+			return mainlineSpecCoverageSummaryReport{}, false, nil
+		}
+		return mainlineSpecCoverageSummaryReport{}, false, err
+	}
+	var spec struct {
+		CurrentExecution struct {
+			LastCodeMaintenanceTarget struct {
+				Result struct {
+					CurrentTotals map[string]int `json:"current_totals"`
+				} `json:"result"`
+			} `json:"last_code_maintenance_target"`
+		} `json:"current_execution"`
+	}
+	data, err := os.ReadFile(absPath)
+	if err != nil {
+		return mainlineSpecCoverageSummaryReport{}, false, err
+	}
+	if err := json.Unmarshal(data, &spec); err != nil {
+		return mainlineSpecCoverageSummaryReport{}, false, err
+	}
+	expected := spec.CurrentExecution.LastCodeMaintenanceTarget.Result.CurrentTotals
+	if len(expected) == 0 {
+		return mainlineSpecCoverageSummaryReport{}, false, nil
+	}
+	actual := coverageSummaryTotalsMap(summary.Summary)
+	report := mainlineSpecCoverageSummaryReport{
+		SchemaVersion: 1,
+		Status:        registry.StatusPass,
+		SpecPath:      specPath,
+		Expected:      expected,
+		Actual:        actual,
+	}
+	for _, field := range coverageSummaryTotalsFields() {
+		if expected[field] != actual[field] {
+			report.Issues = append(report.Issues, mainlineSpecCoverageSummaryIssue{
+				Field:    field,
+				Expected: expected[field],
+				Actual:   actual[field],
+				Message:  fmt.Sprintf("mainline spec current_totals %s=%d does not match coverage summary %d", field, expected[field], actual[field]),
+			})
+		}
+	}
+	if len(report.Issues) > 0 {
+		report.Status = registry.StatusFail
+	}
+	return report, true, nil
+}
+
+func coverageSummaryTotalsFields() []string {
+	return []string{
+		"records",
+		"artifacts",
+		"contract_gates",
+		"atoms",
+		"atom_rows",
+		"errors",
+		"direct_host_atoms",
+		"inferred_host_atoms",
+		"declared_recipes",
+		"observed_recipes",
+		"atom_row_recipes",
+		"recipes_without_atom_rows",
+		"atom_rows_without_recipes",
+	}
+}
+
+func coverageSummaryTotalsMap(summary registry.CoverageSummaryTotals) map[string]int {
+	return map[string]int{
+		"records":                   summary.Records,
+		"artifacts":                 summary.Artifacts,
+		"contract_gates":            summary.ContractGates,
+		"atoms":                     summary.Atoms,
+		"atom_rows":                 summary.AtomRows,
+		"errors":                    summary.Errors,
+		"direct_host_atoms":         summary.DirectHostAtoms,
+		"inferred_host_atoms":       summary.InferredHostAtoms,
+		"declared_recipes":          summary.DeclaredRecipes,
+		"observed_recipes":          summary.ObservedRecipes,
+		"atom_row_recipes":          summary.AtomRowRecipes,
+		"recipes_without_atom_rows": summary.RecipesWithoutAtomRows,
+		"atom_rows_without_recipes": summary.AtomRowsWithoutRecipes,
+	}
 }
 
 func checkMainlineSpecCoverageAxis(root string, axisReport registry.CoverageAxisReport) (mainlineSpecCoverageAxisReport, bool, error) {

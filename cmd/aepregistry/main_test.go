@@ -687,6 +687,71 @@ func TestRunGateReturnsOneForStaleMainlineSpecCoverageAxisSummary(t *testing.T) 
 	}
 }
 
+func TestRunGateReturnsOneForStaleMainlineSpecCoverageSummaryTotals(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 2)
+	writeJSON(t, root, "tmp/matrix/text/matrix.json", map[string]any{
+		"schema_version": 1,
+		"summary":        map[string]any{"total": 2, "passed": 2, "blocked": 0, "failed": 0, "skipped": 0},
+		"cases": []map[string]any{
+			{"recipe_name": "text-basic", "source_version": "AE2020", "target_version": "AE2020", "status": "pass"},
+			{"recipe_name": "text-basic", "source_version": "AE2025", "target_version": "AE2025", "status": "pass"},
+		},
+	})
+	writeMainlineSpecCoverageSummaryTotals(t, root, map[string]any{
+		"records":                   1,
+		"artifacts":                 1,
+		"contract_gates":            0,
+		"atoms":                     1,
+		"atom_rows":                 999,
+		"errors":                    0,
+		"direct_host_atoms":         0,
+		"inferred_host_atoms":       0,
+		"declared_recipes":          0,
+		"observed_recipes":          1,
+		"atom_row_recipes":          1,
+		"recipes_without_atom_rows": 0,
+		"atom_rows_without_recipes": 0,
+	})
+	out := filepath.Join(root, "tmp", "registry_gate.json")
+
+	code := run([]string{
+		"gate",
+		"-root", root,
+		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-out", out,
+		"-versions", "AE2020,AE2025",
+	})
+	if code != 1 {
+		t.Fatalf("run(gate stale coverage summary) = %d, want 1", code)
+	}
+
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var report gateReport
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	step := findGateStep(t, report, "registry_mainline_spec_coverage_summary")
+	if step.Status != registry.StatusFail || step.Errors == 0 {
+		t.Fatalf("mainline spec coverage summary step = %+v", step)
+	}
+	specReportPath := filepath.Join(root, filepath.FromSlash("tmp/registry_mainline_spec_coverage_summary.json"))
+	data, err = os.ReadFile(specReportPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var specReport mainlineSpecCoverageSummaryReport
+	if err := json.Unmarshal(data, &specReport); err != nil {
+		t.Fatal(err)
+	}
+	if specReport.Status != registry.StatusFail || !hasMainlineSpecSummaryIssue(specReport, "atom_rows") {
+		t.Fatalf("mainline spec coverage summary report = %+v", specReport)
+	}
+}
+
 func TestRunGateReturnsOneForRecipeAtomCoverageGaps(t *testing.T) {
 	root := newRegistryRoot(t)
 	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
@@ -1048,6 +1113,20 @@ func writeMainlineSpecSummary(t *testing.T, root string, summary map[string]any)
 	})
 }
 
+func writeMainlineSpecCoverageSummaryTotals(t *testing.T, root string, totals map[string]any) {
+	t.Helper()
+	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/mainline-spec.json", map[string]any{
+		"schema_version": 1,
+		"current_execution": map[string]any{
+			"last_code_maintenance_target": map[string]any{
+				"result": map[string]any{
+					"current_totals": totals,
+				},
+			},
+		},
+	})
+}
+
 func findGateStep(t *testing.T, report gateReport, id string) gateStepReport {
 	t.Helper()
 	for _, step := range report.Steps {
@@ -1060,6 +1139,15 @@ func findGateStep(t *testing.T, report gateReport, id string) gateStepReport {
 }
 
 func hasMainlineSpecIssue(report mainlineSpecCoverageAxisReport, field string) bool {
+	for _, issue := range report.Issues {
+		if issue.Field == field {
+			return true
+		}
+	}
+	return false
+}
+
+func hasMainlineSpecSummaryIssue(report mainlineSpecCoverageSummaryReport, field string) bool {
 	for _, issue := range report.Issues {
 		if issue.Field == field {
 			return true

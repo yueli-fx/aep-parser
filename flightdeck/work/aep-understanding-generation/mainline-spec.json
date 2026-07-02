@@ -143,6 +143,11 @@
       "description": "Read-only consistency report comparing mainline-spec current coverage-axis summary against regenerated coverage-axis totals; ignored by git."
     },
     {
+      "path": "tmp/registry_mainline_spec_coverage_summary.json",
+      "role": "generated_report",
+      "description": "Read-only consistency report comparing mainline-spec current coverage-summary totals against regenerated coverage-summary totals; ignored by git."
+    },
+    {
       "path": "tmp/registry_asset_gate.json",
       "role": "generated_report",
       "description": "Read-only ordered registry gate report for audit, ownership, layout, generated cleanup classification, and cleanup dry-run policy; ignored by git."
@@ -1041,12 +1046,11 @@
     },
     "last_code_maintenance_target": {
       "location": "cmd/aepregistry",
-      "group": "coverage_summary_recipe_atom_gate",
-      "reason": "Promote coverage-summary recipe-to-atom gaps from query-only JSON to a version-matrix gate failure so capability expansion cannot silently add matrix recipes without atom rows.",
+      "group": "mainline_spec_coverage_summary_drift_gate",
+      "reason": "Make version-matrix gate fail when mainline-spec current coverage-summary totals drift from regenerated coverage-summary totals.",
       "result": {
         "commands": {
-          "version_gate": "go run ./cmd/aepregistry gate -root . -out tmp/registry_gate.json -scope version-matrix",
-          "summary_refresh": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_summary.json -summary"
+          "version_gate": "go run ./cmd/aepregistry gate -root . -out tmp/registry_gate.json -scope version-matrix"
         },
         "files": [
           "cmd/aepregistry/main.go",
@@ -1054,9 +1058,10 @@
           "flightdeck/work/aep-understanding-generation/mainline-spec.json"
         ],
         "gate_change": {
-          "step": "registry_coverage_summary",
-          "failure_condition": "summary.errors + summary.recipes_without_atom_rows + summary.atom_rows_without_recipes > 0",
-          "test": "TestRunGateReturnsOneForRecipeAtomCoverageGaps"
+          "step": "registry_mainline_spec_coverage_summary",
+          "output": "tmp/registry_mainline_spec_coverage_summary.json",
+          "failure_condition": "Any field in current_execution.last_code_maintenance_target.result.current_totals differs from regenerated coverage-summary totals.",
+          "test": "TestRunGateReturnsOneForStaleMainlineSpecCoverageSummaryTotals"
         },
         "current_totals": {
           "records": 18,
@@ -1074,7 +1079,9 @@
           "atom_rows_without_recipes": 0
         },
         "post_gate_status": {
-          "version_matrix": "pass"
+          "version_matrix": "pass",
+          "version_matrix_steps": 8,
+          "version_matrix_failed": 0
         }
       }
     },
@@ -1105,7 +1112,7 @@
         }
       }
     },
-    "next_action": "Coverage summary recipe-to-atom gaps now fail the version-matrix gate. Continue with the next scoped capability family or matrix coverage expansion, and keep recipes_without_atom_rows at zero before committing new matrix evidence.",
+    "next_action": "Mainline spec coverage-summary totals now have a drift gate. Continue with the next scoped capability family or matrix coverage expansion, updating current_totals when coverage summary totals intentionally change.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
