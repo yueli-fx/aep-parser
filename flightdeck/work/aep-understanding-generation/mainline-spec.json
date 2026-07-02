@@ -791,17 +791,18 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "shape_filter_deform_split",
-      "reason": "Reduce convert_shape_filters.go growth risk by separating deform/merge shape filter materialization from round/offset/trim filter materialization while preserving behavior.",
+      "group": "text_animator_materializer_family_split",
+      "reason": "Reduce convert_text_animator_materialize.go growth risk by separating text animator transform and style materializers from the dispatcher while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_shape_filters.go",
-          "internal/aepmigrate/convert_shape_filter_deform.go"
+          "internal/aepmigrate/convert_text_animator_materialize.go",
+          "internal/aepmigrate/convert_text_animator_transform.go",
+          "internal/aepmigrate/convert_text_animator_style.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Shape filter materialization now separates deform/merge filters from round/offset/trim filters. Next useful increment is to continue reducing remaining 4-5KB conversion support files or dense tests into coherent modules without changing behavior.",
+    "next_action": "Text animator materialization now delegates transform and style families to focused helpers. Next useful increment is to continue reducing remaining 4-5KB conversion support files or dense tests into coherent modules without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
