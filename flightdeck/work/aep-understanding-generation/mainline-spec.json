@@ -791,22 +791,18 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "text_style_and_verification_helpers_split",
-      "reason": "Reduce convert_text.go, convert_verify.go, and verify.go growth risk by separating text run/paragraph materialization, AE open verification, and verify migration-report diff helpers while preserving behavior.",
+      "group": "convert_test_fixture_split",
+      "reason": "Reduce convert_test.go growth risk by separating AE-open test helpers and shared project/recipe fixture builders while preserving test behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_text.go",
-          "internal/aepmigrate/convert_text_runs.go",
-          "internal/aepmigrate/convert_text_paragraphs.go",
-          "internal/aepmigrate/convert_verify.go",
-          "internal/aepmigrate/convert_verify_aeopen.go",
-          "internal/aepmigrate/verify.go",
-          "internal/aepmigrate/verify_report.go"
+          "internal/aepmigrate/convert_test.go",
+          "internal/aepmigrate/convert_aeopen_test.go",
+          "internal/aepmigrate/convert_fixtures_test.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Text run/paragraph materialization, AE open verification, and verify migration-report diff helpers have been split from their entry files. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from the largest test files or remaining conversion materialization files without changing behavior.",
+    "next_action": "AE-open test helpers and shared project/recipe fixture builders have been split from convert_test.go. Next useful increment is to continue reducing large aepmigrate test files by splitting convert_layer_test.go or convert_shape_test.go into coherent topic files without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
