@@ -791,18 +791,17 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "mask_orchestration_surface_split",
-      "reason": "Reduce convert_mask.go growth risk by separating mask detection/support checks and mask surface materialization from project-level mask orchestration while preserving behavior.",
+      "group": "convert_scope_layer_split",
+      "reason": "Reduce convert_scope.go growth risk by separating comp/layer scope entry construction from top-level convert scope traversal while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_mask.go",
-          "internal/aepmigrate/convert_mask_detect.go",
-          "internal/aepmigrate/convert_mask_surface.go"
+          "internal/aepmigrate/convert_scope.go",
+          "internal/aepmigrate/convert_scope_layer.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Mask detection/support checks and surface materialization have been split from project-level mask orchestration. Next useful increment is to continue reducing remaining 4-5KB conversion support files or dense tests into coherent modules without changing behavior.",
+    "next_action": "Convert scope traversal now delegates comp/layer entry construction to focused helpers. Next useful increment is to continue reducing remaining 4-5KB conversion support files or dense tests into coherent modules without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
