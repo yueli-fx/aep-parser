@@ -55,13 +55,55 @@ func runMigrationSummary(args []string) int {
 	coveragePath := fs.String("coverage", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
 	outPath := fs.String("out", "tmp/migration_coverage_summary.json", "migration coverage summary JSON path")
 	check := fs.Bool("check", false, "validate the existing summary at -out instead of writing a new summary")
+	totalsQuery := fs.Bool("totals", false, "print only migration coverage summary totals")
+	domainQuery := fs.String("domain", "", "print migration coverage summary domain rollup")
+	coverageIDQuery := fs.String("coverage-id", "", "print migration coverage summary record by coverage id")
+	recipeQuery := fs.String("recipe", "", "print migration coverage summary recipe index entry")
+	evidenceLevelQuery := fs.String("evidence-level", "", "print migration coverage summary recipes by host-open evidence level")
 	jsonOut := fs.Bool("json", false, "print JSON report")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(os.Stderr, "usage: aepregistry migration-summary [-root .] [-coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json] [-out tmp/migration_coverage_summary.json] [-check] [-json]")
+		fmt.Fprintln(os.Stderr, "usage: aepregistry migration-summary [-root .] [-coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json] [-out tmp/migration_coverage_summary.json] [-check] [-totals|-domain name|-coverage-id id|-recipe name|-evidence-level level] [-json]")
 		return 2
+	}
+	queryModes := 0
+	for _, enabled := range []bool{*totalsQuery, *domainQuery != "", *coverageIDQuery != "", *recipeQuery != "", *evidenceLevelQuery != ""} {
+		if enabled {
+			queryModes++
+		}
+	}
+	if queryModes > 1 {
+		fmt.Fprintln(os.Stderr, "migration-summary: choose only one of -totals, -domain, -coverage-id, -recipe, or -evidence-level")
+		return 2
+	}
+	if *check && queryModes > 0 {
+		fmt.Fprintln(os.Stderr, "migration-summary: -check cannot be combined with query flags")
+		return 2
+	}
+	if queryModes > 0 {
+		summary, err := readOrBuildMigrationSummary(*root, *coveragePath, *outPath)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "migration-summary:", err)
+			return 2
+		}
+		result, err := registry.QueryMigrationCoverageSummary(summary, registry.MigrationCoverageSummaryQuery{
+			Totals:        *totalsQuery,
+			Domain:        *domainQuery,
+			CoverageID:    *coverageIDQuery,
+			Recipe:        *recipeQuery,
+			EvidenceLevel: *evidenceLevelQuery,
+		})
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "migration-summary:", err)
+			return 1
+		}
+		if err := json.NewEncoder(os.Stdout).Encode(result); err != nil {
+			fmt.Fprintln(os.Stderr, "stdout:", err)
+			return 2
+		}
+		return 0
 	}
 	if *check {
 		report, err := registry.CheckMigrationCoverageSummary(*root, *coveragePath, *outPath)
@@ -100,6 +142,29 @@ func runMigrationSummary(args []string) int {
 		fmt.Printf("rendered coverage summary json: %s\n", *outPath)
 	}
 	return 0
+}
+
+func readOrBuildMigrationSummary(root, coveragePath, outPath string) (registry.MigrationCoverageSummary, error) {
+	var summary registry.MigrationCoverageSummary
+	if err := readJSONFile(outPath, &summary); err == nil {
+		return summary, nil
+	}
+	summary, err := registry.BuildMigrationCoverageSummary(root, coveragePath)
+	if err != nil {
+		return registry.MigrationCoverageSummary{}, err
+	}
+	if err := writeJSONFile(outPath, summary); err != nil {
+		return registry.MigrationCoverageSummary{}, err
+	}
+	return summary, nil
+}
+
+func readJSONFile(path string, value any) error {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(data, value)
 }
 
 func runHostOpenGaps(args []string) int {

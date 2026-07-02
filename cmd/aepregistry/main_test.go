@@ -167,6 +167,51 @@ func TestRunMigrationSummaryWritesAndChecksReport(t *testing.T) {
 	}
 }
 
+func TestRunMigrationSummaryQueriesExistingReport(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+		"schema_version":   1,
+		"writer_axes":      map[string]any{"source_writers": []string{"AE2020"}, "target_writers": []string{"AE2025"}},
+		"host_open_axis":   map[string]any{"hosts": []string{"AE2020", "AE2025"}},
+		"host_open_policy": map[string]any{"evidence_levels": []string{"direct_endpoint_hosts", "representative_only", "representative_covered", "excluded_known_boundary", "recorded_status_only"}},
+		"coverage": []map[string]any{
+			{
+				"id":               "text",
+				"domain":           "text",
+				"artifact":         "tmp/matrix/text/matrix.json",
+				"recipes":          []string{"minimal-text-a"},
+				"writer_status":    "PD-1x1",
+				"writer_coverage":  "full",
+				"totals":           map[string]any{"total": 1, "pass": 1, "blocked": 0, "failed": 0, "skipped": 0},
+				"host_open_status": "recorded",
+			},
+		},
+	})
+	writeJSON(t, root, "tmp/matrix/text/matrix.json", map[string]any{
+		"schema_version": 1,
+		"summary":        map[string]any{"total": 1, "passed": 1, "blocked": 0, "failed": 0, "skipped": 0},
+		"cases": []map[string]any{
+			{"recipe_name": "minimal-text-a", "source_version": "AE2020", "target_version": "AE2025", "status": "pass"},
+		},
+	})
+	out := filepath.Join(root, "tmp", "migration_coverage_summary.json")
+	if code := run([]string{"migration-summary", "-root", root, "-coverage", "flightdeck/work/aep-understanding-generation/coverage.json", "-out", out}); code != 0 {
+		t.Fatalf("render migration summary = %d, want 0", code)
+	}
+
+	for _, args := range [][]string{
+		{"migration-summary", "-root", root, "-out", out, "-totals"},
+		{"migration-summary", "-root", root, "-out", out, "-recipe", "minimal-text-a"},
+		{"migration-summary", "-root", root, "-out", out, "-domain", "text"},
+		{"migration-summary", "-root", root, "-out", out, "-coverage-id", "text"},
+		{"migration-summary", "-root", root, "-out", out, "-evidence-level", "recorded_status_only"},
+	} {
+		if code := run(args); code != 0 {
+			t.Fatalf("run(%v) = %d, want 0", args, code)
+		}
+	}
+}
+
 func TestRunOwnershipWritesOwnershipSummary(t *testing.T) {
 	root := newRegistryRoot(t)
 	writeFile(t, root, "examples/recipes/unowned.json", "{}\n")

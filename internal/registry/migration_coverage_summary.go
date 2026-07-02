@@ -165,6 +165,42 @@ type MigrationCoverageSummaryCheckIssue struct {
 	Message string `json:"message"`
 }
 
+type MigrationCoverageSummaryQuery struct {
+	Totals        bool
+	Domain        string
+	CoverageID    string
+	Recipe        string
+	EvidenceLevel string
+}
+
+type MigrationCoverageEvidenceLevelQueryResult struct {
+	EvidenceLevel string                                 `json:"evidence_level"`
+	Count         int                                    `json:"count"`
+	Recipes       []MigrationCoverageEvidenceLevelRecipe `json:"recipes"`
+}
+
+type MigrationCoverageEvidenceLevelRecipe struct {
+	Recipe           string                    `json:"recipe"`
+	CoverageID       string                    `json:"coverage_id"`
+	Domain           string                    `json:"domain"`
+	HostOpenEvidence MigrationCoverageHostOpen `json:"host_open_evidence"`
+}
+
+type MigrationCoverageOverviewQueryResult struct {
+	Totals     MigrationCoverageTotals          `json:"totals"`
+	Domains    []MigrationCoverageDomainSummary `json:"domains"`
+	Boundaries []MigrationCoverageBoundary      `json:"boundaries"`
+	OpenItems  []json.RawMessage                `json:"open_items,omitempty"`
+}
+
+type MigrationCoverageDomainSummary struct {
+	Domain                 string                          `json:"domain"`
+	RecipeCount            int                             `json:"recipe_count"`
+	WriterTotals           CoverageTotals                  `json:"writer_totals"`
+	HostOpenEvidenceLevels MigrationHostOpenEvidenceCounts `json:"host_open_evidence_levels"`
+	BoundaryIDs            []string                        `json:"boundary_ids"`
+}
+
 func BuildMigrationCoverageSummary(root, coveragePath string) (MigrationCoverageSummary, error) {
 	var coverage coverageFile
 	if err := readJSONPath(root, coveragePath, &coverage); err != nil {
@@ -265,6 +301,83 @@ func BuildMigrationCoverageSummary(root, coveragePath string) (MigrationCoverage
 		return summary.RecipeIndex[i].Recipe < summary.RecipeIndex[j].Recipe
 	})
 	return summary, nil
+}
+
+func QueryMigrationCoverageSummary(summary MigrationCoverageSummary, query MigrationCoverageSummaryQuery) (any, error) {
+	if query.Totals {
+		return summary.Totals, nil
+	}
+	if query.Recipe != "" {
+		var matches []MigrationCoverageRecipeIndexEntry
+		for _, recipe := range summary.RecipeIndex {
+			if recipe.Recipe == query.Recipe {
+				matches = append(matches, recipe)
+			}
+		}
+		if len(matches) == 0 {
+			return nil, fmt.Errorf("recipe not found in coverage summary: %s", query.Recipe)
+		}
+		return matches, nil
+	}
+	if query.Domain != "" {
+		var matches []MigrationCoverageDomainRollup
+		for _, domain := range summary.DomainRollup {
+			if domain.Domain == query.Domain {
+				matches = append(matches, domain)
+			}
+		}
+		if len(matches) == 0 {
+			return nil, fmt.Errorf("domain not found in coverage summary: %s", query.Domain)
+		}
+		return matches, nil
+	}
+	if query.CoverageID != "" {
+		var matches []MigrationCoverageRecordSummary
+		for _, record := range summary.Coverage {
+			if record.ID == query.CoverageID {
+				matches = append(matches, record)
+			}
+		}
+		if len(matches) == 0 {
+			return nil, fmt.Errorf("coverage id not found in coverage summary: %s", query.CoverageID)
+		}
+		return matches, nil
+	}
+	if query.EvidenceLevel != "" {
+		if !stringSet(summary.HostOpenPolicy.EvidenceLevels)[query.EvidenceLevel] {
+			return nil, fmt.Errorf("host-open evidence level is not declared by coverage policy: %s", query.EvidenceLevel)
+		}
+		result := MigrationCoverageEvidenceLevelQueryResult{EvidenceLevel: query.EvidenceLevel}
+		for _, recipe := range summary.RecipeIndex {
+			if recipe.HostOpenEvidence.EvidenceLevel != query.EvidenceLevel {
+				continue
+			}
+			result.Recipes = append(result.Recipes, MigrationCoverageEvidenceLevelRecipe{
+				Recipe:           recipe.Recipe,
+				CoverageID:       recipe.CoverageID,
+				Domain:           recipe.Domain,
+				HostOpenEvidence: recipe.HostOpenEvidence,
+			})
+		}
+		result.Count = len(result.Recipes)
+		return result, nil
+	}
+	domains := make([]MigrationCoverageDomainSummary, 0, len(summary.DomainRollup))
+	for _, domain := range summary.DomainRollup {
+		domains = append(domains, MigrationCoverageDomainSummary{
+			Domain:                 domain.Domain,
+			RecipeCount:            domain.RecipeCount,
+			WriterTotals:           domain.WriterTotals,
+			HostOpenEvidenceLevels: domain.HostOpenEvidenceLevels,
+			BoundaryIDs:            domain.BoundaryIDs,
+		})
+	}
+	return MigrationCoverageOverviewQueryResult{
+		Totals:     summary.Totals,
+		Domains:    domains,
+		Boundaries: summary.Boundaries,
+		OpenItems:  summary.OpenItems,
+	}, nil
 }
 
 func CheckMigrationCoverageSummary(root, coveragePath, summaryPath string) (MigrationCoverageSummaryCheckReport, error) {

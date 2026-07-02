@@ -543,9 +543,10 @@
     {
       "id": "coverage-summary-json-query",
       "status": "available_verified",
-      "purpose": "Query generated coverage summary JSON as machine-readable totals, domain rollups, coverage records, recipe records, or host-open evidence-level groups.",
+      "purpose": "Query generated coverage summary JSON as machine-readable totals, domain rollups, coverage records, recipe records, or host-open evidence-level groups. Go command is primary; the PowerShell script remains as legacy compatibility.",
+      "command": "go run ./cmd/aepregistry migration-summary -root . -out tmp/migration_coverage_summary.json [-totals] [-domain name] [-coverage-id id] [-recipe name] [-evidence-level level]",
       "script": "scripts/migration/query_coverage_summary.ps1",
-      "command": "pwsh -File scripts/migration/query_coverage_summary.ps1 [-Refresh] [-SkipValidate] [-Totals] [-Domain name] [-CoverageId id] [-Recipe name] [-EvidenceLevel level]"
+      "legacy_command": "pwsh -File scripts/migration/query_coverage_summary.ps1 [-Refresh] [-SkipValidate] [-Totals] [-Domain name] [-CoverageId id] [-Recipe name] [-EvidenceLevel level]"
     },
     {
       "id": "standalone-verify-cli",
@@ -609,12 +610,12 @@
         "evidence": "coverage summary check: pass (0 errors)"
       },
       {
-        "command": "pwsh -File scripts/migration/query_coverage_summary.ps1 -Recipe minimal-layer-explicit-matte",
+        "command": "go run ./cmd/aepregistry migration-summary -root . -out tmp/migration_coverage_summary.json -recipe minimal-layer-explicit-matte",
         "status": "pass",
         "evidence": "query returned layer-all-family writer matrix totals 1 pass, 5 blocked, 30 skipped and host-open evidence_level excluded_known_boundary"
       },
       {
-        "command": "pwsh -File scripts/migration/query_coverage_summary.ps1 -Totals",
+        "command": "go run ./cmd/aepregistry migration-summary -root . -out tmp/migration_coverage_summary.json -totals",
         "status": "pass",
         "evidence": "host_open_evidence_levels recorded_status_only=0, representative_covered=0, and endpoint host-open cases=512/512 pass"
       },

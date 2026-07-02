@@ -80,6 +80,55 @@ func TestCheckMigrationCoverageSummaryReportsDrift(t *testing.T) {
 	}
 }
 
+func TestQueryMigrationCoverageSummaryFiltersTotalsRecipeAndEvidenceLevel(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", migrationCoverageSummaryFixture())
+	writeMatrixFixtureWithCases(t, root, "tmp/matrix/text/matrix.json", []map[string]any{
+		{"recipe_name": "minimal-text-a", "source_version": "AE2020", "target_version": "AE2020", "status": "pass"},
+		{"recipe_name": "minimal-text-b", "source_version": "AE2025", "target_version": "AE2025", "status": "pass"},
+	})
+	writeMatrixFixtureWithCases(t, root, "tmp/host/text/matrix.json", []map[string]any{
+		{"recipe_name": "minimal-text-a", "source_version": "AE2020", "target_version": "AE2020", "ae_open_version": "AE2020", "status": "pass"},
+	})
+	writeMatrixFixtureWithCases(t, root, "tmp/matrix/shape/matrix.json", []map[string]any{
+		{"recipe_name": "minimal-shape-a", "source_version": "AE2020", "target_version": "AE2020", "status": "pass"},
+	})
+	summary, err := BuildMigrationCoverageSummary(root, "flightdeck/work/aep-understanding-generation/coverage.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	totals, err := QueryMigrationCoverageSummary(summary, MigrationCoverageSummaryQuery{Totals: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if totals, ok := totals.(MigrationCoverageTotals); !ok || totals.Recipes != 3 {
+		t.Fatalf("totals query = %#v, want totals with three recipes", totals)
+	}
+
+	recipe, err := QueryMigrationCoverageSummary(summary, MigrationCoverageSummaryQuery{Recipe: "minimal-text-a"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	recipeRows := recipe.([]MigrationCoverageRecipeIndexEntry)
+	if len(recipeRows) != 1 || recipeRows[0].CoverageID != "text" {
+		t.Fatalf("recipe query = %+v, want text recipe", recipeRows)
+	}
+
+	evidence, err := QueryMigrationCoverageSummary(summary, MigrationCoverageSummaryQuery{EvidenceLevel: "representative_only"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	evidenceResult := evidence.(MigrationCoverageEvidenceLevelQueryResult)
+	if evidenceResult.Count != 1 || evidenceResult.Recipes[0].Recipe != "minimal-shape-a" {
+		t.Fatalf("evidence query = %+v, want one representative-only shape recipe", evidenceResult)
+	}
+
+	if _, err := QueryMigrationCoverageSummary(summary, MigrationCoverageSummaryQuery{Domain: "missing"}); err == nil {
+		t.Fatal("missing domain query returned nil error")
+	}
+}
+
 func migrationCoverageSummaryFixture() map[string]any {
 	return map[string]any{
 		"schema_version":   1,
