@@ -36,7 +36,7 @@ Invoke-Step "validate current JSON" {
 }
 
 Invoke-Step "validate coverage JSON" {
-  pwsh -File (Join-Path $repoRoot "scripts/migration/validate_coverage.ps1") -CoveragePath $CoveragePath
+  go run ./cmd/aepregistry coverage -root . -coverage $CoveragePath -out tmp/registry_coverage.json -require-ledgers
 }
 
 Invoke-Step "render coverage summary JSON" {

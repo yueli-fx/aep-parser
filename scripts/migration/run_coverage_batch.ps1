@@ -113,8 +113,14 @@ if ($LASTEXITCODE -ne 0) {
   throw "Coverage sync failed for batch '$BatchId' with exit code $LASTEXITCODE"
 }
 
-$validator = Join-Path (Resolve-Path ".").Path "scripts/migration/validate_coverage.ps1"
-pwsh -File $validator -CoveragePath $CoveragePath
+$validatorArgs = @(
+  "run", "./cmd/aepregistry", "coverage",
+  "-root", ".",
+  "-coverage", $CoveragePath,
+  "-out", "tmp/registry_coverage.json",
+  "-require-ledgers"
+)
+go @validatorArgs
 if ($LASTEXITCODE -ne 0) {
   throw "Coverage validation failed for batch '$BatchId' with exit code $LASTEXITCODE"
 }

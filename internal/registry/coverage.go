@@ -18,6 +18,11 @@ type CoverageReport struct {
 	Issues        []CoverageIssue        `json:"issues"`
 }
 
+type CoverageValidationOptions struct {
+	RequireLedgers    bool
+	RequireAllRecipes bool
+}
+
 type CoverageSummary struct {
 	Records       int `json:"records"`
 	Artifacts     int `json:"artifacts"`
@@ -200,12 +205,15 @@ type coverageHostOpenPolicy struct {
 	MatrixCommandStatus string                    `json:"matrix_command_status"`
 	DefaultStrategy     string                    `json:"default_strategy"`
 	BroadFanoutStatus   string                    `json:"broad_fanout_status"`
+	AvailableFlags      []string                  `json:"available_flags"`
 	EvidenceLevels      []string                  `json:"evidence_levels"`
 	EndpointInference   coverageEndpointInference `json:"endpoint_inference"`
 }
 
 type coverageEndpointInference struct {
+	Enabled       bool     `json:"enabled"`
 	Label         string   `json:"label"`
+	OpenMode      string   `json:"open_mode"`
 	DirectHosts   []string `json:"direct_hosts"`
 	InferredHosts []string `json:"inferred_hosts"`
 }
@@ -215,6 +223,7 @@ type coverageRecord struct {
 	Domain                   string           `json:"domain"`
 	Scope                    string           `json:"scope"`
 	Artifact                 string           `json:"artifact"`
+	Ledger                   string           `json:"ledger"`
 	RecipePattern            string           `json:"recipe_pattern"`
 	Recipes                  []string         `json:"recipes"`
 	WriterStatus             string           `json:"writer_status"`
@@ -229,6 +238,7 @@ type coverageRecord struct {
 type coverageEndpoint struct {
 	OpenMode                     string             `json:"open_mode"`
 	Artifact                     string             `json:"artifact"`
+	Ledger                       string             `json:"ledger"`
 	Recipes                      []string           `json:"recipes"`
 	DirectHosts                  []string           `json:"direct_hosts"`
 	InferredHosts                []string           `json:"inferred_hosts"`
@@ -241,6 +251,7 @@ type coverageArtifact struct {
 	ID       string         `json:"id"`
 	Command  string         `json:"command"`
 	Artifact string         `json:"artifact"`
+	Ledger   string         `json:"ledger"`
 	Totals   CoverageTotals `json:"totals"`
 }
 
@@ -289,14 +300,19 @@ type matrixCase struct {
 type coverageArtifactRef struct {
 	RecordID string
 	Path     string
+	Ledger   string
 	Totals   CoverageTotals
 }
 
 func ValidateCoverage(root, coveragePath string) (CoverageReport, error) {
-	return validateCoverage(root, coveragePath, true)
+	return ValidateCoverageWithOptions(root, coveragePath, CoverageValidationOptions{})
 }
 
-func validateCoverage(root, coveragePath string, checkContractGates bool) (CoverageReport, error) {
+func ValidateCoverageWithOptions(root, coveragePath string, options CoverageValidationOptions) (CoverageReport, error) {
+	return validateCoverage(root, coveragePath, true, options)
+}
+
+func validateCoverage(root, coveragePath string, checkContractGates bool, options CoverageValidationOptions) (CoverageReport, error) {
 	var coverage coverageFile
 	if err := readJSONPath(root, coveragePath, &coverage); err != nil {
 		return CoverageReport{}, err
@@ -313,8 +329,12 @@ func validateCoverage(root, coveragePath string, checkContractGates bool) (Cover
 			ContractGates: len(coverage.ContractGates),
 		},
 	}
+	report.checkHostOpenPolicy(coveragePath, coverage)
 	for _, ref := range refs {
 		report.checkArtifact(root, ref)
+		if options.RequireLedgers {
+			report.checkLedger(root, ref)
+		}
 	}
 	if checkContractGates {
 		for _, gate := range coverage.ContractGates {
@@ -323,6 +343,9 @@ func validateCoverage(root, coveragePath string, checkContractGates bool) (Cover
 	}
 	for _, record := range coverage.Coverage {
 		report.checkCoverageRecord(root, record, atomRefs)
+	}
+	if options.RequireAllRecipes {
+		report.checkAllRecipesCovered(root)
 	}
 	report.Summary.Atoms = countUniqueAtoms(report.Records, report.AtomRows)
 	if report.Summary.Errors > 0 {
@@ -470,7 +493,7 @@ func CoverageCells(root, coveragePath string, filter CoverageCellFilter) (Covera
 }
 
 func coverageCells(root, coveragePath string, filter CoverageCellFilter, checkContractGates bool) (CoverageCellsReport, error) {
-	report, err := validateCoverage(root, coveragePath, checkContractGates)
+	report, err := validateCoverage(root, coveragePath, checkContractGates, CoverageValidationOptions{})
 	if err != nil {
 		return CoverageCellsReport{}, err
 	}
@@ -605,27 +628,61 @@ func coverageSummaryBuckets(counts map[string]int) []CoverageSummaryBucket {
 
 func collectCoverageArtifactRefs(coverage coverageFile) []coverageArtifactRef {
 	var refs []coverageArtifactRef
-	add := func(recordID, artifact string, totals CoverageTotals) {
+	add := func(recordID, artifact, ledger string, totals CoverageTotals) {
 		if artifact == "" {
 			return
 		}
 		refs = append(refs, coverageArtifactRef{
 			RecordID: recordID,
 			Path:     filepath.ToSlash(artifact),
+			Ledger:   filepath.ToSlash(ledger),
 			Totals:   totals,
 		})
 	}
 	for _, gate := range coverage.RecurringGates {
-		add(gate.ID, gate.Artifact, gate.Totals)
+		add(gate.ID, gate.Artifact, gate.Ledger, gate.Totals)
 	}
 	for _, record := range coverage.Coverage {
-		add(record.ID, record.Artifact, record.Totals)
-		add(record.ID, record.HostOpenEndpointEvidence.Artifact, record.HostOpenEndpointEvidence.Totals)
+		add(record.ID, record.Artifact, record.Ledger, record.Totals)
+		add(record.ID, record.HostOpenEndpointEvidence.Artifact, record.HostOpenEndpointEvidence.Ledger, record.HostOpenEndpointEvidence.Totals)
 		for _, chunk := range record.HostOpenEndpointEvidence.Chunks {
-			add(record.ID, chunk.Artifact, chunk.Totals)
+			add(record.ID, chunk.Artifact, chunk.Ledger, chunk.Totals)
 		}
 	}
 	return refs
+}
+
+func (r *CoverageReport) checkHostOpenPolicy(coveragePath string, coverage coverageFile) {
+	policy := coverage.HostOpenPolicy
+	if len(policy.AvailableFlags) == 0 && len(policy.EvidenceLevels) == 0 && !policy.EndpointInference.Enabled && policy.EndpointInference.OpenMode == "" {
+		r.addError("missing_host_open_policy", "", coveragePath, "host_open_policy is required")
+		return
+	}
+	for _, flag := range []string{"-ae-open", "-ae-versions", "-max-ae-open-cases"} {
+		if !stringSet(policy.AvailableFlags)[flag] {
+			r.addError("missing_host_open_policy_flag", flag, coveragePath, fmt.Sprintf("host_open_policy.available_flags missing %q", flag))
+		}
+	}
+	for _, level := range []string{"direct_all_hosts", "inferred_by_endpoint", "pending_per_capability"} {
+		if !stringSet(policy.EvidenceLevels)[level] {
+			r.addError("missing_host_open_policy_evidence_level", level, coveragePath, fmt.Sprintf("host_open_policy.evidence_levels missing %q", level))
+		}
+	}
+	if !policy.EndpointInference.Enabled {
+		r.addError("host_open_endpoint_inference_disabled", "", coveragePath, "host_open_policy.endpoint_inference.enabled must be true")
+	}
+	if policy.EndpointInference.OpenMode != "target_bound" {
+		r.addError("host_open_endpoint_inference_open_mode", "", coveragePath, "host_open_policy.endpoint_inference.open_mode must be target_bound")
+	}
+	if len(coverage.HostOpenAxis.Hosts) == 0 {
+		return
+	}
+	knownHosts := stringSet(coverage.HostOpenAxis.Hosts)
+	for _, host := range append(policy.EndpointInference.DirectHosts, policy.EndpointInference.InferredHosts...) {
+		if !knownHosts[host] {
+			r.addError("unknown_host_open_endpoint_host", host, coveragePath, fmt.Sprintf("host_open_policy.endpoint_inference references unknown host %q", host))
+		}
+	}
 }
 
 func (r *CoverageReport) checkArtifact(root string, ref coverageArtifactRef) {
@@ -643,6 +700,15 @@ func (r *CoverageReport) checkArtifact(root string, ref coverageArtifactRef) {
 	}
 	if actual != ref.Totals {
 		r.addError("matrix_totals_mismatch", ref.RecordID, ref.Path, fmt.Sprintf("coverage totals %+v do not match matrix summary %+v", ref.Totals, actual))
+	}
+}
+
+func (r *CoverageReport) checkLedger(root string, ref coverageArtifactRef) {
+	if ref.Ledger == "" {
+		return
+	}
+	if !fileExists(root, ref.Ledger) {
+		r.addError("missing_ledger", ref.RecordID, ref.Ledger, "ledger artifact not found")
 	}
 }
 
@@ -701,6 +767,25 @@ func (r *CoverageReport) checkCoverageRecord(root string, record coverageRecord,
 		return r.AtomRows[i].AtomID < r.AtomRows[j].AtomID
 	})
 	r.checkDeclaredRecipes(record.ID, detail.Artifact, detail.DeclaredRecipes, detail.ObservedRecipes)
+}
+
+func (r *CoverageReport) checkAllRecipesCovered(root string) {
+	matches, err := filepath.Glob(filepath.Join(root, "examples", "recipes", "*.json"))
+	if err != nil || len(matches) == 0 {
+		return
+	}
+	covered := map[string]bool{}
+	for _, record := range r.Records {
+		for _, recipe := range record.ObservedRecipes {
+			covered[recipe] = true
+		}
+	}
+	for _, match := range matches {
+		recipe := stringsTrimExt(filepath.Base(match))
+		if !covered[recipe] {
+			r.addError("uncovered_recipe", recipe, filepath.ToSlash(filepath.Join("examples", "recipes", filepath.Base(match))), fmt.Sprintf("coverage records do not cover recipe %q", recipe))
+		}
+	}
 }
 
 func (r *CoverageReport) checkDeclaredRecipes(recordID, artifact string, declared, observed []string) {

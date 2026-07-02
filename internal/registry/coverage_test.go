@@ -130,7 +130,8 @@ func TestValidateCoverageReportsRecordRecipeVersionAndAtomLinks(t *testing.T) {
 func TestValidateCoverageReportsAtomRowsWithHostOpenEvidenceLabels(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
-		"schema_version": 1,
+		"schema_version":   1,
+		"host_open_policy": validHostOpenPolicyFixture(),
 		"coverage": []map[string]any{
 			{
 				"id":                        "text",
@@ -212,7 +213,8 @@ func TestValidateCoverageReportsAtomRowsWithHostOpenEvidenceLabels(t *testing.T)
 func TestValidateCoverageReportsAtomRowBoundaryLabels(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
-		"schema_version": 1,
+		"schema_version":   1,
+		"host_open_policy": validHostOpenPolicyFixture(),
 		"coverage": []map[string]any{
 			{
 				"id":            "layer",
@@ -277,7 +279,8 @@ func TestValidateCoverageReportsAtomRowBoundaryLabels(t *testing.T) {
 func TestCoverageCellsReportsSourceTargetCasesWithBoundaryLabels(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
-		"schema_version": 1,
+		"schema_version":   1,
+		"host_open_policy": validHostOpenPolicyFixture(),
 		"coverage": []map[string]any{
 			{
 				"id":            "layer",
@@ -496,7 +499,8 @@ func TestSummarizeCoverageReportsObservedRecipesWithoutDeclaration(t *testing.T)
 func TestCoverageAxisSummarizesVersionAxisAndHostLabels(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
-		"schema_version": 1,
+		"schema_version":   1,
+		"host_open_policy": validHostOpenPolicyFixture(),
 		"coverage": []map[string]any{
 			{
 				"id":                        "text",
@@ -618,7 +622,8 @@ func TestCoverageAxisSummarizesVersionAxisAndHostLabels(t *testing.T) {
 func TestCoverageAxisWithFilterNarrowsRowsAndCells(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
-		"schema_version": 1,
+		"schema_version":   1,
+		"host_open_policy": validHostOpenPolicyFixture(),
 		"coverage": []map[string]any{
 			{
 				"id":            "layer",
@@ -874,10 +879,96 @@ func TestValidateCoverageFailsWhenDeclaredRecipesDoNotMatchMatrix(t *testing.T) 
 	assertCoverageIssue(t, report, "matrix_unexpected_recipe", "text", "tmp/matrix/text/matrix.json")
 }
 
+func TestValidateCoverageRequiresHostOpenPolicy(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+		"schema_version": 1,
+		"coverage": []map[string]any{
+			{
+				"id":       "text",
+				"artifact": "tmp/matrix/text/matrix.json",
+				"recipes":  []string{"minimal-text-a", "minimal-text-b"},
+				"totals":   map[string]any{"total": 2, "pass": 2, "blocked": 0, "failed": 0, "skipped": 0},
+			},
+		},
+	})
+	writeMatrixFixture(t, root, "tmp/matrix/text/matrix.json", 2)
+
+	report, err := ValidateCoverage(root, "flightdeck/work/aep-understanding-generation/coverage.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != StatusFail {
+		t.Fatalf("status = %q, want %q", report.Status, StatusFail)
+	}
+	assertCoverageIssue(t, report, "missing_host_open_policy", "", "flightdeck/work/aep-understanding-generation/coverage.json")
+}
+
+func TestValidateCoverageReportsUncoveredRecipes(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeFile(t, root, "examples/recipes/minimal-text-a.json", "{}")
+	writeFile(t, root, "examples/recipes/minimal-text-b.json", "{}")
+	writeFile(t, root, "examples/recipes/minimal-text-c.json", "{}")
+	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+		"schema_version":   1,
+		"host_open_policy": validHostOpenPolicyFixture(),
+		"coverage": []map[string]any{
+			{
+				"id":       "text",
+				"artifact": "tmp/matrix/text/matrix.json",
+				"recipes":  []string{"minimal-text-a", "minimal-text-b"},
+				"totals":   map[string]any{"total": 2, "pass": 2, "blocked": 0, "failed": 0, "skipped": 0},
+			},
+		},
+	})
+	writeMatrixFixture(t, root, "tmp/matrix/text/matrix.json", 2)
+
+	report, err := ValidateCoverageWithOptions(root, "flightdeck/work/aep-understanding-generation/coverage.json", CoverageValidationOptions{
+		RequireAllRecipes: true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != StatusFail {
+		t.Fatalf("status = %q, want %q", report.Status, StatusFail)
+	}
+	assertCoverageIssue(t, report, "uncovered_recipe", "minimal-text-c", "examples/recipes/minimal-text-c.json")
+}
+
+func TestValidateCoverageCanRequireLedgers(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+		"schema_version":   1,
+		"host_open_policy": validHostOpenPolicyFixture(),
+		"coverage": []map[string]any{
+			{
+				"id":       "text",
+				"artifact": "tmp/matrix/text/matrix.json",
+				"ledger":   "tmp/matrix/text/ledger.md",
+				"recipes":  []string{"minimal-text-a", "minimal-text-b"},
+				"totals":   map[string]any{"total": 2, "pass": 2, "blocked": 0, "failed": 0, "skipped": 0},
+			},
+		},
+	})
+	writeMatrixFixture(t, root, "tmp/matrix/text/matrix.json", 2)
+
+	report, err := ValidateCoverageWithOptions(root, "flightdeck/work/aep-understanding-generation/coverage.json", CoverageValidationOptions{
+		RequireLedgers: true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != StatusFail {
+		t.Fatalf("status = %q, want %q", report.Status, StatusFail)
+	}
+	assertCoverageIssue(t, report, "missing_ledger", "text", "tmp/matrix/text/ledger.md")
+}
+
 func writeCoverageFixture(t *testing.T, root, rel string, total int) {
 	t.Helper()
 	writeJSON(t, root, rel, map[string]any{
-		"schema_version": 1,
+		"schema_version":   1,
+		"host_open_policy": validHostOpenPolicyFixture(),
 		"coverage": []map[string]any{
 			{
 				"id":       "text",
@@ -895,10 +986,33 @@ func writeCoverageFixture(t *testing.T, root, rel string, total int) {
 	})
 }
 
+func validHostOpenPolicyFixture() map[string]any {
+	return map[string]any{
+		"available_flags": []string{"-ae-open", "-ae-versions", "-max-ae-open-cases"},
+		"evidence_levels": []string{
+			"direct_all_hosts",
+			"inferred_by_endpoint",
+			"pending_per_capability",
+			"direct_endpoint_hosts",
+			"representative_only",
+			"representative_covered",
+			"excluded_known_boundary",
+			"recorded_status_only",
+		},
+		"endpoint_inference": map[string]any{
+			"enabled":        true,
+			"open_mode":      "target_bound",
+			"direct_hosts":   []string{"AE2020", "AE2025"},
+			"inferred_hosts": []string{"AE2021", "AE2022", "AE2023", "AE2024"},
+		},
+	}
+}
+
 func addBoundaryContractGate(t *testing.T, root string, summary VersionBoundaryCheckSummary) {
 	t.Helper()
 	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
-		"schema_version": 1,
+		"schema_version":   1,
+		"host_open_policy": validHostOpenPolicyFixture(),
 		"contract_gates": []map[string]any{
 			{
 				"id":       "registry-version-boundaries",

@@ -118,7 +118,7 @@ func coverageAxisWithFilter(root, coveragePath string, versionAxis []string, fil
 		versionAxis = DefaultAEVersionAxis()
 	}
 	versionAxis = sortedStrings(versionAxis)
-	report, err := validateCoverage(root, coveragePath, checkContractGates)
+	report, err := validateCoverage(root, coveragePath, checkContractGates, CoverageValidationOptions{})
 	if err != nil {
 		return CoverageAxisReport{}, err
 	}

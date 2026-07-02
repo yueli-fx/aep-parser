@@ -493,8 +493,10 @@
     {
       "id": "coverage-json-validator",
       "status": "available_verified",
-      "purpose": "Validate coverage JSON totals and recipe coverage against referenced matrix artifacts.",
-      "script": "scripts/migration/validate_coverage.ps1"
+      "purpose": "Validate coverage JSON totals, host-open policy, declared ledgers, and recipe coverage against referenced matrix artifacts. Go command is primary; the PowerShell script remains as legacy compatibility.",
+      "command": "go run ./cmd/aepregistry coverage -root . -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -out tmp/registry_coverage.json -require-ledgers",
+      "script": "scripts/migration/validate_coverage.ps1",
+      "legacy_command": "pwsh -File scripts/migration/validate_coverage.ps1"
     },
     {
       "id": "current-json-validator",
@@ -512,7 +514,7 @@
     {
       "id": "coverage-batch-runner",
       "status": "available_verified",
-      "purpose": "Run or skip-run a coverage batch from current JSON, sync coverage JSON, then validate artifact totals.",
+      "purpose": "Run or skip-run a coverage batch from current JSON, sync coverage JSON, then validate artifact totals with the Go coverage validator.",
       "script": "scripts/migration/run_coverage_batch.ps1"
     },
     {
@@ -595,9 +597,9 @@
         "evidence": "checkpoint ok: canonical all-current-writer-coverage replayed into a temporary coverage file from 16 matrix artifacts and validated 143 recipes"
       },
       {
-        "command": "pwsh -File scripts/migration/validate_coverage.ps1",
+        "command": "go run ./cmd/aepregistry coverage -root . -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -out tmp/registry_coverage.json -require-ledgers",
         "status": "pass",
-        "evidence": "coverage ok: checked 16 matrix artifacts, 2 recurring gates, host-open policy, and 143 recipes"
+        "evidence": "registry coverage: pass (49 artifacts, 0 errors); Go validator checks totals, host-open policy, declared ledgers, and 143 recipe coverage"
       },
       {
         "command": "go run ./cmd/aepregistry migration-summary -root . -out tmp/migration_coverage_summary.json",
