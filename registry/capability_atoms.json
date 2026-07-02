@@ -2754,6 +2754,234 @@
       ]
     },
     {
+      "id": "text.animator.rotation_x_keyframes",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-rotation-x-value-keyframes.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_rotx_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.animator.rotation_y_keyframes",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-rotation-y-value-keyframes.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_roty_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.animator.skew_keyframes",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-skew-value-keyframes.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_skew_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.animator.stroke_color_keyframes",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-stroke-color-value-keyframes.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_strokecolor_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.animator.stroke_opacity_keyframes",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-stroke-opacity-value-keyframes.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_strokeopacity_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.animator.stroke_width_keyframes",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-stroke-width-value-keyframes.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_strokewidth_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
       "id": "text.animator.tracking_keyframes",
       "domain": "text",
       "tier": "atom",

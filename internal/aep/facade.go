@@ -1526,6 +1526,96 @@ func AnimateTextFillOpacity(layer *Layer, tickRate float64, kfs []ScalarKeyframe
 	return serializer.AnimateTextFillOpacity(layer, tickRate, kfs)
 }
 
+// @summary    Keyframe a text animator's per-character Stroke Opacity
+// @description Keyframes the per-character Stroke Opacity leaf of a text layer's
+//   first animator (added via AddTextStrokeOpacityAnimator). Needs >= 2
+//   keyframes; tickRate <= 0 uses the comp's.
+// @param      layer     the parsed text layer whose animator to keyframe
+// @param      tickRate  keyframe time base (<= 0 uses the comp's)
+// @param      kfs       the scalar keyframes (>= 2) for the Stroke Opacity leaf
+// @domain     text
+// @stability  alpha
+// @verify     roundtrip
+// @since      AE2020
+// @boundary   shared 1D scalar leaf path; stroke must exist for visual output
+// @incident   text-animator-create-re
+// @alias      animate text stroke opacity,文字描边不透明度关键帧
+func AnimateTextStrokeOpacity(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
+	return serializer.AnimateTextStrokeOpacity(layer, tickRate, kfs)
+}
+
+// @summary    Keyframe a text animator's per-character Stroke Width
+// @description Keyframes the per-character Stroke Width leaf of a text layer's
+//   first animator (added via AddTextStrokeWidthAnimator). Needs >= 2 keyframes;
+//   tickRate <= 0 uses the comp's.
+// @param      layer     the parsed text layer whose animator to keyframe
+// @param      tickRate  keyframe time base (<= 0 uses the comp's)
+// @param      kfs       the scalar keyframes (>= 2) for the Stroke Width leaf
+// @domain     text
+// @stability  alpha
+// @verify     roundtrip
+// @since      AE2020
+// @boundary   shared 1D scalar leaf path; stroke must exist for visual output
+// @incident   text-animator-create-re
+// @alias      animate text stroke width,文字描边宽度关键帧
+func AnimateTextStrokeWidth(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
+	return serializer.AnimateTextStrokeWidth(layer, tickRate, kfs)
+}
+
+// @summary    Keyframe a text animator's per-character Skew
+// @description Keyframes the per-character Skew leaf of a text layer's first
+//   animator (added via AddTextSkewAnimator). Needs >= 2 keyframes; tickRate <=
+//   0 uses the comp's.
+// @param      layer     the parsed text layer whose animator to keyframe
+// @param      tickRate  keyframe time base (<= 0 uses the comp's)
+// @param      kfs       the scalar keyframes (>= 2) for the Skew leaf
+// @domain     text
+// @stability  alpha
+// @verify     roundtrip
+// @since      AE2020
+// @boundary   shared 1D scalar leaf path
+// @incident   text-animator-create-re
+// @alias      animate text skew,文字倾斜关键帧
+func AnimateTextSkew(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
+	return serializer.AnimateTextSkew(layer, tickRate, kfs)
+}
+
+// @summary    Keyframe a text animator's per-character Rotation X
+// @description Keyframes the per-character Rotation X leaf of a text layer's
+//   first animator (added via AddTextRotationXAnimator). Needs >= 2 keyframes;
+//   tickRate <= 0 uses the comp's.
+// @param      layer     the parsed text layer whose animator to keyframe
+// @param      tickRate  keyframe time base (<= 0 uses the comp's)
+// @param      kfs       the scalar keyframes (>= 2) for the Rotation X leaf
+// @domain     text
+// @stability  alpha
+// @verify     roundtrip
+// @since      AE2020
+// @boundary   shared 1D scalar leaf path
+// @incident   text-animator-create-re
+// @alias      animate text rotation x,文字X旋转关键帧
+func AnimateTextRotationX(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
+	return serializer.AnimateTextRotationX(layer, tickRate, kfs)
+}
+
+// @summary    Keyframe a text animator's per-character Rotation Y
+// @description Keyframes the per-character Rotation Y leaf of a text layer's
+//   first animator (added via AddTextRotationYAnimator). Needs >= 2 keyframes;
+//   tickRate <= 0 uses the comp's.
+// @param      layer     the parsed text layer whose animator to keyframe
+// @param      tickRate  keyframe time base (<= 0 uses the comp's)
+// @param      kfs       the scalar keyframes (>= 2) for the Rotation Y leaf
+// @domain     text
+// @stability  alpha
+// @verify     roundtrip
+// @since      AE2020
+// @boundary   shared 1D scalar leaf path
+// @incident   text-animator-create-re
+// @alias      animate text rotation y,文字Y旋转关键帧
+func AnimateTextRotationY(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
+	return serializer.AnimateTextRotationY(layer, tickRate, kfs)
+}
+
 // @summary    Keyframe a text animator's per-character Rotation
 // @description Keyframes the per-character Rotation leaf of a text layer's first
 //   animator (added via AddTextRotationAnimator) — animating the driven angle
@@ -1655,6 +1745,25 @@ func AnimateTextScale(layer *Layer, tickRate float64, kfs []VectorKeyframe) erro
 // @alias      animate text color,文字颜色关键帧,颜色循环,color cycle
 func AnimateTextColor(layer *Layer, tickRate float64, kfs []VectorKeyframe) error {
 	return serializer.AnimateTextColor(layer, tickRate, kfs)
+}
+
+// @summary    Keyframe a text animator's per-character Stroke Color
+// @description Keyframes the per-character Stroke Color leaf of a text layer's
+//   first animator (added via AddTextStrokeColorAnimator). Each keyframe value is
+//   [r, g, b, a] with channels 0..1. Needs >= 2 keyframes; tickRate <= 0 uses
+//   the comp's.
+// @param      layer     the parsed text layer whose animator to keyframe
+// @param      tickRate  keyframe time base (<= 0 uses the comp's)
+// @param      kfs       the color keyframes (>= 2; [r,g,b,a]) for the Stroke Color leaf
+// @domain     text
+// @stability  alpha
+// @verify     roundtrip
+// @since      AE2020
+// @boundary   stroke must exist for visual output
+// @incident   text-animator-create-re
+// @alias      animate text stroke color,文字描边颜色关键帧
+func AnimateTextStrokeColor(layer *Layer, tickRate float64, kfs []VectorKeyframe) error {
+	return serializer.AnimateTextStrokeColor(layer, tickRate, kfs)
 }
 
 // @summary    Set an effect parameter's static value by match-name

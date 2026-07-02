@@ -738,6 +738,9 @@ func applyTextAnimators(layer *aep.Layer, animators []TextAnimatorSpec) error {
 			if err := applyTextRangeOffsetKeyframes(layer, animator); err != nil {
 				return err
 			}
+			if err := applyTextValueKeyframes(layer, animator); err != nil {
+				return err
+			}
 		case "tracking":
 			value, ok := animator.Value.(float64)
 			if !ok {
@@ -803,6 +806,9 @@ func applyTextAnimators(layer *aep.Layer, animators []TextAnimatorSpec) error {
 			if err := applyTextRangeOffsetKeyframes(layer, animator); err != nil {
 				return err
 			}
+			if err := applyTextValueKeyframes(layer, animator); err != nil {
+				return err
+			}
 		case "stroke_width":
 			value, ok := animator.Value.(float64)
 			if !ok {
@@ -815,6 +821,9 @@ func applyTextAnimators(layer *aep.Layer, animators []TextAnimatorSpec) error {
 				return err
 			}
 			if err := applyTextRangeOffsetKeyframes(layer, animator); err != nil {
+				return err
+			}
+			if err := applyTextValueKeyframes(layer, animator); err != nil {
 				return err
 			}
 		case "skew":
@@ -831,6 +840,9 @@ func applyTextAnimators(layer *aep.Layer, animators []TextAnimatorSpec) error {
 			if err := applyTextRangeOffsetKeyframes(layer, animator); err != nil {
 				return err
 			}
+			if err := applyTextValueKeyframes(layer, animator); err != nil {
+				return err
+			}
 		case "rotation_x":
 			value, ok := animator.Value.(float64)
 			if !ok {
@@ -845,6 +857,9 @@ func applyTextAnimators(layer *aep.Layer, animators []TextAnimatorSpec) error {
 			if err := applyTextRangeOffsetKeyframes(layer, animator); err != nil {
 				return err
 			}
+			if err := applyTextValueKeyframes(layer, animator); err != nil {
+				return err
+			}
 		case "rotation_y":
 			value, ok := animator.Value.(float64)
 			if !ok {
@@ -857,6 +872,9 @@ func applyTextAnimators(layer *aep.Layer, animators []TextAnimatorSpec) error {
 				return err
 			}
 			if err := applyTextRangeOffsetKeyframes(layer, animator); err != nil {
+				return err
+			}
+			if err := applyTextValueKeyframes(layer, animator); err != nil {
 				return err
 			}
 		default:
@@ -899,6 +917,36 @@ func applyTextValueKeyframes(layer *aep.Layer, animator TextAnimatorSpec) error 
 			return err
 		}
 		return aep.AnimateTextFillOpacity(layer, 0, keyframes)
+	case "stroke_opacity":
+		keyframes, err := scalarValueKeyframes(animator.ValueKeyframes)
+		if err != nil {
+			return err
+		}
+		return aep.AnimateTextStrokeOpacity(layer, 0, keyframes)
+	case "stroke_width":
+		keyframes, err := scalarValueKeyframes(animator.ValueKeyframes)
+		if err != nil {
+			return err
+		}
+		return aep.AnimateTextStrokeWidth(layer, 0, keyframes)
+	case "skew":
+		keyframes, err := scalarValueKeyframes(animator.ValueKeyframes)
+		if err != nil {
+			return err
+		}
+		return aep.AnimateTextSkew(layer, 0, keyframes)
+	case "rotation_x":
+		keyframes, err := scalarValueKeyframes(animator.ValueKeyframes)
+		if err != nil {
+			return err
+		}
+		return aep.AnimateTextRotationX(layer, 0, keyframes)
+	case "rotation_y":
+		keyframes, err := scalarValueKeyframes(animator.ValueKeyframes)
+		if err != nil {
+			return err
+		}
+		return aep.AnimateTextRotationY(layer, 0, keyframes)
 	case "position":
 		keyframes, err := vectorValueKeyframes(animator.ValueKeyframes, 3)
 		if err != nil {
@@ -923,6 +971,12 @@ func applyTextValueKeyframes(layer *aep.Layer, animator TextAnimatorSpec) error 
 			return err
 		}
 		return aep.AnimateTextColor(layer, 0, keyframes)
+	case "stroke_color":
+		keyframes, err := colorValueKeyframes(animator.ValueKeyframes)
+		if err != nil {
+			return err
+		}
+		return aep.AnimateTextStrokeColor(layer, 0, keyframes)
 	case "tracking":
 		keyframes, err := scalarValueKeyframes(animator.ValueKeyframes)
 		if err != nil {

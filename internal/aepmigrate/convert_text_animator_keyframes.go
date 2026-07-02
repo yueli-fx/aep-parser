@@ -29,6 +29,36 @@ func materializeTextAnimatorValueKeyframes(targetLayer *aep.Layer, property prof
 			return err
 		}
 		return aep.AnimateTextFillOpacity(targetLayer, 0, keyframes)
+	case "ADBE Text Stroke Opacity":
+		keyframes, err := textAnimatorScalarKeyframes(property)
+		if err != nil {
+			return err
+		}
+		return aep.AnimateTextStrokeOpacity(targetLayer, 0, keyframes)
+	case "ADBE Text Stroke Width":
+		keyframes, err := textAnimatorScalarKeyframes(property)
+		if err != nil {
+			return err
+		}
+		return aep.AnimateTextStrokeWidth(targetLayer, 0, keyframes)
+	case "ADBE Text Skew":
+		keyframes, err := textAnimatorScalarKeyframes(property)
+		if err != nil {
+			return err
+		}
+		return aep.AnimateTextSkew(targetLayer, 0, keyframes)
+	case "ADBE Text Rotation X":
+		keyframes, err := textAnimatorScalarKeyframes(property)
+		if err != nil {
+			return err
+		}
+		return aep.AnimateTextRotationX(targetLayer, 0, keyframes)
+	case "ADBE Text Rotation Y":
+		keyframes, err := textAnimatorScalarKeyframes(property)
+		if err != nil {
+			return err
+		}
+		return aep.AnimateTextRotationY(targetLayer, 0, keyframes)
 	case "ADBE Text Position 3D":
 		keyframes, err := textAnimatorVectorKeyframes(property, 3)
 		if err != nil {
@@ -53,6 +83,12 @@ func materializeTextAnimatorValueKeyframes(targetLayer *aep.Layer, property prof
 			return err
 		}
 		return aep.AnimateTextColor(targetLayer, 0, keyframes)
+	case "ADBE Text Stroke Color":
+		keyframes, err := textAnimatorColorKeyframes(property)
+		if err != nil {
+			return err
+		}
+		return aep.AnimateTextStrokeColor(targetLayer, 0, keyframes)
 	case "ADBE Text Tracking Amount":
 		keyframes, err := textAnimatorScalarKeyframes(property)
 		if err != nil {

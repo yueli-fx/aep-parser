@@ -221,7 +221,7 @@
       "host_open_status": "OPEN-ALL-HOSTS representatives plus direct_endpoint_hosts_pass for non-representative recipes; AE2021-AE2024 inferred_by_endpoint",
       "id": "text-animators",
       "ledger": "tmp/migration_matrix_text_animators_all_6x6/ledger.md",
-      "recipe_count": 23,
+      "recipe_count": 29,
       "recipe_pattern": "minimal-text-animator-*",
       "recipes": [
         "minimal-text-animator-character-offset",
@@ -238,23 +238,29 @@
         "minimal-text-animator-rotation",
         "minimal-text-animator-rotation-value-keyframes",
         "minimal-text-animator-rotation-x",
+        "minimal-text-animator-rotation-x-value-keyframes",
         "minimal-text-animator-rotation-y",
+        "minimal-text-animator-rotation-y-value-keyframes",
         "minimal-text-animator-scale",
         "minimal-text-animator-scale-value-keyframes",
         "minimal-text-animator-skew",
+        "minimal-text-animator-skew-value-keyframes",
         "minimal-text-animator-stroke-color",
+        "minimal-text-animator-stroke-color-value-keyframes",
         "minimal-text-animator-stroke-opacity",
+        "minimal-text-animator-stroke-opacity-value-keyframes",
         "minimal-text-animator-stroke-width",
+        "minimal-text-animator-stroke-width-value-keyframes",
         "minimal-text-animator-tracking",
         "minimal-text-animator-tracking-value-keyframes"
       ],
-      "scope": "all 22 current recipe-owned text animator fixtures",
+      "scope": "all 29 current recipe-owned text animator fixtures",
       "totals": {
         "blocked": 0,
         "failed": 0,
-        "pass": 828,
+        "pass": 1044,
         "skipped": 0,
-        "total": 828
+        "total": 1044
       },
       "writer_coverage": "AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 sources into AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 targets",
       "writer_status": "PD-6x6"

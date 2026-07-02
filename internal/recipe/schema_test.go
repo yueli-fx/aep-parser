@@ -2911,6 +2911,11 @@ func TestValidateReportsTextAnimatorScalarValueKeyframesCapabilities(t *testing.
 		{"tracking", "AnimateTextTracking"},
 		{"character_offset", "AnimateTextCharacterOffset"},
 		{"fill_opacity", "AnimateTextFillOpacity"},
+		{"stroke_opacity", "AnimateTextStrokeOpacity"},
+		{"stroke_width", "AnimateTextStrokeWidth"},
+		{"skew", "AnimateTextSkew"},
+		{"rotation_x", "AnimateTextRotationX"},
+		{"rotation_y", "AnimateTextRotationY"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.property, func(t *testing.T) {
@@ -2953,6 +2958,7 @@ func TestValidateReportsTextAnimatorVectorValueKeyframesCapabilities(t *testing.
 		{"position", []float64{0, -80, 0}, "AnimateTextPosition"},
 		{"scale", []float64{100, 100, 100}, "AnimateTextScale"},
 		{"color", []float64{255, 0, 0, 255}, "AnimateTextColor"},
+		{"stroke_color", []float64{255, 0, 0, 255}, "AnimateTextStrokeColor"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.property, func(t *testing.T) {

@@ -22,6 +22,21 @@ func TestConvertWritesRecipeTextAnimatorFillOpacityValueKeyframesProject(t *test
 	assertRecipeConvertsPass(t, "minimal-text-animator-fill-opacity-value-keyframes.json")
 }
 
+func TestConvertWritesRecipeTextAnimatorRemainingValueKeyframesProjects(t *testing.T) {
+	for _, recipeName := range []string{
+		"minimal-text-animator-stroke-opacity-value-keyframes.json",
+		"minimal-text-animator-stroke-width-value-keyframes.json",
+		"minimal-text-animator-skew-value-keyframes.json",
+		"minimal-text-animator-rotation-x-value-keyframes.json",
+		"minimal-text-animator-rotation-y-value-keyframes.json",
+		"minimal-text-animator-stroke-color-value-keyframes.json",
+	} {
+		t.Run(recipeName, func(t *testing.T) {
+			assertRecipeConvertsPass(t, recipeName)
+		})
+	}
+}
+
 func TestConvertWritesRecipeTextAnimatorRotationXYProjects(t *testing.T) {
 	for _, recipeName := range []string{
 		"minimal-text-animator-rotation-x.json",

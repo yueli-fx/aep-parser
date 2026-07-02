@@ -262,15 +262,15 @@
           "AE2025"
         ],
         "summary": {
-          "atom_rows": 144,
-          "writer_full_axis_rows": 143,
+          "atom_rows": 150,
+          "writer_full_axis_rows": 149,
           "writer_partial_rows": 0,
           "boundary_rows": 1,
-          "host_full_axis_rows": 143,
+          "host_full_axis_rows": 149,
           "host_missing_rows": 0,
           "source_target_pairs": 36,
-          "cells": 5184,
-          "pass": 5149,
+          "cells": 5400,
+          "pass": 5365,
           "blocked": 5,
           "failed": 0,
           "skipped": 30
@@ -279,9 +279,9 @@
           {
             "query": "text-animators",
             "command": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_axis_text_animators.json -axis -record text-animators",
-            "atom_rows": 23,
-            "cells": 828,
-            "pass": 828,
+            "atom_rows": 29,
+            "cells": 1044,
+            "pass": 1044,
             "blocked": 0,
             "failed": 0,
             "skipped": 0
@@ -515,9 +515,9 @@
           ]
         },
         "text_animators_query": {
-          "atom_rows": 23,
-          "cells": 828,
-          "pass": 828,
+          "atom_rows": 29,
+          "cells": 1044,
+          "pass": 1044,
           "blocked": 0,
           "failed": 0,
           "skipped": 0
@@ -1079,14 +1079,14 @@
           "records": 18,
           "artifacts": 49,
           "contract_gates": 1,
-          "atoms": 144,
-          "atom_rows": 144,
+          "atoms": 150,
+          "atom_rows": 150,
           "errors": 0,
           "direct_host_atoms": 128,
           "inferred_host_atoms": 128,
-          "declared_recipes": 144,
-          "observed_recipes": 144,
-          "atom_row_recipes": 144,
+          "declared_recipes": 150,
+          "observed_recipes": 150,
+          "atom_row_recipes": 150,
           "recipes_without_atom_rows": 0,
           "atom_rows_without_recipes": 0,
           "observed_recipes_without_declaration": 0,
@@ -1105,24 +1105,38 @@
     },
     "last_capability_target": {
       "location": "text",
-      "group": "text_animator_fill_opacity_value_keyframes",
-      "reason": "Promote fill opacity text animator value keyframes from an unsupported conversion surface to an explicit atom with recipe, serializer facade, migrate replay, and AE2020-AE2025 matrix evidence.",
+      "group": "text_animator_remaining_value_keyframes",
+      "reason": "Promote the remaining static text animator leaves to value-keyframed atoms with recipes, serializer facades, migrate replay, and AE2020-AE2025 matrix evidence.",
       "result": {
-        "recipe": "examples/recipes/minimal-text-animator-fill-opacity-value-keyframes.json",
-        "atom_id": "text.animator.fill_opacity_keyframes",
+        "recipes": [
+          "examples/recipes/minimal-text-animator-stroke-opacity-value-keyframes.json",
+          "examples/recipes/minimal-text-animator-stroke-width-value-keyframes.json",
+          "examples/recipes/minimal-text-animator-skew-value-keyframes.json",
+          "examples/recipes/minimal-text-animator-rotation-x-value-keyframes.json",
+          "examples/recipes/minimal-text-animator-rotation-y-value-keyframes.json",
+          "examples/recipes/minimal-text-animator-stroke-color-value-keyframes.json"
+        ],
+        "atom_ids": [
+          "text.animator.stroke_opacity_keyframes",
+          "text.animator.stroke_width_keyframes",
+          "text.animator.skew_keyframes",
+          "text.animator.rotation_x_keyframes",
+          "text.animator.rotation_y_keyframes",
+          "text.animator.stroke_color_keyframes"
+        ],
         "coverage_record": "text-animators",
         "matrix": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
         "totals": {
-          "total": 828,
-          "pass": 828,
+          "total": 1044,
+          "pass": 1044,
           "blocked": 0,
           "failed": 0,
           "skipped": 0
         },
         "coverage_axis": {
-          "atom_rows": 23,
-          "cells": 828,
-          "pass": 828,
+          "atom_rows": 29,
+          "cells": 1044,
+          "pass": 1044,
           "blocked": 0,
           "failed": 0,
           "skipped": 0
@@ -1130,7 +1144,7 @@
         "host_open_status": "covered by existing text-animators representative endpoint host-open policy; direct host-open fanout is not rerun for every scalar variant"
       }
     },
-    "next_action": "Continue mainline by selecting the next real unsupported conversion surface after text.animator.fill_opacity_keyframes; prefer one coherent capability+matrix batch and update JSON ledgers once per batch.",
+    "next_action": "Continue mainline by selecting the next real unsupported conversion surface after completing the current text animator value-keyframes family; prefer one coherent capability+matrix batch and update JSON ledgers once per batch.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

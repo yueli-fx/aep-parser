@@ -1095,6 +1095,41 @@ func AnimateTextFillOpacity(layer *Layer, tickRate float64, kfs []ScalarKeyframe
 	return animateTextScalarLeaf(layer, matchNameTextFillOpacity, "AnimateTextFillOpacity", tickRate, kfs)
 }
 
+// AnimateTextStrokeOpacity keyframes the per-character Stroke Opacity leaf of
+// the layer's first text animator (added via AddTextStrokeOpacityAnimator).
+// (Full contract lives on the aep.AnimateTextStrokeOpacity facade.)
+func AnimateTextStrokeOpacity(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
+	return animateTextScalarLeaf(layer, matchNameTextStrokeOpacity, "AnimateTextStrokeOpacity", tickRate, kfs)
+}
+
+// AnimateTextStrokeWidth keyframes the per-character Stroke Width leaf of the
+// layer's first text animator (added via AddTextStrokeWidthAnimator).
+// (Full contract lives on the aep.AnimateTextStrokeWidth facade.)
+func AnimateTextStrokeWidth(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
+	return animateTextScalarLeaf(layer, matchNameTextStrokeWidth, "AnimateTextStrokeWidth", tickRate, kfs)
+}
+
+// AnimateTextSkew keyframes the per-character Skew leaf of the layer's first
+// text animator (added via AddTextSkewAnimator).
+// (Full contract lives on the aep.AnimateTextSkew facade.)
+func AnimateTextSkew(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
+	return animateTextScalarLeaf(layer, matchNameTextSkew, "AnimateTextSkew", tickRate, kfs)
+}
+
+// AnimateTextRotationX keyframes the per-character Rotation X leaf of the layer's
+// first text animator (added via AddTextRotationXAnimator).
+// (Full contract lives on the aep.AnimateTextRotationX facade.)
+func AnimateTextRotationX(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
+	return animateTextScalarLeaf(layer, matchNameTextRotationX, "AnimateTextRotationX", tickRate, kfs)
+}
+
+// AnimateTextRotationY keyframes the per-character Rotation Y leaf of the layer's
+// first text animator (added via AddTextRotationYAnimator).
+// (Full contract lives on the aep.AnimateTextRotationY facade.)
+func AnimateTextRotationY(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
+	return animateTextScalarLeaf(layer, matchNameTextRotationY, "AnimateTextRotationY", tickRate, kfs)
+}
+
 // AnimateTextRotation keyframes the per-character Rotation leaf of the layer's
 // first text animator (added via AddTextRotationAnimator), spinning the selected
 // characters as one synchronized group over time (e.g. a continuous 0→360 spin,
@@ -1210,4 +1245,24 @@ func AnimateTextColor(layer *Layer, tickRate float64, kfs []VectorKeyframe) erro
 		}
 	}
 	return animateTextVectorLeaf(layer, matchNameTextFillColor, "AnimateTextColor", false, tickRate, conv)
+}
+
+// AnimateTextStrokeColor keyframes the per-character Stroke Color leaf of the
+// layer's first text animator (added via AddTextStrokeColorAnimator).
+// (Full contract lives on the aep.AnimateTextStrokeColor facade.)
+func AnimateTextStrokeColor(layer *Layer, tickRate float64, kfs []VectorKeyframe) error {
+	conv := make([]VectorKeyframe, len(kfs))
+	for i, kf := range kfs {
+		if len(kf.Value) != 4 {
+			return fmt.Errorf("AnimateTextStrokeColor: keyframe %d Value must be [r,g,b,a] (4 channels), got %d", i, len(kf.Value))
+		}
+		r, g, b, a := kf.Value[0], kf.Value[1], kf.Value[2], kf.Value[3]
+		conv[i] = VectorKeyframe{
+			Time:    kf.Time,
+			Value:   []float64{a * 255, r * 255, g * 255, b * 255},
+			InEase:  kf.InEase,
+			OutEase: kf.OutEase,
+		}
+	}
+	return animateTextVectorLeaf(layer, matchNameTextStrokeColor, "AnimateTextStrokeColor", false, tickRate, conv)
 }

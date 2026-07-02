@@ -1234,9 +1234,15 @@ func TestCompileToFileChecksTextAnimatorScalarValueKeyframesExamples(t *testing.
 		"minimal-text-animator-tracking-value-keyframes.json",
 		"minimal-text-animator-character-offset-value-keyframes.json",
 		"minimal-text-animator-fill-opacity-value-keyframes.json",
+		"minimal-text-animator-stroke-opacity-value-keyframes.json",
+		"minimal-text-animator-stroke-width-value-keyframes.json",
+		"minimal-text-animator-skew-value-keyframes.json",
+		"minimal-text-animator-rotation-x-value-keyframes.json",
+		"minimal-text-animator-rotation-y-value-keyframes.json",
 		"minimal-text-animator-position-value-keyframes.json",
 		"minimal-text-animator-scale-value-keyframes.json",
 		"minimal-text-animator-color-value-keyframes.json",
+		"minimal-text-animator-stroke-color-value-keyframes.json",
 	} {
 		t.Run(name, func(t *testing.T) {
 			raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "recipes", name))
