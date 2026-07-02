@@ -128,6 +128,59 @@ func TestAuditRepositoryTreatsMissingOptionalGeneratedEvidenceAsWarning(t *testi
 	assertIssue(t, report, "missing_optional_evidence", SeverityWarning, "", "tmp/missing-matrix/matrix.json")
 }
 
+func TestAuditRepositoryReportsDependenciesOutsideRegisteredLocations(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeFile(t, root, "orphan/asset.json", "{}\n")
+	writeValidRegistry(t, root, []map[string]any{
+		{
+			"id":       "orphan.atom",
+			"domain":   "orphan",
+			"tier":     "atom",
+			"status":   "planned",
+			"platform": map[string]any{"host_required": false, "os": []string{"windows", "macos", "linux"}},
+			"version_axis": map[string]any{
+				"min_supported":    "AE2020",
+				"known_supported":  []string{"AE2020", "AE2025"},
+				"expansion_policy": "append_new_ae_versions",
+			},
+			"workflows": []string{"generate"},
+			"dependencies": []map[string]any{
+				{"kind": "recipe", "path": "orphan/asset.json", "required": true},
+			},
+		},
+	})
+
+	report, err := AuditRepository(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertIssue(t, report, "unregistered_dependency_location", SeverityError, "orphan.atom", "orphan/asset.json")
+}
+
+func TestAuditRepositoryReportsEvidenceOutsideRegisteredLocations(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeFile(t, root, "orphan/matrix.json", "{}\n")
+	writeValidRegistry(t, root, nil)
+	writeJSON(t, root, "registry/evidence.json", map[string]any{
+		"schema_version": 1,
+		"evidence_sets": []map[string]any{
+			{
+				"id":            "orphan.matrix",
+				"class":         "generated_evidence",
+				"artifact_path": "orphan/matrix.json",
+				"required":      true,
+				"workflows":     []string{"migrate"},
+			},
+		},
+	})
+
+	report, err := AuditRepository(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertIssue(t, report, "unregistered_evidence_location", SeverityError, "", "orphan/matrix.json")
+}
+
 func newTestRegistryRoot(t *testing.T) string {
 	t.Helper()
 	root := t.TempDir()
@@ -152,6 +205,8 @@ func writeValidRegistry(t *testing.T, root string, atoms []map[string]any) {
 		"locations": []map[string]any{
 			{"id": "registry", "path": "registry", "class": "spec_registry", "tracked": true, "required": true, "lifecycle": "source_of_truth"},
 			{"id": "recipes", "path": "examples/recipes", "class": "atomic_fixtures", "tracked": true, "required": true, "lifecycle": "source_contract"},
+			{"id": "templates", "path": "internal/serializer/templates", "class": "source_contract", "tracked": true, "required": true, "lifecycle": "source_contract"},
+			{"id": "fixtures", "path": "test_data/fixtures", "class": "reverse_reference", "tracked": true, "required": true, "lifecycle": "regression_corpus"},
 			{"id": "tmp", "path": "tmp", "class": "generated_evidence", "tracked": false, "required": false, "lifecycle": "disposable"},
 		},
 	})

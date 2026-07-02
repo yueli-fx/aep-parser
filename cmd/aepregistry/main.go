@@ -22,6 +22,8 @@ func run(args []string) int {
 	switch args[0] {
 	case "audit":
 		return runAudit(args[1:])
+	case "inventory":
+		return runInventory(args[1:])
 	default:
 		usage()
 		return 2
@@ -47,7 +49,7 @@ func runAudit(args []string) int {
 		fmt.Fprintln(os.Stderr, "audit:", err)
 		return 2
 	}
-	if err := writeReport(*outPath, report); err != nil {
+	if err := writeJSONFile(*outPath, report); err != nil {
 		fmt.Fprintln(os.Stderr, "write:", err)
 		return 2
 	}
@@ -65,8 +67,42 @@ func runAudit(args []string) int {
 	return 0
 }
 
-func writeReport(path string, report registry.AuditReport) error {
-	data, err := json.MarshalIndent(report, "", "  ")
+func runInventory(args []string) int {
+	fs := flag.NewFlagSet("aepregistry inventory", flag.ContinueOnError)
+	fs.SetOutput(os.Stderr)
+	root := fs.String("root", ".", "repository root")
+	outPath := fs.String("out", "tmp/registry_inventory.json", "inventory report JSON path")
+	jsonOut := fs.Bool("json", false, "print JSON report")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	if fs.NArg() != 0 {
+		fmt.Fprintln(os.Stderr, "usage: aepregistry inventory [-root .] [-out tmp/registry_inventory.json] [-json]")
+		return 2
+	}
+
+	report, err := registry.InventoryRepository(*root)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "inventory:", err)
+		return 2
+	}
+	if err := writeJSONFile(*outPath, report); err != nil {
+		fmt.Fprintln(os.Stderr, "write:", err)
+		return 2
+	}
+	if *jsonOut {
+		if err := json.NewEncoder(os.Stdout).Encode(report); err != nil {
+			fmt.Fprintln(os.Stderr, "stdout:", err)
+			return 2
+		}
+	} else {
+		fmt.Printf("registry inventory: %d locations, %d files, %d bytes\n", report.Summary.Locations, report.Summary.Files, report.Summary.Bytes)
+	}
+	return 0
+}
+
+func writeJSONFile(path string, value any) error {
+	data, err := json.MarshalIndent(value, "", "  ")
 	if err != nil {
 		return err
 	}
@@ -77,5 +113,5 @@ func writeReport(path string, report registry.AuditReport) error {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: aepregistry <audit> [flags]")
+	fmt.Fprintln(os.Stderr, "usage: aepregistry <audit|inventory> [flags]")
 }

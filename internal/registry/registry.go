@@ -205,6 +205,8 @@ func Audit(root string, reg Registry) AuditReport {
 		}
 	}
 
+	coverage := newLocationCoverage(reg.Locations)
+
 	atomIDs := map[string]bool{}
 	for _, atom := range reg.CapabilityAtoms {
 		if atom.ID == "" {
@@ -215,7 +217,7 @@ func Audit(root string, reg Registry) AuditReport {
 			report.addIssue("duplicate_atom", SeverityError, "", atom.ID, "capability atom id must be unique")
 		}
 		atomIDs[atom.ID] = true
-		auditAtom(root, atom, workflowIDs, &report)
+		auditAtom(root, atom, workflowIDs, coverage, &report)
 	}
 
 	for _, evidence := range reg.EvidenceSets {
@@ -235,6 +237,9 @@ func Audit(root string, reg Registry) AuditReport {
 			report.addIssue("invalid_evidence_path", SeverityError, evidence.ArtifactPath, "", "evidence artifact_path must be repository relative")
 			continue
 		}
+		if !coverage.covers(evidence.ArtifactPath) {
+			report.addIssue("unregistered_evidence_location", SeverityError, evidence.ArtifactPath, "", "evidence artifact_path is not covered by any registered location")
+		}
 		if !exists(root, evidence.ArtifactPath) {
 			severity := SeverityWarning
 			code := "missing_optional_evidence"
@@ -250,7 +255,7 @@ func Audit(root string, reg Registry) AuditReport {
 	return report
 }
 
-func auditAtom(root string, atom CapabilityAtom, workflowIDs map[string]bool, report *AuditReport) {
+func auditAtom(root string, atom CapabilityAtom, workflowIDs map[string]bool, coverage locationCoverage, report *AuditReport) {
 	if atom.Domain == "" {
 		report.addIssue("missing_atom_domain", SeverityError, "", atom.ID, "capability atom domain is required")
 	}
@@ -285,6 +290,9 @@ func auditAtom(root string, atom CapabilityAtom, workflowIDs map[string]bool, re
 		if !relPathOK(dep.Path) {
 			report.addIssue("invalid_dependency_path", SeverityError, dep.Path, atom.ID, "dependency path must be repository relative")
 			continue
+		}
+		if !coverage.covers(dep.Path) {
+			report.addIssue("unregistered_dependency_location", SeverityError, dep.Path, atom.ID, "dependency path is not covered by any registered location")
 		}
 		if exists(root, dep.Path) {
 			continue
@@ -355,4 +363,34 @@ func valueOr(value, fallback string) string {
 		return value
 	}
 	return fallback
+}
+
+type locationCoverage []string
+
+func newLocationCoverage(locations []Location) locationCoverage {
+	coverage := make(locationCoverage, 0, len(locations))
+	for _, location := range locations {
+		if relPathOK(location.Path) {
+			coverage = append(coverage, cleanRel(location.Path))
+		}
+	}
+	return coverage
+}
+
+func (c locationCoverage) covers(path string) bool {
+	clean := cleanRel(path)
+	for _, root := range c {
+		if clean == root || hasPathPrefix(clean, root) {
+			return true
+		}
+	}
+	return false
+}
+
+func cleanRel(path string) string {
+	return filepath.ToSlash(filepath.Clean(filepath.FromSlash(path)))
+}
+
+func hasPathPrefix(path, prefix string) bool {
+	return len(path) > len(prefix) && path[:len(prefix)] == prefix && path[len(prefix)] == '/'
 }

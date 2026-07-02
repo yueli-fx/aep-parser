@@ -42,6 +42,31 @@ func TestRunAuditReturnsOneForRegistryErrors(t *testing.T) {
 	}
 }
 
+func TestRunInventoryWritesLocationSummary(t *testing.T) {
+	root := newRegistryRoot(t)
+	out := filepath.Join(root, "tmp", "registry_inventory.json")
+
+	code := run([]string{"inventory", "-root", root, "-out", out})
+	if code != 0 {
+		t.Fatalf("run(inventory) = %d, want 0", code)
+	}
+
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var report registry.InventoryReport
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Summary.Locations == 0 || len(report.Locations) == 0 {
+		t.Fatalf("empty inventory report: %+v", report)
+	}
+	if !hasInventoryLocation(report, "recipes") {
+		t.Fatalf("recipes location missing from inventory: %+v", report.Locations)
+	}
+}
+
 func newRegistryRoot(t *testing.T) string {
 	t.Helper()
 	root := t.TempDir()
@@ -52,6 +77,7 @@ func newRegistryRoot(t *testing.T) string {
 		"locations": []map[string]any{
 			{"id": "registry", "path": "registry", "class": "spec_registry", "tracked": true, "required": true, "lifecycle": "source_of_truth"},
 			{"id": "recipes", "path": "examples/recipes", "class": "atomic_fixtures", "tracked": true, "required": true, "lifecycle": "source_contract"},
+			{"id": "tmp", "path": "tmp", "class": "generated_evidence", "tracked": false, "required": false, "lifecycle": "disposable"},
 		},
 	})
 	writeJSON(t, root, "registry/workflows.json", map[string]any{
@@ -121,4 +147,13 @@ func readReport(t *testing.T, path string) registry.AuditReport {
 		t.Fatal(err)
 	}
 	return report
+}
+
+func hasInventoryLocation(report registry.InventoryReport, id string) bool {
+	for _, location := range report.Locations {
+		if location.ID == id {
+			return true
+		}
+	}
+	return false
 }

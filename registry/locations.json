@@ -19,12 +19,12 @@
       "lifecycle": "source_contract"
     },
     {
-      "id": "migration_capability_ledger",
-      "path": "internal/aepmigrate/version_capability_ledger.json",
+      "id": "migration_engine",
+      "path": "internal/aepmigrate",
       "class": "source_contract",
       "tracked": true,
       "required": true,
-      "lifecycle": "source_contract"
+      "lifecycle": "migration_engine"
     },
     {
       "id": "recipe_atoms",
@@ -109,6 +109,30 @@
     {
       "id": "migration_scripts",
       "path": "scripts/migration",
+      "class": "source_contract",
+      "tracked": true,
+      "required": true,
+      "lifecycle": "automation"
+    },
+    {
+      "id": "migration_cli",
+      "path": "cmd/aepmigrate",
+      "class": "source_contract",
+      "tracked": true,
+      "required": true,
+      "lifecycle": "automation"
+    },
+    {
+      "id": "recipe_cli",
+      "path": "cmd/aeprecipe",
+      "class": "source_contract",
+      "tracked": true,
+      "required": true,
+      "lifecycle": "automation"
+    },
+    {
+      "id": "technique_cli",
+      "path": "cmd/aeptechnique",
       "class": "source_contract",
       "tracked": true,
       "required": true,
