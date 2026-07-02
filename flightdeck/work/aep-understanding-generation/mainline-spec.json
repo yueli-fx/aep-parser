@@ -163,29 +163,35 @@
     "phase": "atom_taxonomy_expansion",
     "last_completed_target": {
       "location": "recipe_atoms",
-      "group": "text",
-      "reason": "registry ownership report selected text as the largest remaining recipe_atoms group after shape, and existing text all_6x6 matrices cover baseline, animator, style, and text-shape recipes.",
+      "group": "comp",
+      "reason": "registry ownership report selected comp as the largest remaining recipe_atoms group after text, and existing comp all_6x6 matrix covers all 18 comp recipes.",
       "source_report": "tmp/registry_ownership.json",
       "observed_counts": {
         "files": 141,
-        "owned_files_before": 31,
-        "unowned_files_before": 110,
-        "selected_group_unowned_files": 24
+        "owned_files_before": 55,
+        "unowned_files_before": 86,
+        "selected_group_unowned_files": 18
       },
       "result": {
-        "capability_atoms_added": 24,
-        "recipe_atoms_owned_files_after": 55,
-        "recipe_atoms_unowned_files_after": 86,
+        "capability_atoms_added": 18,
+        "recipe_atoms_owned_files_after": 73,
+        "recipe_atoms_unowned_files_after": 68,
         "selected_group_remaining_unowned_files": 0
       },
       "previous_target": {
         "location": "recipe_atoms",
-        "group": "shape",
-        "capability_atoms_added": 26,
-        "selected_group_remaining_unowned_files": 0
+        "group": "text",
+        "capability_atoms_added": 24,
+        "selected_group_remaining_unowned_files": 0,
+        "previous_target": {
+          "location": "recipe_atoms",
+          "group": "shape",
+          "capability_atoms_added": 26,
+          "selected_group_remaining_unowned_files": 0
+        }
       }
     },
-    "next_action": "Select the next atom taxonomy target from the updated ownership report; current largest recipe_atoms group is comp with 18 unowned files.",
+    "next_action": "Select the next atom taxonomy target from the updated ownership report; current largest recipe_atoms groups are camera and layer with 15 unowned files each.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
