@@ -791,17 +791,17 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "shape_support_split",
-      "reason": "Reduce convert_scope_support.go growth risk by separating shape-layer and shape-filter support predicates from non-shape layer support predicates while preserving behavior.",
+      "group": "layer_camera_light_split",
+      "reason": "Reduce convert_layer.go growth risk by separating camera and light option materialization from layer refs, metadata, and null layer helpers while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_scope_support.go",
-          "internal/aepmigrate/convert_shape_support.go"
+          "internal/aepmigrate/convert_layer.go",
+          "internal/aepmigrate/convert_layer_camera_light.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Shape-layer and shape-filter support predicates have been split from convert_scope_support.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_rebuild_layers.go or remaining layer camera/light helpers without changing behavior.",
+    "next_action": "Camera and light option materialization has been split from convert_layer.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_rebuild_layers.go, convert_shape_filters.go, matrix.go, or convert_text_animator.go without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
