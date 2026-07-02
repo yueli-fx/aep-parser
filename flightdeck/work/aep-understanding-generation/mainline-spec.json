@@ -791,17 +791,17 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "matrix_helpers_split",
-      "reason": "Reduce matrix.go growth risk by separating matrix label expansion, version normalization, recipe IO, report writing, summary, and path sanitization helpers from matrix execution while preserving behavior.",
+      "group": "convert_rebuild_layers_split",
+      "reason": "Reduce convert_rebuild.go growth risk by separating per-composition layer reconstruction from project and composition creation while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/matrix.go",
-          "internal/aepmigrate/matrix_helpers.go"
+          "internal/aepmigrate/convert_rebuild.go",
+          "internal/aepmigrate/convert_rebuild_layers.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Matrix label expansion, version normalization, recipe IO, report writing, summary, and path sanitization helpers have been split from matrix.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_rebuild.go, convert_text_animator.go, or remaining layer camera/light helpers without changing behavior.",
+    "next_action": "Per-composition layer reconstruction has been split from convert_rebuild.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_text_animator.go, convert_scope_support.go, or remaining layer camera/light helpers without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
