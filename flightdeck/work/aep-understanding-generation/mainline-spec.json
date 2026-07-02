@@ -791,17 +791,17 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "text_animator_materialize_split",
-      "reason": "Reduce convert_text_animator.go growth risk by separating animator creation and keyframe application from project/layer traversal and range extraction while preserving behavior.",
+      "group": "transform_expressions_split",
+      "reason": "Reduce convert_transform.go growth risk by separating transform expression replay from static transform and keyframe materialization while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_text_animator.go",
-          "internal/aepmigrate/convert_text_animator_materialize.go"
+          "internal/aepmigrate/convert_transform.go",
+          "internal/aepmigrate/convert_transform_expressions.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Text animator creation and keyframe application have been split from convert_text_animator.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_rebuild_layers.go or convert_transform.go without changing behavior.",
+    "next_action": "Transform expression replay has been split from convert_transform.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_rebuild_layers.go, convert_text.go, or convert_effect.go without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
