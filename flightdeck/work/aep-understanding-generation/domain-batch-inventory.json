@@ -25,6 +25,7 @@
   "active_package": null,
   "last_completed_package": "essential_graphics_controllers",
   "next_package": "effect_controls_static_values",
+  "mainline_status": "ready_for_next_batch",
   "packages": [
     {
       "id": "essential_graphics_controllers",

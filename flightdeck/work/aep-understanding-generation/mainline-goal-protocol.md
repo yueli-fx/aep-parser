@@ -148,7 +148,7 @@ Default changed files should be limited to:
 
 ## 7. Completion Definition
 
-A mainline goal is complete only when:
+A single package-cycle goal is complete only when:
 
 - Every package member has a recorded status.
 - Every implemented member has tests.
@@ -159,7 +159,13 @@ A mainline goal is complete only when:
 - The worktree is clean, except for user-approved unrelated changes.
 - Commit count follows the batch rules.
 
-If any item is missing, the goal is still active or blocked, not complete.
+If any item is missing, the package cycle is still active or blocked, not
+complete.
+
+Completing one package cycle does not complete the whole AE understanding
+mainline. After a successful package cycle, the persistent mainline status is
+`ready_for_next_batch` with a selected next package. Only a separate
+user-approved final closure plan may mark the overall mainline complete.
 
 ## 8. Stop Conditions
 

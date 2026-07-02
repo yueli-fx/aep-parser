@@ -10,8 +10,10 @@ Suggested user command:
 
 ## Objective
 
-Execute one complete mainline upgrade package under the AE Understanding
-Mainline Goal Protocol. Do not execute field-level work as a goal.
+Execute exactly one mainline upgrade package cycle under the AE Understanding
+Mainline Goal Protocol. Do not execute field-level work as a goal, and do not
+interpret one package cycle as completion of the whole AE understanding
+mainline.
 
 Default first package:
 
@@ -64,6 +66,20 @@ Run exactly one package cycle:
 14. Stop.
 
 Do not start a second package in the same goal run.
+
+When the cycle finishes, report it as:
+
+```text
+package cycle complete; mainline remains active; next package is <id>
+```
+
+Do not report:
+
+```text
+mainline goal complete
+AE understanding complete
+overall goal complete
+```
 
 ## Current Workspace Reconciliation
 
@@ -180,7 +196,7 @@ git commit -m "feat(eg): batch essential graphics controller coverage"
 
 ## Completion Criteria
 
-The goal is complete only when:
+This file's execution cycle is complete only when:
 
 - One package is completed or explicitly blocked.
 - Every package member has a status in JSON.
@@ -193,7 +209,10 @@ The goal is complete only when:
 - The next package is selected in JSON only.
 - No second package has started.
 
-Do not mark the goal complete just because one member passes.
+Do not mark the overall AE understanding mainline complete just because one
+package cycle passes. The persistent mainline state after a successful cycle is
+`ready_for_next_batch`, not `complete`, unless a separate user-approved final
+closure plan proves every package is done.
 
 ## Stop Conditions
 
@@ -208,3 +227,12 @@ Stop and report instead of coding when:
 - The user says the execution is drifting.
 
 When stopped, only update the protocol/plan or redefine the package.
+
+## Next Run Semantics
+
+After a successful package cycle, the next `/goal execute .../goal.md` run must:
+
+1. Read `domain-batch-inventory.json`.
+2. Use `next_package` as the new active package unless the user overrides it.
+3. Treat previous completed packages as baseline evidence, not as the end of the mainline.
+4. Execute exactly one more package cycle.
