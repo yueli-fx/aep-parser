@@ -295,8 +295,21 @@ func egControllerValueChunks(def *pardParamDef, colorCdat []byte) (scene.EGContr
 			leafChunk(rifx.IDCVal, append([]byte(nil), val...)),
 			leafChunk(rifx.IDCDef, append([]byte(nil), val...)),
 		}, nil
+
+	case PCTLTwoD:
+		vals, ok := def.lastValue.([]float64)
+		if !ok || len(vals) < 2 {
+			return 0, nil, fmt.Errorf("AddEssentialProperty: 2D point parameter has no 2D default value")
+		}
+		val := make([]byte, 16)
+		binary.BigEndian.PutUint64(val[0:8], math.Float64bits(vals[0]))
+		binary.BigEndian.PutUint64(val[8:16], math.Float64bits(vals[1]))
+		return scene.EGPoint, []*rifx.Chunk{
+			leafChunk(rifx.IDCVal, append([]byte(nil), val...)),
+			leafChunk(rifx.IDCDef, append([]byte(nil), val...)),
+		}, nil
 	}
-	return 0, nil, fmt.Errorf("AddEssentialProperty: control type %d is not supported yet (supported: scalar/slider, boolean, color)", def.controlType)
+	return 0, nil, fmt.Errorf("AddEssentialProperty: control type %d is not supported yet (supported: scalar/slider, boolean, color, 2D point)", def.controlType)
 }
 
 // buildEGCCtl assembles one LIST:CCtl controller entry.

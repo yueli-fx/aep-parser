@@ -1322,6 +1322,58 @@
       },
       "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
       "writer_status": "PD-6x6"
+    },
+    {
+      "artifact": "tmp/migration_matrix_essential_graphics_controllers_all_6x6/matrix.json",
+      "domain": "essential_graphics",
+      "host_open_endpoint_evidence": {
+        "artifact": "tmp/host_open_gaps/essential-graphics-controllers/chunk-1/matrix.json",
+        "direct_hosts": [
+          "AE2020",
+          "AE2025"
+        ],
+        "inferred_hosts": [
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024"
+        ],
+        "ledger": "tmp/host_open_gaps/essential-graphics-controllers/chunk-1/ledger.md",
+        "open_mode": "target_bound",
+        "recipes": [
+          "minimal-essential-graphics-checkbox-controller",
+          "minimal-essential-graphics-color-controller",
+          "minimal-essential-graphics-controller",
+          "minimal-essential-graphics-point-controller"
+        ],
+        "totals": {
+          "blocked": 0,
+          "failed": 0,
+          "pass": 16,
+          "skipped": 0,
+          "total": 16
+        }
+      },
+      "host_open_status": "direct_endpoint_hosts_pass; AE2021-AE2024 inferred_by_endpoint",
+      "id": "essential-graphics-controllers",
+      "ledger": "tmp/migration_matrix_essential_graphics_controllers_all_6x6/ledger.md",
+      "recipe_count": 4,
+      "recipes": [
+        "minimal-essential-graphics-checkbox-controller",
+        "minimal-essential-graphics-color-controller",
+        "minimal-essential-graphics-controller",
+        "minimal-essential-graphics-point-controller"
+      ],
+      "scope": "Essential Graphics controller exposure for supported effect parameter control types",
+      "totals": {
+        "blocked": 0,
+        "failed": 0,
+        "pass": 144,
+        "skipped": 0,
+        "total": 144
+      },
+      "writer_coverage": "AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 sources into AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 targets",
+      "writer_status": "PD-6x6"
     }
   ],
   "generated_at": "2026-07-03",

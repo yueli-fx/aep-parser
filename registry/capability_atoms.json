@@ -5756,6 +5756,39 @@
       ]
     },
     {
+      "id": "essential.graphics_point_controller",
+      "domain": "essential",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-essential-graphics-point-controller.json",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_essential_graphics_controllers_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against the Essential Graphics controllers all_6x6 migration matrix; host-open evidence remains separately totalized."
+      ]
+    },
+    {
       "id": "essential.graphics_controller",
       "domain": "essential",
       "tier": "atom",

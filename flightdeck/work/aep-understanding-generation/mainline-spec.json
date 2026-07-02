@@ -262,15 +262,15 @@
           "AE2025"
         ],
         "summary": {
-          "atom_rows": 150,
-          "writer_full_axis_rows": 149,
+          "atom_rows": 154,
+          "writer_full_axis_rows": 153,
           "writer_partial_rows": 0,
           "boundary_rows": 1,
-          "host_full_axis_rows": 149,
+          "host_full_axis_rows": 153,
           "host_missing_rows": 0,
           "source_target_pairs": 36,
-          "cells": 5400,
-          "pass": 5365,
+          "cells": 5544,
+          "pass": 5509,
           "blocked": 5,
           "failed": 0,
           "skipped": 30
@@ -1076,17 +1076,17 @@
           "legacy_script_retained": "scripts/migration/run_coverage_batch.ps1"
         },
         "current_totals": {
-          "records": 18,
-          "artifacts": 49,
+          "records": 19,
+          "artifacts": 51,
           "contract_gates": 1,
-          "atoms": 150,
-          "atom_rows": 150,
+          "atoms": 151,
+          "atom_rows": 154,
           "errors": 0,
-          "direct_host_atoms": 128,
-          "inferred_host_atoms": 128,
-          "declared_recipes": 150,
-          "observed_recipes": 150,
-          "atom_row_recipes": 150,
+          "direct_host_atoms": 132,
+          "inferred_host_atoms": 132,
+          "declared_recipes": 151,
+          "observed_recipes": 151,
+          "atom_row_recipes": 151,
           "recipes_without_atom_rows": 0,
           "atom_rows_without_recipes": 0,
           "observed_recipes_without_declaration": 0,
@@ -1104,47 +1104,49 @@
       }
     },
     "last_capability_target": {
-      "location": "text",
-      "group": "text_animator_remaining_value_keyframes",
-      "reason": "Promote the remaining static text animator leaves to value-keyframed atoms with recipes, serializer facades, migrate replay, and AE2020-AE2025 matrix evidence.",
+      "location": "essential_graphics",
+      "group": "essential_graphics_controllers",
+      "reason": "Promote Essential Graphics controller coverage from mixed smoke into a dedicated package with point controller support, package inventory, AE2020-AE2025 matrix evidence, endpoint host-open evidence, and explicit boundaries for unsupported controller kinds.",
       "result": {
         "recipes": [
-          "examples/recipes/minimal-text-animator-stroke-opacity-value-keyframes.json",
-          "examples/recipes/minimal-text-animator-stroke-width-value-keyframes.json",
-          "examples/recipes/minimal-text-animator-skew-value-keyframes.json",
-          "examples/recipes/minimal-text-animator-rotation-x-value-keyframes.json",
-          "examples/recipes/minimal-text-animator-rotation-y-value-keyframes.json",
-          "examples/recipes/minimal-text-animator-stroke-color-value-keyframes.json"
+          "examples/recipes/minimal-essential-graphics-controller.json",
+          "examples/recipes/minimal-essential-graphics-checkbox-controller.json",
+          "examples/recipes/minimal-essential-graphics-color-controller.json",
+          "examples/recipes/minimal-essential-graphics-point-controller.json"
         ],
         "atom_ids": [
-          "text.animator.stroke_opacity_keyframes",
-          "text.animator.stroke_width_keyframes",
-          "text.animator.skew_keyframes",
-          "text.animator.rotation_x_keyframes",
-          "text.animator.rotation_y_keyframes",
-          "text.animator.stroke_color_keyframes"
+          "essential.graphics_controller",
+          "essential.graphics_checkbox_controller",
+          "essential.graphics_color_controller",
+          "essential.graphics_point_controller"
         ],
-        "coverage_record": "text-animators",
-        "matrix": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+        "coverage_record": "essential-graphics-controllers",
+        "matrix": "tmp/migration_matrix_essential_graphics_controllers_all_6x6/matrix.json",
         "totals": {
-          "total": 1044,
-          "pass": 1044,
+          "total": 144,
+          "pass": 144,
           "blocked": 0,
           "failed": 0,
           "skipped": 0
         },
         "coverage_axis": {
-          "atom_rows": 29,
-          "cells": 1044,
-          "pass": 1044,
+          "atom_rows": 4,
+          "cells": 144,
+          "pass": 144,
           "blocked": 0,
           "failed": 0,
           "skipped": 0
         },
-        "host_open_status": "covered by existing text-animators representative endpoint host-open policy; direct host-open fanout is not rerun for every scalar variant"
+        "host_open_status": "direct_endpoint_hosts_pass; AE2021-AE2024 inferred_by_endpoint",
+        "boundaries": {
+          "effect_param_point3d": "boundary_pending_evidence",
+          "effect_param_angle": "boundary_pending_evidence",
+          "source_text": "boundary_pending_evidence",
+          "dropdown": "boundary_pending_evidence"
+        }
       }
     },
-    "next_action": "Continue mainline by selecting the next real unsupported conversion surface after completing the current text animator value-keyframes family; prefer one coherent capability+matrix batch and update JSON ledgers once per batch.",
+    "next_action": "Stop after completing the essential_graphics_controllers package; next package is selected in domain-batch-inventory.json only and must not start until the next explicit goal run.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

@@ -4596,6 +4596,39 @@ func TestCompileToFileExposesEffectParamAsEssentialGraphicsController(t *testing
 	assertProfileCheck(t, report, "expected_profile.essential_graphics[0].type", true)
 }
 
+func TestCompileToFileExposesPointEffectParamAsEssentialGraphicsController(t *testing.T) {
+	raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "recipes", "minimal-essential-graphics-point-controller.json"))
+	if err != nil {
+		t.Fatalf("ReadFile: %v", err)
+	}
+	rec := mustUnmarshalRecipe(t, string(raw))
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	controllers := project.Compositions[0].EssentialGraphicsControllers
+	if len(controllers) != 1 {
+		t.Fatalf("EssentialGraphicsControllers = %d, want 1", len(controllers))
+	}
+	if got := controllers[0].Name; got != "Center Point" {
+		t.Fatalf("EG controller name = %q, want Center Point", got)
+	}
+	if got := controllers[0].Type.String(); got != "point" {
+		t.Fatalf("EG controller type = %q, want point", got)
+	}
+	assertProfileCheck(t, report, "expected_profile.essential_graphics[0].name", true)
+	assertProfileCheck(t, report, "expected_profile.essential_graphics[0].type", true)
+}
+
 func TestCompileToFileChecksEffectParamKeyframesProfileExample(t *testing.T) {
 	raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "recipes", "minimal-effect-param-keyframes.json"))
 	if err != nil {

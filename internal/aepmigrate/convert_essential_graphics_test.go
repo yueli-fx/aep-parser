@@ -17,3 +17,7 @@ func TestConvertWritesRecipeEssentialGraphicsColorProject(t *testing.T) {
 func TestConvertWritesRecipeEssentialGraphicsCheckboxProject(t *testing.T) {
 	assertRecipeConvertsPass(t, "minimal-essential-graphics-checkbox-controller.json")
 }
+
+func TestConvertWritesRecipeEssentialGraphicsPointProject(t *testing.T) {
+	assertRecipeConvertsPass(t, "minimal-essential-graphics-point-controller.json")
+}

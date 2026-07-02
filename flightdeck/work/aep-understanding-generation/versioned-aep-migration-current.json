@@ -286,6 +286,18 @@
           "out": "tmp/migration_matrix_uncovered_default_mogrt_all_6x6",
           "matrix": "tmp/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
           "ledger": "tmp/migration_matrix_uncovered_default_mogrt_all_6x6/ledger.md"
+        },
+        {
+          "coverage_id": "essential-graphics-controllers",
+          "recipe_paths": [
+            "examples/recipes/minimal-essential-graphics-checkbox-controller.json",
+            "examples/recipes/minimal-essential-graphics-color-controller.json",
+            "examples/recipes/minimal-essential-graphics-controller.json",
+            "examples/recipes/minimal-essential-graphics-point-controller.json"
+          ],
+          "out": "tmp/migration_matrix_essential_graphics_controllers_all_6x6",
+          "matrix": "tmp/migration_matrix_essential_graphics_controllers_all_6x6/matrix.json",
+          "ledger": "tmp/migration_matrix_essential_graphics_controllers_all_6x6/ledger.md"
         }
       ]
     }
@@ -379,6 +391,17 @@
           "tmp/host_open_gaps/default-and-mogrt-smoke/chunk-2/matrix.json"
         ],
         "result": "default layer, Essential Graphics, MOGRT name, and null smoke recipes passed endpoint target-bound host-open 44/44."
+      },
+      {
+        "coverage_id": "essential-graphics-controllers",
+        "gap_recipes": 4,
+        "chunks": 1,
+        "priority": "small_direct_endpoint_batch",
+        "status": "pass",
+        "artifacts": [
+          "tmp/host_open_gaps/essential-graphics-controllers/chunk-1/matrix.json"
+        ],
+        "result": "Essential Graphics controller recipes passed endpoint target-bound host-open 16/16."
       },
       {
         "coverage_id": "representative-covered-small-groups",

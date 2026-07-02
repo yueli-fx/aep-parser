@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "project": {
+    "target_version": "AE2020",
+    "name": "Minimal Essential Graphics point controller"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 1,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "text",
+          "name": "Title",
+          "text": "EG",
+          "transform": {
+            "position": [960, 540]
+          },
+          "effects": [
+            {
+              "match_name": "ADBE Point Control",
+              "params": [
+                {
+                  "match_name": "ADBE Point Control-0001",
+                  "value": [320, 180],
+                  "essential_graphics": {
+                    "name": "Center Point"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 1,
+    "layers": [
+      {
+        "name": "Title",
+        "type": "text"
+      }
+    ],
+    "effects": [
+      {
+        "layer_name": "Title",
+        "match_name": "ADBE Point Control",
+        "params": [
+          {
+            "match_name": "ADBE Point Control-0001",
+            "value": [320, 180]
+          }
+        ]
+      }
+    ],
+    "essential_graphics": [
+      {
+        "name": "Center Point",
+        "type": "point"
+      }
+    ]
+  }
+}

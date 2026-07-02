@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-07-03",
+  "goal": "Batch AE understanding work by domain package instead of single-field increments.",
+  "version_axis": [
+    "AE2020",
+    "AE2021",
+    "AE2022",
+    "AE2023",
+    "AE2024",
+    "AE2025"
+  ],
+  "selection_policy": {
+    "minimum_package_size": "one coherent domain family",
+    "forbidden_target_shape": "single field or single property unless it is the only remaining member of a documented package",
+    "evidence_required_for_writer_support": [
+      "parser evidence",
+      "template evidence",
+      "AE-native fixture",
+      "generated host proof",
+      "existing matrix evidence"
+    ],
+    "unsupported_status": "boundary_pending_evidence"
+  },
+  "active_package": null,
+  "last_completed_package": "essential_graphics_controllers",
+  "next_package": "effect_controls_static_values",
+  "packages": [
+    {
+      "id": "essential_graphics_controllers",
+      "domain": "essential_graphics",
+      "scope": "Motion Graphics Template controller exposure for effect parameters and supported source properties.",
+      "execution_status": "complete",
+      "selection_rationale": "Existing EG parser supports controller type readback; writer supports slider/checkbox/color; AE-native point/dropdown/text fixtures exist; point has documented CVal/CDef layout; unsupported members are explicit boundaries instead of field-level goals.",
+      "known_evidence": [
+        "test_data/fixtures/eg_slider_controller.aep",
+        "test_data/fixtures/eg_checkbox_controller.aep",
+        "test_data/fixtures/eg_color_controller.aep",
+        "test_data/fixtures/eg_point_controller.aep",
+        "test_data/fixtures/eg_dropdown_controller.aep",
+        "test_data/fixtures/eg_text_source_text.aep",
+        "internal/rifx/rifx.go IDCVal/IDCDef point 2xf64 layout",
+        "internal/scene/scene_essential_graphics.go EGPoint type code"
+      ],
+      "member_status": {
+        "effect_param_slider": "already_supported",
+        "effect_param_checkbox": "already_supported",
+        "effect_param_color": "already_supported",
+        "effect_param_point2d": "verified_in_this_batch",
+        "effect_param_point3d": "boundary_pending_evidence",
+        "effect_param_angle": "boundary_pending_evidence",
+        "source_text": "boundary_pending_evidence",
+        "dropdown": "boundary_pending_evidence"
+      },
+      "boundaries": {
+        "effect_param_point3d": "EG CTyp and value chunk layout are not yet proven for 3D effect parameter exposure.",
+        "effect_param_angle": "No distinct evidence-backed EG controller type/value contract is recorded for angle effect parameter exposure.",
+        "source_text": "Text source exposure uses a different source-property path contract and is not part of effect-parameter CCtl value support.",
+        "dropdown": "Dropdown has AE-native parser fixture evidence but no writer value/path contract for from-scratch exposure yet."
+      },
+      "recipes": [
+        "minimal-essential-graphics-controller",
+        "minimal-essential-graphics-checkbox-controller",
+        "minimal-essential-graphics-color-controller",
+        "minimal-essential-graphics-point-controller"
+      ],
+      "matrix": "tmp/migration_matrix_essential_graphics_controllers_all_6x6/matrix.json",
+      "ledger": "tmp/migration_matrix_essential_graphics_controllers_all_6x6/ledger.md",
+      "host_open_endpoint_evidence": "tmp/host_open_gaps/essential-graphics-controllers/chunk-1/matrix.json",
+      "totals": {
+        "matrix": {
+          "total": 144,
+          "pass": 144,
+          "blocked": 0,
+          "failed": 0,
+          "skipped": 0
+        },
+        "host_open_endpoint": {
+          "total": 16,
+          "pass": 16,
+          "blocked": 0,
+          "failed": 0,
+          "skipped": 0
+        },
+        "coverage_axis": {
+          "atom_rows": 4,
+          "cells": 144,
+          "pass": 144,
+          "blocked": 0,
+          "failed": 0,
+          "skipped": 0
+        }
+      },
+      "acceptance": {
+        "unit_tests": [
+          "go test ./internal/recipe -run EssentialGraphics -count=1",
+          "go test ./internal/aepmigrate -run EssentialGraphics -count=1",
+          "go test ./internal/aep_test -run EssentialGraphics -count=1"
+        ],
+        "matrix": "AE2020-AE2025 6x6 for all EG controller recipes in the package",
+        "coverage_axis": "new or updated coverage rows have zero failed cells; unsupported members are boundary rows, not hidden notes"
+      }
+    },
+    {
+      "id": "effect_controls_static_values",
+      "domain": "effects",
+      "scope": "Expression control effects and static values across scalar, angle, boolean, color, 2D point, 3D point, and slider.",
+      "execution_status": "candidate"
+    },
+    {
+      "id": "text_domain_residuals",
+      "domain": "text",
+      "scope": "Text source/style/animator residuals after completed value-keyframe animator package.",
+      "execution_status": "candidate"
+    },
+    {
+      "id": "layer_precomp_domain_residuals",
+      "domain": "layer_precomp",
+      "scope": "Layer, precomp, source, matte, and timing residuals.",
+      "execution_status": "candidate"
+    },
+    {
+      "id": "shape_domain_residuals",
+      "domain": "shape",
+      "scope": "Shape graph, modifiers, gradients, masks, and path residuals.",
+      "execution_status": "candidate"
+    }
+  ]
+}
