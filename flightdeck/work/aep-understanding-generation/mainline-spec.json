@@ -791,17 +791,17 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "profile_property_helpers_split",
-      "reason": "Reduce convert_profile_values.go growth risk by separating property presence and vector comparison helpers from profile value conversion while preserving behavior.",
+      "group": "scope_special_support_split",
+      "reason": "Reduce convert_scope_support.go growth risk by separating camera, light, text, and precomp support predicates from footage-backed layer support while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_profile_values.go",
-          "internal/aepmigrate/convert_profile_properties.go"
+          "internal/aepmigrate/convert_scope_support.go",
+          "internal/aepmigrate/convert_scope_special_support.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Property presence and vector comparison helpers have been split from convert_profile_values.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_scope_support.go, convert_shape_support.go, or convert_transform.go without changing behavior.",
+    "next_action": "Camera, light, text, and precomp support predicates have been split from convert_scope_support.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_shape_support.go, convert_transform.go, or matrix_ledger.go without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
