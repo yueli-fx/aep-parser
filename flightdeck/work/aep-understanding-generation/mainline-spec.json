@@ -791,17 +791,17 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "convert_text_animator_test_split",
-      "reason": "Reduce convert_text_test.go growth risk by separating text animator conversion tests from text style, shape, static transform, and default layer tests while preserving test behavior.",
+      "group": "convert_shape_motion_filter_test_split",
+      "reason": "Reduce convert_shape_filter_test.go growth risk by separating wiggle paths, wiggle transform, repeater, and merge paths conversion tests from simpler shape path filter tests while preserving test behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_text_test.go",
-          "internal/aepmigrate/convert_text_animator_test.go"
+          "internal/aepmigrate/convert_shape_filter_test.go",
+          "internal/aepmigrate/convert_shape_motion_filter_test.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Text animator conversion tests have been split from convert_text_test.go. Next useful increment is to continue reducing large aepmigrate test files or remaining 4-5KB conversion support files into coherent topic files without changing behavior.",
+    "next_action": "Shape motion/repeater/merge filter tests have been split from convert_shape_filter_test.go. Next useful increment is to continue reducing remaining 5-7KB aepmigrate test files or 4-5KB conversion support files into coherent topic files without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
