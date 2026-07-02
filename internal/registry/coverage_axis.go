@@ -2,9 +2,13 @@ package registry
 
 import (
 	"sort"
+
+	"github.com/yueli-fx/aep-parser/internal/aeversion"
 )
 
-var DefaultAEVersionAxis = []string{"AE2020", "AE2021", "AE2022", "AE2023", "AE2024", "AE2025"}
+func DefaultAEVersionAxis() []string {
+	return aeversion.SupportedLabels()
+}
 
 type CoverageAxisReport struct {
 	SchemaVersion int                       `json:"schema_version"`
@@ -85,7 +89,7 @@ func CoverageAxisWithFilter(root, coveragePath string, versionAxis []string, fil
 
 func coverageAxisWithFilter(root, coveragePath string, versionAxis []string, filter CoverageAxisFilter, checkContractGates bool) (CoverageAxisReport, error) {
 	if len(versionAxis) == 0 {
-		versionAxis = DefaultAEVersionAxis
+		versionAxis = DefaultAEVersionAxis()
 	}
 	versionAxis = sortedStrings(versionAxis)
 	report, err := validateCoverage(root, coveragePath, checkContractGates)

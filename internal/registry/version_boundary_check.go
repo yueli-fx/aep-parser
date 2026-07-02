@@ -65,7 +65,7 @@ func CheckVersionBoundaries(root, coveragePath string, versionAxis []string) (Ve
 		return VersionBoundaryCheckReport{}, err
 	}
 	if len(versionAxis) == 0 {
-		versionAxis = DefaultAEVersionAxis
+		versionAxis = DefaultAEVersionAxis()
 	}
 	report := VersionBoundaryCheckReport{
 		SchemaVersion: 1,

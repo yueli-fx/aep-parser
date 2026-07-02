@@ -1,47 +1,30 @@
 package aepmigrate
 
 import (
-	"fmt"
 	"strings"
+
+	"github.com/yueli-fx/aep-parser/internal/aeversion"
 )
 
-var supportedVersionLabels = []VersionLabel{
-	VersionAE2020,
-	VersionAE2021,
-	VersionAE2022,
-	VersionAE2023,
-	VersionAE2024,
-	VersionAE2025,
-}
-
 func SupportedVersionLabels() []VersionLabel {
-	return append([]VersionLabel(nil), supportedVersionLabels...)
-}
-
-func SupportedVersionStrings() []string {
-	labels := SupportedVersionLabels()
-	out := make([]string, 0, len(labels))
+	labels := aeversion.SupportedLabels()
+	out := make([]VersionLabel, 0, len(labels))
 	for _, label := range labels {
-		out = append(out, string(label))
+		out = append(out, VersionLabel(label))
 	}
 	return out
 }
 
+func SupportedVersionStrings() []string {
+	return aeversion.SupportedLabels()
+}
+
 func IsSupportedVersionLabel(label VersionLabel) bool {
-	for _, supported := range supportedVersionLabels {
-		if label == supported {
-			return true
-		}
-	}
-	return false
+	return aeversion.IsSupported(string(label))
 }
 
 func TargetVersionHelp() string {
-	labels := SupportedVersionStrings()
-	if len(labels) == 0 {
-		return "target AE version"
-	}
-	return fmt.Sprintf("target AE version: %s through %s", labels[0], labels[len(labels)-1])
+	return aeversion.TargetHelp()
 }
 
 type SourceVersion struct {
@@ -50,28 +33,11 @@ type SourceVersion struct {
 }
 
 func ParseVersionLabel(value string) (VersionLabel, error) {
-	normalized := strings.ToUpper(strings.TrimSpace(value))
-	for _, label := range supportedVersionLabels {
-		labelText := string(label)
-		if normalized == labelText || normalized == strings.TrimPrefix(labelText, "AE") {
-			return label, nil
-		}
+	label, err := aeversion.ParseLabel(value)
+	if err != nil {
+		return "", err
 	}
-	return "", fmt.Errorf("target version must be %s", supportedVersionListForError())
-}
-
-func supportedVersionListForError() string {
-	labels := SupportedVersionStrings()
-	switch len(labels) {
-	case 0:
-		return "a supported AE version"
-	case 1:
-		return labels[0]
-	case 2:
-		return labels[0] + " or " + labels[1]
-	default:
-		return strings.Join(labels[:len(labels)-1], ", ") + ", or " + labels[len(labels)-1]
-	}
+	return VersionLabel(label), nil
 }
 
 func NormalizeSourceVersion(raw string) SourceVersion {

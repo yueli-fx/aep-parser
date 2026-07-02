@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/yueli-fx/aep-parser/internal/aeversion"
 	"github.com/yueli-fx/aep-parser/internal/registry"
 )
 
@@ -76,7 +77,7 @@ func runGate(args []string) int {
 	coveragePath := fs.String("coverage", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
 	outPath := fs.String("out", "tmp/registry_gate.json", "ordered registry gate report JSON path")
 	scope := fs.String("scope", "version-matrix", "gate scope: version-matrix, asset-policy, or all")
-	versions := fs.String("versions", "", "comma-separated AE versions; defaults to AE2020-AE2025")
+	versions := fs.String("versions", "", "comma-separated AE versions; defaults to "+aeversion.SupportedRange())
 	jsonOut := fs.Bool("json", false, "print JSON report")
 	if err := fs.Parse(args); err != nil {
 		return 2
@@ -259,7 +260,7 @@ func runBoundaries(args []string) int {
 	root := fs.String("root", ".", "repository root")
 	coveragePath := fs.String("coverage", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
 	outPath := fs.String("out", "tmp/registry_version_boundaries.json", "version boundary check report JSON path")
-	versions := fs.String("versions", "", "comma-separated AE versions; defaults to AE2020-AE2025")
+	versions := fs.String("versions", "", "comma-separated AE versions; defaults to "+aeversion.SupportedRange())
 	jsonOut := fs.Bool("json", false, "print JSON report")
 	if err := fs.Parse(args); err != nil {
 		return 2
@@ -409,7 +410,7 @@ func runCoverage(args []string) int {
 	rowsOut := fs.Bool("rows", false, "write filtered atom rows JSON instead of full coverage validation report")
 	cellsOut := fs.Bool("cells", false, "write filtered source-target matrix cells JSON instead of full coverage validation report")
 	axisOut := fs.Bool("axis", false, "write AE version-axis coverage summary JSON instead of full coverage validation report")
-	versions := fs.String("versions", "", "comma-separated AE versions for -axis; defaults to AE2020-AE2025")
+	versions := fs.String("versions", "", "comma-separated AE versions for -axis; defaults to "+aeversion.SupportedRange())
 	recordFilter := fs.String("record", "", "filter rows or cells by coverage record id")
 	atomFilter := fs.String("atom", "", "filter rows or cells by atom id")
 	recipeFilter := fs.String("recipe", "", "filter cells by recipe id")
