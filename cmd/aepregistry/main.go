@@ -147,12 +147,13 @@ func runCoverageBatch(args []string) int {
 	batchID := fs.String("batch-id", "", "coverage batch id")
 	list := fs.Bool("list", false, "list known coverage batches")
 	skipRun := fs.Bool("skip-run", false, "validate existing batch artifacts without regenerating matrices or rewriting coverage JSON")
+	sync := fs.Bool("sync", false, "update the coverage JSON at -coverage from existing batch matrix artifacts before validating")
 	jsonOut := fs.Bool("json", false, "print JSON report")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage-batch [-root .] [-current path] [-coverage path] [-out tmp/registry_coverage_batch.json] [-list|-batch-id id -skip-run] [-json]")
+		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage-batch [-root .] [-current path] [-coverage path] [-out tmp/registry_coverage_batch.json] [-list|-batch-id id -skip-run [-sync]] [-json]")
 		return 2
 	}
 	if *list {
@@ -176,10 +177,16 @@ func runCoverageBatch(args []string) int {
 		return 0
 	}
 	if *batchID == "" || !*skipRun {
-		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage-batch [-root .] [-current path] [-coverage path] [-out tmp/registry_coverage_batch.json] [-list|-batch-id id -skip-run] [-json]")
+		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage-batch [-root .] [-current path] [-coverage path] [-out tmp/registry_coverage_batch.json] [-list|-batch-id id -skip-run [-sync]] [-json]")
 		return 2
 	}
-	report, err := registry.CheckCoverageBatch(*root, *currentPath, *coveragePath, *batchID)
+	var report registry.CoverageBatchReport
+	var err error
+	if *sync {
+		report, err = registry.SyncCoverageBatchFromMatrices(*root, *currentPath, *coveragePath, *batchID)
+	} else {
+		report, err = registry.CheckCoverageBatch(*root, *currentPath, *coveragePath, *batchID)
+	}
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "coverage-batch:", err)
 		return 2

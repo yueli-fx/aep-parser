@@ -706,7 +706,7 @@ func appendUniqueSorted(values []string, value string) []string {
 }
 
 func fileExists(root, path string) bool {
-	_, err := os.Stat(filepath.Join(root, filepath.FromSlash(path)))
+	_, err := os.Stat(resolveRegistryPath(root, path))
 	return err == nil
 }
 

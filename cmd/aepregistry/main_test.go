@@ -592,6 +592,53 @@ func TestRunCoverageBatchSkipRunWritesReport(t *testing.T) {
 	}
 }
 
+func TestRunCoverageBatchSyncUpdatesCoverageCandidate(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeCoverageBatchCommandFixture(t, root, 0)
+	out := filepath.Join(root, "tmp", "coverage_batch_sync.json")
+
+	code := run([]string{
+		"coverage-batch",
+		"-root", root,
+		"-current", "flightdeck/work/aep-understanding-generation/current.json",
+		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-out", out,
+		"-batch-id", "all",
+		"-skip-run",
+		"-sync",
+	})
+	if code != 0 {
+		t.Fatalf("run(coverage-batch -sync) = %d, want 0", code)
+	}
+	var report registry.CoverageBatchReport
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != registry.StatusPass || report.Summary.Entries != 1 || report.Summary.Errors != 0 {
+		t.Fatalf("batch sync report = %+v, want pass", report)
+	}
+	var coverage struct {
+		Coverage []struct {
+			ID     string                  `json:"id"`
+			Totals registry.CoverageTotals `json:"totals"`
+		} `json:"coverage"`
+	}
+	data, err = os.ReadFile(filepath.Join(root, filepath.FromSlash("flightdeck/work/aep-understanding-generation/coverage.json")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(data, &coverage); err != nil {
+		t.Fatal(err)
+	}
+	if len(coverage.Coverage) != 1 || coverage.Coverage[0].Totals.Total != 2 || coverage.Coverage[0].Totals.Pass != 2 {
+		t.Fatalf("coverage after sync = %+v, want matrix totals", coverage.Coverage)
+	}
+}
+
 func TestRunCoverageCanWriteSummaryReport(t *testing.T) {
 	root := newRegistryRoot(t)
 	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 2)

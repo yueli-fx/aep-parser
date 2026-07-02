@@ -511,15 +511,16 @@
     {
       "id": "migration-checkpoint-validator",
       "status": "available_verified",
-      "purpose": "Run the JSON-first migration checkpoint: current JSON, coverage JSON, rendered summary JSON, summary validation, host-open gap audit, and diff check; optional flags replay coverage batches, recurring matrix gates, and Go checks.",
+      "purpose": "Run the JSON-first migration checkpoint: current JSON, coverage JSON, rendered summary JSON, summary validation, host-open gap audit, and diff check. IncludeCoverageBatch now uses Go coverage-batch sync for skip-run replay; RunCoverageBatchMatrices keeps the legacy PowerShell matrix rerun path.",
       "script": "scripts/migration/validate_checkpoint.ps1",
       "command": "pwsh -File scripts/migration/validate_checkpoint.ps1 [-IncludeCoverageBatch] [-CoverageBatchId id] [-RunCoverageBatchMatrices] [-IncludeMatrix] [-IncludeGo]"
     },
     {
       "id": "coverage-batch-runner",
       "status": "available_verified",
-      "purpose": "List coverage batches and validate existing batch artifacts from current JSON without regenerating matrices or rewriting coverage JSON. Go command is primary; the PowerShell script remains as legacy compatibility for explicit matrix reruns/sync.",
+      "purpose": "List coverage batches, validate existing batch artifacts, and optionally sync an explicit coverage candidate from current JSON without regenerating matrices. Go command is primary; the PowerShell script remains as legacy compatibility for explicit matrix reruns.",
       "command": "go run ./cmd/aepregistry coverage-batch -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -out tmp/registry_coverage_batch.json -batch-id all-current-writer-coverage -skip-run",
+      "sync_command": "go run ./cmd/aepregistry coverage-batch -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -coverage <temp coverage copy> -out tmp/registry_coverage_batch.json -batch-id all-current-writer-coverage -skip-run -sync",
       "list_command": "go run ./cmd/aepregistry coverage-batch -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -out tmp/registry_coverage_batches.json -list",
       "script": "scripts/migration/run_coverage_batch.ps1",
       "legacy_command": "pwsh -File scripts/migration/run_coverage_batch.ps1 -BatchId all-current-writer-coverage -SkipRun"

@@ -114,6 +114,46 @@ func CheckCoverageBatch(root, currentPath, coveragePath, batchID string) (Covera
 	return report, nil
 }
 
+func SyncCoverageBatchFromMatrices(root, currentPath, coveragePath, batchID string) (CoverageBatchReport, error) {
+	var current currentFile
+	if err := readJSONPath(root, currentPath, &current); err != nil {
+		return CoverageBatchReport{}, err
+	}
+	if coveragePath == "" {
+		coveragePath = current.TruthSources.Coverage
+	}
+	if !fileExists(root, coveragePath) {
+		return CoverageBatchReport{}, fmt.Errorf("coverage path not found: %s", coveragePath)
+	}
+	batch := findCurrentCoverageBatch(current.CoverageBatches, batchID)
+	if batch == nil {
+		report := CoverageBatchReport{
+			SchemaVersion: 1,
+			Status:        StatusFail,
+			CurrentPath:   filepath.ToSlash(currentPath),
+			CoveragePath:  filepath.ToSlash(coveragePath),
+			BatchID:       batchID,
+		}
+		report.addIssue("missing_coverage_batch", "", "", fmt.Sprintf("coverage batch %q not found", batchID))
+		report.finish()
+		return report, nil
+	}
+	for _, entry := range batch.Entries {
+		if entry.Matrix == "" {
+			return CoverageBatchReport{}, fmt.Errorf("coverage batch entry %q missing matrix path", entry.CoverageID)
+		}
+		if _, err := UpdateCoverageFromMatrix(root, CoverageUpdateOptions{
+			ID:           entry.CoverageID,
+			CoveragePath: coveragePath,
+			MatrixPath:   entry.Matrix,
+			LedgerPath:   entry.Ledger,
+		}); err != nil {
+			return CoverageBatchReport{}, fmt.Errorf("sync coverage batch entry %q: %w", entry.CoverageID, err)
+		}
+	}
+	return CheckCoverageBatch(root, currentPath, coveragePath, batchID)
+}
+
 func findCurrentCoverageBatch(batches []currentCoverageBatch, id string) *currentCoverageBatch {
 	for i := range batches {
 		if batches[i].ID == id {

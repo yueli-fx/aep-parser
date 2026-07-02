@@ -1046,31 +1046,35 @@
     },
     "last_code_maintenance_target": {
       "location": "registry_tooling",
-      "group": "go_coverage_json_updater",
-      "reason": "Move one-record coverage ledger updates from a PowerShell-only helper onto a Go-first registry command while preserving unknown record fields and full recipe arrays.",
+      "group": "go_coverage_batch_sync",
+      "reason": "Wire coverage batch skip-run replay to the Go coverage updater so checkpoint batch replay can update a temporary coverage candidate without calling the PowerShell batch/sync scripts.",
       "result": {
         "commands": {
-          "go_coverage_update_temp": "go run ./cmd/aepregistry coverage-update -root . -coverage <temp coverage copy> -id text-baseline -matrix tmp/migration_matrix_text_baseline_all_6x6/matrix.json -out tmp/registry_coverage_update.json",
-          "checkpoint": "pwsh -File scripts/migration/validate_checkpoint.ps1",
-          "focused_registry_tests": "go test ./internal/registry -run CoverageFromMatrix && go test ./cmd/aepregistry -run CoverageUpdate",
+          "go_coverage_batch_sync": "go run ./cmd/aepregistry coverage-batch -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -coverage <temp coverage copy> -out tmp/registry_coverage_batch.json -batch-id all-current-writer-coverage -skip-run -sync",
+          "checkpoint_with_batch": "pwsh -File scripts/migration/validate_checkpoint.ps1 -IncludeCoverageBatch",
+          "focused_registry_tests": "go test ./internal/registry -run SyncCoverageBatch && go test ./cmd/aepregistry -run CoverageBatchSync",
           "version_gate": "go run ./cmd/aepregistry gate -root . -out tmp/registry_gate.json -scope version-matrix",
           "asset_gate": "go run ./cmd/aepregistry gate -root . -out tmp/registry_asset_gate.json -scope asset-policy"
         },
         "files": [
           "cmd/aepregistry/main.go",
-          "cmd/aepregistry/coverage_update_test.go",
-          "internal/registry/coverage_update.go",
-          "internal/registry/coverage_update_test.go",
+          "cmd/aepregistry/main_test.go",
+          "internal/registry/coverage_batch.go",
+          "internal/registry/coverage_batch_test.go",
+          "internal/registry/migration_coverage_summary.go",
+          "scripts/migration/validate_checkpoint.ps1",
           "flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json",
           "flightdeck/work/aep-understanding-generation/mainline-spec.json"
         ],
-        "coverage_update_result": {
-          "report": "tmp/registry_coverage_update.json",
+        "coverage_batch_sync_result": {
+          "report": "tmp/registry_coverage_batch.json",
           "status": "pass",
-          "tested_with_temp_coverage_copy": true,
-          "preserves_unknown_record_fields": true,
-          "keeps_full_recipe_arrays": true,
-          "legacy_script_retained": "scripts/migration/update_coverage.ps1"
+          "entries": 16,
+          "errors": 0,
+          "checkpoint_include_coverage_batch": "pass",
+          "uses_temp_coverage_copy": true,
+          "real_coverage_ledger_modified": false,
+          "legacy_matrix_rerun_path_retained": "scripts/migration/run_coverage_batch.ps1 -RunCoverageBatchMatrices"
         },
         "current_totals": {
           "records": 18,
@@ -1127,7 +1131,7 @@
         }
       }
     },
-    "next_action": "Single-record coverage JSON updates now have a Go-first registry command. Continue mainline by wiring batch sync/replay to the Go updater or selecting a real unsupported conversion surface.",
+    "next_action": "Coverage batch skip-run replay now uses Go sync in the checkpoint path. Continue mainline by moving the remaining checkpoint orchestration or matrix rerun path toward Go, or select a real unsupported conversion surface.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

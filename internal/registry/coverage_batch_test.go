@@ -1,6 +1,10 @@
 package registry
 
-import "testing"
+import (
+	"os"
+	"path/filepath"
+	"testing"
+)
 
 func TestListCoverageBatchesReportsEntries(t *testing.T) {
 	root := newTestRegistryRoot(t)
@@ -43,6 +47,52 @@ func TestCheckCoverageBatchReportsCoverageTotalsDrift(t *testing.T) {
 		t.Fatalf("status = %q, want fail", report.Status)
 	}
 	assertCoverageBatchIssue(t, report, "coverage_totals_mismatch", "text", "tmp/matrix/text/matrix.json")
+}
+
+func TestSyncCoverageBatchFromMatricesUpdatesCoverageCandidate(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeCoverageBatchFixture(t, root, 0)
+
+	report, err := SyncCoverageBatchFromMatrices(root, "flightdeck/work/aep-understanding-generation/current.json", "flightdeck/work/aep-understanding-generation/coverage.json", "all")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != StatusPass || report.Summary.Errors != 0 || report.Summary.Entries != 1 {
+		t.Fatalf("report = %+v, want passing synced batch", report)
+	}
+
+	check, err := CheckCoverageBatch(root, "flightdeck/work/aep-understanding-generation/current.json", "flightdeck/work/aep-understanding-generation/coverage.json", "all")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if check.Status != StatusPass {
+		t.Fatalf("check after sync = %+v, want pass", check)
+	}
+}
+
+func TestSyncCoverageBatchFromMatricesAcceptsAbsoluteCoveragePath(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeCoverageBatchFixture(t, root, 0)
+	source := filepath.Join(root, filepath.FromSlash("flightdeck/work/aep-understanding-generation/coverage.json"))
+	data, err := os.ReadFile(source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	absoluteCoverage := filepath.Join(root, "tmp", "coverage-candidate.json")
+	if err := os.MkdirAll(filepath.Dir(absoluteCoverage), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(absoluteCoverage, data, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	report, err := SyncCoverageBatchFromMatrices(root, "flightdeck/work/aep-understanding-generation/current.json", absoluteCoverage, "all")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != StatusPass {
+		t.Fatalf("report = %+v, want pass for absolute coverage path", report)
+	}
 }
 
 func writeCoverageBatchFixture(t *testing.T, root string, coverageTotal int) {

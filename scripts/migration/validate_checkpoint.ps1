@@ -60,18 +60,22 @@ if ($IncludeCoverageBatch) {
 
   $tempCoverage = Join-Path $env:TEMP ("aep-coverage-candidate-" + [guid]::NewGuid() + ".json")
   try {
-    $batchArgs = @(
-      "-File", (Join-Path $repoRoot "scripts/migration/run_coverage_batch.ps1"),
-      "-BatchId", $CoverageBatchId,
-      "-CurrentPath", $CurrentPath,
-      "-CoveragePath", $tempCoverage
-    )
-    if (-not $RunCoverageBatchMatrices) {
-      $batchArgs += "-SkipRun"
-    }
+    if ($RunCoverageBatchMatrices) {
+      $batchArgs = @(
+        "-File", (Join-Path $repoRoot "scripts/migration/run_coverage_batch.ps1"),
+        "-BatchId", $CoverageBatchId,
+        "-CurrentPath", $CurrentPath,
+        "-CoveragePath", $tempCoverage
+      )
 
-    Invoke-Step "replay coverage batch $CoverageBatchId" {
-      pwsh @batchArgs
+      Invoke-Step "replay coverage batch $CoverageBatchId" {
+        pwsh @batchArgs
+      }
+    } else {
+      Copy-Item -LiteralPath $CoveragePath -Destination $tempCoverage -Force
+      Invoke-Step "replay coverage batch $CoverageBatchId" {
+        go run ./cmd/aepregistry coverage-batch -root . -current $CurrentPath -coverage $tempCoverage -out tmp/registry_coverage_batch.json -batch-id $CoverageBatchId -skip-run -sync
+      }
     }
   } finally {
     if (Test-Path -LiteralPath $tempCoverage) {
