@@ -163,38 +163,36 @@
     "phase": "atom_taxonomy_expansion",
     "last_completed_target": {
       "location": "recipe_atoms",
-      "group": "layer",
-      "reason": "registry ownership report selected layer as the largest remaining recipe_atoms group after camera. Layer all_6x6 has one explicit-matte boundary recipe, so this target registered only the 15 pass-complete layer recipes and left explicit matte under its existing boundary atom.",
+      "group": "remaining_evidence_complete_recipes",
+      "reason": "After shape, text, comp, camera, and layer were registered, the ownership report showed 38 unowned recipe atoms. This batch registered every remaining recipe with complete all_6x6 migration evidence and left only the two recipes that currently have partial/non-6x6 evidence.",
       "source_report": "tmp/registry_ownership.json",
+      "source_matrices": [
+        "tmp/migration_matrix_light_all_6x6/matrix.json",
+        "tmp/migration_matrix_project_all_6x6/matrix.json",
+        "tmp/migration_matrix_transform_all_6x6/matrix.json",
+        "tmp/migration_matrix_effect_params_all_6x6/matrix.json",
+        "tmp/migration_matrix_precomp_all_6x6/matrix.json",
+        "tmp/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json"
+      ],
       "observed_counts": {
         "files": 141,
-        "owned_files_before": 88,
-        "unowned_files_before": 53,
-        "selected_group_unowned_files": 15
+        "owned_files_before": 103,
+        "unowned_files_before": 38,
+        "selected_group_unowned_files": 36
       },
       "result": {
-        "capability_atoms_added": 15,
-        "recipe_atoms_owned_files_after": 103,
-        "recipe_atoms_unowned_files_after": 38,
+        "capability_atoms_added": 36,
+        "recipe_atoms_owned_files_after": 139,
+        "recipe_atoms_unowned_files_after": 2,
         "selected_group_remaining_unowned_files": 0
       },
       "boundary_notes": [
+        "minimal-adjustment-layer remains unowned because only tmp/migration_matrix_adjustment_effect/matrix.json exists, with 3 total rows rather than full AE2020-AE2025 all_6x6 evidence.",
+        "minimal-text-effect remains unowned because current evidence is limited to small text-effect matrices, not a complete all_6x6 matrix.",
         "minimal-layer-explicit-matte remains covered by layer.track_matte.explicit_source as a version-boundary atom, not a pass-complete layer atom."
-      ],
-      "previous_target": {
-        "location": "recipe_atoms",
-        "group": "camera",
-        "capability_atoms_added": 15,
-        "selected_group_remaining_unowned_files": 0,
-        "previous_target": {
-          "location": "recipe_atoms",
-          "group": "comp",
-          "capability_atoms_added": 18,
-          "selected_group_remaining_unowned_files": 0
-        }
-      }
+      ]
     },
-    "next_action": "Select the next atom taxonomy target from the updated ownership report; current largest recipe_atoms group is light with 14 unowned files.",
+    "next_action": "Decide policy for the two remaining recipe_atoms entries: generate full all_6x6 evidence for adjustment/text-effect, or register explicit boundary/pending atoms without marking them verified.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
