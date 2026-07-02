@@ -352,24 +352,28 @@ func coverageSummaryTotalsFields() []string {
 		"atom_row_recipes",
 		"recipes_without_atom_rows",
 		"atom_rows_without_recipes",
+		"observed_recipes_without_declaration",
+		"records_with_undeclared_recipes",
 	}
 }
 
 func coverageSummaryTotalsMap(summary registry.CoverageSummaryTotals) map[string]int {
 	return map[string]int{
-		"records":                   summary.Records,
-		"artifacts":                 summary.Artifacts,
-		"contract_gates":            summary.ContractGates,
-		"atoms":                     summary.Atoms,
-		"atom_rows":                 summary.AtomRows,
-		"errors":                    summary.Errors,
-		"direct_host_atoms":         summary.DirectHostAtoms,
-		"inferred_host_atoms":       summary.InferredHostAtoms,
-		"declared_recipes":          summary.DeclaredRecipes,
-		"observed_recipes":          summary.ObservedRecipes,
-		"atom_row_recipes":          summary.AtomRowRecipes,
-		"recipes_without_atom_rows": summary.RecipesWithoutAtomRows,
-		"atom_rows_without_recipes": summary.AtomRowsWithoutRecipes,
+		"records":                              summary.Records,
+		"artifacts":                            summary.Artifacts,
+		"contract_gates":                       summary.ContractGates,
+		"atoms":                                summary.Atoms,
+		"atom_rows":                            summary.AtomRows,
+		"errors":                               summary.Errors,
+		"direct_host_atoms":                    summary.DirectHostAtoms,
+		"inferred_host_atoms":                  summary.InferredHostAtoms,
+		"declared_recipes":                     summary.DeclaredRecipes,
+		"observed_recipes":                     summary.ObservedRecipes,
+		"atom_row_recipes":                     summary.AtomRowRecipes,
+		"recipes_without_atom_rows":            summary.RecipesWithoutAtomRows,
+		"atom_rows_without_recipes":            summary.AtomRowsWithoutRecipes,
+		"observed_recipes_without_declaration": summary.ObservedRecipesWithoutDeclaration,
+		"records_with_undeclared_recipes":      summary.RecordsWithUndeclaredRecipes,
 	}
 }
 

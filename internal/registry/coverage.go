@@ -27,45 +27,53 @@ type CoverageSummary struct {
 }
 
 type CoverageSummaryReport struct {
-	SchemaVersion           int                     `json:"schema_version"`
-	Status                  string                  `json:"status"`
-	Summary                 CoverageSummaryTotals   `json:"summary"`
-	Records                 int                     `json:"records"`
-	Artifacts               int                     `json:"artifacts"`
-	ContractGates           int                     `json:"contract_gates"`
-	Atoms                   int                     `json:"atoms"`
-	AtomRows                int                     `json:"atom_rows"`
-	Errors                  int                     `json:"errors"`
-	DirectHostAtoms         int                     `json:"direct_host_atoms"`
-	InferredHostAtoms       int                     `json:"inferred_host_atoms"`
-	ByDomain                []CoverageSummaryBucket `json:"by_domain,omitempty"`
-	ByRecord                []CoverageSummaryBucket `json:"by_record,omitempty"`
-	ByWriterStatus          []CoverageSummaryBucket `json:"by_writer_status,omitempty"`
-	ByHostOpenEvidenceLevel []CoverageSummaryBucket `json:"by_host_open_evidence_level,omitempty"`
-	ByBoundaryStatus        []CoverageSummaryBucket `json:"by_boundary_status,omitempty"`
-	RecipesWithoutAtomRows  []string                `json:"recipes_without_atom_rows,omitempty"`
-	AtomRowsWithoutRecipes  []string                `json:"atom_rows_without_recipes,omitempty"`
+	SchemaVersion                int                              `json:"schema_version"`
+	Status                       string                           `json:"status"`
+	Summary                      CoverageSummaryTotals            `json:"summary"`
+	Records                      int                              `json:"records"`
+	Artifacts                    int                              `json:"artifacts"`
+	ContractGates                int                              `json:"contract_gates"`
+	Atoms                        int                              `json:"atoms"`
+	AtomRows                     int                              `json:"atom_rows"`
+	Errors                       int                              `json:"errors"`
+	DirectHostAtoms              int                              `json:"direct_host_atoms"`
+	InferredHostAtoms            int                              `json:"inferred_host_atoms"`
+	ByDomain                     []CoverageSummaryBucket          `json:"by_domain,omitempty"`
+	ByRecord                     []CoverageSummaryBucket          `json:"by_record,omitempty"`
+	ByWriterStatus               []CoverageSummaryBucket          `json:"by_writer_status,omitempty"`
+	ByHostOpenEvidenceLevel      []CoverageSummaryBucket          `json:"by_host_open_evidence_level,omitempty"`
+	ByBoundaryStatus             []CoverageSummaryBucket          `json:"by_boundary_status,omitempty"`
+	RecipesWithoutAtomRows       []string                         `json:"recipes_without_atom_rows,omitempty"`
+	AtomRowsWithoutRecipes       []string                         `json:"atom_rows_without_recipes,omitempty"`
+	RecordsWithUndeclaredRecipes []CoverageSummaryRecordRecipeGap `json:"records_with_undeclared_recipes,omitempty"`
 }
 
 type CoverageSummaryTotals struct {
-	Records                int `json:"records"`
-	Artifacts              int `json:"artifacts"`
-	ContractGates          int `json:"contract_gates"`
-	Atoms                  int `json:"atoms"`
-	AtomRows               int `json:"atom_rows"`
-	Errors                 int `json:"errors"`
-	DirectHostAtoms        int `json:"direct_host_atoms"`
-	InferredHostAtoms      int `json:"inferred_host_atoms"`
-	DeclaredRecipes        int `json:"declared_recipes"`
-	ObservedRecipes        int `json:"observed_recipes"`
-	AtomRowRecipes         int `json:"atom_row_recipes"`
-	RecipesWithoutAtomRows int `json:"recipes_without_atom_rows"`
-	AtomRowsWithoutRecipes int `json:"atom_rows_without_recipes"`
+	Records                           int `json:"records"`
+	Artifacts                         int `json:"artifacts"`
+	ContractGates                     int `json:"contract_gates"`
+	Atoms                             int `json:"atoms"`
+	AtomRows                          int `json:"atom_rows"`
+	Errors                            int `json:"errors"`
+	DirectHostAtoms                   int `json:"direct_host_atoms"`
+	InferredHostAtoms                 int `json:"inferred_host_atoms"`
+	DeclaredRecipes                   int `json:"declared_recipes"`
+	ObservedRecipes                   int `json:"observed_recipes"`
+	AtomRowRecipes                    int `json:"atom_row_recipes"`
+	RecipesWithoutAtomRows            int `json:"recipes_without_atom_rows"`
+	AtomRowsWithoutRecipes            int `json:"atom_rows_without_recipes"`
+	ObservedRecipesWithoutDeclaration int `json:"observed_recipes_without_declaration"`
+	RecordsWithUndeclaredRecipes      int `json:"records_with_undeclared_recipes"`
 }
 
 type CoverageSummaryBucket struct {
 	Name     string `json:"name"`
 	AtomRows int    `json:"atom_rows"`
+}
+
+type CoverageSummaryRecordRecipeGap struct {
+	RecordID string   `json:"record_id"`
+	Recipes  []string `json:"recipes"`
 }
 
 type CoverageRowsReport struct {
@@ -310,11 +318,23 @@ func SummarizeCoverage(report CoverageReport) CoverageSummaryReport {
 	atomRowRecipes := map[string]bool{}
 	atomRowsWithoutRecipes := map[string]bool{}
 	for _, record := range report.Records {
+		recordDeclared := stringSet(record.DeclaredRecipes)
+		var undeclared []string
 		for _, recipe := range record.DeclaredRecipes {
 			declaredRecipes[recipe] = true
 		}
 		for _, recipe := range record.ObservedRecipes {
 			observedRecipes[recipe] = true
+			if !recordDeclared[recipe] {
+				undeclared = append(undeclared, recipe)
+			}
+		}
+		if len(undeclared) > 0 {
+			sort.Strings(undeclared)
+			summary.RecordsWithUndeclaredRecipes = append(summary.RecordsWithUndeclaredRecipes, CoverageSummaryRecordRecipeGap{
+				RecordID: record.ID,
+				Recipes:  undeclared,
+			})
 		}
 	}
 	for _, row := range report.AtomRows {
@@ -347,20 +367,29 @@ func SummarizeCoverage(report CoverageReport) CoverageSummaryReport {
 	}
 	sort.Strings(summary.RecipesWithoutAtomRows)
 	summary.AtomRowsWithoutRecipes = sortedKeys(atomRowsWithoutRecipes)
+	sort.Slice(summary.RecordsWithUndeclaredRecipes, func(i, j int) bool {
+		return summary.RecordsWithUndeclaredRecipes[i].RecordID < summary.RecordsWithUndeclaredRecipes[j].RecordID
+	})
+	undeclaredRecipes := 0
+	for _, record := range summary.RecordsWithUndeclaredRecipes {
+		undeclaredRecipes += len(record.Recipes)
+	}
 	summary.Summary = CoverageSummaryTotals{
-		Records:                summary.Records,
-		Artifacts:              summary.Artifacts,
-		ContractGates:          summary.ContractGates,
-		Atoms:                  summary.Atoms,
-		AtomRows:               summary.AtomRows,
-		Errors:                 summary.Errors,
-		DirectHostAtoms:        summary.DirectHostAtoms,
-		InferredHostAtoms:      summary.InferredHostAtoms,
-		DeclaredRecipes:        len(declaredRecipes),
-		ObservedRecipes:        len(observedRecipes),
-		AtomRowRecipes:         len(atomRowRecipes),
-		RecipesWithoutAtomRows: len(summary.RecipesWithoutAtomRows),
-		AtomRowsWithoutRecipes: len(summary.AtomRowsWithoutRecipes),
+		Records:                           summary.Records,
+		Artifacts:                         summary.Artifacts,
+		ContractGates:                     summary.ContractGates,
+		Atoms:                             summary.Atoms,
+		AtomRows:                          summary.AtomRows,
+		Errors:                            summary.Errors,
+		DirectHostAtoms:                   summary.DirectHostAtoms,
+		InferredHostAtoms:                 summary.InferredHostAtoms,
+		DeclaredRecipes:                   len(declaredRecipes),
+		ObservedRecipes:                   len(observedRecipes),
+		AtomRowRecipes:                    len(atomRowRecipes),
+		RecipesWithoutAtomRows:            len(summary.RecipesWithoutAtomRows),
+		AtomRowsWithoutRecipes:            len(summary.AtomRowsWithoutRecipes),
+		ObservedRecipesWithoutDeclaration: undeclaredRecipes,
+		RecordsWithUndeclaredRecipes:      len(summary.RecordsWithUndeclaredRecipes),
 	}
 	return summary
 }

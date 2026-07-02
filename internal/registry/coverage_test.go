@@ -461,6 +461,38 @@ func TestSummarizeCoverageReportsRecipeAtomCoverageGaps(t *testing.T) {
 	}
 }
 
+func TestSummarizeCoverageReportsObservedRecipesWithoutDeclaration(t *testing.T) {
+	report := CoverageReport{
+		Status: StatusPass,
+		Summary: CoverageSummary{
+			Records:   1,
+			Artifacts: 1,
+			Atoms:     3,
+		},
+		Records: []CoverageRecordReport{
+			{
+				ID:              "shape",
+				DeclaredRecipes: []string{"minimal-shape-a", "minimal-shape-b"},
+				ObservedRecipes: []string{"minimal-shape-a", "minimal-shape-b", "minimal-shape-c"},
+			},
+		},
+		AtomRows: []AtomCoverageRow{
+			{AtomID: "shape.a", RecordID: "shape", Recipe: "minimal-shape-a"},
+			{AtomID: "shape.b", RecordID: "shape", Recipe: "minimal-shape-b"},
+			{AtomID: "shape.c", RecordID: "shape", Recipe: "minimal-shape-c"},
+		},
+	}
+
+	summary := SummarizeCoverage(report)
+	if summary.Summary.ObservedRecipesWithoutDeclaration != 1 || summary.Summary.RecordsWithUndeclaredRecipes != 1 {
+		t.Fatalf("undeclared recipe totals = %+v, want one undeclared recipe on one record", summary.Summary)
+	}
+	if len(summary.RecordsWithUndeclaredRecipes) != 1 || summary.RecordsWithUndeclaredRecipes[0].RecordID != "shape" {
+		t.Fatalf("undeclared recipe records = %+v, want shape", summary.RecordsWithUndeclaredRecipes)
+	}
+	assertStringSet(t, summary.RecordsWithUndeclaredRecipes[0].Recipes, []string{"minimal-shape-c"})
+}
+
 func TestCoverageAxisSummarizesVersionAxisAndHostLabels(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
