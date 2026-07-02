@@ -791,18 +791,17 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "matrix_ledger_builder_split",
-      "reason": "Reduce matrix_ledger.go growth risk by separating ledger row construction and domain/status classification from ledger types and JSON loading while preserving behavior.",
+      "group": "layer_reference_materializer_split",
+      "reason": "Reduce convert_layer.go growth risk by separating parent, light-source, and track-matte reference materialization from layer metadata and null-layer construction while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/matrix_ledger.go",
-          "internal/aepmigrate/matrix_ledger_build.go",
-          "internal/aepmigrate/matrix_ledger_classify.go"
+          "internal/aepmigrate/convert_layer.go",
+          "internal/aepmigrate/convert_layer_refs.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Matrix ledger now separates types/loading, row construction, and domain/status classification. Next useful increment is to continue reducing remaining 4KB conversion support files or dense tests into coherent modules without changing behavior.",
+    "next_action": "Layer reference materialization now lives in a focused module separate from layer metadata and null-layer construction. Next useful increment is to continue reducing remaining 4KB conversion support files or dense tests into coherent modules without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
