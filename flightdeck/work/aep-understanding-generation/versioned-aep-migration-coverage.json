@@ -1194,12 +1194,5 @@
       }
     }
   ],
-  "open_items": [
-    {
-      "id": "host-open-fanout",
-      "scope": "non-representative text animator, effect, transform, project/comp, and camera-light variants",
-      "status": "resolved_by_endpoint_policy",
-      "note": "Coverage now has direct target-bound endpoint host-open evidence for prior pending text/effect/layer/shape gaps and default/MOGRT smoke recipes. Broader all-host fanout remains optional policy escalation, not an active gap."
-    }
-  ]
+  "open_items": []
 }
