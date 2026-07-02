@@ -791,19 +791,19 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "default_layer_rebuilder_split",
-      "reason": "Reduce default layer rebuilder growth risk by separating footage-backed, adjustment, camera/light, and precomp layer materializers while preserving behavior.",
+      "group": "text_run_materializer_split",
+      "reason": "Reduce convert_text_runs.go growth risk by separating text run metrics, option enum materialization, and stroke materialization while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_rebuild_footage_layer.go",
-          "internal/aepmigrate/convert_rebuild_adjustment_layer.go",
-          "internal/aepmigrate/convert_rebuild_camera_light_layer.go",
-          "internal/aepmigrate/convert_rebuild_precomp_layer.go"
+          "internal/aepmigrate/convert_text_runs.go",
+          "internal/aepmigrate/convert_text_run_metrics.go",
+          "internal/aepmigrate/convert_text_run_options.go",
+          "internal/aepmigrate/convert_text_run_stroke.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Default layer rebuilders now separate footage-backed, adjustment, camera/light, and precomp layer materializers. Next useful increment is to continue reducing remaining dense conversion support files or high-signal tests into coherent modules without changing behavior.",
+    "next_action": "Text run materialization now separates metrics, enum-backed options, and stroke fields. Next useful increment is to continue reducing remaining dense conversion support files or high-signal tests into coherent modules without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
