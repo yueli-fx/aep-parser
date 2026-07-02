@@ -791,17 +791,17 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "convert_rebuild_layers_split",
-      "reason": "Reduce convert_rebuild.go growth risk by separating per-composition layer reconstruction from project and composition creation while preserving behavior.",
+      "group": "text_animator_values_split",
+      "reason": "Reduce convert_text_animator.go growth risk by separating text animator initial value, keyframe, and color conversion helpers from animator materialization while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_rebuild.go",
-          "internal/aepmigrate/convert_rebuild_layers.go"
+          "internal/aepmigrate/convert_text_animator.go",
+          "internal/aepmigrate/convert_text_animator_values.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Per-composition layer reconstruction has been split from convert_rebuild.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_text_animator.go, convert_scope_support.go, or remaining layer camera/light helpers without changing behavior.",
+    "next_action": "Text animator initial value, keyframe, and color conversion helpers have been split from convert_text_animator.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_scope_support.go, convert_rebuild_layers.go, or remaining layer camera/light helpers without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
