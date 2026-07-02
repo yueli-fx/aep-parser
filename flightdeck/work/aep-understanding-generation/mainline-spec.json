@@ -1031,24 +1031,21 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/registry",
-      "group": "cleanup_prune_review_dry_run_gate",
-      "reason": "Make review-prunable generated cleanup explicit in the asset-policy gate before any apply path is considered.",
+      "group": "cleanup_prune_review_apply_guard",
+      "reason": "Prevent broad destructive prune-review applies; dry-run remains broad, but apply must explicitly choose producer categories.",
       "result": {
         "files": [
           "cmd/aepregistry/main.go",
           "cmd/aepregistry/main_test.go"
         ],
-        "behavior": "Asset-policy gate now writes tmp/registry_generated_cleanup_execution_prune_review.json using prune-review-siblings in dry-run mode, alongside the existing non-prune execution report.",
-        "asset_gate": {
-          "steps": 6,
-          "failed": 0
+        "behavior": "aepregistry cleanup now rejects -apply with -prune-review-siblings unless -producer is supplied, so pruning protected sibling directories requires an explicit producer scope.",
+        "guarded_command": {
+          "rejected": "go run ./cmd/aepregistry cleanup -root . -out tmp/registry_generated_cleanup_guard_check.json -exec-out tmp/registry_generated_cleanup_execution_guard_check.json -apply -prune-review-siblings -sample-limit 1",
+          "reason": "-apply with -prune-review-siblings requires -producer"
         },
-        "prune_review_dry_run_summary": {
-          "mode": "dry_run",
-          "planned_groups": 3,
-          "planned_files": 344,
-          "skipped_groups": 21,
-          "errors": 0
+        "allowed_pattern": {
+          "example": "go run ./cmd/aepregistry cleanup -root . -out tmp/registry_generated_cleanup.json -exec-out tmp/registry_generated_cleanup_execution_scoped_apply.json -apply -prune-review-siblings -producer <category> -sample-limit 3",
+          "status": "requires_explicit_operator_choice"
         }
       }
     },
@@ -1079,7 +1076,7 @@
         }
       }
     },
-    "next_action": "Review-prunable cleanup now has an explicit dry-run gate artifact. Continue with either a guarded apply policy for selected generated producers or the next scoped capability family, using the same JSON source-of-truth pattern.",
+    "next_action": "Prune-review apply is now guarded by explicit producer scope. Continue with either an operator-chosen scoped apply pass or the next scoped capability family, using the same JSON source-of-truth pattern.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

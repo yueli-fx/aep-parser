@@ -177,7 +177,7 @@ func TestRunCleanupCanPruneReviewSiblings(t *testing.T) {
 	out := filepath.Join(root, "tmp", "registry_generated_cleanup.json")
 	execOut := filepath.Join(root, "tmp", "registry_generated_cleanup_execution.json")
 
-	code := run([]string{"cleanup", "-root", root, "-out", out, "-exec-out", execOut, "-apply", "-prune-review-siblings", "-sample-limit", "1"})
+	code := run([]string{"cleanup", "-root", root, "-out", out, "-exec-out", execOut, "-apply", "-prune-review-siblings", "-producer", "unknown_generated", "-sample-limit", "1"})
 	if code != 0 {
 		t.Fatalf("run(cleanup -apply -prune-review-siblings) = %d, want 0", code)
 	}
@@ -198,6 +198,24 @@ func TestRunCleanupCanPruneReviewSiblings(t *testing.T) {
 	}
 	if report.Summary.DeletedGroups == 0 || report.Summary.Errors != 0 {
 		t.Fatalf("execution summary = %+v, want deleted prune with no errors", report.Summary)
+	}
+}
+
+func TestRunCleanupRejectsPruneReviewApplyWithoutProducer(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeFile(t, root, "tmp/text-basic/report.json", "{}\n")
+	out := filepath.Join(root, "tmp", "registry_generated_cleanup.json")
+	execOut := filepath.Join(root, "tmp", "registry_generated_cleanup_execution.json")
+
+	code := run([]string{"cleanup", "-root", root, "-out", out, "-exec-out", execOut, "-apply", "-prune-review-siblings", "-sample-limit", "1"})
+	if code != 2 {
+		t.Fatalf("run(cleanup unscoped prune apply) = %d, want 2", code)
+	}
+	if _, err := os.Stat(filepath.Join(root, "tmp", "text-basic", "report.json")); err != nil {
+		t.Fatalf("rejected prune apply should keep unreferenced sibling: %v", err)
+	}
+	if _, err := os.Stat(execOut); !os.IsNotExist(err) {
+		t.Fatalf("rejected prune apply should not write exec report, stat err=%v", err)
 	}
 }
 

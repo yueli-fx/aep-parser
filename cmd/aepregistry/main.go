@@ -331,6 +331,10 @@ func runCleanup(args []string) int {
 		fmt.Fprintln(os.Stderr, "usage: aepregistry cleanup [-root .] [-out tmp/registry_generated_cleanup.json] [-exec-out tmp/registry_generated_cleanup_execution.json] [-apply] [-prune-review-siblings] [-producer categories] [-exclude-producer categories] [-state-ref json[,json...]] [-sample-limit 5] [-json]")
 		return 2
 	}
+	if *apply && *pruneReviewSiblings && len(splitCSV(*producers)) == 0 {
+		fmt.Fprintln(os.Stderr, "cleanup: -apply with -prune-review-siblings requires -producer to scope destructive sibling pruning")
+		return 2
+	}
 	if *apply && *execOutPath == "" {
 		*execOutPath = "tmp/registry_generated_cleanup_execution.json"
 	}
