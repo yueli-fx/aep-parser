@@ -1046,15 +1046,13 @@
     },
     "last_code_maintenance_target": {
       "location": "registry_tooling",
-      "group": "go_migration_coverage_summary_query",
-      "reason": "Move migration coverage summary querying onto the Go-first registry command so total/detail/total questions no longer depend on the PowerShell-only query helper.",
+      "group": "go_recurring_matrix_gate",
+      "reason": "Move recurring matrix verification onto a Go-first registry command and refresh the W2020-source full matrix totals after the coverage ledger reached 143 recipes.",
       "result": {
         "commands": {
-          "go_migration_summary_render": "go run ./cmd/aepregistry migration-summary -root . -out tmp/migration_coverage_summary.json",
-          "go_migration_summary_check": "go run ./cmd/aepregistry migration-summary -root . -out tmp/migration_coverage_summary.json -check",
-          "go_migration_summary_totals": "go run ./cmd/aepregistry migration-summary -root . -out tmp/migration_coverage_summary.json -totals",
-          "go_migration_summary_recipe": "go run ./cmd/aepregistry migration-summary -root . -out tmp/migration_coverage_summary.json -recipe minimal-layer-explicit-matte",
-          "go_migration_summary_evidence_level": "go run ./cmd/aepregistry migration-summary -root . -out tmp/migration_coverage_summary.json -evidence-level excluded_known_boundary",
+          "go_recurring_matrix": "go run ./cmd/aepregistry recurring-matrix -root . -out tmp/registry_recurring_matrix.json -out-root tmp/migration_matrix_verify",
+          "go_recurring_matrix_existing_artifact_check": "go run ./cmd/aepregistry recurring-matrix -root . -out tmp/registry_recurring_matrix.json -out-root tmp/migration_matrix_verify -skip-run",
+          "checkpoint_include_matrix": "pwsh -File scripts/migration/validate_checkpoint.ps1 -IncludeMatrix",
           "focused_registry_tests": "go test ./cmd/aepregistry ./internal/registry",
           "version_gate": "go run ./cmd/aepregistry gate -root . -out tmp/registry_gate.json -scope version-matrix",
           "asset_gate": "go run ./cmd/aepregistry gate -root . -out tmp/registry_asset_gate.json -scope asset-policy"
@@ -1062,23 +1060,29 @@
         "files": [
           "cmd/aepregistry/main.go",
           "cmd/aepregistry/main_test.go",
-          "internal/registry/coverage.go",
-          "internal/registry/migration_coverage_summary.go",
-          "internal/registry/migration_coverage_summary_test.go",
+          "internal/registry/recurring_matrix.go",
+          "internal/registry/recurring_matrix_test.go",
+          "scripts/migration/validate_checkpoint.ps1",
+          "scripts/migration/verify_matrix.ps1",
           "flightdeck/work/aep-understanding-generation/current.md",
+          "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json",
           "flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json",
           "flightdeck/work/aep-understanding-generation/mainline-spec.json"
         ],
-        "query_result": {
-          "artifact": "tmp/migration_coverage_summary.json",
-          "coverage_records": 16,
-          "domains": 11,
-          "recipes": 143,
-          "writer_cases": 5148,
-          "endpoint_host_open_cases": 512,
-          "recipe_query": "minimal-layer-explicit-matte boundary=known_matte_contract_boundary blocked=5",
-          "evidence_level_query": "excluded_known_boundary count=1 recipe=minimal-layer-explicit-matte",
-          "legacy_script_retained_for_current_tooling_compatibility": "scripts/migration/query_coverage_summary.ps1"
+        "recurring_matrix_result": {
+          "report": "tmp/registry_recurring_matrix.json",
+          "full_w2020_no_ae_matrix": "tmp/migration_matrix_verify/smoke_all/matrix.json",
+          "full_w2020_no_ae_totals": {
+            "total": 858,
+            "pass": 852,
+            "blocked": 0,
+            "failed": 0,
+            "skipped": 6
+          },
+          "standalone_verify": "pass",
+          "explicit_matte_ae2025_contract": "1/1 pass",
+          "checkpoint_include_matrix_uses_go": true,
+          "legacy_script_retained_for_current_tooling_compatibility": "scripts/migration/verify_matrix.ps1"
         },
         "current_totals": {
           "records": 18,
@@ -1135,7 +1139,7 @@
         }
       }
     },
-    "next_action": "Migration coverage summary render/check/query now has a Go-first registry command. Continue mainline by either moving the next PowerShell-only helper into Go or selecting a real unsupported conversion surface.",
+    "next_action": "Recurring matrix verification now has a Go-first registry command and current W2020-source totals are refreshed to 858 total / 852 pass / 6 skipped. Continue mainline by either moving the next PowerShell-only helper into Go or selecting a real unsupported conversion surface.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

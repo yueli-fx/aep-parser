@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -42,10 +43,106 @@ func run(args []string) int {
 		return runLayout(args[1:])
 	case "ownership":
 		return runOwnership(args[1:])
+	case "recurring-matrix":
+		return runRecurringMatrix(args[1:])
 	default:
 		usage()
 		return 2
 	}
+}
+
+func runRecurringMatrix(args []string) int {
+	fs := flag.NewFlagSet("aepregistry recurring-matrix", flag.ContinueOnError)
+	fs.SetOutput(os.Stderr)
+	root := fs.String("root", ".", "repository root")
+	outRoot := fs.String("out-root", "tmp/migration_matrix_verify", "recurring matrix artifact root")
+	outPath := fs.String("out", "tmp/registry_recurring_matrix.json", "recurring matrix gate report JSON path")
+	skipRun := fs.Bool("skip-run", false, "validate existing artifacts without regenerating matrices")
+	jsonOut := fs.Bool("json", false, "print JSON report")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	if fs.NArg() != 0 {
+		fmt.Fprintln(os.Stderr, "usage: aepregistry recurring-matrix [-root .] [-out-root tmp/migration_matrix_verify] [-out tmp/registry_recurring_matrix.json] [-skip-run] [-json]")
+		return 2
+	}
+	if !*skipRun {
+		if err := runRecurringMatrixArtifacts(*root, *outRoot); err != nil {
+			fmt.Fprintln(os.Stderr, "recurring-matrix:", err)
+			return 2
+		}
+	}
+	report, err := registry.CheckRecurringMatrixGates(*root, *outRoot)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "recurring-matrix:", err)
+		return 2
+	}
+	reportPath := resolveRootPath(*root, *outPath)
+	if err := writeJSONFile(reportPath, report); err != nil {
+		fmt.Fprintln(os.Stderr, "write:", err)
+		return 2
+	}
+	if *jsonOut {
+		if err := json.NewEncoder(os.Stdout).Encode(report); err != nil {
+			fmt.Fprintln(os.Stderr, "stdout:", err)
+			return 2
+		}
+	} else {
+		fmt.Printf("recurring matrix gates: %s (%d gates, %d errors)\n", report.Status, report.Summary.Gates, report.Summary.Errors)
+	}
+	if report.Status == registry.StatusFail {
+		return 1
+	}
+	return 0
+}
+
+func runRecurringMatrixArtifacts(root, outRoot string) error {
+	smokeOut := filepath.ToSlash(filepath.Join(outRoot, "smoke_all"))
+	explicitMatteOut := filepath.ToSlash(filepath.Join(outRoot, "explicit_matte_ae2025"))
+	if err := runGoCommand(root,
+		"run", "./cmd/aepmigrate", "matrix",
+		"-recipes", "examples/recipes",
+		"-sources", "AE2020",
+		"-targets", "all",
+		"-out", smokeOut,
+		"-ledger-out", filepath.ToSlash(filepath.Join(smokeOut, "ledger.md")),
+	); err != nil {
+		return err
+	}
+	verifyCase := filepath.ToSlash(filepath.Join(smokeOut, "minimal-adjustment-layer", "AE2020_to_AE2025"))
+	if err := runGoCommand(root,
+		"run", "./cmd/aepmigrate", "verify",
+		"-source", filepath.ToSlash(filepath.Join(verifyCase, "source.aep")),
+		"-target", filepath.ToSlash(filepath.Join(verifyCase, "target.aep")),
+		"-target-version", "AE2025",
+		"-report", filepath.ToSlash(filepath.Join(verifyCase, "convert_report.json")),
+		"-out", filepath.ToSlash(filepath.Join(verifyCase, "verify_report.json")),
+	); err != nil {
+		return err
+	}
+	return runGoCommand(root,
+		"run", "./cmd/aepmigrate", "matrix",
+		"-recipe", "examples/recipes/minimal-layer-explicit-matte.json",
+		"-sources", "AE2025",
+		"-targets", "AE2025",
+		"-out", explicitMatteOut,
+		"-ledger-out", filepath.ToSlash(filepath.Join(explicitMatteOut, "ledger.md")),
+	)
+}
+
+func runGoCommand(root string, args ...string) error {
+	cmd := exec.Command("go", args...)
+	cmd.Dir = root
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+func resolveRootPath(root, path string) string {
+	if filepath.IsAbs(path) {
+		return path
+	}
+	return filepath.Join(root, filepath.FromSlash(path))
 }
 
 func runMigrationSummary(args []string) int {
@@ -1164,5 +1261,5 @@ func writeJSONFile(path string, value any) error {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: aepregistry <audit|boundaries|cleanup|coverage|gate|host-open-gaps|inventory|layout|migration-summary|ownership> [flags]")
+	fmt.Fprintln(os.Stderr, "usage: aepregistry <audit|boundaries|cleanup|coverage|gate|host-open-gaps|inventory|layout|migration-summary|ownership|recurring-matrix> [flags]")
 }

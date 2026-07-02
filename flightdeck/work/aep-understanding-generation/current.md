@@ -19,7 +19,7 @@ pwsh -File scripts\migration\run_coverage_batch.ps1 -List
 pwsh -File scripts\migration\run_coverage_batch.ps1 -BatchId all-current-writer-coverage -SkipRun
 pwsh -File scripts\migration\validate_coverage.ps1
 pwsh -File scripts\migration\render_coverage_md.ps1
-pwsh -File scripts\migration\verify_matrix.ps1
+go run ./cmd/aepregistry recurring-matrix -root . -out tmp/registry_recurring_matrix.json -out-root tmp/migration_matrix_verify
 go test ./...
 go vet ./...
 ```

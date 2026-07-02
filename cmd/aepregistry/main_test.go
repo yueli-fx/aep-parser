@@ -212,6 +212,47 @@ func TestRunMigrationSummaryQueriesExistingReport(t *testing.T) {
 	}
 }
 
+func TestRunRecurringMatrixSkipRunWritesReport(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeJSON(t, root, "tmp/migration_matrix_verify/smoke_all/matrix.json", map[string]any{
+		"schema_version": 1,
+		"summary":        map[string]any{"total": 858, "passed": 852, "blocked": 0, "failed": 0, "skipped": 6},
+		"cases":          []map[string]any{},
+	})
+	writeJSON(t, root, "tmp/migration_matrix_verify/smoke_all/minimal-adjustment-layer/AE2020_to_AE2025/verify_report.json", map[string]any{
+		"summary":      map[string]any{"status": "pass"},
+		"verification": map[string]any{"profile_diff_status": "pass", "profile_diff_count": 0},
+	})
+	writeJSON(t, root, "tmp/migration_matrix_verify/explicit_matte_ae2025/matrix.json", map[string]any{
+		"schema_version": 1,
+		"summary":        map[string]any{"total": 1, "passed": 1, "blocked": 0, "failed": 0, "skipped": 0},
+		"cases":          []map[string]any{},
+	})
+	out := "tmp/registry_recurring_matrix.json"
+
+	code := run([]string{
+		"recurring-matrix",
+		"-root", root,
+		"-out-root", "tmp/migration_matrix_verify",
+		"-out", out,
+		"-skip-run",
+	})
+	if code != 0 {
+		t.Fatalf("run(recurring-matrix -skip-run) = %d, want 0", code)
+	}
+	var report registry.RecurringMatrixReport
+	data, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(out)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != registry.StatusPass || report.Summary.Gates != 3 || report.Summary.Errors != 0 {
+		t.Fatalf("report = %+v", report)
+	}
+}
+
 func TestRunOwnershipWritesOwnershipSummary(t *testing.T) {
 	root := newRegistryRoot(t)
 	writeFile(t, root, "examples/recipes/unowned.json", "{}\n")

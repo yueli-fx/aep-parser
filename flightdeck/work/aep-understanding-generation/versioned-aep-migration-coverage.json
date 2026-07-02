@@ -71,9 +71,9 @@
   "recurring_gates": [
     {
       "id": "full-w2020-no-ae-boundary",
-      "command": "pwsh -File scripts/migration/verify_matrix.ps1",
-      "artifact": "tmp/migration_matrix_smoke_all/matrix.json",
-      "ledger": "tmp/migration_matrix_smoke_all/ledger.md",
+      "command": "go run ./cmd/aepregistry recurring-matrix -root . -out tmp/registry_recurring_matrix.json -out-root tmp/migration_matrix_verify",
+      "artifact": "tmp/migration_matrix_verify/smoke_all/matrix.json",
+      "ledger": "tmp/migration_matrix_verify/smoke_all/ledger.md",
       "writer_coverage": {
         "source_writers": [
           "AE2020"
@@ -88,8 +88,8 @@
         ]
       },
       "totals": {
-        "total": 846,
-        "pass": 840,
+        "total": 858,
+        "pass": 852,
         "blocked": 0,
         "failed": 0,
         "skipped": 6
@@ -98,9 +98,9 @@
     },
     {
       "id": "explicit-matte-ae2025-contract",
-      "command": "pwsh -File scripts/migration/verify_matrix.ps1",
-      "artifact": "tmp/migration_matrix_explicit_matte_ae2025/matrix.json",
-      "ledger": "tmp/migration_matrix_explicit_matte_ae2025/ledger.md",
+      "command": "go run ./cmd/aepregistry recurring-matrix -root . -out tmp/registry_recurring_matrix.json -out-root tmp/migration_matrix_verify",
+      "artifact": "tmp/migration_matrix_verify/explicit_matte_ae2025/matrix.json",
+      "ledger": "tmp/migration_matrix_verify/explicit_matte_ae2025/ledger.md",
       "writer_coverage": {
         "source_writers": [
           "AE2025"

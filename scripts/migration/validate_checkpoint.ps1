@@ -82,7 +82,7 @@ if ($IncludeCoverageBatch) {
 
 if ($IncludeMatrix) {
   Invoke-Step "verify recurring matrix gates" {
-    pwsh -File (Join-Path $repoRoot "scripts/migration/verify_matrix.ps1")
+    go run ./cmd/aepregistry recurring-matrix -root . -out tmp/registry_recurring_matrix.json -out-root tmp/migration_matrix_verify
   }
 }
 
