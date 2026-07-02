@@ -287,6 +287,9 @@ func TestRunCoverageCanWriteSummaryReport(t *testing.T) {
 	if summary.Status != registry.StatusPass || summary.AtomRows != 0 {
 		t.Fatalf("summary status/atom rows = %q/%d", summary.Status, summary.AtomRows)
 	}
+	if summary.Summary.Records != summary.Records || summary.Summary.Artifacts != summary.Artifacts || summary.Summary.AtomRows != summary.AtomRows {
+		t.Fatalf("nested summary = %+v, want mirrored scalar totals from %+v", summary.Summary, summary)
+	}
 }
 
 func TestRunCoverageCanWriteVersionAxisReport(t *testing.T) {

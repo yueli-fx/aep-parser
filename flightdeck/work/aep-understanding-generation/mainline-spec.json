@@ -115,7 +115,7 @@
     {
       "path": "tmp/registry_coverage_summary.json",
       "role": "generated_report",
-      "description": "Read-only coverage atom-row summary output for quick total-table queries; ignored by git."
+      "description": "Read-only coverage atom-row summary output for quick total-table queries, with both legacy flat scalar fields and a nested summary scalar object; ignored by git."
     },
     {
       "path": "tmp/registry_coverage_axis.json",
@@ -1040,30 +1040,38 @@
       }
     },
     "last_code_maintenance_target": {
-      "location": "tmp",
-      "group": "review_prunable_generated_apply_cleanup",
-      "reason": "Execute the scoped preserve-path cleanup for the remaining version_matrix and host_open_gap review-prunable generated siblings after layout and cleanup reports agreed on the same candidate totals.",
+      "location": "cmd/aepregistry",
+      "group": "coverage_summary_nested_totals",
+      "reason": "Make coverage -summary easier to consume as a total-table JSON artifact by adding a standard nested summary scalar object while preserving existing flat fields.",
       "result": {
         "commands": {
-          "version_matrix_apply": "go run ./cmd/aepregistry cleanup -root . -out tmp/registry_generated_cleanup.json -exec-out tmp/registry_cleanup_version_matrix_prune_apply.json -prune-review-siblings -producer version_matrix -apply -sample-limit 5",
-          "host_open_gap_apply": "go run ./cmd/aepregistry cleanup -root . -out tmp/registry_generated_cleanup_host_apply_prep.json -exec-out tmp/registry_cleanup_host_open_prune_apply.json -prune-review-siblings -producer host_open_gap -apply -sample-limit 5"
+          "summary_refresh": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_summary.json -summary"
         },
-        "deleted_files": {
-          "version_matrix": 288,
-          "host_open_gap": 56,
-          "total": 344
+        "files": [
+          "internal/registry/coverage.go",
+          "internal/registry/coverage_test.go",
+          "cmd/aepregistry/main_test.go",
+          "flightdeck/work/aep-understanding-generation/mainline-spec.json"
+        ],
+        "schema_change": {
+          "report": "registry.CoverageSummaryReport",
+          "added_field": "summary",
+          "compatibility": "Existing flat scalar fields remain unchanged; summary mirrors records, artifacts, contract_gates, atoms, atom_rows, errors, direct_host_atoms, and inferred_host_atoms."
         },
-        "post_cleanup": {
-          "cleanup_candidate_files": 0,
-          "direct_cleanup_candidate_files": 0,
-          "review_prunable_files": 0,
-          "blocked_unowned_files": 0,
-          "asset_policy_gate_steps": 7,
-          "asset_policy_gate_failed": 0,
-          "version_matrix_gate_steps": 7,
-          "version_matrix_gate_failed": 0
+        "current_totals": {
+          "records": 18,
+          "artifacts": 49,
+          "contract_gates": 1,
+          "atoms": 143,
+          "atom_rows": 143,
+          "errors": 0,
+          "direct_host_atoms": 128,
+          "inferred_host_atoms": 128
         },
-        "preservation": "Only unreferenced generated siblings were deleted; registered evidence and state-referenced matrix/ledger paths were preserved by cleanup preserve_paths."
+        "post_gate_status": {
+          "version_matrix": "pass",
+          "asset_policy": "pass"
+        }
       }
     },
     "last_capability_target": {
@@ -1093,7 +1101,7 @@
         }
       }
     },
-    "next_action": "Generated cleanup candidates are now reduced to zero with asset-policy and version-matrix gates passing. Continue with the next scoped capability family or matrix coverage expansion rather than additional cleanup unless new generated candidates appear.",
+    "next_action": "Coverage summary JSON now has a nested scalar summary for total-table consumption. Continue with the next scoped capability family or matrix coverage expansion rather than additional cleanup unless new generated candidates appear.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

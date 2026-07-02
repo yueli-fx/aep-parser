@@ -29,6 +29,7 @@ type CoverageSummary struct {
 type CoverageSummaryReport struct {
 	SchemaVersion           int                     `json:"schema_version"`
 	Status                  string                  `json:"status"`
+	Summary                 CoverageSummaryTotals   `json:"summary"`
 	Records                 int                     `json:"records"`
 	Artifacts               int                     `json:"artifacts"`
 	ContractGates           int                     `json:"contract_gates"`
@@ -42,6 +43,17 @@ type CoverageSummaryReport struct {
 	ByWriterStatus          []CoverageSummaryBucket `json:"by_writer_status,omitempty"`
 	ByHostOpenEvidenceLevel []CoverageSummaryBucket `json:"by_host_open_evidence_level,omitempty"`
 	ByBoundaryStatus        []CoverageSummaryBucket `json:"by_boundary_status,omitempty"`
+}
+
+type CoverageSummaryTotals struct {
+	Records           int `json:"records"`
+	Artifacts         int `json:"artifacts"`
+	ContractGates     int `json:"contract_gates"`
+	Atoms             int `json:"atoms"`
+	AtomRows          int `json:"atom_rows"`
+	Errors            int `json:"errors"`
+	DirectHostAtoms   int `json:"direct_host_atoms"`
+	InferredHostAtoms int `json:"inferred_host_atoms"`
 }
 
 type CoverageSummaryBucket struct {
@@ -304,6 +316,16 @@ func SummarizeCoverage(report CoverageReport) CoverageSummaryReport {
 	summary.ByWriterStatus = coverageSummaryBuckets(byWriterStatus)
 	summary.ByHostOpenEvidenceLevel = coverageSummaryBuckets(byHostOpenEvidenceLevel)
 	summary.ByBoundaryStatus = coverageSummaryBuckets(byBoundaryStatus)
+	summary.Summary = CoverageSummaryTotals{
+		Records:           summary.Records,
+		Artifacts:         summary.Artifacts,
+		ContractGates:     summary.ContractGates,
+		Atoms:             summary.Atoms,
+		AtomRows:          summary.AtomRows,
+		Errors:            summary.Errors,
+		DirectHostAtoms:   summary.DirectHostAtoms,
+		InferredHostAtoms: summary.InferredHostAtoms,
+	}
 	return summary
 }
 

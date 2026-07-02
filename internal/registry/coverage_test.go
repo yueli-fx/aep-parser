@@ -409,6 +409,9 @@ func TestSummarizeCoverageGroupsAtomRowsForQuickQueries(t *testing.T) {
 	if summary.Status != StatusPass || summary.AtomRows != 3 || summary.Atoms != 3 {
 		t.Fatalf("summary status/rows/atoms = %q/%d/%d", summary.Status, summary.AtomRows, summary.Atoms)
 	}
+	if summary.Summary.AtomRows != 3 || summary.Summary.Atoms != 3 || summary.Summary.DirectHostAtoms != 1 || summary.Summary.InferredHostAtoms != 1 {
+		t.Fatalf("nested summary = %+v, want scalar totals mirrored for machine-readable total queries", summary.Summary)
+	}
 	assertCoverageSummaryBucket(t, summary.ByRecord, "text", 2)
 	assertCoverageSummaryBucket(t, summary.ByRecord, "layer", 1)
 	assertCoverageSummaryBucket(t, summary.ByDomain, "text", 2)
