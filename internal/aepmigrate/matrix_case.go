@@ -96,36 +96,13 @@ func runMatrixCase(opts MatrixOptions, hosts map[string]string, recipePath, sour
 		Target:     target,
 	}
 	if opts.AEOpen {
-		jsPath := opts.AEOpenJSXPath
-		if jsPath == "" {
-			jsPath = filepath.Join("test_data", "generators", "verify_open.jsx")
-		}
-		jsPath, err = filepath.Abs(jsPath)
+		aeOpen, err := matrixAEOpenOptions(opts, c.AEOpenPath, caseDir)
 		if err != nil {
 			c.Status = MatrixStatusFailed
 			c.Reason = err.Error()
 			return c
 		}
-		argsPath, err := filepath.Abs(filepath.Join(caseDir, "ae_open.args.json"))
-		if err != nil {
-			c.Status = MatrixStatusFailed
-			c.Reason = err.Error()
-			return c
-		}
-		donePath, err := filepath.Abs(filepath.Join(caseDir, "ae_open.done"))
-		if err != nil {
-			c.Status = MatrixStatusFailed
-			c.Reason = err.Error()
-			return c
-		}
-		convertOpts.AEOpen = &AEOpenOptions{
-			Host:       opts.Host,
-			AEPath:     c.AEOpenPath,
-			JSXPath:    jsPath,
-			ArgsPath:   argsPath,
-			DonePath:   donePath,
-			TimeoutSec: opts.AEOpenTimeoutSec,
-		}
+		convertOpts.AEOpen = aeOpen
 	}
 	convertReport, err := Convert(convertOpts)
 	if writeErr := writeMatrixJSON(convertReportPath, convertReport); writeErr != nil && err == nil {
@@ -136,25 +113,6 @@ func runMatrixCase(opts MatrixOptions, hosts map[string]string, recipePath, sour
 		c.Reason = err.Error()
 		return c
 	}
-	switch convertReport.Summary.Status {
-	case StatusPass:
-		c.Status = MatrixStatusPass
-	case StatusBlocked:
-		c.Status = MatrixStatusBlocked
-		c.Reason = "convert_blocked"
-	case StatusError:
-		c.Status = MatrixStatusFailed
-		c.Reason = "convert_error"
-	default:
-		c.Status = MatrixStatusFailed
-		c.Reason = "convert_status_" + string(convertReport.Summary.Status)
-	}
+	c.Status, c.Reason = matrixConvertStatus(convertReport)
 	return c
-}
-
-func matrixCompileInvalidReason(report recipe.Report) (MatrixStatus, string) {
-	if len(report.Refusals) == 1 && report.Refusals[0].Code == "explicit_matte_requires_ae2025" {
-		return MatrixStatusSkipped, "source_contract_unsupported"
-	}
-	return MatrixStatusBlocked, "recipe_compile_blocked"
 }
