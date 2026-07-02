@@ -13,15 +13,16 @@ Machine-readable truth sources:
 - `domain-batch-inventory.json`
 - `mainline-spec.json`
 
-The next selected batch is `text_domain_residuals`; the last completed batch
-was `effect_controls_static_values`.
+There is no next selected batch; the last completed batch was
+`shape_domain_residuals`.
 
 ## Next
 
 When the user says to execute the mainline goal, run the continuous package
-queue from `goal.md`. Each package is still a separate batch and commit, but
-the goal should continue to the next package until no candidates remain or a
-package is explicitly blocked.
+queue from `goal.md`. Each package is still a separate batch, but intermediate
+package checkpoints stay in JSON/worktree state. The goal should continue to
+the next package until no candidates remain or a package is explicitly blocked,
+then commit once after final validation unless the user asks otherwise.
 
 ## Read now
 
@@ -62,11 +63,12 @@ Done:
 
 Current:
 
-- Package cycle status is `ready_for_next_batch`.
-- Last completed package is `effect_controls_static_values`: the existing
-  expression-control static-values recipe was re-run through AE2020-AE2025
-  matrix coverage and refreshed in the coverage JSON.
-- Next candidate package is `text_domain_residuals`.
+- Package queue status is `complete` in `domain-batch-inventory.json`.
+- Last completed package is `shape_domain_residuals`: shape family and
+  ellipse-fill recipe records were re-run through AE2020-AE2025 matrix coverage
+  and refreshed in the coverage JSON.
+- Next step is the final closure gate and one final commit unless the user asks
+  to leave the validated state uncommitted.
 - Do not start a full AE-open run unless explicitly expanding the host-open
   axis or closing a specific host-open gap.
 

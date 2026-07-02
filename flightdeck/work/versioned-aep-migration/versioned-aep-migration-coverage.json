@@ -53,6 +53,7 @@
       "host_open_status": "direct_endpoint_hosts_pass; AE2021-AE2024 inferred_by_endpoint",
       "id": "text-baseline",
       "ledger": "tmp/migration_matrix_text_baseline_all_6x6/ledger.md",
+      "recipe_count": 2,
       "recipes": [
         "minimal-default-text-layer",
         "minimal-default-text-static-transform"
@@ -65,7 +66,7 @@
         "skipped": 0,
         "total": 72
       },
-      "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
+      "writer_coverage": "AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 sources into AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 targets",
       "writer_status": "PD-6x6"
     },
     {
@@ -662,7 +663,7 @@
         "skipped": 0,
         "total": 36
       },
-      "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
+      "writer_coverage": "AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 sources into AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 targets",
       "writer_status": "PD-6x6"
     },
     {
@@ -1187,7 +1188,7 @@
         "skipped": 0,
         "total": 972
       },
-      "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
+      "writer_coverage": "AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 sources into AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 targets",
       "writer_status": "PD-6x6"
     },
     {
@@ -1221,6 +1222,7 @@
       "host_open_status": "direct_endpoint_hosts_pass; AE2021-AE2024 inferred_by_endpoint",
       "id": "shape-ellipse-fill",
       "ledger": "tmp/migration_matrix_shape_ellipse_fill_all_6x6/ledger.md",
+      "recipe_count": 1,
       "recipes": [
         "minimal-shape-ellipse-fill"
       ],
@@ -1232,7 +1234,7 @@
         "skipped": 0,
         "total": 36
       },
-      "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
+      "writer_coverage": "AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 sources into AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 targets",
       "writer_status": "PD-6x6"
     },
     {

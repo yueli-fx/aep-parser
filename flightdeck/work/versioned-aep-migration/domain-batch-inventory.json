@@ -23,9 +23,9 @@
     "unsupported_status": "boundary_pending_evidence"
   },
   "active_package": null,
-  "last_completed_package": "effect_controls_static_values",
-  "next_package": "text_domain_residuals",
-  "mainline_status": "ready_for_next_batch",
+  "last_completed_package": "shape_domain_residuals",
+  "next_package": null,
+  "mainline_status": "complete",
   "packages": [
     {
       "id": "essential_graphics_controllers",
@@ -169,19 +169,228 @@
       "id": "text_domain_residuals",
       "domain": "text",
       "scope": "Text source/style/animator residuals after completed value-keyframe animator package.",
-      "execution_status": "candidate"
+      "execution_status": "complete",
+      "selection_rationale": "Existing baseline, style, and animator recipe families already cover the remaining text domain surface in the version matrix; this cycle re-ran all text matrices and refreshed the coverage JSON instead of adding speculative text fields.",
+      "known_evidence": [
+        "examples/recipes/minimal-default-text-layer.json",
+        "examples/recipes/minimal-default-text-static-transform.json",
+        "examples/recipes/minimal-text-style.json",
+        "examples/recipes/minimal-text-shape.json",
+        "examples/recipes/minimal-text-animator-*.json",
+        "internal/aepmigrate/convert_text_test.go",
+        "internal/aepmigrate/convert_text_animator_test.go",
+        "internal/recipe/compiler_test.go"
+      ],
+      "member_status": {
+        "text_baseline": "verified_in_this_batch",
+        "text_style": "verified_in_this_batch",
+        "text_animators": "verified_in_this_batch"
+      },
+      "coverage_records": [
+        "text-baseline",
+        "text-style",
+        "text-animators"
+      ],
+      "recipes": [
+        "minimal-default-text-layer",
+        "minimal-default-text-static-transform",
+        "minimal-text-style",
+        "minimal-text-shape",
+        "minimal-text-animator-*"
+      ],
+      "matrices": {
+        "text_baseline": "tmp/migration_matrix_text_baseline_all_6x6/matrix.json",
+        "text_style": "tmp/migration_matrix_text_style_all_6x6/matrix.json",
+        "text_animators": "tmp/migration_matrix_text_animators_all_6x6/matrix.json"
+      },
+      "ledgers": {
+        "text_baseline": "tmp/migration_matrix_text_baseline_all_6x6/ledger.md",
+        "text_style": "tmp/migration_matrix_text_style_all_6x6/ledger.md",
+        "text_animators": "tmp/migration_matrix_text_animators_all_6x6/ledger.md"
+      },
+      "totals": {
+        "matrix": {
+          "total": 1188,
+          "pass": 1188,
+          "blocked": 0,
+          "failed": 0,
+          "skipped": 0
+        },
+        "coverage_axis": {
+          "atom_rows": 33,
+          "cells": 1188,
+          "pass": 1188,
+          "blocked": 0,
+          "failed": 0,
+          "skipped": 0
+        }
+      },
+      "acceptance": {
+        "unit_tests": [
+          "go test ./internal/recipe -run Text -count=1",
+          "go test ./internal/aepmigrate -run Text -count=1",
+          "go test ./internal/aep_test -run Text -count=1"
+        ],
+        "matrix": "AE2020-AE2025 6x6 for text baseline, text style, and all minimal-text-animator recipes",
+        "coverage_axis": "text domain has zero failed cells across AE2020-AE2025"
+      }
     },
     {
       "id": "layer_precomp_domain_residuals",
       "domain": "layer_precomp",
       "scope": "Layer, precomp, source, matte, and timing residuals.",
-      "execution_status": "candidate"
+      "execution_status": "complete",
+      "selection_rationale": "Existing layer and precomp recipe families already cover the current layer/precomp residual surface. This cycle re-ran the AE2020-AE2025 writer matrices, refreshed coverage JSON, and retained the explicit matte source downgrade as a known version boundary instead of treating it as a failure.",
+      "known_evidence": [
+        "examples/recipes/minimal-layer-*.json",
+        "examples/recipes/minimal-precomp-*.json",
+        "registry/version_boundaries.json#ae2025.explicit_matte_source",
+        "internal/recipe/compiler_layer.go",
+        "internal/aepmigrate/convert_layer_test.go"
+      ],
+      "member_status": {
+        "layer_family": "verified_in_this_batch",
+        "precomp_family": "verified_in_this_batch",
+        "classic_track_matte": "verified_in_this_batch",
+        "explicit_track_matte_source": "known_version_boundary",
+        "source_refs": "verified_in_this_batch",
+        "timing": "verified_in_this_batch"
+      },
+      "coverage_records": [
+        "layer-all-family",
+        "precomp"
+      ],
+      "recipes": [
+        "minimal-layer-*",
+        "minimal-precomp-*"
+      ],
+      "matrices": {
+        "layer_all_family": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+        "precomp": "tmp/migration_matrix_precomp_all_6x6/matrix.json"
+      },
+      "ledgers": {
+        "layer_all_family": "tmp/migration_matrix_layer_all_6x6/ledger.md",
+        "precomp": "tmp/migration_matrix_precomp_all_6x6/ledger.md"
+      },
+      "boundaries": {
+        "explicit_track_matte_source": "AE2025-only explicit matte source contract: lower source writers are skipped and AE2025-to-older target downgrades are blocked by registry/version_boundaries.json."
+      },
+      "totals": {
+        "matrix": {
+          "total": 612,
+          "pass": 577,
+          "blocked": 5,
+          "failed": 0,
+          "skipped": 30
+        },
+        "coverage_axis": {
+          "atom_rows": 17,
+          "cells": 612,
+          "pass": 577,
+          "blocked": 5,
+          "failed": 0,
+          "skipped": 30
+        }
+      },
+      "acceptance": {
+        "unit_tests": [
+          "go test ./internal/recipe -run \"Layer|Precomp\" -count=1",
+          "go test ./internal/aepmigrate -run \"Layer|Precomp\" -count=1",
+          "go test ./internal/aep_test -run \"Layer|Precomp\" -count=1"
+        ],
+        "matrix": "AE2020-AE2025 6x6 for all minimal-layer-* and minimal-precomp-* recipes",
+        "coverage_axis": "layer/precomp has zero failed cells; explicit matte non-pass cells are the known source-contract boundary"
+      }
     },
     {
       "id": "shape_domain_residuals",
       "domain": "shape",
       "scope": "Shape graph, modifiers, gradients, masks, and path residuals.",
-      "execution_status": "candidate"
+      "execution_status": "complete",
+      "selection_rationale": "Existing shape family coverage is split into the 27-recipe shape-all-family record plus the focused shape-ellipse-fill record. This cycle re-ran both AE2020-AE2025 matrices explicitly from the coverage ledger recipe lists so ellipse stayed a separate atom row instead of being duplicated into the family record.",
+      "known_evidence": [
+        "examples/recipes/minimal-shape-*.json",
+        "internal/serializer/templates/shapes",
+        "internal/recipe/compiler_shape.go",
+        "internal/aepmigrate/convert_shape_test.go",
+        "flightdeck/knowledge/shape/trim-paths-vector-filter-re.md",
+        "flightdeck/knowledge/shape/gradient-fill-write-re.md"
+      ],
+      "member_status": {
+        "shape_graph_family": "verified_in_this_batch",
+        "shape_modifiers": "verified_in_this_batch",
+        "gradient_fill_and_stroke": "verified_in_this_batch",
+        "stroke_and_fill_options": "verified_in_this_batch",
+        "ellipse_fill": "verified_in_this_batch"
+      },
+      "coverage_records": [
+        "shape-all-family",
+        "shape-ellipse-fill"
+      ],
+      "recipes": [
+        "minimal-shape-fill-blend-mode",
+        "minimal-shape-fill-composite-order",
+        "minimal-shape-fill-rule",
+        "minimal-shape-gradient-fill",
+        "minimal-shape-gradient-fill-alpha-stops",
+        "minimal-shape-gradient-fill-highlight",
+        "minimal-shape-gradient-stroke",
+        "minimal-shape-gradient-stroke-alpha-stops",
+        "minimal-shape-gradient-stroke-highlight",
+        "minimal-shape-gradient-stroke-style",
+        "minimal-shape-merge-paths",
+        "minimal-shape-offset-paths",
+        "minimal-shape-polystar",
+        "minimal-shape-pucker-bloat",
+        "minimal-shape-rect-fill-default-transform",
+        "minimal-shape-repeater",
+        "minimal-shape-round-corners",
+        "minimal-shape-stroke-composite-order",
+        "minimal-shape-stroke-dashes",
+        "minimal-shape-stroke-style",
+        "minimal-shape-stroke-taper",
+        "minimal-shape-stroke-wave",
+        "minimal-shape-trim",
+        "minimal-shape-twist",
+        "minimal-shape-wiggle-paths",
+        "minimal-shape-wiggle-transform",
+        "minimal-shape-zigzag",
+        "minimal-shape-ellipse-fill"
+      ],
+      "matrices": {
+        "shape_all_family": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+        "shape_ellipse_fill": "tmp/migration_matrix_shape_ellipse_fill_all_6x6/matrix.json"
+      },
+      "ledgers": {
+        "shape_all_family": "tmp/migration_matrix_shape_all_6x6/ledger.md",
+        "shape_ellipse_fill": "tmp/migration_matrix_shape_ellipse_fill_all_6x6/ledger.md"
+      },
+      "totals": {
+        "matrix": {
+          "total": 1008,
+          "pass": 1008,
+          "blocked": 0,
+          "failed": 0,
+          "skipped": 0
+        },
+        "coverage_axis": {
+          "atom_rows": 28,
+          "cells": 1008,
+          "pass": 1008,
+          "blocked": 0,
+          "failed": 0,
+          "skipped": 0
+        }
+      },
+      "acceptance": {
+        "unit_tests": [
+          "go test ./internal/recipe -run Shape -count=1",
+          "go test ./internal/aepmigrate -run Shape -count=1",
+          "go test ./internal/aep_test -run Shape -count=1"
+        ],
+        "matrix": "AE2020-AE2025 6x6 for shape-all-family and shape-ellipse-fill records",
+        "coverage_axis": "shape domain has zero failed cells across AE2020-AE2025"
+      }
     }
   ]
 }

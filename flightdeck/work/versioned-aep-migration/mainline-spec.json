@@ -1104,45 +1104,49 @@
       }
     },
     "last_capability_target": {
-      "location": "effects",
-      "group": "effect_controls_static_values",
-      "reason": "Promote expression-control static values into a completed mainline package using existing template-backed writer support, recipe/profile checks, refreshed AE2020-AE2025 matrix evidence, and existing endpoint host-open evidence.",
+      "location": "shape",
+      "group": "shape_domain_residuals",
+      "reason": "Promote the current shape residual coverage into a completed mainline package using fresh AE2020-AE2025 matrix evidence while preserving the ledger split between the 27-recipe shape family and the focused ellipse-fill record.",
       "result": {
         "recipes": [
-          "examples/recipes/minimal-effect-control-static-values.json"
+          "examples/recipes/minimal-shape-*.json"
         ],
         "atom_ids": [
-          "effect.control.static_values"
+          "shape.*"
         ],
-        "coverage_record": "effects-control-static-values",
-        "matrix": "tmp/migration_matrix_effect_control_static_values_all_6x6/matrix.json",
+        "coverage_records": [
+          "shape-all-family",
+          "shape-ellipse-fill"
+        ],
+        "matrices": [
+          "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "tmp/migration_matrix_shape_ellipse_fill_all_6x6/matrix.json"
+        ],
         "totals": {
-          "total": 36,
-          "pass": 36,
+          "total": 1008,
+          "pass": 1008,
           "blocked": 0,
           "failed": 0,
           "skipped": 0
         },
         "coverage_axis": {
-          "atom_rows": 1,
-          "cells": 36,
-          "pass": 36,
+          "atom_rows": 28,
+          "cells": 1008,
+          "pass": 1008,
           "blocked": 0,
           "failed": 0,
           "skipped": 0
         },
-        "host_open_status": "direct_endpoint_hosts_pass; AE2021-AE2024 inferred_by_endpoint",
+        "host_open_status": "shape gradient-stroke representatives retain OPEN-ALL-HOSTS evidence; remaining shape recipes retain direct endpoint evidence as recorded in versioned-aep-migration-coverage.json",
         "members": {
-          "angle_control": "verified_in_this_batch",
-          "checkbox_control": "verified_in_this_batch",
-          "color_control": "verified_in_this_batch",
-          "point2d_control": "verified_in_this_batch",
-          "point3d_control": "verified_in_this_batch",
-          "slider_control": "verified_in_this_batch"
+          "shape_graph_family": "verified_in_this_batch",
+          "shape_modifiers": "verified_in_this_batch",
+          "gradient_fill_and_stroke": "verified_in_this_batch",
+          "ellipse_fill": "verified_in_this_batch"
         }
       }
     },
-    "next_action": "Stop after completing the effect_controls_static_values package; next package is selected in domain-batch-inventory.json only and must not start until the next explicit goal run.",
+    "next_action": "Run final closure gates for the completed package queue, then make one final commit unless the user asks to leave the validated state uncommitted.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

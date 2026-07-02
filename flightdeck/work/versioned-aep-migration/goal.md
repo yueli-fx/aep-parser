@@ -59,14 +59,15 @@ Each package cycle must remain a coherent package batch:
 9. Run one package matrix across AE2020-AE2025.
 10. Update coverage/current/spec JSON once.
 11. Run registry/checkpoint gates.
-12. Commit once.
+12. Keep the package checkpoint in JSON/worktree without committing.
 13. Select the next package in JSON.
-14. Commit the completed package cycle.
-15. Continue with the next selected package.
+14. Continue with the next selected package.
 
-Do not combine multiple packages into one commit. Do not start field-level work
-between packages. After every completed package, the workspace must be
-recoverable from committed JSON state before the next package begins.
+Do not start field-level work between packages. After every completed package,
+the workspace must be recoverable from JSON state before the next package
+begins. Do not commit after each package by default; keep package checkpoints
+as working-tree JSON/Markdown changes and make one final commit after the full
+queue is validated.
 
 When each package cycle finishes, report it internally as:
 
@@ -185,24 +186,25 @@ unless the user explicitly asks.
 
 ## Commit Rule
 
-Default commit budget per package:
+Default commit policy for this continuous goal:
 
 ```text
-one implementation commit
+no intermediate commits
 ```
 
 Optional:
 
 ```text
-one separate infrastructure commit, only if required before package work
+one final commit after the full package queue is validated
 ```
 
-Do not create per-field, per-recipe, or per-matrix commits.
+Do not create per-field, per-recipe, per-matrix, or per-package commits during
+the continuous run unless the user explicitly asks for a checkpoint commit.
 
-Default commit message for the default package:
+Default final commit message shape:
 
 ```powershell
-git commit -m "feat(eg): batch essential graphics controller coverage"
+git commit -m "feat(aepmigrate): complete versioned migration package queue"
 ```
 
 ## Package Cycle Completion Criteria
@@ -216,7 +218,6 @@ One package cycle is complete only when:
 - Coverage JSON references the package matrix.
 - Unsupported members have explicit boundary reasons.
 - Registry/checkpoint gates pass or the blocking gate is recorded.
-- The package commit is created if implementation was completed.
 - The next package is selected in JSON.
 
 Do not mark the overall AE understanding mainline complete just because one
@@ -234,7 +235,8 @@ This goal is complete only when:
 - The coverage/current/spec JSON files pass registry/checkpoint gates.
 - `domain-batch-inventory.json` records `mainline_status` as `complete` or
   `blocked_with_boundaries`.
-- The final state is committed.
+- The final state is committed once, unless the user explicitly asks to leave it
+  uncommitted.
 
 ## Stop Conditions
 
@@ -245,7 +247,8 @@ Stop and report instead of coding when:
 - Evidence is insufficient and would require guessing binary structure.
 - Matrix evidence cannot be written back to coverage JSON.
 - The diff starts spreading into repeated Markdown logging.
-- Commit count would exceed the per-package budget.
+- Commits start appearing before the final queue state without explicit user
+  approval.
 - The user says the execution is drifting.
 
 When stopped, only update the protocol/plan or redefine the package.

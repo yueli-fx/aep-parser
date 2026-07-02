@@ -127,19 +127,21 @@ mainline deliverable by themselves.
 
 ## 6. Commit Rules
 
-One mainline upgrade package defaults to:
+The continuous mainline goal defaults to:
 
-- One implementation commit
-- Optionally one prior infrastructure commit
+- No intermediate commits
+- One final commit after the full package queue is validated
 
-A continuous mainline goal may complete multiple packages in one goal run, but
-the commit budget resets per package. Each completed package must be committed
-and recoverable before the next package starts.
+Package checkpoints still need to be recoverable from JSON/Markdown state before
+the next package starts, but they stay in the working tree until the queue is
+complete. Commit early only when the user explicitly asks for a checkpoint
+commit.
 
 Forbidden:
 
 - One field per commit
 - One matrix per commit
+- One package per commit during the continuous queue
 - Updating `history.md`, `index.md`, or `cockpit.md` for every validation slice
 - Turning temporary validation into a pile of Markdown logs
 
@@ -161,8 +163,9 @@ A package cycle is complete only when:
 - Matrix results are reflected in coverage JSON.
 - Unsupported members have explicit boundary reasons.
 - Registry coverage/checkpoint gates pass.
-- The worktree is clean, except for user-approved unrelated changes.
-- Commit count follows the batch rules.
+- The working tree contains only intentional package queue changes plus any
+  user-approved unrelated changes.
+- No commit is required for the package checkpoint during a continuous run.
 
 If any item is missing, the package cycle is still active or blocked, not
 complete.
@@ -183,8 +186,8 @@ A continuous mainline goal is complete only when:
 - The final state is committed.
 
 If candidates remain, continue to the next package in the same goal run after
-the previous package commit. Do not stop merely because one package cycle
-passed.
+the previous package checkpoint. Do not stop merely because one package cycle
+passed, and do not commit merely because one package cycle passed.
 
 ## 8. Stop Conditions
 
@@ -195,7 +198,7 @@ Stop immediately when any of these happen:
 - Implementation requires guessing AEP binary structure.
 - Matrix results cannot be summarized back into JSON.
 - Markdown churn starts replacing JSON state.
-- Commits are trending toward field-by-field fragments.
+- Commits are trending toward field-by-field or package-by-package fragments.
 - The user says the execution granularity has drifted.
 
 After stopping, only do one of these:
@@ -213,8 +216,9 @@ Good goal wording:
 Execute the versioned AEP migration mainline package queue. For each package in
 domain-batch-inventory.json, inventory all members, implement or verify the
 evidence-backed members as one batch, run AE2020-AE2025 matrix coverage, update
-coverage JSON once, commit the package, then continue to the next package until
-no candidate packages remain or a package is explicitly blocked.
+coverage JSON once, checkpoint the package in JSON/worktree state, then continue
+to the next package until no candidate packages remain or a package is
+explicitly blocked. Commit once after the full queue is validated.
 ```
 
 Bad goal wording:
