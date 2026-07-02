@@ -29,8 +29,8 @@ func TestExecuteGeneratedCleanupDryRunPlansOnlyCleanupCandidates(t *testing.T) {
 		t.Fatalf("summary = %+v, want one planned, two skipped, no deletes/errors", exec.Summary)
 	}
 	assertGeneratedExecutionBucket(t, exec.Summary.StatusBuckets, "planned", 1, 1)
-	assertGeneratedExecutionBucket(t, exec.Summary.StatusBuckets, "skipped", 2, 3)
-	assertGeneratedExecutionBucket(t, exec.Summary.SkippedReasonBuckets, "not_cleanup_candidate", 1, 2)
+	assertGeneratedExecutionBucket(t, exec.Summary.StatusBuckets, "skipped", 2, 2)
+	assertGeneratedExecutionBucket(t, exec.Summary.SkippedReasonBuckets, "not_cleanup_candidate", 1, 1)
 	assertGeneratedExecutionBucket(t, exec.Summary.SkippedReasonBuckets, "producer_excluded", 1, 1)
 	technique := findGeneratedExecutionOp(t, exec, "tmp_evidence", "technique_smoke")
 	if technique.Status != "planned" || technique.Reason != "dry_run" || technique.CleanupOperation != "delete_directory_tree" {
@@ -82,6 +82,93 @@ func TestExecuteGeneratedCleanupApplyDeletesOnlyCleanupCandidateTargets(t *testi
 	}
 	if !testPathExists(root, "tmp/migration_matrix_text/log.txt") {
 		t.Fatalf("apply deleted mixed group sibling without preserve handling")
+	}
+}
+
+func TestExecuteGeneratedCleanupPrunesReviewSiblingsOnlyWhenExplicit(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeFile(t, root, "tmp/migration_matrix_text/matrix.json", "{}\n")
+	writeFile(t, root, "tmp/migration_matrix_text/case/report.json", "{}\n")
+	writeFile(t, root, "tmp/migration_matrix_text/case/source.aep", "aep\n")
+	writeGeneratedCleanupRegistry(t, root)
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chdir(root); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		if err := os.Chdir(cwd); err != nil {
+			t.Fatalf("restore cwd: %v", err)
+		}
+	})
+
+	cleanup, err := GeneratedCleanupRepository(".", GeneratedCleanupOptions{SampleLimit: 2})
+	if err != nil {
+		t.Fatal(err)
+	}
+	dryRun := ExecuteGeneratedCleanup(".", cleanup, GeneratedCleanupExecutionOptions{
+		PruneReviewSiblings: true,
+	})
+
+	matrix := findGeneratedExecutionOp(t, dryRun, "tmp_evidence", "migration_matrix_text")
+	if matrix.Status != "planned" || matrix.Reason != "dry_run" || matrix.Files != 2 {
+		t.Fatalf("matrix dry-run op = %+v, want planned prune of two unreferenced siblings", matrix)
+	}
+	if dryRun.Summary.PlannedFiles != 2 {
+		t.Fatalf("dry-run planned files = %d, want two unreferenced siblings", dryRun.Summary.PlannedFiles)
+	}
+	if len(matrix.PreservePaths) != 1 || matrix.PreservePaths[0] != "tmp/migration_matrix_text/matrix.json" {
+		t.Fatalf("matrix preserve paths = %+v", matrix.PreservePaths)
+	}
+
+	applied := ExecuteGeneratedCleanup(".", cleanup, GeneratedCleanupExecutionOptions{
+		Apply:               true,
+		PruneReviewSiblings: true,
+	})
+	matrix = findGeneratedExecutionOp(t, applied, "tmp_evidence", "migration_matrix_text")
+	if matrix.Status != "deleted" {
+		t.Fatalf("matrix apply op = %+v, want deleted", matrix)
+	}
+	if applied.Summary.DeletedFiles != 2 {
+		t.Fatalf("applied deleted files = %d, want two unreferenced siblings", applied.Summary.DeletedFiles)
+	}
+	if !testPathExists(root, "tmp/migration_matrix_text/matrix.json") {
+		t.Fatalf("prune removed preserve path")
+	}
+	if testPathExists(root, "tmp/migration_matrix_text/case/report.json") || testPathExists(root, "tmp/migration_matrix_text/case/source.aep") {
+		t.Fatalf("prune kept unreferenced siblings")
+	}
+	if testPathExists(root, "tmp/migration_matrix_text/case") {
+		t.Fatalf("prune kept empty sibling directory")
+	}
+}
+
+func TestExecuteGeneratedCleanupDoesNotPruneWildcardReviewTargets(t *testing.T) {
+	report := GeneratedCleanupReport{
+		Locations: []GeneratedCleanupLocation{
+			{ID: "tmp_evidence", Path: "tmp", Groups: []GeneratedCleanupGroup{
+				{
+					LocationID:        "tmp_evidence",
+					Group:             "registry",
+					ProducerCategory:  "registry_report",
+					Action:            "review_state_referenced_generated",
+					CleanupOperation:  "preserve_paths_then_review_unreferenced_siblings",
+					CleanupTarget:     "tmp/registry*",
+					PreservePaths:     []string{"tmp/registry_gate.json"},
+					UnreferencedFiles: 1,
+					Files:             2,
+				},
+			}},
+		},
+	}
+
+	exec := ExecuteGeneratedCleanup(t.TempDir(), report, GeneratedCleanupExecutionOptions{PruneReviewSiblings: true})
+	op := exec.Operations[0]
+	if op.Status != "skipped" || op.Reason != "not_cleanup_candidate" {
+		t.Fatalf("op = %+v, want wildcard review target skipped", op)
 	}
 }
 

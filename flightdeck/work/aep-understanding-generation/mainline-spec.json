@@ -228,6 +228,52 @@
     "phase": "version_matrix_totalization",
     "last_completed_target": {
       "location": "generated_evidence",
+      "group": "preserve_aware_review_sibling_prune",
+      "reason": "Add and execute an explicit preserve-aware cleanup mode for remaining review groups. The mode deletes only unreferenced generated siblings while preserving registry evidence paths and state-file referenced paths, replacing manual cleanup scripts with a Go-first JSON-reported operation.",
+      "source_report": "tmp/registry_generated_cleanup_execution_prune_review_apply.json",
+      "result": {
+        "apply_command": "go run ./cmd/aepregistry cleanup -root . -out tmp/registry_generated_cleanup_prune_review.json -exec-out tmp/registry_generated_cleanup_execution_prune_review_apply.json -prune-review-siblings -apply -sample-limit 3",
+        "flag_added": "-prune-review-siblings",
+        "deleted_groups": 20,
+        "deleted_files": 30622,
+        "skipped_groups": 1,
+        "errors": 0,
+        "deleted_by_producer": [
+          {
+            "producer": "version_matrix",
+            "groups": 19,
+            "files": 26982
+          },
+          {
+            "producer": "host_open_gap",
+            "groups": 1,
+            "files": 3640
+          }
+        ],
+        "post_cleanup_report": {
+          "groups": 21,
+          "files": 133,
+          "cleanup_candidate_files": 34,
+          "referenced_files": 99,
+          "state_referenced_files": 97,
+          "retain_registered_files": 66,
+          "mixed_groups": 0,
+          "state_referenced_groups": 15,
+          "unknown_producer_groups": 0,
+          "remaining_producers": [
+            "version_matrix",
+            "host_open_gap",
+            "registry_report"
+          ]
+        },
+        "post_gate_status": {
+          "asset_policy": "pass",
+          "version_matrix": "pass"
+        },
+        "note": "Remaining cleanup candidates are registry_report self-noise plus a state-referenced registry report group; version_matrix and host_open_gap evidence groups now contain only preserved matrix/ledger/state paths."
+      },
+      "previous_target": {
+      "location": "generated_evidence",
       "group": "non_version_generated_apply_cleanup",
       "reason": "Execute the reviewed non-version-matrix generated cleanup batch after state-reference protection. This removes unreferenced technique/selfhost scratch outputs and untracked generated test-data scratch directories while leaving version_matrix, registry_report, host_open_gap mixed evidence, and state-referenced evidence untouched.",
       "source_report": "tmp/registry_generated_cleanup_execution_non_version_apply.json",
@@ -851,21 +897,23 @@
         }
       }
       }
+      }
     },
     "last_code_maintenance_target": {
       "location": "internal/registry",
-      "group": "cleanup_state_reference_protection",
-      "reason": "Teach generated cleanup reports to treat tmp paths referenced inside JSON state files, by default current and coverage JSON, as state references so cleanup planning does not mark current operational or recurring-gate evidence as pure disposable output.",
+      "group": "preserve_aware_review_sibling_prune",
+      "reason": "Teach generated cleanup execution to optionally prune unreferenced siblings from review groups while preserving registry and state-referenced paths, with accurate execution file totals based on affected unreferenced files.",
       "result": {
         "files": [
-          "internal/registry/generated_cleanup.go",
-          "internal/registry/generated_cleanup_test.go",
+          "internal/registry/generated_cleanup_execute.go",
+          "internal/registry/generated_cleanup_execute_test.go",
+          "cmd/aepregistry/main_test.go",
           "cmd/aepregistry/main.go"
         ],
-        "behavior": "cleanup reports now expose state_referenced_files/groups and state_reference_paths; cleanup CLI and asset-policy gate default -state-ref to current and coverage JSON"
+        "behavior": "cleanup CLI exposes -prune-review-siblings; executor dry-run/apply can plan and delete only unreferenced siblings for preserve_paths_then_review_unreferenced_siblings groups; execution summary file totals now match affected unreferenced files"
       }
     },
-    "next_action": "Generated cleanup now has no standalone cleanup_candidate groups after the non-version apply. Remaining generated evidence is 21 groups: version_matrix state-referenced evidence, host_open_gap mixed evidence, and registry_report outputs. Next useful increment is preserve-path-aware review of the remaining state-referenced/mixed groups instead of any bulk apply.",
+    "next_action": "Generated cleanup is now reduced to preserved evidence plus registry_report self-noise: 21 generated groups, 133 files, 99 referenced files, 34 cleanup-candidate files, 0 mixed groups, 0 unknown producer groups. Next useful increment is to decide whether registry_report outputs should remain disposable self-noise, be excluded from candidate totals, or get a separate report-retention policy.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

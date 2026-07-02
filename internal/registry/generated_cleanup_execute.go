@@ -9,9 +9,10 @@ import (
 )
 
 type GeneratedCleanupExecutionOptions struct {
-	Apply            bool
-	IncludeProducers []string
-	ExcludeProducers []string
+	Apply               bool
+	PruneReviewSiblings bool
+	IncludeProducers    []string
+	ExcludeProducers    []string
 }
 
 type GeneratedCleanupExecutionReport struct {
@@ -49,6 +50,7 @@ type GeneratedCleanupExecutionOp struct {
 	ProducerCategory string   `json:"producer_category"`
 	CleanupOperation string   `json:"cleanup_operation"`
 	CleanupTarget    string   `json:"cleanup_target"`
+	PreservePaths    []string `json:"preserve_paths,omitempty"`
 	Files            int      `json:"files"`
 	Bytes            int64    `json:"bytes"`
 	Status           string   `json:"status"`
@@ -73,24 +75,24 @@ func ExecuteGeneratedCleanup(root string, report GeneratedCleanupReport, opts Ge
 	locations := generatedCleanupLocationRoots(report)
 	for _, location := range report.Locations {
 		for _, group := range location.Groups {
-			op := generatedCleanupExecutionOp(root, locations, group, include, exclude, opts.Apply)
+			op := generatedCleanupExecutionOp(root, locations, group, include, exclude, opts.Apply, opts.PruneReviewSiblings)
 			out.Operations = append(out.Operations, op)
 			out.Summary.Groups++
 			out.Summary.Files += group.Files
-			addGeneratedCleanupExecutionBucket(statusBuckets, op.Status, group.Files)
+			addGeneratedCleanupExecutionBucket(statusBuckets, op.Status, op.Files)
 			if op.Status == "skipped" {
-				addGeneratedCleanupExecutionBucket(skippedReasonBuckets, valueOr(op.Reason, "unspecified"), group.Files)
+				addGeneratedCleanupExecutionBucket(skippedReasonBuckets, valueOr(op.Reason, "unspecified"), op.Files)
 			}
 			switch op.Status {
 			case "planned":
 				out.Summary.PlannedGroups++
-				out.Summary.PlannedFiles += group.Files
+				out.Summary.PlannedFiles += op.Files
 			case "deleted":
 				out.Summary.DeletedGroups++
-				out.Summary.DeletedFiles += group.Files
+				out.Summary.DeletedFiles += op.Files
 			case "skipped":
 				out.Summary.SkippedGroups++
-				out.Summary.SkippedFiles += group.Files
+				out.Summary.SkippedFiles += op.Files
 			case "error":
 				out.Summary.Errors++
 			}
@@ -142,18 +144,24 @@ func sortedGeneratedCleanupExecutionBuckets(buckets map[string]GeneratedCleanupE
 	return out
 }
 
-func generatedCleanupExecutionOp(root string, locations []string, group GeneratedCleanupGroup, include, exclude map[string]bool, apply bool) GeneratedCleanupExecutionOp {
+func generatedCleanupExecutionOp(root string, locations []string, group GeneratedCleanupGroup, include, exclude map[string]bool, apply, pruneReviewSiblings bool) GeneratedCleanupExecutionOp {
 	op := GeneratedCleanupExecutionOp{
 		LocationID:       group.LocationID,
 		Group:            group.Group,
 		ProducerCategory: group.ProducerCategory,
 		CleanupOperation: group.CleanupOperation,
 		CleanupTarget:    group.CleanupTarget,
+		PreservePaths:    append([]string(nil), group.PreservePaths...),
 		Files:            group.UnreferencedFiles,
 		Bytes:            group.Bytes,
 		Samples:          group.DeleteSamples,
 	}
-	if group.Action != "cleanup_candidate" {
+	reviewPrune := pruneReviewSiblings &&
+		group.CleanupOperation == "preserve_paths_then_review_unreferenced_siblings" &&
+		group.UnreferencedFiles > 0 &&
+		len(group.PreservePaths) > 0 &&
+		!strings.HasSuffix(group.CleanupTarget, "*")
+	if group.Action != "cleanup_candidate" && !reviewPrune {
 		op.Status = "skipped"
 		op.Reason = "not_cleanup_candidate"
 		return op
@@ -168,7 +176,9 @@ func generatedCleanupExecutionOp(root string, locations []string, group Generate
 		op.Reason = "producer_excluded"
 		return op
 	}
-	if group.CleanupOperation != "delete_directory_tree" && group.CleanupOperation != "delete_file_prefix_matches" {
+	if group.CleanupOperation != "delete_directory_tree" &&
+		group.CleanupOperation != "delete_file_prefix_matches" &&
+		group.CleanupOperation != "preserve_paths_then_review_unreferenced_siblings" {
 		op.Status = "skipped"
 		op.Reason = "operation_not_deletable"
 		return op
@@ -248,9 +258,73 @@ func applyGeneratedCleanupOperation(root string, group GeneratedCleanupGroup) er
 			}
 		}
 		return nil
+	case "preserve_paths_then_review_unreferenced_siblings":
+		return applyGeneratedCleanupPreservePaths(root, group)
 	default:
 		return fmt.Errorf("unsupported cleanup operation %q", group.CleanupOperation)
 	}
+}
+
+func applyGeneratedCleanupPreservePaths(root string, group GeneratedCleanupGroup) error {
+	rootAbs, err := filepath.Abs(root)
+	if err != nil {
+		return err
+	}
+	target, err := safeCleanupPath(root, group.CleanupTarget)
+	if err != nil {
+		return err
+	}
+	preserve := map[string]bool{}
+	for _, path := range group.PreservePaths {
+		clean := cleanRel(path)
+		if clean == group.CleanupTarget || hasPathPrefix(clean, group.CleanupTarget) {
+			preserve[clean] = true
+			continue
+		}
+		return fmt.Errorf("preserve path %q is outside cleanup target %q", path, group.CleanupTarget)
+	}
+	var dirs []string
+	err = filepath.WalkDir(target, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			dirs = append(dirs, path)
+			return nil
+		}
+		rel, err := filepath.Rel(rootAbs, path)
+		if err != nil {
+			return err
+		}
+		if preserve[cleanRel(rel)] {
+			return nil
+		}
+		return os.Remove(path)
+	})
+	if err != nil {
+		return err
+	}
+	sort.Slice(dirs, func(i, j int) bool {
+		return len(dirs[i]) > len(dirs[j])
+	})
+	for _, dir := range dirs {
+		if dir == target {
+			continue
+		}
+		entries, err := os.ReadDir(dir)
+		if err != nil {
+			if os.IsNotExist(err) {
+				continue
+			}
+			return err
+		}
+		if len(entries) == 0 {
+			if err := os.Remove(dir); err != nil && !os.IsNotExist(err) {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func safeCleanupPath(root, rel string) (string, error) {

@@ -171,6 +171,36 @@ func TestRunCleanupCanWriteExecutionDryRunReport(t *testing.T) {
 	}
 }
 
+func TestRunCleanupCanPruneReviewSiblings(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeFile(t, root, "tmp/text-basic/report.json", "{}\n")
+	out := filepath.Join(root, "tmp", "registry_generated_cleanup.json")
+	execOut := filepath.Join(root, "tmp", "registry_generated_cleanup_execution.json")
+
+	code := run([]string{"cleanup", "-root", root, "-out", out, "-exec-out", execOut, "-apply", "-prune-review-siblings", "-sample-limit", "1"})
+	if code != 0 {
+		t.Fatalf("run(cleanup -apply -prune-review-siblings) = %d, want 0", code)
+	}
+
+	if _, err := os.Stat(filepath.Join(root, "tmp", "text-basic", "matrix.json")); err != nil {
+		t.Fatalf("prune should keep registered matrix: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(root, "tmp", "text-basic", "report.json")); !os.IsNotExist(err) {
+		t.Fatalf("prune should remove unreferenced sibling, stat err=%v", err)
+	}
+	data, err := os.ReadFile(execOut)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var report registry.GeneratedCleanupExecutionReport
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Summary.DeletedGroups == 0 || report.Summary.Errors != 0 {
+		t.Fatalf("execution summary = %+v, want deleted prune with no errors", report.Summary)
+	}
+}
+
 func TestRunCoverageWritesReportAndReturnsOneForDrift(t *testing.T) {
 	root := newRegistryRoot(t)
 	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 3)

@@ -308,6 +308,7 @@ func runCleanup(args []string) int {
 	execOutPath := fs.String("exec-out", "", "optional generated cleanup execution report JSON path")
 	sampleLimit := fs.Int("sample-limit", 5, "maximum file samples per generated group")
 	apply := fs.Bool("apply", false, "apply deletion for cleanup_candidate groups; default is dry-run only")
+	pruneReviewSiblings := fs.Bool("prune-review-siblings", false, "allow review groups to delete unreferenced siblings while preserving registered and state-referenced paths")
 	producers := fs.String("producer", "", "comma-separated producer categories to include in execution report")
 	excludeProducers := fs.String("exclude-producer", "registry_report", "comma-separated producer categories to exclude from execution report")
 	stateRefs := fs.String("state-ref", strings.Join(defaultCleanupStateReferenceFiles(), ","), "comma-separated JSON state files whose tmp references protect generated cleanup groups")
@@ -316,7 +317,7 @@ func runCleanup(args []string) int {
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(os.Stderr, "usage: aepregistry cleanup [-root .] [-out tmp/registry_generated_cleanup.json] [-exec-out tmp/registry_generated_cleanup_execution.json] [-apply] [-producer categories] [-exclude-producer categories] [-state-ref json[,json...]] [-sample-limit 5] [-json]")
+		fmt.Fprintln(os.Stderr, "usage: aepregistry cleanup [-root .] [-out tmp/registry_generated_cleanup.json] [-exec-out tmp/registry_generated_cleanup_execution.json] [-apply] [-prune-review-siblings] [-producer categories] [-exclude-producer categories] [-state-ref json[,json...]] [-sample-limit 5] [-json]")
 		return 2
 	}
 	if *apply && *execOutPath == "" {
@@ -337,9 +338,10 @@ func runCleanup(args []string) int {
 	}
 	if *execOutPath != "" {
 		exec := registry.ExecuteGeneratedCleanup(*root, report, registry.GeneratedCleanupExecutionOptions{
-			Apply:            *apply,
-			IncludeProducers: splitCSV(*producers),
-			ExcludeProducers: splitCSV(*excludeProducers),
+			Apply:               *apply,
+			PruneReviewSiblings: *pruneReviewSiblings,
+			IncludeProducers:    splitCSV(*producers),
+			ExcludeProducers:    splitCSV(*excludeProducers),
 		})
 		if err := writeJSONFile(*execOutPath, exec); err != nil {
 			fmt.Fprintln(os.Stderr, "write:", err)
