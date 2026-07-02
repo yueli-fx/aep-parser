@@ -61,6 +61,12 @@ func writeTempRecipe(t *testing.T, recipePath string) string {
 func assertRecipeConvertsPass(t *testing.T, recipeName string) string {
 	t.Helper()
 	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", recipeName))
+	_, outPath := assertSourceConvertsPass(t, source)
+	return outPath
+}
+
+func assertSourceConvertsPass(t *testing.T, source string) (Report, string) {
+	t.Helper()
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
 	report, err := Convert(ConvertOptions{
 		InputPath:  source,
@@ -79,7 +85,7 @@ func assertRecipeConvertsPass(t *testing.T, recipeName string) string {
 	if _, err := os.Stat(outPath); err != nil {
 		t.Fatalf("converted output missing: %v", err)
 	}
-	return outPath
+	return report, outPath
 }
 
 func writeTempRecipeWithTarget(t *testing.T, recipePath, targetVersion string) string {

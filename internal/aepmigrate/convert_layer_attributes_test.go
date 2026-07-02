@@ -1,66 +1,15 @@
 package aepmigrate
 
-import (
-	"path/filepath"
-	"testing"
-)
+import "testing"
 
 func TestConvertWritesRecipeLayerLabelProject(t *testing.T) {
-	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-layer-label.json"))
-	outPath := filepath.Join(t.TempDir(), "converted.aep")
-
-	report, err := Convert(ConvertOptions{
-		InputPath:  source,
-		OutputPath: outPath,
-		Target:     VersionAE2025,
-	})
-	if err != nil {
-		t.Fatalf("Convert: %v", err)
-	}
-	if report.Summary.Status != StatusPass {
-		t.Fatalf("status = %q, entries=%+v, diffs=%+v", report.Summary.Status, report.Entries, report.Verification.ProfileDiffs)
-	}
-	if report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 {
-		t.Fatalf("profile diff verification = %+v, want pass with 0 diffs", report.Verification)
-	}
+	assertRecipeConvertsPass(t, "minimal-layer-label.json")
 }
 
 func TestConvertWritesRecipeLayerCommentProject(t *testing.T) {
-	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-layer-comment.json"))
-	outPath := filepath.Join(t.TempDir(), "converted.aep")
-
-	report, err := Convert(ConvertOptions{
-		InputPath:  source,
-		OutputPath: outPath,
-		Target:     VersionAE2025,
-	})
-	if err != nil {
-		t.Fatalf("Convert: %v", err)
-	}
-	if report.Summary.Status != StatusPass {
-		t.Fatalf("status = %q, entries=%+v, diffs=%+v", report.Summary.Status, report.Entries, report.Verification.ProfileDiffs)
-	}
-	if report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 {
-		t.Fatalf("profile diff verification = %+v, want pass with 0 diffs", report.Verification)
-	}
+	assertRecipeConvertsPass(t, "minimal-layer-comment.json")
 }
 
 func TestConvertWritesRecipeLayerParentProject(t *testing.T) {
-	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-layer-parent.json"))
-	outPath := filepath.Join(t.TempDir(), "converted.aep")
-
-	report, err := Convert(ConvertOptions{
-		InputPath:  source,
-		OutputPath: outPath,
-		Target:     VersionAE2025,
-	})
-	if err != nil {
-		t.Fatalf("Convert: %v", err)
-	}
-	if report.Summary.Status != StatusPass {
-		t.Fatalf("status = %q, entries=%+v, diffs=%+v", report.Summary.Status, report.Entries, report.Verification.ProfileDiffs)
-	}
-	if report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 {
-		t.Fatalf("profile diff verification = %+v, want pass with 0 diffs", report.Verification)
-	}
+	assertRecipeConvertsPass(t, "minimal-layer-parent.json")
 }

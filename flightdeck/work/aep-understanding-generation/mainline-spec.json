@@ -791,24 +791,27 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "recipe_conversion_smoke_helper",
-      "reason": "Reduce high-signal conversion smoke test drift by centralizing the repeated recipe compile, convert, profile-diff pass, and output existence assertion path.",
+      "group": "source_conversion_smoke_helper_extension",
+      "reason": "Extend conversion smoke test helper coverage from recipe-only cases to source AEP fixture cases, keeping specialized profile assertions local while centralizing convert/pass/profile-diff/output checks.",
       "result": {
         "files": [
           "internal/aepmigrate/convert_recipe_fixtures_test.go",
-          "internal/aepmigrate/convert_effect_test.go",
-          "internal/aepmigrate/convert_effect_param_test.go",
-          "internal/aepmigrate/convert_text_animator_test.go",
-          "internal/aepmigrate/convert_shape_filter_test.go",
-          "internal/aepmigrate/convert_shape_distort_filter_test.go",
-          "internal/aepmigrate/convert_shape_gradient_test.go",
-          "internal/aepmigrate/convert_shape_motion_filter_test.go",
-          "internal/aepmigrate/convert_shape_stroke_test.go"
+          "internal/aepmigrate/convert_layer_attributes_test.go",
+          "internal/aepmigrate/convert_layer_camera_light_test.go",
+          "internal/aepmigrate/convert_layer_light_test.go",
+          "internal/aepmigrate/convert_layer_object_test.go",
+          "internal/aepmigrate/convert_layer_special_test.go",
+          "internal/aepmigrate/convert_layer_surface_test.go",
+          "internal/aepmigrate/convert_layer_switches_test.go",
+          "internal/aepmigrate/convert_layer_test.go",
+          "internal/aepmigrate/convert_layer_timing_test.go",
+          "internal/aepmigrate/convert_text_test.go",
+          "internal/aepmigrate/convert_transform_test.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Recipe conversion smoke tests now share one pass/output assertion helper for effect, text animator, and shape recipe families. Next useful increment is to continue moving remaining recipe-only conversion tests onto the helper, or reduce a dense production support file where repeated validation predicates remain local.",
+    "next_action": "Conversion smoke tests now share source-level and recipe-level pass/output helpers across layer, text, transform, effect, text animator, and shape families. Next useful increment is to inspect remaining conversion tests for non-helper duplication or switch to a dense production support file if test duplication is mostly exhausted.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

@@ -1,8 +1,6 @@
 package aepmigrate
 
 import (
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/yueli-fx/aep-parser/internal/aep"
@@ -11,22 +9,7 @@ import (
 
 func TestConvertWritesDefaultSolidLayerProject(t *testing.T) {
 	source := writeTempProjectWithOneSolidLayer(t)
-	outPath := filepath.Join(t.TempDir(), "converted.aep")
-
-	report, err := Convert(ConvertOptions{
-		InputPath:  source,
-		OutputPath: outPath,
-		Target:     VersionAE2025,
-	})
-	if err != nil {
-		t.Fatalf("Convert: %v", err)
-	}
-	if report.Summary.Status != StatusPass {
-		t.Fatalf("status = %q, entries=%+v, diffs=%+v", report.Summary.Status, report.Entries, report.Verification.ProfileDiffs)
-	}
-	if report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 {
-		t.Fatalf("profile diff verification = %+v, want pass with 0 diffs", report.Verification)
-	}
+	_, outPath := assertSourceConvertsPass(t, source)
 	outProject, err := aep.Open(outPath)
 	if err != nil {
 		t.Fatalf("Open converted: %v", err)
@@ -45,67 +28,14 @@ func TestConvertWritesDefaultSolidLayerProject(t *testing.T) {
 }
 
 func TestConvertWritesRecipeDefaultSolidLayerProject(t *testing.T) {
-	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-layer-source-ref.json"))
-	outPath := filepath.Join(t.TempDir(), "converted.aep")
-
-	report, err := Convert(ConvertOptions{
-		InputPath:  source,
-		OutputPath: outPath,
-		Target:     VersionAE2025,
-	})
-	if err != nil {
-		t.Fatalf("Convert: %v", err)
-	}
-	if report.Summary.Status != StatusPass {
-		t.Fatalf("status = %q, entries=%+v, diffs=%+v", report.Summary.Status, report.Entries, report.Verification.ProfileDiffs)
-	}
-	if report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 {
-		t.Fatalf("profile diff verification = %+v, want pass with 0 diffs", report.Verification)
-	}
-	if _, err := os.Stat(outPath); err != nil {
-		t.Fatalf("converted output missing: %v", err)
-	}
+	assertRecipeConvertsPass(t, "minimal-layer-source-ref.json")
 }
 
 func TestConvertWritesDefaultAdjustmentLayerProject(t *testing.T) {
 	source := writeTempProjectWithOneAdjustmentLayer(t)
-	outPath := filepath.Join(t.TempDir(), "converted.aep")
-
-	report, err := Convert(ConvertOptions{
-		InputPath:  source,
-		OutputPath: outPath,
-		Target:     VersionAE2025,
-	})
-	if err != nil {
-		t.Fatalf("Convert: %v", err)
-	}
-	if report.Summary.Status != StatusPass {
-		t.Fatalf("status = %q, entries=%+v, diffs=%+v", report.Summary.Status, report.Entries, report.Verification.ProfileDiffs)
-	}
-	if report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 {
-		t.Fatalf("profile diff verification = %+v, want pass with 0 diffs", report.Verification)
-	}
+	assertSourceConvertsPass(t, source)
 }
 
 func TestConvertWritesRecipeDefaultAdjustmentLayerProject(t *testing.T) {
-	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-default-adjustment-layer.json"))
-	outPath := filepath.Join(t.TempDir(), "converted.aep")
-
-	report, err := Convert(ConvertOptions{
-		InputPath:  source,
-		OutputPath: outPath,
-		Target:     VersionAE2025,
-	})
-	if err != nil {
-		t.Fatalf("Convert: %v", err)
-	}
-	if report.Summary.Status != StatusPass {
-		t.Fatalf("status = %q, entries=%+v, diffs=%+v", report.Summary.Status, report.Entries, report.Verification.ProfileDiffs)
-	}
-	if report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 {
-		t.Fatalf("profile diff verification = %+v, want pass with 0 diffs", report.Verification)
-	}
-	if _, err := os.Stat(outPath); err != nil {
-		t.Fatalf("converted output missing: %v", err)
-	}
+	assertRecipeConvertsPass(t, "minimal-default-adjustment-layer.json")
 }
