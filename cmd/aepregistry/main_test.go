@@ -696,7 +696,7 @@ func TestRunGateAssetPolicyWritesOwnershipAndCleanupReports(t *testing.T) {
 	if err := json.Unmarshal(data, &report); err != nil {
 		t.Fatal(err)
 	}
-	if report.Scope != "asset-policy" || report.Status != registry.StatusPass || report.Summary.Steps != 6 || report.Summary.Failed != 0 {
+	if report.Scope != "asset-policy" || report.Status != registry.StatusPass || report.Summary.Steps != 7 || report.Summary.Failed != 0 {
 		t.Fatalf("asset gate report = %+v", report)
 	}
 	wantOrder := []string{
@@ -704,6 +704,7 @@ func TestRunGateAssetPolicyWritesOwnershipAndCleanupReports(t *testing.T) {
 		"registry_ownership",
 		"registry_layout",
 		"registry_generated_cleanup",
+		"registry_layout_cleanup_consistency",
 		"registry_generated_cleanup_execution_dry_run",
 		"registry_generated_cleanup_execution_prune_review_dry_run",
 	}
@@ -716,12 +717,24 @@ func TestRunGateAssetPolicyWritesOwnershipAndCleanupReports(t *testing.T) {
 		"tmp/registry_ownership.json",
 		"tmp/registry_layout.json",
 		"tmp/registry_generated_cleanup.json",
+		"tmp/registry_layout_cleanup_consistency.json",
 		"tmp/registry_generated_cleanup_execution.json",
 		"tmp/registry_generated_cleanup_execution_prune_review.json",
 	} {
 		if _, err := os.Stat(filepath.Join(root, filepath.FromSlash(rel))); err != nil {
 			t.Fatalf("expected asset gate output %s: %v", rel, err)
 		}
+	}
+	consistencyData, err := os.ReadFile(filepath.Join(root, "tmp", "registry_layout_cleanup_consistency.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var consistency layoutCleanupConsistencyReport
+	if err := json.Unmarshal(consistencyData, &consistency); err != nil {
+		t.Fatal(err)
+	}
+	if consistency.Status != registry.StatusPass || len(consistency.Issues) != 0 {
+		t.Fatalf("layout cleanup consistency = %+v", consistency)
 	}
 	pruneData, err := os.ReadFile(filepath.Join(root, "tmp", "registry_generated_cleanup_execution_prune_review.json"))
 	if err != nil {

@@ -86,6 +86,21 @@ type mainlineSpecCoverageAxisIssue struct {
 	Message  string `json:"message"`
 }
 
+type layoutCleanupConsistencyReport struct {
+	SchemaVersion int                             `json:"schema_version"`
+	Status        string                          `json:"status"`
+	Layout        map[string]int                  `json:"layout"`
+	Cleanup       map[string]int                  `json:"cleanup"`
+	Issues        []layoutCleanupConsistencyIssue `json:"issues,omitempty"`
+}
+
+type layoutCleanupConsistencyIssue struct {
+	Field   string `json:"field"`
+	Layout  int    `json:"layout"`
+	Cleanup int    `json:"cleanup"`
+	Message string `json:"message"`
+}
+
 func runGate(args []string) int {
 	fs := flag.NewFlagSet("aepregistry gate", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
@@ -367,6 +382,13 @@ func runAssetPolicyGate(root string, addStep func(gateStepReport)) error {
 	}
 	addStep(gateStepReport{ID: "registry_generated_cleanup", Command: "go run ./cmd/aepregistry cleanup -root . -out " + cleanupOut + " -sample-limit 3", Output: cleanupOut, Status: registry.StatusPass})
 
+	consistencyOut := "tmp/registry_layout_cleanup_consistency.json"
+	consistency := checkLayoutCleanupConsistency(layout, cleanup)
+	if err := writeJSONFile(filepath.Join(root, filepath.FromSlash(consistencyOut)), consistency); err != nil {
+		return fmt.Errorf("write layout cleanup consistency: %w", err)
+	}
+	addStep(gateStepReport{ID: "registry_layout_cleanup_consistency", Command: "go run ./cmd/aepregistry gate -root . -out tmp/registry_asset_gate.json -scope asset-policy", Output: consistencyOut, Status: consistency.Status, Errors: len(consistency.Issues)})
+
 	execOut := "tmp/registry_generated_cleanup_execution.json"
 	exec := registry.ExecuteGeneratedCleanup(root, cleanup, registry.GeneratedCleanupExecutionOptions{ExcludeProducers: []string{"registry_report"}})
 	if err := writeJSONFile(filepath.Join(root, filepath.FromSlash(execOut)), exec); err != nil {
@@ -389,6 +411,41 @@ func runAssetPolicyGate(root string, addStep func(gateStepReport)) error {
 	}
 	addStep(gateStepReport{ID: "registry_generated_cleanup_execution_prune_review_dry_run", Command: "go run ./cmd/aepregistry cleanup -root . -out " + cleanupOut + " -exec-out " + pruneExecOut + " -prune-review-siblings -exclude-producer registry_report -sample-limit 3", Output: pruneExecOut, Status: pruneExecStatus, Errors: pruneExec.Summary.Errors})
 	return nil
+}
+
+func checkLayoutCleanupConsistency(layout registry.LayoutReport, cleanup registry.GeneratedCleanupReport) layoutCleanupConsistencyReport {
+	layoutValues := map[string]int{
+		"cleanup_candidate_files":        layout.Summary.CleanupCandidateFiles,
+		"direct_cleanup_candidate_files": layout.Summary.DirectCleanupCandidateFiles,
+		"review_prunable_files":          layout.Summary.ReviewPrunableFiles,
+		"registry_report_files":          layout.Summary.RegistryReportFiles,
+	}
+	cleanupValues := map[string]int{
+		"cleanup_candidate_files":        cleanup.Summary.CleanupCandidateFiles,
+		"direct_cleanup_candidate_files": cleanup.Summary.DirectCleanupCandidateFiles,
+		"review_prunable_files":          cleanup.Summary.ReviewPrunableFiles,
+		"registry_report_files":          cleanup.Summary.RegistryReportFiles,
+	}
+	report := layoutCleanupConsistencyReport{
+		SchemaVersion: 1,
+		Status:        registry.StatusPass,
+		Layout:        layoutValues,
+		Cleanup:       cleanupValues,
+	}
+	for _, field := range []string{"cleanup_candidate_files", "direct_cleanup_candidate_files", "review_prunable_files"} {
+		if layoutValues[field] != cleanupValues[field] {
+			report.Issues = append(report.Issues, layoutCleanupConsistencyIssue{
+				Field:   field,
+				Layout:  layoutValues[field],
+				Cleanup: cleanupValues[field],
+				Message: fmt.Sprintf("layout %s=%d does not match generated cleanup %d", field, layoutValues[field], cleanupValues[field]),
+			})
+		}
+	}
+	if len(report.Issues) > 0 {
+		report.Status = registry.StatusFail
+	}
+	return report
 }
 
 func runBoundaries(args []string) int {
