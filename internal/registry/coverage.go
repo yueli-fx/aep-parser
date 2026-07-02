@@ -14,6 +14,7 @@ type CoverageReport struct {
 	Status        string                 `json:"status"`
 	Summary       CoverageSummary        `json:"summary"`
 	Records       []CoverageRecordReport `json:"records,omitempty"`
+	AtomRows      []AtomCoverageRow      `json:"atom_rows,omitempty"`
 	Issues        []CoverageIssue        `json:"issues"`
 }
 
@@ -52,6 +53,21 @@ type CoverageRecordReport struct {
 	Totals          CoverageTotals `json:"totals"`
 }
 
+type AtomCoverageRow struct {
+	AtomID                string         `json:"atom_id"`
+	RecordID              string         `json:"record_id"`
+	Recipe                string         `json:"recipe,omitempty"`
+	Artifact              string         `json:"artifact"`
+	WriterStatus          string         `json:"writer_status,omitempty"`
+	SourceVersions        []string       `json:"source_versions,omitempty"`
+	TargetVersions        []string       `json:"target_versions,omitempty"`
+	AEOpenVersions        []string       `json:"ae_open_versions,omitempty"`
+	HostOpenEvidenceLevel string         `json:"host_open_evidence_level,omitempty"`
+	DirectHostVersions    []string       `json:"direct_host_versions,omitempty"`
+	InferredHostVersions  []string       `json:"inferred_host_versions,omitempty"`
+	Totals                CoverageTotals `json:"totals"`
+}
+
 type coverageFile struct {
 	SchemaVersion  int                `json:"schema_version"`
 	RecurringGates []coverageArtifact `json:"recurring_gates"`
@@ -62,14 +78,20 @@ type coverageRecord struct {
 	ID                       string           `json:"id"`
 	Artifact                 string           `json:"artifact"`
 	Recipes                  []string         `json:"recipes"`
+	WriterStatus             string           `json:"writer_status"`
+	HostOpenStatus           string           `json:"host_open_status"`
+	HostOpenRepresentatives  []string         `json:"host_open_representatives"`
 	Totals                   CoverageTotals   `json:"totals"`
 	HostOpenEndpointEvidence coverageEndpoint `json:"host_open_endpoint_evidence"`
 }
 
 type coverageEndpoint struct {
-	Artifact string             `json:"artifact"`
-	Totals   CoverageTotals     `json:"totals"`
-	Chunks   []coverageArtifact `json:"chunks"`
+	Artifact      string             `json:"artifact"`
+	Recipes       []string           `json:"recipes"`
+	DirectHosts   []string           `json:"direct_hosts"`
+	InferredHosts []string           `json:"inferred_hosts"`
+	Totals        CoverageTotals     `json:"totals"`
+	Chunks        []coverageArtifact `json:"chunks"`
 }
 
 type coverageArtifact struct {
@@ -128,7 +150,7 @@ func ValidateCoverage(root, coveragePath string) (CoverageReport, error) {
 	for _, record := range coverage.Coverage {
 		report.checkCoverageRecord(root, record, atomRefs)
 	}
-	report.Summary.Atoms = countUniqueAtoms(report.Records)
+	report.Summary.Atoms = countUniqueAtoms(report.Records, report.AtomRows)
 	if report.Summary.Errors > 0 {
 		report.Status = StatusFail
 	}
@@ -198,6 +220,13 @@ func (r *CoverageReport) checkCoverageRecord(root string, record coverageRecord,
 	}
 	detail.AtomIDs = atomRefs.atomIDsForRecord(detail.Artifact, detail.ObservedRecipes)
 	r.Records = append(r.Records, detail)
+	r.AtomRows = append(r.AtomRows, atomRowsForRecord(record, matrix, atomRefs)...)
+	sort.Slice(r.AtomRows, func(i, j int) bool {
+		if r.AtomRows[i].AtomID == r.AtomRows[j].AtomID {
+			return r.AtomRows[i].Recipe < r.AtomRows[j].Recipe
+		}
+		return r.AtomRows[i].AtomID < r.AtomRows[j].AtomID
+	})
 	r.checkDeclaredRecipes(record.ID, detail.Artifact, detail.DeclaredRecipes, detail.ObservedRecipes)
 }
 
@@ -275,12 +304,141 @@ func (r coverageAtomRefs) atomIDsForRecord(artifact string, recipes []string) []
 	return sortedKeys(ids)
 }
 
-func countUniqueAtoms(records []CoverageRecordReport) int {
+func atomRowsForRecord(record coverageRecord, matrix matrixFile, refs coverageAtomRefs) []AtomCoverageRow {
+	stats := matrixStatsByRecipe(matrix)
+	var rows []AtomCoverageRow
+	added := map[string]bool{}
+	for _, recipe := range sortedRecipeStatsKeys(stats) {
+		for _, atomID := range refs.byRecipe[recipe] {
+			stat := stats[recipe]
+			rows = append(rows, AtomCoverageRow{
+				AtomID:                atomID,
+				RecordID:              record.ID,
+				Recipe:                recipe,
+				Artifact:              filepath.ToSlash(record.Artifact),
+				WriterStatus:          record.WriterStatus,
+				SourceVersions:        sortedKeys(stat.sourceVersions),
+				TargetVersions:        sortedKeys(stat.targetVersions),
+				AEOpenVersions:        sortedKeys(stat.aeOpenVersions),
+				HostOpenEvidenceLevel: hostOpenEvidenceLevel(record, recipe),
+				DirectHostVersions:    directHostVersions(record, recipe),
+				InferredHostVersions:  inferredHostVersions(record, recipe),
+				Totals:                stat.totals,
+			})
+			added[atomID] = true
+		}
+	}
+	for _, atomID := range refs.byEvidence[filepath.ToSlash(record.Artifact)] {
+		if added[atomID] {
+			continue
+		}
+		rows = append(rows, AtomCoverageRow{
+			AtomID:                atomID,
+			RecordID:              record.ID,
+			Artifact:              filepath.ToSlash(record.Artifact),
+			WriterStatus:          record.WriterStatus,
+			SourceVersions:        matrixSourceVersions(matrix),
+			TargetVersions:        matrixTargetVersions(matrix),
+			AEOpenVersions:        matrixAEOpenVersions(matrix),
+			HostOpenEvidenceLevel: "recorded_status_only",
+			Totals:                record.Totals,
+		})
+	}
+	return rows
+}
+
+func sortedRecipeStatsKeys(values map[string]recipeMatrixStats) []string {
+	out := make([]string, 0, len(values))
+	for value := range values {
+		out = append(out, value)
+	}
+	sort.Strings(out)
+	return out
+}
+
+type recipeMatrixStats struct {
+	sourceVersions map[string]bool
+	targetVersions map[string]bool
+	aeOpenVersions map[string]bool
+	totals         CoverageTotals
+}
+
+func matrixStatsByRecipe(matrix matrixFile) map[string]recipeMatrixStats {
+	stats := map[string]recipeMatrixStats{}
+	for _, c := range matrix.Cases {
+		if c.RecipeName == "" {
+			continue
+		}
+		stat := stats[c.RecipeName]
+		if stat.sourceVersions == nil {
+			stat.sourceVersions = map[string]bool{}
+			stat.targetVersions = map[string]bool{}
+			stat.aeOpenVersions = map[string]bool{}
+		}
+		if c.SourceVersion != "" {
+			stat.sourceVersions[c.SourceVersion] = true
+		}
+		if c.TargetVersion != "" {
+			stat.targetVersions[c.TargetVersion] = true
+		}
+		if c.AEOpenVersion != "" {
+			stat.aeOpenVersions[c.AEOpenVersion] = true
+		}
+		stat.totals.Total++
+		switch c.Status {
+		case "pass":
+			stat.totals.Pass++
+		case "blocked":
+			stat.totals.Blocked++
+		case "failed":
+			stat.totals.Failed++
+		case "skipped":
+			stat.totals.Skipped++
+		}
+		stats[c.RecipeName] = stat
+	}
+	return stats
+}
+
+func hostOpenEvidenceLevel(record coverageRecord, recipe string) string {
+	if stringSet(record.HostOpenEndpointEvidence.Recipes)[recipe] {
+		return "direct_endpoint_hosts_pass"
+	}
+	if stringSet(record.HostOpenRepresentatives)[recipe] {
+		return "direct_all_hosts_representative"
+	}
+	if strings.Contains(record.HostOpenStatus, "OPEN-ALL-HOSTS") {
+		return "direct_all_hosts_record"
+	}
+	if record.HostOpenStatus != "" {
+		return "recorded_status_only"
+	}
+	return ""
+}
+
+func directHostVersions(record coverageRecord, recipe string) []string {
+	if stringSet(record.HostOpenEndpointEvidence.Recipes)[recipe] {
+		return sortedStrings(record.HostOpenEndpointEvidence.DirectHosts)
+	}
+	return nil
+}
+
+func inferredHostVersions(record coverageRecord, recipe string) []string {
+	if stringSet(record.HostOpenEndpointEvidence.Recipes)[recipe] {
+		return sortedStrings(record.HostOpenEndpointEvidence.InferredHosts)
+	}
+	return nil
+}
+
+func countUniqueAtoms(records []CoverageRecordReport, rows []AtomCoverageRow) int {
 	ids := map[string]bool{}
 	for _, record := range records {
 		for _, id := range record.AtomIDs {
 			ids[id] = true
 		}
+	}
+	for _, row := range rows {
+		ids[row.AtomID] = true
 	}
 	return len(ids)
 }

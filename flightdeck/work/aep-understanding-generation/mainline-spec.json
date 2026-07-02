@@ -168,20 +168,37 @@
     "phase": "version_matrix_totalization",
     "last_completed_target": {
       "location": "coverage_ledger",
-      "group": "coverage_recipe_atom_version_validator",
-      "reason": "Extend the Go coverage gate from totals-only checking toward the total/detail/total contract. The report now extracts per-record recipes, source/target writer versions, AE host-open versions when present, and atom IDs linked through recipe/evidence dependencies.",
+      "group": "coverage_atom_status_rows",
+      "reason": "Extend the Go coverage gate from record-level summaries to per-atom status rows. The report now emits one row per linked atom with recipe, writer source/target versions, per-recipe totals, and explicit host-open evidence labels for direct all-host representatives versus direct endpoint plus inferred intermediate hosts.",
       "source_report": "tmp/registry_coverage.json",
       "result": {
         "command": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage.json",
         "records_checked": 16,
         "artifacts_checked": 45,
         "atoms_linked": 139,
+        "atom_rows": 139,
+        "host_open_evidence_levels": [
+          {
+            "level": "direct_all_hosts_representative",
+            "atom_rows": 14
+          },
+          {
+            "level": "direct_endpoint_hosts_pass",
+            "atom_rows": 124
+          },
+          {
+            "level": "recorded_status_only",
+            "atom_rows": 1
+          }
+        ],
         "coverage_errors": 0
       },
       "previous_target": {
         "location": "coverage_ledger",
-        "group": "coverage_totals_validator",
+        "group": "coverage_recipe_atom_version_validator",
+        "records_checked": 16,
         "artifacts_checked": 45,
+        "atoms_linked": 139,
         "coverage_errors": 0
       },
       "previous_atom_target": {
@@ -197,7 +214,7 @@
         "minimal-layer-explicit-matte remains covered by layer.track_matte.explicit_source as a version-boundary atom, not a pass-complete layer atom."
       ]
     },
-    "next_action": "Extend the coverage validator from record-level axis summaries to per-atom status rows, including direct versus inferred host-open labels and known boundary labels. Keep the two remaining recipe_atoms entries pending until full evidence or explicit boundary status is chosen.",
+    "next_action": "Extend atom rows with explicit known-boundary labels and matrix cell detail where needed, then decide whether the two remaining recipe_atoms entries need full all_6x6 evidence or pending/boundary atom rows.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
