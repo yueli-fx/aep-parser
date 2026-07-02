@@ -1,0 +1,227 @@
+{
+  "schema_version": 1,
+  "id": "aep-understanding-mainline",
+  "status": "active",
+  "purpose": "Keep the AEP understanding, generation, migration, and cleanup work on a machine-readable mainline so large execution does not drift into ad hoc validation or documentation churn.",
+  "background": {
+    "user_goals": [
+      "Cross-platform where possible; AE-host-only validation is allowed when the host is inherently required.",
+      "Prefer Go tools over PowerShell for new planning, registry, audit, and summarization work.",
+      "Eventually support automatic AEP learning, reusable skill extraction, workflow generation, and possible AI-driven project generation.",
+      "Parse detailed AEP information instead of only proving round-trip smoke behavior.",
+      "Convert versions as losslessly as possible, with explicit boundaries for high-version-only features.",
+      "Support AE2020+ now and leave an explicit expansion path for AE2026, AE2027, and later versions.",
+      "Keep commercial value in view: reusable conversion, validation, learning, generation, and project inspection workflows."
+    ],
+    "current_problem": "Data, examples, fixtures, generated evidence, and project state are spread across data, examples, test_data, tmp, internal serializer templates, and flightdeck work files. Large validation work must become total-summary / detailed-work / total-summary instead of scattered manual notes."
+  },
+  "principles": [
+    {
+      "id": "spec_first",
+      "rule": "Before executing a large phase, update or create a machine-readable spec that defines scope, artifacts, gates, and next actions."
+    },
+    {
+      "id": "json_source_of_truth",
+      "rule": "Prefer JSON source-of-truth artifacts over long mutable markdown plans. Markdown may summarize JSON, but must not be the authoritative ledger."
+    },
+    {
+      "id": "go_first",
+      "rule": "Use Go for new registry, audit, inventory, ownership, summarization, and orchestration where practical. PowerShell may remain for AE host orchestration until replaced safely."
+    },
+    {
+      "id": "no_destructive_cleanup_without_ownership",
+      "rule": "Do not delete, move, or rename data until the relevant location, ownership, and evidence reports identify what the asset is and why it is safe to change."
+    },
+    {
+      "id": "total_detail_total",
+      "rule": "Large validation work must have a total plan/ledger, detailed per-atom execution, and a regenerated total summary."
+    },
+    {
+      "id": "bounded_commits",
+      "rule": "Batch related verification or registry updates into scoped commits. Avoid many tiny commits for repeated validation-only work."
+    }
+  ],
+  "artifact_contracts": [
+    {
+      "path": "registry/locations.json",
+      "role": "source_of_truth",
+      "description": "Classifies repository asset locations and lifecycle rules."
+    },
+    {
+      "path": "registry/workflows.json",
+      "role": "source_of_truth",
+      "description": "Defines stable workflow identifiers used by atoms and evidence."
+    },
+    {
+      "path": "registry/capability_atoms.json",
+      "role": "source_of_truth",
+      "description": "Defines representative and eventually exhaustive capability atoms."
+    },
+    {
+      "path": "registry/evidence.json",
+      "role": "source_of_truth",
+      "description": "Points at generated or tracked evidence artifacts without making tmp itself authoritative."
+    },
+    {
+      "path": "flightdeck/work/aep-understanding-generation/mainline-spec.json",
+      "role": "source_of_truth",
+      "description": "Defines this mainline scope, phases, gates, and current execution pointer."
+    },
+    {
+      "path": "tmp/registry_audit.json",
+      "role": "generated_report",
+      "description": "Read-only audit output; ignored by git."
+    },
+    {
+      "path": "tmp/registry_inventory.json",
+      "role": "generated_report",
+      "description": "Read-only location inventory output; ignored by git."
+    },
+    {
+      "path": "tmp/registry_ownership.json",
+      "role": "generated_report",
+      "description": "Read-only ownership/unowned output; ignored by git."
+    }
+  ],
+  "phases": [
+    {
+      "id": "registry_foundation",
+      "status": "complete",
+      "objective": "Create a machine-readable registry and Go audit surface before data cleanup.",
+      "done_evidence": [
+        "cmd/aepregistry audit",
+        "registry/locations.json",
+        "registry/workflows.json",
+        "registry/capability_atoms.json",
+        "registry/evidence.json"
+      ]
+    },
+    {
+      "id": "asset_visibility",
+      "status": "active",
+      "objective": "Make asset distribution and ownership visible enough to guide cleanup and atomization.",
+      "allowed_work": [
+        "Improve aepregistry inventory and ownership reports.",
+        "Add generated JSON reports under tmp.",
+        "Add tests for report semantics and deterministic summaries."
+      ],
+      "not_allowed_work": [
+        "Delete data.",
+        "Move data.",
+        "Mark large unowned regions as owned without atom/evidence justification.",
+        "Create new long-lived markdown plans for the same state."
+      ],
+      "exit_criteria": [
+        "registry audit passes with zero errors.",
+        "inventory report identifies all registered locations and missing locations.",
+        "ownership report identifies owned and unowned files by location and gives grouped priorities for major unowned regions.",
+        "The next atomization target can be selected from JSON evidence, not memory."
+      ]
+    },
+    {
+      "id": "atom_taxonomy_expansion",
+      "status": "planned",
+      "objective": "Expand capability atoms from representative samples toward coverage of recipes, templates, fixtures, and version evidence.",
+      "entry_criteria": [
+        "asset_visibility exit criteria are satisfied.",
+        "A specific location or domain is selected from ownership groups."
+      ],
+      "expected_outputs": [
+        "Updated registry/capability_atoms.json",
+        "Updated registry/evidence.json",
+        "Passing registry audit",
+        "Reduced unowned count for selected domain or an explicit boundary reason"
+      ]
+    },
+    {
+      "id": "version_matrix_totalization",
+      "status": "planned",
+      "objective": "Bring AE2020-AE2025 migration validation into a total/detail/total JSON ledger by atom and version axis.",
+      "entry_criteria": [
+        "Atom taxonomy exists for the selected validation domain.",
+        "Existing historical matrix outputs are registered or intentionally excluded."
+      ],
+      "version_axis": {
+        "current_known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "Add AE2026/AE2027 as data entries after writers, fixtures, host paths, and evidence gates are registered."
+      },
+      "expected_outputs": [
+        "Machine-readable matrix summary by atom and version.",
+        "Direct vs inferred host-open labels are explicit.",
+        "Known source-contract boundaries are not counted as unexplained failures."
+      ]
+    }
+  ],
+  "current_execution": {
+    "phase": "asset_visibility",
+    "next_action": "Finish or revise the in-progress ownership grouping change only if it satisfies asset_visibility exit criteria.",
+    "must_not_skip": [
+      "Run registry audit after report changes.",
+      "Run focused Go tests for internal/registry and cmd/aepregistry.",
+      "Run full go test ./... before claiming completion of a committed Go change."
+    ]
+  },
+  "verification_gates": [
+    {
+      "id": "registry_audit",
+      "command": "go run ./cmd/aepregistry audit -root . -out tmp/registry_audit.json",
+      "required_for": [
+        "registry",
+        "asset_visibility",
+        "atom_taxonomy_expansion",
+        "version_matrix_totalization"
+      ]
+    },
+    {
+      "id": "registry_inventory",
+      "command": "go run ./cmd/aepregistry inventory -root . -out tmp/registry_inventory.json",
+      "required_for": [
+        "asset_visibility"
+      ]
+    },
+    {
+      "id": "registry_ownership",
+      "command": "go run ./cmd/aepregistry ownership -root . -out tmp/registry_ownership.json -sample-limit 20",
+      "required_for": [
+        "asset_visibility",
+        "atom_taxonomy_expansion"
+      ]
+    },
+    {
+      "id": "focused_registry_tests",
+      "command": "go test ./internal/registry ./cmd/aepregistry",
+      "required_for": [
+        "registry",
+        "asset_visibility"
+      ]
+    },
+    {
+      "id": "full_go_tests",
+      "command": "go test ./...",
+      "required_for": [
+        "committed_go_changes"
+      ]
+    },
+    {
+      "id": "go_vet",
+      "command": "go vet ./...",
+      "required_for": [
+        "committed_go_changes"
+      ]
+    },
+    {
+      "id": "diff_check",
+      "command": "git diff --check",
+      "required_for": [
+        "committed_changes"
+      ]
+    }
+  ]
+}
