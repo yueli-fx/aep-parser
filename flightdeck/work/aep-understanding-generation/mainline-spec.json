@@ -791,19 +791,17 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "text_animator_value_helper_split",
-      "reason": "Reduce convert_text_animator_values.go growth risk by separating initial values, scalar keyframes, vector keyframes, and color conversion/keyframes while preserving behavior.",
+      "group": "effect_param_materializer_split",
+      "reason": "Reduce convert_effect.go growth risk by separating project-level effect traversal from effect parameter layer-ref, value/keyframe, and expression materialization while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_text_animator_initial_values.go",
-          "internal/aepmigrate/convert_text_animator_scalar_keyframes.go",
-          "internal/aepmigrate/convert_text_animator_vector_keyframes.go",
-          "internal/aepmigrate/convert_text_animator_color_values.go"
+          "internal/aepmigrate/convert_effect.go",
+          "internal/aepmigrate/convert_effect_param_materialize.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Text animator value helpers now separate initial values, scalar keyframes, vector keyframes, and color conversion/keyframes. Next useful increment is to continue reducing remaining dense conversion support files or high-signal tests into coherent modules without changing behavior.",
+    "next_action": "Effect materialization now separates project-level effect traversal from effect parameter layer-ref, value/keyframe, and expression application. Next useful increment is to continue reducing remaining dense conversion support files or high-signal tests into coherent modules without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
