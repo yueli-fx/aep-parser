@@ -791,17 +791,19 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "scope_special_support_split",
-      "reason": "Reduce convert_scope_support.go growth risk by separating camera, light, text, and precomp support predicates from footage-backed layer support while preserving behavior.",
+      "group": "shape_graphic_and_transform_keyframe_helpers_split",
+      "reason": "Reduce convert_shape_support.go and convert_transform.go growth risk by separating shape graphic/filter predicates and transform keyframe conversion helpers while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_scope_support.go",
-          "internal/aepmigrate/convert_scope_special_support.go"
+          "internal/aepmigrate/convert_shape_support.go",
+          "internal/aepmigrate/convert_shape_graphic_support.go",
+          "internal/aepmigrate/convert_transform.go",
+          "internal/aepmigrate/convert_transform_keyframes.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Camera, light, text, and precomp support predicates have been split from convert_scope_support.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_shape_support.go, convert_transform.go, or matrix_ledger.go without changing behavior.",
+    "next_action": "Shape graphic/filter predicates and transform keyframe conversion helpers have been split from their entry files. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from matrix_ledger.go, matrix.go, or remaining test files without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
