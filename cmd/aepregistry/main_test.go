@@ -534,6 +534,64 @@ func TestRunCoverageCanRequireLedgers(t *testing.T) {
 	}
 }
 
+func TestRunCoverageBatchCanListBatches(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeCoverageBatchCommandFixture(t, root, 2)
+	out := filepath.Join(root, "tmp", "coverage_batches.json")
+
+	code := run([]string{
+		"coverage-batch",
+		"-root", root,
+		"-current", "flightdeck/work/aep-understanding-generation/current.json",
+		"-out", out,
+		"-list",
+	})
+	if code != 0 {
+		t.Fatalf("run(coverage-batch -list) = %d, want 0", code)
+	}
+	var report registry.CoverageBatchListReport
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != registry.StatusPass || report.Summary.Batches != 1 || report.Batches[0].ID != "all" {
+		t.Fatalf("list report = %+v, want all batch", report)
+	}
+}
+
+func TestRunCoverageBatchSkipRunWritesReport(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeCoverageBatchCommandFixture(t, root, 2)
+	out := filepath.Join(root, "tmp", "coverage_batch.json")
+
+	code := run([]string{
+		"coverage-batch",
+		"-root", root,
+		"-current", "flightdeck/work/aep-understanding-generation/current.json",
+		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-out", out,
+		"-batch-id", "all",
+		"-skip-run",
+	})
+	if code != 0 {
+		t.Fatalf("run(coverage-batch -skip-run) = %d, want 0", code)
+	}
+	var report registry.CoverageBatchReport
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != registry.StatusPass || report.Summary.Entries != 1 || report.Summary.Errors != 0 {
+		t.Fatalf("batch report = %+v, want pass", report)
+	}
+}
+
 func TestRunCoverageCanWriteSummaryReport(t *testing.T) {
 	root := newRegistryRoot(t)
 	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 2)
@@ -1665,6 +1723,51 @@ func writeCurrentCommandFixture(t *testing.T, root string) {
 			},
 		},
 		"canonical_coverage_batch": "all",
+	})
+}
+
+func writeCoverageBatchCommandFixture(t *testing.T, root string, coverageTotal int) {
+	t.Helper()
+	currentPath := "flightdeck/work/aep-understanding-generation/current.json"
+	coveragePath := "flightdeck/work/aep-understanding-generation/coverage.json"
+	writeJSON(t, root, coveragePath, map[string]any{
+		"schema_version": 1,
+		"coverage": []map[string]any{
+			{
+				"id":       "text",
+				"artifact": "tmp/matrix/text/matrix.json",
+				"ledger":   "tmp/matrix/text/ledger.md",
+				"recipes":  []string{"text-basic"},
+				"totals":   map[string]any{"total": coverageTotal, "pass": coverageTotal, "blocked": 0, "failed": 0, "skipped": 0},
+			},
+		},
+	})
+	writeJSON(t, root, "tmp/matrix/text/matrix.json", map[string]any{
+		"schema_version": 1,
+		"summary":        map[string]any{"total": 2, "passed": 2, "blocked": 0, "failed": 0, "skipped": 0},
+		"cases":          []map[string]any{{"recipe_name": "text-basic", "source_version": "AE2020", "target_version": "AE2020", "status": "pass"}},
+	})
+	writeFile(t, root, "tmp/matrix/text/ledger.md", "# ledger\n")
+	writeJSON(t, root, currentPath, map[string]any{
+		"truth_sources": map[string]any{
+			"current":  currentPath,
+			"coverage": coveragePath,
+		},
+		"coverage_batches": []map[string]any{
+			{
+				"id":          "all",
+				"description": "all current coverage",
+				"entries": []map[string]any{
+					{
+						"coverage_id":  "text",
+						"out":          "tmp/matrix/text",
+						"matrix":       "tmp/matrix/text/matrix.json",
+						"ledger":       "tmp/matrix/text/ledger.md",
+						"recipe_paths": []string{"examples/recipes/text-basic.json"},
+					},
+				},
+			},
+		},
 	})
 }
 

@@ -1,0 +1,98 @@
+package registry
+
+import "testing"
+
+func TestListCoverageBatchesReportsEntries(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeCoverageBatchFixture(t, root, 2)
+
+	report, err := ListCoverageBatches(root, "flightdeck/work/aep-understanding-generation/current.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != StatusPass || report.Summary.Batches != 1 || report.Summary.Entries != 1 {
+		t.Fatalf("report = %+v, want one listed batch", report)
+	}
+	if len(report.Batches) != 1 || report.Batches[0].ID != "all" || report.Batches[0].Entries != 1 {
+		t.Fatalf("batches = %+v, want all/1", report.Batches)
+	}
+}
+
+func TestCheckCoverageBatchSkipRunPassesForMatchingArtifacts(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeCoverageBatchFixture(t, root, 2)
+
+	report, err := CheckCoverageBatch(root, "flightdeck/work/aep-understanding-generation/current.json", "flightdeck/work/aep-understanding-generation/coverage.json", "all")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != StatusPass || report.Summary.Errors != 0 || report.Summary.Entries != 1 {
+		t.Fatalf("report = %+v, want passing batch check", report)
+	}
+}
+
+func TestCheckCoverageBatchReportsCoverageTotalsDrift(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeCoverageBatchFixture(t, root, 3)
+
+	report, err := CheckCoverageBatch(root, "flightdeck/work/aep-understanding-generation/current.json", "flightdeck/work/aep-understanding-generation/coverage.json", "all")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != StatusFail {
+		t.Fatalf("status = %q, want fail", report.Status)
+	}
+	assertCoverageBatchIssue(t, report, "coverage_totals_mismatch", "text", "tmp/matrix/text/matrix.json")
+}
+
+func writeCoverageBatchFixture(t *testing.T, root string, coverageTotal int) {
+	t.Helper()
+	writeFile(t, root, "examples/recipes/text-basic.json", "{}\n")
+	writeMatrixFixtureWithSummary(t, root, "tmp/matrix/text/matrix.json", map[string]any{
+		"total": 2, "passed": 2, "blocked": 0, "failed": 0, "skipped": 0,
+	})
+	writeFile(t, root, "tmp/matrix/text/ledger.md", "# ledger\n")
+	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+		"schema_version": 1,
+		"coverage": []map[string]any{
+			{
+				"id":       "text",
+				"artifact": "tmp/matrix/text/matrix.json",
+				"ledger":   "tmp/matrix/text/ledger.md",
+				"recipes":  []string{"text-basic"},
+				"totals":   map[string]any{"total": coverageTotal, "pass": coverageTotal, "blocked": 0, "failed": 0, "skipped": 0},
+			},
+		},
+	})
+	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/current.json", map[string]any{
+		"truth_sources": map[string]any{
+			"current":  "flightdeck/work/aep-understanding-generation/current.json",
+			"coverage": "flightdeck/work/aep-understanding-generation/coverage.json",
+		},
+		"coverage_batches": []map[string]any{
+			{
+				"id":          "all",
+				"description": "all current coverage",
+				"entries": []map[string]any{
+					{
+						"coverage_id":  "text",
+						"out":          "tmp/matrix/text",
+						"matrix":       "tmp/matrix/text/matrix.json",
+						"ledger":       "tmp/matrix/text/ledger.md",
+						"recipe_paths": []string{"examples/recipes/text-basic.json"},
+					},
+				},
+			},
+		},
+	})
+}
+
+func assertCoverageBatchIssue(t *testing.T, report CoverageBatchReport, code, coverageID, path string) {
+	t.Helper()
+	for _, issue := range report.Issues {
+		if issue.Code == code && issue.CoverageID == coverageID && issue.Path == path {
+			return
+		}
+	}
+	t.Fatalf("issue %q/%q/%q not found in %+v", code, coverageID, path, report.Issues)
+}

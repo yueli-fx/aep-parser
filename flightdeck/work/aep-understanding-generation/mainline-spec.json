@@ -1046,11 +1046,12 @@
     },
     "last_code_maintenance_target": {
       "location": "registry_tooling",
-      "group": "go_current_validator_gate",
-      "reason": "Move current JSON validation onto a Go-first registry command so checkpoint no longer depends on the PowerShell current-state validator.",
+      "group": "go_coverage_batch_gate",
+      "reason": "Move coverage batch listing and skip-run artifact checks onto a Go-first registry command without rewriting coverage JSON.",
       "result": {
         "commands": {
-          "go_current_validator": "go run ./cmd/aepregistry current -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -out tmp/registry_current.json",
+          "go_coverage_batch_list": "go run ./cmd/aepregistry coverage-batch -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -out tmp/registry_coverage_batches.json -list",
+          "go_coverage_batch_skip_run": "go run ./cmd/aepregistry coverage-batch -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -out tmp/registry_coverage_batch.json -batch-id all-current-writer-coverage -skip-run",
           "checkpoint": "pwsh -File scripts/migration/validate_checkpoint.ps1",
           "focused_registry_tests": "go test ./cmd/aepregistry ./internal/registry",
           "version_gate": "go run ./cmd/aepregistry gate -root . -out tmp/registry_gate.json -scope version-matrix",
@@ -1059,24 +1060,24 @@
         "files": [
           "cmd/aepregistry/main.go",
           "cmd/aepregistry/main_test.go",
+          "internal/registry/coverage_batch.go",
+          "internal/registry/coverage_batch_test.go",
           "internal/registry/current.go",
-          "internal/registry/current_test.go",
-          "scripts/migration/validate_checkpoint.ps1",
           "flightdeck/work/aep-understanding-generation/current.md",
           "flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json",
           "flightdeck/work/aep-understanding-generation/mainline-spec.json"
         ],
-        "current_validator_result": {
-          "report": "tmp/registry_current.json",
+        "coverage_batch_result": {
+          "list_report": "tmp/registry_coverage_batches.json",
+          "batch_report": "tmp/registry_coverage_batch.json",
           "status": "pass",
-          "coverage_batches": 2,
-          "tooling": 11,
+          "batches": 2,
+          "list_entries": 19,
+          "checked_batch": "all-current-writer-coverage",
+          "checked_entries": 16,
           "errors": 0,
-          "truth_sources_checked": true,
-          "matrix_gates_checked": true,
-          "coverage_batches_checked": true,
-          "checkpoint_uses_go": true,
-          "legacy_script_retained_for_current_tooling_compatibility": "scripts/migration/validate_current.ps1"
+          "rewrites_coverage_json": false,
+          "legacy_script_retained_for_matrix_rerun_and_sync": "scripts/migration/run_coverage_batch.ps1"
         },
         "current_totals": {
           "records": 18,
@@ -1133,7 +1134,7 @@
         }
       }
     },
-    "next_action": "Current JSON validation now has a Go-first registry command and checkpoint calls it directly. Continue mainline by either moving the next PowerShell-only helper into Go or selecting a real unsupported conversion surface.",
+    "next_action": "Coverage batch list/skip-run checks now have a Go-first registry command that validates existing artifacts without rewriting coverage JSON. Continue mainline by moving the next PowerShell-only helper into Go or selecting a real unsupported conversion surface.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

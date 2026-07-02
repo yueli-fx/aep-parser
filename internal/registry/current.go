@@ -96,12 +96,14 @@ type currentNextBatch struct {
 }
 
 type currentCoverageBatch struct {
-	ID      string                      `json:"id"`
-	Entries []currentCoverageBatchEntry `json:"entries"`
+	ID          string                      `json:"id"`
+	Description string                      `json:"description"`
+	Entries     []currentCoverageBatchEntry `json:"entries"`
 }
 
 type currentCoverageBatchEntry struct {
 	CoverageID      string   `json:"coverage_id"`
+	Out             string   `json:"out"`
 	Matrix          string   `json:"matrix"`
 	Ledger          string   `json:"ledger"`
 	RecipeGlob      string   `json:"recipe_glob"`

@@ -516,8 +516,11 @@
     {
       "id": "coverage-batch-runner",
       "status": "available_verified",
-      "purpose": "Run or skip-run a coverage batch from current JSON, sync coverage JSON, then validate artifact totals with the Go coverage validator.",
-      "script": "scripts/migration/run_coverage_batch.ps1"
+      "purpose": "List coverage batches and validate existing batch artifacts from current JSON without regenerating matrices or rewriting coverage JSON. Go command is primary; the PowerShell script remains as legacy compatibility for explicit matrix reruns/sync.",
+      "command": "go run ./cmd/aepregistry coverage-batch -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -out tmp/registry_coverage_batch.json -batch-id all-current-writer-coverage -skip-run",
+      "list_command": "go run ./cmd/aepregistry coverage-batch -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -out tmp/registry_coverage_batches.json -list",
+      "script": "scripts/migration/run_coverage_batch.ps1",
+      "legacy_command": "pwsh -File scripts/migration/run_coverage_batch.ps1 -BatchId all-current-writer-coverage -SkipRun"
     },
     {
       "id": "coverage-md-renderer",
@@ -597,6 +600,11 @@
         "command": "pwsh -File scripts/migration/validate_checkpoint.ps1 -IncludeCoverageBatch",
         "status": "pass",
         "evidence": "checkpoint ok: canonical all-current-writer-coverage replayed into a temporary coverage file from 16 matrix artifacts and validated 143 recipes"
+      },
+      {
+        "command": "go run ./cmd/aepregistry coverage-batch -root . -current flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -out tmp/registry_coverage_batch.json -batch-id all-current-writer-coverage -skip-run",
+        "status": "pass",
+        "evidence": "coverage batch all-current-writer-coverage: pass (16 entries, 0 errors)"
       },
       {
         "command": "go run ./cmd/aepregistry coverage -root . -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -out tmp/registry_coverage.json -require-ledgers",

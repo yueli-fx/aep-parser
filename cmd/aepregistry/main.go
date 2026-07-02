@@ -29,6 +29,8 @@ func run(args []string) int {
 		return runBoundaries(args[1:])
 	case "coverage":
 		return runCoverage(args[1:])
+	case "coverage-batch":
+		return runCoverageBatch(args[1:])
 	case "current":
 		return runCurrent(args[1:])
 	case "gate":
@@ -51,6 +53,71 @@ func run(args []string) int {
 		usage()
 		return 2
 	}
+}
+
+func runCoverageBatch(args []string) int {
+	fs := flag.NewFlagSet("aepregistry coverage-batch", flag.ContinueOnError)
+	fs.SetOutput(os.Stderr)
+	root := fs.String("root", ".", "repository root")
+	currentPath := fs.String("current", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json", "current state JSON path")
+	coveragePath := fs.String("coverage", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
+	outPath := fs.String("out", "tmp/registry_coverage_batch.json", "coverage batch report JSON path")
+	batchID := fs.String("batch-id", "", "coverage batch id")
+	list := fs.Bool("list", false, "list known coverage batches")
+	skipRun := fs.Bool("skip-run", false, "validate existing batch artifacts without regenerating matrices or rewriting coverage JSON")
+	jsonOut := fs.Bool("json", false, "print JSON report")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	if fs.NArg() != 0 {
+		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage-batch [-root .] [-current path] [-coverage path] [-out tmp/registry_coverage_batch.json] [-list|-batch-id id -skip-run] [-json]")
+		return 2
+	}
+	if *list {
+		report, err := registry.ListCoverageBatches(*root, *currentPath)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "coverage-batch:", err)
+			return 2
+		}
+		if err := writeJSONFile(resolveRootPath(*root, *outPath), report); err != nil {
+			fmt.Fprintln(os.Stderr, "write:", err)
+			return 2
+		}
+		if *jsonOut {
+			if err := json.NewEncoder(os.Stdout).Encode(report); err != nil {
+				fmt.Fprintln(os.Stderr, "stdout:", err)
+				return 2
+			}
+		} else {
+			fmt.Printf("coverage batches: %d batches, %d entries\n", report.Summary.Batches, report.Summary.Entries)
+		}
+		return 0
+	}
+	if *batchID == "" || !*skipRun {
+		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage-batch [-root .] [-current path] [-coverage path] [-out tmp/registry_coverage_batch.json] [-list|-batch-id id -skip-run] [-json]")
+		return 2
+	}
+	report, err := registry.CheckCoverageBatch(*root, *currentPath, *coveragePath, *batchID)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "coverage-batch:", err)
+		return 2
+	}
+	if err := writeJSONFile(resolveRootPath(*root, *outPath), report); err != nil {
+		fmt.Fprintln(os.Stderr, "write:", err)
+		return 2
+	}
+	if *jsonOut {
+		if err := json.NewEncoder(os.Stdout).Encode(report); err != nil {
+			fmt.Fprintln(os.Stderr, "stdout:", err)
+			return 2
+		}
+	} else {
+		fmt.Printf("coverage batch %s: %s (%d entries, %d errors)\n", report.BatchID, report.Status, report.Summary.Entries, report.Summary.Errors)
+	}
+	if report.Status == registry.StatusFail {
+		return 1
+	}
+	return 0
 }
 
 func runCurrent(args []string) int {
@@ -1304,5 +1371,5 @@ func writeJSONFile(path string, value any) error {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: aepregistry <audit|boundaries|cleanup|coverage|current|gate|host-open-gaps|inventory|layout|migration-summary|ownership|recurring-matrix> [flags]")
+	fmt.Fprintln(os.Stderr, "usage: aepregistry <audit|boundaries|cleanup|coverage|coverage-batch|current|gate|host-open-gaps|inventory|layout|migration-summary|ownership|recurring-matrix> [flags]")
 }
