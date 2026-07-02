@@ -791,17 +791,18 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "rebuild_shape_materialize_split",
-      "reason": "Reduce convert_rebuild_special_materialize.go growth risk by separating shape layer rebuild materialization from camera, light, and precomp rebuild materialization while preserving behavior.",
+      "group": "mask_orchestration_surface_split",
+      "reason": "Reduce convert_mask.go growth risk by separating mask detection/support checks and mask surface materialization from project-level mask orchestration while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_rebuild_special_materialize.go",
-          "internal/aepmigrate/convert_rebuild_shape_materialize.go"
+          "internal/aepmigrate/convert_mask.go",
+          "internal/aepmigrate/convert_mask_detect.go",
+          "internal/aepmigrate/convert_mask_surface.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Shape layer rebuild materialization has been split from special camera/light/precomp rebuild materialization. Next useful increment is to continue reducing remaining 4-5KB conversion support files or dense tests into coherent modules without changing behavior.",
+    "next_action": "Mask detection/support checks and surface materialization have been split from project-level mask orchestration. Next useful increment is to continue reducing remaining 4-5KB conversion support files or dense tests into coherent modules without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
