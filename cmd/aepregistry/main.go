@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/yueli-fx/aep-parser/internal/registry"
 )
@@ -43,14 +44,21 @@ func runCleanup(args []string) int {
 	fs.SetOutput(os.Stderr)
 	root := fs.String("root", ".", "repository root")
 	outPath := fs.String("out", "tmp/registry_generated_cleanup.json", "generated cleanup classification JSON path")
+	execOutPath := fs.String("exec-out", "", "optional generated cleanup execution report JSON path")
 	sampleLimit := fs.Int("sample-limit", 5, "maximum file samples per generated group")
+	apply := fs.Bool("apply", false, "apply deletion for cleanup_candidate groups; default is dry-run only")
+	producers := fs.String("producer", "", "comma-separated producer categories to include in execution report")
+	excludeProducers := fs.String("exclude-producer", "registry_report", "comma-separated producer categories to exclude from execution report")
 	jsonOut := fs.Bool("json", false, "print JSON report")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(os.Stderr, "usage: aepregistry cleanup [-root .] [-out tmp/registry_generated_cleanup.json] [-sample-limit 5] [-json]")
+		fmt.Fprintln(os.Stderr, "usage: aepregistry cleanup [-root .] [-out tmp/registry_generated_cleanup.json] [-exec-out tmp/registry_generated_cleanup_execution.json] [-apply] [-producer categories] [-exclude-producer categories] [-sample-limit 5] [-json]")
 		return 2
+	}
+	if *apply && *execOutPath == "" {
+		*execOutPath = "tmp/registry_generated_cleanup_execution.json"
 	}
 
 	report, err := registry.GeneratedCleanupRepository(*root, registry.GeneratedCleanupOptions{SampleLimit: *sampleLimit})
@@ -62,6 +70,21 @@ func runCleanup(args []string) int {
 		fmt.Fprintln(os.Stderr, "write:", err)
 		return 2
 	}
+	if *execOutPath != "" {
+		exec := registry.ExecuteGeneratedCleanup(*root, report, registry.GeneratedCleanupExecutionOptions{
+			Apply:            *apply,
+			IncludeProducers: splitCSV(*producers),
+			ExcludeProducers: splitCSV(*excludeProducers),
+		})
+		if err := writeJSONFile(*execOutPath, exec); err != nil {
+			fmt.Fprintln(os.Stderr, "write:", err)
+			return 2
+		}
+		if exec.Summary.Errors > 0 {
+			fmt.Fprintf(os.Stderr, "cleanup execution: %d errors\n", exec.Summary.Errors)
+			return 1
+		}
+	}
 	if *jsonOut {
 		if err := json.NewEncoder(os.Stdout).Encode(report); err != nil {
 			fmt.Fprintln(os.Stderr, "stdout:", err)
@@ -72,6 +95,17 @@ func runCleanup(args []string) int {
 			report.Summary.Locations, report.Summary.Groups, report.Summary.CleanupCandidateFiles)
 	}
 	return 0
+}
+
+func splitCSV(value string) []string {
+	var out []string
+	for _, part := range strings.Split(value, ",") {
+		part = strings.TrimSpace(part)
+		if part != "" {
+			out = append(out, part)
+		}
+	}
+	return out
 }
 
 func runAudit(args []string) int {

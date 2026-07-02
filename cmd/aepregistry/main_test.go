@@ -143,6 +143,33 @@ func TestRunCleanupWritesGeneratedCleanupReport(t *testing.T) {
 	}
 }
 
+func TestRunCleanupCanWriteExecutionDryRunReport(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeFile(t, root, "tmp/orphan/matrix.json", "{}\n")
+	out := filepath.Join(root, "tmp", "registry_generated_cleanup.json")
+	execOut := filepath.Join(root, "tmp", "registry_generated_cleanup_execution.json")
+
+	code := run([]string{"cleanup", "-root", root, "-out", out, "-exec-out", execOut, "-sample-limit", "1"})
+	if code != 0 {
+		t.Fatalf("run(cleanup -exec-out) = %d, want 0", code)
+	}
+
+	data, err := os.ReadFile(execOut)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var report registry.GeneratedCleanupExecutionReport
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Mode != "dry_run" || report.Summary.PlannedGroups == 0 || report.Summary.DeletedGroups != 0 {
+		t.Fatalf("execution report = %+v, want dry-run planned cleanup", report.Summary)
+	}
+	if _, err := os.Stat(filepath.Join(root, "tmp", "orphan", "matrix.json")); err != nil {
+		t.Fatalf("dry-run should keep orphan matrix: %v", err)
+	}
+}
+
 func TestRunCoverageWritesReportAndReturnsOneForDrift(t *testing.T) {
 	root := newRegistryRoot(t)
 	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 3)
