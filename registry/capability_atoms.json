@@ -1771,6 +1771,1191 @@
       "boundaries": [
         "Verified against the existing shape all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
       ]
+    },
+    {
+      "id": "text.source.static_transform",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-default-text-static-transform.json",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_baseline_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.animator.character_offset",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-character-offset.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_charoffset_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.animator.character_offset_keyframes",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-character-offset-value-keyframes.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_charoffset_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.animator.color",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-color.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_color_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.animator.color_keyframes",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-color-value-keyframes.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_color_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.animator.fill_opacity",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-fill-opacity.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_fillopacity_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.animator.opacity",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-opacity.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_opacity_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.animator.opacity_keyframes",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-opacity-value-keyframes.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_opacity_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.animator.position",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-position.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_position_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.animator.position_keyframes",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-position-value-keyframes.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_position_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.animator.range_offset",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-range-offset.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_selector_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.animator.rotation",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-rotation.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_rotation_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.animator.rotation_keyframes",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-rotation-value-keyframes.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_rotation_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.animator.rotation_x",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-rotation-x.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_rotx_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.animator.rotation_y",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-rotation-y.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_roty_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.animator.scale",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-scale.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_scale_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.animator.scale_keyframes",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-scale-value-keyframes.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_scale_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.animator.skew",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-skew.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_skew_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.animator.stroke_color",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-stroke-color.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_strokecolor_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.animator.stroke_opacity",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-stroke-opacity.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_strokeopacity_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.animator.stroke_width",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-stroke-width.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_strokewidth_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.animator.tracking_keyframes",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-animator-tracking-value-keyframes.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/text/text_animators_tracking_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.source.style",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-style.json",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_style_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
+    },
+    {
+      "id": "text.source.shape_bridge",
+      "domain": "text",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "version_axis": {
+        "min_supported": "AE2020",
+        "known_supported": [
+          "AE2020",
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024",
+          "AE2025"
+        ],
+        "expansion_policy": "append_new_ae_versions"
+      },
+      "workflows": [
+        "generate",
+        "migrate"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-text-shape.json",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_text_style_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Verified against an existing text all_6x6 migration matrix; host-open and render-compare evidence remain separately totalized."
+      ]
     }
   ]
 }
