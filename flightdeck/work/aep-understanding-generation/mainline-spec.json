@@ -227,6 +227,68 @@
   "current_execution": {
     "phase": "version_matrix_totalization",
     "last_completed_target": {
+      "location": "generated_evidence",
+      "group": "non_version_generated_apply_cleanup",
+      "reason": "Execute the reviewed non-version-matrix generated cleanup batch after state-reference protection. This removes unreferenced technique/selfhost scratch outputs and untracked generated test-data scratch directories while leaving version_matrix, registry_report, host_open_gap mixed evidence, and state-referenced evidence untouched.",
+      "source_report": "tmp/registry_generated_cleanup_execution_non_version_apply.json",
+      "result": {
+        "apply_command": "go run ./cmd/aepregistry cleanup -root . -out tmp/registry_generated_cleanup_non_version.json -exec-out tmp/registry_generated_cleanup_execution_non_version_apply.json -exclude-producer version_matrix,registry_report -apply -sample-limit 3",
+        "excluded_producers": [
+          "version_matrix",
+          "registry_report"
+        ],
+        "deleted_groups": 157,
+        "deleted_files": 12709,
+        "skipped_groups": 21,
+        "errors": 0,
+        "deleted_by_producer": [
+          {
+            "producer": "technique_learning",
+            "groups": 125,
+            "files": 11197
+          },
+          {
+            "producer": "selfhost_learning",
+            "groups": 29,
+            "files": 1438
+          },
+          {
+            "producer": "generated_reverse_fixtures",
+            "groups": 1,
+            "files": 54
+          },
+          {
+            "producer": "ship_gate_fixtures",
+            "groups": 1,
+            "files": 19
+          },
+          {
+            "producer": "host_open_args",
+            "groups": 1,
+            "files": 1
+          }
+        ],
+        "post_cleanup_report": {
+          "groups": 21,
+          "files": 30750,
+          "cleanup_candidate_files": 30651,
+          "state_referenced_files": 97,
+          "state_referenced_groups": 15,
+          "mixed_groups": 6,
+          "unknown_producer_groups": 0,
+          "remaining_producers": [
+            "version_matrix",
+            "host_open_gap",
+            "registry_report"
+          ]
+        },
+        "post_gate_status": {
+          "asset_policy": "pass",
+          "version_matrix": "pass"
+        },
+        "note": "No standalone cleanup_candidate groups remain after this apply. Remaining cleanup_candidate_files are unreferenced siblings inside state-referenced or mixed generated groups and require preserve-path-aware review, not bulk deletion."
+      },
+      "previous_target": {
       "location": "version_matrix_coverage",
       "group": "focused_axis_queries",
       "reason": "Extend the AE2020-AE2025 coverage-axis report with the existing coverage filters so total/detail/total queries can be narrowed by record, atom, recipe, case status, writer status, host level, or boundary status.",
@@ -788,6 +850,7 @@
           }
         }
       }
+      }
     },
     "last_code_maintenance_target": {
       "location": "internal/registry",
@@ -802,7 +865,7 @@
         "behavior": "cleanup reports now expose state_referenced_files/groups and state_reference_paths; cleanup CLI and asset-policy gate default -state-ref to current and coverage JSON"
       }
     },
-    "next_action": "Generated cleanup now protects tmp paths referenced by current and coverage JSON. The version_matrix cleanup batch deleted 63 unreferenced groups / 7602 files, then restored the coverage recurring smoke matrix and now protects it as state-referenced evidence; next useful increment is to review remaining non-version-matrix cleanup candidates before any further apply.",
+    "next_action": "Generated cleanup now has no standalone cleanup_candidate groups after the non-version apply. Remaining generated evidence is 21 groups: version_matrix state-referenced evidence, host_open_gap mixed evidence, and registry_report outputs. Next useful increment is preserve-path-aware review of the remaining state-referenced/mixed groups instead of any bulk apply.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
