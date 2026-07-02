@@ -687,6 +687,55 @@ func TestRunGateReturnsOneForStaleMainlineSpecCoverageAxisSummary(t *testing.T) 
 	}
 }
 
+func TestRunGateReturnsOneForRecipeAtomCoverageGaps(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+		"schema_version": 1,
+		"coverage": []map[string]any{
+			{
+				"id":            "text",
+				"artifact":      "tmp/matrix/text/matrix.json",
+				"recipes":       []string{"text-basic", "unregistered-text"},
+				"writer_status": "PD-6x6",
+				"totals":        map[string]any{"total": 2, "pass": 2, "blocked": 0, "failed": 0, "skipped": 0},
+			},
+		},
+	})
+	writeJSON(t, root, "tmp/matrix/text/matrix.json", map[string]any{
+		"schema_version": 1,
+		"summary":        map[string]any{"total": 2, "passed": 2, "blocked": 0, "failed": 0, "skipped": 0},
+		"cases": []map[string]any{
+			{"recipe_name": "text-basic", "source_version": "AE2020", "target_version": "AE2020", "status": "pass"},
+			{"recipe_name": "unregistered-text", "source_version": "AE2025", "target_version": "AE2025", "status": "pass"},
+		},
+	})
+	out := filepath.Join(root, "tmp", "registry_gate.json")
+
+	code := run([]string{
+		"gate",
+		"-root", root,
+		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-out", out,
+		"-versions", "AE2020,AE2025",
+	})
+	if code != 1 {
+		t.Fatalf("run(gate recipe gap) = %d, want 1", code)
+	}
+
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var report gateReport
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	step := findGateStep(t, report, "registry_coverage_summary")
+	if step.Status != registry.StatusFail || step.Errors == 0 {
+		t.Fatalf("coverage summary step = %+v, want recipe atom gap failure", step)
+	}
+}
+
 func TestRunGateAssetPolicyWritesOwnershipAndCleanupReports(t *testing.T) {
 	root := newRegistryRoot(t)
 	out := filepath.Join(root, "tmp", "registry_asset_gate.json")

@@ -215,7 +215,12 @@ func runVersionMatrixGate(root, coveragePath string, axis []string, addStep func
 	if err := writeJSONFile(filepath.Join(root, filepath.FromSlash(summaryOut)), summary); err != nil {
 		return fmt.Errorf("write coverage summary: %w", err)
 	}
-	addStep(gateStepReport{ID: "registry_coverage_summary", Command: "go run ./cmd/aepregistry coverage -root . -out " + summaryOut + " -summary", Output: summaryOut, Status: summary.Status, Errors: summary.Errors})
+	summaryStatus := summary.Status
+	summaryErrors := summary.Errors + summary.Summary.RecipesWithoutAtomRows + summary.Summary.AtomRowsWithoutRecipes
+	if summaryErrors > 0 {
+		summaryStatus = registry.StatusFail
+	}
+	addStep(gateStepReport{ID: "registry_coverage_summary", Command: "go run ./cmd/aepregistry coverage -root . -out " + summaryOut + " -summary", Output: summaryOut, Status: summaryStatus, Errors: summaryErrors})
 
 	axisOut := "tmp/registry_coverage_axis.json"
 	axisReport, err := registry.CoverageAxisWithFilter(root, coveragePath, axis, registry.CoverageAxisFilter{})

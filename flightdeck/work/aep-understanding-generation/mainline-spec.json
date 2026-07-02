@@ -1041,30 +1041,22 @@
     },
     "last_code_maintenance_target": {
       "location": "cmd/aepregistry",
-      "group": "coverage_summary_recipe_atom_gaps",
-      "reason": "Make coverage -summary prove whether observed matrix recipes are attached to atom rows before expanding the next capability family.",
+      "group": "coverage_summary_recipe_atom_gate",
+      "reason": "Promote coverage-summary recipe-to-atom gaps from query-only JSON to a version-matrix gate failure so capability expansion cannot silently add matrix recipes without atom rows.",
       "result": {
         "commands": {
+          "version_gate": "go run ./cmd/aepregistry gate -root . -out tmp/registry_gate.json -scope version-matrix",
           "summary_refresh": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_summary.json -summary"
         },
         "files": [
-          "internal/registry/coverage.go",
-          "internal/registry/coverage_test.go",
+          "cmd/aepregistry/main.go",
           "cmd/aepregistry/main_test.go",
           "flightdeck/work/aep-understanding-generation/mainline-spec.json"
         ],
-        "schema_change": {
-          "report": "registry.CoverageSummaryReport",
-          "added_fields": [
-            "summary.declared_recipes",
-            "summary.observed_recipes",
-            "summary.atom_row_recipes",
-            "summary.recipes_without_atom_rows",
-            "summary.atom_rows_without_recipes",
-            "recipes_without_atom_rows",
-            "atom_rows_without_recipes"
-          ],
-          "compatibility": "Existing flat scalar fields remain unchanged; new fields only add machine-readable recipe-to-atom coverage totals and gap lists."
+        "gate_change": {
+          "step": "registry_coverage_summary",
+          "failure_condition": "summary.errors + summary.recipes_without_atom_rows + summary.atom_rows_without_recipes > 0",
+          "test": "TestRunGateReturnsOneForRecipeAtomCoverageGaps"
         },
         "current_totals": {
           "records": 18,
@@ -1082,8 +1074,7 @@
           "atom_rows_without_recipes": 0
         },
         "post_gate_status": {
-          "version_matrix": "pass",
-          "asset_policy": "pass"
+          "version_matrix": "pass"
         }
       }
     },
@@ -1114,7 +1105,7 @@
         }
       }
     },
-    "next_action": "Coverage summary JSON now proves observed recipes are fully attached to atom rows. Continue with the next scoped capability family or matrix coverage expansion, using recipes_without_atom_rows as the first gap check.",
+    "next_action": "Coverage summary recipe-to-atom gaps now fail the version-matrix gate. Continue with the next scoped capability family or matrix coverage expansion, and keep recipes_without_atom_rows at zero before committing new matrix evidence.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
