@@ -536,6 +536,14 @@ func TestCoverageAxisSummarizesVersionAxisAndHostLabels(t *testing.T) {
 	if axis.Summary.SourceTargetPairs != 5 || axis.Summary.Cells != 6 {
 		t.Fatalf("pair/cell summary = %+v", axis.Summary)
 	}
+	textDomain := findCoverageAxisDomain(t, axis, "text")
+	if textDomain.AtomRows != 2 || textDomain.WriterFullAxisRows != 2 || textDomain.HostFullAxisRows != 2 || textDomain.Cells != 4 || textDomain.Pass != 4 {
+		t.Fatalf("text domain summary = %+v", textDomain)
+	}
+	layerDomain := findCoverageAxisDomain(t, axis, "layer")
+	if layerDomain.AtomRows != 1 || layerDomain.BoundaryRows != 1 || layerDomain.HostBoundaryRows != 1 || layerDomain.Cells != 2 || layerDomain.Blocked != 1 {
+		t.Fatalf("layer domain summary = %+v", layerDomain)
+	}
 }
 
 func TestCoverageAxisWithFilterNarrowsRowsAndCells(t *testing.T) {
@@ -716,6 +724,17 @@ func findCoverageAxisRow(t *testing.T, report CoverageAxisReport, atomID string)
 	}
 	t.Fatalf("axis row %q not found in %+v", atomID, report.Rows)
 	return CoverageAxisRow{}
+}
+
+func findCoverageAxisDomain(t *testing.T, report CoverageAxisReport, domain string) CoverageAxisDomainSummary {
+	t.Helper()
+	for _, summary := range report.ByDomain {
+		if summary.Domain == domain {
+			return summary
+		}
+	}
+	t.Fatalf("axis domain %q not found in %+v", domain, report.ByDomain)
+	return CoverageAxisDomainSummary{}
 }
 
 func findCoverageAxisPair(t *testing.T, report CoverageAxisReport, source, target string) CoverageAxisPairSummary {

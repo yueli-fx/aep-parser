@@ -11,13 +11,14 @@ func DefaultAEVersionAxis() []string {
 }
 
 type CoverageAxisReport struct {
-	SchemaVersion int                       `json:"schema_version"`
-	Status        string                    `json:"status"`
-	VersionAxis   []string                  `json:"version_axis"`
-	Filter        CoverageAxisFilter        `json:"filter"`
-	Summary       CoverageAxisSummary       `json:"summary"`
-	ByVersionPair []CoverageAxisPairSummary `json:"by_version_pair"`
-	Rows          []CoverageAxisRow         `json:"rows"`
+	SchemaVersion int                         `json:"schema_version"`
+	Status        string                      `json:"status"`
+	VersionAxis   []string                    `json:"version_axis"`
+	Filter        CoverageAxisFilter          `json:"filter"`
+	Summary       CoverageAxisSummary         `json:"summary"`
+	ByDomain      []CoverageAxisDomainSummary `json:"by_domain,omitempty"`
+	ByVersionPair []CoverageAxisPairSummary   `json:"by_version_pair"`
+	Rows          []CoverageAxisRow           `json:"rows"`
 }
 
 type CoverageAxisFilter struct {
@@ -53,6 +54,24 @@ type CoverageAxisSummary struct {
 	Blocked               int `json:"blocked"`
 	Failed                int `json:"failed"`
 	Skipped               int `json:"skipped"`
+}
+
+type CoverageAxisDomainSummary struct {
+	Domain             string `json:"domain"`
+	AtomRows           int    `json:"atom_rows"`
+	WriterFullAxisRows int    `json:"writer_full_axis_rows"`
+	WriterPartialRows  int    `json:"writer_partial_rows"`
+	BoundaryRows       int    `json:"boundary_rows"`
+	HostFullAxisRows   int    `json:"host_full_axis_rows"`
+	HostDirectOnlyRows int    `json:"host_direct_only_rows"`
+	HostInferredRows   int    `json:"host_inferred_rows"`
+	HostBoundaryRows   int    `json:"host_boundary_rows"`
+	HostMissingRows    int    `json:"host_missing_rows"`
+	Cells              int    `json:"cells"`
+	Pass               int    `json:"pass"`
+	Blocked            int    `json:"blocked"`
+	Failed             int    `json:"failed"`
+	Skipped            int    `json:"skipped"`
 }
 
 type CoverageAxisRow struct {
@@ -128,6 +147,7 @@ func coverageAxisWithFilter(root, coveragePath string, versionAxis []string, fil
 		VersionAxis:   append([]string(nil), versionAxis...),
 		Filter:        filter,
 	}
+	domainSummaries := map[string]*CoverageAxisDomainSummary{}
 	for _, row := range report.AtomRows {
 		if !coverageAxisRowMatches(row, filter) {
 			continue
@@ -153,25 +173,35 @@ func coverageAxisWithFilter(root, coveragePath string, versionAxis []string, fil
 		}
 		axis.Rows = append(axis.Rows, axisRow)
 		axis.Summary.AtomRows++
+		domainSummary := coverageAxisDomainSummary(domainSummaries, axisRow.Domain)
+		domainSummary.AtomRows++
 		switch axisRow.WriterAxisStatus {
 		case "full_source_target_axis":
 			axis.Summary.WriterFullAxisRows++
+			domainSummary.WriterFullAxisRows++
 		case "partial_source_target_axis":
 			axis.Summary.WriterPartialRows++
+			domainSummary.WriterPartialRows++
 		case "boundary_source_contract":
 			axis.Summary.BoundaryRows++
+			domainSummary.BoundaryRows++
 		}
 		switch axisRow.HostAxisStatus {
 		case "full_direct_or_inferred_axis", "full_direct_all_hosts_axis":
 			axis.Summary.HostFullAxisRows++
+			domainSummary.HostFullAxisRows++
 		case "direct_hosts_only":
 			axis.Summary.HostDirectOnlyRows++
+			domainSummary.HostDirectOnlyRows++
 		case "direct_and_inferred_hosts":
 			axis.Summary.HostInferredRows++
+			domainSummary.HostInferredRows++
 		case "excluded_known_boundary":
 			axis.Summary.HostBoundaryRows++
+			domainSummary.HostBoundaryRows++
 		default:
 			axis.Summary.HostMissingRows++
+			domainSummary.HostMissingRows++
 		}
 	}
 	axisCells := cells.Cells
@@ -187,6 +217,8 @@ func coverageAxisWithFilter(root, coveragePath string, versionAxis []string, fil
 			}
 		}
 	}
+	coverageAxisAddDomainCellSummaries(domainSummaries, axisCells)
+	axis.ByDomain = coverageAxisDomainSummaries(domainSummaries)
 	axis.ByVersionPair = coverageAxisPairSummaries(axisCells, versionAxis)
 	axis.Summary.SourceTargetPairs = len(axis.ByVersionPair)
 	for _, pair := range axis.ByVersionPair {
@@ -209,6 +241,48 @@ func coverageAxisWithFilter(root, coveragePath string, versionAxis []string, fil
 		return axis.Rows[i].Recipe < axis.Rows[j].Recipe
 	})
 	return axis, nil
+}
+
+func coverageAxisDomainSummary(summaries map[string]*CoverageAxisDomainSummary, domain string) *CoverageAxisDomainSummary {
+	if domain == "" {
+		domain = "unknown"
+	}
+	summary := summaries[domain]
+	if summary == nil {
+		summary = &CoverageAxisDomainSummary{Domain: domain}
+		summaries[domain] = summary
+	}
+	return summary
+}
+
+func coverageAxisAddDomainCellSummaries(summaries map[string]*CoverageAxisDomainSummary, cells []CoverageCell) {
+	for _, cell := range cells {
+		summary := coverageAxisDomainSummary(summaries, cell.Domain)
+		summary.Cells++
+		switch cell.Status {
+		case "pass":
+			summary.Pass++
+		case "blocked":
+			summary.Blocked++
+		case "failed":
+			summary.Failed++
+		case "skipped":
+			summary.Skipped++
+		}
+	}
+}
+
+func coverageAxisDomainSummaries(summaries map[string]*CoverageAxisDomainSummary) []CoverageAxisDomainSummary {
+	domains := make([]string, 0, len(summaries))
+	for domain := range summaries {
+		domains = append(domains, domain)
+	}
+	sort.Strings(domains)
+	out := make([]CoverageAxisDomainSummary, 0, len(domains))
+	for _, domain := range domains {
+		out = append(out, *summaries[domain])
+	}
+	return out
 }
 
 func coverageAxisRowOnlyFiltersActive(filter CoverageAxisFilter) bool {

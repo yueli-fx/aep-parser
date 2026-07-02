@@ -1031,27 +1031,41 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/registry",
-      "group": "coverage_axis_missing_version_filters",
-      "reason": "Make the total/detail/total coverage table directly queryable by missing source, target, or host AE version so 2020+ matrix gaps can be listed without manual JSON scanning.",
+      "group": "coverage_axis_domain_totals",
+      "reason": "Make the total/detail/total coverage table expose domain-level axis totals directly, so text/effect/shape/layer coverage can be answered from one JSON report before drilling into rows.",
       "result": {
         "files": [
-          "cmd/aepregistry/main.go",
-          "cmd/aepregistry/main_test.go",
           "internal/registry/coverage_axis.go",
           "internal/registry/coverage_test.go"
         ],
-        "behavior": "aepregistry coverage -axis now accepts missing-version filters for source, target, and host evidence; filtered axis reports narrow source-target cell summaries to the retained atom rows.",
+        "behavior": "aepregistry coverage -axis now includes by_domain summaries with atom rows, writer/host axis status counts, and cell pass/blocked/failed/skipped totals for each atom domain.",
         "queries": {
-          "text_missing_target_ae2025": {
-            "command": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_axis_text_missing_target_ae2025.json -axis -domain text -missing-target-version AE2025",
-            "atom_rows": 0,
-            "cells": 0
+          "axis_domain_totals": {
+            "command": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_axis.json -axis",
+            "domains": 14,
+            "text": {
+              "atom_rows": 26,
+              "cells": 936,
+              "pass": 936,
+              "blocked": 0
+            },
+            "shape": {
+              "atom_rows": 28,
+              "cells": 1008,
+              "pass": 1008,
+              "blocked": 0
+            },
+            "layer": {
+              "atom_rows": 16,
+              "boundary_rows": 1,
+              "cells": 576,
+              "pass": 541,
+              "blocked": 5
+            }
           }
         },
-        "new_filters": [
-          "-missing-source-version",
-          "-missing-target-version",
-          "-missing-host-version"
+        "new_report_fields": [
+          "by_domain"
         ]
       }
     },
