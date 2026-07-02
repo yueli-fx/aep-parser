@@ -1046,8 +1046,8 @@
     },
     "last_code_maintenance_target": {
       "location": "coverage_ledger",
-      "group": "light_recipe_declarations",
-      "reason": "Declare the observed light writer-matrix recipes in the coverage ledger to reduce observed-but-undeclared recipe gaps before larger family batches.",
+      "group": "camera_recipe_declarations",
+      "reason": "Declare the observed camera writer-matrix recipes in the coverage ledger to reduce observed-but-undeclared recipe gaps before larger family batches.",
       "result": {
         "commands": {
           "summary_refresh": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_summary.json -summary",
@@ -1059,28 +1059,29 @@
         ],
         "declared_records": [
           {
-            "record": "light",
+            "record": "camera",
             "recipes": [
-              "minimal-light-casts-shadows",
-              "minimal-light-color",
-              "minimal-light-cone-angle",
-              "minimal-light-cone-feather",
-              "minimal-light-falloff-distance",
-              "minimal-light-falloff-start",
-              "minimal-light-falloff-type",
-              "minimal-light-intensity",
-              "minimal-light-kind",
-              "minimal-light-layer",
-              "minimal-light-object-profile",
-              "minimal-light-shadow-darkness",
-              "minimal-light-shadow-diffusion",
-              "minimal-light-source"
+              "minimal-camera-aperture",
+              "minimal-camera-blur-level",
+              "minimal-camera-depth-of-field",
+              "minimal-camera-focus-distance",
+              "minimal-camera-iris-aspect-ratio",
+              "minimal-camera-iris-diffraction-fringe",
+              "minimal-camera-iris-highlight-gain",
+              "minimal-camera-iris-highlight-saturation",
+              "minimal-camera-iris-highlight-threshold",
+              "minimal-camera-iris-rotation",
+              "minimal-camera-iris-roundness",
+              "minimal-camera-iris-shape",
+              "minimal-camera-layer",
+              "minimal-camera-object-profile",
+              "minimal-camera-zoom"
             ]
           }
         ],
         "gap_delta": {
-          "declared_recipes": "+14",
-          "observed_recipes_without_declaration": "-14",
+          "declared_recipes": "+15",
+          "observed_recipes_without_declaration": "-15",
           "records_with_undeclared_recipes": "-1"
         },
         "current_totals": {
@@ -1092,20 +1093,19 @@
           "errors": 0,
           "direct_host_atoms": 128,
           "inferred_host_atoms": 128,
-          "declared_recipes": 45,
+          "declared_recipes": 60,
           "observed_recipes": 143,
           "atom_row_recipes": 143,
           "recipes_without_atom_rows": 0,
           "atom_rows_without_recipes": 0,
-          "observed_recipes_without_declaration": 98,
-          "records_with_undeclared_recipes": 5
+          "observed_recipes_without_declaration": 83,
+          "records_with_undeclared_recipes": 4
         },
         "remaining_undeclared_records": [
           "shape-all-family",
           "text-animators",
           "comp",
-          "layer-all-family",
-          "camera"
+          "layer-all-family"
         ],
         "post_gate_status": {
           "version_matrix": "pass",
@@ -1144,7 +1144,7 @@
         }
       }
     },
-    "next_action": "Coverage ledger undeclared recipe gaps are down to 98 observed recipes across 5 records. Continue reducing by declaring the next scoped family, preferably camera before the larger comp/text/shape/layer families.",
+    "next_action": "Coverage ledger undeclared recipe gaps are down to 83 observed recipes across 4 records. Continue reducing by declaring the next scoped family; layer-all-family is the smallest remaining batch before comp/text/shape.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
