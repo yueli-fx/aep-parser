@@ -2525,7 +2525,7 @@
         "shape.star.add",
         "shape.star.set_type"
       ],
-      "example": "examples/recipes/minimal-shape-fill-blend-mode.json"
+      "example": "examples/recipes/minimal-shape-ellipse-fill.json"
     },
     "comps[].layers[].shape.merge_paths": {
       "path": "comps[].layers[].shape.merge_paths",
@@ -2702,7 +2702,7 @@
         "shape.ellipse.set_position",
         "shape.star.set_position"
       ],
-      "example": "examples/recipes/minimal-shape-polystar.json"
+      "example": "examples/recipes/minimal-shape-ellipse-fill.json"
     },
     "comps[].layers[].shape.pucker_bloat": {
       "path": "comps[].layers[].shape.pucker_bloat",
@@ -2938,7 +2938,7 @@
         "shape.rect.set_size",
         "shape.ellipse.set_size"
       ],
-      "example": "examples/recipes/minimal-shape-fill-blend-mode.json"
+      "example": "examples/recipes/minimal-shape-ellipse-fill.json"
     },
     "comps[].layers[].shape.stroke": {
       "path": "comps[].layers[].shape.stroke",
@@ -7302,7 +7302,7 @@
       "go_type": "*int",
       "summary": "Expected number of shape layers.",
       "validation": "Expected count must be non-negative.",
-      "example": "examples/recipes/minimal-shape-fill-blend-mode.json"
+      "example": "examples/recipes/minimal-shape-ellipse-fill.json"
     },
     "expected_profile.text_layer_count": {
       "path": "expected_profile.text_layer_count",

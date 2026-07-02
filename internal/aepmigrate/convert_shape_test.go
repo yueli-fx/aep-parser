@@ -19,3 +19,7 @@ func TestConvertWritesRectFillShapeLayerProject(t *testing.T) {
 func TestConvertWritesRecipeRectFillShapeLayerProject(t *testing.T) {
 	assertRecipeConvertsPass(t, "minimal-shape-rect-fill-default-transform.json")
 }
+
+func TestConvertWritesRecipeEllipseFillShapeLayerProject(t *testing.T) {
+	assertRecipeConvertsPass(t, "minimal-shape-ellipse-fill.json")
+}

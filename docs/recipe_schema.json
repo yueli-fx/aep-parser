@@ -4331,7 +4331,7 @@
           ]
         }
       ],
-      "x-aep-example": "examples/recipes/minimal-shape-fill-blend-mode.json"
+      "x-aep-example": "examples/recipes/minimal-shape-ellipse-fill.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.size",
@@ -4371,7 +4371,7 @@
           ]
         }
       ],
-      "x-aep-example": "examples/recipes/minimal-shape-fill-blend-mode.json"
+      "x-aep-example": "examples/recipes/minimal-shape-ellipse-fill.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.position",
@@ -4426,7 +4426,7 @@
           ]
         }
       ],
-      "x-aep-example": "examples/recipes/minimal-shape-polystar.json"
+      "x-aep-example": "examples/recipes/minimal-shape-ellipse-fill.json"
     },
     {
       "x-aep-path": "comps[].layers[].shape.roundness",
@@ -9134,7 +9134,7 @@
       "go_type": "*int",
       "description": "Expected number of shape layers.",
       "x-aep-validation": "Expected count must be non-negative.",
-      "x-aep-example": "examples/recipes/minimal-shape-fill-blend-mode.json"
+      "x-aep-example": "examples/recipes/minimal-shape-ellipse-fill.json"
     },
     {
       "x-aep-path": "expected_profile.bits_per_channel",

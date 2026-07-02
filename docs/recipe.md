@@ -279,9 +279,9 @@ This reference is generated from the canonical recipe field model.
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.kind` | `string` | structural | Shape primitive type. | Shape kind must use a supported primitive type. | `shape.star.add` (`VectorGroup.AddStar`)<br>`shape.star.set_type` (`StarNode.SetStarType`) | examples/recipes/minimal-shape-fill-blend-mode.json |
-| `comps[].layers[].shape.size` | `array<float64>` | - | Shape size vector. | When present, shape size must contain exactly two numeric values. | `shape.rect.set_size` (`RectNode.SetSize`)<br>`shape.ellipse.set_size` (`EllipseNode.SetSize`) | examples/recipes/minimal-shape-fill-blend-mode.json |
-| `comps[].layers[].shape.position` | `array<float64>` | - | Shape local position vector. | When present, shape position must contain exactly two numeric values. | `shape.rect.set_position` (`RectNode.SetPosition`)<br>`shape.ellipse.set_position` (`EllipseNode.SetPosition`)<br>`shape.star.set_position` (`StarNode.SetPosition`) | examples/recipes/minimal-shape-polystar.json |
+| `comps[].layers[].shape.kind` | `string` | structural | Shape primitive type. | Shape kind must use a supported primitive type. | `shape.star.add` (`VectorGroup.AddStar`)<br>`shape.star.set_type` (`StarNode.SetStarType`) | examples/recipes/minimal-shape-ellipse-fill.json |
+| `comps[].layers[].shape.size` | `array<float64>` | - | Shape size vector. | When present, shape size must contain exactly two numeric values. | `shape.rect.set_size` (`RectNode.SetSize`)<br>`shape.ellipse.set_size` (`EllipseNode.SetSize`) | examples/recipes/minimal-shape-ellipse-fill.json |
+| `comps[].layers[].shape.position` | `array<float64>` | - | Shape local position vector. | When present, shape position must contain exactly two numeric values. | `shape.rect.set_position` (`RectNode.SetPosition`)<br>`shape.ellipse.set_position` (`EllipseNode.SetPosition`)<br>`shape.star.set_position` (`StarNode.SetPosition`) | examples/recipes/minimal-shape-ellipse-fill.json |
 | `comps[].layers[].shape.roundness` | `number` | - | Rectangle corner roundness. | Shape roundness is supported only for rect shapes and must be non-negative. | `shape.rect.set_roundness` (`RectNode.SetRoundness`) | examples/recipes/minimal-text-shape.json |
 | `comps[].layers[].shape.points` | `number` | - | Star or polygon point count. | Star and polygon point count must be at least 3. | `shape.star.set_points` (`StarNode.SetPoints`) | examples/recipes/minimal-shape-polystar.json |
 | `comps[].layers[].shape.rotation` | `number` | - | Shape local rotation. | - | `shape.star.set_rotation` (`StarNode.SetRotation`) | examples/recipes/minimal-shape-polystar.json |
@@ -607,7 +607,7 @@ This reference is generated from the canonical recipe field model.
 | `expected_profile.comp_count` | `number` | - | Expected number of compositions. | Expected count must be non-negative. | - | examples/recipes/minimal-adjustment-layer.json |
 | `expected_profile.layer_count` | `number` | - | Expected total number of layers. | Expected count must be non-negative. | - | examples/recipes/minimal-adjustment-layer.json |
 | `expected_profile.text_layer_count` | `number` | - | Expected number of text layers. | Expected count must be non-negative. | - | examples/recipes/minimal-adjustment-layer.json |
-| `expected_profile.shape_layer_count` | `number` | - | Expected number of shape layers. | Expected count must be non-negative. | - | examples/recipes/minimal-shape-fill-blend-mode.json |
+| `expected_profile.shape_layer_count` | `number` | - | Expected number of shape layers. | Expected count must be non-negative. | - | examples/recipes/minimal-shape-ellipse-fill.json |
 | `expected_profile.bits_per_channel` | `string` | - | Expected project color bit depth. | Expected project color bit depth must be 8, 16, or 32 bits per channel. | - | examples/recipes/minimal-project-bits-per-channel.json |
 | `expected_profile.linear_blending` | `boolean` | - | Expected project linear blending switch. | - | - | examples/recipes/minimal-project-linear-color.json |
 | `expected_profile.linearize_working_space` | `boolean` | - | Expected project linearized working space switch. | - | - | examples/recipes/minimal-project-linear-color.json |

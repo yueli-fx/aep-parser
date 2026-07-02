@@ -44,6 +44,16 @@
       ]
     },
     {
+      "id": "matrix.shape_ellipse_fill.all_6x6",
+      "class": "generated_evidence",
+      "artifact_path": "tmp/migration_matrix_shape_ellipse_fill_all_6x6/matrix.json",
+      "required": true,
+      "workflows": [
+        "migrate",
+        "host_open"
+      ]
+    },
+    {
       "id": "matrix.effect_param_keyframes",
       "class": "generated_evidence",
       "artifact_path": "tmp/migration_matrix_effect_param_keyframes/matrix.json",

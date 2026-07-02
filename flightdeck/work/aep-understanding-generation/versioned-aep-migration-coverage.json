@@ -1025,8 +1025,8 @@
     {
       "id": "shape-all-family",
       "domain": "shape",
-      "scope": "all 27 current shape recipes",
-      "recipe_pattern": "minimal-shape-*",
+      "scope": "27 established shape recipes before focused post-ledger additions",
+      "recipe_pattern": "minimal-shape-* established set",
       "recipe_count": 27,
       "writer_status": "PD-6x6",
       "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
@@ -1144,6 +1144,51 @@
       "totals": {
         "total": 972,
         "pass": 972,
+        "blocked": 0,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "id": "shape-ellipse-fill",
+      "domain": "shape",
+      "scope": "ellipse primitive size and position with fill materialization",
+      "recipes": [
+        "minimal-shape-ellipse-fill"
+      ],
+      "writer_status": "PD-6x6",
+      "writer_coverage": "AE2020-AE2025 sources into AE2020-AE2025 targets",
+      "host_open_status": "direct_endpoint_hosts_pass; AE2021-AE2024 inferred_by_endpoint",
+      "host_open_endpoint_evidence": {
+        "open_mode": "target_bound",
+        "direct_hosts": [
+          "AE2020",
+          "AE2025"
+        ],
+        "inferred_hosts": [
+          "AE2021",
+          "AE2022",
+          "AE2023",
+          "AE2024"
+        ],
+        "recipes": [
+          "minimal-shape-ellipse-fill"
+        ],
+        "artifact": "tmp/host_open_gaps/shape-ellipse-fill/chunk-1/matrix.json",
+        "ledger": "tmp/host_open_gaps/shape-ellipse-fill/chunk-1/ledger.md",
+        "totals": {
+          "total": 4,
+          "pass": 4,
+          "blocked": 0,
+          "failed": 0,
+          "skipped": 0
+        }
+      },
+      "artifact": "tmp/migration_matrix_shape_ellipse_fill_all_6x6/matrix.json",
+      "ledger": "tmp/migration_matrix_shape_ellipse_fill_all_6x6/ledger.md",
+      "totals": {
+        "total": 36,
+        "pass": 36,
         "blocked": 0,
         "failed": 0,
         "skipped": 0

@@ -1461,6 +1461,50 @@
       ]
     },
     {
+      "id": "shape.primitive.ellipse",
+      "domain": "shape",
+      "tier": "atom",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "workflows": [
+        "generate",
+        "migrate",
+        "host_open"
+      ],
+      "dependencies": [
+        {
+          "kind": "recipe",
+          "path": "examples/recipes/minimal-shape-ellipse-fill.json",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/ellipse_body.bin",
+          "required": true
+        },
+        {
+          "kind": "template",
+          "path": "internal/serializer/templates/shapes/fill_body.bin",
+          "required": true
+        },
+        {
+          "kind": "evidence",
+          "path": "tmp/migration_matrix_shape_ellipse_fill_all_6x6/matrix.json",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Covers static ellipse size and position with fill materialization across the AE2020-AE2025 writer matrix and endpoint host-open evidence."
+      ]
+    },
+    {
       "id": "shape.filter.repeater",
       "domain": "shape",
       "tier": "atom",

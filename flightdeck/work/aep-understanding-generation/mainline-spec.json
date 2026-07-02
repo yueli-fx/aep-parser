@@ -1047,14 +1047,14 @@
       }
     },
     "last_capability_target": {
-      "location": "effect",
-      "group": "effect_control_static_values",
-      "reason": "Add one atomized native effect-control family after the Convert materialization pipeline split, without growing convert.go.",
+      "location": "shape",
+      "group": "shape_primitive_ellipse",
+      "reason": "Add one focused shape primitive atom outside the legacy shape-all family so new recipe coverage remains explicit and queryable.",
       "result": {
-        "recipe": "examples/recipes/minimal-effect-control-static-values.json",
-        "atom_id": "effect.control.static_values",
-        "coverage_record": "effects-control-static-values",
-        "matrix": "tmp/migration_matrix_effect_control_static_values_all_6x6/matrix.json",
+        "recipe": "examples/recipes/minimal-shape-ellipse-fill.json",
+        "atom_id": "shape.primitive.ellipse",
+        "coverage_record": "shape-ellipse-fill",
+        "matrix": "tmp/migration_matrix_shape_ellipse_fill_all_6x6/matrix.json",
         "totals": {
           "total": 36,
           "pass": 36,
@@ -1063,7 +1063,7 @@
           "skipped": 0
         },
         "host_open_status": "direct_endpoint_hosts_pass; AE2021-AE2024 inferred_by_endpoint",
-        "host_open_endpoint_matrix": "tmp/host_open_gaps/effects-control-static-values/chunk-1/matrix.json",
+        "host_open_endpoint_matrix": "tmp/host_open_gaps/shape-ellipse-fill/chunk-1/matrix.json",
         "host_open_totals": {
           "total": 4,
           "pass": 4,
@@ -1073,7 +1073,7 @@
         }
       }
     },
-    "next_action": "effect.control.static_values now has writer 6x6 and endpoint host-open evidence. Continue with the next scoped capability family using the same recipe -> atom -> coverage -> axis pattern.",
+    "next_action": "shape.primitive.ellipse now has writer 6x6 and endpoint host-open evidence. Continue with the next scoped capability family using the same recipe -> atom -> coverage -> axis pattern.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

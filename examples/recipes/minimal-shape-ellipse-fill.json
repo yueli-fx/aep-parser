@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "project": {
+    "target_version": "AE2020",
+    "name": "Minimal ellipse fill"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 640,
+      "height": 360,
+      "frame_rate": 24,
+      "duration": 2,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "shape",
+          "name": "Ellipse Card",
+          "shape": {
+            "kind": "ellipse",
+            "size": [260, 140],
+            "position": [40, -20],
+            "fill_color": [255, 48, 160, 224]
+          },
+          "transform": {
+            "position": [320, 180]
+          }
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 1,
+    "shape_layer_count": 1,
+    "layers": [
+      {
+        "name": "Ellipse Card",
+        "type": "shape"
+      }
+    ],
+    "properties": [
+      {
+        "layer_name": "Ellipse Card",
+        "match_name": "ADBE Vector Ellipse Size",
+        "value": [260, 140]
+      },
+      {
+        "layer_name": "Ellipse Card",
+        "match_name": "ADBE Vector Ellipse Position",
+        "value": [40, -20]
+      },
+      {
+        "layer_name": "Ellipse Card",
+        "match_name": "ADBE Vector Fill Color",
+        "value": [224, 255, 48, 160]
+      }
+    ]
+  }
+}
