@@ -487,8 +487,10 @@
     {
       "id": "coverage-json-updater",
       "status": "available_verified",
-      "purpose": "Read a matrix JSON artifact and update one coverage record in versioned-aep-migration-coverage.json.",
-      "script": "scripts/migration/update_coverage.ps1"
+      "purpose": "Read a matrix JSON artifact and update one coverage record in versioned-aep-migration-coverage.json. Go command is primary and preserves unknown coverage record fields; the PowerShell script remains as legacy compatibility.",
+      "command": "go run ./cmd/aepregistry coverage-update -root . -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -id text-baseline -matrix tmp/migration_matrix_text_baseline_all_6x6/matrix.json",
+      "script": "scripts/migration/update_coverage.ps1",
+      "legacy_command": "pwsh -File scripts/migration/update_coverage.ps1 -Id text-baseline -MatrixPath tmp/migration_matrix_text_baseline_all_6x6/matrix.json"
     },
     {
       "id": "coverage-json-validator",

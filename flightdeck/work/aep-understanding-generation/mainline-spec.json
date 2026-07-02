@@ -1046,32 +1046,31 @@
     },
     "last_code_maintenance_target": {
       "location": "registry_tooling",
-      "group": "go_coverage_markdown_renderer",
-      "reason": "Move the optional coverage Markdown renderer onto a Go-first registry command so the current mainline command list no longer depends on a direct PowerShell helper for this view.",
+      "group": "go_coverage_json_updater",
+      "reason": "Move one-record coverage ledger updates from a PowerShell-only helper onto a Go-first registry command while preserving unknown record fields and full recipe arrays.",
       "result": {
         "commands": {
-          "go_coverage_md": "go run ./cmd/aepregistry coverage-md -root . -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -out tmp/migration_coverage.md",
+          "go_coverage_update_temp": "go run ./cmd/aepregistry coverage-update -root . -coverage <temp coverage copy> -id text-baseline -matrix tmp/migration_matrix_text_baseline_all_6x6/matrix.json -out tmp/registry_coverage_update.json",
           "checkpoint": "pwsh -File scripts/migration/validate_checkpoint.ps1",
-          "focused_registry_tests": "go test ./internal/registry -run CoverageMarkdown && go test ./cmd/aepregistry -run CoverageMD",
+          "focused_registry_tests": "go test ./internal/registry -run CoverageFromMatrix && go test ./cmd/aepregistry -run CoverageUpdate",
           "version_gate": "go run ./cmd/aepregistry gate -root . -out tmp/registry_gate.json -scope version-matrix",
           "asset_gate": "go run ./cmd/aepregistry gate -root . -out tmp/registry_asset_gate.json -scope asset-policy"
         },
         "files": [
           "cmd/aepregistry/main.go",
-          "cmd/aepregistry/coverage_markdown_test.go",
-          "internal/registry/coverage.go",
-          "internal/registry/coverage_markdown.go",
-          "internal/registry/coverage_markdown_test.go",
-          "flightdeck/work/aep-understanding-generation/current.md",
+          "cmd/aepregistry/coverage_update_test.go",
+          "internal/registry/coverage_update.go",
+          "internal/registry/coverage_update_test.go",
           "flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json",
           "flightdeck/work/aep-understanding-generation/mainline-spec.json"
         ],
-        "coverage_md_result": {
-          "output": "tmp/migration_coverage.md",
+        "coverage_update_result": {
+          "report": "tmp/registry_coverage_update.json",
           "status": "pass",
-          "source": "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json",
-          "legacy_script_retained": "scripts/migration/render_coverage_md.ps1",
-          "writes_truth_sources": false
+          "tested_with_temp_coverage_copy": true,
+          "preserves_unknown_record_fields": true,
+          "keeps_full_recipe_arrays": true,
+          "legacy_script_retained": "scripts/migration/update_coverage.ps1"
         },
         "current_totals": {
           "records": 18,
@@ -1128,7 +1127,7 @@
         }
       }
     },
-    "next_action": "The optional coverage Markdown view now has a Go-first registry command and current.md has no direct PowerShell renderer call. Continue mainline by moving the next PowerShell-only helper into Go or selecting a real unsupported conversion surface.",
+    "next_action": "Single-record coverage JSON updates now have a Go-first registry command. Continue mainline by wiring batch sync/replay to the Go updater or selecting a real unsupported conversion surface.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

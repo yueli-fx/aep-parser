@@ -33,6 +33,8 @@ func run(args []string) int {
 		return runCoverageBatch(args[1:])
 	case "coverage-md":
 		return runCoverageMD(args[1:])
+	case "coverage-update":
+		return runCoverageUpdate(args[1:])
 	case "current":
 		return runCurrent(args[1:])
 	case "gate":
@@ -81,6 +83,57 @@ func runCoverageMD(args []string) int {
 		return 2
 	}
 	fmt.Printf("rendered coverage markdown: %s\n", *outPath)
+	return 0
+}
+
+func runCoverageUpdate(args []string) int {
+	fs := flag.NewFlagSet("aepregistry coverage-update", flag.ContinueOnError)
+	fs.SetOutput(os.Stderr)
+	root := fs.String("root", ".", "repository root")
+	coveragePath := fs.String("coverage", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
+	id := fs.String("id", "", "coverage record id")
+	matrixPath := fs.String("matrix", "", "matrix JSON artifact path")
+	domain := fs.String("domain", "", "domain for a new or updated coverage record")
+	scope := fs.String("scope", "", "scope for a new or updated coverage record")
+	writerStatus := fs.String("writer-status", "", "override writer status")
+	hostOpenStatus := fs.String("host-open-status", "", "override host-open status")
+	ledgerPath := fs.String("ledger", "", "optional ledger path; defaults to ledger.md next to the matrix")
+	outPath := fs.String("out", "tmp/registry_coverage_update.json", "coverage update report JSON path")
+	jsonOut := fs.Bool("json", false, "print JSON report")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	if fs.NArg() != 0 || *id == "" || *matrixPath == "" {
+		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage-update [-root .] -id id -matrix tmp/matrix.json [-coverage path] [-domain name] [-scope text] [-writer-status status] [-host-open-status status] [-ledger path] [-out tmp/registry_coverage_update.json] [-json]")
+		return 2
+	}
+	report, err := registry.UpdateCoverageFromMatrix(*root, registry.CoverageUpdateOptions{
+		ID:             *id,
+		CoveragePath:   *coveragePath,
+		MatrixPath:     *matrixPath,
+		Domain:         *domain,
+		Scope:          *scope,
+		WriterStatus:   *writerStatus,
+		HostOpenStatus: *hostOpenStatus,
+		LedgerPath:     *ledgerPath,
+	})
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "coverage-update:", err)
+		return 2
+	}
+	if err := writeJSONFile(resolveRootPath(*root, *outPath), report); err != nil {
+		fmt.Fprintln(os.Stderr, "write:", err)
+		return 2
+	}
+	if *jsonOut {
+		if err := json.NewEncoder(os.Stdout).Encode(report); err != nil {
+			fmt.Fprintln(os.Stderr, "stdout:", err)
+			return 2
+		}
+	} else {
+		fmt.Printf("updated coverage id %q from %s: total=%d pass=%d blocked=%d failed=%d skipped=%d\n",
+			report.CoverageID, report.MatrixPath, report.Totals.Total, report.Totals.Pass, report.Totals.Blocked, report.Totals.Failed, report.Totals.Skipped)
+	}
 	return 0
 }
 
@@ -1407,5 +1460,5 @@ func writeTextFile(path, value string) error {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: aepregistry <audit|boundaries|cleanup|coverage|coverage-batch|coverage-md|current|gate|host-open-gaps|inventory|layout|migration-summary|ownership|recurring-matrix> [flags]")
+	fmt.Fprintln(os.Stderr, "usage: aepregistry <audit|boundaries|cleanup|coverage|coverage-batch|coverage-md|coverage-update|current|gate|host-open-gaps|inventory|layout|migration-summary|ownership|recurring-matrix> [flags]")
 }
