@@ -1031,26 +1031,27 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/registry",
-      "group": "coverage_domain_filters",
-      "reason": "Make the total/detail/total coverage table directly queryable by atom domain so text/effect/shape coverage can be answered without atom-prefix or manual JSON scanning.",
+      "group": "coverage_axis_missing_version_filters",
+      "reason": "Make the total/detail/total coverage table directly queryable by missing source, target, or host AE version so 2020+ matrix gaps can be listed without manual JSON scanning.",
       "result": {
         "files": [
           "cmd/aepregistry/main.go",
           "cmd/aepregistry/main_test.go",
-          "internal/registry/coverage.go",
           "internal/registry/coverage_axis.go",
           "internal/registry/coverage_test.go"
         ],
-        "behavior": "coverage summary now exposes by_domain; coverage rows, cells, and axis rows carry atom domain metadata and aepregistry coverage accepts -domain for rows/cells/axis filters; filtered axis reports narrow source-target cell summaries to the retained domain rows.",
+        "behavior": "aepregistry coverage -axis now accepts missing-version filters for source, target, and host evidence; filtered axis reports narrow source-target cell summaries to the retained atom rows.",
         "queries": {
-          "text_domain_axis": {
-            "command": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_axis_text_domain.json -axis -domain text",
-            "atom_rows": 26,
-            "cells": 936
+          "text_missing_target_ae2025": {
+            "command": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_axis_text_missing_target_ae2025.json -axis -domain text -missing-target-version AE2025",
+            "atom_rows": 0,
+            "cells": 0
           }
         },
         "new_filters": [
-          "-domain"
+          "-missing-source-version",
+          "-missing-target-version",
+          "-missing-host-version"
         ]
       }
     },
@@ -1201,6 +1202,13 @@
     {
       "id": "registry_coverage_axis_text_domain",
       "command": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_axis_text_domain.json -axis -domain text",
+      "required_for": [
+        "version_matrix_totalization"
+      ]
+    },
+    {
+      "id": "registry_coverage_axis_text_missing_target_ae2025",
+      "command": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_axis_text_missing_target_ae2025.json -axis -domain text -missing-target-version AE2025",
       "required_for": [
         "version_matrix_totalization"
       ]

@@ -667,6 +667,33 @@ func TestCoverageAxisWithFilterNarrowsRowsAndCells(t *testing.T) {
 	if textOnly.Summary.Cells != 1 || textOnly.Summary.Pass != 1 || textOnly.Filter.Domain != "text" {
 		t.Fatalf("text-domain summary = %+v filter=%+v", textOnly.Summary, textOnly.Filter)
 	}
+
+	textMissingTarget, err := CoverageAxisWithFilter(root, "flightdeck/work/aep-understanding-generation/coverage.json", []string{"AE2024", "AE2025"}, CoverageAxisFilter{
+		Domain:               "text",
+		MissingTargetVersion: "AE2025",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if textMissingTarget.Summary.AtomRows != 1 || len(textMissingTarget.Rows) != 1 || textMissingTarget.Rows[0].AtomID != "text.source.default" {
+		t.Fatalf("text missing-target rows = %+v summary=%+v", textMissingTarget.Rows, textMissingTarget.Summary)
+	}
+	if textMissingTarget.Summary.Cells != 1 || textMissingTarget.Filter.MissingTargetVersion != "AE2025" {
+		t.Fatalf("text missing-target summary = %+v filter=%+v", textMissingTarget.Summary, textMissingTarget.Filter)
+	}
+
+	missingHostAE2025, err := CoverageAxisWithFilter(root, "flightdeck/work/aep-understanding-generation/coverage.json", []string{"AE2024", "AE2025"}, CoverageAxisFilter{
+		MissingHostVersion: "AE2025",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if missingHostAE2025.Summary.AtomRows != 1 || len(missingHostAE2025.Rows) != 1 || missingHostAE2025.Rows[0].AtomID != "layer.parent" {
+		t.Fatalf("missing-host AE2025 rows = %+v summary=%+v", missingHostAE2025.Rows, missingHostAE2025.Summary)
+	}
+	if missingHostAE2025.Summary.Cells != 1 || missingHostAE2025.Filter.MissingHostVersion != "AE2025" {
+		t.Fatalf("missing-host AE2025 summary = %+v filter=%+v", missingHostAE2025.Summary, missingHostAE2025.Filter)
+	}
 }
 
 func findCoverageCell(t *testing.T, cells []CoverageCell, status string) CoverageCell {

@@ -30,6 +30,9 @@ type CoverageAxisFilter struct {
 	WriterAxisStatus      string `json:"writer_axis_status,omitempty"`
 	HostOpenEvidenceLevel string `json:"host_open_evidence_level,omitempty"`
 	HostAxisStatus        string `json:"host_axis_status,omitempty"`
+	MissingSourceVersion  string `json:"missing_source_version,omitempty"`
+	MissingTargetVersion  string `json:"missing_target_version,omitempty"`
+	MissingHostVersion    string `json:"missing_host_version,omitempty"`
 	BoundaryStatus        string `json:"boundary_status,omitempty"`
 }
 
@@ -139,6 +142,15 @@ func coverageAxisWithFilter(root, coveragePath string, versionAxis []string, fil
 		if filter.HostAxisStatus != "" && axisRow.HostAxisStatus != filter.HostAxisStatus {
 			continue
 		}
+		if filter.MissingSourceVersion != "" && !stringSet(axisRow.MissingSourceVersions)[filter.MissingSourceVersion] {
+			continue
+		}
+		if filter.MissingTargetVersion != "" && !stringSet(axisRow.MissingTargetVersions)[filter.MissingTargetVersion] {
+			continue
+		}
+		if filter.MissingHostVersion != "" && !stringSet(axisRow.MissingHostVersions)[filter.MissingHostVersion] {
+			continue
+		}
 		axis.Rows = append(axis.Rows, axisRow)
 		axis.Summary.AtomRows++
 		switch axisRow.WriterAxisStatus {
@@ -163,7 +175,7 @@ func coverageAxisWithFilter(root, coveragePath string, versionAxis []string, fil
 		}
 	}
 	axisCells := cells.Cells
-	if filter.WriterAxisStatus != "" || filter.HostAxisStatus != "" {
+	if coverageAxisRowOnlyFiltersActive(filter) {
 		rowKeys := map[string]bool{}
 		for _, row := range axis.Rows {
 			rowKeys[coverageAxisIdentity(row.AtomID, row.RecordID, row.Recipe)] = true
@@ -197,6 +209,14 @@ func coverageAxisWithFilter(root, coveragePath string, versionAxis []string, fil
 		return axis.Rows[i].Recipe < axis.Rows[j].Recipe
 	})
 	return axis, nil
+}
+
+func coverageAxisRowOnlyFiltersActive(filter CoverageAxisFilter) bool {
+	return filter.WriterAxisStatus != "" ||
+		filter.HostAxisStatus != "" ||
+		filter.MissingSourceVersion != "" ||
+		filter.MissingTargetVersion != "" ||
+		filter.MissingHostVersion != ""
 }
 
 func coverageAxisIdentity(atomID, recordID, recipe string) string {

@@ -454,13 +454,16 @@ func runCoverage(args []string) int {
 	writerAxisStatusFilter := fs.String("writer-axis-status", "", "filter axis rows by writer axis status")
 	hostLevelFilter := fs.String("host-level", "", "filter rows or cells by host-open evidence level")
 	hostAxisStatusFilter := fs.String("host-axis-status", "", "filter axis rows by host axis status")
+	missingSourceVersionFilter := fs.String("missing-source-version", "", "filter axis rows missing a source AE version")
+	missingTargetVersionFilter := fs.String("missing-target-version", "", "filter axis rows missing a target AE version")
+	missingHostVersionFilter := fs.String("missing-host-version", "", "filter axis rows missing host-open evidence for an AE version")
 	boundaryStatusFilter := fs.String("boundary-status", "", "filter rows or cells by boundary status")
 	jsonOut := fs.Bool("json", false, "print JSON report")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage [-root .] [-coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json] [-out tmp/registry_coverage.json] [-summary|-rows|-cells|-axis] [-versions AE2020,AE2021,...] [-record id] [-domain name] [-atom id] [-recipe id] [-case-status status] [-writer-status status] [-writer-axis-status status] [-host-level level] [-host-axis-status status] [-boundary-status status] [-json]")
+		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage [-root .] [-coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json] [-out tmp/registry_coverage.json] [-summary|-rows|-cells|-axis] [-versions AE2020,AE2021,...] [-record id] [-domain name] [-atom id] [-recipe id] [-case-status status] [-writer-status status] [-writer-axis-status status] [-host-level level] [-host-axis-status status] [-missing-source-version AE2025] [-missing-target-version AE2025] [-missing-host-version AE2025] [-boundary-status status] [-json]")
 		return 2
 	}
 	modes := 0
@@ -488,6 +491,9 @@ func runCoverage(args []string) int {
 			WriterAxisStatus:      *writerAxisStatusFilter,
 			HostOpenEvidenceLevel: *hostLevelFilter,
 			HostAxisStatus:        *hostAxisStatusFilter,
+			MissingSourceVersion:  *missingSourceVersionFilter,
+			MissingTargetVersion:  *missingTargetVersionFilter,
+			MissingHostVersion:    *missingHostVersionFilter,
 			BoundaryStatus:        *boundaryStatusFilter,
 		})
 		if err != nil {
