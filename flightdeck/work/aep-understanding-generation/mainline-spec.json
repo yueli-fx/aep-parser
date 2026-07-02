@@ -791,17 +791,17 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "shape_motion_filters_split",
-      "reason": "Reduce convert_shape_filters.go growth risk by separating wiggle paths, wiggle transform, and repeater materialization from simpler shape filters while preserving behavior.",
+      "group": "matrix_case_split",
+      "reason": "Reduce matrix.go growth risk by separating single-case execution and compile-block classification from matrix planning and report aggregation while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_shape_filters.go",
-          "internal/aepmigrate/convert_shape_motion_filters.go"
+          "internal/aepmigrate/matrix.go",
+          "internal/aepmigrate/matrix_case.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Wiggle paths, wiggle transform, and repeater materialization have been split from convert_shape_filters.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_rebuild_layers.go, matrix.go, or convert_text_animator.go without changing behavior.",
+    "next_action": "Single-case matrix execution and compile-block classification have been split from matrix.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_rebuild_layers.go or convert_text_animator.go without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
