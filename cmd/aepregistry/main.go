@@ -31,6 +31,8 @@ func run(args []string) int {
 		return runCoverage(args[1:])
 	case "coverage-batch":
 		return runCoverageBatch(args[1:])
+	case "coverage-md":
+		return runCoverageMD(args[1:])
 	case "current":
 		return runCurrent(args[1:])
 	case "gate":
@@ -53,6 +55,33 @@ func run(args []string) int {
 		usage()
 		return 2
 	}
+}
+
+func runCoverageMD(args []string) int {
+	fs := flag.NewFlagSet("aepregistry coverage-md", flag.ContinueOnError)
+	fs.SetOutput(os.Stderr)
+	root := fs.String("root", ".", "repository root")
+	coveragePath := fs.String("coverage", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
+	outPath := fs.String("out", "tmp/migration_coverage.md", "coverage markdown output path")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	if fs.NArg() != 0 {
+		fmt.Fprintln(os.Stderr, "usage: aepregistry coverage-md [-root .] [-coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json] [-out tmp/migration_coverage.md]")
+		return 2
+	}
+	md, err := registry.RenderCoverageMarkdown(*root, *coveragePath)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "coverage-md:", err)
+		return 2
+	}
+	out := resolveRootPath(*root, *outPath)
+	if err := writeTextFile(out, md); err != nil {
+		fmt.Fprintln(os.Stderr, "write:", err)
+		return 2
+	}
+	fmt.Printf("rendered coverage markdown: %s\n", *outPath)
+	return 0
 }
 
 func runCoverageBatch(args []string) int {
@@ -1370,6 +1399,13 @@ func writeJSONFile(path string, value any) error {
 	return os.WriteFile(path, append(data, '\n'), 0o644)
 }
 
+func writeTextFile(path, value string) error {
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return err
+	}
+	return os.WriteFile(path, []byte(value), 0o644)
+}
+
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: aepregistry <audit|boundaries|cleanup|coverage|coverage-batch|current|gate|host-open-gaps|inventory|layout|migration-summary|ownership|recurring-matrix> [flags]")
+	fmt.Fprintln(os.Stderr, "usage: aepregistry <audit|boundaries|cleanup|coverage|coverage-batch|coverage-md|current|gate|host-open-gaps|inventory|layout|migration-summary|ownership|recurring-matrix> [flags]")
 }

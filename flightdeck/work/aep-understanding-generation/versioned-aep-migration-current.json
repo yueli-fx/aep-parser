@@ -525,8 +525,10 @@
     {
       "id": "coverage-md-renderer",
       "status": "available_verified",
-      "purpose": "Generate a temporary human-readable Markdown table from coverage JSON when needed.",
+      "purpose": "Generate a temporary human-readable Markdown table from coverage JSON when needed. Go command is primary; the PowerShell script remains as legacy compatibility.",
+      "command": "go run ./cmd/aepregistry coverage-md -root . -coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json -out tmp/migration_coverage.md",
       "script": "scripts/migration/render_coverage_md.ps1",
+      "legacy_command": "pwsh -File scripts/migration/render_coverage_md.ps1",
       "output": "tmp/migration_coverage.md"
     },
     {

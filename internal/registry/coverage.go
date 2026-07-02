@@ -252,6 +252,7 @@ type coverageArtifact struct {
 	Command  string         `json:"command"`
 	Artifact string         `json:"artifact"`
 	Ledger   string         `json:"ledger"`
+	Status   string         `json:"status"`
 	Totals   CoverageTotals `json:"totals"`
 }
 
