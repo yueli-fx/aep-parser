@@ -267,6 +267,57 @@ func TestRunCoverageCanWriteVersionAxisReport(t *testing.T) {
 	}
 }
 
+func TestRunCoverageAxisSupportsFocusedFilters(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+		"schema_version": 1,
+		"coverage": []map[string]any{
+			{
+				"id":            "text",
+				"artifact":      "tmp/matrix/text/matrix.json",
+				"recipes":       []string{"text-basic"},
+				"writer_status": "boundary",
+				"totals":        map[string]any{"total": 2, "pass": 1, "blocked": 1, "failed": 0, "skipped": 0},
+			},
+		},
+	})
+	writeJSON(t, root, "tmp/matrix/text/matrix.json", map[string]any{
+		"schema_version": 1,
+		"summary":        map[string]any{"total": 2, "passed": 1, "blocked": 1, "failed": 0, "skipped": 0},
+		"cases": []map[string]any{
+			{"recipe_name": "text-basic", "source_version": "AE2020", "target_version": "AE2020", "status": "pass"},
+			{"recipe_name": "text-basic", "source_version": "AE2025", "target_version": "AE2024", "status": "blocked"},
+		},
+	})
+	out := filepath.Join(root, "tmp", "registry_coverage_axis_blocked.json")
+
+	code := run([]string{
+		"coverage",
+		"-root", root,
+		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-out", out,
+		"-axis",
+		"-atom", "text.source.default",
+		"-case-status", "blocked",
+		"-versions", "AE2020,AE2024,AE2025",
+	})
+	if code != 0 {
+		t.Fatalf("run(coverage -axis filtered) = %d, want 0", code)
+	}
+
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var report registry.CoverageAxisReport
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Summary.AtomRows != 1 || report.Summary.Cells != 1 || report.Summary.Blocked != 1 || report.Filter.CaseStatus != "blocked" {
+		t.Fatalf("filtered axis report = %+v filter=%+v", report.Summary, report.Filter)
+	}
+}
+
 func TestRunCoverageCanWriteFilteredAtomRows(t *testing.T) {
 	root := newRegistryRoot(t)
 	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{

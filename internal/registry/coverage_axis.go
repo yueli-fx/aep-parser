@@ -10,9 +10,20 @@ type CoverageAxisReport struct {
 	SchemaVersion int                       `json:"schema_version"`
 	Status        string                    `json:"status"`
 	VersionAxis   []string                  `json:"version_axis"`
+	Filter        CoverageAxisFilter        `json:"filter"`
 	Summary       CoverageAxisSummary       `json:"summary"`
 	ByVersionPair []CoverageAxisPairSummary `json:"by_version_pair"`
 	Rows          []CoverageAxisRow         `json:"rows"`
+}
+
+type CoverageAxisFilter struct {
+	RecordID              string `json:"record_id,omitempty"`
+	AtomID                string `json:"atom_id,omitempty"`
+	Recipe                string `json:"recipe,omitempty"`
+	CaseStatus            string `json:"case_status,omitempty"`
+	WriterStatus          string `json:"writer_status,omitempty"`
+	HostOpenEvidenceLevel string `json:"host_open_evidence_level,omitempty"`
+	BoundaryStatus        string `json:"boundary_status,omitempty"`
 }
 
 type CoverageAxisSummary struct {
@@ -65,6 +76,10 @@ type CoverageAxisPairSummary struct {
 }
 
 func CoverageAxis(root, coveragePath string, versionAxis []string) (CoverageAxisReport, error) {
+	return CoverageAxisWithFilter(root, coveragePath, versionAxis, CoverageAxisFilter{})
+}
+
+func CoverageAxisWithFilter(root, coveragePath string, versionAxis []string, filter CoverageAxisFilter) (CoverageAxisReport, error) {
 	if len(versionAxis) == 0 {
 		versionAxis = DefaultAEVersionAxis
 	}
@@ -73,16 +88,37 @@ func CoverageAxis(root, coveragePath string, versionAxis []string) (CoverageAxis
 	if err != nil {
 		return CoverageAxisReport{}, err
 	}
-	cells, err := CoverageCells(root, coveragePath, CoverageCellFilter{})
+	cells, err := CoverageCells(root, coveragePath, CoverageCellFilter{
+		RecordID:              filter.RecordID,
+		AtomID:                filter.AtomID,
+		Recipe:                filter.Recipe,
+		CaseStatus:            filter.CaseStatus,
+		WriterStatus:          filter.WriterStatus,
+		HostOpenEvidenceLevel: filter.HostOpenEvidenceLevel,
+		BoundaryStatus:        filter.BoundaryStatus,
+	})
 	if err != nil {
 		return CoverageAxisReport{}, err
+	}
+	rowKeysFromCells := map[string]bool{}
+	if filter.CaseStatus != "" {
+		for _, cell := range cells.Cells {
+			rowKeysFromCells[coverageAxisIdentity(cell.AtomID, cell.RecordID, cell.Recipe)] = true
+		}
 	}
 	axis := CoverageAxisReport{
 		SchemaVersion: 1,
 		Status:        report.Status,
 		VersionAxis:   append([]string(nil), versionAxis...),
+		Filter:        filter,
 	}
 	for _, row := range report.AtomRows {
+		if !coverageAxisRowMatches(row, filter) {
+			continue
+		}
+		if filter.CaseStatus != "" && !rowKeysFromCells[coverageAxisIdentity(row.AtomID, row.RecordID, row.Recipe)] {
+			continue
+		}
 		axisRow := coverageAxisRow(row, versionAxis)
 		axis.Rows = append(axis.Rows, axisRow)
 		axis.Summary.AtomRows++
@@ -129,6 +165,32 @@ func CoverageAxis(root, coveragePath string, versionAxis []string) (CoverageAxis
 		return axis.Rows[i].Recipe < axis.Rows[j].Recipe
 	})
 	return axis, nil
+}
+
+func coverageAxisIdentity(atomID, recordID, recipe string) string {
+	return atomID + "\x00" + recordID + "\x00" + recipe
+}
+
+func coverageAxisRowMatches(row AtomCoverageRow, filter CoverageAxisFilter) bool {
+	if filter.RecordID != "" && row.RecordID != filter.RecordID {
+		return false
+	}
+	if filter.AtomID != "" && row.AtomID != filter.AtomID {
+		return false
+	}
+	if filter.Recipe != "" && row.Recipe != filter.Recipe {
+		return false
+	}
+	if filter.WriterStatus != "" && row.WriterStatus != filter.WriterStatus {
+		return false
+	}
+	if filter.HostOpenEvidenceLevel != "" && row.HostOpenEvidenceLevel != filter.HostOpenEvidenceLevel {
+		return false
+	}
+	if filter.BoundaryStatus != "" && row.BoundaryStatus != filter.BoundaryStatus {
+		return false
+	}
+	return true
 }
 
 func coverageAxisRow(row AtomCoverageRow, versionAxis []string) CoverageAxisRow {

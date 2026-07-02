@@ -186,7 +186,15 @@ func runCoverage(args []string) int {
 	var report registry.CoverageReport
 	var output any
 	if *axisOut {
-		axis, err := registry.CoverageAxis(*root, *coveragePath, splitCSV(*versions))
+		axis, err := registry.CoverageAxisWithFilter(*root, *coveragePath, splitCSV(*versions), registry.CoverageAxisFilter{
+			RecordID:              *recordFilter,
+			AtomID:                *atomFilter,
+			Recipe:                *recipeFilter,
+			CaseStatus:            *caseStatusFilter,
+			WriterStatus:          *writerStatusFilter,
+			HostOpenEvidenceLevel: *hostLevelFilter,
+			BoundaryStatus:        *boundaryStatusFilter,
+		})
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "coverage:", err)
 			return 2
