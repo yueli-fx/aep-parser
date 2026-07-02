@@ -1,76 +1,15 @@
 package aepmigrate
 
-import (
-	"os"
-	"path/filepath"
-	"testing"
-)
+import "testing"
 
 func TestConvertWritesRecipeRectRoundCornersShapeLayerProject(t *testing.T) {
-	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-shape-round-corners.json"))
-	outPath := filepath.Join(t.TempDir(), "converted.aep")
-
-	report, err := Convert(ConvertOptions{
-		InputPath:  source,
-		OutputPath: outPath,
-		Target:     VersionAE2025,
-	})
-	if err != nil {
-		t.Fatalf("Convert: %v", err)
-	}
-	if report.Summary.Status != StatusPass {
-		t.Fatalf("status = %q, entries=%+v, diffs=%+v", report.Summary.Status, report.Entries, report.Verification.ProfileDiffs)
-	}
-	if report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 {
-		t.Fatalf("profile diff verification = %+v, want pass with 0 diffs", report.Verification)
-	}
-	if _, err := os.Stat(outPath); err != nil {
-		t.Fatalf("converted output missing: %v", err)
-	}
+	assertRecipeConvertsPass(t, "minimal-shape-round-corners.json")
 }
 
 func TestConvertWritesRecipeRectOffsetPathsShapeLayerProject(t *testing.T) {
-	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-shape-offset-paths.json"))
-	outPath := filepath.Join(t.TempDir(), "converted.aep")
-
-	report, err := Convert(ConvertOptions{
-		InputPath:  source,
-		OutputPath: outPath,
-		Target:     VersionAE2025,
-	})
-	if err != nil {
-		t.Fatalf("Convert: %v", err)
-	}
-	if report.Summary.Status != StatusPass {
-		t.Fatalf("status = %q, entries=%+v, diffs=%+v", report.Summary.Status, report.Entries, report.Verification.ProfileDiffs)
-	}
-	if report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 {
-		t.Fatalf("profile diff verification = %+v, want pass with 0 diffs", report.Verification)
-	}
-	if _, err := os.Stat(outPath); err != nil {
-		t.Fatalf("converted output missing: %v", err)
-	}
+	assertRecipeConvertsPass(t, "minimal-shape-offset-paths.json")
 }
 
 func TestConvertWritesRecipeRectTrimPathsShapeLayerProject(t *testing.T) {
-	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-shape-trim.json"))
-	outPath := filepath.Join(t.TempDir(), "converted.aep")
-
-	report, err := Convert(ConvertOptions{
-		InputPath:  source,
-		OutputPath: outPath,
-		Target:     VersionAE2025,
-	})
-	if err != nil {
-		t.Fatalf("Convert: %v", err)
-	}
-	if report.Summary.Status != StatusPass {
-		t.Fatalf("status = %q, entries=%+v, diffs=%+v", report.Summary.Status, report.Entries, report.Verification.ProfileDiffs)
-	}
-	if report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 {
-		t.Fatalf("profile diff verification = %+v, want pass with 0 diffs", report.Verification)
-	}
-	if _, err := os.Stat(outPath); err != nil {
-		t.Fatalf("converted output missing: %v", err)
-	}
+	assertRecipeConvertsPass(t, "minimal-shape-trim.json")
 }

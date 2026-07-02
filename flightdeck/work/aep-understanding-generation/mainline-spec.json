@@ -791,19 +791,24 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "scope_flag_predicate_dedup",
-      "reason": "Reduce scope support drift risk by centralizing repeated advanced layer switch rejection predicates while preserving layer-specific visible, blend, track matte, adjustment, null, and collapse constraints.",
+      "group": "recipe_conversion_smoke_helper",
+      "reason": "Reduce high-signal conversion smoke test drift by centralizing the repeated recipe compile, convert, profile-diff pass, and output existence assertion path.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_scope_flags.go",
-          "internal/aepmigrate/convert_scope_support.go",
-          "internal/aepmigrate/convert_scope_special_support.go",
-          "internal/aepmigrate/convert_shape_support.go"
+          "internal/aepmigrate/convert_recipe_fixtures_test.go",
+          "internal/aepmigrate/convert_effect_test.go",
+          "internal/aepmigrate/convert_effect_param_test.go",
+          "internal/aepmigrate/convert_text_animator_test.go",
+          "internal/aepmigrate/convert_shape_filter_test.go",
+          "internal/aepmigrate/convert_shape_distort_filter_test.go",
+          "internal/aepmigrate/convert_shape_gradient_test.go",
+          "internal/aepmigrate/convert_shape_motion_filter_test.go",
+          "internal/aepmigrate/convert_shape_stroke_test.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Scope support now centralizes repeated advanced layer switch rejection predicates while keeping layer-specific constraints local. Next useful increment is to continue reducing remaining dense conversion support files or high-signal tests into coherent modules without changing behavior.",
+    "next_action": "Recipe conversion smoke tests now share one pass/output assertion helper for effect, text animator, and shape recipe families. Next useful increment is to continue moving remaining recipe-only conversion tests onto the helper, or reduce a dense production support file where repeated validation predicates remain local.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
