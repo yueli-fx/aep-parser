@@ -115,7 +115,7 @@
     {
       "path": "tmp/registry_coverage_summary.json",
       "role": "generated_report",
-      "description": "Read-only coverage atom-row summary output for quick total-table queries, with both legacy flat scalar fields and a nested summary scalar object; ignored by git."
+      "description": "Read-only coverage atom-row summary output for quick total-table queries, with legacy flat scalar fields, a nested summary scalar object, and recipe-to-atom gap lists; ignored by git."
     },
     {
       "path": "tmp/registry_coverage_axis.json",
@@ -1041,8 +1041,8 @@
     },
     "last_code_maintenance_target": {
       "location": "cmd/aepregistry",
-      "group": "coverage_summary_nested_totals",
-      "reason": "Make coverage -summary easier to consume as a total-table JSON artifact by adding a standard nested summary scalar object while preserving existing flat fields.",
+      "group": "coverage_summary_recipe_atom_gaps",
+      "reason": "Make coverage -summary prove whether observed matrix recipes are attached to atom rows before expanding the next capability family.",
       "result": {
         "commands": {
           "summary_refresh": "go run ./cmd/aepregistry coverage -root . -out tmp/registry_coverage_summary.json -summary"
@@ -1055,8 +1055,16 @@
         ],
         "schema_change": {
           "report": "registry.CoverageSummaryReport",
-          "added_field": "summary",
-          "compatibility": "Existing flat scalar fields remain unchanged; summary mirrors records, artifacts, contract_gates, atoms, atom_rows, errors, direct_host_atoms, and inferred_host_atoms."
+          "added_fields": [
+            "summary.declared_recipes",
+            "summary.observed_recipes",
+            "summary.atom_row_recipes",
+            "summary.recipes_without_atom_rows",
+            "summary.atom_rows_without_recipes",
+            "recipes_without_atom_rows",
+            "atom_rows_without_recipes"
+          ],
+          "compatibility": "Existing flat scalar fields remain unchanged; new fields only add machine-readable recipe-to-atom coverage totals and gap lists."
         },
         "current_totals": {
           "records": 18,
@@ -1066,7 +1074,12 @@
           "atom_rows": 143,
           "errors": 0,
           "direct_host_atoms": 128,
-          "inferred_host_atoms": 128
+          "inferred_host_atoms": 128,
+          "declared_recipes": 26,
+          "observed_recipes": 143,
+          "atom_row_recipes": 143,
+          "recipes_without_atom_rows": 0,
+          "atom_rows_without_recipes": 0
         },
         "post_gate_status": {
           "version_matrix": "pass",
@@ -1101,7 +1114,7 @@
         }
       }
     },
-    "next_action": "Coverage summary JSON now has a nested scalar summary for total-table consumption. Continue with the next scoped capability family or matrix coverage expansion rather than additional cleanup unless new generated candidates appear.",
+    "next_action": "Coverage summary JSON now proves observed recipes are fully attached to atom rows. Continue with the next scoped capability family or matrix coverage expansion, using recipes_without_atom_rows as the first gap check.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

@@ -43,17 +43,24 @@ type CoverageSummaryReport struct {
 	ByWriterStatus          []CoverageSummaryBucket `json:"by_writer_status,omitempty"`
 	ByHostOpenEvidenceLevel []CoverageSummaryBucket `json:"by_host_open_evidence_level,omitempty"`
 	ByBoundaryStatus        []CoverageSummaryBucket `json:"by_boundary_status,omitempty"`
+	RecipesWithoutAtomRows  []string                `json:"recipes_without_atom_rows,omitempty"`
+	AtomRowsWithoutRecipes  []string                `json:"atom_rows_without_recipes,omitempty"`
 }
 
 type CoverageSummaryTotals struct {
-	Records           int `json:"records"`
-	Artifacts         int `json:"artifacts"`
-	ContractGates     int `json:"contract_gates"`
-	Atoms             int `json:"atoms"`
-	AtomRows          int `json:"atom_rows"`
-	Errors            int `json:"errors"`
-	DirectHostAtoms   int `json:"direct_host_atoms"`
-	InferredHostAtoms int `json:"inferred_host_atoms"`
+	Records                int `json:"records"`
+	Artifacts              int `json:"artifacts"`
+	ContractGates          int `json:"contract_gates"`
+	Atoms                  int `json:"atoms"`
+	AtomRows               int `json:"atom_rows"`
+	Errors                 int `json:"errors"`
+	DirectHostAtoms        int `json:"direct_host_atoms"`
+	InferredHostAtoms      int `json:"inferred_host_atoms"`
+	DeclaredRecipes        int `json:"declared_recipes"`
+	ObservedRecipes        int `json:"observed_recipes"`
+	AtomRowRecipes         int `json:"atom_row_recipes"`
+	RecipesWithoutAtomRows int `json:"recipes_without_atom_rows"`
+	AtomRowsWithoutRecipes int `json:"atom_rows_without_recipes"`
 }
 
 type CoverageSummaryBucket struct {
@@ -298,12 +305,29 @@ func SummarizeCoverage(report CoverageReport) CoverageSummaryReport {
 	byWriterStatus := map[string]int{}
 	byHostOpenEvidenceLevel := map[string]int{}
 	byBoundaryStatus := map[string]int{}
+	declaredRecipes := map[string]bool{}
+	observedRecipes := map[string]bool{}
+	atomRowRecipes := map[string]bool{}
+	atomRowsWithoutRecipes := map[string]bool{}
+	for _, record := range report.Records {
+		for _, recipe := range record.DeclaredRecipes {
+			declaredRecipes[recipe] = true
+		}
+		for _, recipe := range record.ObservedRecipes {
+			observedRecipes[recipe] = true
+		}
+	}
 	for _, row := range report.AtomRows {
 		incrementBucket(byDomain, row.Domain)
 		incrementBucket(byRecord, row.RecordID)
 		incrementBucket(byWriterStatus, row.WriterStatus)
 		incrementBucket(byHostOpenEvidenceLevel, row.HostOpenEvidenceLevel)
 		incrementBucket(byBoundaryStatus, row.BoundaryStatus)
+		if row.Recipe == "" {
+			atomRowsWithoutRecipes[row.AtomID] = true
+		} else {
+			atomRowRecipes[row.Recipe] = true
+		}
 		if len(row.DirectHostVersions) > 0 {
 			summary.DirectHostAtoms++
 		}
@@ -316,15 +340,27 @@ func SummarizeCoverage(report CoverageReport) CoverageSummaryReport {
 	summary.ByWriterStatus = coverageSummaryBuckets(byWriterStatus)
 	summary.ByHostOpenEvidenceLevel = coverageSummaryBuckets(byHostOpenEvidenceLevel)
 	summary.ByBoundaryStatus = coverageSummaryBuckets(byBoundaryStatus)
+	for recipe := range observedRecipes {
+		if !atomRowRecipes[recipe] {
+			summary.RecipesWithoutAtomRows = append(summary.RecipesWithoutAtomRows, recipe)
+		}
+	}
+	sort.Strings(summary.RecipesWithoutAtomRows)
+	summary.AtomRowsWithoutRecipes = sortedKeys(atomRowsWithoutRecipes)
 	summary.Summary = CoverageSummaryTotals{
-		Records:           summary.Records,
-		Artifacts:         summary.Artifacts,
-		ContractGates:     summary.ContractGates,
-		Atoms:             summary.Atoms,
-		AtomRows:          summary.AtomRows,
-		Errors:            summary.Errors,
-		DirectHostAtoms:   summary.DirectHostAtoms,
-		InferredHostAtoms: summary.InferredHostAtoms,
+		Records:                summary.Records,
+		Artifacts:              summary.Artifacts,
+		ContractGates:          summary.ContractGates,
+		Atoms:                  summary.Atoms,
+		AtomRows:               summary.AtomRows,
+		Errors:                 summary.Errors,
+		DirectHostAtoms:        summary.DirectHostAtoms,
+		InferredHostAtoms:      summary.InferredHostAtoms,
+		DeclaredRecipes:        len(declaredRecipes),
+		ObservedRecipes:        len(observedRecipes),
+		AtomRowRecipes:         len(atomRowRecipes),
+		RecipesWithoutAtomRows: len(summary.RecipesWithoutAtomRows),
+		AtomRowsWithoutRecipes: len(summary.AtomRowsWithoutRecipes),
 	}
 	return summary
 }

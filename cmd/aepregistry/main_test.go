@@ -262,7 +262,14 @@ func TestRunCoverageWritesReportAndReturnsOneForDrift(t *testing.T) {
 func TestRunCoverageCanWriteSummaryReport(t *testing.T) {
 	root := newRegistryRoot(t)
 	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 2)
-	writeMatrixFixture(t, root, "tmp/matrix/text/matrix.json", 2)
+	writeJSON(t, root, "tmp/matrix/text/matrix.json", map[string]any{
+		"schema_version": 1,
+		"summary":        map[string]any{"total": 2, "passed": 2, "blocked": 0, "failed": 0, "skipped": 0},
+		"cases": []map[string]any{
+			{"recipe_name": "minimal-text-a", "source_version": "AE2020", "target_version": "AE2020", "status": "pass"},
+			{"recipe_name": "minimal-text-b", "source_version": "AE2025", "target_version": "AE2025", "status": "pass"},
+		},
+	})
 	out := filepath.Join(root, "tmp", "registry_coverage_summary.json")
 
 	code := run([]string{
@@ -289,6 +296,9 @@ func TestRunCoverageCanWriteSummaryReport(t *testing.T) {
 	}
 	if summary.Summary.Records != summary.Records || summary.Summary.Artifacts != summary.Artifacts || summary.Summary.AtomRows != summary.AtomRows {
 		t.Fatalf("nested summary = %+v, want mirrored scalar totals from %+v", summary.Summary, summary)
+	}
+	if summary.Summary.ObservedRecipes != 2 || summary.Summary.RecipesWithoutAtomRows != 2 || len(summary.RecipesWithoutAtomRows) != 2 {
+		t.Fatalf("recipe gap summary = %+v gaps=%v, want two observed recipes without atom rows", summary.Summary, summary.RecipesWithoutAtomRows)
 	}
 }
 

@@ -427,6 +427,40 @@ func TestSummarizeCoverageGroupsAtomRowsForQuickQueries(t *testing.T) {
 	}
 }
 
+func TestSummarizeCoverageReportsRecipeAtomCoverageGaps(t *testing.T) {
+	report := CoverageReport{
+		Status: StatusPass,
+		Summary: CoverageSummary{
+			Records:   1,
+			Artifacts: 1,
+			Atoms:     2,
+		},
+		Records: []CoverageRecordReport{
+			{
+				ID:              "text",
+				DeclaredRecipes: []string{"minimal-text-a", "minimal-text-b", "minimal-text-c"},
+				ObservedRecipes: []string{"minimal-text-a", "minimal-text-b", "minimal-text-c"},
+			},
+		},
+		AtomRows: []AtomCoverageRow{
+			{AtomID: "text.a", RecordID: "text", Recipe: "minimal-text-a"},
+			{AtomID: "text.b", RecordID: "text", Recipe: "minimal-text-b"},
+			{AtomID: "text.template", RecordID: "text"},
+		},
+	}
+
+	summary := SummarizeCoverage(report)
+	if summary.Summary.DeclaredRecipes != 3 || summary.Summary.ObservedRecipes != 3 || summary.Summary.AtomRowRecipes != 2 {
+		t.Fatalf("recipe totals = %+v, want declared/observed/atom-row recipes 3/3/2", summary.Summary)
+	}
+	if summary.Summary.RecipesWithoutAtomRows != 1 || len(summary.RecipesWithoutAtomRows) != 1 || summary.RecipesWithoutAtomRows[0] != "minimal-text-c" {
+		t.Fatalf("recipes without atom rows = %d/%v, want minimal-text-c", summary.Summary.RecipesWithoutAtomRows, summary.RecipesWithoutAtomRows)
+	}
+	if summary.Summary.AtomRowsWithoutRecipes != 1 || len(summary.AtomRowsWithoutRecipes) != 1 || summary.AtomRowsWithoutRecipes[0] != "text.template" {
+		t.Fatalf("atom rows without recipes = %d/%v, want text.template", summary.Summary.AtomRowsWithoutRecipes, summary.AtomRowsWithoutRecipes)
+	}
+}
+
 func TestCoverageAxisSummarizesVersionAxisAndHostLabels(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
