@@ -10,42 +10,25 @@ func materializeShapeGradientFill(shapeLayer *aep.ShapeLayer, source profile.Lay
 	if err != nil {
 		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Grad Type"); ok {
-		if err := fill.SetGradientType(aep.GradientType(int(value))); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Grad Type", func(value float64) error {
+		return fill.SetGradientType(aep.GradientType(int(value)))
+	}); err != nil {
+		return err
 	}
-	if value, ok := propertyVector(source.Properties, "ADBE Vector Grad Start Pt", 2); ok {
-		if err := fill.SetStartPoint([2]float64{value[0], value[1]}); err != nil {
-			return err
-		}
+	if err := applyShapeVector2Property(source.Properties, "ADBE Vector Grad Start Pt", fill.SetStartPoint); err != nil {
+		return err
 	}
-	if value, ok := propertyVector(source.Properties, "ADBE Vector Grad End Pt", 2); ok {
-		if err := fill.SetEndPoint([2]float64{value[0], value[1]}); err != nil {
-			return err
-		}
+	if err := applyShapeVector2Property(source.Properties, "ADBE Vector Grad End Pt", fill.SetEndPoint); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Grad HiLite Length"); ok {
-		if err := fill.SetHighlightLength(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Grad HiLite Length", fill.SetHighlightLength); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Grad HiLite Angle"); ok {
-		if err := fill.SetHighlightAngle(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Grad HiLite Angle", fill.SetHighlightAngle); err != nil {
+		return err
 	}
-	if gradient, ok := propertyGradient(source.Properties, "ADBE Vector Grad Colors"); ok {
-		if len(gradient.ColorStops) > 0 {
-			if err := fill.SetColorStops(gradient.ColorStops); err != nil {
-				return err
-			}
-		}
-		if len(gradient.AlphaStops) > 0 {
-			if err := fill.SetAlphaStops(gradient.AlphaStops); err != nil {
-				return err
-			}
-		}
+	if err := applyShapeGradientStops(source.Properties, fill); err != nil {
+		return err
 	}
 	return nil
 }

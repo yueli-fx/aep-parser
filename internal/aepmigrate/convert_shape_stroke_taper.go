@@ -6,35 +6,23 @@ import (
 )
 
 func materializeShapeStrokeTaper(stroke *aep.StrokeNode, source profile.Layer) error {
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper Start Length"); ok {
-		if err := stroke.Taper().SetStartLength(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Taper Start Length", stroke.Taper().SetStartLength); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper End Length"); ok {
-		if err := stroke.Taper().SetEndLength(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Taper End Length", stroke.Taper().SetEndLength); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper Start Width"); ok {
-		if err := stroke.Taper().SetStartWidth(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Taper Start Width", stroke.Taper().SetStartWidth); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper End Width"); ok {
-		if err := stroke.Taper().SetEndWidth(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Taper End Width", stroke.Taper().SetEndWidth); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper Start Ease"); ok {
-		if err := stroke.Taper().SetStartEase(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Taper Start Ease", stroke.Taper().SetStartEase); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper End Ease"); ok {
-		if err := stroke.Taper().SetEndEase(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Taper End Ease", stroke.Taper().SetEndEase); err != nil {
+		return err
 	}
 	return nil
 }

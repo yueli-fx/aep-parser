@@ -10,45 +10,31 @@ func materializeShapeWigglePaths(shapeLayer *aep.ShapeLayer, source profile.Laye
 	if err != nil {
 		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Roughen Size"); ok {
-		if err := wigglePaths.SetSize(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Roughen Size", wigglePaths.SetSize); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Roughen Detail"); ok {
-		if err := wigglePaths.SetDetail(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Roughen Detail", wigglePaths.SetDetail); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Temporal Freq"); ok {
-		if err := wigglePaths.SetWigglesPerSecond(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Temporal Freq", wigglePaths.SetWigglesPerSecond); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Random Seed"); ok {
-		if err := wigglePaths.SetRandomSeed(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Random Seed", wigglePaths.SetRandomSeed); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Roughen Points"); ok {
-		if err := wigglePaths.SetPoints(aep.RoughenPoints(int(value))); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Roughen Points", func(value float64) error {
+		return wigglePaths.SetPoints(aep.RoughenPoints(int(value)))
+	}); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Correlation"); ok {
-		if err := wigglePaths.SetCorrelation(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Correlation", wigglePaths.SetCorrelation); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Temporal Phase"); ok {
-		if err := wigglePaths.SetTemporalPhase(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Temporal Phase", wigglePaths.SetTemporalPhase); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Spatial Phase"); ok {
-		if err := wigglePaths.SetSpatialPhase(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Spatial Phase", wigglePaths.SetSpatialPhase); err != nil {
+		return err
 	}
 	return nil
 }

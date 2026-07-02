@@ -6,20 +6,14 @@ import (
 )
 
 func materializeShapeStrokeWave(stroke *aep.StrokeNode, source profile.Layer) error {
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper Wave Amount"); ok {
-		if err := stroke.Wave().SetAmount(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Taper Wave Amount", stroke.Wave().SetAmount); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper Wavelength"); ok {
-		if err := stroke.Wave().SetWavelength(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Taper Wavelength", stroke.Wave().SetWavelength); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Taper Wave Phase"); ok {
-		if err := stroke.Wave().SetPhase(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Taper Wave Phase", stroke.Wave().SetPhase); err != nil {
+		return err
 	}
 	return nil
 }

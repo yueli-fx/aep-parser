@@ -10,30 +10,26 @@ func materializeShapeFill(shapeLayer *aep.ShapeLayer, source profile.Layer) erro
 	if err != nil {
 		return err
 	}
-	if value, ok := propertyVector(source.Properties, "ADBE Vector Fill Color", 4); ok {
-		if err := fill.SetColor(profileARGBToRGBA(value)); err != nil {
-			return err
-		}
+	if err := applyShapeARGBProperty(source.Properties, "ADBE Vector Fill Color", fill.SetColor); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Fill Opacity"); ok {
-		if err := fill.SetOpacity(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Fill Opacity", fill.SetOpacity); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Blend Mode"); ok {
-		if err := fill.SetBlendMode(aep.ShapeBlendMode(int(value))); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Blend Mode", func(value float64) error {
+		return fill.SetBlendMode(aep.ShapeBlendMode(int(value)))
+	}); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Composite Order"); ok {
-		if err := fill.SetCompositeOrder(aep.ShapeCompositeOrder(int(value))); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Composite Order", func(value float64) error {
+		return fill.SetCompositeOrder(aep.ShapeCompositeOrder(int(value)))
+	}); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Fill Rule"); ok {
-		if err := fill.SetFillRule(aep.FillRule(int(value))); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Fill Rule", func(value float64) error {
+		return fill.SetFillRule(aep.FillRule(int(value)))
+	}); err != nil {
+		return err
 	}
 	return nil
 }

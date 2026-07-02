@@ -10,45 +10,31 @@ func materializeStarPrimitive(shapeLayer *aep.ShapeLayer, shape profile.Shape) e
 	if err != nil {
 		return err
 	}
-	if value, ok := propertyFloat(shape.Properties, "ADBE Vector Star Type"); ok {
-		if err := star.SetStarType(aep.StarType(int(value))); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(shape.Properties, "ADBE Vector Star Type", func(value float64) error {
+		return star.SetStarType(aep.StarType(int(value)))
+	}); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(shape.Properties, "ADBE Vector Star Points"); ok {
-		if err := star.SetPoints(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(shape.Properties, "ADBE Vector Star Points", star.SetPoints); err != nil {
+		return err
 	}
-	if value, ok := propertyVector(shape.Properties, "ADBE Vector Star Position", 2); ok {
-		if err := star.SetPosition([2]float64{value[0], value[1]}); err != nil {
-			return err
-		}
+	if err := applyShapeVector2Property(shape.Properties, "ADBE Vector Star Position", star.SetPosition); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(shape.Properties, "ADBE Vector Star Rotation"); ok {
-		if err := star.SetRotation(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(shape.Properties, "ADBE Vector Star Rotation", star.SetRotation); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(shape.Properties, "ADBE Vector Star Inner Radius"); ok {
-		if err := star.SetInnerRadius(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(shape.Properties, "ADBE Vector Star Inner Radius", star.SetInnerRadius); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(shape.Properties, "ADBE Vector Star Outer Radius"); ok {
-		if err := star.SetOuterRadius(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(shape.Properties, "ADBE Vector Star Outer Radius", star.SetOuterRadius); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(shape.Properties, "ADBE Vector Star Inner Roundess"); ok {
-		if err := star.SetInnerRoundness(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(shape.Properties, "ADBE Vector Star Inner Roundess", star.SetInnerRoundness); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(shape.Properties, "ADBE Vector Star Outer Roundess"); ok {
-		if err := star.SetOuterRoundness(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(shape.Properties, "ADBE Vector Star Outer Roundess", star.SetOuterRoundness); err != nil {
+		return err
 	}
 	return nil
 }

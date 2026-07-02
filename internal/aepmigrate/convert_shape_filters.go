@@ -10,10 +10,8 @@ func materializeShapeRoundCorners(shapeLayer *aep.ShapeLayer, source profile.Lay
 	if err != nil {
 		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector RoundCorner Radius"); ok {
-		if err := roundCorners.SetRadius(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector RoundCorner Radius", roundCorners.SetRadius); err != nil {
+		return err
 	}
 	return nil
 }
@@ -23,30 +21,22 @@ func materializeShapeOffsetPaths(shapeLayer *aep.ShapeLayer, source profile.Laye
 	if err != nil {
 		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Offset Amount"); ok {
-		if err := offsetPaths.SetAmount(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Offset Amount", offsetPaths.SetAmount); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Offset Line Join"); ok {
-		if err := offsetPaths.SetLineJoin(aep.StrokeLineJoin(int(value))); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Offset Line Join", func(value float64) error {
+		return offsetPaths.SetLineJoin(aep.StrokeLineJoin(int(value)))
+	}); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Offset Miter Limit"); ok {
-		if err := offsetPaths.SetMiterLimit(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Offset Miter Limit", offsetPaths.SetMiterLimit); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Offset Copies"); ok {
-		if err := offsetPaths.SetCopies(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Offset Copies", offsetPaths.SetCopies); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Offset Copy Offset"); ok {
-		if err := offsetPaths.SetCopyOffset(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Offset Copy Offset", offsetPaths.SetCopyOffset); err != nil {
+		return err
 	}
 	return nil
 }
@@ -56,25 +46,19 @@ func materializeShapeTrim(shapeLayer *aep.ShapeLayer, source profile.Layer) erro
 	if err != nil {
 		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Trim Start"); ok {
-		if err := trim.SetStart(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Trim Start", trim.SetStart); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Trim End"); ok {
-		if err := trim.SetEnd(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Trim End", trim.SetEnd); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Trim Offset"); ok {
-		if err := trim.SetOffset(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Trim Offset", trim.SetOffset); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(source.Properties, "ADBE Vector Trim Type"); ok {
-		if err := trim.SetType(aep.TrimType(int(value))); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(source.Properties, "ADBE Vector Trim Type", func(value float64) error {
+		return trim.SetType(aep.TrimType(int(value)))
+	}); err != nil {
+		return err
 	}
 	return nil
 }

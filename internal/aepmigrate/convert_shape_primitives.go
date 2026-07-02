@@ -25,25 +25,19 @@ func materializeRectPrimitive(shapeLayer *aep.ShapeLayer, shape profile.Shape) e
 	if err != nil {
 		return err
 	}
-	if value, ok := propertyVector(shape.Properties, "ADBE Vector Rect Size", 2); ok {
-		if err := rect.SetSize([2]float64{value[0], value[1]}); err != nil {
-			return err
-		}
+	if err := applyShapeVector2Property(shape.Properties, "ADBE Vector Rect Size", rect.SetSize); err != nil {
+		return err
 	}
-	if value, ok := propertyVector(shape.Properties, "ADBE Vector Rect Position", 2); ok {
-		if err := rect.SetPosition([2]float64{value[0], value[1]}); err != nil {
-			return err
-		}
+	if err := applyShapeVector2Property(shape.Properties, "ADBE Vector Rect Position", rect.SetPosition); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(shape.Properties, "ADBE Vector Rect Roundness"); ok {
-		if err := rect.SetRoundness(value); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(shape.Properties, "ADBE Vector Rect Roundness", rect.SetRoundness); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(shape.Properties, "ADBE Vector Shape Direction"); ok {
-		if err := rect.SetDirection(aep.ShapeDirection(int(value))); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(shape.Properties, "ADBE Vector Shape Direction", func(value float64) error {
+		return rect.SetDirection(aep.ShapeDirection(int(value)))
+	}); err != nil {
+		return err
 	}
 	return nil
 }
@@ -53,20 +47,16 @@ func materializeEllipsePrimitive(shapeLayer *aep.ShapeLayer, shape profile.Shape
 	if err != nil {
 		return err
 	}
-	if value, ok := propertyVector(shape.Properties, "ADBE Vector Ellipse Size", 2); ok {
-		if err := ellipse.SetSize([2]float64{value[0], value[1]}); err != nil {
-			return err
-		}
+	if err := applyShapeVector2Property(shape.Properties, "ADBE Vector Ellipse Size", ellipse.SetSize); err != nil {
+		return err
 	}
-	if value, ok := propertyVector(shape.Properties, "ADBE Vector Ellipse Position", 2); ok {
-		if err := ellipse.SetPosition([2]float64{value[0], value[1]}); err != nil {
-			return err
-		}
+	if err := applyShapeVector2Property(shape.Properties, "ADBE Vector Ellipse Position", ellipse.SetPosition); err != nil {
+		return err
 	}
-	if value, ok := propertyFloat(shape.Properties, "ADBE Vector Shape Direction"); ok {
-		if err := ellipse.SetDirection(aep.ShapeDirection(int(value))); err != nil {
-			return err
-		}
+	if err := applyShapeFloatProperty(shape.Properties, "ADBE Vector Shape Direction", func(value float64) error {
+		return ellipse.SetDirection(aep.ShapeDirection(int(value)))
+	}); err != nil {
+		return err
 	}
 	return nil
 }
