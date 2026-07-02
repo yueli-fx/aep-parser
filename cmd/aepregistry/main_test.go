@@ -452,6 +452,92 @@ func TestRunGateReturnsOneForFailedStep(t *testing.T) {
 	}
 }
 
+func TestRunGateAssetPolicyWritesOwnershipAndCleanupReports(t *testing.T) {
+	root := newRegistryRoot(t)
+	out := filepath.Join(root, "tmp", "registry_asset_gate.json")
+
+	code := run([]string{
+		"gate",
+		"-root", root,
+		"-out", out,
+		"-scope", "asset-policy",
+	})
+	if code != 0 {
+		t.Fatalf("run(gate asset-policy) = %d, want 0", code)
+	}
+
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var report gateReport
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Scope != "asset-policy" || report.Status != registry.StatusPass || report.Summary.Steps != 5 || report.Summary.Failed != 0 {
+		t.Fatalf("asset gate report = %+v", report)
+	}
+	wantOrder := []string{
+		"registry_audit",
+		"registry_ownership",
+		"registry_layout",
+		"registry_generated_cleanup",
+		"registry_generated_cleanup_execution_dry_run",
+	}
+	for i, want := range wantOrder {
+		if report.Steps[i].ID != want {
+			t.Fatalf("asset step %d = %q, want %q; steps=%+v", i, report.Steps[i].ID, want, report.Steps)
+		}
+	}
+	for _, rel := range []string{
+		"tmp/registry_ownership.json",
+		"tmp/registry_layout.json",
+		"tmp/registry_generated_cleanup.json",
+		"tmp/registry_generated_cleanup_execution.json",
+	} {
+		if _, err := os.Stat(filepath.Join(root, filepath.FromSlash(rel))); err != nil {
+			t.Fatalf("expected asset gate output %s: %v", rel, err)
+		}
+	}
+}
+
+func TestRunGateAssetPolicyReturnsOneForLayoutBlockers(t *testing.T) {
+	root := newRegistryRoot(t)
+	writeFile(t, root, "examples/recipes/unowned.json", "{}\n")
+	out := filepath.Join(root, "tmp", "registry_asset_gate.json")
+
+	code := run([]string{
+		"gate",
+		"-root", root,
+		"-out", out,
+		"-scope", "asset-policy",
+	})
+	if code != 1 {
+		t.Fatalf("run(gate asset-policy blocked) = %d, want 1", code)
+	}
+
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var report gateReport
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != registry.StatusFail || report.Summary.Failed == 0 {
+		t.Fatalf("asset gate report = %+v, want failed layout", report)
+	}
+	foundLayoutFailure := false
+	for _, step := range report.Steps {
+		if step.ID == "registry_layout" && step.Status == registry.StatusFail && step.Errors > 0 {
+			foundLayoutFailure = true
+		}
+	}
+	if !foundLayoutFailure {
+		t.Fatalf("layout failure not found in %+v", report.Steps)
+	}
+}
+
 func TestRunCoverageCanWriteFilteredAtomRows(t *testing.T) {
 	root := newRegistryRoot(t)
 	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
@@ -586,6 +672,25 @@ func newRegistryRoot(t *testing.T) string {
 				"workflows": []string{"generate"},
 				"dependencies": []map[string]any{
 					{"kind": "recipe", "path": "examples/recipes/text-basic.json", "required": true},
+				},
+			},
+			{
+				"id":       "registry.asset_map",
+				"domain":   "registry",
+				"tier":     "source_contract",
+				"status":   "verified",
+				"platform": map[string]any{"host_required": false, "os": []string{"windows", "macos", "linux"}},
+				"version_axis": map[string]any{
+					"min_supported":    "AE2020",
+					"known_supported":  []string{"AE2020", "AE2025"},
+					"expansion_policy": "append_new_ae_versions",
+				},
+				"workflows": []string{"generate"},
+				"dependencies": []map[string]any{
+					{"kind": "registry", "path": "registry/locations.json", "required": true},
+					{"kind": "registry", "path": "registry/workflows.json", "required": true},
+					{"kind": "registry", "path": "registry/capability_atoms.json", "required": true},
+					{"kind": "registry", "path": "registry/evidence.json", "required": true},
 				},
 			},
 		},

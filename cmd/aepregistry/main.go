@@ -47,6 +47,7 @@ type gateReport struct {
 	SchemaVersion int              `json:"schema_version"`
 	Status        string           `json:"status"`
 	Root          string           `json:"root"`
+	Scope         string           `json:"scope"`
 	CoveragePath  string           `json:"coverage_path"`
 	VersionAxis   []string         `json:"version_axis,omitempty"`
 	Summary       gateSummary      `json:"summary"`
@@ -74,13 +75,18 @@ func runGate(args []string) int {
 	root := fs.String("root", ".", "repository root")
 	coveragePath := fs.String("coverage", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json", "coverage ledger JSON path")
 	outPath := fs.String("out", "tmp/registry_gate.json", "ordered registry gate report JSON path")
+	scope := fs.String("scope", "version-matrix", "gate scope: version-matrix, asset-policy, or all")
 	versions := fs.String("versions", "", "comma-separated AE versions; defaults to AE2020-AE2025")
 	jsonOut := fs.Bool("json", false, "print JSON report")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(os.Stderr, "usage: aepregistry gate [-root .] [-coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json] [-out tmp/registry_gate.json] [-versions AE2020,AE2021,...] [-json]")
+		fmt.Fprintln(os.Stderr, "usage: aepregistry gate [-root .] [-coverage flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json] [-out tmp/registry_gate.json] [-scope version-matrix|asset-policy|all] [-versions AE2020,AE2021,...] [-json]")
+		return 2
+	}
+	if *scope != "version-matrix" && *scope != "asset-policy" && *scope != "all" {
+		fmt.Fprintln(os.Stderr, "gate: -scope must be version-matrix, asset-policy, or all")
 		return 2
 	}
 
@@ -89,6 +95,7 @@ func runGate(args []string) int {
 		SchemaVersion: 1,
 		Status:        registry.StatusPass,
 		Root:          filepath.ToSlash(*root),
+		Scope:         *scope,
 		CoveragePath:  filepath.ToSlash(*coveragePath),
 		VersionAxis:   axis,
 	}
@@ -116,61 +123,18 @@ func runGate(args []string) int {
 	}
 	addStep(gateStepReport{ID: "registry_audit", Command: "go run ./cmd/aepregistry audit -root . -out " + auditOut, Output: auditOut, Status: audit.Status, Errors: audit.Summary.Errors})
 
-	boundariesOut := "tmp/registry_version_boundaries.json"
-	boundaries, err := registry.CheckVersionBoundaries(*root, *coveragePath, axis)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "gate boundaries:", err)
-		return 2
+	if *scope == "version-matrix" || *scope == "all" {
+		if err := runVersionMatrixGate(*root, *coveragePath, axis, addStep); err != nil {
+			fmt.Fprintln(os.Stderr, "gate version-matrix:", err)
+			return 2
+		}
 	}
-	if err := writeJSONFile(filepath.Join(*root, filepath.FromSlash(boundariesOut)), boundaries); err != nil {
-		fmt.Fprintln(os.Stderr, "write:", err)
-		return 2
+	if *scope == "asset-policy" || *scope == "all" {
+		if err := runAssetPolicyGate(*root, addStep); err != nil {
+			fmt.Fprintln(os.Stderr, "gate asset-policy:", err)
+			return 2
+		}
 	}
-	addStep(gateStepReport{ID: "registry_version_boundaries", Command: "go run ./cmd/aepregistry boundaries -root . -out " + boundariesOut, Output: boundariesOut, Status: boundaries.Status, Errors: boundaries.Summary.Errors})
-
-	coverageOut := "tmp/registry_coverage.json"
-	coverage, err := registry.ValidateCoverage(*root, *coveragePath)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "gate coverage:", err)
-		return 2
-	}
-	if err := writeJSONFile(filepath.Join(*root, filepath.FromSlash(coverageOut)), coverage); err != nil {
-		fmt.Fprintln(os.Stderr, "write:", err)
-		return 2
-	}
-	addStep(gateStepReport{ID: "registry_coverage", Command: "go run ./cmd/aepregistry coverage -root . -out " + coverageOut, Output: coverageOut, Status: coverage.Status, Errors: coverage.Summary.Errors})
-
-	summaryOut := "tmp/registry_coverage_summary.json"
-	summary := registry.SummarizeCoverage(coverage)
-	if err := writeJSONFile(filepath.Join(*root, filepath.FromSlash(summaryOut)), summary); err != nil {
-		fmt.Fprintln(os.Stderr, "write:", err)
-		return 2
-	}
-	addStep(gateStepReport{ID: "registry_coverage_summary", Command: "go run ./cmd/aepregistry coverage -root . -out " + summaryOut + " -summary", Output: summaryOut, Status: summary.Status, Errors: summary.Errors})
-
-	axisOut := "tmp/registry_coverage_axis.json"
-	axisReport, err := registry.CoverageAxisWithFilter(*root, *coveragePath, axis, registry.CoverageAxisFilter{})
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "gate coverage axis:", err)
-		return 2
-	}
-	if err := writeJSONFile(filepath.Join(*root, filepath.FromSlash(axisOut)), axisReport); err != nil {
-		fmt.Fprintln(os.Stderr, "write:", err)
-		return 2
-	}
-	addStep(gateStepReport{ID: "registry_coverage_axis", Command: "go run ./cmd/aepregistry coverage -root . -out " + axisOut + " -axis", Output: axisOut, Status: axisReport.Status})
-
-	boundaryAxisOut := "tmp/registry_coverage_axis_boundary.json"
-	boundaryAxis, err := registry.CoverageAxisWithFilter(*root, *coveragePath, axis, registry.CoverageAxisFilter{AtomID: "layer.track_matte.explicit_source"})
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "gate boundary axis:", err)
-		return 2
-	}
-	if err := writeJSONFile(filepath.Join(*root, filepath.FromSlash(boundaryAxisOut)), boundaryAxis); err != nil {
-		fmt.Fprintln(os.Stderr, "write:", err)
-		return 2
-	}
-	addStep(gateStepReport{ID: "registry_coverage_axis_boundary", Command: "go run ./cmd/aepregistry coverage -root . -out " + boundaryAxisOut + " -axis -atom layer.track_matte.explicit_source", Output: boundaryAxisOut, Status: boundaryAxis.Status})
 
 	if err := writeJSONFile(*outPath, report); err != nil {
 		fmt.Fprintln(os.Stderr, "write:", err)
@@ -188,6 +152,105 @@ func runGate(args []string) int {
 		return 1
 	}
 	return 0
+}
+
+func runVersionMatrixGate(root, coveragePath string, axis []string, addStep func(gateStepReport)) error {
+	boundariesOut := "tmp/registry_version_boundaries.json"
+	boundaries, err := registry.CheckVersionBoundaries(root, coveragePath, axis)
+	if err != nil {
+		return fmt.Errorf("boundaries: %w", err)
+	}
+	if err := writeJSONFile(filepath.Join(root, filepath.FromSlash(boundariesOut)), boundaries); err != nil {
+		return fmt.Errorf("write boundaries: %w", err)
+	}
+	addStep(gateStepReport{ID: "registry_version_boundaries", Command: "go run ./cmd/aepregistry boundaries -root . -out " + boundariesOut, Output: boundariesOut, Status: boundaries.Status, Errors: boundaries.Summary.Errors})
+
+	coverageOut := "tmp/registry_coverage.json"
+	coverage, err := registry.ValidateCoverage(root, coveragePath)
+	if err != nil {
+		return fmt.Errorf("coverage: %w", err)
+	}
+	if err := writeJSONFile(filepath.Join(root, filepath.FromSlash(coverageOut)), coverage); err != nil {
+		return fmt.Errorf("write coverage: %w", err)
+	}
+	addStep(gateStepReport{ID: "registry_coverage", Command: "go run ./cmd/aepregistry coverage -root . -out " + coverageOut, Output: coverageOut, Status: coverage.Status, Errors: coverage.Summary.Errors})
+
+	summaryOut := "tmp/registry_coverage_summary.json"
+	summary := registry.SummarizeCoverage(coverage)
+	if err := writeJSONFile(filepath.Join(root, filepath.FromSlash(summaryOut)), summary); err != nil {
+		return fmt.Errorf("write coverage summary: %w", err)
+	}
+	addStep(gateStepReport{ID: "registry_coverage_summary", Command: "go run ./cmd/aepregistry coverage -root . -out " + summaryOut + " -summary", Output: summaryOut, Status: summary.Status, Errors: summary.Errors})
+
+	axisOut := "tmp/registry_coverage_axis.json"
+	axisReport, err := registry.CoverageAxisWithFilter(root, coveragePath, axis, registry.CoverageAxisFilter{})
+	if err != nil {
+		return fmt.Errorf("coverage axis: %w", err)
+	}
+	if err := writeJSONFile(filepath.Join(root, filepath.FromSlash(axisOut)), axisReport); err != nil {
+		return fmt.Errorf("write coverage axis: %w", err)
+	}
+	addStep(gateStepReport{ID: "registry_coverage_axis", Command: "go run ./cmd/aepregistry coverage -root . -out " + axisOut + " -axis", Output: axisOut, Status: axisReport.Status})
+
+	boundaryAxisOut := "tmp/registry_coverage_axis_boundary.json"
+	boundaryAxis, err := registry.CoverageAxisWithFilter(root, coveragePath, axis, registry.CoverageAxisFilter{AtomID: "layer.track_matte.explicit_source"})
+	if err != nil {
+		return fmt.Errorf("boundary axis: %w", err)
+	}
+	if err := writeJSONFile(filepath.Join(root, filepath.FromSlash(boundaryAxisOut)), boundaryAxis); err != nil {
+		return fmt.Errorf("write boundary axis: %w", err)
+	}
+	addStep(gateStepReport{ID: "registry_coverage_axis_boundary", Command: "go run ./cmd/aepregistry coverage -root . -out " + boundaryAxisOut + " -axis -atom layer.track_matte.explicit_source", Output: boundaryAxisOut, Status: boundaryAxis.Status})
+	return nil
+}
+
+func runAssetPolicyGate(root string, addStep func(gateStepReport)) error {
+	ownershipOut := "tmp/registry_ownership.json"
+	ownership, err := registry.OwnershipRepository(root, registry.OwnershipOptions{SampleLimit: 20})
+	if err != nil {
+		return fmt.Errorf("ownership: %w", err)
+	}
+	if err := writeJSONFile(filepath.Join(root, filepath.FromSlash(ownershipOut)), ownership); err != nil {
+		return fmt.Errorf("write ownership: %w", err)
+	}
+	addStep(gateStepReport{ID: "registry_ownership", Command: "go run ./cmd/aepregistry ownership -root . -out " + ownershipOut + " -sample-limit 20", Output: ownershipOut, Status: registry.StatusPass})
+
+	layoutOut := "tmp/registry_layout.json"
+	layout, err := registry.LayoutRepository(root, registry.LayoutOptions{SampleLimit: 20})
+	if err != nil {
+		return fmt.Errorf("layout: %w", err)
+	}
+	if err := writeJSONFile(filepath.Join(root, filepath.FromSlash(layoutOut)), layout); err != nil {
+		return fmt.Errorf("write layout: %w", err)
+	}
+	layoutErrors := layout.Summary.BlockedUnownedFiles + layout.Summary.MissingRequired
+	layoutStatus := registry.StatusPass
+	if layoutErrors > 0 {
+		layoutStatus = registry.StatusFail
+	}
+	addStep(gateStepReport{ID: "registry_layout", Command: "go run ./cmd/aepregistry layout -root . -out " + layoutOut + " -sample-limit 20", Output: layoutOut, Status: layoutStatus, Errors: layoutErrors})
+
+	cleanupOut := "tmp/registry_generated_cleanup.json"
+	cleanup, err := registry.GeneratedCleanupRepository(root, registry.GeneratedCleanupOptions{SampleLimit: 3})
+	if err != nil {
+		return fmt.Errorf("cleanup: %w", err)
+	}
+	if err := writeJSONFile(filepath.Join(root, filepath.FromSlash(cleanupOut)), cleanup); err != nil {
+		return fmt.Errorf("write cleanup: %w", err)
+	}
+	addStep(gateStepReport{ID: "registry_generated_cleanup", Command: "go run ./cmd/aepregistry cleanup -root . -out " + cleanupOut + " -sample-limit 3", Output: cleanupOut, Status: registry.StatusPass})
+
+	execOut := "tmp/registry_generated_cleanup_execution.json"
+	exec := registry.ExecuteGeneratedCleanup(root, cleanup, registry.GeneratedCleanupExecutionOptions{ExcludeProducers: []string{"registry_report"}})
+	if err := writeJSONFile(filepath.Join(root, filepath.FromSlash(execOut)), exec); err != nil {
+		return fmt.Errorf("write cleanup execution: %w", err)
+	}
+	execStatus := registry.StatusPass
+	if exec.Summary.Errors > 0 {
+		execStatus = registry.StatusFail
+	}
+	addStep(gateStepReport{ID: "registry_generated_cleanup_execution_dry_run", Command: "go run ./cmd/aepregistry cleanup -root . -out " + cleanupOut + " -exec-out " + execOut + " -sample-limit 3", Output: execOut, Status: execStatus, Errors: exec.Summary.Errors})
+	return nil
 }
 
 func runBoundaries(args []string) int {
