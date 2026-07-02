@@ -61,6 +61,12 @@ type VersionAxis struct {
 	ExpansionPolicy string   `json:"expansion_policy"`
 }
 
+type VersionPolicy struct {
+	MinimumSupported string   `json:"minimum_supported"`
+	KnownSupported   []string `json:"known_supported"`
+	ExpansionPolicy  string   `json:"expansion_policy"`
+}
+
 type Dependency struct {
 	Kind     string `json:"kind"`
 	Path     string `json:"path"`
@@ -148,6 +154,7 @@ type workflowsFile struct {
 
 type atomsFile struct {
 	SchemaVersion   int              `json:"schema_version"`
+	VersionPolicy   VersionPolicy    `json:"version_policy"`
 	CapabilityAtoms []CapabilityAtom `json:"capability_atoms"`
 }
 
@@ -195,10 +202,45 @@ func Load(root string) (Registry, error) {
 	return Registry{
 		Locations:         locations.Locations,
 		Workflows:         workflows.Workflows,
-		CapabilityAtoms:   atoms.CapabilityAtoms,
+		CapabilityAtoms:   applyCapabilityAtomDefaults(atoms.CapabilityAtoms, atoms.VersionPolicy),
 		EvidenceSets:      evidence.EvidenceSets,
 		VersionBoundaries: boundaries.VersionBoundaries,
 	}, nil
+}
+
+func applyCapabilityAtomDefaults(atoms []CapabilityAtom, policy VersionPolicy) []CapabilityAtom {
+	defaultAxis := policy.versionAxis()
+	if defaultAxis.isZero() {
+		return atoms
+	}
+	out := make([]CapabilityAtom, len(atoms))
+	copy(out, atoms)
+	for i := range out {
+		if out[i].VersionAxis.isZero() {
+			out[i].VersionAxis = defaultAxis.copy()
+		}
+	}
+	return out
+}
+
+func (p VersionPolicy) versionAxis() VersionAxis {
+	return VersionAxis{
+		MinSupported:    p.MinimumSupported,
+		KnownSupported:  append([]string(nil), p.KnownSupported...),
+		ExpansionPolicy: p.ExpansionPolicy,
+	}
+}
+
+func (v VersionAxis) isZero() bool {
+	return v.MinSupported == "" && len(v.KnownSupported) == 0 && v.ExpansionPolicy == ""
+}
+
+func (v VersionAxis) copy() VersionAxis {
+	return VersionAxis{
+		MinSupported:    v.MinSupported,
+		KnownSupported:  append([]string(nil), v.KnownSupported...),
+		ExpansionPolicy: v.ExpansionPolicy,
+	}
 }
 
 func Audit(root string, reg Registry) AuditReport {

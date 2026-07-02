@@ -11,7 +11,10 @@
       "AE2024",
       "AE2025"
     ],
-    "expansion_policy": "append AE2026/AE2027 as known_supported entries after fixtures, writers, and host-open policy are registered"
+    "expansion_policy": "append_new_ae_versions",
+    "notes": [
+      "Append AE2026/AE2027 as known_supported entries after fixtures, writers, and host-open policy are registered."
+    ]
   },
   "capability_atoms": [
     {
@@ -26,18 +29,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "parse",
@@ -74,18 +65,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "profile",
         "generate",
@@ -120,18 +99,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "learn",
@@ -169,18 +136,6 @@
           "windows",
           "macos"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -220,18 +175,6 @@
           "macos"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate",
@@ -270,18 +213,6 @@
           "windows",
           "macos"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "profile",
@@ -328,18 +259,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -373,18 +292,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "profile",
         "generate",
@@ -414,18 +321,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -453,18 +348,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -494,18 +377,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -533,18 +404,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -574,18 +433,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -612,18 +459,6 @@
           "windows",
           "macos"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "host_open",
@@ -652,18 +487,6 @@
           "macos"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "learn",
         "profile"
@@ -690,18 +513,6 @@
           "windows",
           "macos"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "learn",
@@ -730,18 +541,6 @@
           "macos"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "learn"
@@ -768,18 +567,6 @@
           "windows",
           "macos"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -808,18 +595,6 @@
           "macos"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "learn",
         "profile"
@@ -847,18 +622,6 @@
           "macos"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "host_open"
       ],
@@ -884,18 +647,6 @@
           "windows",
           "macos"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "host_open"
@@ -923,18 +674,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "parse",
@@ -984,18 +723,6 @@
           "macos"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "profile",
         "generate",
@@ -1034,18 +761,6 @@
           "windows",
           "macos"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "migrate",
@@ -1095,18 +810,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "parse",
         "profile",
@@ -1145,18 +848,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "learn",
@@ -1202,18 +893,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -1251,18 +930,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -1302,18 +969,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -1351,18 +1006,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -1402,18 +1045,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -1451,18 +1082,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -1502,18 +1121,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -1551,18 +1158,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -1602,18 +1197,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -1651,18 +1234,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -1702,18 +1273,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -1752,18 +1311,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -1801,18 +1348,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -1857,18 +1392,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -1906,18 +1429,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -1962,18 +1473,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -2011,18 +1510,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -2062,18 +1549,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -2111,18 +1586,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -2162,18 +1625,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -2211,18 +1662,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -2262,18 +1701,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -2311,18 +1738,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -2362,18 +1777,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -2411,18 +1814,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -2462,18 +1853,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -2512,18 +1891,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -2556,18 +1923,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -2607,18 +1962,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -2656,18 +1999,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -2707,18 +2038,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -2756,18 +2075,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -2807,18 +2114,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -2856,18 +2151,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -2907,18 +2190,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -2956,18 +2227,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -3007,18 +2266,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -3056,18 +2303,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -3107,18 +2342,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -3156,18 +2379,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -3207,18 +2418,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -3256,18 +2455,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -3307,18 +2494,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -3356,18 +2531,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -3407,18 +2570,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -3456,18 +2607,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -3507,18 +2646,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -3556,18 +2683,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -3607,18 +2722,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -3651,18 +2754,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -3697,18 +2788,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -3741,18 +2820,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -3787,18 +2854,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -3831,18 +2886,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -3877,18 +2920,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -3921,18 +2952,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -3967,18 +2986,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -4011,18 +3018,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -4057,18 +3052,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -4101,18 +3084,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -4147,18 +3118,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -4191,18 +3150,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -4237,18 +3184,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -4281,18 +3216,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -4327,18 +3250,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -4371,18 +3282,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -4417,18 +3316,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -4461,18 +3348,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -4507,18 +3382,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -4551,18 +3414,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -4597,18 +3448,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -4641,18 +3480,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -4687,18 +3514,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -4731,18 +3546,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -4777,18 +3580,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -4821,18 +3612,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -4867,18 +3646,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -4911,18 +3678,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -4957,18 +3712,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -5001,18 +3744,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -5047,18 +3778,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -5091,18 +3810,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -5137,18 +3844,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -5181,18 +3876,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -5227,18 +3910,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -5271,18 +3942,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -5317,18 +3976,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -5361,18 +4008,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -5407,18 +4042,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -5451,18 +4074,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -5497,18 +4108,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -5541,18 +4140,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -5587,18 +4174,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -5631,18 +4206,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -5677,18 +4240,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -5721,18 +4272,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -5767,18 +4306,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -5811,18 +4338,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -5857,18 +4372,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -5901,18 +4404,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -5947,18 +4438,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -5991,18 +4470,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -6037,18 +4504,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -6081,18 +4536,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -6127,18 +4570,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -6171,18 +4602,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -6217,18 +4636,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -6261,18 +4668,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -6307,18 +4702,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -6351,18 +4734,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -6397,18 +4768,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -6441,18 +4800,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -6487,18 +4834,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -6531,18 +4866,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -6577,18 +4900,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -6621,18 +4932,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -6667,18 +4966,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -6711,18 +4998,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -6757,18 +5032,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -6801,18 +5064,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -6847,18 +5098,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -6891,18 +5130,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -6937,18 +5164,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -6981,18 +5196,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -7027,18 +5230,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -7071,18 +5262,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -7117,18 +5296,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -7161,18 +5328,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -7207,18 +5362,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -7251,18 +5394,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -7297,18 +5428,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -7341,18 +5460,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -7387,18 +5494,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -7431,18 +5526,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",
@@ -7477,18 +5560,6 @@
           "linux"
         ]
       },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
-      },
       "workflows": [
         "generate",
         "migrate"
@@ -7521,18 +5592,6 @@
           "macos",
           "linux"
         ]
-      },
-      "version_axis": {
-        "min_supported": "AE2020",
-        "known_supported": [
-          "AE2020",
-          "AE2021",
-          "AE2022",
-          "AE2023",
-          "AE2024",
-          "AE2025"
-        ],
-        "expansion_policy": "append_new_ae_versions"
       },
       "workflows": [
         "generate",

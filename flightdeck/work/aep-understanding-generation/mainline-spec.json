@@ -790,18 +790,19 @@
       }
     },
     "last_code_maintenance_target": {
-      "location": "cmd/aepregistry",
-      "group": "resolved_gate_version_axis",
-      "reason": "Make registry version-matrix gate reports write the resolved default AE2020-AE2025 version axis when -versions is omitted, so the top-level gate JSON answers which versions were checked.",
+      "location": "registry/capability_atoms.json",
+      "group": "capability_atom_version_axis_inheritance",
+      "reason": "Remove repeated per-atom AE2020-AE2025 version_axis blocks and make capability atoms inherit the top-level version_policy when an atom omits version_axis, so future AE2026/AE2027 expansion has one data location instead of 162 repeated edits.",
       "result": {
         "files": [
-          "cmd/aepregistry/main.go",
-          "cmd/aepregistry/main_test.go"
+          "registry/capability_atoms.json",
+          "internal/registry/registry.go",
+          "internal/registry/audit_test.go"
         ],
-        "behavior": "gate report metadata now includes the default version axis for version-matrix/all scope"
+        "behavior": "registry Load normalizes omitted atom version_axis from top-level version_policy; explicit partial atom axes remain audited as explicit data"
       }
     },
-    "next_action": "The registry version-matrix gate now reports the resolved AE2020-AE2025 axis and passes on the current coverage ledger. Next useful increment is to inspect registry capability atom version-axis repetition and decide whether defaults should be data-level inheritance rather than repeated arrays.",
+    "next_action": "Capability atom version-axis defaults are now inherited from top-level version_policy and registry audit passes. Next useful increment is to run the asset-policy gate after this data shrink and then inspect whether version_boundaries has similar repeated target/source lists that should remain explicit because they encode boundary policy.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

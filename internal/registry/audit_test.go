@@ -46,6 +46,37 @@ func TestAuditRepositoryPassesForDeclaredAssets(t *testing.T) {
 	}
 }
 
+func TestAuditRepositoryInheritsVersionPolicyForAtoms(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeFile(t, root, "tmp/text-basic/matrix.json", "{}\n")
+	writeValidRegistry(t, root, []map[string]any{
+		{
+			"id":        "text.source.default",
+			"domain":    "text",
+			"tier":      "atom",
+			"status":    "verified",
+			"platform":  map[string]any{"host_required": false, "os": []string{"windows", "macos", "linux"}},
+			"workflows": []string{"generate"},
+		},
+	})
+
+	report, err := AuditRepository(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != StatusPass {
+		t.Fatalf("status = %q, want %q; issues: %+v", report.Status, StatusPass, report.Issues)
+	}
+
+	reg, err := Load(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := reg.CapabilityAtoms[0].VersionAxis; got.MinSupported != "AE2020" || len(got.KnownSupported) != 6 || got.ExpansionPolicy != "append_new_ae_versions" {
+		t.Fatalf("inherited version axis = %+v", got)
+	}
+}
+
 func TestAuditRepositoryReportsMissingRequiredDependency(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeValidRegistry(t, root, []map[string]any{
@@ -419,6 +450,7 @@ func writeValidRegistry(t *testing.T, root string, atoms []map[string]any) {
 	})
 	writeJSON(t, root, "registry/capability_atoms.json", map[string]any{
 		"schema_version":   1,
+		"version_policy":   defaultVersionPolicyFixture(),
 		"capability_atoms": atoms,
 	})
 	writeJSON(t, root, "registry/evidence.json", map[string]any{
@@ -449,6 +481,14 @@ func writeValidRegistryWithGeneratorLocation(t *testing.T, root string, atoms []
 			{"id": "tmp", "path": "tmp", "class": "generated_evidence", "tracked": false, "required": false, "lifecycle": "disposable"},
 		},
 	})
+}
+
+func defaultVersionPolicyFixture() map[string]any {
+	return map[string]any{
+		"minimum_supported": "AE2020",
+		"known_supported":   []string{"AE2020", "AE2021", "AE2022", "AE2023", "AE2024", "AE2025"},
+		"expansion_policy":  "append_new_ae_versions",
+	}
 }
 
 func writeJSON(t *testing.T, root, rel string, value any) {
