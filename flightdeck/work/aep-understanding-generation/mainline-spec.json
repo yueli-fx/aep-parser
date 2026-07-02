@@ -791,17 +791,18 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "transform_expressions_split",
-      "reason": "Reduce convert_transform.go growth risk by separating transform expression replay from static transform and keyframe materialization while preserving behavior.",
+      "group": "rebuild_layer_materialize_split",
+      "reason": "Reduce convert_rebuild_layers.go growth risk by separating per-layer materialization details from layer dispatch and reference finalization while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_transform.go",
-          "internal/aepmigrate/convert_transform_expressions.go"
+          "internal/aepmigrate/convert_rebuild_layers.go",
+          "internal/aepmigrate/convert_rebuild_layer_materialize.go",
+          "internal/aepmigrate/convert_rebuild_special_materialize.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Transform expression replay has been split from convert_transform.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_rebuild_layers.go, convert_text.go, or convert_effect.go without changing behavior.",
+    "next_action": "Per-layer rebuild materialization has been split from convert_rebuild_layers.go. Next useful increment is to continue reducing large aepmigrate files by extracting coherent helper groups from convert_text.go, convert_effect.go, or convert_shape_styles.go without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
