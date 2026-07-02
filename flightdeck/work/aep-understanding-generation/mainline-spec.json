@@ -790,19 +790,18 @@
       }
     },
     "last_code_maintenance_target": {
-      "location": "registry/capability_atoms.json",
-      "group": "capability_atom_version_axis_inheritance",
-      "reason": "Remove repeated per-atom AE2020-AE2025 version_axis blocks and make capability atoms inherit the top-level version_policy when an atom omits version_axis, so future AE2026/AE2027 expansion has one data location instead of 162 repeated edits.",
+      "location": "internal/registry",
+      "group": "capability_version_policy_drift_audit",
+      "reason": "Add audit coverage that rejects drift between registry/capability_atoms.json top-level version_policy and the shared AE2020-AE2025 version axis, keeping data defaults and code defaults aligned before future AE2026/AE2027 expansion.",
       "result": {
         "files": [
-          "registry/capability_atoms.json",
           "internal/registry/registry.go",
           "internal/registry/audit_test.go"
         ],
-        "behavior": "registry Load normalizes omitted atom version_axis from top-level version_policy; explicit partial atom axes remain audited as explicit data"
+        "behavior": "registry audit fails when declared capability version_policy minimum/known_supported/expansion_policy drifts from the shared supported axis contract"
       }
     },
-    "next_action": "Capability atom version-axis defaults are now inherited from top-level version_policy and registry audit passes. Next useful increment is to run the asset-policy gate after this data shrink and then inspect whether version_boundaries has similar repeated target/source lists that should remain explicit because they encode boundary policy.",
+    "next_action": "Capability atom version_policy is now inherited and drift-audited. version_boundaries currently has one explicit matte-source boundary whose source/target lists encode real policy and should stay explicit; next useful increment is to inspect matrix evidence producers before deciding whether to regenerate or retain remaining tmp version_matrix artifacts.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

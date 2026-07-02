@@ -16,11 +16,12 @@ const (
 )
 
 type Registry struct {
-	Locations         []Location
-	Workflows         []Workflow
-	CapabilityAtoms   []CapabilityAtom
-	EvidenceSets      []EvidenceSet
-	VersionBoundaries []VersionBoundary
+	Locations               []Location
+	Workflows               []Workflow
+	CapabilityVersionPolicy VersionPolicy
+	CapabilityAtoms         []CapabilityAtom
+	EvidenceSets            []EvidenceSet
+	VersionBoundaries       []VersionBoundary
 }
 
 type Location struct {
@@ -200,11 +201,12 @@ func Load(root string) (Registry, error) {
 		return Registry{}, err
 	}
 	return Registry{
-		Locations:         locations.Locations,
-		Workflows:         workflows.Workflows,
-		CapabilityAtoms:   applyCapabilityAtomDefaults(atoms.CapabilityAtoms, atoms.VersionPolicy),
-		EvidenceSets:      evidence.EvidenceSets,
-		VersionBoundaries: boundaries.VersionBoundaries,
+		Locations:               locations.Locations,
+		Workflows:               workflows.Workflows,
+		CapabilityVersionPolicy: atoms.VersionPolicy,
+		CapabilityAtoms:         applyCapabilityAtomDefaults(atoms.CapabilityAtoms, atoms.VersionPolicy),
+		EvidenceSets:            evidence.EvidenceSets,
+		VersionBoundaries:       boundaries.VersionBoundaries,
 	}, nil
 }
 
@@ -241,6 +243,10 @@ func (v VersionAxis) copy() VersionAxis {
 		KnownSupported:  append([]string(nil), v.KnownSupported...),
 		ExpansionPolicy: v.ExpansionPolicy,
 	}
+}
+
+func (p VersionPolicy) isZero() bool {
+	return p.MinimumSupported == "" && len(p.KnownSupported) == 0 && p.ExpansionPolicy == ""
 }
 
 func Audit(root string, reg Registry) AuditReport {
@@ -297,6 +303,7 @@ func Audit(root string, reg Registry) AuditReport {
 	}
 
 	coverage := newLocationCoverage(reg.Locations)
+	auditCapabilityVersionPolicy(reg.CapabilityVersionPolicy, &report)
 
 	atomIDs := map[string]bool{}
 	for _, atom := range reg.CapabilityAtoms {
@@ -349,6 +356,28 @@ func Audit(root string, reg Registry) AuditReport {
 
 	report.finish()
 	return report
+}
+
+func auditCapabilityVersionPolicy(policy VersionPolicy, report *AuditReport) {
+	if policy.isZero() {
+		return
+	}
+	defaultAxis := DefaultAEVersionAxis()
+	if policy.MinimumSupported == "" {
+		report.addIssue("missing_capability_version_policy_minimum", SeverityError, "registry/capability_atoms.json", "", "capability version_policy.minimum_supported is required when version_policy is declared")
+	} else if len(defaultAxis) > 0 && policy.MinimumSupported != defaultAxis[0] {
+		report.addIssue("capability_version_policy_minimum_mismatch", SeverityError, "registry/capability_atoms.json", "", fmt.Sprintf("capability version_policy.minimum_supported = %q, want %q", policy.MinimumSupported, defaultAxis[0]))
+	}
+	if len(policy.KnownSupported) == 0 {
+		report.addIssue("missing_capability_version_policy_known", SeverityError, "registry/capability_atoms.json", "", "capability version_policy.known_supported is required when version_policy is declared")
+	} else if !stringSlicesEqual(policy.KnownSupported, defaultAxis) {
+		report.addIssue("capability_version_policy_known_mismatch", SeverityError, "registry/capability_atoms.json", "", fmt.Sprintf("capability version_policy.known_supported = %v, want %v", policy.KnownSupported, defaultAxis))
+	}
+	if policy.ExpansionPolicy == "" {
+		report.addIssue("missing_capability_version_policy_expansion", SeverityError, "registry/capability_atoms.json", "", "capability version_policy.expansion_policy is required when version_policy is declared")
+	} else if policy.ExpansionPolicy != "append_new_ae_versions" {
+		report.addIssue("capability_version_policy_expansion_mismatch", SeverityError, "registry/capability_atoms.json", "", fmt.Sprintf("capability version_policy.expansion_policy = %q, want append_new_ae_versions", policy.ExpansionPolicy))
+	}
 }
 
 func auditAtom(root string, atom CapabilityAtom, workflowIDs map[string]bool, coverage locationCoverage, report *AuditReport) {
@@ -623,4 +652,16 @@ func cleanRel(path string) string {
 
 func hasPathPrefix(path, prefix string) bool {
 	return len(path) > len(prefix) && path[:len(prefix)] == prefix && path[len(prefix)] == '/'
+}
+
+func stringSlicesEqual(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }

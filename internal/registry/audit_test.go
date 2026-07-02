@@ -77,6 +77,48 @@ func TestAuditRepositoryInheritsVersionPolicyForAtoms(t *testing.T) {
 	}
 }
 
+func TestAuditRepositoryRejectsVersionPolicyDrift(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeFile(t, root, "tmp/text-basic/matrix.json", "{}\n")
+	writeValidRegistry(t, root, []map[string]any{
+		{
+			"id":        "text.source.default",
+			"domain":    "text",
+			"tier":      "atom",
+			"status":    "verified",
+			"platform":  map[string]any{"host_required": false, "os": []string{"windows", "macos", "linux"}},
+			"workflows": []string{"generate"},
+		},
+	})
+	writeJSON(t, root, "registry/capability_atoms.json", map[string]any{
+		"schema_version": 1,
+		"version_policy": map[string]any{
+			"minimum_supported": "AE2020",
+			"known_supported":   []string{"AE2020", "AE2025"},
+			"expansion_policy":  "append_new_ae_versions",
+		},
+		"capability_atoms": []map[string]any{
+			{
+				"id":        "text.source.default",
+				"domain":    "text",
+				"tier":      "atom",
+				"status":    "verified",
+				"platform":  map[string]any{"host_required": false, "os": []string{"windows", "macos", "linux"}},
+				"workflows": []string{"generate"},
+			},
+		},
+	})
+
+	report, err := AuditRepository(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != StatusFail {
+		t.Fatalf("status = %q, want %q", report.Status, StatusFail)
+	}
+	assertIssue(t, report, "capability_version_policy_known_mismatch", SeverityError, "", "registry/capability_atoms.json")
+}
+
 func TestAuditRepositoryReportsMissingRequiredDependency(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeValidRegistry(t, root, []map[string]any{
