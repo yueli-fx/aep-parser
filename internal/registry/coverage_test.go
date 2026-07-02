@@ -37,6 +37,42 @@ func TestValidateCoverageFailsWhenArtifactTotalsDrift(t *testing.T) {
 	assertCoverageIssue(t, report, "matrix_totals_mismatch", "text", "tmp/matrix/text/matrix.json")
 }
 
+func TestValidateCoverageChecksContractGates(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 2)
+	writeMatrixFixture(t, root, "tmp/matrix/text/matrix.json", 2)
+	writeBoundaryGateReport(t, root, VersionBoundaryCheckSummary{Boundaries: 1, Matched: 1, CheckedCells: 3})
+	addBoundaryContractGate(t, root, VersionBoundaryCheckSummary{Boundaries: 1, Matched: 1, CheckedCells: 3})
+
+	report, err := ValidateCoverage(root, "flightdeck/work/aep-understanding-generation/coverage.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != StatusPass {
+		t.Fatalf("status = %q, want %q; issues: %+v", report.Status, StatusPass, report.Issues)
+	}
+	if report.Summary.ContractGates != 1 {
+		t.Fatalf("contract gates = %d, want 1", report.Summary.ContractGates)
+	}
+}
+
+func TestValidateCoverageReportsContractGateDrift(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 2)
+	writeMatrixFixture(t, root, "tmp/matrix/text/matrix.json", 2)
+	writeBoundaryGateReport(t, root, VersionBoundaryCheckSummary{Boundaries: 1, Matched: 1, CheckedCells: 2})
+	addBoundaryContractGate(t, root, VersionBoundaryCheckSummary{Boundaries: 1, Matched: 1, CheckedCells: 3})
+
+	report, err := ValidateCoverage(root, "flightdeck/work/aep-understanding-generation/coverage.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != StatusFail {
+		t.Fatalf("status = %q, want %q", report.Status, StatusFail)
+	}
+	assertCoverageIssue(t, report, "contract_gate_summary_mismatch", "registry-version-boundaries", "tmp/registry_version_boundaries.json")
+}
+
 func TestValidateCoverageReportsRecordRecipeVersionAndAtomLinks(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 4)
@@ -671,6 +707,45 @@ func writeCoverageFixture(t *testing.T, root, rel string, total int) {
 				},
 			},
 		},
+	})
+}
+
+func addBoundaryContractGate(t *testing.T, root string, summary VersionBoundaryCheckSummary) {
+	t.Helper()
+	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+		"schema_version": 1,
+		"contract_gates": []map[string]any{
+			{
+				"id":       "registry-version-boundaries",
+				"kind":     "version_boundaries",
+				"command":  "go run ./cmd/aepregistry boundaries -root . -out tmp/registry_version_boundaries.json",
+				"artifact": "tmp/registry_version_boundaries.json",
+				"status":   StatusPass,
+				"summary":  summary,
+			},
+		},
+		"coverage": []map[string]any{
+			{
+				"id":       "text",
+				"artifact": "tmp/matrix/text/matrix.json",
+				"totals": map[string]any{
+					"total":   2,
+					"pass":    2,
+					"blocked": 0,
+					"failed":  0,
+					"skipped": 0,
+				},
+			},
+		},
+	})
+}
+
+func writeBoundaryGateReport(t *testing.T, root string, summary VersionBoundaryCheckSummary) {
+	t.Helper()
+	writeJSON(t, root, "tmp/registry_version_boundaries.json", map[string]any{
+		"schema_version": 1,
+		"status":         StatusPass,
+		"summary":        summary,
 	})
 }
 

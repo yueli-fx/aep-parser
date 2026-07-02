@@ -1194,5 +1194,26 @@
       }
     }
   ],
-  "open_items": []
+  "open_items": [],
+  "contract_gates": [
+    {
+      "id": "registry-version-boundaries",
+      "kind": "version_boundaries",
+      "command": "go run ./cmd/aepregistry boundaries -root . -out tmp/registry_version_boundaries.json",
+      "artifact": "tmp/registry_version_boundaries.json",
+      "status": "pass",
+      "summary": {
+        "boundaries": 1,
+        "matched": 1,
+        "missing_rows": 0,
+        "duplicate_rows": 0,
+        "mismatched_totals": 0,
+        "mismatched_status": 0,
+        "checked_cells": 36,
+        "missing_cells": 0,
+        "mismatched_cells": 0,
+        "errors": 0
+      }
+    }
+  ]
 }

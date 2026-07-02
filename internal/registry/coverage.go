@@ -19,10 +19,11 @@ type CoverageReport struct {
 }
 
 type CoverageSummary struct {
-	Records   int `json:"records"`
-	Artifacts int `json:"artifacts"`
-	Atoms     int `json:"atoms"`
-	Errors    int `json:"errors"`
+	Records       int `json:"records"`
+	Artifacts     int `json:"artifacts"`
+	ContractGates int `json:"contract_gates"`
+	Atoms         int `json:"atoms"`
+	Errors        int `json:"errors"`
 }
 
 type CoverageSummaryReport struct {
@@ -30,6 +31,7 @@ type CoverageSummaryReport struct {
 	Status                  string                  `json:"status"`
 	Records                 int                     `json:"records"`
 	Artifacts               int                     `json:"artifacts"`
+	ContractGates           int                     `json:"contract_gates"`
 	Atoms                   int                     `json:"atoms"`
 	AtomRows                int                     `json:"atom_rows"`
 	Errors                  int                     `json:"errors"`
@@ -142,9 +144,10 @@ type CoverageCell struct {
 }
 
 type coverageFile struct {
-	SchemaVersion  int                `json:"schema_version"`
-	RecurringGates []coverageArtifact `json:"recurring_gates"`
-	Coverage       []coverageRecord   `json:"coverage"`
+	SchemaVersion  int                    `json:"schema_version"`
+	RecurringGates []coverageArtifact     `json:"recurring_gates"`
+	ContractGates  []coverageContractGate `json:"contract_gates"`
+	Coverage       []coverageRecord       `json:"coverage"`
 }
 
 type coverageRecord struct {
@@ -173,6 +176,15 @@ type coverageArtifact struct {
 	Command  string         `json:"command"`
 	Artifact string         `json:"artifact"`
 	Totals   CoverageTotals `json:"totals"`
+}
+
+type coverageContractGate struct {
+	ID       string                      `json:"id"`
+	Kind     string                      `json:"kind"`
+	Command  string                      `json:"command"`
+	Artifact string                      `json:"artifact"`
+	Status   string                      `json:"status"`
+	Summary  VersionBoundaryCheckSummary `json:"summary,omitempty"`
 }
 
 type coverageBoundary struct {
@@ -226,12 +238,16 @@ func ValidateCoverage(root, coveragePath string) (CoverageReport, error) {
 		SchemaVersion: 1,
 		Status:        StatusPass,
 		Summary: CoverageSummary{
-			Records:   len(coverage.RecurringGates) + len(coverage.Coverage),
-			Artifacts: len(refs),
+			Records:       len(coverage.RecurringGates) + len(coverage.Coverage),
+			Artifacts:     len(refs),
+			ContractGates: len(coverage.ContractGates),
 		},
 	}
 	for _, ref := range refs {
 		report.checkArtifact(root, ref)
+	}
+	for _, gate := range coverage.ContractGates {
+		report.checkContractGate(root, gate)
 	}
 	for _, record := range coverage.Coverage {
 		report.checkCoverageRecord(root, record, atomRefs)
@@ -249,6 +265,7 @@ func SummarizeCoverage(report CoverageReport) CoverageSummaryReport {
 		Status:        report.Status,
 		Records:       report.Summary.Records,
 		Artifacts:     report.Summary.Artifacts,
+		ContractGates: report.Summary.ContractGates,
 		Atoms:         report.Summary.Atoms,
 		AtomRows:      len(report.AtomRows),
 		Errors:        report.Summary.Errors,
@@ -480,6 +497,33 @@ func (r *CoverageReport) checkArtifact(root string, ref coverageArtifactRef) {
 	}
 	if actual != ref.Totals {
 		r.addError("matrix_totals_mismatch", ref.RecordID, ref.Path, fmt.Sprintf("coverage totals %+v do not match matrix summary %+v", ref.Totals, actual))
+	}
+}
+
+func (r *CoverageReport) checkContractGate(root string, gate coverageContractGate) {
+	if gate.Artifact == "" {
+		r.addError("missing_contract_gate_artifact", gate.ID, "", "contract gate artifact is required")
+		return
+	}
+	switch gate.Kind {
+	case "version_boundaries":
+		r.checkVersionBoundaryContractGate(root, gate)
+	default:
+		r.addError("unknown_contract_gate_kind", gate.ID, gate.Artifact, fmt.Sprintf("unknown contract gate kind %q", gate.Kind))
+	}
+}
+
+func (r *CoverageReport) checkVersionBoundaryContractGate(root string, gate coverageContractGate) {
+	var actual VersionBoundaryCheckReport
+	if err := readJSONPath(root, gate.Artifact, &actual); err != nil {
+		r.addError("missing_or_invalid_contract_gate", gate.ID, gate.Artifact, fmt.Sprintf("read contract gate artifact: %v", err))
+		return
+	}
+	if gate.Status != "" && actual.Status != gate.Status {
+		r.addError("contract_gate_status_mismatch", gate.ID, gate.Artifact, fmt.Sprintf("contract gate status %q does not match artifact status %q", gate.Status, actual.Status))
+	}
+	if gate.Summary != (VersionBoundaryCheckSummary{}) && gate.Summary != actual.Summary {
+		r.addError("contract_gate_summary_mismatch", gate.ID, gate.Artifact, fmt.Sprintf("contract gate summary %+v does not match artifact summary %+v", gate.Summary, actual.Summary))
 	}
 }
 
