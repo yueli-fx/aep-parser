@@ -791,17 +791,17 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "convert_layer_timing_test_split",
-      "reason": "Reduce convert_layer_object_test.go growth risk by separating layer timing and null transform conversion tests from camera/light/object profile tests while preserving test behavior.",
+      "group": "convert_shape_stroke_test_split",
+      "reason": "Reduce convert_shape_test.go growth risk by separating stroke, dash, taper, and wave conversion tests from basic shape and fill tests while preserving test behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_layer_object_test.go",
-          "internal/aepmigrate/convert_layer_timing_test.go"
+          "internal/aepmigrate/convert_shape_test.go",
+          "internal/aepmigrate/convert_shape_stroke_test.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Layer timing and null transform conversion tests have been split from convert_layer_object_test.go. Next useful increment is to continue reducing remaining 5-7KB aepmigrate tests or 4-5KB conversion support files into coherent topic files without changing behavior.",
+    "next_action": "Shape stroke conversion tests have been split from convert_shape_test.go. Next useful increment is to continue reducing remaining 5-7KB aepmigrate tests or 4-5KB conversion support files into coherent topic files without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",

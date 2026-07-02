@@ -6,28 +6,8 @@ import (
 	"testing"
 )
 
-func TestConvertWritesDefaultShapeLayerProject(t *testing.T) {
-	source := writeTempProjectWithDefaultShapeLayer(t)
-	outPath := filepath.Join(t.TempDir(), "converted.aep")
-
-	report, err := Convert(ConvertOptions{
-		InputPath:  source,
-		OutputPath: outPath,
-		Target:     VersionAE2025,
-	})
-	if err != nil {
-		t.Fatalf("Convert: %v", err)
-	}
-	if report.Summary.Status != StatusPass {
-		t.Fatalf("status = %q, entries=%+v, diffs=%+v", report.Summary.Status, report.Entries, report.Verification.ProfileDiffs)
-	}
-	if report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 {
-		t.Fatalf("profile diff verification = %+v, want pass with 0 diffs", report.Verification)
-	}
-}
-
-func TestConvertWritesRecipeDefaultShapeLayerProject(t *testing.T) {
-	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-default-shape-layer.json"))
+func TestConvertWritesRecipeRectStrokeShapeLayerProject(t *testing.T) {
+	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-shape-stroke-style.json"))
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
 
 	report, err := Convert(ConvertOptions{
@@ -49,8 +29,8 @@ func TestConvertWritesRecipeDefaultShapeLayerProject(t *testing.T) {
 	}
 }
 
-func TestConvertWritesRectFillShapeLayerProject(t *testing.T) {
-	source := writeTempProjectWithRectFillShapeLayer(t)
+func TestConvertWritesRecipeRectStrokeDashesShapeLayerProject(t *testing.T) {
+	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-shape-stroke-dashes.json"))
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
 
 	report, err := Convert(ConvertOptions{
@@ -67,10 +47,36 @@ func TestConvertWritesRectFillShapeLayerProject(t *testing.T) {
 	if report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 {
 		t.Fatalf("profile diff verification = %+v, want pass with 0 diffs", report.Verification)
 	}
+	if _, err := os.Stat(outPath); err != nil {
+		t.Fatalf("converted output missing: %v", err)
+	}
 }
 
-func TestConvertWritesRecipeRectFillShapeLayerProject(t *testing.T) {
-	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-shape-rect-fill-default-transform.json"))
+func TestConvertWritesRecipeEllipseStrokeTaperShapeLayerProject(t *testing.T) {
+	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-shape-stroke-taper.json"))
+	outPath := filepath.Join(t.TempDir(), "converted.aep")
+
+	report, err := Convert(ConvertOptions{
+		InputPath:  source,
+		OutputPath: outPath,
+		Target:     VersionAE2025,
+	})
+	if err != nil {
+		t.Fatalf("Convert: %v", err)
+	}
+	if report.Summary.Status != StatusPass {
+		t.Fatalf("status = %q, entries=%+v, diffs=%+v", report.Summary.Status, report.Entries, report.Verification.ProfileDiffs)
+	}
+	if report.Verification.ProfileDiffStatus != "pass" || report.Verification.ProfileDiffCount != 0 {
+		t.Fatalf("profile diff verification = %+v, want pass with 0 diffs", report.Verification)
+	}
+	if _, err := os.Stat(outPath); err != nil {
+		t.Fatalf("converted output missing: %v", err)
+	}
+}
+
+func TestConvertWritesRecipeEllipseStrokeWaveShapeLayerProject(t *testing.T) {
+	source := writeTempRecipe(t, filepath.Join("..", "..", "examples", "recipes", "minimal-shape-stroke-wave.json"))
 	outPath := filepath.Join(t.TempDir(), "converted.aep")
 
 	report, err := Convert(ConvertOptions{
