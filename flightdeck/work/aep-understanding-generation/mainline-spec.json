@@ -791,17 +791,17 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "matrix_run_plan_split",
-      "reason": "Reduce matrix.go growth risk by separating matrix run plan preparation and case enumeration from the public RunMatrix orchestration while preserving behavior.",
+      "group": "shape_filter_deform_split",
+      "reason": "Reduce convert_shape_filters.go growth risk by separating deform/merge shape filter materialization from round/offset/trim filter materialization while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/matrix.go",
-          "internal/aepmigrate/matrix_run.go"
+          "internal/aepmigrate/convert_shape_filters.go",
+          "internal/aepmigrate/convert_shape_filter_deform.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "RunMatrix now delegates input normalization, case-limit enforcement, host map preparation, and case enumeration to a focused run-plan helper. Next useful increment is to continue reducing remaining 4-5KB conversion support files or dense tests into coherent modules without changing behavior.",
+    "next_action": "Shape filter materialization now separates deform/merge filters from round/offset/trim filters. Next useful increment is to continue reducing remaining 4-5KB conversion support files or dense tests into coherent modules without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
