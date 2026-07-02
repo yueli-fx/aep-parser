@@ -8,7 +8,79 @@ import (
 	"testing"
 
 	"github.com/yueli-fx/aep-parser/internal/aehost"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
+
+func TestConvertRunsAEOpenGateWhenConfigured(t *testing.T) {
+	source := writeTempProjectWithOneComp(t, aep.TargetAE2020)
+	outPath := filepath.Join(t.TempDir(), "converted.aep")
+	donePath := filepath.Join(t.TempDir(), "ae-open.done")
+	host := &fakeAEOpenHost{doneBody: "PASS\nproject items.length=1\ncomp=Main layers.length=0\n"}
+
+	report, err := Convert(ConvertOptions{
+		InputPath:  source,
+		OutputPath: outPath,
+		Target:     VersionAE2025,
+		AEOpen: &AEOpenOptions{
+			Host:       host,
+			AEPath:     "AfterFX.exe",
+			JSXPath:    "verify_open.jsx",
+			ArgsPath:   filepath.Join(t.TempDir(), "verify_open_args.json"),
+			DonePath:   donePath,
+			TimeoutSec: 12,
+		},
+	})
+	if err != nil {
+		t.Fatalf("Convert: %v", err)
+	}
+	if report.Summary.Status != StatusPass {
+		t.Fatalf("status = %q, entries=%+v", report.Summary.Status, report.Entries)
+	}
+	if report.Verification.AEOpenStatus != "pass" {
+		t.Fatalf("AE open status = %q, verification=%+v", report.Verification.AEOpenStatus, report.Verification)
+	}
+	if report.Verification.AEOpenLog == "" {
+		t.Fatalf("AEOpenLog empty, verification=%+v", report.Verification)
+	}
+	if report.Verification.AEOpenExitCode == nil || *report.Verification.AEOpenExitCode != 0 {
+		t.Fatalf("AEOpenExitCode = %v, want 0", report.Verification.AEOpenExitCode)
+	}
+	if !host.called {
+		t.Fatal("fake AE host was not called")
+	}
+	if host.request.AEPath != "AfterFX.exe" || host.request.JSXPath != "verify_open.jsx" || host.request.DonePath != donePath || host.request.TimeoutSec != 12 {
+		t.Fatalf("host request = %+v", host.request)
+	}
+}
+
+func TestConvertBlocksWhenAEOpenGateFails(t *testing.T) {
+	source := writeTempProjectWithOneComp(t, aep.TargetAE2020)
+	outPath := filepath.Join(t.TempDir(), "converted.aep")
+	host := &fakeAEOpenHost{doneBody: "FAIL\nERROR: cannot open\n", exitCode: 1}
+
+	report, err := Convert(ConvertOptions{
+		InputPath:  source,
+		OutputPath: outPath,
+		Target:     VersionAE2025,
+		AEOpen: &AEOpenOptions{
+			Host:       host,
+			AEPath:     "AfterFX.exe",
+			JSXPath:    "verify_open.jsx",
+			ArgsPath:   filepath.Join(t.TempDir(), "verify_open_args.json"),
+			DonePath:   filepath.Join(t.TempDir(), "ae-open.done"),
+			TimeoutSec: 12,
+		},
+	})
+	if err != nil {
+		t.Fatalf("Convert: %v", err)
+	}
+	if report.Summary.Status != StatusBlocked {
+		t.Fatalf("status = %q, want blocked; entries=%+v", report.Summary.Status, report.Entries)
+	}
+	if report.Verification.AEOpenStatus != "fail" {
+		t.Fatalf("AE open status = %q, verification=%+v", report.Verification.AEOpenStatus, report.Verification)
+	}
+}
 
 func TestWriteAEOpenArgsUsesAbsolutePaths(t *testing.T) {
 	argsPath := filepath.Join(t.TempDir(), "verify_open_args.json")
