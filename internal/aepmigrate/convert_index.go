@@ -1,8 +1,6 @@
 package aepmigrate
 
 import (
-	"fmt"
-
 	"github.com/yueli-fx/aep-parser/internal/aep"
 	"github.com/yueli-fx/aep-parser/internal/profile"
 )
@@ -80,76 +78,4 @@ func (idx convertTargetCompIndex) add(source profile.Composition, target *aep.Co
 	if _, exists := idx.byName[source.Name]; !exists {
 		idx.byName[source.Name] = target
 	}
-}
-
-type convertFootageIndex struct {
-	byID   map[uint32]profile.Item
-	byName map[string]profile.Item
-}
-
-func newConvertFootageIndex(prof *profile.Profile) convertFootageIndex {
-	out := convertFootageIndex{
-		byID:   map[uint32]profile.Item{},
-		byName: map[string]profile.Item{},
-	}
-	if prof == nil {
-		return out
-	}
-	for _, item := range prof.Items.Footage {
-		if item.ID != 0 {
-			out.byID[item.ID] = item
-		}
-		if _, exists := out.byName[item.Name]; !exists {
-			out.byName[item.Name] = item
-		}
-	}
-	return out
-}
-
-func (idx convertFootageIndex) solidDetails(layer profile.Layer) (profile.FootageDetails, bool) {
-	if layer.SourceRef == nil {
-		return profile.FootageDetails{}, false
-	}
-	var item profile.Item
-	var ok bool
-	if layer.SourceRef.ID != 0 {
-		item, ok = idx.byID[layer.SourceRef.ID]
-	}
-	if !ok && layer.SourceRef.Name != "" {
-		item, ok = idx.byName[layer.SourceRef.Name]
-	}
-	if !ok || item.Footage == nil || item.Footage.AssetType != "solid" {
-		return profile.FootageDetails{}, false
-	}
-	return *item.Footage, true
-}
-
-func targetCompBySource(project *aep.Project, index int, source profile.Composition) (*aep.Composition, error) {
-	if index < len(project.Compositions) {
-		return project.Compositions[index], nil
-	}
-	for _, comp := range project.Compositions {
-		if comp.Name == source.Name {
-			return comp, nil
-		}
-	}
-	return nil, fmt.Errorf("comp %q effects: target comp missing", source.Name)
-}
-
-func targetLayerBySourceRef(comp *aep.Composition, ref *profile.LayerRef) *aep.Layer {
-	if ref == nil {
-		return nil
-	}
-	if ref.Name != "" {
-		if layer := comp.LayerByName(ref.Name); layer != nil {
-			return layer
-		}
-	}
-	if ref.Index >= 0 && ref.Index < len(comp.Layers) {
-		return comp.Layers[ref.Index]
-	}
-	if ref.Index > 0 && ref.Index <= len(comp.Layers) {
-		return comp.Layers[ref.Index-1]
-	}
-	return nil
 }
