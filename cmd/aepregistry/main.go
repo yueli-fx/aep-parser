@@ -235,7 +235,10 @@ func runAssetPolicyGate(root string, addStep func(gateStepReport)) error {
 	addStep(gateStepReport{ID: "registry_layout", Command: "go run ./cmd/aepregistry layout -root . -out " + layoutOut + " -sample-limit 20", Output: layoutOut, Status: layoutStatus, Errors: layoutErrors})
 
 	cleanupOut := "tmp/registry_generated_cleanup.json"
-	cleanup, err := registry.GeneratedCleanupRepository(root, registry.GeneratedCleanupOptions{SampleLimit: 3})
+	cleanup, err := registry.GeneratedCleanupRepository(root, registry.GeneratedCleanupOptions{
+		SampleLimit:         3,
+		StateReferenceFiles: defaultCleanupStateReferenceFiles(),
+	})
 	if err != nil {
 		return fmt.Errorf("cleanup: %w", err)
 	}
@@ -307,7 +310,7 @@ func runCleanup(args []string) int {
 	apply := fs.Bool("apply", false, "apply deletion for cleanup_candidate groups; default is dry-run only")
 	producers := fs.String("producer", "", "comma-separated producer categories to include in execution report")
 	excludeProducers := fs.String("exclude-producer", "registry_report", "comma-separated producer categories to exclude from execution report")
-	stateRefs := fs.String("state-ref", "flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json", "comma-separated JSON state files whose tmp references protect generated cleanup groups")
+	stateRefs := fs.String("state-ref", strings.Join(defaultCleanupStateReferenceFiles(), ","), "comma-separated JSON state files whose tmp references protect generated cleanup groups")
 	jsonOut := fs.Bool("json", false, "print JSON report")
 	if err := fs.Parse(args); err != nil {
 		return 2
@@ -368,6 +371,13 @@ func splitCSV(value string) []string {
 		}
 	}
 	return out
+}
+
+func defaultCleanupStateReferenceFiles() []string {
+	return []string{
+		"flightdeck/work/aep-understanding-generation/versioned-aep-migration-current.json",
+		"flightdeck/work/aep-understanding-generation/versioned-aep-migration-coverage.json",
+	}
 }
 
 func runAudit(args []string) int {

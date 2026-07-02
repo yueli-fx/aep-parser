@@ -792,17 +792,17 @@
     "last_code_maintenance_target": {
       "location": "internal/registry",
       "group": "cleanup_state_reference_protection",
-      "reason": "Teach generated cleanup reports to treat tmp paths referenced inside JSON state files, by default versioned-aep-migration-current.json, as state references so cleanup planning does not mark current operational evidence as pure disposable output.",
+      "reason": "Teach generated cleanup reports to treat tmp paths referenced inside JSON state files, by default current and coverage JSON, as state references so cleanup planning does not mark current operational or recurring-gate evidence as pure disposable output.",
       "result": {
         "files": [
           "internal/registry/generated_cleanup.go",
           "internal/registry/generated_cleanup_test.go",
           "cmd/aepregistry/main.go"
         ],
-        "behavior": "cleanup reports now expose state_referenced_files/groups and state_reference_paths; cleanup CLI defaults -state-ref to versioned-aep-migration-current.json"
+        "behavior": "cleanup reports now expose state_referenced_files/groups and state_reference_paths; cleanup CLI and asset-policy gate default -state-ref to current and coverage JSON"
       }
     },
-    "next_action": "Generated cleanup now protects tmp paths referenced by current JSON. The current version_matrix dry run plans 63 cleanup-candidate groups / 7602 files and skips 19 not-cleanup-candidate groups after state-reference protection; next useful increment is to review the remaining planned version_matrix groups before any apply.",
+    "next_action": "Generated cleanup now protects tmp paths referenced by current and coverage JSON. The version_matrix cleanup batch deleted 63 unreferenced groups / 7602 files, then restored the coverage recurring smoke matrix and now protects it as state-referenced evidence; next useful increment is to review remaining non-version-matrix cleanup candidates before any further apply.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
