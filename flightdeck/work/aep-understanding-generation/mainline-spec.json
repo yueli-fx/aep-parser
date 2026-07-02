@@ -791,17 +791,17 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/aepmigrate",
-      "group": "layer_reference_materializer_split",
-      "reason": "Reduce convert_layer.go growth risk by separating parent, light-source, and track-matte reference materialization from layer metadata and null-layer construction while preserving behavior.",
+      "group": "comp_metadata_reopen_split",
+      "reason": "Reduce convert_comp_metadata.go growth risk by separating no-layer composition label/comment reopen handling from stable composition setting materialization while preserving behavior.",
       "result": {
         "files": [
-          "internal/aepmigrate/convert_layer.go",
-          "internal/aepmigrate/convert_layer_refs.go"
+          "internal/aepmigrate/convert_comp_metadata.go",
+          "internal/aepmigrate/convert_comp_metadata_reopen.go"
         ],
         "behavior": "no semantic change intended"
       }
     },
-    "next_action": "Layer reference materialization now lives in a focused module separate from layer metadata and null-layer construction. Next useful increment is to continue reducing remaining 4KB conversion support files or dense tests into coherent modules without changing behavior.",
+    "next_action": "Composition stable setting materialization is now separated from the no-layer label/comment reopen path. Next useful increment is to continue reducing remaining 4KB conversion support files or dense tests into coherent modules without changing behavior.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
