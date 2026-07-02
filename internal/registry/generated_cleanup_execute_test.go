@@ -28,6 +28,10 @@ func TestExecuteGeneratedCleanupDryRunPlansOnlyCleanupCandidates(t *testing.T) {
 	if exec.Summary.PlannedGroups != 1 || exec.Summary.SkippedGroups != 2 || exec.Summary.DeletedGroups != 0 || exec.Summary.Errors != 0 {
 		t.Fatalf("summary = %+v, want one planned, two skipped, no deletes/errors", exec.Summary)
 	}
+	assertGeneratedExecutionBucket(t, exec.Summary.StatusBuckets, "planned", 1, 1)
+	assertGeneratedExecutionBucket(t, exec.Summary.StatusBuckets, "skipped", 2, 3)
+	assertGeneratedExecutionBucket(t, exec.Summary.SkippedReasonBuckets, "not_cleanup_candidate", 1, 2)
+	assertGeneratedExecutionBucket(t, exec.Summary.SkippedReasonBuckets, "producer_excluded", 1, 1)
 	technique := findGeneratedExecutionOp(t, exec, "tmp_evidence", "technique_smoke")
 	if technique.Status != "planned" || technique.Reason != "dry_run" || technique.CleanupOperation != "delete_directory_tree" {
 		t.Fatalf("technique op = %+v", technique)
@@ -148,6 +152,19 @@ func findGeneratedExecutionOp(t *testing.T, report GeneratedCleanupExecutionRepo
 	}
 	t.Fatalf("execution op %s/%s not found in %+v", locationID, group, report.Operations)
 	return GeneratedCleanupExecutionOp{}
+}
+
+func assertGeneratedExecutionBucket(t *testing.T, buckets []GeneratedCleanupExecutionBucket, name string, groups, files int) {
+	t.Helper()
+	for _, bucket := range buckets {
+		if bucket.Name == name {
+			if bucket.Groups != groups || bucket.Files != files {
+				t.Fatalf("bucket %q = %+v, want groups=%d files=%d", name, bucket, groups, files)
+			}
+			return
+		}
+	}
+	t.Fatalf("bucket %q not found in %+v", name, buckets)
 }
 
 func testPathExists(root, rel string) bool {

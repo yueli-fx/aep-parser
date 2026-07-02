@@ -22,17 +22,25 @@ type GeneratedCleanupExecutionReport struct {
 }
 
 type GeneratedCleanupExecutionSummary struct {
-	Groups                int `json:"groups"`
-	PlannedGroups         int `json:"planned_groups"`
-	SkippedGroups         int `json:"skipped_groups"`
-	DeletedGroups         int `json:"deleted_groups,omitempty"`
-	Files                 int `json:"files"`
-	PlannedFiles          int `json:"planned_files"`
-	SkippedFiles          int `json:"skipped_files"`
-	DeletedFiles          int `json:"deleted_files,omitempty"`
-	DeleteDirectoryGroups int `json:"delete_directory_groups"`
-	DeletePrefixGroups    int `json:"delete_prefix_groups"`
-	Errors                int `json:"errors"`
+	Groups                int                               `json:"groups"`
+	PlannedGroups         int                               `json:"planned_groups"`
+	SkippedGroups         int                               `json:"skipped_groups"`
+	DeletedGroups         int                               `json:"deleted_groups,omitempty"`
+	Files                 int                               `json:"files"`
+	PlannedFiles          int                               `json:"planned_files"`
+	SkippedFiles          int                               `json:"skipped_files"`
+	DeletedFiles          int                               `json:"deleted_files,omitempty"`
+	DeleteDirectoryGroups int                               `json:"delete_directory_groups"`
+	DeletePrefixGroups    int                               `json:"delete_prefix_groups"`
+	Errors                int                               `json:"errors"`
+	StatusBuckets         []GeneratedCleanupExecutionBucket `json:"status_buckets,omitempty"`
+	SkippedReasonBuckets  []GeneratedCleanupExecutionBucket `json:"skipped_reason_buckets,omitempty"`
+}
+
+type GeneratedCleanupExecutionBucket struct {
+	Name   string `json:"name"`
+	Groups int    `json:"groups"`
+	Files  int    `json:"files"`
 }
 
 type GeneratedCleanupExecutionOp struct {
@@ -60,6 +68,8 @@ func ExecuteGeneratedCleanup(root string, report GeneratedCleanupReport, opts Ge
 		SchemaVersion: 1,
 		Mode:          mode,
 	}
+	statusBuckets := map[string]GeneratedCleanupExecutionBucket{}
+	skippedReasonBuckets := map[string]GeneratedCleanupExecutionBucket{}
 	locations := generatedCleanupLocationRoots(report)
 	for _, location := range report.Locations {
 		for _, group := range location.Groups {
@@ -67,6 +77,10 @@ func ExecuteGeneratedCleanup(root string, report GeneratedCleanupReport, opts Ge
 			out.Operations = append(out.Operations, op)
 			out.Summary.Groups++
 			out.Summary.Files += group.Files
+			addGeneratedCleanupExecutionBucket(statusBuckets, op.Status, group.Files)
+			if op.Status == "skipped" {
+				addGeneratedCleanupExecutionBucket(skippedReasonBuckets, valueOr(op.Reason, "unspecified"), group.Files)
+			}
 			switch op.Status {
 			case "planned":
 				out.Summary.PlannedGroups++
@@ -88,6 +102,8 @@ func ExecuteGeneratedCleanup(root string, report GeneratedCleanupReport, opts Ge
 			}
 		}
 	}
+	out.Summary.StatusBuckets = sortedGeneratedCleanupExecutionBuckets(statusBuckets)
+	out.Summary.SkippedReasonBuckets = sortedGeneratedCleanupExecutionBuckets(skippedReasonBuckets)
 	sort.Slice(out.Operations, func(i, j int) bool {
 		left := out.Operations[i]
 		right := out.Operations[j]
@@ -102,6 +118,27 @@ func ExecuteGeneratedCleanup(root string, report GeneratedCleanupReport, opts Ge
 		}
 		return left.Group < right.Group
 	})
+	return out
+}
+
+func addGeneratedCleanupExecutionBucket(buckets map[string]GeneratedCleanupExecutionBucket, name string, files int) {
+	bucket := buckets[name]
+	bucket.Name = name
+	bucket.Groups++
+	bucket.Files += files
+	buckets[name] = bucket
+}
+
+func sortedGeneratedCleanupExecutionBuckets(buckets map[string]GeneratedCleanupExecutionBucket) []GeneratedCleanupExecutionBucket {
+	names := make([]string, 0, len(buckets))
+	for name := range buckets {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	out := make([]GeneratedCleanupExecutionBucket, 0, len(names))
+	for _, name := range names {
+		out = append(out, buckets[name])
+	}
 	return out
 }
 

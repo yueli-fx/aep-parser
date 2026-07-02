@@ -791,17 +791,17 @@
     },
     "last_code_maintenance_target": {
       "location": "internal/registry",
-      "group": "capability_version_policy_drift_audit",
-      "reason": "Add audit coverage that rejects drift between registry/capability_atoms.json top-level version_policy and the shared AE2020-AE2025 version axis, keeping data defaults and code defaults aligned before future AE2026/AE2027 expansion.",
+      "group": "cleanup_execution_summary_buckets",
+      "reason": "Make generated cleanup execution reports summarize operation status and skipped reasons so producer-filtered dry runs, such as version_matrix cleanup review, can be interpreted from JSON without manually scanning operations.",
       "result": {
         "files": [
-          "internal/registry/registry.go",
-          "internal/registry/audit_test.go"
+          "internal/registry/generated_cleanup_execute.go",
+          "internal/registry/generated_cleanup_execute_test.go"
         ],
-        "behavior": "registry audit fails when declared capability version_policy minimum/known_supported/expansion_policy drifts from the shared supported axis contract"
+        "behavior": "cleanup execution summary now includes status_buckets and skipped_reason_buckets while preserving existing planned/skipped/deleted totals"
       }
     },
-    "next_action": "Capability atom version_policy is now inherited and drift-audited. version_boundaries currently has one explicit matte-source boundary whose source/target lists encode real policy and should stay explicit; next useful increment is to inspect matrix evidence producers before deciding whether to regenerate or retain remaining tmp version_matrix artifacts.",
+    "next_action": "Producer-filtered cleanup dry runs now expose JSON status and skipped-reason buckets. The current version_matrix dry run plans 64 cleanup-candidate groups and skips 18 mixed registered groups; next useful increment is to decide whether to apply only the pure version_matrix cleanup batch or first register/regenerate any matrix groups still needed by coverage.",
     "must_not_skip": [
       "Run registry audit after report changes.",
       "Run registry ownership after atom taxonomy changes.",
