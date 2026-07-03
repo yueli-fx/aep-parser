@@ -5,7 +5,7 @@ import "testing"
 func TestLintJargon_Hits(t *testing.T) {
 	cases := []string{
 		"This was the V2.2 builder transplant",
-		"see CLAUDE.md #5 for the rule",
+		"see the V2.2 internal plan for the rule",
 		"derived in tmp_debug/foo",
 		"RE'd from tolerance.aep",
 		"the wave 2 ldta pass",

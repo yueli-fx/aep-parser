@@ -33,7 +33,7 @@
 
 ## 5. 工件落位
 
-`flightdeck/showcase/booyah-clone/`(对齐 CLAUDE.md「showcase 生成器」工件规则 + showcase 眼验面):
+`flightdeck/showcase/booyah-clone/`(对齐 `flightdeck/knowledge/showcase/showcase.md` 的 showcase 生成器工件规则 + showcase 眼验面):
 - `gen.go` + 按 comp 拆的 `gen_<comp>.go`(同一 package main)
 - `render.jsx`(saveFrameToPng 终帧)+ `verify.jsx`(dump DOM 值对账)
 - `INDEX.md`(frontmatter + **覆盖账本**,见 §8)

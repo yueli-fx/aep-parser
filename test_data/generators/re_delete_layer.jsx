@@ -8,7 +8,7 @@
 //   Q4 Ewst sibling co-deleted with Layr?
 //
 // AE version compatibility:
-//   - Uses ONLY APIs available in AE 2020 (project read floor per CLAUDE.md):
+//   - Uses ONLY APIs available in AE 2020 (project read floor per project operating rules):
 //     * comp.layers.addSolid / addNull — AE 2020
 //     * layer.parent = otherLayer    — AE 2020
 //     * layer.trackMatteType = TrackMatteType.ALPHA  — AE 2020 (implicit "layer above")
