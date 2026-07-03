@@ -9,6 +9,7 @@
 
 (function () {
     var base = "e:/projects/tools/aep-parser/test_data/";
+    var fixtureBase = base + "fixtures/";
     var log = [];
     function step(name, fn) {
         try { fn(); log.push("OK  " + name); }
@@ -41,7 +42,7 @@
     });
 
     step("save", function () {
-        app.project.save(new File(base + "re_comp_idta.aep"));
+        app.project.save(new File(fixtureBase + "re_comp_idta.aep"));
     });
 
     step("write_done_marker", function () {

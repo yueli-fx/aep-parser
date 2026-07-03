@@ -6,8 +6,8 @@ The mechanical ledger only counted direct references to each `.jsx` filename. Th
 
 ## Summary
 
-- keep-active: 6
-- keep-provenance-gap: 5
+- keep-active: 10
+- historical-evidence-review: 1
 - archive-or-delete-candidate: 15
 - direct-delete-now: 0
 
@@ -15,27 +15,27 @@ No generator should be deleted solely from the original `delete-candidate` class
 
 ## Keep Active
 
-These are active because `scripts/fixtures/fixtures_manifest.json` already regenerates them:
+These are active because `scripts/fixtures/fixtures_manifest.json` regenerates them:
 
 | Generator | Reason |
 |---|---|
+| `test_data/generators/build_material_classic_2020.jsx` | Manifest entry added; produces `test_data/fixtures/re_material_classic_2020.aep`, used by material classic tests. |
+| `test_data/generators/build_re_comp_idta.jsx` | Output path repaired to `test_data/fixtures/re_comp_idta.aep`; manifest entry added. |
+| `test_data/generators/build_re_layer_comment.jsx` | Output path repaired to `test_data/fixtures/re_layer_comment.aep`; manifest entry added. |
 | `test_data/generators/fdta_probe_AE2020.jsx` | Manifest entry; produces `test_data/fixtures/fdta_probe/AE2020_*.aep`. |
 | `test_data/generators/fdta_probe_AE2025.jsx` | Manifest entry; produces `test_data/fixtures/fdta_probe/AE2025_*.aep`. |
+| `test_data/generators/gen_text_range_adv_smoothness.jsx` | Manifest entry added; source fixture B for text range advanced template synthesis. |
 | `test_data/generators/re_camera_filmsize.jsx` | Manifest entry; output also appears in split-roundtrip baseline. |
 | `test_data/generators/re_cdta_ae2020.jsx` | Manifest entry; output also appears in split-roundtrip baseline. |
 | `test_data/generators/re_cross_project_insert.jsx` | Manifest entry; produces generated cross-project source/dest fixtures. |
 | `test_data/generators/re_sepdim_anim3.jsx` | Manifest entry; generated outputs appear in split-roundtrip baseline. |
 
-## Keep, But Repair Provenance
+## Historical Evidence Review
 
-These should not be deleted, but their generation story is incomplete or stale.
+This should not be deleted until the project decides what to do with historical generated ship-gate evidence.
 
 | Generator | Current evidence | Needed repair |
 |---|---|---|
-| `test_data/generators/build_material_classic_2020.jsx` | Produces `test_data/fixtures/re_material_classic_2020.aep`; used by `internal/aep_test/material_classic_shipgate_test.go`. | Add to fixture manifest or document why it stays manual. |
-| `test_data/generators/build_re_comp_idta.jsx` | `re_comp_idta.aep` is cited by serializer comments, tests, and knowledge. | Script currently saves to `test_data/re_comp_idta.aep`, while tracked fixture is `test_data/fixtures/re_comp_idta.aep`; fix output path before adding manifest. |
-| `test_data/generators/build_re_layer_comment.jsx` | `re_layer_comment.aep` is cited by codec/test comments and layer knowledge. | Script currently saves to `test_data/re_layer_comment.aep`, while tracked fixture is `test_data/fixtures/re_layer_comment.aep`; fix output path before adding manifest. |
-| `test_data/generators/gen_text_range_adv_smoothness.jsx` | Produces tracked `test_data/fixtures/re_text_range_adv_sm.aep`; comments say it is fixture B for Range Advanced template synthesis. | Either document the synthesis/extraction dependency or prove the embedded template no longer needs this source fixture. |
 | `test_data/generators/verify_ge_duplicate_layer_explicit_matte.jsx` | Generated `.aep` appears in split-roundtrip baseline and `knowledge/layer/ae-duplicatelayer-re.md` as historical AE 2025 ship-gate evidence. | Decide whether historical generated ship-gate AEPs in `test_data/generated/ship-gate` stay as baseline evidence or move to durable registry evidence. |
 
 ## Archive Or Delete Candidates
@@ -62,6 +62,6 @@ These had no current Go/manifest/knowledge owner beyond their own script, an obs
 
 ## Next Actions
 
-1. Repair provenance for the 5 `keep-provenance-gap` rows before deleting anything around them.
+1. Decide the historical evidence policy for `verify_ge_duplicate_layer_explicit_matte.jsx`.
 2. For the 15 archive/delete candidates, first decide whether their tracked `.aep` outputs and `tools/debug/split_roundtrip_baseline/baseline.txt` entries are still useful. If not, delete the script, its unreferenced tracked fixture(s), and any stale baseline hash in one cleanup commit.
-3. Re-run `scripts/fixtures/regen_fixtures.ps1 -CheckOnly` after manifest edits, if AE availability allows it; otherwise run non-AE registry/capindex gates and record AE as not run.
+3. `scripts/fixtures/regen_fixtures.ps1 -CheckOnly` has been run after the manifest edits. It reports `79 manifest jobs, 47 with missing outputs (46 driveable, 1 manual-only), 0 ungoverned on-disk aep`; the repaired tracked fixture entries are not missing, but broader generated fixture gaps remain.

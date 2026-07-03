@@ -5,10 +5,11 @@
 // (Layer.SetComment currently appends to the tail and AE ignores it —
 // incidents/layer-setcomment-cmta-append-position.md). Saves re_layer_comment.aep.
 //
-// Run via ae_run.ps1 against AE 2020. Writes re_layer_comment.aep + a .done log.
+// Run via ae_run.ps1 against AE 2020. Writes fixtures/re_layer_comment.aep + a .done log.
 
 (function () {
     var base = "e:/projects/tools/aep-parser/test_data/";
+    var fixtureBase = base + "fixtures/";
     var log = [];
     function step(name, fn) {
         try { fn(); log.push("OK  " + name); }
@@ -28,7 +29,7 @@
     });
 
     step("save", function () {
-        app.project.save(new File(base + "re_layer_comment.aep"));
+        app.project.save(new File(fixtureBase + "re_layer_comment.aep"));
     });
 
     step("write_done_marker", function () {

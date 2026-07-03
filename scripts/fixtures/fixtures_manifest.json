@@ -7,6 +7,9 @@
     "2025": "E:\\adobe\\Adobe After Effects 2025\\Support Files\\AfterFX.exe"
   },
   "fixtures": [
+    { "jsx": "test_data/generators/build_material_classic_2020.jsx", "ae": "2020", "env": {}, "done": "test_data/build_material_classic_2020.done", "outputs": ["test_data/fixtures/re_material_classic_2020.aep"] },
+    { "jsx": "test_data/generators/build_re_comp_idta.jsx", "ae": "2020", "env": {}, "done": "test_data/build_re_comp_idta.done", "outputs": ["test_data/fixtures/re_comp_idta.aep"] },
+    { "jsx": "test_data/generators/build_re_layer_comment.jsx", "ae": "2020", "env": {}, "done": "test_data/build_re_layer_comment.done", "outputs": ["test_data/fixtures/re_layer_comment.aep"] },
     { "jsx": "test_data/generators/build_renderer_ae2020.jsx", "ae": "2020", "env": {}, "done": "test_data/build_renderer_ae2020.done", "outputs": ["test_data/fixtures/renderer_ae2020_r0.aep", "test_data/fixtures/renderer_ae2020_r1.aep", "test_data/fixtures/renderer_ae2020_r2.aep", "test_data/generated/fixtures/renderer_ae2020_r3.aep"] },
     { "jsx": "test_data/generators/build_rq_ae2020.jsx", "ae": "2020", "env": {}, "done": "test_data/build_rq_ae2020.done", "outputs": ["test_data/fixtures/rq_ae2020_base.aep"] },
     { "jsx": "test_data/generators/fdta_probe_AE2020.jsx", "ae": "2020", "env": {}, "done": "test_data/fdta_probe_AE2020.done", "outputs": ["test_data/fixtures/fdta_probe/AE2020_empty.aep", "test_data/fixtures/fdta_probe/AE2020_1comp.aep", "test_data/fixtures/fdta_probe/AE2020_2comp.aep", "test_data/fixtures/fdta_probe/AE2020_1comp_after_delete.aep", "test_data/fixtures/fdta_probe/AE2020_nested.aep"] },
@@ -56,6 +59,7 @@
     { "jsx": "test_data/generators/re_stroke_linecap.jsx", "ae": "2020", "env": {}, "done": "test_data/re_stroke_linecap.done", "outputs": ["test_data/generated/fixtures/re_stroke_linecap.aep"] },
     { "jsx": "test_data/generators/re_template.jsx", "ae": "2020", "env": {}, "done": null, "outputs": ["test_data/generated/fixtures/re_out.aep"], "manual": true, "notes": "RE template/example, alert-based, no .done — not a production fixture" },
     { "jsx": "test_data/generators/re_text.jsx", "ae": "2020", "env": {}, "done": "test_data/re_text.done", "outputs": ["test_data/fixtures/re_text.aep"] },
+    { "jsx": "test_data/generators/gen_text_range_adv_smoothness.jsx", "ae": "2020", "env": {}, "done": "test_data/gen_text_range_adv_smoothness.done", "outputs": ["test_data/fixtures/re_text_range_adv_sm.aep"], "notes": "source fixture B for text range advanced template synthesis; keep with gen_text_range_advanced_template.jsx provenance" },
     { "jsx": "test_data/generators/re_text_ae24_more.jsx", "ae": "2025", "env": {}, "done": "test_data/re_text_ae24_more.done", "outputs": ["test_data/fixtures/re_text_ae24_more.aep"] },
     { "jsx": "test_data/generators/re_text_caps_ae24.jsx", "ae": "2025", "env": {}, "done": "test_data/re_text_caps_ae24.done", "outputs": ["test_data/fixtures/re_text_caps_ae24.aep"] },
     { "jsx": "test_data/generators/re_text_multipara.jsx", "ae": "2020", "env": {}, "done": "test_data/re_text_multipara.done", "outputs": ["test_data/fixtures/re_text_multipara.aep"], "notes": "RE for empty + multi-paragraph SetText btdk shape (empty=single \\r paragraph; N paras = N count-patched entry clones)" },
