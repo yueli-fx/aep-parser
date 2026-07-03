@@ -1,5 +1,10 @@
 # Recipe Layer Comment
 
+SUMMARY: Recipe support note for Layer Comment.
+READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for layer fields related to Layer Comment
+
+---
+
 Context: recipe `layer.comment` support, proven with
 `examples/recipes/minimal-layer-comment.json`.
 

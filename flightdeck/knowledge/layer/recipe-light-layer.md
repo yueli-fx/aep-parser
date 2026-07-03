@@ -1,5 +1,10 @@
 # Recipe Light Layer
 
+SUMMARY: Recipe support note for Light Layer.
+READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for layer fields related to Light Layer
+
+---
+
 Context: recipe `type: "light"` support, proven with
 `examples/recipes/minimal-light-layer.json`.
 

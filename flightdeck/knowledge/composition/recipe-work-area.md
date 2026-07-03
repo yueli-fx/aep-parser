@@ -1,5 +1,10 @@
 # Recipe Comp Work Area
 
+SUMMARY: Recipe support note for Comp Work Area.
+READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for composition fields related to Comp Work Area
+
+---
+
 Context: recipe `comp.work_area` support, proven with
 `examples/recipes/minimal-comp-work-area.json`.
 

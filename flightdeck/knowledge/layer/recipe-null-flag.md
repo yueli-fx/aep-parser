@@ -1,5 +1,10 @@
 # Recipe Layer Null Flag
 
+SUMMARY: Recipe support note for Layer Null Flag.
+READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for layer fields related to Layer Null Flag
+
+---
+
 Context: recipe `layer.is_null` support, proven with
 `examples/recipes/minimal-layer-null-flag.json`.
 

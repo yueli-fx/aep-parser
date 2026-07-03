@@ -1,5 +1,10 @@
 # Recipe Layer Auto Orient
 
+SUMMARY: Recipe support note for Layer Auto Orient.
+READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for layer fields related to Layer Auto Orient
+
+---
+
 Context: recipe `layer.auto_orient` support, proven with
 `examples/recipes/minimal-layer-auto-orient.json`.
 

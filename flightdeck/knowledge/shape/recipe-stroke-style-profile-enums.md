@@ -1,5 +1,10 @@
 # Recipe Stroke Style Profile Enums
 
+SUMMARY: Recipe support note for Stroke Style Profile Enums.
+READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for shape fields related to Stroke Style Profile Enums
+
+---
+
 Context: recipe `shape.stroke` line style support, proven with
 `examples/recipes/minimal-shape-stroke-style.json`.
 

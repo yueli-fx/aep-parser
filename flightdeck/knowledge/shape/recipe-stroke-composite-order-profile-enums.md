@@ -1,5 +1,10 @@
 # Recipe Stroke Composite Order Profile Enums
 
+SUMMARY: Recipe support note for Stroke Composite Order Profile Enums.
+READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for shape fields related to Stroke Composite Order Profile Enums
+
+---
+
 Context: recipe `shape.stroke.composite_order` support, proven with
 `examples/recipes/minimal-shape-stroke-composite-order.json`.
 

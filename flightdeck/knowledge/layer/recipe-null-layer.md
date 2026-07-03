@@ -1,5 +1,10 @@
 # Recipe Null Layer
 
+SUMMARY: Recipe support note for Null Layer.
+READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for layer fields related to Null Layer
+
+---
+
 Context: recipe `type: "null"` support, proven with
 `examples/recipes/minimal-null-layer.json`.
 

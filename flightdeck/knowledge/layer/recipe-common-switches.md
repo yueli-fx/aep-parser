@@ -1,5 +1,10 @@
 # Recipe Layer Common Switches
 
+SUMMARY: Recipe support note for Layer Common Switches.
+READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for layer fields related to Layer Common Switches
+
+---
+
 Context: recipe support for common layer switches, proven with
 `examples/recipes/minimal-layer-common-switches.json`.
 

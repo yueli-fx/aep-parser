@@ -1,5 +1,10 @@
 # Recipe Fill Composite Order Profile Enums
 
+SUMMARY: Recipe support note for Fill Composite Order Profile Enums.
+READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for shape fields related to Fill Composite Order Profile Enums
+
+---
+
 Context: recipe `shape.fill_composite_order` support, proven with
 `examples/recipes/minimal-shape-fill-composite-order.json`.
 

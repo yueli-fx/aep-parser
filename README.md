@@ -73,17 +73,35 @@ go run ./cmd/aepselfhost start-watch -out-root tmp\technique_selfhost_gate -dura
 
 ## 原理与分层
 
-`.aep` 是 **RIFX**（Big-Endian RIFF）格式（魔数 `RIFX` + `Egg!`），内部为嵌套 Chunk 树；本库通过逆向工程已知偏移量提取数据。代码按单向 DAG 分层（M8 物理分包）：
+`.aep` 是 **RIFX**（Big-Endian RIFF）格式（魔数 `RIFX` + `Egg!`），内部为嵌套 Chunk 树；本库通过逆向工程已知偏移量提取数据。核心代码仍按单向 DAG 分层，但现在已经扩展出迁移、配方、治理和技法内化几条工作面：
 
 ```text
-internal/rifx        通用 RIFX/Chunk 二进制读写器（无 AEP 语义）
-        ↑
-internal/codec       纯值/字节编解码
-internal/scene       运行时模型（Project/Composition/Layer/…）+ writer 接口
-internal/serializer  chunk ⇄ scene（parse / lower / write / back / mutate）
-        ↑
-internal/aep         薄 facade：公开 API（Open / FromReader / New* / 类型别名）
+internal/rifx          通用 RIFX/Chunk 二进制读写器（无 AEP 语义）
+internal/codec         纯值/字节编解码与 layout helper
+
+internal/scene         运行时模型（Project/Composition/Layer/…）+ writer 接口
+internal/serializer    chunk ⇄ scene（parse / lower / write / back / mutate）
+internal/aep           公开 API facade（Open / FromReader / New* / 类型别名）
+
+internal/aep_test      public API + AE ship-gate 测试面
+internal/aehost        AE host 调用与发现
+internal/aeoracle      AE render / frame / pixel compare 证据
+internal/profile       解析工程的稳定 profile，用于 diff / migration / recipe
+
+internal/aepmigrate    AE 版本迁移：profile → rebuild → verify / matrix
+internal/recipe        JSON recipe 校验与编译，走 internal/aep facade 生成工程
+internal/recipedoc     recipe schema / capability 文档生成
+
+internal/apidoc        public API 注释词表真相源
+internal/capindex      capability 索引与查询
+internal/registry      位置 / 证据 / coverage / ownership / cleanup 治理
+
+internal/technique     从 profile 抽取技法事实、画像、解释
+internal/selfhost      技法内化的报告与验收面
+internal/server        HTTP parse/profile 服务
 ```
+
+新增 public 能力时通常沿这条线落地：`internal/aep` facade doc comment + cap tag → `internal/serializer` 实现 → `internal/scene` 状态 / writer contract → `internal/aep_test` gate → docgen/capindex。字节布局知识沉淀到 `flightdeck/knowledge/<domain>/`；长期引用的机器证据进入 `registry/` 或 `registry/evidence/<topic>/`，不把 `tmp/` 当真相源。
 
 ## 参考
 

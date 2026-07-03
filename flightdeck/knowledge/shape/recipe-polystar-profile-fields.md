@@ -1,5 +1,10 @@
 # Recipe Polystar Profile Fields
 
+SUMMARY: Recipe support note for Polystar Profile Fields.
+READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for shape fields related to Polystar Profile Fields
+
+---
+
 Context: recipe `shape.kind` support for `star` / `polygon`, proven with
 `examples/recipes/minimal-shape-polystar.json`.
 

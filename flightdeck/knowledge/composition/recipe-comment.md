@@ -1,5 +1,10 @@
 # Recipe Comp Comment
 
+SUMMARY: Recipe support note for Comp Comment.
+READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for composition fields related to Comp Comment
+
+---
+
 Context: recipe `comp.comment` support, proven with
 `examples/recipes/minimal-comp-comment.json`.
 

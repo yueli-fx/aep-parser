@@ -1,5 +1,10 @@
 # Recipe Repeater Profile Enums
 
+SUMMARY: Recipe support note for Repeater Profile Enums.
+READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for shape fields related to Repeater Profile Enums
+
+---
+
 Context: recipe `shape.repeater` support, proven with
 `examples/recipes/minimal-shape-repeater.json`.
 

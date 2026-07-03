@@ -1,5 +1,10 @@
 # Recipe Comp Motion Blur Enabled
 
+SUMMARY: Recipe support note for Comp Motion Blur Enabled.
+READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for composition fields related to Comp Motion Blur Enabled
+
+---
+
 Context: recipe `comp.motion_blur.enabled` support, proven with
 `examples/recipes/minimal-comp-motion-blur-enabled.json`.
 

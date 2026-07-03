@@ -1,5 +1,10 @@
 # Recipe Comp Renderer
 
+SUMMARY: Recipe support note for Comp Renderer.
+READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for composition fields related to Comp Renderer
+
+---
+
 Context: recipe `comp.renderer` support, proven with
 `examples/recipes/minimal-comp-renderer.json`.
 

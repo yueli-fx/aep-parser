@@ -1,5 +1,10 @@
 # Recipe Layer Shy
 
+SUMMARY: Recipe support note for Layer Shy.
+READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for layer fields related to Layer Shy
+
+---
+
 Context: recipe `layer.shy` support, proven with
 `examples/recipes/minimal-layer-shy.json`.
 

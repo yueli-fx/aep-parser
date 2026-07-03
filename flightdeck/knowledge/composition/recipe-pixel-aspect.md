@@ -1,5 +1,10 @@
 # Recipe Comp Pixel Aspect
 
+SUMMARY: Recipe support note for Comp Pixel Aspect.
+READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for composition fields related to Comp Pixel Aspect
+
+---
+
 Context: recipe `comp.pixel_aspect` support, proven with
 `examples/recipes/minimal-comp-pixel-aspect.json`.
 

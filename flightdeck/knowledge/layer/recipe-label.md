@@ -1,5 +1,10 @@
 # Recipe Layer Label
 
+SUMMARY: Recipe support note for Layer Label.
+READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for layer fields related to Layer Label
+
+---
+
 Context: recipe `layer.label` support, proven with
 `examples/recipes/minimal-layer-label.json`.
 

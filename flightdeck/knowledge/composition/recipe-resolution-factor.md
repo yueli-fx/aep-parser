@@ -1,5 +1,10 @@
 # Recipe Comp Resolution Factor
 
+SUMMARY: Recipe support note for Comp Resolution Factor.
+READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for composition fields related to Comp Resolution Factor
+
+---
+
 Context: recipe `comp.resolution_factor` support, proven with
 `examples/recipes/minimal-comp-resolution-factor.json`.
 

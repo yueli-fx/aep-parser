@@ -1,5 +1,10 @@
 # Recipe Layer Timing
 
+SUMMARY: Recipe support note for Layer Timing.
+READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for layer fields related to Layer Timing
+
+---
+
 Context: recipe `layer.start_time`, `layer.in_point`, and `layer.out_point`
 support, proven with `examples/recipes/minimal-layer-timing.json`.
 

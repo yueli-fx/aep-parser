@@ -1,5 +1,10 @@
 # Recipe Light Options
 
+SUMMARY: Recipe support note for Light Options.
+READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for layer fields related to Light Options
+
+---
+
 Context: recipe light option support, starting with
 `examples/recipes/minimal-light-intensity.json` and
 `examples/recipes/minimal-light-color.json`, plus

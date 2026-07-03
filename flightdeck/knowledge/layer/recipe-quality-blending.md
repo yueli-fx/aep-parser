@@ -1,5 +1,10 @@
 # Recipe Layer Quality And Blending
 
+SUMMARY: Recipe support note for Layer Quality And Blending.
+READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for layer fields related to Layer Quality And Blending
+
+---
+
 Context: recipe `layer.quality` and `layer.blending_mode` support, proven with
 `examples/recipes/minimal-layer-quality-blending.json`.
 

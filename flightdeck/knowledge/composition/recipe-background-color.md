@@ -1,5 +1,10 @@
 # Recipe Comp Background Color
 
+SUMMARY: Recipe support note for Comp Background Color.
+READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for composition fields related to Comp Background Color
+
+---
+
 Context: recipe `comp.background_color` support, proven with
 `examples/recipes/minimal-comp-background-color.json`.
 

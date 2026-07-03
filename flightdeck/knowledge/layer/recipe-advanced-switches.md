@@ -1,5 +1,10 @@
 # Recipe Layer Advanced Switches
 
+SUMMARY: Recipe support note for Layer Advanced Switches.
+READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for layer fields related to Layer Advanced Switches
+
+---
+
 Context: recipe support for advanced layer switches, proven with
 `examples/recipes/minimal-layer-advanced-switches.json`.
 

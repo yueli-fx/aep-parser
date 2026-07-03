@@ -1,5 +1,10 @@
 # Recipe Merge Paths Profile Enums
 
+SUMMARY: Recipe support note for Merge Paths Profile Enums.
+READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for shape fields related to Merge Paths Profile Enums
+
+---
+
 Context: recipe `shape.merge_paths` support, proven with
 `examples/recipes/minimal-shape-merge-paths.json`.
 

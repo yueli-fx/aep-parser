@@ -1,5 +1,10 @@
 # Recipe Comp Hide Shy Layers
 
+SUMMARY: Recipe support note for Comp Hide Shy Layers.
+READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for composition fields related to Comp Hide Shy Layers
+
+---
+
 Context: recipe `comp.hide_shy_layers` support, proven with
 `examples/recipes/minimal-comp-hide-shy-layers.json`.
 
