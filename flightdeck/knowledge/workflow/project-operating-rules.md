@@ -1,12 +1,12 @@
 # Project operating rules
 
-SUMMARY: Core aep-parser operating rules that used to live in CLAUDE.md: API stability, package boundaries, write/delivery gates, comments/docs, and truth-source priority.
+SUMMARY: Core aep-parser operating rules: API stability, package boundaries, write/delivery gates, comments/docs, and truth-source priority.
 READ WHEN: changing public API, parser/writer internals, package dependencies, structural write operations, docs generated from API comments, or claiming a feature is shippable
 
 ---
 
-`CLAUDE.md` is retired. Durable project rules now live in Flightdeck briefing
-for session essentials and in routed knowledge files for task-specific detail.
+Durable project rules live in Flightdeck briefing for session essentials and in
+routed knowledge files for task-specific detail.
 
 ## API Stability
 
