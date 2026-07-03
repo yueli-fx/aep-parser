@@ -15,13 +15,13 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 
 **🔍 待review** = agent 已建 + AE 实渲 + 自己眼验，**等用户在真机打开 .aep 复核**；**✅ complete** = **用户真机验收过**。agent 不自标 complete（详 `briefing.md` § Showcase）。
 
-15 个 🖼 可视方向 ✅ complete（2026-06-14 用户真机逐个验收通过；gradient +radial 类型、expressions +四语汇 idiom 的增量同日复核通过）+ [3d-camera] ✅ complete（2026-06-15，3D 图层 + 相机：视差 + 透视 tumble）。**[shape-filters] 当前 🔍 待review**（2026-06-16 扩成 4×4，加 Wiggle 调制对比行 Points/Correlation，等真机复核翻回 complete）。📋 B 类读值档：4 个 from-scratch 可行已补，3 个 from-scratch 不可表达（见末节）。
+16 个 🖼 可视能力方向 ✅ complete（2026-06-14 用户真机逐个验收通过；gradient +radial 类型、expressions +四语汇 idiom 的增量同日复核通过；[3d-camera] 2026-06-15 通过；[shape-filters] 2026-07-03 复核通过）。番外 [procedural-fx] 也已 complete。📋 B 类读值档：4 个 from-scratch 可行已补并 complete，3 个 from-scratch 不可表达（见末节）。
 
 ## 🖼 A 类 — 可视方向（看图档）
 
 | 方向 | 测什么 | 状态 |
 |---|---|---|
-| [shape-filters](shape-filters/INDEX.md) | 形状矢量滤镜家族 11 件 + PolyStar + 双滤镜叠加 + **Wiggle 调制对比行**（Points/Correlation） | 🔍 待review（2026-06-16 加第 4 行调制对比） |
+| [shape-filters](shape-filters/INDEX.md) | 形状矢量滤镜家族 11 件 + PolyStar + 双滤镜叠加 + **Wiggle 调制对比行**（Points/Correlation） | ✅ complete（2026-07-03 用户确认通过） |
 | [shape-primitives](shape-primitives/INDEX.md) | 四种参数图元 + Fill/Stroke/Gradient 描绘变体 | ✅ complete |
 | [keyframes-ease](keyframes-ease/INDEX.md) | 时间缓动 linear/ease-out/ease-in-out（渲中间帧看位置差） | ✅ complete |
 | [expressions](expressions/INDEX.md) | 表达式激活（time\*N 旋转）+ 四语汇 idiom（跨层/loopOut/wiggle/slider） | ✅ complete |
@@ -38,7 +38,7 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 | [animated-path](animated-path/INDEX.md) | 动画路径几何 morph 横条→正方→竖条（渲 t=2s + extent readback） | ✅ complete |
 | [3d-camera](3d-camera/INDEX.md) | 3D 图层 + 相机：Z 视差（同尺寸卡按深浅渲大小不同）+ Rotate Y 透视 tumble（梯形） | ✅ complete |
 | [procedural-fx](procedural-fx/INDEX.md) | 程序化火焰 v3（多层合成：黑底+3 火层 FractalNoise→Tritone→TurbulentDisplace+同心 mask 温度分区+Add 叠热芯+Glo2 Glow；技法 T3 additive-depth） | ✅ complete（用户真机验收过 2026-06-18；双版本 gate 绿、逐像素一致） |
-| [glitch](glitch/INDEX.md) | 纯 native glitch（RGB 色差 split + 噪声驱动位移撕裂 + 扫描线 + 辉光；技法 T16/T17 + T2/T5 glitch 迁移；零插件） | 🔍 待review（2026-06-18 agent AE2025 渲验，4 技法肉眼可见、无第三方依赖；待真机复核） |
+| [glitch](glitch/INDEX.md) | 纯 native glitch 技法门禁（RGB 色差 split + 噪声驱动位移撕裂 + 辉光；不是 Booyah 1:1 复刻；零插件） | 🔍 待review（2026-07-03 Go/parse gate + AE2025/AE2020 render 重跑通过；待真机复核） |
 
 ## 📋 B 类 — 读值档（dump 值核对，不看图）
 
@@ -50,7 +50,7 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 | [project-settings](project-settings/INDEX.md) | 工程设置 bitsPerChannel/linearBlending/expressionEngine/footageTimecode（4 项一致） | ✅ complete |
 | [camera-light](camera-light/INDEX.md) | NewCameraLayer/NewLightLayer 建层（**灯光=环境光** + 相机=双节点,值皆模板默认；选项 setter elide） | ✅ complete |
 | [essential-graphics](essential-graphics/INDEX.md) | AddEssentialProperty + 模板命名 | 🛑 **BLOCKED**（面板崩溃，连单 slider 也崩；RE 候选，暂不修） |
-| [pseudo-effect](pseudo-effect/INDEX.md) | BuildPseudoEffect 从零合成伪效果，单效果铺满全部 11 种控件（en 纯 ASCII + zh GBK 中文标签）；控件容器无渲染面 | 🔍 待review（2026-06-20 agent AE2020 结构 dump 验：两份接受、控件全、显示名「演示」对；zh 控件标签待中文真机复核） |
+| [pseudo-effect](pseudo-effect/INDEX.md) | BuildPseudoEffect 从零合成伪效果，单效果铺满全部 11 种控件（en 纯 ASCII + zh GBK 中文标签）；控件容器无渲染面 | ✅ complete（2026-07-03 用户确认；label 默认亮态，`pseudo_max.aep` 含一条故意 dimmed label） |
 
 ### ⚠ from-scratch 不可表达（3 个 — 非缺陷，能力本质是 fixture-mutation）
 
@@ -73,6 +73,6 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 
 ---
 
-> **15 个 🖼 可视方向 ✅ complete** · **3 个 📋 读值档 ✅ complete**(comp-settings / project-settings / camera-light) · **EG 🛑 BLOCKED**(面板崩溃,RE 候选) · **3 个 from-scratch 不可表达（markers/render-queue/media-replace，已注明）**。能力 showcase 覆盖收官。全量清单 + 验证档位详 `specs/2026-06-13-full-showcase-coverage.md`。
+> **16 个 🖼 可视能力方向 ✅ complete** · **4 个 📋 读值档 ✅ complete**(comp-settings / project-settings / camera-light / pseudo-effect) · **glitch 技法门禁 🔍 待review** · **EG 🛑 BLOCKED**(面板崩溃,RE 候选) · **3 个 from-scratch 不可表达（markers/render-queue/media-replace，已注明）**。全量清单 + 验证档位详 `specs/2026-06-13-full-showcase-coverage.md`。
 >
 > **番外 [procedural-fx] ✅ complete**（2026-06-18,非能力域,是 `specs/procedural-fx-generator` 产品 demo）:火焰 v3 多层合成,用户真机验收过 + 双版本 gate 绿。经 v1(被否)→v2(单层修色温/Glow)→v3(多层出层次)三轮。详 procedural-fx/INDEX.md + `checklists/techniques/build-good-fire.md`。

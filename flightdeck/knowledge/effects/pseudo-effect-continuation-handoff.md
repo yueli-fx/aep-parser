@@ -84,7 +84,7 @@ READ WHEN: 维护 BuildPseudoEffect、新增伪控件类型、或复用 pard/val
 - Point 0x06:@0x3C=0x00050000 · @0x48=0x00640000 结构常量(缺则 AE「range has no values」)
 - Dropdown 0x07:@0x38 last · @0x3C(hi16 nb_options)+ 尾 pdnm
 - Layer:type 0x00 + @0x30=2
-- Group/Label 0x0d(label @0x04=0x20)· GroupEnd 0x0e(@0x04=0x08)
+- Group/Label 0x0d; plain label @0x04=0x00 renders bright, `Dimmed:true` label @0x04=0x20 renders gray (2026-07-03 user panel verification; an inverted patch made Values gray and Spatial(dimmed) bright) · GroupEnd 0x0e(@0x04=0x08)
 
 **value-entry tdb4 head**(124B,从金样本 verbatim,@0x10-0x3B 是 opaque f64 scale 块 + @0x3C control-type marker):
 - dim1(slider/angle/checkbox):`db990001 0001 0000 0001 0004 0000 5da8` + 0x10起 `3f1a36e2eb1c432d 3ff0…(几个 1.0) … 0404 0000`(@0x3C=control_type)

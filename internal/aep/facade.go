@@ -913,8 +913,10 @@ func WithLabelCodepage(cp PseudoLabelCodepage) PseudoOption {
 // PseudoControl is one control of a from-scratch pseudo effect: a kind + the
 // label shown in AE's Effect Controls, plus optional per-kind customization
 // (Slider Min/Max/Default, Angle Default, Checkbox Checked, Color, Dropdown
-// Options, Point/Point3D PointDefault, Layer LayerID). The optional fields' zero
-// values reproduce AE's plain type defaults.
+// Options, Point/Point3D PointDefault, Layer LayerID, Label Dimmed). The
+// optional fields' zero values reproduce AE's plain type defaults. For
+// PseudoLabel, Dimmed=false renders a normal bright label; Dimmed=true writes
+// the AE panel's gray/dim label flag.
 type PseudoControl = serializer.PseudoControl
 
 // @summary    Build a pseudo effect from scratch in Go and apply it
@@ -938,7 +940,9 @@ type PseudoControl = serializer.PseudoControl
 //   host layer's coordinate space (e.g. {0.25, 0.125} on a 400×400 source-less
 //   layer reads back as [100, 50]). Group and Label kinds are flat marker
 //   controls — AE's pseudo-effect "groups" are a visual grouping in the Effect
-//   Controls panel, not a nested property group.
+//   Controls panel, not a nested property group. A PseudoLabel with
+//   Dimmed=false is a normal bright label; Dimmed=true sets the AE panel's
+//   gray/dim label flag.
 //
 //   Control labels are written into the name field, which AE decodes in the
 //   viewing machine's system ANSI codepage (not UTF-8). ASCII labels are exact
@@ -961,7 +965,7 @@ type PseudoControl = serializer.PseudoControl
 // @verify     ae-accept
 // @gate       TestBuildPseudoEffect_AEShipGate_AE2020,TestBuildPseudoEffect_AEShipGate_AE2025,TestBuildPseudoEffectRich_AEShipGate_AE2020,TestBuildPseudoEffectRich_AEShipGate_AE2025,TestBuildPseudoEffectValueEntry_AEShipGate_AE2020,TestBuildPseudoEffectValueEntry_AEShipGate_AE2025
 // @since      AE2020
-// @boundary   synthesizes a pseudo effect from scratch (no .ffx, no AE, no cloned template); all control kinds (slider/color/checkbox/angle/point/point3d/dropdown/group/label/layer) read back live in AE; group/label are flat marker controls (only the built-in Compositing Options is truly nested); CJK labels are byte-equivalence-verified (not ship-gated) and locale-dependent; camera/light and un-Reopened fresh layers refused
+// @boundary   synthesizes a pseudo effect from scratch (no .ffx, no AE, no cloned template); all control kinds (slider/color/checkbox/angle/point/point3d/dropdown/group/label/layer) read back live in AE; group/label are flat marker controls (only the built-in Compositing Options is truly nested); PseudoLabel Dimmed=false is normal/bright and Dimmed=true is gray/dim in the AE panel; CJK labels are byte-equivalence-verified (not ship-gated) and locale-dependent; camera/light and un-Reopened fresh layers refused
 // @incident   add-effect-splice-re
 // @alias      build pseudo effect,从零造伪效果,pseudo effect maker,authoring,造效果,自定义控件,slider color checkbox dropdown group label layer point,slider min max,自定义范围,下拉菜单,分组,标签,图层选择,点坐标,中文标签,cjk label,gbk,离线造伪效果
 func BuildPseudoEffect(layer *Layer, uid, name, displayName string, controls []PseudoControl, opts ...PseudoOption) (*Effect, error) {
@@ -2412,6 +2416,21 @@ const (
 	EffectColorLink          = serializer.EffectColorLink          // Color Link
 	EffectCompoundArithmetic = serializer.EffectCompoundArithmetic // Compound Arithmetic
 	EffectSetChannels        = serializer.EffectSetChannels        // Set Channels
+	EffectAIFPerlinNoise3D   = serializer.EffectAIFPerlinNoise3D   // Turbulent Noise
+	EffectCameraLensBlur     = serializer.EffectCameraLensBlur     // Camera Lens Blur
+	EffectCartoonify         = serializer.EffectCartoonify         // Cartoon
+	EffectLinearColorKey     = serializer.EffectLinearColorKey     // Linear Color Key
+	EffectPaint              = serializer.EffectPaint              // Paint
+	EffectPhotoFilterPS      = serializer.EffectPhotoFilterPS      // Photo Filter
+	EffectPSArbitraryMap     = serializer.EffectPSArbitraryMap     // PS Arbitrary Map
+	EffectScatter            = serializer.EffectScatter            // Scatter
+	EffectColorama           = serializer.EffectColorama           // Colorama
+	EffectRadioWaves         = serializer.EffectRadioWaves         // Radio Waves
+	EffectShatter            = serializer.EffectShatter            // Shatter
+	EffectVegas              = serializer.EffectVegas              // Vegas
+	EffectCinema4D           = serializer.EffectCinema4D           // Cineware
+	EffectKeylight           = serializer.EffectKeylight           // Keylight
+	EffectMochaAECC          = serializer.EffectMochaAECC          // Mocha AE
 
 	EffectDisplacementMapLayer = serializer.EffectDisplacementMapLayer // Displacement Map Layer param
 	EffectCompoundBlurLayer    = serializer.EffectCompoundBlurLayer    // Compound Blur "Blur Layer" param

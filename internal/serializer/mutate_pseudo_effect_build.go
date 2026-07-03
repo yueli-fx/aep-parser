@@ -108,7 +108,7 @@ type PseudoControl struct {
 	LayerID uint32
 
 	// Label (PseudoLabel): dim/gray the label text. Default false = normal
-	// (non-gray) — the @0x04 0x20 bit, RE'd from pseudo2.aep. //nolint:jargon
+	// (bright); Dimmed true sets pard @0x04 bit 0x20.
 	Dimmed bool
 }
 
@@ -438,8 +438,8 @@ func synthControlPard(c PseudoControl, cp PseudoLabelCodepage) (*rifx.Chunk, err
 			bePutU32(d[0x30:], 2)
 		case PseudoLabel:
 			// 0x0d self-closing group = a label (a group-end is generated after
-			// it). @0x04 bit 0x20 = dim/gray; default 0 = normal (non-gray). RE'd
-			// from pseudo2.aep: non-gray label @0x04=0x00, gray @0x04=0x20.
+			// it). User panel verification: @0x04=0 renders as a normal bright
+			// label; @0x04 bit 0x20 renders as gray/dim.
 			if c.Dimmed {
 				bePutU32(d[0x04:], 0x20)
 			}

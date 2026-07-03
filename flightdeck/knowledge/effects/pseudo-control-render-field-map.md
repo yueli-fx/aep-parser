@@ -20,7 +20,7 @@ The pseudo gates checked **AE-accept + DOM readback + resave**, never **panel re
 
 | offset | field | meaning |
 |---|---|---|
-| `@0x04` u32 | flags | `0x20`=**dim/gray** (an OPTION on a label; default 0 = non-gray — a label is a self-closing 0x0d group, the 0x20 bit only dims it) · `0x08`=group-end · `0x200`=an *optional* slider bit (varies; removing it is safe) |
+| `@0x04` u32 | flags | label `0x00`=**normal/bright**, `0x20`=**gray/dim** (confirmed twice by user panel verification on regenerated `pseudo_default.aep`/`pseudo_max.aep`; a temporary inverted patch made Values gray and Spatial(dimmed) bright, proving the direction) · `0x08`=group-end · `0x200`=an *optional* slider bit (varies; removing it is safe) |
 | `@0x0C` u32 | **control_type** | 03 angle·04 checkbox·05 color·06 point·07 dropdown·0a slider·0d group/label·0e group-end·12 3d·00 header/layer-picker |
 | `@0x10–0x2F` | name | **system ANSI codepage** (NOT UTF-8) — see [[pseudo-control-label-ansi-codepage]] |
 | `@0x30` u32 | kind | **2 = structural/reference** (header / layer-picker / group / label) · **0 = value-leaf** |
@@ -57,7 +57,8 @@ There is **no per-param keyframe/hold flag** in the pard. All value types share 
 
 ## Fix (committed)
 
-`mutate_pseudo_effect_build.go`: point/3d write coords into the pard; point/3d/labels/groups elide their value entry; layer-picker value entry `tdsb=1` + host-default `tdpi`; matchName = `Pseudo/<uid>`; slider drops `@0x04`, sets `@0x7C=0x00020000`. Dead synthesis paths removed. Test `TestPseudoControlEntries_ValueRules`. **User-verified in AE**: all of slider / point / 3d / layer-picker now render correctly (Strength 75, Center 200,200, Position 3D 100,300,0, Source Layer = host). See [[pseudo-layer-picker-tdpi-retarget-clobber]] for the binding-target (vs render) side of the picker.
+`mutate_pseudo_effect_build.go`: point/3d write coords into the pard; point/3d/labels/groups elide their value entry; layer-picker value entry `tdsb=1` + host-default `tdpi`; matchName = `Pseudo/<uid>`; slider drops `@0x04`, sets `@0x7C=0x00020000`; label default leaves `@0x04=0` and `Dimmed:true` sets `0x20`. Dead synthesis paths removed. Test `TestPseudoControlEntries_ValueRules`. **User-verified in AE**: all of slider / point / 3d / layer-picker now render correctly (Strength 75, Center 200,200, Position 3D 100,300,0, Source Layer = host), and label bright/dim polarity is `0` bright / `0x20` gray. See [[pseudo-layer-picker-tdpi-retarget-clobber]] for the binding-target (vs render) side of the picker.
 
 ## Cases
 - 2026-06-20 — from-scratch showcase (`flightdeck/showcase/pseudo-effect`) panel render; user supplied minimal AE-authored oracles (`data/reference/pseudo-effect/pseudo2.aep` layer-picker-only `Pseudo/148432`) that enabled the byte-for-byte diff isolating each cause.
+- 2026-07-03 — user panel review corrected the label polarity: `Dimmed:false` must leave `@0x04=0`, `Dimmed:true` sets `@0x04=0x20`. The regenerated showcase was accepted after `Values` became bright and only `Spatial (dimmed)` stayed gray.

@@ -514,6 +514,11 @@ func TestEffectConstants_MatchRegistry(t *testing.T) {
 		aep.EffectBezierWarp, aep.EffectMeshWarp, aep.EffectChannelMixer,
 		aep.EffectReshape, aep.EffectVectorPaint, aep.EffectTexturize,
 		aep.EffectColorLink, aep.EffectCompoundArithmetic, aep.EffectSetChannels,
+		aep.EffectAIFPerlinNoise3D, aep.EffectCameraLensBlur, aep.EffectCartoonify,
+		aep.EffectLinearColorKey, aep.EffectPaint, aep.EffectPhotoFilterPS,
+		aep.EffectPSArbitraryMap, aep.EffectScatter, aep.EffectColorama,
+		aep.EffectRadioWaves, aep.EffectShatter, aep.EffectVegas,
+		aep.EffectCinema4D, aep.EffectKeylight, aep.EffectMochaAECC,
 	}
 	supported := map[string]bool{}
 	for _, n := range aep.SupportedEffects() {

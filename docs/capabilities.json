@@ -1212,7 +1212,7 @@
         "TestBuildPseudoEffectValueEntry_AEShipGate_AE2020",
         "TestBuildPseudoEffectValueEntry_AEShipGate_AE2025"
       ],
-      "boundary": "synthesizes a pseudo effect from scratch (no .ffx, no AE, no cloned template); all control kinds (slider/color/checkbox/angle/point/point3d/dropdown/group/label/layer) read back live in AE; group/label are flat marker controls (only the built-in Compositing Options is truly nested); CJK labels are byte-equivalence-verified (not ship-gated) and locale-dependent; camera/light and un-Reopened fresh layers refused",
+      "boundary": "synthesizes a pseudo effect from scratch (no .ffx, no AE, no cloned template); all control kinds (slider/color/checkbox/angle/point/point3d/dropdown/group/label/layer) read back live in AE; group/label are flat marker controls (only the built-in Compositing Options is truly nested); PseudoLabel Dimmed=false is normal/bright and Dimmed=true is gray/dim in the AE panel; CJK labels are byte-equivalence-verified (not ship-gated) and locale-dependent; camera/light and un-Reopened fresh layers refused",
       "incident": [
         "add-effect-splice-re"
       ],

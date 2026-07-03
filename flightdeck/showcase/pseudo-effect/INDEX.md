@@ -3,8 +3,8 @@ showcase: pseudo-effect
 direction: 纯 Go 从零合成一个伪效果，单个效果里铺满全部 11 种控件类型，出英文 + 中文两份供眼验 Effect Controls 面板
 capabilities: [build-pseudo-effect, pseudo-slider, pseudo-color, pseudo-checkbox, pseudo-angle, pseudo-point, pseudo-point3d, pseudo-dropdown, pseudo-group, pseudo-label, pseudo-layer, with-label-codepage]
 gates: [TestBuildPseudoEffect_AEShipGate_AE2020, TestBuildPseudoEffect_AEShipGate_AE2025, TestBuildPseudoEffectRich_AEShipGate_AE2020, TestBuildPseudoEffectRich_AEShipGate_AE2025, TestBuildPseudoEffectValueEntry_AEShipGate_AE2020, TestBuildPseudoEffectValueEntry_AEShipGate_AE2025]
-status: 待review
-last_updated: 2026-06-20
+status: complete
+last_updated: 2026-07-03
 regenerate: "go run ./flightdeck/showcase/pseudo-effect  (B 类读值：AE 打开看 Effect Controls 面板，或跑 test_data/generators/verify_pseudo_effect.jsx 结构 dump)"
 ---
 
@@ -40,7 +40,8 @@ Point3D · Layer-picker · Group(起 + 子 Slider + 子 Checkbox + 止)。
 - 全 11 种控件读回齐全；**组是扁平标记控件**（控件平铺，非属性树嵌套——AE 原生行为，
   详 `incidents/pseudo-control-label-ansi-codepage` 同批 RE 与 facade doc）。
 - en 标签全部正常显示；zh 效果显示名「演示」正常（charCodes 28436,31034），zh **控件标签**在西文 gate 机
-  显示乱码 = 预期（GBK 字节被 cp1252 误读），**待用户中文真机复核**翻 complete。
+  显示乱码 = 预期（GBK 字节被 cp1252 误读）。用户中文真机复核通过（2026-07-03）；后续发现 label 亮/灰位写反，已修正、重生成并经用户复核通过。
 
-> ⚠ unverified（待办）: zh 控件标签在中文 Windows 的显示 — 需用户真机打开 `pseudo_demo_zh.aep` 复核
-> （西文 gate 机不可验，byte-equivalence 单测 `TestPardNameBytes_GBKMatchesAENative` 兜底）。
+## Label 灰色状态说明
+
+用户复核确认 label 亮/灰语义：AE 的默认 label 是亮态，`@0x04=0`；`Dimmed:true` 写 `@0x04=0x20` 并显示灰色。`pseudo_default.aep` / `pseudo_max.aep` 已按该语义重生成并复核通过；`pseudo_max.aep` 里 `-- Spatial (dimmed) --` 是故意设置的灰色 label，用于覆盖 dimmed label 字段；`pseudo_default.aep` 的 label 为亮态。AE 的 Label 控件本身是只读分隔/说明行，不像 Slider/Checkbox 那样可交互编辑，但不应默认灰掉。
