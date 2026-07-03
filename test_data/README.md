@@ -2,9 +2,11 @@
 
 `test_data/` is for test fixtures and fixture generators.
 
-- `fixtures/` contains stable files used directly by tests.
+- `fixtures/` contains stable files used directly by tests. See
+  `fixtures/README.md` for fixture retention rules.
 - `generators/` contains JSX scripts that author or verify fixtures in After
-  Effects.
+  Effects. See `generators/README.md` before deleting older or version-named
+  scripts.
 - `generated/` contains ignored local outputs from regeneration, ship-gates, or
   exploratory AE runs.
 
