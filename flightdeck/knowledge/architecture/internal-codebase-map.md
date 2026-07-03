@@ -9,6 +9,9 @@ RECHECK WHEN: packages are moved across `internal/`, public API facade ownership
 `internal/` is no longer only the original RIFX parser stack. Treat it as five
 working layers:
 
+Repository-facing version: `internal/README.md` mirrors this map for developers
+who are browsing the code without Flightdeck context.
+
 1. Binary and value substrate:
    - `rifx` reads/writes Big-Endian RIFF/RIFX chunk trees without AEP semantics.
    - `codec` holds byte/value encoders and layout helpers.
