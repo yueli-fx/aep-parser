@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "purpose": "Machine-readable evidence pointers. Generated tmp artifacts are referenced here but remain disposable.",
+  "purpose": "Machine-readable evidence pointers. Required generated evidence is durable and tracked under registry/evidence/<topic>; tmp artifacts remain disposable reports or scratch output only.",
   "evidence_sets": [
     {
       "id": "migration.coverage.current",
@@ -23,9 +23,9 @@
       ]
     },
     {
-      "id": "matrix.text_animators.all_6x6",
+      "id": "migration.versioned_aep_migration_evidence",
       "class": "generated_evidence",
-      "artifact_path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+      "artifact_path": "registry/evidence/versioned-aep-migration",
       "required": true,
       "workflows": [
         "migrate",
@@ -33,16 +33,33 @@
       ],
       "producer": {
         "category": "version_matrix",
-        "command": "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/minimal-text-animator-*.json -out tmp/migration_matrix_text_animators_all_6x6",
+        "command": "go run ./cmd/aepregistry recurring-matrix -root . -out tmp/registry_recurring_matrix.json -out-root registry/evidence/versioned-aep-migration/migration_matrix_verify",
         "outputs": [
-          "tmp/migration_matrix_text_animators_all_6x6/matrix.json"
+          "registry/evidence/versioned-aep-migration"
+        ]
+      }
+    },
+    {
+      "id": "matrix.text_animators.all_6x6",
+      "class": "generated_evidence",
+      "artifact_path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
+      "required": true,
+      "workflows": [
+        "migrate",
+        "host_open"
+      ],
+      "producer": {
+        "category": "version_matrix",
+        "command": "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/minimal-text-animator-*.json -out registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6",
+        "outputs": [
+          "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json"
         ]
       }
     },
     {
       "id": "matrix.shape.all_6x6",
       "class": "generated_evidence",
-      "artifact_path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+      "artifact_path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
       "required": true,
       "workflows": [
         "migrate",
@@ -51,16 +68,16 @@
       ],
       "producer": {
         "category": "version_matrix",
-        "command": "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/minimal-shape-*.json -out tmp/migration_matrix_shape_all_6x6",
+        "command": "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/minimal-shape-*.json -out registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6",
         "outputs": [
-          "tmp/migration_matrix_shape_all_6x6/matrix.json"
+          "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json"
         ]
       }
     },
     {
       "id": "matrix.shape_ellipse_fill.all_6x6",
       "class": "generated_evidence",
-      "artifact_path": "tmp/migration_matrix_shape_ellipse_fill_all_6x6/matrix.json",
+      "artifact_path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_ellipse_fill_all_6x6/matrix.json",
       "required": true,
       "workflows": [
         "migrate",
@@ -68,16 +85,16 @@
       ],
       "producer": {
         "category": "version_matrix",
-        "command": "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/minimal-shape-ellipse-fill.json -out tmp/migration_matrix_shape_ellipse_fill_all_6x6",
+        "command": "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/minimal-shape-ellipse-fill.json -out registry/evidence/versioned-aep-migration/migration_matrix_shape_ellipse_fill_all_6x6",
         "outputs": [
-          "tmp/migration_matrix_shape_ellipse_fill_all_6x6/matrix.json"
+          "registry/evidence/versioned-aep-migration/migration_matrix_shape_ellipse_fill_all_6x6/matrix.json"
         ]
       }
     },
     {
       "id": "matrix.effect_param_keyframes",
       "class": "generated_evidence",
-      "artifact_path": "tmp/migration_matrix_effect_param_keyframes/matrix.json",
+      "artifact_path": "registry/evidence/versioned-aep-migration/migration_matrix_effect_param_keyframes/matrix.json",
       "required": true,
       "workflows": [
         "migrate",
@@ -85,32 +102,32 @@
       ],
       "producer": {
         "category": "version_matrix",
-        "command": "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/minimal-effect-param-keyframes.json -out tmp/migration_matrix_effect_param_keyframes",
+        "command": "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/minimal-effect-param-keyframes.json -out registry/evidence/versioned-aep-migration/migration_matrix_effect_param_keyframes",
         "outputs": [
-          "tmp/migration_matrix_effect_param_keyframes/matrix.json"
+          "registry/evidence/versioned-aep-migration/migration_matrix_effect_param_keyframes/matrix.json"
         ]
       }
     },
     {
       "id": "matrix.effect_control_static_values.all_6x6",
       "class": "generated_evidence",
-      "artifact_path": "tmp/migration_matrix_effect_control_static_values_all_6x6/matrix.json",
+      "artifact_path": "registry/evidence/versioned-aep-migration/migration_matrix_effect_control_static_values_all_6x6/matrix.json",
       "required": true,
       "workflows": [
         "migrate"
       ],
       "producer": {
         "category": "version_matrix",
-        "command": "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/minimal-effect-control-static-values.json -out tmp/migration_matrix_effect_control_static_values_all_6x6",
+        "command": "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/minimal-effect-control-static-values.json -out registry/evidence/versioned-aep-migration/migration_matrix_effect_control_static_values_all_6x6",
         "outputs": [
-          "tmp/migration_matrix_effect_control_static_values_all_6x6/matrix.json"
+          "registry/evidence/versioned-aep-migration/migration_matrix_effect_control_static_values_all_6x6/matrix.json"
         ]
       }
     },
     {
       "id": "matrix.layer_matte",
       "class": "generated_evidence",
-      "artifact_path": "tmp/migration_matrix_layer_matte/matrix.json",
+      "artifact_path": "registry/evidence/versioned-aep-migration/migration_matrix_layer_matte/matrix.json",
       "required": true,
       "workflows": [
         "migrate",
@@ -118,16 +135,16 @@
       ],
       "producer": {
         "category": "version_matrix",
-        "command": "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/minimal-layer-track-matte.json -out tmp/migration_matrix_layer_matte",
+        "command": "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/minimal-layer-track-matte.json -out registry/evidence/versioned-aep-migration/migration_matrix_layer_matte",
         "outputs": [
-          "tmp/migration_matrix_layer_matte/matrix.json"
+          "registry/evidence/versioned-aep-migration/migration_matrix_layer_matte/matrix.json"
         ]
       }
     },
     {
       "id": "matrix.explicit_matte.ae2025_contract",
       "class": "generated_evidence",
-      "artifact_path": "tmp/migration_matrix_explicit_matte_ae2025/matrix.json",
+      "artifact_path": "registry/evidence/versioned-aep-migration/migration_matrix_explicit_matte_ae2025/matrix.json",
       "required": true,
       "workflows": [
         "migrate",
@@ -135,25 +152,25 @@
       ],
       "producer": {
         "category": "version_matrix",
-        "command": "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/minimal-layer-explicit-matte.json -out tmp/migration_matrix_explicit_matte_ae2025",
+        "command": "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/minimal-layer-explicit-matte.json -out registry/evidence/versioned-aep-migration/migration_matrix_explicit_matte_ae2025",
         "outputs": [
-          "tmp/migration_matrix_explicit_matte_ae2025/matrix.json"
+          "registry/evidence/versioned-aep-migration/migration_matrix_explicit_matte_ae2025/matrix.json"
         ]
       }
     },
     {
       "id": "host_open.text_animators.endpoint_chunk",
       "class": "generated_evidence",
-      "artifact_path": "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-4/matrix.json",
+      "artifact_path": "registry/evidence/versioned-aep-migration/host_open_gaps/text-animators/non-representative-endpoint/chunk-4/matrix.json",
       "required": true,
       "workflows": [
         "host_open"
       ],
       "producer": {
         "category": "host_open_gap",
-        "command": "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/minimal-text-animator-*.json -out tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-4 -ae-open -ae-root E:/adobe",
+        "command": "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/minimal-text-animator-*.json -out registry/evidence/versioned-aep-migration/host_open_gaps/text-animators/non-representative-endpoint/chunk-4 -ae-open -ae-root E:/adobe",
         "outputs": [
-          "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-4/matrix.json"
+          "registry/evidence/versioned-aep-migration/host_open_gaps/text-animators/non-representative-endpoint/chunk-4/matrix.json"
         ]
       }
     }

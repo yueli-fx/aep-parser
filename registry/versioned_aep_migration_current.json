@@ -16,7 +16,7 @@
                             "Run validation in batches, then update JSON once per batch.",
                             "Do not update cockpit.md, index.md, or history.md for each validation slice.",
                             "Do not create one commit per small matrix result; batch evidence commits only when a coherent batch is complete.",
-                            "Keep raw matrix outputs under tmp/ and reference them from coverage JSON.",
+                            "Keep disposable reports under tmp/; keep durable matrix evidence under registry/evidence/versioned-aep-migration/ and reference it from coverage JSON.",
                             "Use markdown rendering only when a human-readable view is needed."
                         ],
     "current_state":  {
@@ -38,7 +38,7 @@
                                                   ],
                           "ae_install_root":  "E:/adobe",
                           "latest_recurring_gate":  {
-                                                        "artifact":  "tmp/migration_matrix_verify/smoke_all/matrix.json",
+                                                        "artifact":  "registry/evidence/versioned-aep-migration/migration_matrix_verify/smoke_all/matrix.json",
                                                         "totals":  {
                                                                        "total":  906,
                                                                        "pass":  900,
@@ -49,7 +49,7 @@
                                                         "status":  "pass_with_source_contract_skips"
                                                     },
                           "latest_explicit_matte_gate":  {
-                                                             "artifact":  "tmp/migration_matrix_verify/explicit_matte_ae2025/matrix.json",
+                                                             "artifact":  "registry/evidence/versioned-aep-migration/migration_matrix_verify/explicit_matte_ae2025/matrix.json",
                                                              "totals":  {
                                                                             "total":  1,
                                                                             "pass":  1,
@@ -60,10 +60,10 @@
                                                              "status":  "pass"
                                                          },
                           "latest_standalone_verify_gate":  {
-                                                                "artifact":  "tmp/migration_matrix_verify/smoke_all/minimal-adjustment-layer/AE2020_to_AE2025/verify_report.json",
-                                                                "source":  "tmp/migration_matrix_verify/smoke_all/minimal-adjustment-layer/AE2020_to_AE2025/source.aep",
-                                                                "target":  "tmp/migration_matrix_verify/smoke_all/minimal-adjustment-layer/AE2020_to_AE2025/target.aep",
-                                                                "migration_report":  "tmp/migration_matrix_verify/smoke_all/minimal-adjustment-layer/AE2020_to_AE2025/convert_report.json",
+                                                                "artifact":  "registry/evidence/versioned-aep-migration/migration_matrix_verify/smoke_all/minimal-adjustment-layer/AE2020_to_AE2025/verify_report.json",
+                                                                "source":  "registry/evidence/versioned-aep-migration/migration_matrix_verify/smoke_all/minimal-adjustment-layer/AE2020_to_AE2025/source.aep",
+                                                                "target":  "registry/evidence/versioned-aep-migration/migration_matrix_verify/smoke_all/minimal-adjustment-layer/AE2020_to_AE2025/target.aep",
+                                                                "migration_report":  "registry/evidence/versioned-aep-migration/migration_matrix_verify/smoke_all/minimal-adjustment-layer/AE2020_to_AE2025/convert_report.json",
                                                                 "target_version":  "AE2025",
                                                                 "status":  "pass",
                                                                 "profile_diff_status":  "pass",
@@ -74,7 +74,7 @@
                        "id":  "text-animator-remaining-value-keyframes",
                        "commit":  null,
                        "artifacts":  [
-                                         "tmp/migration_matrix_text_animators_all_6x6/matrix.json"
+                                         "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json"
                                      ],
                        "summary":  [
                                        {
@@ -95,16 +95,16 @@
                                                  {
                                                      "coverage_id":  "precomp",
                                                      "recipe_glob":  "examples/recipes/minimal-precomp-*.json",
-                                                     "out":  "tmp/migration_matrix_precomp_all_6x6",
-                                                     "matrix":  "tmp/migration_matrix_precomp_all_6x6/matrix.json",
-                                                     "ledger":  "tmp/migration_matrix_precomp_all_6x6/ledger.md"
+                                                     "out":  "registry/evidence/versioned-aep-migration/migration_matrix_precomp_all_6x6",
+                                                     "matrix":  "registry/evidence/versioned-aep-migration/migration_matrix_precomp_all_6x6/matrix.json",
+                                                     "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_precomp_all_6x6/ledger.md"
                                                  },
                                                  {
                                                      "coverage_id":  "layer-all-family",
                                                      "recipe_glob":  "examples/recipes/minimal-layer-*.json",
-                                                     "out":  "tmp/migration_matrix_layer_all_6x6",
-                                                     "matrix":  "tmp/migration_matrix_layer_all_6x6/matrix.json",
-                                                     "ledger":  "tmp/migration_matrix_layer_all_6x6/ledger.md",
+                                                     "out":  "registry/evidence/versioned-aep-migration/migration_matrix_layer_all_6x6",
+                                                     "matrix":  "registry/evidence/versioned-aep-migration/migration_matrix_layer_all_6x6/matrix.json",
+                                                     "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_layer_all_6x6/ledger.md",
                                                      "allow_matrix_exit":  [
                                                                                1
                                                                            ],
@@ -113,9 +113,9 @@
                                                  {
                                                      "coverage_id":  "shape-all-family",
                                                      "recipe_glob":  "examples/recipes/minimal-shape-*.json",
-                                                     "out":  "tmp/migration_matrix_shape_all_6x6",
-                                                     "matrix":  "tmp/migration_matrix_shape_all_6x6/matrix.json",
-                                                     "ledger":  "tmp/migration_matrix_shape_all_6x6/ledger.md"
+                                                     "out":  "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6",
+                                                     "matrix":  "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
+                                                     "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/ledger.md"
                                                  }
                                              ]
                              },
@@ -129,9 +129,9 @@
                                                                           "examples/recipes/minimal-default-text-layer.json",
                                                                           "examples/recipes/minimal-default-text-static-transform.json"
                                                                       ],
-                                                     "out":  "tmp/migration_matrix_text_baseline_all_6x6",
-                                                     "matrix":  "tmp/migration_matrix_text_baseline_all_6x6/matrix.json",
-                                                     "ledger":  "tmp/migration_matrix_text_baseline_all_6x6/ledger.md"
+                                                     "out":  "registry/evidence/versioned-aep-migration/migration_matrix_text_baseline_all_6x6",
+                                                     "matrix":  "registry/evidence/versioned-aep-migration/migration_matrix_text_baseline_all_6x6/matrix.json",
+                                                     "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_text_baseline_all_6x6/ledger.md"
                                                  },
                                                  {
                                                      "coverage_id":  "text-style",
@@ -139,16 +139,16 @@
                                                                           "examples/recipes/minimal-text-style.json",
                                                                           "examples/recipes/minimal-text-shape.json"
                                                                       ],
-                                                     "out":  "tmp/migration_matrix_text_style_all_6x6",
-                                                     "matrix":  "tmp/migration_matrix_text_style_all_6x6/matrix.json",
-                                                     "ledger":  "tmp/migration_matrix_text_style_all_6x6/ledger.md"
+                                                     "out":  "registry/evidence/versioned-aep-migration/migration_matrix_text_style_all_6x6",
+                                                     "matrix":  "registry/evidence/versioned-aep-migration/migration_matrix_text_style_all_6x6/matrix.json",
+                                                     "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_text_style_all_6x6/ledger.md"
                                                  },
                                                  {
                                                      "coverage_id":  "text-animators",
                                                      "recipe_glob":  "examples/recipes/minimal-text-animator-*.json",
-                                                     "out":  "tmp/migration_matrix_text_animators_all_6x6",
-                                                     "matrix":  "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
-                                                     "ledger":  "tmp/migration_matrix_text_animators_all_6x6/ledger.md"
+                                                     "out":  "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6",
+                                                     "matrix":  "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
+                                                     "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/ledger.md"
                                                  },
                                                  {
                                                      "coverage_id":  "effects-static",
@@ -156,9 +156,9 @@
                                                                           "examples/recipes/minimal-text-effect.json",
                                                                           "examples/recipes/minimal-adjustment-layer.json"
                                                                       ],
-                                                     "out":  "tmp/migration_matrix_static_effects_all_6x6",
-                                                     "matrix":  "tmp/migration_matrix_static_effects_all_6x6/matrix.json",
-                                                     "ledger":  "tmp/migration_matrix_static_effects_all_6x6/ledger.md"
+                                                     "out":  "registry/evidence/versioned-aep-migration/migration_matrix_static_effects_all_6x6",
+                                                     "matrix":  "registry/evidence/versioned-aep-migration/migration_matrix_static_effects_all_6x6/matrix.json",
+                                                     "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_static_effects_all_6x6/ledger.md"
                                                  },
                                                  {
                                                      "coverage_id":  "effects-dynamic-params",
@@ -168,18 +168,18 @@
                                                                           "examples/recipes/minimal-effect-param-keyframes.json",
                                                                           "examples/recipes/minimal-effect-param-vector-keyframes.json"
                                                                       ],
-                                                     "out":  "tmp/migration_matrix_effect_params_all_6x6",
-                                                     "matrix":  "tmp/migration_matrix_effect_params_all_6x6/matrix.json",
-                                                     "ledger":  "tmp/migration_matrix_effect_params_all_6x6/ledger.md"
+                                                     "out":  "registry/evidence/versioned-aep-migration/migration_matrix_effect_params_all_6x6",
+                                                     "matrix":  "registry/evidence/versioned-aep-migration/migration_matrix_effect_params_all_6x6/matrix.json",
+                                                     "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_effect_params_all_6x6/ledger.md"
                                                  },
                                                  {
                                                      "coverage_id":  "effects-control-static-values",
                                                      "recipe_paths":  [
                                                                           "examples/recipes/minimal-effect-control-static-values.json"
                                                                       ],
-                                                     "out":  "tmp/migration_matrix_effect_control_static_values_all_6x6",
-                                                     "matrix":  "tmp/migration_matrix_effect_control_static_values_all_6x6/matrix.json",
-                                                     "ledger":  "tmp/migration_matrix_effect_control_static_values_all_6x6/ledger.md"
+                                                     "out":  "registry/evidence/versioned-aep-migration/migration_matrix_effect_control_static_values_all_6x6",
+                                                     "matrix":  "registry/evidence/versioned-aep-migration/migration_matrix_effect_control_static_values_all_6x6/matrix.json",
+                                                     "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_effect_control_static_values_all_6x6/ledger.md"
                                                  },
                                                  {
                                                      "coverage_id":  "transforms-dynamic",
@@ -188,51 +188,51 @@
                                                                           "examples/recipes/minimal-transform-keyframe-ease.json",
                                                                           "examples/recipes/minimal-transform-expression.json"
                                                                       ],
-                                                     "out":  "tmp/migration_matrix_transform_all_6x6",
-                                                     "matrix":  "tmp/migration_matrix_transform_all_6x6/matrix.json",
-                                                     "ledger":  "tmp/migration_matrix_transform_all_6x6/ledger.md"
+                                                     "out":  "registry/evidence/versioned-aep-migration/migration_matrix_transform_all_6x6",
+                                                     "matrix":  "registry/evidence/versioned-aep-migration/migration_matrix_transform_all_6x6/matrix.json",
+                                                     "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_transform_all_6x6/ledger.md"
                                                  },
                                                  {
                                                      "coverage_id":  "project",
                                                      "recipe_glob":  "examples/recipes/minimal-project-*.json",
-                                                     "out":  "tmp/migration_matrix_project_all_6x6",
-                                                     "matrix":  "tmp/migration_matrix_project_all_6x6/matrix.json",
-                                                     "ledger":  "tmp/migration_matrix_project_all_6x6/ledger.md"
+                                                     "out":  "registry/evidence/versioned-aep-migration/migration_matrix_project_all_6x6",
+                                                     "matrix":  "registry/evidence/versioned-aep-migration/migration_matrix_project_all_6x6/matrix.json",
+                                                     "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_project_all_6x6/ledger.md"
                                                  },
                                                  {
                                                      "coverage_id":  "comp",
                                                      "recipe_glob":  "examples/recipes/minimal-comp-*.json",
-                                                     "out":  "tmp/migration_matrix_comp_all_6x6",
-                                                     "matrix":  "tmp/migration_matrix_comp_all_6x6/matrix.json",
-                                                     "ledger":  "tmp/migration_matrix_comp_all_6x6/ledger.md"
+                                                     "out":  "registry/evidence/versioned-aep-migration/migration_matrix_comp_all_6x6",
+                                                     "matrix":  "registry/evidence/versioned-aep-migration/migration_matrix_comp_all_6x6/matrix.json",
+                                                     "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_comp_all_6x6/ledger.md"
                                                  },
                                                  {
                                                      "coverage_id":  "precomp",
                                                      "recipe_glob":  "examples/recipes/minimal-precomp-*.json",
-                                                     "out":  "tmp/migration_matrix_precomp_all_6x6",
-                                                     "matrix":  "tmp/migration_matrix_precomp_all_6x6/matrix.json",
-                                                     "ledger":  "tmp/migration_matrix_precomp_all_6x6/ledger.md"
+                                                     "out":  "registry/evidence/versioned-aep-migration/migration_matrix_precomp_all_6x6",
+                                                     "matrix":  "registry/evidence/versioned-aep-migration/migration_matrix_precomp_all_6x6/matrix.json",
+                                                     "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_precomp_all_6x6/ledger.md"
                                                  },
                                                  {
                                                      "coverage_id":  "camera",
                                                      "recipe_glob":  "examples/recipes/minimal-camera-*.json",
-                                                     "out":  "tmp/migration_matrix_camera_all_6x6",
-                                                     "matrix":  "tmp/migration_matrix_camera_all_6x6/matrix.json",
-                                                     "ledger":  "tmp/migration_matrix_camera_all_6x6/ledger.md"
+                                                     "out":  "registry/evidence/versioned-aep-migration/migration_matrix_camera_all_6x6",
+                                                     "matrix":  "registry/evidence/versioned-aep-migration/migration_matrix_camera_all_6x6/matrix.json",
+                                                     "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_camera_all_6x6/ledger.md"
                                                  },
                                                  {
                                                      "coverage_id":  "light",
                                                      "recipe_glob":  "examples/recipes/minimal-light-*.json",
-                                                     "out":  "tmp/migration_matrix_light_all_6x6",
-                                                     "matrix":  "tmp/migration_matrix_light_all_6x6/matrix.json",
-                                                     "ledger":  "tmp/migration_matrix_light_all_6x6/ledger.md"
+                                                     "out":  "registry/evidence/versioned-aep-migration/migration_matrix_light_all_6x6",
+                                                     "matrix":  "registry/evidence/versioned-aep-migration/migration_matrix_light_all_6x6/matrix.json",
+                                                     "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_light_all_6x6/ledger.md"
                                                  },
                                                  {
                                                      "coverage_id":  "layer-all-family",
                                                      "recipe_glob":  "examples/recipes/minimal-layer-*.json",
-                                                     "out":  "tmp/migration_matrix_layer_all_6x6",
-                                                     "matrix":  "tmp/migration_matrix_layer_all_6x6/matrix.json",
-                                                     "ledger":  "tmp/migration_matrix_layer_all_6x6/ledger.md",
+                                                     "out":  "registry/evidence/versioned-aep-migration/migration_matrix_layer_all_6x6",
+                                                     "matrix":  "registry/evidence/versioned-aep-migration/migration_matrix_layer_all_6x6/matrix.json",
+                                                     "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_layer_all_6x6/ledger.md",
                                                      "allow_matrix_exit":  [
                                                                                1
                                                                            ],
@@ -241,18 +241,18 @@
                                                  {
                                                      "coverage_id":  "shape-all-family",
                                                      "recipe_glob":  "examples/recipes/minimal-shape-*.json",
-                                                     "out":  "tmp/migration_matrix_shape_all_6x6",
-                                                     "matrix":  "tmp/migration_matrix_shape_all_6x6/matrix.json",
-                                                     "ledger":  "tmp/migration_matrix_shape_all_6x6/ledger.md"
+                                                     "out":  "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6",
+                                                     "matrix":  "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
+                                                     "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/ledger.md"
                                                  },
                                                  {
                                                      "coverage_id":  "shape-ellipse-fill",
                                                      "recipe_paths":  [
                                                                           "examples/recipes/minimal-shape-ellipse-fill.json"
                                                                       ],
-                                                     "out":  "tmp/migration_matrix_shape_ellipse_fill_all_6x6",
-                                                     "matrix":  "tmp/migration_matrix_shape_ellipse_fill_all_6x6/matrix.json",
-                                                     "ledger":  "tmp/migration_matrix_shape_ellipse_fill_all_6x6/ledger.md"
+                                                     "out":  "registry/evidence/versioned-aep-migration/migration_matrix_shape_ellipse_fill_all_6x6",
+                                                     "matrix":  "registry/evidence/versioned-aep-migration/migration_matrix_shape_ellipse_fill_all_6x6/matrix.json",
+                                                     "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_shape_ellipse_fill_all_6x6/ledger.md"
                                                  },
                                                  {
                                                      "coverage_id":  "default-and-mogrt-smoke",
@@ -269,9 +269,9 @@
                                                                           "examples/recipes/minimal-motion-graphics-template-name.json",
                                                                           "examples/recipes/minimal-null-layer.json"
                                                                       ],
-                                                     "out":  "tmp/migration_matrix_uncovered_default_mogrt_all_6x6",
-                                                     "matrix":  "tmp/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
-                                                     "ledger":  "tmp/migration_matrix_uncovered_default_mogrt_all_6x6/ledger.md"
+                                                     "out":  "registry/evidence/versioned-aep-migration/migration_matrix_uncovered_default_mogrt_all_6x6",
+                                                     "matrix":  "registry/evidence/versioned-aep-migration/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
+                                                     "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_uncovered_default_mogrt_all_6x6/ledger.md"
                                                  },
                                                  {
                                                      "coverage_id":  "essential-graphics-controllers",
@@ -281,9 +281,9 @@
                                                                           "examples/recipes/minimal-essential-graphics-controller.json",
                                                                           "examples/recipes/minimal-essential-graphics-point-controller.json"
                                                                       ],
-                                                     "out":  "tmp/migration_matrix_essential_graphics_controllers_all_6x6",
-                                                     "matrix":  "tmp/migration_matrix_essential_graphics_controllers_all_6x6/matrix.json",
-                                                     "ledger":  "tmp/migration_matrix_essential_graphics_controllers_all_6x6/ledger.md"
+                                                     "out":  "registry/evidence/versioned-aep-migration/migration_matrix_essential_graphics_controllers_all_6x6",
+                                                     "matrix":  "registry/evidence/versioned-aep-migration/migration_matrix_essential_graphics_controllers_all_6x6/matrix.json",
+                                                     "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_essential_graphics_controllers_all_6x6/ledger.md"
                                                  }
                                              ]
                              }
@@ -329,7 +329,7 @@
                                                              "chunks":  1,
                                                              "priority":  "small_direct_endpoint_batch",
                                                              "status":  "pass",
-                                                             "artifact":  "tmp/host_open_gaps/text-baseline/chunk-1/matrix.json"
+                                                             "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/text-baseline/chunk-1/matrix.json"
                                                          },
                                                          {
                                                              "coverage_id":  "effects-static",
@@ -337,7 +337,7 @@
                                                              "chunks":  1,
                                                              "priority":  "small_direct_endpoint_batch",
                                                              "status":  "pass",
-                                                             "artifact":  "tmp/host_open_gaps/effects-static/chunk-1/matrix.json"
+                                                             "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/effects-static/chunk-1/matrix.json"
                                                          },
                                                          {
                                                              "coverage_id":  "layer-all-family",
@@ -346,10 +346,10 @@
                                                              "priority":  "chunked_non_boundary_batch",
                                                              "status":  "pass",
                                                              "artifacts":  [
-                                                                               "tmp/host_open_gaps/layer-all-family/chunk-1/matrix.json",
-                                                                               "tmp/host_open_gaps/layer-all-family/chunk-2/matrix.json",
-                                                                               "tmp/host_open_gaps/layer-all-family/chunk-3/matrix.json",
-                                                                               "tmp/host_open_gaps/layer-all-family/chunk-4/matrix.json"
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/layer-all-family/chunk-1/matrix.json",
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/layer-all-family/chunk-2/matrix.json",
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/layer-all-family/chunk-3/matrix.json",
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/layer-all-family/chunk-4/matrix.json"
                                                                            ],
                                                              "result":  "non-boundary layer chunks passed 60/60, including classic track matte endpoint host-open."
                                                          },
@@ -360,10 +360,10 @@
                                                              "priority":  "chunked_non_representative_batch",
                                                              "status":  "pass",
                                                              "artifacts":  [
-                                                                               "tmp/host_open_gaps/shape-all-family/chunk-1/matrix.json",
-                                                                               "tmp/host_open_gaps/shape-all-family/chunk-2/matrix.json",
-                                                                               "tmp/host_open_gaps/shape-all-family/chunk-3/matrix.json",
-                                                                               "tmp/host_open_gaps/shape-all-family/chunk-4/matrix.json"
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/shape-all-family/chunk-1/matrix.json",
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/shape-all-family/chunk-2/matrix.json",
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/shape-all-family/chunk-3/matrix.json",
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/shape-all-family/chunk-4/matrix.json"
                                                                            ]
                                                          },
                                                          {
@@ -373,8 +373,8 @@
                                                              "priority":  "recorded_only_endpoint_batch",
                                                              "status":  "pass",
                                                              "artifacts":  [
-                                                                               "tmp/host_open_gaps/default-and-mogrt-smoke/chunk-1/matrix.json",
-                                                                               "tmp/host_open_gaps/default-and-mogrt-smoke/chunk-2/matrix.json"
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/default-and-mogrt-smoke/chunk-1/matrix.json",
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/default-and-mogrt-smoke/chunk-2/matrix.json"
                                                                            ],
                                                              "result":  "default layer, Essential Graphics, MOGRT name, and null smoke recipes passed endpoint target-bound host-open 44/44."
                                                          },
@@ -385,7 +385,7 @@
                                                              "priority":  "small_direct_endpoint_batch",
                                                              "status":  "pass",
                                                              "artifacts":  [
-                                                                               "tmp/host_open_gaps/essential-graphics-controllers/chunk-1/matrix.json"
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/essential-graphics-controllers/chunk-1/matrix.json"
                                                                            ],
                                                              "result":  "Essential Graphics controller recipes passed endpoint target-bound host-open 16/16."
                                                          },
@@ -402,10 +402,10 @@
                                                              "priority":  "small_representative_covered_endpoint_batch",
                                                              "status":  "pass",
                                                              "artifacts":  [
-                                                                               "tmp/host_open_gaps/text-style/non-representative-endpoint/matrix.json",
-                                                                               "tmp/host_open_gaps/effects-dynamic-params/non-representative-endpoint/matrix.json",
-                                                                               "tmp/host_open_gaps/transforms-dynamic/non-representative-endpoint/matrix.json",
-                                                                               "tmp/host_open_gaps/project/non-representative-endpoint/matrix.json"
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/text-style/non-representative-endpoint/matrix.json",
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/effects-dynamic-params/non-representative-endpoint/matrix.json",
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/transforms-dynamic/non-representative-endpoint/matrix.json",
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/project/non-representative-endpoint/matrix.json"
                                                                            ],
                                                              "result":  "small representative-covered text/effect/transform/project recipes passed endpoint target-bound host-open 36/36."
                                                          },
@@ -416,9 +416,9 @@
                                                              "priority":  "representative_covered_endpoint_batch",
                                                              "status":  "pass",
                                                              "artifacts":  [
-                                                                               "tmp/host_open_gaps/light/non-representative-endpoint/chunk-1/matrix.json",
-                                                                               "tmp/host_open_gaps/light/non-representative-endpoint/chunk-2/matrix.json",
-                                                                               "tmp/host_open_gaps/light/non-representative-endpoint/chunk-3/matrix.json"
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/light/non-representative-endpoint/chunk-1/matrix.json",
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/light/non-representative-endpoint/chunk-2/matrix.json",
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/light/non-representative-endpoint/chunk-3/matrix.json"
                                                                            ],
                                                              "result":  "non-representative light recipes passed endpoint target-bound host-open 52/52."
                                                          },
@@ -429,9 +429,9 @@
                                                              "priority":  "representative_covered_endpoint_batch",
                                                              "status":  "pass",
                                                              "artifacts":  [
-                                                                               "tmp/host_open_gaps/camera/non-representative-endpoint/chunk-1/matrix.json",
-                                                                               "tmp/host_open_gaps/camera/non-representative-endpoint/chunk-2/matrix.json",
-                                                                               "tmp/host_open_gaps/camera/non-representative-endpoint/chunk-3/matrix.json"
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/camera/non-representative-endpoint/chunk-1/matrix.json",
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/camera/non-representative-endpoint/chunk-2/matrix.json",
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/camera/non-representative-endpoint/chunk-3/matrix.json"
                                                                            ],
                                                              "result":  "non-representative camera recipes passed endpoint target-bound host-open 56/56."
                                                          },
@@ -442,9 +442,9 @@
                                                              "priority":  "representative_covered_endpoint_batch",
                                                              "status":  "pass",
                                                              "artifacts":  [
-                                                                               "tmp/host_open_gaps/comp/non-representative-endpoint/chunk-1/matrix.json",
-                                                                               "tmp/host_open_gaps/comp/non-representative-endpoint/chunk-2/matrix.json",
-                                                                               "tmp/host_open_gaps/comp/non-representative-endpoint/chunk-3/matrix.json"
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/comp/non-representative-endpoint/chunk-1/matrix.json",
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/comp/non-representative-endpoint/chunk-2/matrix.json",
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/comp/non-representative-endpoint/chunk-3/matrix.json"
                                                                            ],
                                                              "result":  "non-representative comp recipes passed endpoint target-bound host-open 68/68."
                                                          },
@@ -455,10 +455,10 @@
                                                              "priority":  "representative_covered_endpoint_batch",
                                                              "status":  "pass",
                                                              "artifacts":  [
-                                                                               "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-1/matrix.json",
-                                                                               "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-2/matrix.json",
-                                                                               "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-3/matrix.json",
-                                                                               "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-4/matrix.json"
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/text-animators/non-representative-endpoint/chunk-1/matrix.json",
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/text-animators/non-representative-endpoint/chunk-2/matrix.json",
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/text-animators/non-representative-endpoint/chunk-3/matrix.json",
+                                                                               "registry/evidence/versioned-aep-migration/host_open_gaps/text-animators/non-representative-endpoint/chunk-4/matrix.json"
                                                                            ],
                                                              "result":  "non-representative text animator recipes passed endpoint target-bound host-open 80/80."
                                                          }
@@ -481,9 +481,9 @@
                         "id":  "coverage-json-updater",
                         "status":  "available_verified",
                         "purpose":  "Read a matrix JSON artifact and update one coverage record in versioned-aep-migration-coverage.json. Go command is primary and preserves unknown coverage record fields; the PowerShell script remains as legacy compatibility.",
-                        "command":  "go run ./cmd/aepregistry coverage-update -root . -coverage registry/versioned_aep_migration_coverage.json -id text-baseline -matrix tmp/migration_matrix_text_baseline_all_6x6/matrix.json",
+                        "command":  "go run ./cmd/aepregistry coverage-update -root . -coverage registry/versioned_aep_migration_coverage.json -id text-baseline -matrix registry/evidence/versioned-aep-migration/migration_matrix_text_baseline_all_6x6/matrix.json",
                         "script":  "scripts/migration/update_coverage.ps1",
-                        "legacy_command":  "pwsh -File scripts/migration/update_coverage.ps1 -Id text-baseline -MatrixPath tmp/migration_matrix_text_baseline_all_6x6/matrix.json"
+                        "legacy_command":  "pwsh -File scripts/migration/update_coverage.ps1 -Id text-baseline -MatrixPath registry/evidence/versioned-aep-migration/migration_matrix_text_baseline_all_6x6/matrix.json"
                     },
                     {
                         "id":  "coverage-json-validator",
@@ -563,7 +563,7 @@
                         "purpose":  "Run a source/target AEP verification report with profile diff, migration-report allowed differences, capability-ledger boundaries, and optional AE-open verification.",
                         "command":  "go run ./cmd/aepmigrate verify -source source.aep -target target.aep -target-version AE2025 -report convert_report.json -out verify_report.json",
                         "script":  "scripts/migration/verify_matrix.ps1",
-                        "evidence":  "tmp/migration_matrix_verify/smoke_all/minimal-adjustment-layer/AE2020_to_AE2025/verify_report.json"
+                        "evidence":  "registry/evidence/versioned-aep-migration/migration_matrix_verify/smoke_all/minimal-adjustment-layer/AE2020_to_AE2025/verify_report.json"
                     }
                 ],
     "next_batches":  [
@@ -641,7 +641,7 @@
                                                   "evidence":  "gap groups=0 gap recipes=0 chunks=0"
                                               },
                                               {
-                                                  "command":  "go run ./cmd/aepregistry recurring-matrix -root . -out tmp/registry_recurring_matrix.json -out-root tmp/migration_matrix_verify",
+                                                  "command":  "go run ./cmd/aepregistry recurring-matrix -root . -out tmp/registry_recurring_matrix.json -out-root registry/evidence/versioned-aep-migration/migration_matrix_verify",
                                                   "status":  "pass",
                                                   "evidence":  "full W2020 no-AE matrix 900/906 pass with 6 source-contract skips; standalone verify CLI smoke pass; explicit matte AE2025 contract 1/1 pass"
                                               },

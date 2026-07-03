@@ -102,7 +102,7 @@ foreach ($record in $coverage.coverage) {
   $chunks = @()
   $chunkIndex = 1
   foreach ($chunkRecipes in @(Split-IntoChunks -Items $gapRecipes -ChunkSize $recipesPerChunk)) {
-    $outRoot = "tmp/host_open_gaps/$($record.id)/chunk-$chunkIndex"
+    $outRoot = "registry/evidence/versioned-aep-migration/host_open_gaps/$($record.id)/chunk-$chunkIndex"
     $recipeArgs = Get-RecipePathArgs -RecipeNames $chunkRecipes
     $commandParts = @(
       "go run ./cmd/aepmigrate matrix"

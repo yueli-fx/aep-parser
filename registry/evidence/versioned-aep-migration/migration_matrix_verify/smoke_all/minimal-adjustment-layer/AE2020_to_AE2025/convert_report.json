@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "source": {
+    "path": "registry\\evidence\\versioned-aep-migration\\migration_matrix_verify\\smoke_all\\minimal-adjustment-layer\\AE2020_to_AE2025\\source.aep",
+    "version_label": "AE2020",
+    "version_raw": "17.7x45"
+  },
+  "target": {
+    "version_label": "AE2025",
+    "path": "registry\\evidence\\versioned-aep-migration\\migration_matrix_verify\\smoke_all\\minimal-adjustment-layer\\AE2020_to_AE2025\\target.aep"
+  },
+  "summary": {
+    "status": "pass",
+    "preserved": 0,
+    "retargeted": 4,
+    "translated": 0,
+    "approximated": 0,
+    "dropped": 0,
+    "blocked": 0,
+    "unknown": 0
+  },
+  "entries": [
+    {
+      "path": "project",
+      "class": "retargeted",
+      "target_version": "AE2025",
+      "reason": "Project skeleton is recreated through the requested target AE template."
+    },
+    {
+      "path": "comps[Main]",
+      "class": "retargeted",
+      "target_version": "AE2025",
+      "reason": "Composition and stable composition settings are recreated through the target AE project template."
+    },
+    {
+      "path": "comps[Main].layers[Grade]",
+      "class": "retargeted",
+      "target_version": "AE2025",
+      "reason": "Default adjustment layer is recreated through the target AE project template."
+    },
+    {
+      "path": "comps[Main].layers[Title]",
+      "class": "retargeted",
+      "target_version": "AE2025",
+      "reason": "Default text layer is recreated through the target AE project template."
+    }
+  ],
+  "verification": {
+    "profile_diff_status": "pass",
+    "profile_diff_count": 0,
+    "ae_open_status": "not_run",
+    "render_status": "not_run"
+  }
+}

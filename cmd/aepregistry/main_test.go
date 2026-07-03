@@ -760,7 +760,7 @@ func TestRunCheckpointWritesVersionBoundaryGateBeforeCoverageValidation(t *testi
 	if report.Status != registry.StatusPass || report.Summary.Steps != 5 || report.Steps[1].ID != "version_boundaries" {
 		t.Fatalf("checkpoint report = %+v, want boundary gate before coverage validation", report)
 	}
-	if _, err := os.Stat(filepath.Join(root, filepath.FromSlash("tmp/registry_version_boundaries.json"))); err != nil {
+	if _, err := os.Stat(filepath.Join(root, filepath.FromSlash("registry/evidence/versioned-aep-migration/registry_version_boundaries.json"))); err != nil {
 		t.Fatalf("boundary gate report was not written: %v", err)
 	}
 }
@@ -1184,7 +1184,7 @@ func TestRunGateWritesOrderedReports(t *testing.T) {
 	}
 	for _, rel := range []string{
 		"tmp/registry_audit.json",
-		"tmp/registry_version_boundaries.json",
+		"registry/evidence/versioned-aep-migration/registry_version_boundaries.json",
 		"tmp/registry_coverage.json",
 		"tmp/registry_coverage_summary.json",
 		"tmp/registry_coverage_axis.json",
@@ -2206,8 +2206,8 @@ func addCheckpointBoundaryContractGate(t *testing.T, root string) {
 		{
 			"id":       "registry-version-boundaries",
 			"kind":     "version_boundaries",
-			"command":  "go run ./cmd/aepregistry boundaries -root . -out tmp/registry_version_boundaries.json",
-			"artifact": "tmp/registry_version_boundaries.json",
+			"command":  "go run ./cmd/aepregistry boundaries -root . -out registry/evidence/versioned-aep-migration/registry_version_boundaries.json",
+			"artifact": "registry/evidence/versioned-aep-migration/registry_version_boundaries.json",
 			"status":   registry.StatusPass,
 			"summary": map[string]any{
 				"boundaries":        1,
@@ -2272,8 +2272,8 @@ func addCommandBoundaryContractGate(t *testing.T, root string) {
 			{
 				"id":       "registry-version-boundaries",
 				"kind":     "version_boundaries",
-				"command":  "go run ./cmd/aepregistry boundaries -root . -out tmp/registry_version_boundaries.json",
-				"artifact": "tmp/registry_version_boundaries.json",
+				"command":  "go run ./cmd/aepregistry boundaries -root . -out registry/evidence/versioned-aep-migration/registry_version_boundaries.json",
+				"artifact": "registry/evidence/versioned-aep-migration/registry_version_boundaries.json",
 				"status":   registry.StatusPass,
 				"summary": map[string]any{
 					"boundaries":        1,

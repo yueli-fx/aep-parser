@@ -86,7 +86,7 @@ if ($IncludeCoverageBatch) {
 
 if ($IncludeMatrix) {
   Invoke-Step "verify recurring matrix gates" {
-    go run ./cmd/aepregistry recurring-matrix -root . -out tmp/registry_recurring_matrix.json -out-root tmp/migration_matrix_verify
+    go run ./cmd/aepregistry recurring-matrix -root . -out tmp/registry_recurring_matrix.json -out-root registry/evidence/versioned-aep-migration/migration_matrix_verify
   }
 }
 

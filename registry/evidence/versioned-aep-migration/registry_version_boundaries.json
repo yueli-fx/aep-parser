@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "status": "pass",
+  "coverage_path": "registry/versioned_aep_migration_coverage.json",
+  "version_axis": [
+    "AE2020",
+    "AE2021",
+    "AE2022",
+    "AE2023",
+    "AE2024",
+    "AE2025"
+  ],
+  "summary": {
+    "boundaries": 1,
+    "matched": 1,
+    "missing_rows": 0,
+    "duplicate_rows": 0,
+    "mismatched_totals": 0,
+    "mismatched_status": 0,
+    "checked_cells": 36,
+    "missing_cells": 0,
+    "mismatched_cells": 0,
+    "errors": 0
+  },
+  "boundaries": [
+    {
+      "boundary_id": "ae2025.explicit_matte_source",
+      "atom_id": "layer.track_matte.explicit_source",
+      "recipe": "minimal-layer-explicit-matte",
+      "policy": "known_source_contract_boundary",
+      "expected_boundary_status": "known_matte_contract_boundary",
+      "actual_boundary_status": "known_matte_contract_boundary",
+      "writer_axis_status": "boundary_source_contract",
+      "expected_cells": {
+        "total": 36,
+        "pass": 1,
+        "blocked": 5,
+        "failed": 0,
+        "skipped": 30
+      },
+      "actual_cells": {
+        "total": 36,
+        "pass": 1,
+        "blocked": 5,
+        "failed": 0,
+        "skipped": 30
+      },
+      "cell_policy": [
+        {
+          "source_versions": [
+            "AE2020",
+            "AE2021",
+            "AE2022",
+            "AE2023",
+            "AE2024"
+          ],
+          "target_versions": [
+            "AE2020",
+            "AE2021",
+            "AE2022",
+            "AE2023",
+            "AE2024",
+            "AE2025"
+          ],
+          "status": "skipped",
+          "reason": "source contract unavailable before AE2025"
+        },
+        {
+          "source_versions": [
+            "AE2025"
+          ],
+          "target_versions": [
+            "AE2025"
+          ],
+          "status": "pass"
+        },
+        {
+          "source_versions": [
+            "AE2025"
+          ],
+          "target_versions": [
+            "AE2020",
+            "AE2021",
+            "AE2022",
+            "AE2023",
+            "AE2024"
+          ],
+          "status": "blocked",
+          "reason": "explicit matte source cannot downgrade to older writer targets"
+        }
+      ],
+      "checked_cells": 36,
+      "match": true
+    }
+  ],
+  "issues": null
+}

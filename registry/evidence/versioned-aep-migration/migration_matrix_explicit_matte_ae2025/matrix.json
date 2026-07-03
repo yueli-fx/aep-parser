@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "out_root": "tmp\\migration_matrix_explicit_matte_ae2025",
+  "summary": {
+    "total": 1,
+    "passed": 1,
+    "blocked": 0,
+    "failed": 0,
+    "skipped": 0
+  },
+  "cases": [
+    {
+      "recipe_path": "examples\\recipes\\minimal-layer-explicit-matte.json",
+      "recipe_name": "minimal-layer-explicit-matte",
+      "source_version": "AE2025",
+      "target_version": "AE2025",
+      "status": "pass",
+      "case_dir": "tmp\\migration_matrix_explicit_matte_ae2025\\minimal-layer-explicit-matte\\AE2025_to_AE2025",
+      "source_path": "tmp\\migration_matrix_explicit_matte_ae2025\\minimal-layer-explicit-matte\\AE2025_to_AE2025\\source.aep",
+      "output_path": "tmp\\migration_matrix_explicit_matte_ae2025\\minimal-layer-explicit-matte\\AE2025_to_AE2025\\target.aep",
+      "compile_report_path": "tmp\\migration_matrix_explicit_matte_ae2025\\minimal-layer-explicit-matte\\AE2025_to_AE2025\\compile_report.json",
+      "convert_report_path": "tmp\\migration_matrix_explicit_matte_ae2025\\minimal-layer-explicit-matte\\AE2025_to_AE2025\\convert_report.json"
+    }
+  ]
+}

@@ -21,7 +21,7 @@
       "location_id": "tmp_evidence",
       "action": "review_generated_cleanup",
       "cleanup_safety": "generated_untracked_review",
-      "rationale": "tmp contains disposable generated reports and matrix outputs. Direct cleanup is allowed only for classified rebuildable candidates; mixed groups require preserve_paths and explicit producer scope."
+      "rationale": "tmp contains disposable generated reports and scratch outputs only. Required matrix evidence must be promoted to registry/evidence/<topic>; direct cleanup is allowed only for classified rebuildable candidates, and mixed groups require preserve_paths plus explicit producer scope."
     }
   ]
 }

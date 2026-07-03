@@ -88,12 +88,12 @@
       "evidence": [
         {
           "kind": "matrix",
-          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_layer_all_6x6/matrix.json",
           "required": true
         },
         {
           "kind": "matrix",
-          "path": "tmp/migration_matrix_explicit_matte_ae2025/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_explicit_matte_ae2025/matrix.json",
           "required": true
         }
       ],

@@ -160,7 +160,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -199,7 +199,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -243,7 +243,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_effect_param_keyframes/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_effect_param_keyframes/matrix.json",
           "required": true
         }
       ],
@@ -747,7 +747,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_explicit_matte_ae2025/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_explicit_matte_ae2025/matrix.json",
           "required": true
         }
       ],
@@ -915,7 +915,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -953,7 +953,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -991,7 +991,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -1029,7 +1029,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -1067,7 +1067,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -1105,7 +1105,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -1143,7 +1143,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -1181,7 +1181,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -1219,7 +1219,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -1257,7 +1257,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -1295,7 +1295,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -1333,7 +1333,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -1376,7 +1376,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -1414,7 +1414,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -1457,7 +1457,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -1501,7 +1501,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_ellipse_fill_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_ellipse_fill_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -1539,7 +1539,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -1577,7 +1577,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -1615,7 +1615,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -1653,7 +1653,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -1691,7 +1691,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -1729,7 +1729,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -1767,7 +1767,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -1805,7 +1805,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -1843,7 +1843,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -1881,7 +1881,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -1919,7 +1919,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_shape_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -1952,7 +1952,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_baseline_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_baseline_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -1990,7 +1990,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -2028,7 +2028,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -2066,7 +2066,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -2104,7 +2104,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -2142,7 +2142,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -2180,7 +2180,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -2218,7 +2218,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -2256,7 +2256,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -2294,7 +2294,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -2332,7 +2332,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -2370,7 +2370,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -2408,7 +2408,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -2446,7 +2446,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -2484,7 +2484,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -2522,7 +2522,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -2560,7 +2560,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -2598,7 +2598,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -2636,7 +2636,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -2674,7 +2674,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -2712,7 +2712,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -2750,7 +2750,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -2788,7 +2788,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -2826,7 +2826,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -2864,7 +2864,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -2902,7 +2902,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -2940,7 +2940,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -2978,7 +2978,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3016,7 +3016,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3049,7 +3049,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_style_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_style_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3082,7 +3082,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_text_style_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_text_style_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3115,7 +3115,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_comp_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_comp_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3148,7 +3148,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_comp_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_comp_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3181,7 +3181,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_comp_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_comp_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3214,7 +3214,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_comp_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_comp_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3247,7 +3247,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_comp_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_comp_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3280,7 +3280,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_comp_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_comp_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3313,7 +3313,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_comp_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_comp_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3346,7 +3346,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_comp_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_comp_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3379,7 +3379,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_comp_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_comp_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3412,7 +3412,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_comp_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_comp_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3445,7 +3445,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_comp_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_comp_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3478,7 +3478,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_comp_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_comp_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3511,7 +3511,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_comp_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_comp_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3544,7 +3544,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_comp_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_comp_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3577,7 +3577,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_comp_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_comp_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3610,7 +3610,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_comp_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_comp_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3643,7 +3643,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_comp_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_comp_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3676,7 +3676,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_comp_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_comp_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3709,7 +3709,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_camera_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_camera_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3742,7 +3742,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_camera_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_camera_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3775,7 +3775,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_camera_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_camera_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3808,7 +3808,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_camera_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_camera_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3841,7 +3841,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_camera_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_camera_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3874,7 +3874,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_camera_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_camera_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3907,7 +3907,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_camera_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_camera_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3940,7 +3940,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_camera_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_camera_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -3973,7 +3973,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_camera_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_camera_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4006,7 +4006,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_camera_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_camera_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4039,7 +4039,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_camera_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_camera_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4072,7 +4072,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_camera_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_camera_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4105,7 +4105,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_camera_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_camera_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4138,7 +4138,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_camera_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_camera_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4171,7 +4171,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_camera_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_camera_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4204,7 +4204,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_layer_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4237,7 +4237,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_layer_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4270,7 +4270,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_layer_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4303,7 +4303,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_layer_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4336,7 +4336,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_layer_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4369,7 +4369,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_layer_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4402,7 +4402,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_layer_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4435,7 +4435,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_layer_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4468,7 +4468,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_layer_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4501,7 +4501,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_layer_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4534,7 +4534,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_layer_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4567,7 +4567,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_layer_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4600,7 +4600,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_layer_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4633,7 +4633,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_layer_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4666,7 +4666,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_layer_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_layer_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4699,7 +4699,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_light_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_light_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4732,7 +4732,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_light_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_light_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4765,7 +4765,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_light_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_light_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4798,7 +4798,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_light_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_light_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4831,7 +4831,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_light_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_light_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4864,7 +4864,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_light_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_light_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4897,7 +4897,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_light_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_light_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4930,7 +4930,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_light_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_light_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4963,7 +4963,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_light_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_light_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -4996,7 +4996,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_light_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_light_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5029,7 +5029,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_light_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_light_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5062,7 +5062,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_light_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_light_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5095,7 +5095,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_light_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_light_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5128,7 +5128,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_light_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_light_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5161,7 +5161,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_project_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_project_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5194,7 +5194,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_project_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_project_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5227,7 +5227,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_project_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_project_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5260,7 +5260,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_project_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_project_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5293,7 +5293,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_transform_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_transform_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5326,7 +5326,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_transform_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_transform_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5359,7 +5359,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_transform_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_transform_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5392,7 +5392,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_effect_params_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_effect_params_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5425,7 +5425,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_effect_params_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_effect_params_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5458,7 +5458,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_effect_params_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_effect_params_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5521,7 +5521,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_effect_control_static_values_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_effect_control_static_values_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5554,7 +5554,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_precomp_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_precomp_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5587,7 +5587,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5620,7 +5620,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5653,7 +5653,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5686,7 +5686,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5719,7 +5719,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5752,7 +5752,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5785,7 +5785,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_essential_graphics_controllers_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_essential_graphics_controllers_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5818,7 +5818,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5851,7 +5851,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5884,7 +5884,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5917,7 +5917,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5950,7 +5950,7 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
           "required": true
         }
       ],
@@ -5983,12 +5983,12 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_static_effects_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_static_effects_all_6x6/matrix.json",
           "required": true
         }
       ],
       "boundaries": [
-        "Verified against tmp/migration_matrix_static_effects_all_6x6/matrix.json; host-open evidence is tracked by the coverage ledger."
+        "Verified against registry/evidence/versioned-aep-migration/migration_matrix_static_effects_all_6x6/matrix.json; host-open evidence is tracked by the coverage ledger."
       ]
     },
     {
@@ -6016,12 +6016,12 @@
         },
         {
           "kind": "evidence",
-          "path": "tmp/migration_matrix_static_effects_all_6x6/matrix.json",
+          "path": "registry/evidence/versioned-aep-migration/migration_matrix_static_effects_all_6x6/matrix.json",
           "required": true
         }
       ],
       "boundaries": [
-        "Verified against tmp/migration_matrix_static_effects_all_6x6/matrix.json; host-open evidence is tracked by the coverage ledger."
+        "Verified against registry/evidence/versioned-aep-migration/migration_matrix_static_effects_all_6x6/matrix.json; host-open evidence is tracked by the coverage ledger."
       ]
     }
   ]

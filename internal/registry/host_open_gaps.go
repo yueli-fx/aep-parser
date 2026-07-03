@@ -174,7 +174,7 @@ func hostOpenGapChunks(recordID string, recipes, directHosts []string, aeRoot st
 		}
 		chunkRecipes := append([]string(nil), recipes[start:end]...)
 		chunkID := fmt.Sprintf("chunk-%d", len(chunks)+1)
-		outRoot := fmt.Sprintf("tmp/host_open_gaps/%s/%s", recordID, chunkID)
+		outRoot := fmt.Sprintf("registry/evidence/versioned-aep-migration/host_open_gaps/%s/%s", recordID, chunkID)
 		chunks = append(chunks, HostOpenGapChunkPlan{
 			ID:                  chunkID,
 			Recipes:             chunkRecipes,

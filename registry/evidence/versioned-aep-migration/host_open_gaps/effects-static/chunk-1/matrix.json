@@ -1,0 +1,133 @@
+{
+  "schema_version": 1,
+  "out_root": "registry/evidence/versioned-aep-migration/host_open_gaps/effects-static/chunk-1",
+  "ae_hosts": {
+    "AE2020": "E:\\adobe\\Adobe After Effects 2020\\Support Files\\AfterFX.exe",
+    "AE2021": "E:\\adobe\\Adobe After Effects 2021\\Support Files\\AfterFX.exe",
+    "AE2022": "E:\\adobe\\Adobe After Effects 2022\\Support Files\\AfterFX.exe",
+    "AE2023": "E:\\adobe\\Adobe After Effects 2023\\Support Files\\AfterFX.exe",
+    "AE2024": "E:\\adobe\\Adobe After Effects 2024\\Support Files\\AfterFX.exe",
+    "AE2025": "E:\\adobe\\Adobe After Effects 2025\\Support Files\\AfterFX.exe"
+  },
+  "summary": {
+    "total": 8,
+    "passed": 8,
+    "blocked": 0,
+    "failed": 0,
+    "skipped": 0
+  },
+  "cases": [
+    {
+      "recipe_path": "examples/recipes/minimal-adjustment-layer.json",
+      "recipe_name": "minimal-adjustment-layer",
+      "source_version": "AE2020",
+      "target_version": "AE2020",
+      "ae_open_version": "AE2020",
+      "ae_open_path": "E:\\adobe\\Adobe After Effects 2020\\Support Files\\AfterFX.exe",
+      "status": "pass",
+      "case_dir": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-adjustment-layer\\AE2020_to_AE2020",
+      "source_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-adjustment-layer\\AE2020_to_AE2020\\source.aep",
+      "output_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-adjustment-layer\\AE2020_to_AE2020\\target.aep",
+      "compile_report_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-adjustment-layer\\AE2020_to_AE2020\\compile_report.json",
+      "convert_report_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-adjustment-layer\\AE2020_to_AE2020\\convert_report.json"
+    },
+    {
+      "recipe_path": "examples/recipes/minimal-adjustment-layer.json",
+      "recipe_name": "minimal-adjustment-layer",
+      "source_version": "AE2020",
+      "target_version": "AE2025",
+      "ae_open_version": "AE2025",
+      "ae_open_path": "E:\\adobe\\Adobe After Effects 2025\\Support Files\\AfterFX.exe",
+      "status": "pass",
+      "case_dir": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-adjustment-layer\\AE2020_to_AE2025",
+      "source_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-adjustment-layer\\AE2020_to_AE2025\\source.aep",
+      "output_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-adjustment-layer\\AE2020_to_AE2025\\target.aep",
+      "compile_report_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-adjustment-layer\\AE2020_to_AE2025\\compile_report.json",
+      "convert_report_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-adjustment-layer\\AE2020_to_AE2025\\convert_report.json"
+    },
+    {
+      "recipe_path": "examples/recipes/minimal-adjustment-layer.json",
+      "recipe_name": "minimal-adjustment-layer",
+      "source_version": "AE2025",
+      "target_version": "AE2020",
+      "ae_open_version": "AE2020",
+      "ae_open_path": "E:\\adobe\\Adobe After Effects 2020\\Support Files\\AfterFX.exe",
+      "status": "pass",
+      "case_dir": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-adjustment-layer\\AE2025_to_AE2020",
+      "source_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-adjustment-layer\\AE2025_to_AE2020\\source.aep",
+      "output_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-adjustment-layer\\AE2025_to_AE2020\\target.aep",
+      "compile_report_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-adjustment-layer\\AE2025_to_AE2020\\compile_report.json",
+      "convert_report_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-adjustment-layer\\AE2025_to_AE2020\\convert_report.json"
+    },
+    {
+      "recipe_path": "examples/recipes/minimal-adjustment-layer.json",
+      "recipe_name": "minimal-adjustment-layer",
+      "source_version": "AE2025",
+      "target_version": "AE2025",
+      "ae_open_version": "AE2025",
+      "ae_open_path": "E:\\adobe\\Adobe After Effects 2025\\Support Files\\AfterFX.exe",
+      "status": "pass",
+      "case_dir": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-adjustment-layer\\AE2025_to_AE2025",
+      "source_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-adjustment-layer\\AE2025_to_AE2025\\source.aep",
+      "output_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-adjustment-layer\\AE2025_to_AE2025\\target.aep",
+      "compile_report_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-adjustment-layer\\AE2025_to_AE2025\\compile_report.json",
+      "convert_report_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-adjustment-layer\\AE2025_to_AE2025\\convert_report.json"
+    },
+    {
+      "recipe_path": "examples/recipes/minimal-text-effect.json",
+      "recipe_name": "minimal-text-effect",
+      "source_version": "AE2020",
+      "target_version": "AE2020",
+      "ae_open_version": "AE2020",
+      "ae_open_path": "E:\\adobe\\Adobe After Effects 2020\\Support Files\\AfterFX.exe",
+      "status": "pass",
+      "case_dir": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-text-effect\\AE2020_to_AE2020",
+      "source_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-text-effect\\AE2020_to_AE2020\\source.aep",
+      "output_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-text-effect\\AE2020_to_AE2020\\target.aep",
+      "compile_report_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-text-effect\\AE2020_to_AE2020\\compile_report.json",
+      "convert_report_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-text-effect\\AE2020_to_AE2020\\convert_report.json"
+    },
+    {
+      "recipe_path": "examples/recipes/minimal-text-effect.json",
+      "recipe_name": "minimal-text-effect",
+      "source_version": "AE2020",
+      "target_version": "AE2025",
+      "ae_open_version": "AE2025",
+      "ae_open_path": "E:\\adobe\\Adobe After Effects 2025\\Support Files\\AfterFX.exe",
+      "status": "pass",
+      "case_dir": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-text-effect\\AE2020_to_AE2025",
+      "source_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-text-effect\\AE2020_to_AE2025\\source.aep",
+      "output_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-text-effect\\AE2020_to_AE2025\\target.aep",
+      "compile_report_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-text-effect\\AE2020_to_AE2025\\compile_report.json",
+      "convert_report_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-text-effect\\AE2020_to_AE2025\\convert_report.json"
+    },
+    {
+      "recipe_path": "examples/recipes/minimal-text-effect.json",
+      "recipe_name": "minimal-text-effect",
+      "source_version": "AE2025",
+      "target_version": "AE2020",
+      "ae_open_version": "AE2020",
+      "ae_open_path": "E:\\adobe\\Adobe After Effects 2020\\Support Files\\AfterFX.exe",
+      "status": "pass",
+      "case_dir": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-text-effect\\AE2025_to_AE2020",
+      "source_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-text-effect\\AE2025_to_AE2020\\source.aep",
+      "output_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-text-effect\\AE2025_to_AE2020\\target.aep",
+      "compile_report_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-text-effect\\AE2025_to_AE2020\\compile_report.json",
+      "convert_report_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-text-effect\\AE2025_to_AE2020\\convert_report.json"
+    },
+    {
+      "recipe_path": "examples/recipes/minimal-text-effect.json",
+      "recipe_name": "minimal-text-effect",
+      "source_version": "AE2025",
+      "target_version": "AE2025",
+      "ae_open_version": "AE2025",
+      "ae_open_path": "E:\\adobe\\Adobe After Effects 2025\\Support Files\\AfterFX.exe",
+      "status": "pass",
+      "case_dir": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-text-effect\\AE2025_to_AE2025",
+      "source_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-text-effect\\AE2025_to_AE2025\\source.aep",
+      "output_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-text-effect\\AE2025_to_AE2025\\target.aep",
+      "compile_report_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-text-effect\\AE2025_to_AE2025\\compile_report.json",
+      "convert_report_path": "tmp\\host_open_gaps\\effects-static\\chunk-1\\minimal-text-effect\\AE2025_to_AE2025\\convert_report.json"
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 {
     "contract_gates":  [
                            {
-                               "artifact":  "tmp/registry_version_boundaries.json",
-                               "command":  "go run ./cmd/aepregistry boundaries -root . -out tmp/registry_version_boundaries.json",
+                               "artifact":  "registry/evidence/versioned-aep-migration/registry_version_boundaries.json",
+                               "command":  "go run ./cmd/aepregistry boundaries -root . -out registry/evidence/versioned-aep-migration/registry_version_boundaries.json",
                                "id":  "registry-version-boundaries",
                                "kind":  "version_boundaries",
                                "status":  "pass",
@@ -22,10 +22,10 @@
                        ],
     "coverage":  [
                      {
-                         "artifact":  "tmp/migration_matrix_text_baseline_all_6x6/matrix.json",
+                         "artifact":  "registry/evidence/versioned-aep-migration/migration_matrix_text_baseline_all_6x6/matrix.json",
                          "domain":  "text",
                          "host_open_endpoint_evidence":  {
-                                                             "artifact":  "tmp/host_open_gaps/text-baseline/chunk-1/matrix.json",
+                                                             "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/text-baseline/chunk-1/matrix.json",
                                                              "direct_hosts":  [
                                                                                   "AE2020",
                                                                                   "AE2025"
@@ -36,7 +36,7 @@
                                                                                     "AE2023",
                                                                                     "AE2024"
                                                                                 ],
-                                                             "ledger":  "tmp/host_open_gaps/text-baseline/chunk-1/ledger.md",
+                                                             "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/text-baseline/chunk-1/ledger.md",
                                                              "open_mode":  "target_bound",
                                                              "recipes":  [
                                                                              "minimal-default-text-layer",
@@ -52,7 +52,7 @@
                                                          },
                          "host_open_status":  "direct_endpoint_hosts_pass; AE2021-AE2024 inferred_by_endpoint",
                          "id":  "text-baseline",
-                         "ledger":  "tmp/migration_matrix_text_baseline_all_6x6/ledger.md",
+                         "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_text_baseline_all_6x6/ledger.md",
                          "recipe_count":  2,
                          "recipes":  [
                                          "minimal-default-text-layer",
@@ -70,10 +70,10 @@
                          "writer_status":  "PD-6x6"
                      },
                      {
-                         "artifact":  "tmp/migration_matrix_text_style_all_6x6/matrix.json",
+                         "artifact":  "registry/evidence/versioned-aep-migration/migration_matrix_text_style_all_6x6/matrix.json",
                          "domain":  "text",
                          "host_open_endpoint_evidence":  {
-                                                             "artifact":  "tmp/host_open_gaps/text-style/non-representative-endpoint/matrix.json",
+                                                             "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/text-style/non-representative-endpoint/matrix.json",
                                                              "direct_hosts":  [
                                                                                   "AE2020",
                                                                                   "AE2025"
@@ -84,7 +84,7 @@
                                                                                     "AE2023",
                                                                                     "AE2024"
                                                                                 ],
-                                                             "ledger":  "tmp/host_open_gaps/text-style/non-representative-endpoint/ledger.md",
+                                                             "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/text-style/non-representative-endpoint/ledger.md",
                                                              "open_mode":  "target_bound",
                                                              "recipes":  [
                                                                              "minimal-text-shape"
@@ -103,7 +103,7 @@
                                                        ],
                          "host_open_status":  "OPEN-ALL-HOSTS representative plus direct_endpoint_hosts_pass for non-representative recipes; AE2021-AE2024 inferred_by_endpoint",
                          "id":  "text-style",
-                         "ledger":  "tmp/migration_matrix_text_style_all_6x6/ledger.md",
+                         "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_text_style_all_6x6/ledger.md",
                          "recipes":  [
                                          "minimal-text-style",
                                          "minimal-text-shape"
@@ -120,14 +120,14 @@
                          "writer_status":  "PD-6x6"
                      },
                      {
-                         "artifact":  "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+                         "artifact":  "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/matrix.json",
                          "domain":  "text",
                          "host_open_endpoint_evidence":  {
                                                              "chunks":  [
                                                                             {
-                                                                                "artifact":  "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-1/matrix.json",
+                                                                                "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/text-animators/non-representative-endpoint/chunk-1/matrix.json",
                                                                                 "id":  "chunk-1",
-                                                                                "ledger":  "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-1/ledger.md",
+                                                                                "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/text-animators/non-representative-endpoint/chunk-1/ledger.md",
                                                                                 "totals":  {
                                                                                                "blocked":  0,
                                                                                                "failed":  0,
@@ -137,9 +137,9 @@
                                                                                            }
                                                                             },
                                                                             {
-                                                                                "artifact":  "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-2/matrix.json",
+                                                                                "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/text-animators/non-representative-endpoint/chunk-2/matrix.json",
                                                                                 "id":  "chunk-2",
-                                                                                "ledger":  "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-2/ledger.md",
+                                                                                "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/text-animators/non-representative-endpoint/chunk-2/ledger.md",
                                                                                 "totals":  {
                                                                                                "blocked":  0,
                                                                                                "failed":  0,
@@ -149,9 +149,9 @@
                                                                                            }
                                                                             },
                                                                             {
-                                                                                "artifact":  "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-3/matrix.json",
+                                                                                "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/text-animators/non-representative-endpoint/chunk-3/matrix.json",
                                                                                 "id":  "chunk-3",
-                                                                                "ledger":  "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-3/ledger.md",
+                                                                                "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/text-animators/non-representative-endpoint/chunk-3/ledger.md",
                                                                                 "totals":  {
                                                                                                "blocked":  0,
                                                                                                "failed":  0,
@@ -161,9 +161,9 @@
                                                                                            }
                                                                             },
                                                                             {
-                                                                                "artifact":  "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-4/matrix.json",
+                                                                                "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/text-animators/non-representative-endpoint/chunk-4/matrix.json",
                                                                                 "id":  "chunk-4",
-                                                                                "ledger":  "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-4/ledger.md",
+                                                                                "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/text-animators/non-representative-endpoint/chunk-4/ledger.md",
                                                                                 "totals":  {
                                                                                                "blocked":  0,
                                                                                                "failed":  0,
@@ -221,7 +221,7 @@
                                                        ],
                          "host_open_status":  "OPEN-ALL-HOSTS representatives plus direct_endpoint_hosts_pass for non-representative recipes; AE2021-AE2024 inferred_by_endpoint",
                          "id":  "text-animators",
-                         "ledger":  "tmp/migration_matrix_text_animators_all_6x6/ledger.md",
+                         "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_text_animators_all_6x6/ledger.md",
                          "recipe_count":  29,
                          "recipe_pattern":  "minimal-text-animator-*",
                          "recipes":  [
@@ -267,10 +267,10 @@
                          "writer_status":  "PD-6x6"
                      },
                      {
-                         "artifact":  "tmp/migration_matrix_static_effects_all_6x6/matrix.json",
+                         "artifact":  "registry/evidence/versioned-aep-migration/migration_matrix_static_effects_all_6x6/matrix.json",
                          "domain":  "effect",
                          "host_open_endpoint_evidence":  {
-                                                             "artifact":  "tmp/host_open_gaps/effects-static/chunk-1/matrix.json",
+                                                             "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/effects-static/chunk-1/matrix.json",
                                                              "direct_hosts":  [
                                                                                   "AE2020",
                                                                                   "AE2025"
@@ -281,7 +281,7 @@
                                                                                     "AE2023",
                                                                                     "AE2024"
                                                                                 ],
-                                                             "ledger":  "tmp/host_open_gaps/effects-static/chunk-1/ledger.md",
+                                                             "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/effects-static/chunk-1/ledger.md",
                                                              "open_mode":  "target_bound",
                                                              "recipes":  [
                                                                              "minimal-text-effect",
@@ -297,7 +297,7 @@
                                                          },
                          "host_open_status":  "direct_endpoint_hosts_pass; AE2021-AE2024 inferred_by_endpoint",
                          "id":  "effects-static",
-                         "ledger":  "tmp/migration_matrix_static_effects_all_6x6/ledger.md",
+                         "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_static_effects_all_6x6/ledger.md",
                          "recipes":  [
                                          "minimal-text-effect",
                                          "minimal-adjustment-layer"
@@ -314,10 +314,10 @@
                          "writer_status":  "PD-6x6"
                      },
                      {
-                         "artifact":  "tmp/migration_matrix_effect_params_all_6x6/matrix.json",
+                         "artifact":  "registry/evidence/versioned-aep-migration/migration_matrix_effect_params_all_6x6/matrix.json",
                          "domain":  "effect",
                          "host_open_endpoint_evidence":  {
-                                                             "artifact":  "tmp/host_open_gaps/effects-dynamic-params/non-representative-endpoint/matrix.json",
+                                                             "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/effects-dynamic-params/non-representative-endpoint/matrix.json",
                                                              "direct_hosts":  [
                                                                                   "AE2020",
                                                                                   "AE2025"
@@ -328,7 +328,7 @@
                                                                                     "AE2023",
                                                                                     "AE2024"
                                                                                 ],
-                                                             "ledger":  "tmp/host_open_gaps/effects-dynamic-params/non-representative-endpoint/ledger.md",
+                                                             "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/effects-dynamic-params/non-representative-endpoint/ledger.md",
                                                              "open_mode":  "target_bound",
                                                              "recipes":  [
                                                                              "minimal-effect-layer-param",
@@ -349,7 +349,7 @@
                                                        ],
                          "host_open_status":  "OPEN-ALL-HOSTS representative plus direct_endpoint_hosts_pass for non-representative recipes; AE2021-AE2024 inferred_by_endpoint",
                          "id":  "effects-dynamic-params",
-                         "ledger":  "tmp/migration_matrix_effect_params_all_6x6/ledger.md",
+                         "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_effect_params_all_6x6/ledger.md",
                          "recipes":  [
                                          "minimal-effect-layer-param",
                                          "minimal-effect-param-expression",
@@ -368,10 +368,10 @@
                          "writer_status":  "PD-6x6"
                      },
                      {
-                         "artifact":  "tmp/migration_matrix_effect_control_static_values_all_6x6/matrix.json",
+                         "artifact":  "registry/evidence/versioned-aep-migration/migration_matrix_effect_control_static_values_all_6x6/matrix.json",
                          "domain":  "effect",
                          "host_open_endpoint_evidence":  {
-                                                             "artifact":  "tmp/host_open_gaps/effects-control-static-values/chunk-1/matrix.json",
+                                                             "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/effects-control-static-values/chunk-1/matrix.json",
                                                              "direct_hosts":  [
                                                                                   "AE2020",
                                                                                   "AE2025"
@@ -382,7 +382,7 @@
                                                                                     "AE2023",
                                                                                     "AE2024"
                                                                                 ],
-                                                             "ledger":  "tmp/host_open_gaps/effects-control-static-values/chunk-1/ledger.md",
+                                                             "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/effects-control-static-values/chunk-1/ledger.md",
                                                              "open_mode":  "target_bound",
                                                              "recipes":  [
                                                                              "minimal-effect-control-static-values"
@@ -397,7 +397,7 @@
                                                          },
                          "host_open_status":  "direct_endpoint_hosts_pass; AE2021-AE2024 inferred_by_endpoint",
                          "id":  "effects-control-static-values",
-                         "ledger":  "tmp/migration_matrix_effect_control_static_values_all_6x6/ledger.md",
+                         "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_effect_control_static_values_all_6x6/ledger.md",
                          "recipe_count":  1,
                          "recipes":  [
                                          "minimal-effect-control-static-values"
@@ -414,10 +414,10 @@
                          "writer_status":  "PD-6x6"
                      },
                      {
-                         "artifact":  "tmp/migration_matrix_transform_all_6x6/matrix.json",
+                         "artifact":  "registry/evidence/versioned-aep-migration/migration_matrix_transform_all_6x6/matrix.json",
                          "domain":  "transform",
                          "host_open_endpoint_evidence":  {
-                                                             "artifact":  "tmp/host_open_gaps/transforms-dynamic/non-representative-endpoint/matrix.json",
+                                                             "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/transforms-dynamic/non-representative-endpoint/matrix.json",
                                                              "direct_hosts":  [
                                                                                   "AE2020",
                                                                                   "AE2025"
@@ -428,7 +428,7 @@
                                                                                     "AE2023",
                                                                                     "AE2024"
                                                                                 ],
-                                                             "ledger":  "tmp/host_open_gaps/transforms-dynamic/non-representative-endpoint/ledger.md",
+                                                             "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/transforms-dynamic/non-representative-endpoint/ledger.md",
                                                              "open_mode":  "target_bound",
                                                              "recipes":  [
                                                                              "minimal-transform-expression",
@@ -448,7 +448,7 @@
                                                        ],
                          "host_open_status":  "OPEN-ALL-HOSTS representative plus direct_endpoint_hosts_pass for non-representative recipes; AE2021-AE2024 inferred_by_endpoint",
                          "id":  "transforms-dynamic",
-                         "ledger":  "tmp/migration_matrix_transform_all_6x6/ledger.md",
+                         "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_transform_all_6x6/ledger.md",
                          "recipes":  [
                                          "minimal-transform-keyframes",
                                          "minimal-transform-keyframe-ease",
@@ -466,10 +466,10 @@
                          "writer_status":  "PD-6x6"
                      },
                      {
-                         "artifact":  "tmp/migration_matrix_project_all_6x6/matrix.json",
+                         "artifact":  "registry/evidence/versioned-aep-migration/migration_matrix_project_all_6x6/matrix.json",
                          "domain":  "project",
                          "host_open_endpoint_evidence":  {
-                                                             "artifact":  "tmp/host_open_gaps/project/non-representative-endpoint/matrix.json",
+                                                             "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/project/non-representative-endpoint/matrix.json",
                                                              "direct_hosts":  [
                                                                                   "AE2020",
                                                                                   "AE2025"
@@ -480,7 +480,7 @@
                                                                                     "AE2023",
                                                                                     "AE2024"
                                                                                 ],
-                                                             "ledger":  "tmp/host_open_gaps/project/non-representative-endpoint/ledger.md",
+                                                             "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/project/non-representative-endpoint/ledger.md",
                                                              "open_mode":  "target_bound",
                                                              "recipes":  [
                                                                              "minimal-project-bits-per-channel",
@@ -501,7 +501,7 @@
                                                        ],
                          "host_open_status":  "OPEN-ALL-HOSTS representative plus direct_endpoint_hosts_pass for non-representative recipes; AE2021-AE2024 inferred_by_endpoint",
                          "id":  "project",
-                         "ledger":  "tmp/migration_matrix_project_all_6x6/ledger.md",
+                         "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_project_all_6x6/ledger.md",
                          "recipe_count":  4,
                          "recipe_pattern":  "minimal-project-*",
                          "recipes":  [
@@ -522,14 +522,14 @@
                          "writer_status":  "PD-6x6"
                      },
                      {
-                         "artifact":  "tmp/migration_matrix_comp_all_6x6/matrix.json",
+                         "artifact":  "registry/evidence/versioned-aep-migration/migration_matrix_comp_all_6x6/matrix.json",
                          "domain":  "comp",
                          "host_open_endpoint_evidence":  {
                                                              "chunks":  [
                                                                             {
-                                                                                "artifact":  "tmp/host_open_gaps/comp/non-representative-endpoint/chunk-1/matrix.json",
+                                                                                "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/comp/non-representative-endpoint/chunk-1/matrix.json",
                                                                                 "id":  "chunk-1",
-                                                                                "ledger":  "tmp/host_open_gaps/comp/non-representative-endpoint/chunk-1/ledger.md",
+                                                                                "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/comp/non-representative-endpoint/chunk-1/ledger.md",
                                                                                 "totals":  {
                                                                                                "blocked":  0,
                                                                                                "failed":  0,
@@ -539,9 +539,9 @@
                                                                                            }
                                                                             },
                                                                             {
-                                                                                "artifact":  "tmp/host_open_gaps/comp/non-representative-endpoint/chunk-2/matrix.json",
+                                                                                "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/comp/non-representative-endpoint/chunk-2/matrix.json",
                                                                                 "id":  "chunk-2",
-                                                                                "ledger":  "tmp/host_open_gaps/comp/non-representative-endpoint/chunk-2/ledger.md",
+                                                                                "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/comp/non-representative-endpoint/chunk-2/ledger.md",
                                                                                 "totals":  {
                                                                                                "blocked":  0,
                                                                                                "failed":  0,
@@ -551,9 +551,9 @@
                                                                                            }
                                                                             },
                                                                             {
-                                                                                "artifact":  "tmp/host_open_gaps/comp/non-representative-endpoint/chunk-3/matrix.json",
+                                                                                "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/comp/non-representative-endpoint/chunk-3/matrix.json",
                                                                                 "id":  "chunk-3",
-                                                                                "ledger":  "tmp/host_open_gaps/comp/non-representative-endpoint/chunk-3/ledger.md",
+                                                                                "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/comp/non-representative-endpoint/chunk-3/ledger.md",
                                                                                 "totals":  {
                                                                                                "blocked":  0,
                                                                                                "failed":  0,
@@ -607,7 +607,7 @@
                                                        ],
                          "host_open_status":  "OPEN-ALL-HOSTS representative plus direct_endpoint_hosts_pass for non-representative recipes; AE2021-AE2024 inferred_by_endpoint",
                          "id":  "comp",
-                         "ledger":  "tmp/migration_matrix_comp_all_6x6/ledger.md",
+                         "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_comp_all_6x6/ledger.md",
                          "recipe_count":  18,
                          "recipe_pattern":  "minimal-comp-*",
                          "recipes":  [
@@ -642,14 +642,14 @@
                          "writer_status":  "PD-6x6"
                      },
                      {
-                         "artifact":  "tmp/migration_matrix_precomp_all_6x6/matrix.json",
+                         "artifact":  "registry/evidence/versioned-aep-migration/migration_matrix_precomp_all_6x6/matrix.json",
                          "domain":  "precomp",
                          "host_open_representatives":  [
                                                            "minimal-precomp-layer"
                                                        ],
                          "host_open_status":  "OPEN-ALL-HOSTS for current recipe",
                          "id":  "precomp",
-                         "ledger":  "tmp/migration_matrix_precomp_all_6x6/ledger.md",
+                         "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_precomp_all_6x6/ledger.md",
                          "recipe_count":  1,
                          "recipe_pattern":  "minimal-precomp-*",
                          "recipes":  [
@@ -667,14 +667,14 @@
                          "writer_status":  "PD-6x6"
                      },
                      {
-                         "artifact":  "tmp/migration_matrix_camera_all_6x6/matrix.json",
+                         "artifact":  "registry/evidence/versioned-aep-migration/migration_matrix_camera_all_6x6/matrix.json",
                          "domain":  "camera",
                          "host_open_endpoint_evidence":  {
                                                              "chunks":  [
                                                                             {
-                                                                                "artifact":  "tmp/host_open_gaps/camera/non-representative-endpoint/chunk-1/matrix.json",
+                                                                                "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/camera/non-representative-endpoint/chunk-1/matrix.json",
                                                                                 "id":  "chunk-1",
-                                                                                "ledger":  "tmp/host_open_gaps/camera/non-representative-endpoint/chunk-1/ledger.md",
+                                                                                "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/camera/non-representative-endpoint/chunk-1/ledger.md",
                                                                                 "totals":  {
                                                                                                "blocked":  0,
                                                                                                "failed":  0,
@@ -684,9 +684,9 @@
                                                                                            }
                                                                             },
                                                                             {
-                                                                                "artifact":  "tmp/host_open_gaps/camera/non-representative-endpoint/chunk-2/matrix.json",
+                                                                                "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/camera/non-representative-endpoint/chunk-2/matrix.json",
                                                                                 "id":  "chunk-2",
-                                                                                "ledger":  "tmp/host_open_gaps/camera/non-representative-endpoint/chunk-2/ledger.md",
+                                                                                "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/camera/non-representative-endpoint/chunk-2/ledger.md",
                                                                                 "totals":  {
                                                                                                "blocked":  0,
                                                                                                "failed":  0,
@@ -696,9 +696,9 @@
                                                                                            }
                                                                             },
                                                                             {
-                                                                                "artifact":  "tmp/host_open_gaps/camera/non-representative-endpoint/chunk-3/matrix.json",
+                                                                                "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/camera/non-representative-endpoint/chunk-3/matrix.json",
                                                                                 "id":  "chunk-3",
-                                                                                "ledger":  "tmp/host_open_gaps/camera/non-representative-endpoint/chunk-3/ledger.md",
+                                                                                "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/camera/non-representative-endpoint/chunk-3/ledger.md",
                                                                                 "totals":  {
                                                                                                "blocked":  0,
                                                                                                "failed":  0,
@@ -749,7 +749,7 @@
                                                        ],
                          "host_open_status":  "OPEN-ALL-HOSTS representative plus direct_endpoint_hosts_pass for non-representative recipes; AE2021-AE2024 inferred_by_endpoint",
                          "id":  "camera",
-                         "ledger":  "tmp/migration_matrix_camera_all_6x6/ledger.md",
+                         "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_camera_all_6x6/ledger.md",
                          "recipe_count":  15,
                          "recipe_pattern":  "minimal-camera-*",
                          "recipes":  [
@@ -781,14 +781,14 @@
                          "writer_status":  "PD-6x6"
                      },
                      {
-                         "artifact":  "tmp/migration_matrix_light_all_6x6/matrix.json",
+                         "artifact":  "registry/evidence/versioned-aep-migration/migration_matrix_light_all_6x6/matrix.json",
                          "domain":  "light",
                          "host_open_endpoint_evidence":  {
                                                              "chunks":  [
                                                                             {
-                                                                                "artifact":  "tmp/host_open_gaps/light/non-representative-endpoint/chunk-1/matrix.json",
+                                                                                "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/light/non-representative-endpoint/chunk-1/matrix.json",
                                                                                 "id":  "chunk-1",
-                                                                                "ledger":  "tmp/host_open_gaps/light/non-representative-endpoint/chunk-1/ledger.md",
+                                                                                "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/light/non-representative-endpoint/chunk-1/ledger.md",
                                                                                 "totals":  {
                                                                                                "blocked":  0,
                                                                                                "failed":  0,
@@ -798,9 +798,9 @@
                                                                                            }
                                                                             },
                                                                             {
-                                                                                "artifact":  "tmp/host_open_gaps/light/non-representative-endpoint/chunk-2/matrix.json",
+                                                                                "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/light/non-representative-endpoint/chunk-2/matrix.json",
                                                                                 "id":  "chunk-2",
-                                                                                "ledger":  "tmp/host_open_gaps/light/non-representative-endpoint/chunk-2/ledger.md",
+                                                                                "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/light/non-representative-endpoint/chunk-2/ledger.md",
                                                                                 "totals":  {
                                                                                                "blocked":  0,
                                                                                                "failed":  0,
@@ -810,9 +810,9 @@
                                                                                            }
                                                                             },
                                                                             {
-                                                                                "artifact":  "tmp/host_open_gaps/light/non-representative-endpoint/chunk-3/matrix.json",
+                                                                                "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/light/non-representative-endpoint/chunk-3/matrix.json",
                                                                                 "id":  "chunk-3",
-                                                                                "ledger":  "tmp/host_open_gaps/light/non-representative-endpoint/chunk-3/ledger.md",
+                                                                                "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/light/non-representative-endpoint/chunk-3/ledger.md",
                                                                                 "totals":  {
                                                                                                "blocked":  0,
                                                                                                "failed":  0,
@@ -862,7 +862,7 @@
                                                        ],
                          "host_open_status":  "OPEN-ALL-HOSTS representative plus direct_endpoint_hosts_pass for non-representative recipes; AE2021-AE2024 inferred_by_endpoint",
                          "id":  "light",
-                         "ledger":  "tmp/migration_matrix_light_all_6x6/ledger.md",
+                         "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_light_all_6x6/ledger.md",
                          "recipe_count":  14,
                          "recipe_pattern":  "minimal-light-*",
                          "recipes":  [
@@ -893,7 +893,7 @@
                          "writer_status":  "PD-6x6"
                      },
                      {
-                         "artifact":  "tmp/migration_matrix_layer_all_6x6/matrix.json",
+                         "artifact":  "registry/evidence/versioned-aep-migration/migration_matrix_layer_all_6x6/matrix.json",
                          "boundary":  {
                                           "blocked_recipe_ids":  [
                                                                      "minimal-layer-explicit-matte"
@@ -914,9 +914,9 @@
                          "host_open_endpoint_evidence":  {
                                                              "chunks":  [
                                                                             {
-                                                                                "artifact":  "tmp/host_open_gaps/layer-all-family/chunk-1/matrix.json",
+                                                                                "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/layer-all-family/chunk-1/matrix.json",
                                                                                 "id":  "chunk-1",
-                                                                                "ledger":  "tmp/host_open_gaps/layer-all-family/chunk-1/ledger.md",
+                                                                                "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/layer-all-family/chunk-1/ledger.md",
                                                                                 "totals":  {
                                                                                                "blocked":  0,
                                                                                                "failed":  0,
@@ -926,9 +926,9 @@
                                                                                            }
                                                                             },
                                                                             {
-                                                                                "artifact":  "tmp/host_open_gaps/layer-all-family/chunk-2/matrix.json",
+                                                                                "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/layer-all-family/chunk-2/matrix.json",
                                                                                 "id":  "chunk-2",
-                                                                                "ledger":  "tmp/host_open_gaps/layer-all-family/chunk-2/ledger.md",
+                                                                                "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/layer-all-family/chunk-2/ledger.md",
                                                                                 "totals":  {
                                                                                                "blocked":  0,
                                                                                                "failed":  0,
@@ -938,9 +938,9 @@
                                                                                            }
                                                                             },
                                                                             {
-                                                                                "artifact":  "tmp/host_open_gaps/layer-all-family/chunk-3/matrix.json",
+                                                                                "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/layer-all-family/chunk-3/matrix.json",
                                                                                 "id":  "chunk-3",
-                                                                                "ledger":  "tmp/host_open_gaps/layer-all-family/chunk-3/ledger.md",
+                                                                                "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/layer-all-family/chunk-3/ledger.md",
                                                                                 "totals":  {
                                                                                                "blocked":  0,
                                                                                                "failed":  0,
@@ -950,9 +950,9 @@
                                                                                            }
                                                                             },
                                                                             {
-                                                                                "artifact":  "tmp/host_open_gaps/layer-all-family/chunk-4/matrix.json",
+                                                                                "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/layer-all-family/chunk-4/matrix.json",
                                                                                 "id":  "chunk-4",
-                                                                                "ledger":  "tmp/host_open_gaps/layer-all-family/chunk-4/ledger.md",
+                                                                                "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/layer-all-family/chunk-4/ledger.md",
                                                                                 "totals":  {
                                                                                                "blocked":  0,
                                                                                                "failed":  0,
@@ -1004,7 +1004,7 @@
                                                          },
                          "host_open_status":  "direct_endpoint_hosts_pass for non-boundary recipes; explicit matte boundary excluded",
                          "id":  "layer-all-family",
-                         "ledger":  "tmp/migration_matrix_layer_all_6x6/ledger.md",
+                         "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_layer_all_6x6/ledger.md",
                          "recipe_count":  16,
                          "recipe_pattern":  "minimal-layer-*",
                          "recipes":  [
@@ -1037,14 +1037,14 @@
                          "writer_status":  "boundary"
                      },
                      {
-                         "artifact":  "tmp/migration_matrix_shape_all_6x6/matrix.json",
+                         "artifact":  "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/matrix.json",
                          "domain":  "shape",
                          "host_open_endpoint_evidence":  {
                                                              "chunks":  [
                                                                             {
-                                                                                "artifact":  "tmp/host_open_gaps/shape-all-family/chunk-1/matrix.json",
+                                                                                "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/shape-all-family/chunk-1/matrix.json",
                                                                                 "id":  "chunk-1",
-                                                                                "ledger":  "tmp/host_open_gaps/shape-all-family/chunk-1/ledger.md",
+                                                                                "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/shape-all-family/chunk-1/ledger.md",
                                                                                 "totals":  {
                                                                                                "blocked":  0,
                                                                                                "failed":  0,
@@ -1054,9 +1054,9 @@
                                                                                            }
                                                                             },
                                                                             {
-                                                                                "artifact":  "tmp/host_open_gaps/shape-all-family/chunk-2/matrix.json",
+                                                                                "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/shape-all-family/chunk-2/matrix.json",
                                                                                 "id":  "chunk-2",
-                                                                                "ledger":  "tmp/host_open_gaps/shape-all-family/chunk-2/ledger.md",
+                                                                                "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/shape-all-family/chunk-2/ledger.md",
                                                                                 "totals":  {
                                                                                                "blocked":  0,
                                                                                                "failed":  0,
@@ -1066,9 +1066,9 @@
                                                                                            }
                                                                             },
                                                                             {
-                                                                                "artifact":  "tmp/host_open_gaps/shape-all-family/chunk-3/matrix.json",
+                                                                                "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/shape-all-family/chunk-3/matrix.json",
                                                                                 "id":  "chunk-3",
-                                                                                "ledger":  "tmp/host_open_gaps/shape-all-family/chunk-3/ledger.md",
+                                                                                "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/shape-all-family/chunk-3/ledger.md",
                                                                                 "totals":  {
                                                                                                "blocked":  0,
                                                                                                "failed":  0,
@@ -1078,9 +1078,9 @@
                                                                                            }
                                                                             },
                                                                             {
-                                                                                "artifact":  "tmp/host_open_gaps/shape-all-family/chunk-4/matrix.json",
+                                                                                "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/shape-all-family/chunk-4/matrix.json",
                                                                                 "id":  "chunk-4",
-                                                                                "ledger":  "tmp/host_open_gaps/shape-all-family/chunk-4/ledger.md",
+                                                                                "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/shape-all-family/chunk-4/ledger.md",
                                                                                 "totals":  {
                                                                                                "blocked":  0,
                                                                                                "failed":  0,
@@ -1149,7 +1149,7 @@
                                                        ],
                          "host_open_status":  "OPEN-ALL-HOSTS for gradient-stroke variants; direct_endpoint_hosts_pass for remaining shape recipes",
                          "id":  "shape-all-family",
-                         "ledger":  "tmp/migration_matrix_shape_all_6x6/ledger.md",
+                         "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_shape_all_6x6/ledger.md",
                          "recipe_count":  27,
                          "recipes":  [
                                          "minimal-shape-fill-blend-mode",
@@ -1192,10 +1192,10 @@
                          "writer_status":  "PD-6x6"
                      },
                      {
-                         "artifact":  "tmp/migration_matrix_shape_ellipse_fill_all_6x6/matrix.json",
+                         "artifact":  "registry/evidence/versioned-aep-migration/migration_matrix_shape_ellipse_fill_all_6x6/matrix.json",
                          "domain":  "shape",
                          "host_open_endpoint_evidence":  {
-                                                             "artifact":  "tmp/host_open_gaps/shape-ellipse-fill/chunk-1/matrix.json",
+                                                             "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/shape-ellipse-fill/chunk-1/matrix.json",
                                                              "direct_hosts":  [
                                                                                   "AE2020",
                                                                                   "AE2025"
@@ -1206,7 +1206,7 @@
                                                                                     "AE2023",
                                                                                     "AE2024"
                                                                                 ],
-                                                             "ledger":  "tmp/host_open_gaps/shape-ellipse-fill/chunk-1/ledger.md",
+                                                             "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/shape-ellipse-fill/chunk-1/ledger.md",
                                                              "open_mode":  "target_bound",
                                                              "recipes":  [
                                                                              "minimal-shape-ellipse-fill"
@@ -1221,7 +1221,7 @@
                                                          },
                          "host_open_status":  "direct_endpoint_hosts_pass; AE2021-AE2024 inferred_by_endpoint",
                          "id":  "shape-ellipse-fill",
-                         "ledger":  "tmp/migration_matrix_shape_ellipse_fill_all_6x6/ledger.md",
+                         "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_shape_ellipse_fill_all_6x6/ledger.md",
                          "recipe_count":  1,
                          "recipes":  [
                                          "minimal-shape-ellipse-fill"
@@ -1238,14 +1238,14 @@
                          "writer_status":  "PD-6x6"
                      },
                      {
-                         "artifact":  "tmp/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
+                         "artifact":  "registry/evidence/versioned-aep-migration/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
                          "domain":  "mixed",
                          "host_open_endpoint_evidence":  {
                                                              "chunks":  [
                                                                             {
-                                                                                "artifact":  "tmp/host_open_gaps/default-and-mogrt-smoke/chunk-1/matrix.json",
+                                                                                "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/default-and-mogrt-smoke/chunk-1/matrix.json",
                                                                                 "id":  "chunk-1",
-                                                                                "ledger":  "tmp/host_open_gaps/default-and-mogrt-smoke/chunk-1/ledger.md",
+                                                                                "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/default-and-mogrt-smoke/chunk-1/ledger.md",
                                                                                 "totals":  {
                                                                                                "blocked":  0,
                                                                                                "failed":  0,
@@ -1255,9 +1255,9 @@
                                                                                            }
                                                                             },
                                                                             {
-                                                                                "artifact":  "tmp/host_open_gaps/default-and-mogrt-smoke/chunk-2/matrix.json",
+                                                                                "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/default-and-mogrt-smoke/chunk-2/matrix.json",
                                                                                 "id":  "chunk-2",
-                                                                                "ledger":  "tmp/host_open_gaps/default-and-mogrt-smoke/chunk-2/ledger.md",
+                                                                                "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/default-and-mogrt-smoke/chunk-2/ledger.md",
                                                                                 "totals":  {
                                                                                                "blocked":  0,
                                                                                                "failed":  0,
@@ -1301,7 +1301,7 @@
                                                          },
                          "host_open_status":  "direct_endpoint_hosts_pass; AE2021-AE2024 inferred_by_endpoint",
                          "id":  "default-and-mogrt-smoke",
-                         "ledger":  "tmp/migration_matrix_uncovered_default_mogrt_all_6x6/ledger.md",
+                         "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_uncovered_default_mogrt_all_6x6/ledger.md",
                          "recipes":  [
                                          "minimal-default-adjustment-layer",
                                          "minimal-default-camera-layer",
@@ -1327,10 +1327,10 @@
                          "writer_status":  "PD-6x6"
                      },
                      {
-                         "artifact":  "tmp/migration_matrix_essential_graphics_controllers_all_6x6/matrix.json",
+                         "artifact":  "registry/evidence/versioned-aep-migration/migration_matrix_essential_graphics_controllers_all_6x6/matrix.json",
                          "domain":  "essential_graphics",
                          "host_open_endpoint_evidence":  {
-                                                             "artifact":  "tmp/host_open_gaps/essential-graphics-controllers/chunk-1/matrix.json",
+                                                             "artifact":  "registry/evidence/versioned-aep-migration/host_open_gaps/essential-graphics-controllers/chunk-1/matrix.json",
                                                              "direct_hosts":  [
                                                                                   "AE2020",
                                                                                   "AE2025"
@@ -1341,7 +1341,7 @@
                                                                                     "AE2023",
                                                                                     "AE2024"
                                                                                 ],
-                                                             "ledger":  "tmp/host_open_gaps/essential-graphics-controllers/chunk-1/ledger.md",
+                                                             "ledger":  "registry/evidence/versioned-aep-migration/host_open_gaps/essential-graphics-controllers/chunk-1/ledger.md",
                                                              "open_mode":  "target_bound",
                                                              "recipes":  [
                                                                              "minimal-essential-graphics-checkbox-controller",
@@ -1359,7 +1359,7 @@
                                                          },
                          "host_open_status":  "direct_endpoint_hosts_pass; AE2021-AE2024 inferred_by_endpoint",
                          "id":  "essential-graphics-controllers",
-                         "ledger":  "tmp/migration_matrix_essential_graphics_controllers_all_6x6/ledger.md",
+                         "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_essential_graphics_controllers_all_6x6/ledger.md",
                          "recipe_count":  4,
                          "recipes":  [
                                          "minimal-essential-graphics-checkbox-controller",
@@ -1434,10 +1434,10 @@
     "purpose":  "Machine-readable total coverage ledger for versioned AEP migration validation.",
     "recurring_gates":  [
                             {
-                                "artifact":  "tmp/migration_matrix_verify/smoke_all/matrix.json",
-                                "command":  "go run ./cmd/aepregistry recurring-matrix -root . -out tmp/registry_recurring_matrix.json -out-root tmp/migration_matrix_verify",
+                                "artifact":  "registry/evidence/versioned-aep-migration/migration_matrix_verify/smoke_all/matrix.json",
+                                "command":  "go run ./cmd/aepregistry recurring-matrix -root . -out tmp/registry_recurring_matrix.json -out-root registry/evidence/versioned-aep-migration/migration_matrix_verify",
                                 "id":  "full-w2020-no-ae-boundary",
-                                "ledger":  "tmp/migration_matrix_verify/smoke_all/ledger.md",
+                                "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_verify/smoke_all/ledger.md",
                                 "status":  "pass_with_source_contract_skips",
                                 "totals":  {
                                                "blocked":  0,
@@ -1461,10 +1461,10 @@
                                                     }
                             },
                             {
-                                "artifact":  "tmp/migration_matrix_verify/explicit_matte_ae2025/matrix.json",
-                                "command":  "go run ./cmd/aepregistry recurring-matrix -root . -out tmp/registry_recurring_matrix.json -out-root tmp/migration_matrix_verify",
+                                "artifact":  "registry/evidence/versioned-aep-migration/migration_matrix_verify/explicit_matte_ae2025/matrix.json",
+                                "command":  "go run ./cmd/aepregistry recurring-matrix -root . -out tmp/registry_recurring_matrix.json -out-root registry/evidence/versioned-aep-migration/migration_matrix_verify",
                                 "id":  "explicit-matte-ae2025-contract",
-                                "ledger":  "tmp/migration_matrix_verify/explicit_matte_ae2025/ledger.md",
+                                "ledger":  "registry/evidence/versioned-aep-migration/migration_matrix_verify/explicit_matte_ae2025/ledger.md",
                                 "status":  "pass",
                                 "totals":  {
                                                "blocked":  0,

@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$OutRoot = "tmp\migration_matrix_verify"
+    [string]$OutRoot = "registry\evidence\versioned-aep-migration\migration_matrix_verify"
 )
 
 $ErrorActionPreference = "Stop"

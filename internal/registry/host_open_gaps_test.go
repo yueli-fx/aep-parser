@@ -59,7 +59,7 @@ func TestPlanHostOpenGapsChunksPendingAndRepresentativeRecords(t *testing.T) {
 	if text.Chunks[0].ExpectedAEOpenCases != 8 || text.Chunks[1].ExpectedAEOpenCases != 4 {
 		t.Fatalf("text chunk cases = %+v", text.Chunks)
 	}
-	if text.Chunks[0].Command == "" || text.Chunks[0].Matrix != "tmp/host_open_gaps/text/chunk-1/matrix.json" {
+	if text.Chunks[0].Command == "" || text.Chunks[0].Matrix != "registry/evidence/versioned-aep-migration/host_open_gaps/text/chunk-1/matrix.json" {
 		t.Fatalf("text chunk = %+v", text.Chunks[0])
 	}
 	shape := report.Gaps[1]

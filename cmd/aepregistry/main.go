@@ -388,7 +388,7 @@ func runCheckpoint(args []string) int {
 	}
 	if !stopIfFailed() {
 		for _, gate := range checkpointVersionBoundaryGates(*root, *coveragePath) {
-			out := checkpointValueOr(gate.Artifact, "tmp/registry_version_boundaries.json")
+			out := checkpointValueOr(gate.Artifact, "registry/evidence/versioned-aep-migration/registry_version_boundaries.json")
 			command := checkpointValueOr(gate.Command, "go run ./cmd/aepregistry boundaries -root . -coverage "+*coveragePath+" -out "+out)
 			boundaries, err := registry.CheckVersionBoundaries(*root, *coveragePath, nil)
 			addStep(checkpointStep("version_boundaries", command, out, boundaries.Status, boundaries.Summary.Errors, err))
@@ -593,7 +593,7 @@ func runRecurringMatrix(args []string) int {
 	fs := flag.NewFlagSet("aepregistry recurring-matrix", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
 	root := fs.String("root", ".", "repository root")
-	outRoot := fs.String("out-root", "tmp/migration_matrix_verify", "recurring matrix artifact root")
+	outRoot := fs.String("out-root", "registry/evidence/versioned-aep-migration/migration_matrix_verify", "recurring matrix artifact root")
 	outPath := fs.String("out", "tmp/registry_recurring_matrix.json", "recurring matrix gate report JSON path")
 	skipRun := fs.Bool("skip-run", false, "validate existing artifacts without regenerating matrices")
 	jsonOut := fs.Bool("json", false, "print JSON report")
@@ -601,7 +601,7 @@ func runRecurringMatrix(args []string) int {
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(os.Stderr, "usage: aepregistry recurring-matrix [-root .] [-out-root tmp/migration_matrix_verify] [-out tmp/registry_recurring_matrix.json] [-skip-run] [-json]")
+		fmt.Fprintln(os.Stderr, "usage: aepregistry recurring-matrix [-root .] [-out-root registry/evidence/versioned-aep-migration/migration_matrix_verify] [-out tmp/registry_recurring_matrix.json] [-skip-run] [-json]")
 		return 2
 	}
 	if !*skipRun {
@@ -1003,7 +1003,7 @@ func runGate(args []string) int {
 }
 
 func runVersionMatrixGate(root, coveragePath string, axis []string, addStep func(gateStepReport)) error {
-	boundariesOut := "tmp/registry_version_boundaries.json"
+	boundariesOut := "registry/evidence/versioned-aep-migration/registry_version_boundaries.json"
 	boundaries, err := registry.CheckVersionBoundaries(root, coveragePath, axis)
 	if err != nil {
 		return fmt.Errorf("boundaries: %w", err)
@@ -1391,14 +1391,14 @@ func runBoundaries(args []string) int {
 	fs.SetOutput(os.Stderr)
 	root := fs.String("root", ".", "repository root")
 	coveragePath := fs.String("coverage", defaultMigrationCoveragePath, "coverage ledger JSON path")
-	outPath := fs.String("out", "tmp/registry_version_boundaries.json", "version boundary check report JSON path")
+	outPath := fs.String("out", "registry/evidence/versioned-aep-migration/registry_version_boundaries.json", "version boundary check report JSON path")
 	versions := fs.String("versions", "", "comma-separated AE versions; defaults to "+aeversion.SupportedRange())
 	jsonOut := fs.Bool("json", false, "print JSON report")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintf(os.Stderr, "usage: aepregistry boundaries [-root .] [-coverage %s] [-out tmp/registry_version_boundaries.json] [-versions AE2020,AE2021,...] [-json]\n", defaultMigrationCoveragePath)
+		fmt.Fprintf(os.Stderr, "usage: aepregistry boundaries [-root .] [-coverage %s] [-out registry/evidence/versioned-aep-migration/registry_version_boundaries.json] [-versions AE2020,AE2021,...] [-json]\n", defaultMigrationCoveragePath)
 		return 2
 	}
 

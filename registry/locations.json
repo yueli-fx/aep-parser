@@ -107,6 +107,14 @@
       "lifecycle": "durable_project_state"
     },
     {
+      "id": "versioned_migration_evidence",
+      "path": "registry/evidence/versioned-aep-migration",
+      "class": "generated_evidence",
+      "tracked": true,
+      "required": true,
+      "lifecycle": "durable_evidence"
+    },
+    {
       "id": "migration_scripts",
       "path": "scripts/migration",
       "class": "source_contract",
