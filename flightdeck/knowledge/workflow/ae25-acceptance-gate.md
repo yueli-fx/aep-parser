@@ -115,7 +115,7 @@ Builder 出 fresh，写 600。
 
 随后实证：AE 高版本能读 AE 2020 格式 items（back-compat）。所以可以 collapse 3 模板 → 1 (AE 2020 minimum)。同时 ship gate 仍过。
 
-最终代码: 单一 `templates/2020_dummy_comp.aep`。Project.target 字段仍存在 —— 决定 **empty-project skeleton** (root chunks 如 svap/nhed)，不影响 Item items。
+最终代码: 单一 `internal/serializer/templates/project/2020_dummy_comp.aep`。Project.target 字段仍存在 —— 决定 **empty-project skeleton** (root chunks 如 svap/nhed)，不影响 Item items。
 
 ## 工具链
 
@@ -140,7 +140,7 @@ JSX 末尾写 `.done` marker；Go 端轮询等。
 | `internal/codec/framerate.go` | `fpsTiming` + `canonicalFpsTiming` + `lookupFpsTiming` |
 | `internal/serializer/mutate_composition_new.go` | `compTmpl` (single seed) + builder logic |
 | `internal/serializer/write.go` | `syncHeadCounters` (Stage 2) |
-| `internal/serializer/templates/2020_dummy_comp.aep` | 唯一 canonical seed |
+| `internal/serializer/templates/project/2020_dummy_comp.aep` | 唯一 canonical seed |
 | `tmp_debug/gen_dummy_comp.jsx` | JSX 工具：让任意 AE 版本写一个 dummy_comp |
 | `test_data/generators/verify_v2_1.jsx` | AE-side ship gate driver |
-| `internal/aep/new_composition_test.go` | `runAEShipGate` + `TestV2_1_AEShipGate_AE2020/2025` |
+| `internal/aep_test/new_composition_test.go` | `runAeRunShipGate` + `TestV2_1_AEShipGate_AE2020/2025` |

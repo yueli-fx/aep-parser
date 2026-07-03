@@ -5,6 +5,8 @@ READ WHEN: building / debugging ShapeLayer write path; AE accepts file but layer
 
 ---
 
+Path note: this is a historical RE/debug log from before the facade split. Historical prose may name old implementation paths such as `internal/aep/lower_layer.go` or `internal/aep/templates/*`; the current implementation lives mostly under `internal/serializer/*`, `internal/serializer/templates/*`, `internal/codec/*`, and `internal/aep_test/*`. Preserve old paths inside dated incident notes as evidence context; when using this as an action guide, confirm the current file with `rg` first.
+
 2026-05-23 — Phase 5 Task 5.7 first run. AE 2025 + AE 2020 都拒收 V2.2 builder 产的 canonical 3-ShapeLayer .aep。
 
 ## 错误信号
