@@ -33,9 +33,11 @@
 - Do not commit exploratory markdown churn. Draft specs, plans, knowledge
   sketches, and cockpit/index wording can stay uncommitted while they are still
   being discussed or shaped.
-- Commit documentation-only work when it is a key checkpoint: the user approves
-  the direction, says to start executing, asks to commit, or the document is a
-  finalized rule/spec/knowledge update needed by future work.
+- Commit documentation-only work only when the user explicitly asks to commit,
+  explicitly says the document is finalized, or it is shipped with a completed
+  code/test/fixture change as part of the same landed unit.
+- Do not commit cockpit/work/spec/plan/knowledge drafts just because the user
+  asked to record, park, explore, or start shaping a future task.
 - Keep commits atomic by landed unit. Code plus its required tests, fixtures,
   docs, and Flightdeck sync can be one commit; unrelated cleanup should be
   separate.

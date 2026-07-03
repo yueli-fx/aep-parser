@@ -10,6 +10,12 @@ Focus: `codebase-hygiene-survey` 已完成并归档到 cold archive；当前活�
 
 ## Next
 
+- **Arbitrary AEP version migration**
+  (`work/arbitrary-aep-version-migration/index.md`) — parked future task for
+  upgrading/downgrading arbitrary AE projects. When other work finds
+  high-version-only fields, version-specific field layouts, or downgrade
+  fallback needs, record them in this package instead of scattering them through
+  temporary notes.
 - **Fixture regeneration follow-up**：如后续需要恢复 `test_data/generated/fixtures`，为 `scripts/fixtures/regen_fixtures.ps1 -CheckOnly` 的 47 个 missing outputs 单独开包；不要混入已完成的 hygiene survey cleanup。
 - **Booyah 用户真机验收 ⑩⑪⑫**：用户确认后更新 `flightdeck/showcase/booyah-clone/INDEX.md`，再按 review-gate 翻 complete；未确认前不要关闭 Booyah topic。
 - **Technique research**：glitch showcase gate v1 已完成，Go/parse gate + AE2025/AE2020 render gate 均通过；下一步推荐另一个 reference phenomenon 包或基于 glitch recipe 的生成器升级。不要按单个字段继续。
