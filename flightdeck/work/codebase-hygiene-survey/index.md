@@ -7,7 +7,7 @@ New investigation effort created from the user's 2026-07-03 request to make the 
 Initial scan and first cleanup batch completed:
 
 - `internal/`: 1024 files, 717 Go files, 307 embedded templates/data files. Largest code surfaces are `aep_test` (258 Go tests), `aepmigrate` (150 Go files), `serializer` (95), `scene` (53), `registry` (32), and `selfhost` (27).
-- `flightdeck/knowledge`: 142 local knowledge files after adding `architecture/internal-codebase-map.md` and `workflow/jsx-generator-cleanup-provenance.md`. The 44 recipe notes that lacked routing-complete `SUMMARY` / `READ WHEN` headers have been repaired; current missing header count is 0. The 2 stale-codepath rows have been reviewed and repaired/reclassified.
+- `flightdeck/knowledge`: 142 local knowledge files after adding `architecture/internal-codebase-map.md` and `workflow/jsx-generator-cleanup-provenance.md`. The 44 recipe notes that lacked routing-complete `SUMMARY` / `READ WHEN` headers have been repaired; current missing header count is 0. The 2 stale-codepath rows have been reviewed and repaired/reclassified. A body-validity pass fixed stale current paths and marked generated evidence that is no longer present on disk.
 - `test_data/generators`: 223 JSX scripts after cleanup. The `verify_v2_2_*` scripts are still active and must not be treated as old AE 2022 code.
 - Generator provenance review of the 26 mechanical `delete-candidate` rows ended with `keep-active: 10`, `deleted-script: 16`, `deleted-tracked-fixture: 8`, and `stale-baseline-hashes-removed: 16`.
 - `tmp`: started with 116 JSON files, about 4.0 MB, all ignored. The ledger marked 106 as `safe-delete`; those were removed. Current `tmp` JSON count is 10, all `regenerate-only` command/report paths.
@@ -25,6 +25,7 @@ Next batch:
 - design.md
 - ledgers/internal-ledger.md
 - ledgers/knowledge-ledger.md
+- ledgers/knowledge-body-validity-review.md
 - ledgers/generator-ledger.md
 - ledgers/generator-provenance-review.md
 - ledgers/tmp-json-ledger.md
@@ -58,6 +59,10 @@ Done:
 - Repaired/reclassified the 2 stale-codepath knowledge entries:
   - `knowledge/workflow/ae25-acceptance-gate.md` now points at current `internal/serializer/templates/project` and `internal/aep_test` paths.
   - `knowledge/layer/v2-2-aelayer-structure.md` now explicitly marks old `internal/aep/*` mentions as historical context.
+- Added `ledgers/knowledge-body-validity-review.md` and ran an evidence-first body validity pass:
+  - Fixed stale test/template paths in `recipe-draft-3d-profile.md`, `pseudo-effect-continuation-handoff.md`, `ae-drops-unknown-chunks-on-resave.md`, `ae25-acceptance-gate.md`, and `re-fixture.md`.
+  - Marked generated AEP evidence in effect, camera/light, and wiggle-modulation notes as historical or manifest-owned when it is not present in the current checkout.
+  - Applied no simple similarity merges; high-similarity recipe notes remain separate unless a future family note preserves all per-field evidence.
 - Added `ledgers/generator-provenance-review.md`; no generator was deleted because the review found active manifest rows and provenance/evidence questions among the mechanical delete candidates.
 - Repaired 4 generator provenance gaps:
   - Added manifest ownership for `build_material_classic_2020.jsx`.

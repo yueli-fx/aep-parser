@@ -148,7 +148,7 @@ AE 启动 / splash timeout：AE 没执行到目标 JSX，也不会写预期 `.do
 
 失败时 dump 落 `<doneFile>.fail/`：`screenshot.png` / `ocr.txt` / `windows.txt` / `actions.log` / `meta.json`。
 
-**Go 端 ship-gate**用 `runAeRunShipGate(t, aeExe, jsxPath, doneFile, timeoutSec)` helper (`internal/aep/testutil_shipgate_test.go`)，不要再直接 `exec.Command(aeExe, "-r", ...)`。helper 自带两个机制：
+**Go 端 ship-gate**用 `runAeRunShipGate(t, aeExe, jsxPath, doneFile, timeoutSec)` helper (`internal/aep_test/testutil_shipgate_test.go`)，不要再直接 `exec.Command(aeExe, "-r", ...)`。helper 自带两个机制：
 
 - **test-cache 文件追踪**：helper 显式读 verify JSX / ae_run.ps1 / 规则表，把它们纳入 go test cache key——改 JSX 自动失效缓存，**不再需要靠 `-count=1` 纪律防「JSX 改了缓存还绿」**（gate 实跑时仍建议 `-count=1` 强制真跑）。
 - **exit 1/2 自动 warm-retry 一次**：冷启动 flake 自愈；确定性 reject 重试照样红，不会被掩盖。首跑取证保留在 `<doneFile>.fail.1/`。
@@ -234,7 +234,7 @@ AE 启动 / splash timeout：AE 没执行到目标 JSX，也不会写预期 `.do
 - JSX 渲染每个 comp 用**唯一 time**（`comp.saveFrameToPng(job.time, png)`，Go 端逐 comp 给开 ≥0.5s 的不同 time）→ run 内每 comp 唯一缓存键。
 - Go harness 渲染前**清磁盘缓存**：删 `Temp\Adobe\After Effects\*\Disk Cache*.noindex`（= AE「Empty Disk Cache」按钮，缓存会自动重建，无数据丢失）→ 消除跨会话/历史中毒帧。仅做唯一 time 不够：被历史 `t=0` run 污染的桶仍会喂旧帧。
 
-参考实现：`internal/aep/mg_text_style_shipgate_test.go`（`clearAEDiskCache` helper）+ `test_data/generators/verify_mg_text_style.jsx`。**自验铁律**：gate 跑完逐张 `md5sum` 应**全不同**、并 `Read` 几张 PNG 目视确认渲的是各自 comp（红线4：值对 ≠ 渲染对）。如果多张 PNG 内容一样，优先怀疑 AE disk cache / stale-frame，而不是 setter 立即失败。
+参考实现：`internal/aep_test/mg_text_style_shipgate_test.go`（`clearAEDiskCache` helper）+ `test_data/generators/verify_mg_text_style.jsx`。**自验铁律**：gate 跑完逐张 `md5sum` 应**全不同**、并 `Read` 几张 PNG 目视确认渲的是各自 comp（红线4：值对 ≠ 渲染对）。如果多张 PNG 内容一样，优先怀疑 AE disk cache / stale-frame，而不是 setter 立即失败。
 
 ## AE 退出不弹框（关键陷阱）
 

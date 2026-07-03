@@ -24,5 +24,5 @@ flag from the parsed composition bytes, so `expected_profile.draft_3d` is a
 roundtrip/profile contract.
 
 Do not upgrade this to an AE DOM acceptance claim without new evidence. Existing
-notes in `internal/aep/comp_settings_shipgate_test.go` document that AE 2025's
+notes in `internal/aep_test/comp_settings_shipgate_test.go` document that AE 2025's
 `comp.draft3d` DOM readback did not reflect the written flag reliably.

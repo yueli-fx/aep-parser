@@ -100,8 +100,11 @@ matching `re_effect_library*.jsx` applying a curated **parameter-only**
 built-in set. Extractor: `tmp_debug/extract_effect_lib <fixture.aep>` (parses
 the fixture, walks to the parade, wraps each `(tdmn, sspc)` pair, writes
 `effect_<sanitized-matchname>.bin`; reusable replacement for wave 1's throwaway
-in-package test). The `.bin`s are the committed source of truth — `test_data/`
-is gitignored so the fixtures/JSX live locally.
+in-package test). The `.bin`s are the committed source of truth — generated
+fixture AEPs under `test_data/generated/fixtures/` are rebuildable evidence and
+may be absent in a clean checkout. Regenerate them with
+`scripts/fixtures/regen_fixtures.ps1` before using them as live extraction
+inputs.
 
 Wave 1: Gaussian Blur 2 · Fill · Tint · Brightness & Contrast 2 · Tritone ·
 Easy Levels2 · Pro Levels2 · HUE SATURATION · Box Blur · Glo2 · Invert ·

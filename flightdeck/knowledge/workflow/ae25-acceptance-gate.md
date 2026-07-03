@@ -61,7 +61,7 @@ cdta 总 204 字节，但 parser 历史只读 ~16 个关键字段（W/H/fps/dura
 **Fixture sources**:
 - `test_data/fixtures/re_tickrate.aep` RE_fps_* — 每个 canonical fps 的 cdta 字节
 - `test_data/fixtures/re_cdta_probe.aep` A_baseline (29.97, 10s) — masterTicks 公式实证
-- `internal/serializer/templates/2020_dummy_comp.aep` — 默认 30fps 12s seed
+- `internal/serializer/templates/project/2020_dummy_comp.aep` — 默认 30fps 12s seed
 
 ## Stage 2 详: head counters
 

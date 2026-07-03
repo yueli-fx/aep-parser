@@ -8,7 +8,7 @@ READ WHEN: 想往 .aep 嵌入自定义数据/作者元数据/版权/任意 stash
 ## Signature
 - symptom: `自定义 RIFX chunk 注入 .aep,AE 能正常打开,但 AE 保存(resave)后该 chunk 消失`
 - error_type: —  (negative-finding / 数据丢失,非异常)
-- where: AE 保存路径(AE 从自身 DOM 重序列化整个工程);probe = TestCustomChunkProbe_* (internal/aep/custom_chunk_probe_shipgate_test.go)
+- where: AE 保存路径(AE 从自身 DOM 重序列化整个工程);probe = TestCustomChunkProbe_* (internal/aep_test/custom_chunk_probe_shipgate_test.go)
 - trigger: 往工程里塞 AE schema 之外的任意 chunk,期望它跨 AE 保存存活
 
 ## 症状/复现

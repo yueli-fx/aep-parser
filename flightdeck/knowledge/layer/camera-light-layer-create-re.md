@@ -102,8 +102,8 @@ where the field lives:
     `SetIrisShape`/`…`/`SetIrisHighlightSaturation` failed from-scratch with
     `property not present`. Fixed with the **same leaf-splice as Light Color**,
     batched: author a camera with **DoF on** + all 8 set non-default
-    (`tmp_debug/gen_camera_iris.jsx` → `test_data/generated/fixtures/re_camera_iris.aep`), extract
-    all 8 `(tdmn, LIST:tdbs)` pairs into one `templates/camera_iris_leaves.bin`
+    (`tmp_debug/gen_camera_iris.jsx` → historical `test_data/generated/fixtures/re_camera_iris.aep`), extract
+    all 8 `(tdmn, LIST:tdbs)` pairs into current `internal/serializer/templates/options/camera_iris_leaves.bin`
     (a LIST(tdgp) of 8 pairs in canonical order; `extract_camera_iris_leaves`),
     and `newTemplatedLayer` (camera only) splices them **after Blur Level** +
     resets each cdat to AE's default (Shape 1 / Rotation 0 / Roundness 0 /
@@ -150,9 +150,9 @@ where the field lives:
     embed-whole-Layr template → no slot, `LightColor()` nil on a fresh light.
     Fixed by the **leaf-splice** half (not whole-template re-extraction): author a
     light with a non-default colour in AE 2020 (`tmp_debug/gen_light_color.jsx` →
-    `test_data/generated/fixtures/re_light_color.aep`), extract just the `(tdmn "ADBE Light Color",
+    historical `test_data/generated/fixtures/re_light_color.aep`), extract just the `(tdmn "ADBE Light Color",
     LIST:tdbs)` pair (`tmp_debug/extract_light_color_leaf` →
-    `templates/light_color_leaf.bin`, a LIST(tdgp) wrapper), and have
+    current `internal/serializer/templates/options/light_color_leaf.bin`, a LIST(tdgp) wrapper), and have
     `newTemplatedLayer` (light only) splice it into the cloned Light Options group
     + reset the cdat to white **before** the property-tree parse — so the existing
     `SetLightColor`/`LightColor()` light up from scratch. Same synthesis-insert

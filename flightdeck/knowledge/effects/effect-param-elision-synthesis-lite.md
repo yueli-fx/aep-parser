@@ -107,6 +107,12 @@ read back on open AND after AE's own resave. Materialized color stream is
 byte-identical to AE-native (verified vs fixture). Only slider's tdbs
 carries tdum/tduM; angle/color/point are unbounded (no patch needed).
 
+2026-07-03 validity note: `re_effect_param_types.aep` and
+`re_effect_param_types_units.aep` are manifest-owned generated evidence and may
+be absent in the current checkout. Regenerate them before using them as live RE
+inputs; current runtime truth lives in committed generic effect-param templates
+under `internal/serializer/templates/effects/effectparam_*.bin`.
+
 ### Finding 3 — point-param cdat units = fraction of the layer's coord space
 
 (RE `test_data/generated/fixtures/re_effect_param_types_units.aep`: 200×100 solid + shape layer,
