@@ -62,7 +62,7 @@ New L2 itself: trackMatteType=5013 (copied), but now no layer above → matte in
 
 Implementation uses (a) for the first shipped path: refuse implicit-matte duplication unless the caller clears matte intent first.
 
-**2026-05-28 amendment**: F2 quirk applies ONLY to **implicit** "layer-above" matte (positional source). For AE 23+ **explicit** matte (`TrackMatteLayerID != 0` in ldta `@0xA0`), the matte source is decoupled from layer order — duplicating is safe with verbatim byte-copy of `@0xA0` + `@0x6B`. DuplicateLayer refuse-case split: implicit (still refused per F2) vs explicit (allowed). AE 2025 ship-gate via `ge_duplicate_layer_explicit_matte.aep` (uses `re_trackmatte_ae24.aep` as source).
+**2026-05-28 amendment**: F2 quirk applies ONLY to **implicit** "layer-above" matte (positional source). For AE 23+ **explicit** matte (`TrackMatteLayerID != 0` in ldta `@0xA0`), the matte source is decoupled from layer order — duplicating is safe with verbatim byte-copy of `@0xA0` + `@0x6B`. DuplicateLayer refuse-case split: implicit (still refused per F2) vs explicit (allowed). Historical AE 2025 ship-gate evidence used generated `ge_duplicate_layer_explicit_matte.aep` from `re_trackmatte_ae24.aep`; the generated ship-gate AEP and sidecar verifier were retired from the live fixture set during the 2026-07-03 hygiene cleanup because no current Go gate or manifest owned them.
 
 ---
 

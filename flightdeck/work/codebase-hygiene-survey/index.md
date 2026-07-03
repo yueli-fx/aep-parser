@@ -8,18 +8,17 @@ Initial scan and first cleanup batch completed:
 
 - `internal/`: 1024 files, 717 Go files, 307 embedded templates/data files. Largest code surfaces are `aep_test` (258 Go tests), `aepmigrate` (150 Go files), `serializer` (95), `scene` (53), `registry` (32), and `selfhost` (27).
 - `flightdeck/knowledge`: 142 local knowledge files after adding `architecture/internal-codebase-map.md` and `workflow/jsx-generator-cleanup-provenance.md`. The 44 recipe notes that lacked routing-complete `SUMMARY` / `READ WHEN` headers have been repaired; current missing header count is 0. The 2 stale-codepath rows have been reviewed and repaired/reclassified.
-- `test_data/generators`: 239 JSX scripts. Prefix scan: `verify*` 147 total including 16 active `verify_v2_2_*`, `re*` 69, `probe*` 8, `build*` 6, `gen*` 4, `fdta*` 2, `ship_gate*` 2, `smoke*` 1. `verify_v2_2_*` is active and must not be treated as old AE 2022 code.
-- Generator provenance review of the 26 mechanical `delete-candidate` rows found `keep-active: 10`, `historical-evidence-review: 1`, `archive-or-delete-candidate: 15`, `direct-delete-now: 0`; no JSX was deleted in this batch.
+- `test_data/generators`: 223 JSX scripts after cleanup. The `verify_v2_2_*` scripts are still active and must not be treated as old AE 2022 code.
+- Generator provenance review of the 26 mechanical `delete-candidate` rows ended with `keep-active: 10`, `deleted-script: 16`, `deleted-tracked-fixture: 8`, and `stale-baseline-hashes-removed: 16`.
 - `tmp`: started with 116 JSON files, about 4.0 MB, all ignored. The ledger marked 106 as `safe-delete`; those were removed. Current `tmp` JSON count is 10, all `regenerate-only` command/report paths.
 
 ## Next
 
 Next batch:
 
-1. Decide historical evidence policy for `verify_ge_duplicate_layer_explicit_matte.jsx`.
-2. Decide archive/delete policy for the 15 generator candidates listed in `ledgers/generator-provenance-review.md`, including whether their tracked fixture outputs and `tools/debug/split_roundtrip_baseline/baseline.txt` entries still matter.
-3. Keep `serializer`, `scene`, `aepmigrate`, and `aep_test` as watch areas only; no package split belongs in this survey without a dedicated plan.
-4. Keep the 10 remaining `tmp` JSON files unless their producer command references are changed or regenerated.
+1. Treat the broader `scripts/fixtures/regen_fixtures.ps1 -CheckOnly` missing generated-output inventory as a separate fixture regeneration package if those generated fixtures are needed again.
+2. Keep `serializer`, `scene`, `aepmigrate`, and `aep_test` as watch areas only; no package split belongs in this survey without a dedicated plan.
+3. Keep the 10 remaining `tmp` JSON files unless their producer command references are changed or regenerated.
 
 ## Read now
 
@@ -51,7 +50,7 @@ Done:
 - Generated four ledgers under `ledgers/`:
   - `internal-ledger.md`: package responsibility / size / first-pass class.
   - `knowledge-ledger.md`: all local knowledge classified; current classes are `valid: 142`.
-  - `generator-ledger.md`: 239 JSX scripts classified; current classes are `active-ship-gate: 136`, `active-re-fixture: 75`, `delete-candidate: 26`, `historical-re: 2`.
+  - `generator-ledger.md`: current JSX scripts classified; current classes are `active-ship-gate: 136`, `active-re-fixture: 85`, `historical-re: 2`.
   - `tmp-json-ledger.md`: remaining 10 `tmp` JSON files are all `regenerate-only`.
 - Repaired routing headers on 44 recipe knowledge files; verified `MISSING_HEADERS 0`.
 - Updated README architecture section to include migration, recipe, governance, technique, and service layers.
@@ -85,11 +84,21 @@ Done:
   - `go run ./cmd/aepregistry layout -root .` → 18 locations, 0 cleanup candidates, 0 blocked unowned.
   - `go run ./cmd/aepregistry ownership -root .` → 18 locations, 1572 files, 1274 owned, 298 unowned.
   - `go run ./cmd/capindex -check` → pass.
+- Removed 16 stale generator scripts, 8 unreferenced tracked fixture AEPs, and 16 stale `test_data/generated/ship-gate/ge_*` split-roundtrip baseline hashes after provenance review.
+- Removed stale `fixture_generators.smoke_helpers` registry atom because the deleted placeholder `smoke_ae_run.jsx` was the last `smoke_*.jsx` dependency and no current workflow owns that generator family.
+- Post-cleanup fixture inventory:
+  - `pwsh -NoProfile -File scripts/fixtures/regen_fixtures.ps1 -CheckOnly` → `79 manifest jobs, 47 with missing outputs (46 driveable, 1 manual-only), 0 ungoverned on-disk aep`.
+  - The 47 missing outputs are the broader generated fixture inventory under `test_data/generated/fixtures`; they predate this deletion batch and are not ungoverned tracked AEPs.
+- Post-cleanup registry/capindex sanity gates:
+  - `go run ./cmd/aepregistry audit -root .` → pass, 0 errors, 0 warnings.
+  - `go run ./cmd/aepregistry layout -root .` → 18 locations, 0 cleanup candidates, 0 blocked unowned.
+  - `go run ./cmd/aepregistry ownership -root .` → 18 locations, 1550 files, 1250 owned, 300 unowned.
+  - `go run ./cmd/capindex -check` → pass.
 
 Current:
 
-- Ready for historical evidence policy on `verify_ge_duplicate_layer_explicit_matte.jsx` and archive/delete policy decisions for the 15 generator candidates.
+- Survey execution is complete for the requested internal map, knowledge classification/header repair, generator cleanup, and tmp cleanup scope.
 
 ## Open questions
 
-- For 15 generator archive/delete candidates, should their tracked fixture outputs and split-roundtrip baseline hashes be deleted together, migrated to durable evidence, or preserved as historical baselines?
+- None for generator cleanup after verification; remaining generated fixture gaps are the broader `regen_fixtures.ps1 -CheckOnly` missing-output inventory.

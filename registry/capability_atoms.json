@@ -642,32 +642,6 @@
       ]
     },
     {
-      "id": "fixture_generators.smoke_helpers",
-      "domain": "fixture",
-      "tier": "generator_family",
-      "status": "verified",
-      "platform": {
-        "host_required": true,
-        "os": [
-          "windows",
-          "macos"
-        ]
-      },
-      "workflows": [
-        "host_open"
-      ],
-      "dependencies": [
-        {
-          "kind": "glob",
-          "path": "test_data/generators/smoke_*.jsx",
-          "required": true
-        }
-      ],
-      "boundaries": [
-        "Owns smoke-test AE runner JSX sources that validate host orchestration behavior."
-      ]
-    },
-    {
       "id": "reference.reverse_engineering_corpus",
       "domain": "reference",
       "tier": "source_corpus",

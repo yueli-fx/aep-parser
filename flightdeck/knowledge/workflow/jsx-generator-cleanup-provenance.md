@@ -16,5 +16,6 @@ Cleanup order:
 1. Extract output names from the script (`.aep`, `.done`, `.json`, `.txt`, `.png`).
 2. Search those output names across `internal`, `flightdeck/knowledge`, `registry`, `docs`, `scripts`, `tools`, and `test_data`.
 3. Check `scripts/fixtures/fixtures_manifest.json` before treating a zero-reference script as unused.
-4. If the output is tracked but unreferenced, delete or archive the script and output in one commit; also remove stale baseline hashes.
-5. If the output is still a fixture/template truth source, repair provenance instead of deleting the generator.
+4. Check `registry/capability_atoms.json` for required glob atoms before deleting the last script in a prefix family; otherwise `aepregistry audit` will fail on a missing dependency.
+5. If the output is tracked but unreferenced, delete or archive the script and output in one commit; also remove stale baseline hashes.
+6. If the output is still a fixture/template truth source, repair provenance instead of deleting the generator.
