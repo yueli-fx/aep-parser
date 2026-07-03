@@ -37,7 +37,18 @@ func TestLayoutRepositoryClassifiesCleanupAndAtomizationActions(t *testing.T) {
 	writeJSON(t, root, "registry/evidence.json", map[string]any{
 		"schema_version": 1,
 		"evidence_sets": []map[string]any{
-			{"id": "matrix.text", "class": "generated_evidence", "artifact_path": "tmp/text-basic/matrix.json", "required": true, "workflows": []string{"migrate"}},
+			{
+				"id":            "matrix.text",
+				"class":         "generated_evidence",
+				"artifact_path": "tmp/text-basic/matrix.json",
+				"required":      true,
+				"workflows":     []string{"migrate"},
+				"producer": map[string]any{
+					"category": "version_matrix",
+					"command":  "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/text-basic.json -out tmp/text-basic",
+					"outputs":  []string{"tmp/text-basic/matrix.json"},
+				},
+			},
 		},
 	})
 

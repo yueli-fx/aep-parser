@@ -336,6 +336,73 @@ func TestAuditRepositoryTreatsMissingOptionalGeneratedEvidenceAsWarning(t *testi
 	assertIssue(t, report, "missing_optional_evidence", SeverityWarning, "", "tmp/missing-matrix/matrix.json")
 }
 
+func TestAuditRepositoryRequiresProducerForRequiredGeneratedEvidence(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeFile(t, root, "tmp/text-basic/matrix.json", "{}\n")
+	writeValidRegistry(t, root, nil)
+	writeJSON(t, root, "registry/evidence.json", map[string]any{
+		"schema_version": 1,
+		"evidence_sets": []map[string]any{
+			{
+				"id":            "matrix.text",
+				"class":         "generated_evidence",
+				"artifact_path": "tmp/text-basic/matrix.json",
+				"required":      true,
+				"workflows":     []string{"migrate"},
+			},
+		},
+	})
+
+	report, err := AuditRepository(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertIssue(t, report, "missing_evidence_producer", SeverityError, "", "tmp/text-basic/matrix.json")
+	assertIssue(t, report, "missing_evidence_producer_command", SeverityError, "", "tmp/text-basic/matrix.json")
+}
+
+func TestAuditRepositoryRequiresPolicyForGeneratedAndLocalOnlyLocations(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeFile(t, root, "tmp/text-basic/matrix.json", "{}\n")
+	writeValidRegistry(t, root, nil)
+	writeJSON(t, root, "registry/locations.json", map[string]any{
+		"schema_version": 1,
+		"locations": []map[string]any{
+			{"id": "tmp", "path": "tmp", "class": "generated_evidence", "tracked": false, "required": false, "lifecycle": "disposable"},
+			{"id": "local_samples", "path": "data/samples", "class": "local_corpus", "tracked": false, "required": false, "lifecycle": "local_only"},
+		},
+	})
+	writeJSON(t, root, "registry/asset_policy.json", map[string]any{
+		"schema_version": 1,
+		"rules": []map[string]any{
+			{"id": "tmp.generated", "location_id": "tmp", "action": "review_generated_cleanup", "cleanup_safety": "generated_untracked_review"},
+		},
+	})
+
+	report, err := AuditRepository(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertIssue(t, report, "missing_asset_policy_location_rule", SeverityError, "", "local_samples")
+}
+
+func TestAuditRepositoryRejectsUnknownAssetPolicyLocation(t *testing.T) {
+	root := newTestRegistryRoot(t)
+	writeValidRegistry(t, root, nil)
+	writeJSON(t, root, "registry/asset_policy.json", map[string]any{
+		"schema_version": 1,
+		"rules": []map[string]any{
+			{"id": "missing", "location_id": "missing_location", "action": "keep_registered", "cleanup_safety": "no_cleanup_action"},
+		},
+	})
+
+	report, err := AuditRepository(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertIssue(t, report, "unknown_asset_policy_location", SeverityError, "", "missing_location")
+}
+
 func TestAuditRepositoryReportsDependenciesOutsideRegisteredLocations(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeFile(t, root, "orphan/asset.json", "{}\n")
@@ -504,6 +571,11 @@ func writeValidRegistry(t *testing.T, root string, atoms []map[string]any) {
 				"artifact_path": "tmp/text-basic/matrix.json",
 				"required":      true,
 				"workflows":     []string{"migrate"},
+				"producer": map[string]any{
+					"category": "version_matrix",
+					"command":  "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/text-basic.json -out tmp/text-basic",
+					"outputs":  []string{"tmp/text-basic/matrix.json"},
+				},
 			},
 		},
 	})

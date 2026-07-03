@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "purpose": "Machine-readable asset governance policy for locations that intentionally allow untracked generated or local-only files.",
+  "rules": [
+    {
+      "id": "generated_test_data.rebuildable",
+      "location_id": "generated_test_data",
+      "action": "review_generated_cleanup",
+      "cleanup_safety": "generated_untracked_review",
+      "rationale": "test_data/generated contains rebuildable generated evidence. Registered evidence and state-referenced files must be preserved by cleanup classification before deleting siblings."
+    },
+    {
+      "id": "local_samples.local_only",
+      "location_id": "local_samples",
+      "action": "exclude_local_only",
+      "cleanup_safety": "not_project_cleanup",
+      "rationale": "data/samples is an intentional local corpus. It stays outside tracked cleanup and atom ledgers unless a sample is promoted into a registered fixture or evidence record."
+    },
+    {
+      "id": "tmp_evidence.disposable",
+      "location_id": "tmp_evidence",
+      "action": "review_generated_cleanup",
+      "cleanup_safety": "generated_untracked_review",
+      "rationale": "tmp contains disposable generated reports and matrix outputs. Direct cleanup is allowed only for classified rebuildable candidates; mixed groups require preserve_paths and explicit producer scope."
+    }
+  ]
+}

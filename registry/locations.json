@@ -92,19 +92,19 @@
     },
     {
       "id": "migration_current_state",
-      "path": "flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json",
+      "path": "registry/versioned_aep_migration_current.json",
       "class": "spec_registry",
       "tracked": true,
       "required": true,
-      "lifecycle": "active_project_state"
+      "lifecycle": "durable_project_state"
     },
     {
       "id": "migration_coverage_state",
-      "path": "flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json",
+      "path": "registry/versioned_aep_migration_coverage.json",
       "class": "spec_registry",
       "tracked": true,
       "required": true,
-      "lifecycle": "active_project_state"
+      "lifecycle": "durable_project_state"
     },
     {
       "id": "migration_scripts",

@@ -265,7 +265,7 @@ func TestRunRecurringMatrixSkipRunWritesReport(t *testing.T) {
 	root := newRegistryRoot(t)
 	writeJSON(t, root, "tmp/migration_matrix_verify/smoke_all/matrix.json", map[string]any{
 		"schema_version": 1,
-		"summary":        map[string]any{"total": 858, "passed": 852, "blocked": 0, "failed": 0, "skipped": 6},
+		"summary":        map[string]any{"total": 906, "passed": 900, "blocked": 0, "failed": 0, "skipped": 6},
 		"cases":          []map[string]any{},
 	})
 	writeJSON(t, root, "tmp/migration_matrix_verify/smoke_all/minimal-adjustment-layer/AE2020_to_AE2025/verify_report.json", map[string]any{
@@ -422,7 +422,7 @@ func TestRunCleanupCanPruneReviewSiblings(t *testing.T) {
 	out := filepath.Join(root, "tmp", "registry_generated_cleanup.json")
 	execOut := filepath.Join(root, "tmp", "registry_generated_cleanup_execution.json")
 
-	code := run([]string{"cleanup", "-root", root, "-out", out, "-exec-out", execOut, "-apply", "-prune-review-siblings", "-producer", "unknown_generated", "-sample-limit", "1"})
+	code := run([]string{"cleanup", "-root", root, "-out", out, "-exec-out", execOut, "-apply", "-prune-review-siblings", "-producer", "version_matrix", "-sample-limit", "1"})
 	if code != 0 {
 		t.Fatalf("run(cleanup -apply -prune-review-siblings) = %d, want 0", code)
 	}
@@ -1505,11 +1505,12 @@ func TestRunGateAssetPolicyWritesOwnershipAndCleanupReports(t *testing.T) {
 	if err := json.Unmarshal(data, &report); err != nil {
 		t.Fatal(err)
 	}
-	if report.Scope != "asset-policy" || report.Status != registry.StatusPass || report.Summary.Steps != 7 || report.Summary.Failed != 0 {
+	if report.Scope != "asset-policy" || report.Status != registry.StatusPass || report.Summary.Steps != 8 || report.Summary.Failed != 0 {
 		t.Fatalf("asset gate report = %+v", report)
 	}
 	wantOrder := []string{
 		"registry_audit",
+		"registry_asset_policy",
 		"registry_ownership",
 		"registry_layout",
 		"registry_generated_cleanup",
@@ -1523,6 +1524,7 @@ func TestRunGateAssetPolicyWritesOwnershipAndCleanupReports(t *testing.T) {
 		}
 	}
 	for _, rel := range []string{
+		"tmp/registry_asset_policy.json",
 		"tmp/registry_ownership.json",
 		"tmp/registry_layout.json",
 		"tmp/registry_generated_cleanup.json",
@@ -1555,6 +1557,37 @@ func TestRunGateAssetPolicyWritesOwnershipAndCleanupReports(t *testing.T) {
 	}
 	if pruneReport.Mode != "dry_run" || pruneReport.Summary.Errors != 0 {
 		t.Fatalf("prune-review dry run = %+v, want dry-run without errors", pruneReport)
+	}
+}
+
+func TestRunGateAssetPolicyFailsWhenPolicyFileMissing(t *testing.T) {
+	root := newRegistryRoot(t)
+	if err := os.Remove(filepath.Join(root, "registry", "asset_policy.json")); err != nil {
+		t.Fatal(err)
+	}
+	out := filepath.Join(root, "tmp", "registry_asset_gate.json")
+
+	code := run([]string{
+		"gate",
+		"-root", root,
+		"-out", out,
+		"-scope", "asset-policy",
+	})
+	if code != 1 {
+		t.Fatalf("run(gate asset-policy missing policy) = %d, want 1", code)
+	}
+
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var report gateReport
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	step := findGateStep(t, report, "registry_asset_policy")
+	if step.Status != registry.StatusFail || step.Errors == 0 {
+		t.Fatalf("asset policy step = %+v, want failing step", step)
 	}
 }
 
@@ -1748,6 +1781,7 @@ func newRegistryRoot(t *testing.T) string {
 				"dependencies": []map[string]any{
 					{"kind": "registry", "path": "registry/locations.json", "required": true},
 					{"kind": "registry", "path": "registry/workflows.json", "required": true},
+					{"kind": "registry", "path": "registry/asset_policy.json", "required": true},
 					{"kind": "registry", "path": "registry/capability_atoms.json", "required": true},
 					{"kind": "registry", "path": "registry/evidence.json", "required": true},
 				},
@@ -1757,7 +1791,30 @@ func newRegistryRoot(t *testing.T) string {
 	writeJSON(t, root, "registry/evidence.json", map[string]any{
 		"schema_version": 1,
 		"evidence_sets": []map[string]any{
-			{"id": "matrix.text", "class": "generated_evidence", "artifact_path": "tmp/text-basic/matrix.json", "required": true, "workflows": []string{"generate"}},
+			{
+				"id":            "matrix.text",
+				"class":         "generated_evidence",
+				"artifact_path": "tmp/text-basic/matrix.json",
+				"required":      true,
+				"workflows":     []string{"generate"},
+				"producer": map[string]any{
+					"category": "version_matrix",
+					"command":  "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/text-basic.json -out tmp/text-basic",
+					"outputs":  []string{"tmp/text-basic/matrix.json"},
+				},
+			},
+		},
+	})
+	writeJSON(t, root, "registry/asset_policy.json", map[string]any{
+		"schema_version": 1,
+		"rules": []map[string]any{
+			{
+				"id":             "tmp.generated_evidence",
+				"location_id":    "tmp",
+				"action":         "review_generated_cleanup",
+				"cleanup_safety": "generated_untracked_review",
+				"rationale":      "tmp is disposable generated evidence; registered evidence and state-referenced paths are preserved by cleanup classification.",
+			},
 		},
 	})
 	return root

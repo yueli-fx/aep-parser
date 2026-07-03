@@ -44,7 +44,7 @@
         },
         {
           "kind": "state",
-          "path": "flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json",
+          "path": "registry/versioned_aep_migration_coverage.json",
           "required": true
         }
       ],
@@ -113,6 +113,11 @@
         {
           "kind": "registry",
           "path": "registry/evidence.json",
+          "required": true
+        },
+        {
+          "kind": "registry",
+          "path": "registry/asset_policy.json",
           "required": true
         },
         {
@@ -779,7 +784,7 @@
         },
         {
           "kind": "state",
-          "path": "flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json",
+          "path": "registry/versioned_aep_migration_coverage.json",
           "required": true
         },
         {

@@ -5,7 +5,7 @@ import "testing"
 func TestCheckRecurringMatrixGatesPassesForExpectedArtifacts(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeMatrixFixtureWithSummary(t, root, "tmp/migration_matrix_verify/smoke_all/matrix.json", map[string]any{
-		"total": 858, "passed": 852, "blocked": 0, "failed": 0, "skipped": 6,
+		"total": 906, "passed": 900, "blocked": 0, "failed": 0, "skipped": 6,
 	})
 	writeJSON(t, root, "tmp/migration_matrix_verify/smoke_all/minimal-adjustment-layer/AE2020_to_AE2025/verify_report.json", map[string]any{
 		"summary":      map[string]any{"status": "pass"},
@@ -27,7 +27,7 @@ func TestCheckRecurringMatrixGatesPassesForExpectedArtifacts(t *testing.T) {
 func TestCheckRecurringMatrixGatesReportsDrift(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeMatrixFixtureWithSummary(t, root, "tmp/migration_matrix_verify/smoke_all/matrix.json", map[string]any{
-		"total": 858, "passed": 851, "blocked": 0, "failed": 1, "skipped": 6,
+		"total": 906, "passed": 899, "blocked": 0, "failed": 1, "skipped": 6,
 	})
 	writeJSON(t, root, "tmp/migration_matrix_verify/smoke_all/minimal-adjustment-layer/AE2020_to_AE2025/verify_report.json", map[string]any{
 		"summary":      map[string]any{"status": "pass"},

@@ -22,6 +22,7 @@ type Registry struct {
 	CapabilityAtoms         []CapabilityAtom
 	EvidenceSets            []EvidenceSet
 	VersionBoundaries       []VersionBoundary
+	AssetPolicyRules        []AssetPolicyRule
 }
 
 type Location struct {
@@ -37,6 +38,14 @@ type Workflow struct {
 	ID            string `json:"id"`
 	Summary       string `json:"summary"`
 	CrossPlatform string `json:"cross_platform"`
+}
+
+type AssetPolicyRule struct {
+	ID            string `json:"id"`
+	LocationID    string `json:"location_id"`
+	Action        string `json:"action"`
+	CleanupSafety string `json:"cleanup_safety"`
+	Rationale     string `json:"rationale,omitempty"`
 }
 
 type CapabilityAtom struct {
@@ -80,6 +89,14 @@ type EvidenceSet struct {
 	ArtifactPath string   `json:"artifact_path"`
 	Required     bool     `json:"required"`
 	Workflows    []string `json:"workflows"`
+	Producer     Producer `json:"producer,omitempty"`
+}
+
+type Producer struct {
+	Category string   `json:"category,omitempty"`
+	Command  string   `json:"command,omitempty"`
+	Inputs   []string `json:"inputs,omitempty"`
+	Outputs  []string `json:"outputs,omitempty"`
 }
 
 type VersionBoundary struct {
@@ -127,6 +144,7 @@ type AuditReport struct {
 type AuditSummary struct {
 	Locations         int `json:"locations"`
 	Workflows         int `json:"workflows"`
+	AssetPolicyRules  int `json:"asset_policy_rules"`
 	CapabilityAtoms   int `json:"capability_atoms"`
 	EvidenceSets      int `json:"evidence_sets"`
 	VersionBoundaries int `json:"version_boundaries"`
@@ -151,6 +169,11 @@ type locationsFile struct {
 type workflowsFile struct {
 	SchemaVersion int        `json:"schema_version"`
 	Workflows     []Workflow `json:"workflows"`
+}
+
+type assetPolicyFile struct {
+	SchemaVersion int               `json:"schema_version"`
+	Rules         []AssetPolicyRule `json:"rules"`
 }
 
 type atomsFile struct {
@@ -181,6 +204,7 @@ func Load(root string) (Registry, error) {
 	var (
 		locations  locationsFile
 		workflows  workflowsFile
+		assetRules assetPolicyFile
 		atoms      atomsFile
 		evidence   evidenceFile
 		boundaries versionBoundariesFile
@@ -189,6 +213,9 @@ func Load(root string) (Registry, error) {
 		return Registry{}, err
 	}
 	if err := readJSON(root, "registry/workflows.json", &workflows); err != nil {
+		return Registry{}, err
+	}
+	if err := readOptionalJSON(root, "registry/asset_policy.json", &assetRules); err != nil {
 		return Registry{}, err
 	}
 	if err := readJSON(root, "registry/capability_atoms.json", &atoms); err != nil {
@@ -203,6 +230,7 @@ func Load(root string) (Registry, error) {
 	return Registry{
 		Locations:               locations.Locations,
 		Workflows:               workflows.Workflows,
+		AssetPolicyRules:        assetRules.Rules,
 		CapabilityVersionPolicy: atoms.VersionPolicy,
 		CapabilityAtoms:         applyCapabilityAtomDefaults(atoms.CapabilityAtoms, atoms.VersionPolicy),
 		EvidenceSets:            evidence.EvidenceSets,
@@ -256,6 +284,7 @@ func Audit(root string, reg Registry) AuditReport {
 		Summary: AuditSummary{
 			Locations:         len(reg.Locations),
 			Workflows:         len(reg.Workflows),
+			AssetPolicyRules:  len(reg.AssetPolicyRules),
 			CapabilityAtoms:   len(reg.CapabilityAtoms),
 			EvidenceSets:      len(reg.EvidenceSets),
 			VersionBoundaries: len(reg.VersionBoundaries),
@@ -301,6 +330,7 @@ func Audit(root string, reg Registry) AuditReport {
 			report.addIssue(code, severity, location.Path, "", "registered location does not exist")
 		}
 	}
+	auditAssetPolicy(reg, locationIDs, &report)
 
 	coverage := newLocationCoverage(reg.Locations)
 	auditCapabilityVersionPolicy(reg.CapabilityVersionPolicy, &report)
@@ -322,9 +352,20 @@ func Audit(root string, reg Registry) AuditReport {
 		if evidence.ID == "" {
 			report.addIssue("missing_evidence_id", SeverityError, evidence.ArtifactPath, "", "evidence id is required")
 		}
+		if evidence.Required && evidence.Class == "generated_evidence" && len(evidence.Workflows) == 0 {
+			report.addIssue("missing_evidence_workflows", SeverityError, evidence.ArtifactPath, "", "required generated evidence must declare producer workflows")
+		}
 		for _, workflow := range evidence.Workflows {
 			if !workflowIDs[workflow] {
 				report.addIssue("unknown_workflow", SeverityError, workflow, "", "evidence references an unknown workflow")
+			}
+		}
+		if evidence.Required && evidence.Class == "generated_evidence" {
+			if evidence.Producer.Category == "" {
+				report.addIssue("missing_evidence_producer", SeverityError, evidence.ArtifactPath, "", "required generated evidence must declare producer.category")
+			}
+			if evidence.Producer.Command == "" {
+				report.addIssue("missing_evidence_producer_command", SeverityError, evidence.ArtifactPath, "", "required generated evidence must declare producer.command")
 			}
 		}
 		if evidence.ArtifactPath == "" {
@@ -378,6 +419,47 @@ func auditCapabilityVersionPolicy(policy VersionPolicy, report *AuditReport) {
 	} else if policy.ExpansionPolicy != "append_new_ae_versions" {
 		report.addIssue("capability_version_policy_expansion_mismatch", SeverityError, "registry/capability_atoms.json", "", fmt.Sprintf("capability version_policy.expansion_policy = %q, want append_new_ae_versions", policy.ExpansionPolicy))
 	}
+}
+
+func auditAssetPolicy(reg Registry, locationIDs map[string]bool, report *AuditReport) {
+	if len(reg.AssetPolicyRules) == 0 {
+		return
+	}
+	ruleIDs := map[string]bool{}
+	rulesByLocation := map[string]bool{}
+	for _, rule := range reg.AssetPolicyRules {
+		if rule.ID == "" {
+			report.addIssue("missing_asset_policy_rule_id", SeverityError, rule.LocationID, "", "asset policy rule id is required")
+		} else if ruleIDs[rule.ID] {
+			report.addIssue("duplicate_asset_policy_rule", SeverityError, rule.ID, "", "asset policy rule id must be unique")
+		}
+		ruleIDs[rule.ID] = true
+		if rule.LocationID == "" {
+			report.addIssue("missing_asset_policy_location", SeverityError, rule.ID, "", "asset policy rule location_id is required")
+		} else if !locationIDs[rule.LocationID] {
+			report.addIssue("unknown_asset_policy_location", SeverityError, rule.LocationID, "", "asset policy rule references an unknown location")
+		} else {
+			rulesByLocation[rule.LocationID] = true
+		}
+		if rule.Action == "" {
+			report.addIssue("missing_asset_policy_action", SeverityError, rule.ID, "", "asset policy rule action is required")
+		}
+		if rule.CleanupSafety == "" {
+			report.addIssue("missing_asset_policy_cleanup_safety", SeverityError, rule.ID, "", "asset policy rule cleanup_safety is required")
+		}
+	}
+	for _, location := range reg.Locations {
+		if !assetPolicyRequiredForLocation(location) || rulesByLocation[location.ID] {
+			continue
+		}
+		report.addIssue("missing_asset_policy_location_rule", SeverityError, location.ID, "", "generated or local-only locations must have an asset policy rule")
+	}
+}
+
+func assetPolicyRequiredForLocation(location Location) bool {
+	return location.Lifecycle == "local_only" ||
+		location.Class == "local_corpus" ||
+		(!location.Tracked && location.Class == "generated_evidence")
 }
 
 func auditAtom(root string, atom CapabilityAtom, workflowIDs map[string]bool, coverage locationCoverage, report *AuditReport) {

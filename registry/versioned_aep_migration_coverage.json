@@ -1,0 +1,1505 @@
+{
+    "contract_gates":  [
+                           {
+                               "artifact":  "tmp/registry_version_boundaries.json",
+                               "command":  "go run ./cmd/aepregistry boundaries -root . -out tmp/registry_version_boundaries.json",
+                               "id":  "registry-version-boundaries",
+                               "kind":  "version_boundaries",
+                               "status":  "pass",
+                               "summary":  {
+                                               "boundaries":  1,
+                                               "checked_cells":  36,
+                                               "duplicate_rows":  0,
+                                               "errors":  0,
+                                               "matched":  1,
+                                               "mismatched_cells":  0,
+                                               "mismatched_status":  0,
+                                               "mismatched_totals":  0,
+                                               "missing_cells":  0,
+                                               "missing_rows":  0
+                                           }
+                           }
+                       ],
+    "coverage":  [
+                     {
+                         "artifact":  "tmp/migration_matrix_text_baseline_all_6x6/matrix.json",
+                         "domain":  "text",
+                         "host_open_endpoint_evidence":  {
+                                                             "artifact":  "tmp/host_open_gaps/text-baseline/chunk-1/matrix.json",
+                                                             "direct_hosts":  [
+                                                                                  "AE2020",
+                                                                                  "AE2025"
+                                                                              ],
+                                                             "inferred_hosts":  [
+                                                                                    "AE2021",
+                                                                                    "AE2022",
+                                                                                    "AE2023",
+                                                                                    "AE2024"
+                                                                                ],
+                                                             "ledger":  "tmp/host_open_gaps/text-baseline/chunk-1/ledger.md",
+                                                             "open_mode":  "target_bound",
+                                                             "recipes":  [
+                                                                             "minimal-default-text-layer",
+                                                                             "minimal-default-text-static-transform"
+                                                                         ],
+                                                             "totals":  {
+                                                                            "blocked":  0,
+                                                                            "failed":  0,
+                                                                            "pass":  8,
+                                                                            "skipped":  0,
+                                                                            "total":  8
+                                                                        }
+                                                         },
+                         "host_open_status":  "direct_endpoint_hosts_pass; AE2021-AE2024 inferred_by_endpoint",
+                         "id":  "text-baseline",
+                         "ledger":  "tmp/migration_matrix_text_baseline_all_6x6/ledger.md",
+                         "recipe_count":  2,
+                         "recipes":  [
+                                         "minimal-default-text-layer",
+                                         "minimal-default-text-static-transform"
+                                     ],
+                         "scope":  "default text layer creation and static transform text fixtures",
+                         "totals":  {
+                                        "blocked":  0,
+                                        "failed":  0,
+                                        "pass":  72,
+                                        "skipped":  0,
+                                        "total":  72
+                                    },
+                         "writer_coverage":  "AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 sources into AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 targets",
+                         "writer_status":  "PD-6x6"
+                     },
+                     {
+                         "artifact":  "tmp/migration_matrix_text_style_all_6x6/matrix.json",
+                         "domain":  "text",
+                         "host_open_endpoint_evidence":  {
+                                                             "artifact":  "tmp/host_open_gaps/text-style/non-representative-endpoint/matrix.json",
+                                                             "direct_hosts":  [
+                                                                                  "AE2020",
+                                                                                  "AE2025"
+                                                                              ],
+                                                             "inferred_hosts":  [
+                                                                                    "AE2021",
+                                                                                    "AE2022",
+                                                                                    "AE2023",
+                                                                                    "AE2024"
+                                                                                ],
+                                                             "ledger":  "tmp/host_open_gaps/text-style/non-representative-endpoint/ledger.md",
+                                                             "open_mode":  "target_bound",
+                                                             "recipes":  [
+                                                                             "minimal-text-shape"
+                                                                         ],
+                                                             "scope":  "non_representative_recipes",
+                                                             "totals":  {
+                                                                            "blocked":  0,
+                                                                            "failed":  0,
+                                                                            "pass":  4,
+                                                                            "skipped":  0,
+                                                                            "total":  4
+                                                                        }
+                                                         },
+                         "host_open_representatives":  [
+                                                           "minimal-text-style"
+                                                       ],
+                         "host_open_status":  "OPEN-ALL-HOSTS representative plus direct_endpoint_hosts_pass for non-representative recipes; AE2021-AE2024 inferred_by_endpoint",
+                         "id":  "text-style",
+                         "ledger":  "tmp/migration_matrix_text_style_all_6x6/ledger.md",
+                         "recipes":  [
+                                         "minimal-text-style",
+                                         "minimal-text-shape"
+                                     ],
+                         "scope":  "current text style fixture set",
+                         "totals":  {
+                                        "blocked":  0,
+                                        "failed":  0,
+                                        "pass":  72,
+                                        "skipped":  0,
+                                        "total":  72
+                                    },
+                         "writer_coverage":  "AE2020-AE2025 sources into AE2020-AE2025 targets",
+                         "writer_status":  "PD-6x6"
+                     },
+                     {
+                         "artifact":  "tmp/migration_matrix_text_animators_all_6x6/matrix.json",
+                         "domain":  "text",
+                         "host_open_endpoint_evidence":  {
+                                                             "chunks":  [
+                                                                            {
+                                                                                "artifact":  "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-1/matrix.json",
+                                                                                "id":  "chunk-1",
+                                                                                "ledger":  "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-1/ledger.md",
+                                                                                "totals":  {
+                                                                                               "blocked":  0,
+                                                                                               "failed":  0,
+                                                                                               "pass":  24,
+                                                                                               "skipped":  0,
+                                                                                               "total":  24
+                                                                                           }
+                                                                            },
+                                                                            {
+                                                                                "artifact":  "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-2/matrix.json",
+                                                                                "id":  "chunk-2",
+                                                                                "ledger":  "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-2/ledger.md",
+                                                                                "totals":  {
+                                                                                               "blocked":  0,
+                                                                                               "failed":  0,
+                                                                                               "pass":  24,
+                                                                                               "skipped":  0,
+                                                                                               "total":  24
+                                                                                           }
+                                                                            },
+                                                                            {
+                                                                                "artifact":  "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-3/matrix.json",
+                                                                                "id":  "chunk-3",
+                                                                                "ledger":  "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-3/ledger.md",
+                                                                                "totals":  {
+                                                                                               "blocked":  0,
+                                                                                               "failed":  0,
+                                                                                               "pass":  24,
+                                                                                               "skipped":  0,
+                                                                                               "total":  24
+                                                                                           }
+                                                                            },
+                                                                            {
+                                                                                "artifact":  "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-4/matrix.json",
+                                                                                "id":  "chunk-4",
+                                                                                "ledger":  "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-4/ledger.md",
+                                                                                "totals":  {
+                                                                                               "blocked":  0,
+                                                                                               "failed":  0,
+                                                                                               "pass":  8,
+                                                                                               "skipped":  0,
+                                                                                               "total":  8
+                                                                                           }
+                                                                            }
+                                                                        ],
+                                                             "direct_hosts":  [
+                                                                                  "AE2020",
+                                                                                  "AE2025"
+                                                                              ],
+                                                             "inferred_hosts":  [
+                                                                                    "AE2021",
+                                                                                    "AE2022",
+                                                                                    "AE2023",
+                                                                                    "AE2024"
+                                                                                ],
+                                                             "open_mode":  "target_bound",
+                                                             "recipes":  [
+                                                                             "minimal-text-animator-character-offset",
+                                                                             "minimal-text-animator-character-offset-value-keyframes",
+                                                                             "minimal-text-animator-color",
+                                                                             "minimal-text-animator-fill-opacity",
+                                                                             "minimal-text-animator-opacity",
+                                                                             "minimal-text-animator-opacity-value-keyframes",
+                                                                             "minimal-text-animator-position",
+                                                                             "minimal-text-animator-position-value-keyframes",
+                                                                             "minimal-text-animator-range-offset",
+                                                                             "minimal-text-animator-rotation",
+                                                                             "minimal-text-animator-rotation-value-keyframes",
+                                                                             "minimal-text-animator-rotation-x",
+                                                                             "minimal-text-animator-rotation-y",
+                                                                             "minimal-text-animator-scale",
+                                                                             "minimal-text-animator-scale-value-keyframes",
+                                                                             "minimal-text-animator-stroke-color",
+                                                                             "minimal-text-animator-stroke-opacity",
+                                                                             "minimal-text-animator-stroke-width",
+                                                                             "minimal-text-animator-tracking",
+                                                                             "minimal-text-animator-tracking-value-keyframes"
+                                                                         ],
+                                                             "scope":  "non_representative_recipes",
+                                                             "totals":  {
+                                                                            "blocked":  0,
+                                                                            "failed":  0,
+                                                                            "pass":  80,
+                                                                            "skipped":  0,
+                                                                            "total":  80
+                                                                        }
+                                                         },
+                         "host_open_representatives":  [
+                                                           "minimal-text-animator-skew",
+                                                           "minimal-text-animator-color-value-keyframes"
+                                                       ],
+                         "host_open_status":  "OPEN-ALL-HOSTS representatives plus direct_endpoint_hosts_pass for non-representative recipes; AE2021-AE2024 inferred_by_endpoint",
+                         "id":  "text-animators",
+                         "ledger":  "tmp/migration_matrix_text_animators_all_6x6/ledger.md",
+                         "recipe_count":  29,
+                         "recipe_pattern":  "minimal-text-animator-*",
+                         "recipes":  [
+                                         "minimal-text-animator-character-offset",
+                                         "minimal-text-animator-character-offset-value-keyframes",
+                                         "minimal-text-animator-color",
+                                         "minimal-text-animator-color-value-keyframes",
+                                         "minimal-text-animator-fill-opacity",
+                                         "minimal-text-animator-fill-opacity-value-keyframes",
+                                         "minimal-text-animator-opacity",
+                                         "minimal-text-animator-opacity-value-keyframes",
+                                         "minimal-text-animator-position",
+                                         "minimal-text-animator-position-value-keyframes",
+                                         "minimal-text-animator-range-offset",
+                                         "minimal-text-animator-rotation",
+                                         "minimal-text-animator-rotation-value-keyframes",
+                                         "minimal-text-animator-rotation-x",
+                                         "minimal-text-animator-rotation-x-value-keyframes",
+                                         "minimal-text-animator-rotation-y",
+                                         "minimal-text-animator-rotation-y-value-keyframes",
+                                         "minimal-text-animator-scale",
+                                         "minimal-text-animator-scale-value-keyframes",
+                                         "minimal-text-animator-skew",
+                                         "minimal-text-animator-skew-value-keyframes",
+                                         "minimal-text-animator-stroke-color",
+                                         "minimal-text-animator-stroke-color-value-keyframes",
+                                         "minimal-text-animator-stroke-opacity",
+                                         "minimal-text-animator-stroke-opacity-value-keyframes",
+                                         "minimal-text-animator-stroke-width",
+                                         "minimal-text-animator-stroke-width-value-keyframes",
+                                         "minimal-text-animator-tracking",
+                                         "minimal-text-animator-tracking-value-keyframes"
+                                     ],
+                         "scope":  "all 29 current recipe-owned text animator fixtures",
+                         "totals":  {
+                                        "blocked":  0,
+                                        "failed":  0,
+                                        "pass":  1044,
+                                        "skipped":  0,
+                                        "total":  1044
+                                    },
+                         "writer_coverage":  "AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 sources into AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 targets",
+                         "writer_status":  "PD-6x6"
+                     },
+                     {
+                         "artifact":  "tmp/migration_matrix_static_effects_all_6x6/matrix.json",
+                         "domain":  "effect",
+                         "host_open_endpoint_evidence":  {
+                                                             "artifact":  "tmp/host_open_gaps/effects-static/chunk-1/matrix.json",
+                                                             "direct_hosts":  [
+                                                                                  "AE2020",
+                                                                                  "AE2025"
+                                                                              ],
+                                                             "inferred_hosts":  [
+                                                                                    "AE2021",
+                                                                                    "AE2022",
+                                                                                    "AE2023",
+                                                                                    "AE2024"
+                                                                                ],
+                                                             "ledger":  "tmp/host_open_gaps/effects-static/chunk-1/ledger.md",
+                                                             "open_mode":  "target_bound",
+                                                             "recipes":  [
+                                                                             "minimal-text-effect",
+                                                                             "minimal-adjustment-layer"
+                                                                         ],
+                                                             "totals":  {
+                                                                            "blocked":  0,
+                                                                            "failed":  0,
+                                                                            "pass":  8,
+                                                                            "skipped":  0,
+                                                                            "total":  8
+                                                                        }
+                                                         },
+                         "host_open_status":  "direct_endpoint_hosts_pass; AE2021-AE2024 inferred_by_endpoint",
+                         "id":  "effects-static",
+                         "ledger":  "tmp/migration_matrix_static_effects_all_6x6/ledger.md",
+                         "recipes":  [
+                                         "minimal-text-effect",
+                                         "minimal-adjustment-layer"
+                                     ],
+                         "scope":  "static supported effects",
+                         "totals":  {
+                                        "blocked":  0,
+                                        "failed":  0,
+                                        "pass":  72,
+                                        "skipped":  0,
+                                        "total":  72
+                                    },
+                         "writer_coverage":  "AE2020-AE2025 sources into AE2020-AE2025 targets",
+                         "writer_status":  "PD-6x6"
+                     },
+                     {
+                         "artifact":  "tmp/migration_matrix_effect_params_all_6x6/matrix.json",
+                         "domain":  "effect",
+                         "host_open_endpoint_evidence":  {
+                                                             "artifact":  "tmp/host_open_gaps/effects-dynamic-params/non-representative-endpoint/matrix.json",
+                                                             "direct_hosts":  [
+                                                                                  "AE2020",
+                                                                                  "AE2025"
+                                                                              ],
+                                                             "inferred_hosts":  [
+                                                                                    "AE2021",
+                                                                                    "AE2022",
+                                                                                    "AE2023",
+                                                                                    "AE2024"
+                                                                                ],
+                                                             "ledger":  "tmp/host_open_gaps/effects-dynamic-params/non-representative-endpoint/ledger.md",
+                                                             "open_mode":  "target_bound",
+                                                             "recipes":  [
+                                                                             "minimal-effect-layer-param",
+                                                                             "minimal-effect-param-expression",
+                                                                             "minimal-effect-param-keyframes"
+                                                                         ],
+                                                             "scope":  "non_representative_recipes",
+                                                             "totals":  {
+                                                                            "blocked":  0,
+                                                                            "failed":  0,
+                                                                            "pass":  12,
+                                                                            "skipped":  0,
+                                                                            "total":  12
+                                                                        }
+                                                         },
+                         "host_open_representatives":  [
+                                                           "minimal-effect-param-vector-keyframes"
+                                                       ],
+                         "host_open_status":  "OPEN-ALL-HOSTS representative plus direct_endpoint_hosts_pass for non-representative recipes; AE2021-AE2024 inferred_by_endpoint",
+                         "id":  "effects-dynamic-params",
+                         "ledger":  "tmp/migration_matrix_effect_params_all_6x6/ledger.md",
+                         "recipes":  [
+                                         "minimal-effect-layer-param",
+                                         "minimal-effect-param-expression",
+                                         "minimal-effect-param-keyframes",
+                                         "minimal-effect-param-vector-keyframes"
+                                     ],
+                         "scope":  "layer-ref params, expressions, scalar keyframes, vector keyframes",
+                         "totals":  {
+                                        "blocked":  0,
+                                        "failed":  0,
+                                        "pass":  144,
+                                        "skipped":  0,
+                                        "total":  144
+                                    },
+                         "writer_coverage":  "AE2020-AE2025 sources into AE2020-AE2025 targets",
+                         "writer_status":  "PD-6x6"
+                     },
+                     {
+                         "artifact":  "tmp/migration_matrix_effect_control_static_values_all_6x6/matrix.json",
+                         "domain":  "effect",
+                         "host_open_endpoint_evidence":  {
+                                                             "artifact":  "tmp/host_open_gaps/effects-control-static-values/chunk-1/matrix.json",
+                                                             "direct_hosts":  [
+                                                                                  "AE2020",
+                                                                                  "AE2025"
+                                                                              ],
+                                                             "inferred_hosts":  [
+                                                                                    "AE2021",
+                                                                                    "AE2022",
+                                                                                    "AE2023",
+                                                                                    "AE2024"
+                                                                                ],
+                                                             "ledger":  "tmp/host_open_gaps/effects-control-static-values/chunk-1/ledger.md",
+                                                             "open_mode":  "target_bound",
+                                                             "recipes":  [
+                                                                             "minimal-effect-control-static-values"
+                                                                         ],
+                                                             "totals":  {
+                                                                            "blocked":  0,
+                                                                            "failed":  0,
+                                                                            "pass":  4,
+                                                                            "skipped":  0,
+                                                                            "total":  4
+                                                                        }
+                                                         },
+                         "host_open_status":  "direct_endpoint_hosts_pass; AE2021-AE2024 inferred_by_endpoint",
+                         "id":  "effects-control-static-values",
+                         "ledger":  "tmp/migration_matrix_effect_control_static_values_all_6x6/ledger.md",
+                         "recipe_count":  1,
+                         "recipes":  [
+                                         "minimal-effect-control-static-values"
+                                     ],
+                         "scope":  "native effect control static values for angle, checkbox, color, point, point3D, and slider controls",
+                         "totals":  {
+                                        "blocked":  0,
+                                        "failed":  0,
+                                        "pass":  36,
+                                        "skipped":  0,
+                                        "total":  36
+                                    },
+                         "writer_coverage":  "AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 sources into AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 targets",
+                         "writer_status":  "PD-6x6"
+                     },
+                     {
+                         "artifact":  "tmp/migration_matrix_transform_all_6x6/matrix.json",
+                         "domain":  "transform",
+                         "host_open_endpoint_evidence":  {
+                                                             "artifact":  "tmp/host_open_gaps/transforms-dynamic/non-representative-endpoint/matrix.json",
+                                                             "direct_hosts":  [
+                                                                                  "AE2020",
+                                                                                  "AE2025"
+                                                                              ],
+                                                             "inferred_hosts":  [
+                                                                                    "AE2021",
+                                                                                    "AE2022",
+                                                                                    "AE2023",
+                                                                                    "AE2024"
+                                                                                ],
+                                                             "ledger":  "tmp/host_open_gaps/transforms-dynamic/non-representative-endpoint/ledger.md",
+                                                             "open_mode":  "target_bound",
+                                                             "recipes":  [
+                                                                             "minimal-transform-expression",
+                                                                             "minimal-transform-keyframes"
+                                                                         ],
+                                                             "scope":  "non_representative_recipes",
+                                                             "totals":  {
+                                                                            "blocked":  0,
+                                                                            "failed":  0,
+                                                                            "pass":  8,
+                                                                            "skipped":  0,
+                                                                            "total":  8
+                                                                        }
+                                                         },
+                         "host_open_representatives":  [
+                                                           "minimal-transform-keyframe-ease"
+                                                       ],
+                         "host_open_status":  "OPEN-ALL-HOSTS representative plus direct_endpoint_hosts_pass for non-representative recipes; AE2021-AE2024 inferred_by_endpoint",
+                         "id":  "transforms-dynamic",
+                         "ledger":  "tmp/migration_matrix_transform_all_6x6/ledger.md",
+                         "recipes":  [
+                                         "minimal-transform-keyframes",
+                                         "minimal-transform-keyframe-ease",
+                                         "minimal-transform-expression"
+                                     ],
+                         "scope":  "transform keyframes, keyframe ease, and transform expressions",
+                         "totals":  {
+                                        "blocked":  0,
+                                        "failed":  0,
+                                        "pass":  108,
+                                        "skipped":  0,
+                                        "total":  108
+                                    },
+                         "writer_coverage":  "AE2020-AE2025 sources into AE2020-AE2025 targets",
+                         "writer_status":  "PD-6x6"
+                     },
+                     {
+                         "artifact":  "tmp/migration_matrix_project_all_6x6/matrix.json",
+                         "domain":  "project",
+                         "host_open_endpoint_evidence":  {
+                                                             "artifact":  "tmp/host_open_gaps/project/non-representative-endpoint/matrix.json",
+                                                             "direct_hosts":  [
+                                                                                  "AE2020",
+                                                                                  "AE2025"
+                                                                              ],
+                                                             "inferred_hosts":  [
+                                                                                    "AE2021",
+                                                                                    "AE2022",
+                                                                                    "AE2023",
+                                                                                    "AE2024"
+                                                                                ],
+                                                             "ledger":  "tmp/host_open_gaps/project/non-representative-endpoint/ledger.md",
+                                                             "open_mode":  "target_bound",
+                                                             "recipes":  [
+                                                                             "minimal-project-bits-per-channel",
+                                                                             "minimal-project-linear-color",
+                                                                             "minimal-project-preferences"
+                                                                         ],
+                                                             "scope":  "non_representative_recipes",
+                                                             "totals":  {
+                                                                            "blocked":  0,
+                                                                            "failed":  0,
+                                                                            "pass":  12,
+                                                                            "skipped":  0,
+                                                                            "total":  12
+                                                                        }
+                                                         },
+                         "host_open_representatives":  [
+                                                           "minimal-project-display-settings"
+                                                       ],
+                         "host_open_status":  "OPEN-ALL-HOSTS representative plus direct_endpoint_hosts_pass for non-representative recipes; AE2021-AE2024 inferred_by_endpoint",
+                         "id":  "project",
+                         "ledger":  "tmp/migration_matrix_project_all_6x6/ledger.md",
+                         "recipe_count":  4,
+                         "recipe_pattern":  "minimal-project-*",
+                         "recipes":  [
+                                         "minimal-project-bits-per-channel",
+                                         "minimal-project-display-settings",
+                                         "minimal-project-linear-color",
+                                         "minimal-project-preferences"
+                                     ],
+                         "scope":  "all 4 current project setting recipes",
+                         "totals":  {
+                                        "blocked":  0,
+                                        "failed":  0,
+                                        "pass":  144,
+                                        "skipped":  0,
+                                        "total":  144
+                                    },
+                         "writer_coverage":  "AE2020-AE2025 sources into AE2020-AE2025 targets",
+                         "writer_status":  "PD-6x6"
+                     },
+                     {
+                         "artifact":  "tmp/migration_matrix_comp_all_6x6/matrix.json",
+                         "domain":  "comp",
+                         "host_open_endpoint_evidence":  {
+                                                             "chunks":  [
+                                                                            {
+                                                                                "artifact":  "tmp/host_open_gaps/comp/non-representative-endpoint/chunk-1/matrix.json",
+                                                                                "id":  "chunk-1",
+                                                                                "ledger":  "tmp/host_open_gaps/comp/non-representative-endpoint/chunk-1/ledger.md",
+                                                                                "totals":  {
+                                                                                               "blocked":  0,
+                                                                                               "failed":  0,
+                                                                                               "pass":  24,
+                                                                                               "skipped":  0,
+                                                                                               "total":  24
+                                                                                           }
+                                                                            },
+                                                                            {
+                                                                                "artifact":  "tmp/host_open_gaps/comp/non-representative-endpoint/chunk-2/matrix.json",
+                                                                                "id":  "chunk-2",
+                                                                                "ledger":  "tmp/host_open_gaps/comp/non-representative-endpoint/chunk-2/ledger.md",
+                                                                                "totals":  {
+                                                                                               "blocked":  0,
+                                                                                               "failed":  0,
+                                                                                               "pass":  24,
+                                                                                               "skipped":  0,
+                                                                                               "total":  24
+                                                                                           }
+                                                                            },
+                                                                            {
+                                                                                "artifact":  "tmp/host_open_gaps/comp/non-representative-endpoint/chunk-3/matrix.json",
+                                                                                "id":  "chunk-3",
+                                                                                "ledger":  "tmp/host_open_gaps/comp/non-representative-endpoint/chunk-3/ledger.md",
+                                                                                "totals":  {
+                                                                                               "blocked":  0,
+                                                                                               "failed":  0,
+                                                                                               "pass":  20,
+                                                                                               "skipped":  0,
+                                                                                               "total":  20
+                                                                                           }
+                                                                            }
+                                                                        ],
+                                                             "direct_hosts":  [
+                                                                                  "AE2020",
+                                                                                  "AE2025"
+                                                                              ],
+                                                             "inferred_hosts":  [
+                                                                                    "AE2021",
+                                                                                    "AE2022",
+                                                                                    "AE2023",
+                                                                                    "AE2024"
+                                                                                ],
+                                                             "open_mode":  "target_bound",
+                                                             "recipes":  [
+                                                                             "minimal-comp-background-color",
+                                                                             "minimal-comp-comment",
+                                                                             "minimal-comp-display-start-time",
+                                                                             "minimal-comp-draft-3d",
+                                                                             "minimal-comp-flag-profile",
+                                                                             "minimal-comp-frame-blending",
+                                                                             "minimal-comp-hide-shy-layers",
+                                                                             "minimal-comp-label",
+                                                                             "minimal-comp-metadata-profile",
+                                                                             "minimal-comp-motion-blur",
+                                                                             "minimal-comp-motion-blur-enabled",
+                                                                             "minimal-comp-pixel-aspect",
+                                                                             "minimal-comp-preserve-nested-frame-rate",
+                                                                             "minimal-comp-preserve-nested-resolution",
+                                                                             "minimal-comp-renderer",
+                                                                             "minimal-comp-resolution-factor",
+                                                                             "minimal-comp-work-area"
+                                                                         ],
+                                                             "scope":  "non_representative_recipes",
+                                                             "totals":  {
+                                                                            "blocked":  0,
+                                                                            "failed":  0,
+                                                                            "pass":  68,
+                                                                            "skipped":  0,
+                                                                            "total":  68
+                                                                        }
+                                                         },
+                         "host_open_representatives":  [
+                                                           "minimal-comp-object-profile"
+                                                       ],
+                         "host_open_status":  "OPEN-ALL-HOSTS representative plus direct_endpoint_hosts_pass for non-representative recipes; AE2021-AE2024 inferred_by_endpoint",
+                         "id":  "comp",
+                         "ledger":  "tmp/migration_matrix_comp_all_6x6/ledger.md",
+                         "recipe_count":  18,
+                         "recipe_pattern":  "minimal-comp-*",
+                         "recipes":  [
+                                         "minimal-comp-background-color",
+                                         "minimal-comp-comment",
+                                         "minimal-comp-display-start-time",
+                                         "minimal-comp-draft-3d",
+                                         "minimal-comp-flag-profile",
+                                         "minimal-comp-frame-blending",
+                                         "minimal-comp-hide-shy-layers",
+                                         "minimal-comp-label",
+                                         "minimal-comp-metadata-profile",
+                                         "minimal-comp-motion-blur",
+                                         "minimal-comp-motion-blur-enabled",
+                                         "minimal-comp-object-profile",
+                                         "minimal-comp-pixel-aspect",
+                                         "minimal-comp-preserve-nested-frame-rate",
+                                         "minimal-comp-preserve-nested-resolution",
+                                         "minimal-comp-renderer",
+                                         "minimal-comp-resolution-factor",
+                                         "minimal-comp-work-area"
+                                     ],
+                         "scope":  "all 18 current comp setting recipes",
+                         "totals":  {
+                                        "blocked":  0,
+                                        "failed":  0,
+                                        "pass":  648,
+                                        "skipped":  0,
+                                        "total":  648
+                                    },
+                         "writer_coverage":  "AE2020-AE2025 sources into AE2020-AE2025 targets",
+                         "writer_status":  "PD-6x6"
+                     },
+                     {
+                         "artifact":  "tmp/migration_matrix_precomp_all_6x6/matrix.json",
+                         "domain":  "precomp",
+                         "host_open_representatives":  [
+                                                           "minimal-precomp-layer"
+                                                       ],
+                         "host_open_status":  "OPEN-ALL-HOSTS for current recipe",
+                         "id":  "precomp",
+                         "ledger":  "tmp/migration_matrix_precomp_all_6x6/ledger.md",
+                         "recipe_count":  1,
+                         "recipe_pattern":  "minimal-precomp-*",
+                         "recipes":  [
+                                         "minimal-precomp-layer"
+                                     ],
+                         "scope":  "all 1 current precomp recipe",
+                         "totals":  {
+                                        "blocked":  0,
+                                        "failed":  0,
+                                        "pass":  36,
+                                        "skipped":  0,
+                                        "total":  36
+                                    },
+                         "writer_coverage":  "AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 sources into AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 targets",
+                         "writer_status":  "PD-6x6"
+                     },
+                     {
+                         "artifact":  "tmp/migration_matrix_camera_all_6x6/matrix.json",
+                         "domain":  "camera",
+                         "host_open_endpoint_evidence":  {
+                                                             "chunks":  [
+                                                                            {
+                                                                                "artifact":  "tmp/host_open_gaps/camera/non-representative-endpoint/chunk-1/matrix.json",
+                                                                                "id":  "chunk-1",
+                                                                                "ledger":  "tmp/host_open_gaps/camera/non-representative-endpoint/chunk-1/ledger.md",
+                                                                                "totals":  {
+                                                                                               "blocked":  0,
+                                                                                               "failed":  0,
+                                                                                               "pass":  24,
+                                                                                               "skipped":  0,
+                                                                                               "total":  24
+                                                                                           }
+                                                                            },
+                                                                            {
+                                                                                "artifact":  "tmp/host_open_gaps/camera/non-representative-endpoint/chunk-2/matrix.json",
+                                                                                "id":  "chunk-2",
+                                                                                "ledger":  "tmp/host_open_gaps/camera/non-representative-endpoint/chunk-2/ledger.md",
+                                                                                "totals":  {
+                                                                                               "blocked":  0,
+                                                                                               "failed":  0,
+                                                                                               "pass":  24,
+                                                                                               "skipped":  0,
+                                                                                               "total":  24
+                                                                                           }
+                                                                            },
+                                                                            {
+                                                                                "artifact":  "tmp/host_open_gaps/camera/non-representative-endpoint/chunk-3/matrix.json",
+                                                                                "id":  "chunk-3",
+                                                                                "ledger":  "tmp/host_open_gaps/camera/non-representative-endpoint/chunk-3/ledger.md",
+                                                                                "totals":  {
+                                                                                               "blocked":  0,
+                                                                                               "failed":  0,
+                                                                                               "pass":  8,
+                                                                                               "skipped":  0,
+                                                                                               "total":  8
+                                                                                           }
+                                                                            }
+                                                                        ],
+                                                             "direct_hosts":  [
+                                                                                  "AE2020",
+                                                                                  "AE2025"
+                                                                              ],
+                                                             "inferred_hosts":  [
+                                                                                    "AE2021",
+                                                                                    "AE2022",
+                                                                                    "AE2023",
+                                                                                    "AE2024"
+                                                                                ],
+                                                             "open_mode":  "target_bound",
+                                                             "recipes":  [
+                                                                             "minimal-camera-aperture",
+                                                                             "minimal-camera-blur-level",
+                                                                             "minimal-camera-depth-of-field",
+                                                                             "minimal-camera-focus-distance",
+                                                                             "minimal-camera-iris-aspect-ratio",
+                                                                             "minimal-camera-iris-diffraction-fringe",
+                                                                             "minimal-camera-iris-highlight-gain",
+                                                                             "minimal-camera-iris-highlight-saturation",
+                                                                             "minimal-camera-iris-highlight-threshold",
+                                                                             "minimal-camera-iris-rotation",
+                                                                             "minimal-camera-iris-roundness",
+                                                                             "minimal-camera-iris-shape",
+                                                                             "minimal-camera-layer",
+                                                                             "minimal-camera-zoom"
+                                                                         ],
+                                                             "scope":  "non_representative_recipes",
+                                                             "totals":  {
+                                                                            "blocked":  0,
+                                                                            "failed":  0,
+                                                                            "pass":  56,
+                                                                            "skipped":  0,
+                                                                            "total":  56
+                                                                        }
+                                                         },
+                         "host_open_representatives":  [
+                                                           "minimal-camera-object-profile"
+                                                       ],
+                         "host_open_status":  "OPEN-ALL-HOSTS representative plus direct_endpoint_hosts_pass for non-representative recipes; AE2021-AE2024 inferred_by_endpoint",
+                         "id":  "camera",
+                         "ledger":  "tmp/migration_matrix_camera_all_6x6/ledger.md",
+                         "recipe_count":  15,
+                         "recipe_pattern":  "minimal-camera-*",
+                         "recipes":  [
+                                         "minimal-camera-aperture",
+                                         "minimal-camera-blur-level",
+                                         "minimal-camera-depth-of-field",
+                                         "minimal-camera-focus-distance",
+                                         "minimal-camera-iris-aspect-ratio",
+                                         "minimal-camera-iris-diffraction-fringe",
+                                         "minimal-camera-iris-highlight-gain",
+                                         "minimal-camera-iris-highlight-saturation",
+                                         "minimal-camera-iris-highlight-threshold",
+                                         "minimal-camera-iris-rotation",
+                                         "minimal-camera-iris-roundness",
+                                         "minimal-camera-iris-shape",
+                                         "minimal-camera-layer",
+                                         "minimal-camera-object-profile",
+                                         "minimal-camera-zoom"
+                                     ],
+                         "scope":  "all 15 current camera recipes",
+                         "totals":  {
+                                        "blocked":  0,
+                                        "failed":  0,
+                                        "pass":  540,
+                                        "skipped":  0,
+                                        "total":  540
+                                    },
+                         "writer_coverage":  "AE2020-AE2025 sources into AE2020-AE2025 targets",
+                         "writer_status":  "PD-6x6"
+                     },
+                     {
+                         "artifact":  "tmp/migration_matrix_light_all_6x6/matrix.json",
+                         "domain":  "light",
+                         "host_open_endpoint_evidence":  {
+                                                             "chunks":  [
+                                                                            {
+                                                                                "artifact":  "tmp/host_open_gaps/light/non-representative-endpoint/chunk-1/matrix.json",
+                                                                                "id":  "chunk-1",
+                                                                                "ledger":  "tmp/host_open_gaps/light/non-representative-endpoint/chunk-1/ledger.md",
+                                                                                "totals":  {
+                                                                                               "blocked":  0,
+                                                                                               "failed":  0,
+                                                                                               "pass":  24,
+                                                                                               "skipped":  0,
+                                                                                               "total":  24
+                                                                                           }
+                                                                            },
+                                                                            {
+                                                                                "artifact":  "tmp/host_open_gaps/light/non-representative-endpoint/chunk-2/matrix.json",
+                                                                                "id":  "chunk-2",
+                                                                                "ledger":  "tmp/host_open_gaps/light/non-representative-endpoint/chunk-2/ledger.md",
+                                                                                "totals":  {
+                                                                                               "blocked":  0,
+                                                                                               "failed":  0,
+                                                                                               "pass":  24,
+                                                                                               "skipped":  0,
+                                                                                               "total":  24
+                                                                                           }
+                                                                            },
+                                                                            {
+                                                                                "artifact":  "tmp/host_open_gaps/light/non-representative-endpoint/chunk-3/matrix.json",
+                                                                                "id":  "chunk-3",
+                                                                                "ledger":  "tmp/host_open_gaps/light/non-representative-endpoint/chunk-3/ledger.md",
+                                                                                "totals":  {
+                                                                                               "blocked":  0,
+                                                                                               "failed":  0,
+                                                                                               "pass":  4,
+                                                                                               "skipped":  0,
+                                                                                               "total":  4
+                                                                                           }
+                                                                            }
+                                                                        ],
+                                                             "direct_hosts":  [
+                                                                                  "AE2020",
+                                                                                  "AE2025"
+                                                                              ],
+                                                             "inferred_hosts":  [
+                                                                                    "AE2021",
+                                                                                    "AE2022",
+                                                                                    "AE2023",
+                                                                                    "AE2024"
+                                                                                ],
+                                                             "open_mode":  "target_bound",
+                                                             "recipes":  [
+                                                                             "minimal-light-casts-shadows",
+                                                                             "minimal-light-color",
+                                                                             "minimal-light-cone-angle",
+                                                                             "minimal-light-cone-feather",
+                                                                             "minimal-light-falloff-distance",
+                                                                             "minimal-light-falloff-start",
+                                                                             "minimal-light-falloff-type",
+                                                                             "minimal-light-intensity",
+                                                                             "minimal-light-kind",
+                                                                             "minimal-light-layer",
+                                                                             "minimal-light-shadow-darkness",
+                                                                             "minimal-light-shadow-diffusion",
+                                                                             "minimal-light-source"
+                                                                         ],
+                                                             "scope":  "non_representative_recipes",
+                                                             "totals":  {
+                                                                            "blocked":  0,
+                                                                            "failed":  0,
+                                                                            "pass":  52,
+                                                                            "skipped":  0,
+                                                                            "total":  52
+                                                                        }
+                                                         },
+                         "host_open_representatives":  [
+                                                           "minimal-light-object-profile"
+                                                       ],
+                         "host_open_status":  "OPEN-ALL-HOSTS representative plus direct_endpoint_hosts_pass for non-representative recipes; AE2021-AE2024 inferred_by_endpoint",
+                         "id":  "light",
+                         "ledger":  "tmp/migration_matrix_light_all_6x6/ledger.md",
+                         "recipe_count":  14,
+                         "recipe_pattern":  "minimal-light-*",
+                         "recipes":  [
+                                         "minimal-light-casts-shadows",
+                                         "minimal-light-color",
+                                         "minimal-light-cone-angle",
+                                         "minimal-light-cone-feather",
+                                         "minimal-light-falloff-distance",
+                                         "minimal-light-falloff-start",
+                                         "minimal-light-falloff-type",
+                                         "minimal-light-intensity",
+                                         "minimal-light-kind",
+                                         "minimal-light-layer",
+                                         "minimal-light-object-profile",
+                                         "minimal-light-shadow-darkness",
+                                         "minimal-light-shadow-diffusion",
+                                         "minimal-light-source"
+                                     ],
+                         "scope":  "all 14 current light recipes",
+                         "totals":  {
+                                        "blocked":  0,
+                                        "failed":  0,
+                                        "pass":  504,
+                                        "skipped":  0,
+                                        "total":  504
+                                    },
+                         "writer_coverage":  "AE2020-AE2025 sources into AE2020-AE2025 targets",
+                         "writer_status":  "PD-6x6"
+                     },
+                     {
+                         "artifact":  "tmp/migration_matrix_layer_all_6x6/matrix.json",
+                         "boundary":  {
+                                          "blocked_recipe_ids":  [
+                                                                     "minimal-layer-explicit-matte"
+                                                                 ],
+                                          "details":  [
+                                                          {
+                                                              "blocked":  5,
+                                                              "pass":  1,
+                                                              "reason":  "AE2025-only explicit matte source contract; lower sources skipped, AE2025 downgrades blocked",
+                                                              "recipe":  "minimal-layer-explicit-matte",
+                                                              "skipped":  30
+                                                          }
+                                                      ],
+                                          "passing_recipe_count":  15,
+                                          "status":  "known_matte_contract_boundary"
+                                      },
+                         "domain":  "layer",
+                         "host_open_endpoint_evidence":  {
+                                                             "chunks":  [
+                                                                            {
+                                                                                "artifact":  "tmp/host_open_gaps/layer-all-family/chunk-1/matrix.json",
+                                                                                "id":  "chunk-1",
+                                                                                "ledger":  "tmp/host_open_gaps/layer-all-family/chunk-1/ledger.md",
+                                                                                "totals":  {
+                                                                                               "blocked":  0,
+                                                                                               "failed":  0,
+                                                                                               "pass":  24,
+                                                                                               "skipped":  0,
+                                                                                               "total":  24
+                                                                                           }
+                                                                            },
+                                                                            {
+                                                                                "artifact":  "tmp/host_open_gaps/layer-all-family/chunk-2/matrix.json",
+                                                                                "id":  "chunk-2",
+                                                                                "ledger":  "tmp/host_open_gaps/layer-all-family/chunk-2/ledger.md",
+                                                                                "totals":  {
+                                                                                               "blocked":  0,
+                                                                                               "failed":  0,
+                                                                                               "pass":  24,
+                                                                                               "skipped":  0,
+                                                                                               "total":  24
+                                                                                           }
+                                                                            },
+                                                                            {
+                                                                                "artifact":  "tmp/host_open_gaps/layer-all-family/chunk-3/matrix.json",
+                                                                                "id":  "chunk-3",
+                                                                                "ledger":  "tmp/host_open_gaps/layer-all-family/chunk-3/ledger.md",
+                                                                                "totals":  {
+                                                                                               "blocked":  0,
+                                                                                               "failed":  0,
+                                                                                               "pass":  8,
+                                                                                               "skipped":  0,
+                                                                                               "total":  8
+                                                                                           }
+                                                                            },
+                                                                            {
+                                                                                "artifact":  "tmp/host_open_gaps/layer-all-family/chunk-4/matrix.json",
+                                                                                "id":  "chunk-4",
+                                                                                "ledger":  "tmp/host_open_gaps/layer-all-family/chunk-4/ledger.md",
+                                                                                "totals":  {
+                                                                                               "blocked":  0,
+                                                                                               "failed":  0,
+                                                                                               "pass":  4,
+                                                                                               "skipped":  0,
+                                                                                               "total":  4
+                                                                                           }
+                                                                            }
+                                                                        ],
+                                                             "direct_hosts":  [
+                                                                                  "AE2020",
+                                                                                  "AE2025"
+                                                                              ],
+                                                             "excluded_known_boundary_recipes":  [
+                                                                                                     "minimal-layer-explicit-matte"
+                                                                                                 ],
+                                                             "inferred_hosts":  [
+                                                                                    "AE2021",
+                                                                                    "AE2022",
+                                                                                    "AE2023",
+                                                                                    "AE2024"
+                                                                                ],
+                                                             "open_mode":  "target_bound",
+                                                             "recipes":  [
+                                                                             "minimal-layer-advanced-switches",
+                                                                             "minimal-layer-auto-orient",
+                                                                             "minimal-layer-comment",
+                                                                             "minimal-layer-common-switches",
+                                                                             "minimal-layer-label",
+                                                                             "minimal-layer-mask",
+                                                                             "minimal-layer-motion-blur",
+                                                                             "minimal-layer-null-flag",
+                                                                             "minimal-layer-object-profile",
+                                                                             "minimal-layer-parent",
+                                                                             "minimal-layer-quality-blending",
+                                                                             "minimal-layer-shy",
+                                                                             "minimal-layer-source-ref",
+                                                                             "minimal-layer-timing",
+                                                                             "minimal-layer-track-matte"
+                                                                         ],
+                                                             "scope":  "non_boundary_recipes",
+                                                             "totals":  {
+                                                                            "blocked":  0,
+                                                                            "failed":  0,
+                                                                            "pass":  60,
+                                                                            "skipped":  0,
+                                                                            "total":  60
+                                                                        }
+                                                         },
+                         "host_open_status":  "direct_endpoint_hosts_pass for non-boundary recipes; explicit matte boundary excluded",
+                         "id":  "layer-all-family",
+                         "ledger":  "tmp/migration_matrix_layer_all_6x6/ledger.md",
+                         "recipe_count":  16,
+                         "recipe_pattern":  "minimal-layer-*",
+                         "recipes":  [
+                                         "minimal-layer-advanced-switches",
+                                         "minimal-layer-auto-orient",
+                                         "minimal-layer-comment",
+                                         "minimal-layer-common-switches",
+                                         "minimal-layer-explicit-matte",
+                                         "minimal-layer-label",
+                                         "minimal-layer-mask",
+                                         "minimal-layer-motion-blur",
+                                         "minimal-layer-null-flag",
+                                         "minimal-layer-object-profile",
+                                         "minimal-layer-parent",
+                                         "minimal-layer-quality-blending",
+                                         "minimal-layer-shy",
+                                         "minimal-layer-source-ref",
+                                         "minimal-layer-timing",
+                                         "minimal-layer-track-matte"
+                                     ],
+                         "scope":  "all 16 current layer recipes",
+                         "totals":  {
+                                        "blocked":  5,
+                                        "failed":  0,
+                                        "pass":  541,
+                                        "skipped":  30,
+                                        "total":  576
+                                    },
+                         "writer_coverage":  "AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 sources into AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 targets",
+                         "writer_status":  "boundary"
+                     },
+                     {
+                         "artifact":  "tmp/migration_matrix_shape_all_6x6/matrix.json",
+                         "domain":  "shape",
+                         "host_open_endpoint_evidence":  {
+                                                             "chunks":  [
+                                                                            {
+                                                                                "artifact":  "tmp/host_open_gaps/shape-all-family/chunk-1/matrix.json",
+                                                                                "id":  "chunk-1",
+                                                                                "ledger":  "tmp/host_open_gaps/shape-all-family/chunk-1/ledger.md",
+                                                                                "totals":  {
+                                                                                               "blocked":  0,
+                                                                                               "failed":  0,
+                                                                                               "pass":  24,
+                                                                                               "skipped":  0,
+                                                                                               "total":  24
+                                                                                           }
+                                                                            },
+                                                                            {
+                                                                                "artifact":  "tmp/host_open_gaps/shape-all-family/chunk-2/matrix.json",
+                                                                                "id":  "chunk-2",
+                                                                                "ledger":  "tmp/host_open_gaps/shape-all-family/chunk-2/ledger.md",
+                                                                                "totals":  {
+                                                                                               "blocked":  0,
+                                                                                               "failed":  0,
+                                                                                               "pass":  24,
+                                                                                               "skipped":  0,
+                                                                                               "total":  24
+                                                                                           }
+                                                                            },
+                                                                            {
+                                                                                "artifact":  "tmp/host_open_gaps/shape-all-family/chunk-3/matrix.json",
+                                                                                "id":  "chunk-3",
+                                                                                "ledger":  "tmp/host_open_gaps/shape-all-family/chunk-3/ledger.md",
+                                                                                "totals":  {
+                                                                                               "blocked":  0,
+                                                                                               "failed":  0,
+                                                                                               "pass":  24,
+                                                                                               "skipped":  0,
+                                                                                               "total":  24
+                                                                                           }
+                                                                            },
+                                                                            {
+                                                                                "artifact":  "tmp/host_open_gaps/shape-all-family/chunk-4/matrix.json",
+                                                                                "id":  "chunk-4",
+                                                                                "ledger":  "tmp/host_open_gaps/shape-all-family/chunk-4/ledger.md",
+                                                                                "totals":  {
+                                                                                               "blocked":  0,
+                                                                                               "failed":  0,
+                                                                                               "pass":  20,
+                                                                                               "skipped":  0,
+                                                                                               "total":  20
+                                                                                           }
+                                                                            }
+                                                                        ],
+                                                             "direct_hosts":  [
+                                                                                  "AE2020",
+                                                                                  "AE2025"
+                                                                              ],
+                                                             "excluded_all_host_representatives":  [
+                                                                                                       "minimal-shape-gradient-stroke",
+                                                                                                       "minimal-shape-gradient-stroke-alpha-stops",
+                                                                                                       "minimal-shape-gradient-stroke-highlight",
+                                                                                                       "minimal-shape-gradient-stroke-style"
+                                                                                                   ],
+                                                             "inferred_hosts":  [
+                                                                                    "AE2021",
+                                                                                    "AE2022",
+                                                                                    "AE2023",
+                                                                                    "AE2024"
+                                                                                ],
+                                                             "open_mode":  "target_bound",
+                                                             "recipes":  [
+                                                                             "minimal-shape-fill-blend-mode",
+                                                                             "minimal-shape-fill-composite-order",
+                                                                             "minimal-shape-fill-rule",
+                                                                             "minimal-shape-gradient-fill",
+                                                                             "minimal-shape-gradient-fill-alpha-stops",
+                                                                             "minimal-shape-gradient-fill-highlight",
+                                                                             "minimal-shape-merge-paths",
+                                                                             "minimal-shape-offset-paths",
+                                                                             "minimal-shape-polystar",
+                                                                             "minimal-shape-pucker-bloat",
+                                                                             "minimal-shape-rect-fill-default-transform",
+                                                                             "minimal-shape-repeater",
+                                                                             "minimal-shape-round-corners",
+                                                                             "minimal-shape-stroke-composite-order",
+                                                                             "minimal-shape-stroke-dashes",
+                                                                             "minimal-shape-stroke-style",
+                                                                             "minimal-shape-stroke-taper",
+                                                                             "minimal-shape-stroke-wave",
+                                                                             "minimal-shape-trim",
+                                                                             "minimal-shape-twist",
+                                                                             "minimal-shape-wiggle-paths",
+                                                                             "minimal-shape-wiggle-transform",
+                                                                             "minimal-shape-zigzag"
+                                                                         ],
+                                                             "scope":  "non_representative_recipes",
+                                                             "totals":  {
+                                                                            "blocked":  0,
+                                                                            "failed":  0,
+                                                                            "pass":  92,
+                                                                            "skipped":  0,
+                                                                            "total":  92
+                                                                        }
+                                                         },
+                         "host_open_representatives":  [
+                                                           "minimal-shape-gradient-stroke",
+                                                           "minimal-shape-gradient-stroke-alpha-stops",
+                                                           "minimal-shape-gradient-stroke-highlight",
+                                                           "minimal-shape-gradient-stroke-style"
+                                                       ],
+                         "host_open_status":  "OPEN-ALL-HOSTS for gradient-stroke variants; direct_endpoint_hosts_pass for remaining shape recipes",
+                         "id":  "shape-all-family",
+                         "ledger":  "tmp/migration_matrix_shape_all_6x6/ledger.md",
+                         "recipe_count":  27,
+                         "recipes":  [
+                                         "minimal-shape-fill-blend-mode",
+                                         "minimal-shape-fill-composite-order",
+                                         "minimal-shape-fill-rule",
+                                         "minimal-shape-gradient-fill",
+                                         "minimal-shape-gradient-fill-alpha-stops",
+                                         "minimal-shape-gradient-fill-highlight",
+                                         "minimal-shape-gradient-stroke",
+                                         "minimal-shape-gradient-stroke-alpha-stops",
+                                         "minimal-shape-gradient-stroke-highlight",
+                                         "minimal-shape-gradient-stroke-style",
+                                         "minimal-shape-merge-paths",
+                                         "minimal-shape-offset-paths",
+                                         "minimal-shape-polystar",
+                                         "minimal-shape-pucker-bloat",
+                                         "minimal-shape-rect-fill-default-transform",
+                                         "minimal-shape-repeater",
+                                         "minimal-shape-round-corners",
+                                         "minimal-shape-stroke-composite-order",
+                                         "minimal-shape-stroke-dashes",
+                                         "minimal-shape-stroke-style",
+                                         "minimal-shape-stroke-taper",
+                                         "minimal-shape-stroke-wave",
+                                         "minimal-shape-trim",
+                                         "minimal-shape-twist",
+                                         "minimal-shape-wiggle-paths",
+                                         "minimal-shape-wiggle-transform",
+                                         "minimal-shape-zigzag"
+                                     ],
+                         "scope":  "27 established shape recipes before focused post-ledger additions",
+                         "totals":  {
+                                        "blocked":  0,
+                                        "failed":  0,
+                                        "pass":  972,
+                                        "skipped":  0,
+                                        "total":  972
+                                    },
+                         "writer_coverage":  "AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 sources into AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 targets",
+                         "writer_status":  "PD-6x6"
+                     },
+                     {
+                         "artifact":  "tmp/migration_matrix_shape_ellipse_fill_all_6x6/matrix.json",
+                         "domain":  "shape",
+                         "host_open_endpoint_evidence":  {
+                                                             "artifact":  "tmp/host_open_gaps/shape-ellipse-fill/chunk-1/matrix.json",
+                                                             "direct_hosts":  [
+                                                                                  "AE2020",
+                                                                                  "AE2025"
+                                                                              ],
+                                                             "inferred_hosts":  [
+                                                                                    "AE2021",
+                                                                                    "AE2022",
+                                                                                    "AE2023",
+                                                                                    "AE2024"
+                                                                                ],
+                                                             "ledger":  "tmp/host_open_gaps/shape-ellipse-fill/chunk-1/ledger.md",
+                                                             "open_mode":  "target_bound",
+                                                             "recipes":  [
+                                                                             "minimal-shape-ellipse-fill"
+                                                                         ],
+                                                             "totals":  {
+                                                                            "blocked":  0,
+                                                                            "failed":  0,
+                                                                            "pass":  4,
+                                                                            "skipped":  0,
+                                                                            "total":  4
+                                                                        }
+                                                         },
+                         "host_open_status":  "direct_endpoint_hosts_pass; AE2021-AE2024 inferred_by_endpoint",
+                         "id":  "shape-ellipse-fill",
+                         "ledger":  "tmp/migration_matrix_shape_ellipse_fill_all_6x6/ledger.md",
+                         "recipe_count":  1,
+                         "recipes":  [
+                                         "minimal-shape-ellipse-fill"
+                                     ],
+                         "scope":  "ellipse primitive size and position with fill materialization",
+                         "totals":  {
+                                        "blocked":  0,
+                                        "failed":  0,
+                                        "pass":  36,
+                                        "skipped":  0,
+                                        "total":  36
+                                    },
+                         "writer_coverage":  "AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 sources into AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 targets",
+                         "writer_status":  "PD-6x6"
+                     },
+                     {
+                         "artifact":  "tmp/migration_matrix_uncovered_default_mogrt_all_6x6/matrix.json",
+                         "domain":  "mixed",
+                         "host_open_endpoint_evidence":  {
+                                                             "chunks":  [
+                                                                            {
+                                                                                "artifact":  "tmp/host_open_gaps/default-and-mogrt-smoke/chunk-1/matrix.json",
+                                                                                "id":  "chunk-1",
+                                                                                "ledger":  "tmp/host_open_gaps/default-and-mogrt-smoke/chunk-1/ledger.md",
+                                                                                "totals":  {
+                                                                                               "blocked":  0,
+                                                                                               "failed":  0,
+                                                                                               "pass":  24,
+                                                                                               "skipped":  0,
+                                                                                               "total":  24
+                                                                                           }
+                                                                            },
+                                                                            {
+                                                                                "artifact":  "tmp/host_open_gaps/default-and-mogrt-smoke/chunk-2/matrix.json",
+                                                                                "id":  "chunk-2",
+                                                                                "ledger":  "tmp/host_open_gaps/default-and-mogrt-smoke/chunk-2/ledger.md",
+                                                                                "totals":  {
+                                                                                               "blocked":  0,
+                                                                                               "failed":  0,
+                                                                                               "pass":  20,
+                                                                                               "skipped":  0,
+                                                                                               "total":  20
+                                                                                           }
+                                                                            }
+                                                                        ],
+                                                             "direct_hosts":  [
+                                                                                  "AE2020",
+                                                                                  "AE2025"
+                                                                              ],
+                                                             "inferred_hosts":  [
+                                                                                    "AE2021",
+                                                                                    "AE2022",
+                                                                                    "AE2023",
+                                                                                    "AE2024"
+                                                                                ],
+                                                             "open_mode":  "target_bound",
+                                                             "recipes":  [
+                                                                             "minimal-default-adjustment-layer",
+                                                                             "minimal-default-camera-layer",
+                                                                             "minimal-default-light-layer",
+                                                                             "minimal-default-null-layer",
+                                                                             "minimal-default-precomp-layer",
+                                                                             "minimal-default-shape-layer",
+                                                                             "minimal-essential-graphics-checkbox-controller",
+                                                                             "minimal-essential-graphics-color-controller",
+                                                                             "minimal-essential-graphics-controller",
+                                                                             "minimal-motion-graphics-template-name",
+                                                                             "minimal-null-layer"
+                                                                         ],
+                                                             "totals":  {
+                                                                            "blocked":  0,
+                                                                            "failed":  0,
+                                                                            "pass":  44,
+                                                                            "skipped":  0,
+                                                                            "total":  44
+                                                                        }
+                                                         },
+                         "host_open_status":  "direct_endpoint_hosts_pass; AE2021-AE2024 inferred_by_endpoint",
+                         "id":  "default-and-mogrt-smoke",
+                         "ledger":  "tmp/migration_matrix_uncovered_default_mogrt_all_6x6/ledger.md",
+                         "recipes":  [
+                                         "minimal-default-adjustment-layer",
+                                         "minimal-default-camera-layer",
+                                         "minimal-default-light-layer",
+                                         "minimal-default-null-layer",
+                                         "minimal-default-precomp-layer",
+                                         "minimal-default-shape-layer",
+                                         "minimal-essential-graphics-checkbox-controller",
+                                         "minimal-essential-graphics-color-controller",
+                                         "minimal-essential-graphics-controller",
+                                         "minimal-motion-graphics-template-name",
+                                         "minimal-null-layer"
+                                     ],
+                         "scope":  "current recipes not owned by a narrower family matrix: default layer smoke, null parent smoke, Essential Graphics controllers, and motion graphics template name",
+                         "totals":  {
+                                        "blocked":  0,
+                                        "failed":  0,
+                                        "pass":  396,
+                                        "skipped":  0,
+                                        "total":  396
+                                    },
+                         "writer_coverage":  "AE2020-AE2025 sources into AE2020-AE2025 targets",
+                         "writer_status":  "PD-6x6"
+                     },
+                     {
+                         "artifact":  "tmp/migration_matrix_essential_graphics_controllers_all_6x6/matrix.json",
+                         "domain":  "essential_graphics",
+                         "host_open_endpoint_evidence":  {
+                                                             "artifact":  "tmp/host_open_gaps/essential-graphics-controllers/chunk-1/matrix.json",
+                                                             "direct_hosts":  [
+                                                                                  "AE2020",
+                                                                                  "AE2025"
+                                                                              ],
+                                                             "inferred_hosts":  [
+                                                                                    "AE2021",
+                                                                                    "AE2022",
+                                                                                    "AE2023",
+                                                                                    "AE2024"
+                                                                                ],
+                                                             "ledger":  "tmp/host_open_gaps/essential-graphics-controllers/chunk-1/ledger.md",
+                                                             "open_mode":  "target_bound",
+                                                             "recipes":  [
+                                                                             "minimal-essential-graphics-checkbox-controller",
+                                                                             "minimal-essential-graphics-color-controller",
+                                                                             "minimal-essential-graphics-controller",
+                                                                             "minimal-essential-graphics-point-controller"
+                                                                         ],
+                                                             "totals":  {
+                                                                            "blocked":  0,
+                                                                            "failed":  0,
+                                                                            "pass":  16,
+                                                                            "skipped":  0,
+                                                                            "total":  16
+                                                                        }
+                                                         },
+                         "host_open_status":  "direct_endpoint_hosts_pass; AE2021-AE2024 inferred_by_endpoint",
+                         "id":  "essential-graphics-controllers",
+                         "ledger":  "tmp/migration_matrix_essential_graphics_controllers_all_6x6/ledger.md",
+                         "recipe_count":  4,
+                         "recipes":  [
+                                         "minimal-essential-graphics-checkbox-controller",
+                                         "minimal-essential-graphics-color-controller",
+                                         "minimal-essential-graphics-controller",
+                                         "minimal-essential-graphics-point-controller"
+                                     ],
+                         "scope":  "Essential Graphics controller exposure for supported effect parameter control types",
+                         "totals":  {
+                                        "blocked":  0,
+                                        "failed":  0,
+                                        "pass":  144,
+                                        "skipped":  0,
+                                        "total":  144
+                                    },
+                         "writer_coverage":  "AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 sources into AE2020,AE2021,AE2022,AE2023,AE2024,AE2025 targets",
+                         "writer_status":  "PD-6x6"
+                     }
+                 ],
+    "generated_at":  "2026-07-03",
+    "host_open_axis":  {
+                           "hosts":  [
+                                         "AE2020",
+                                         "AE2021",
+                                         "AE2022",
+                                         "AE2023",
+                                         "AE2024",
+                                         "AE2025"
+                                     ],
+                           "note":  "Host-open evidence is tracked separately from writer source/target profile-diff evidence."
+                       },
+    "host_open_policy":  {
+                             "available_flags":  [
+                                                     "-ae-open",
+                                                     "-ae-versions",
+                                                     "-max-ae-open-cases"
+                                                 ],
+                             "broad_fanout_status":  "optional_policy_escalation",
+                             "default_strategy":  "representative_host_open_by_capability",
+                             "endpoint_inference":  {
+                                                        "direct_hosts":  [
+                                                                             "AE2020",
+                                                                             "AE2025"
+                                                                         ],
+                                                        "enabled":  true,
+                                                        "inferred_hosts":  [
+                                                                               "AE2021",
+                                                                               "AE2022",
+                                                                               "AE2023",
+                                                                               "AE2024"
+                                                                           ],
+                                                        "label":  "inferred_by_endpoint",
+                                                        "limits":  "Do not infer across known source-contract boundaries, version-gated fixture features, or any capability with a direct host-open failure.",
+                                                        "open_mode":  "target_bound",
+                                                        "rule":  "If the same capability passes target-bound direct host-open on AE2020 targets opened by AE2020 and AE2025 targets opened by AE2025, intermediate hosts may be marked inferred_by_endpoint, not direct_verified."
+                                                    },
+                             "evidence_levels":  [
+                                                     "direct_all_hosts",
+                                                     "direct_endpoint_hosts",
+                                                     "inferred_by_endpoint",
+                                                     "representative_only",
+                                                     "representative_covered",
+                                                     "excluded_known_boundary",
+                                                     "recorded_status_only",
+                                                     "pending_per_capability"
+                                                 ],
+                             "matrix_command_status":  "no_upgrade_required"
+                         },
+    "open_items":  [
+
+                   ],
+    "purpose":  "Machine-readable total coverage ledger for versioned AEP migration validation.",
+    "recurring_gates":  [
+                            {
+                                "artifact":  "tmp/migration_matrix_verify/smoke_all/matrix.json",
+                                "command":  "go run ./cmd/aepregistry recurring-matrix -root . -out tmp/registry_recurring_matrix.json -out-root tmp/migration_matrix_verify",
+                                "id":  "full-w2020-no-ae-boundary",
+                                "ledger":  "tmp/migration_matrix_verify/smoke_all/ledger.md",
+                                "status":  "pass_with_source_contract_skips",
+                                "totals":  {
+                                               "blocked":  0,
+                                               "failed":  0,
+                                               "pass":  900,
+                                               "skipped":  6,
+                                               "total":  906
+                                           },
+                                "writer_coverage":  {
+                                                        "source_writers":  [
+                                                                               "AE2020"
+                                                                           ],
+                                                        "target_writers":  [
+                                                                               "AE2020",
+                                                                               "AE2021",
+                                                                               "AE2022",
+                                                                               "AE2023",
+                                                                               "AE2024",
+                                                                               "AE2025"
+                                                                           ]
+                                                    }
+                            },
+                            {
+                                "artifact":  "tmp/migration_matrix_verify/explicit_matte_ae2025/matrix.json",
+                                "command":  "go run ./cmd/aepregistry recurring-matrix -root . -out tmp/registry_recurring_matrix.json -out-root tmp/migration_matrix_verify",
+                                "id":  "explicit-matte-ae2025-contract",
+                                "ledger":  "tmp/migration_matrix_verify/explicit_matte_ae2025/ledger.md",
+                                "status":  "pass",
+                                "totals":  {
+                                               "blocked":  0,
+                                               "failed":  0,
+                                               "pass":  1,
+                                               "skipped":  0,
+                                               "total":  1
+                                           },
+                                "writer_coverage":  {
+                                                        "source_writers":  [
+                                                                               "AE2025"
+                                                                           ],
+                                                        "target_writers":  [
+                                                                               "AE2025"
+                                                                           ]
+                                                    }
+                            }
+                        ],
+    "schema_version":  1,
+    "writer_axes":  {
+                        "source_writers":  [
+                                               "AE2020",
+                                               "AE2021",
+                                               "AE2022",
+                                               "AE2023",
+                                               "AE2024",
+                                               "AE2025"
+                                           ],
+                        "target_writers":  [
+                                               "AE2020",
+                                               "AE2021",
+                                               "AE2022",
+                                               "AE2023",
+                                               "AE2024",
+                                               "AE2025"
+                                           ]
+                    }
+}

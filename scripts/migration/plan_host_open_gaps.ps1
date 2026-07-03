@@ -1,5 +1,5 @@
 param(
-  [string]$CoveragePath = "flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json",
+  [string]$CoveragePath = "registry/versioned_aep_migration_coverage.json",
   [string]$Out = "tmp/host_open_gap_audit.json",
   [string]$AERoot = "",
   [int]$MaxAEOpenCases = 24

@@ -53,8 +53,8 @@ func CheckRecurringMatrixGates(root, outRoot string) (RecurringMatrixReport, err
 		OutRoot:       outRoot,
 	}
 	report.checkMatrix(root, "full-w2020-no-ae-matrix", pathJoinSlash(outRoot, "smoke_all", "matrix.json"), CoverageTotals{
-		Total:   858,
-		Pass:    852,
+		Total:   906,
+		Pass:    900,
 		Blocked: 0,
 		Failed:  0,
 		Skipped: 6,

@@ -215,7 +215,18 @@ func TestOwnershipRepositoryTreatsRegisteredGeneratedMatrixRootAsOwnedUnit(t *te
 	writeJSON(t, root, "registry/evidence.json", map[string]any{
 		"schema_version": 1,
 		"evidence_sets": []map[string]any{
-			{"id": "matrix.text", "class": "generated_evidence", "artifact_path": "tmp/migration_matrix_text/matrix.json", "required": true, "workflows": []string{"generate"}},
+			{
+				"id":            "matrix.text",
+				"class":         "generated_evidence",
+				"artifact_path": "tmp/migration_matrix_text/matrix.json",
+				"required":      true,
+				"workflows":     []string{"generate"},
+				"producer": map[string]any{
+					"category": "version_matrix",
+					"command":  "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/text-basic.json -out tmp/migration_matrix_text",
+					"outputs":  []string{"tmp/migration_matrix_text/matrix.json"},
+				},
+			},
 		},
 	})
 

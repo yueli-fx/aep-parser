@@ -20,25 +20,27 @@ type GeneratedCleanupReport struct {
 }
 
 type GeneratedCleanupSummary struct {
-	Locations                   int                    `json:"locations"`
-	Groups                      int                    `json:"groups"`
-	Files                       int                    `json:"files"`
-	Bytes                       int64                  `json:"bytes"`
-	ReferencedFiles             int                    `json:"referenced_files"`
-	UnreferencedFiles           int                    `json:"unreferenced_files"`
-	CleanupCandidateFiles       int                    `json:"cleanup_candidate_files"`
-	DirectCleanupCandidateFiles int                    `json:"direct_cleanup_candidate_files"`
-	ReviewPrunableFiles         int                    `json:"review_prunable_files"`
-	RetainRegisteredFiles       int                    `json:"retain_registered_files"`
-	StateReferencedFiles        int                    `json:"state_referenced_files"`
-	MixedGroups                 int                    `json:"mixed_groups"`
-	StateReferencedGroups       int                    `json:"state_referenced_groups"`
-	RegistryReportGroups        int                    `json:"registry_report_groups"`
-	RegistryReportFiles         int                    `json:"registry_report_files"`
-	UnknownProducerGroups       int                    `json:"unknown_producer_groups"`
-	SampleLimit                 int                    `json:"sample_limit"`
-	ActionBuckets               []GeneratedGroupBucket `json:"action_buckets,omitempty"`
-	ProducerBuckets             []GeneratedGroupBucket `json:"producer_buckets,omitempty"`
+	Locations                     int                    `json:"locations"`
+	Groups                        int                    `json:"groups"`
+	Files                         int                    `json:"files"`
+	Bytes                         int64                  `json:"bytes"`
+	ReferencedFiles               int                    `json:"referenced_files"`
+	UnreferencedFiles             int                    `json:"unreferenced_files"`
+	CleanupCandidateFiles         int                    `json:"cleanup_candidate_files"`
+	DirectCleanupCandidateFiles   int                    `json:"direct_cleanup_candidate_files"`
+	ReviewPrunableFiles           int                    `json:"review_prunable_files"`
+	RetainRegisteredFiles         int                    `json:"retain_registered_files"`
+	StateReferencedFiles          int                    `json:"state_referenced_files"`
+	MixedGroups                   int                    `json:"mixed_groups"`
+	StateReferencedGroups         int                    `json:"state_referenced_groups"`
+	RegistryReportGroups          int                    `json:"registry_report_groups"`
+	RegistryReportFiles           int                    `json:"registry_report_files"`
+	UnknownProducerGroups         int                    `json:"unknown_producer_groups"`
+	UnknownRetainedProducerGroups int                    `json:"unknown_retained_producer_groups"`
+	UnknownRetainedProducerFiles  int                    `json:"unknown_retained_producer_files"`
+	SampleLimit                   int                    `json:"sample_limit"`
+	ActionBuckets                 []GeneratedGroupBucket `json:"action_buckets,omitempty"`
+	ProducerBuckets               []GeneratedGroupBucket `json:"producer_buckets,omitempty"`
 }
 
 type GeneratedCleanupLocation struct {
@@ -144,6 +146,10 @@ func GeneratedCleanup(root string, reg Registry, opts GeneratedCleanupOptions) (
 			}
 			if group.ProducerCategory == "unknown_generated" {
 				report.Summary.UnknownProducerGroups++
+				if group.ReferencedFiles > 0 {
+					report.Summary.UnknownRetainedProducerGroups++
+					report.Summary.UnknownRetainedProducerFiles += group.ReferencedFiles
+				}
 			}
 			addGeneratedBucket(actionBuckets, group.Action, group.Files)
 			addGeneratedBucket(producerBuckets, group.ProducerCategory, group.Files)
@@ -158,7 +164,7 @@ func isGeneratedCleanupLocation(location Location) bool {
 	return !location.Tracked && location.Class == "generated_evidence"
 }
 
-func generatedCleanupLocation(root string, location Location, refs ownershipRefs, stateRefs generatedStateRefs, evidence map[string][]string, sampleLimit int) (GeneratedCleanupLocation, error) {
+func generatedCleanupLocation(root string, location Location, refs ownershipRefs, stateRefs generatedStateRefs, evidence map[string]generatedEvidenceGroup, sampleLimit int) (GeneratedCleanupLocation, error) {
 	entry := GeneratedCleanupLocation{
 		ID:        location.ID,
 		Path:      location.Path,
@@ -181,13 +187,20 @@ func generatedCleanupLocation(root string, location Location, refs ownershipRefs
 		group := groups[groupName]
 		if group == nil {
 			category, workflows := inferGeneratedProducer(location.ID, groupName)
+			evidenceGroup := evidence[generatedEvidenceGroupKey(location.ID, groupName)]
+			if category == "unknown_generated" && len(evidenceGroup.ProducerCategories) == 1 {
+				category = evidenceGroup.ProducerCategories[0]
+			}
+			if len(workflows) == 0 && len(evidenceGroup.ProducerWorkflows) > 0 {
+				workflows = append([]string(nil), evidenceGroup.ProducerWorkflows...)
+			}
 			group = &GeneratedCleanupGroup{
 				LocationID:        location.ID,
 				Group:             groupName,
 				PathPrefix:        generatedGroupPathPrefix(location.Path, clean, groupName),
 				ProducerCategory:  category,
 				ProducerWorkflows: workflows,
-				EvidenceIDs:       append([]string(nil), evidence[generatedEvidenceGroupKey(location.ID, groupName)]...),
+				EvidenceIDs:       append([]string(nil), evidenceGroup.IDs...),
 			}
 			groups[groupName] = group
 		}
@@ -245,8 +258,14 @@ func generatedCleanupLocation(root string, location Location, refs ownershipRefs
 	return entry, nil
 }
 
-func generatedEvidenceByGroup(reg Registry) map[string][]string {
-	out := map[string][]string{}
+type generatedEvidenceGroup struct {
+	IDs                []string
+	ProducerCategories []string
+	ProducerWorkflows  []string
+}
+
+func generatedEvidenceByGroup(reg Registry) map[string]generatedEvidenceGroup {
+	out := map[string]generatedEvidenceGroup{}
 	for _, evidence := range reg.EvidenceSets {
 		for _, location := range reg.Locations {
 			if !isGeneratedCleanupLocation(location) {
@@ -259,11 +278,21 @@ func generatedEvidenceByGroup(reg Registry) map[string][]string {
 			}
 			group := groupName(path, location.Path)
 			key := generatedEvidenceGroupKey(location.ID, group)
-			out[key] = append(out[key], evidence.ID)
+			meta := out[key]
+			meta.IDs = append(meta.IDs, evidence.ID)
+			if evidence.Producer.Category != "" {
+				meta.ProducerCategories = append(meta.ProducerCategories, evidence.Producer.Category)
+			}
+			meta.ProducerWorkflows = append(meta.ProducerWorkflows, evidence.Workflows...)
+			out[key] = meta
 		}
 	}
 	for key := range out {
-		sort.Strings(out[key])
+		meta := out[key]
+		meta.IDs = sortedKeys(stringSet(meta.IDs))
+		meta.ProducerCategories = sortedKeys(stringSet(meta.ProducerCategories))
+		meta.ProducerWorkflows = sortedKeys(stringSet(meta.ProducerWorkflows))
+		out[key] = meta
 	}
 	return out
 }

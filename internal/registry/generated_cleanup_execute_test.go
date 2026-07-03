@@ -146,7 +146,11 @@ func TestExecuteGeneratedCleanupPrunesReviewSiblingsOnlyWhenExplicit(t *testing.
 	}
 }
 
-func TestExecuteGeneratedCleanupDoesNotPruneWildcardReviewTargets(t *testing.T) {
+func TestExecuteGeneratedCleanupPrunesWildcardReviewFiles(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "tmp/registry_gate.json", "{}\n")
+	writeFile(t, root, "tmp/registry_current.json", "{}\n")
+	writeFile(t, root, "tmp/registry_dir/keep.txt", "dir\n")
 	report := GeneratedCleanupReport{
 		Locations: []GeneratedCleanupLocation{
 			{ID: "tmp_evidence", Path: "tmp", Groups: []GeneratedCleanupGroup{
@@ -165,10 +169,75 @@ func TestExecuteGeneratedCleanupDoesNotPruneWildcardReviewTargets(t *testing.T) 
 		},
 	}
 
-	exec := ExecuteGeneratedCleanup(t.TempDir(), report, GeneratedCleanupExecutionOptions{PruneReviewSiblings: true})
+	exec := ExecuteGeneratedCleanup(root, report, GeneratedCleanupExecutionOptions{
+		Apply:               true,
+		PruneReviewSiblings: true,
+		IncludeProducers:    []string{"registry_report"},
+	})
 	op := exec.Operations[0]
-	if op.Status != "skipped" || op.Reason != "not_cleanup_candidate" {
-		t.Fatalf("op = %+v, want wildcard review target skipped", op)
+	if op.Status != "deleted" || op.Files != 1 {
+		t.Fatalf("op = %+v, want wildcard review target to delete one unreferenced file", op)
+	}
+	if !testPathExists(root, "tmp/registry_gate.json") {
+		t.Fatalf("wildcard review prune removed preserve path")
+	}
+	if testPathExists(root, "tmp/registry_current.json") {
+		t.Fatalf("wildcard review prune kept unreferenced prefix file")
+	}
+	if !testPathExists(root, "tmp/registry_dir/keep.txt") {
+		t.Fatalf("wildcard review prune removed matching directory contents")
+	}
+}
+
+func TestExecuteGeneratedCleanupPrunesWildcardReviewFilesWithRelativeRoot(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "tmp/migration_coverage.md", "coverage\n")
+	writeFile(t, root, "tmp/migration_old.json", "{}\n")
+	report := GeneratedCleanupReport{
+		Locations: []GeneratedCleanupLocation{
+			{ID: "tmp_evidence", Path: "tmp", Groups: []GeneratedCleanupGroup{
+				{
+					LocationID:        "tmp_evidence",
+					Group:             "migration",
+					ProducerCategory:  "migration_report",
+					Action:            "review_state_referenced_generated",
+					CleanupOperation:  "preserve_paths_then_review_unreferenced_siblings",
+					CleanupTarget:     "tmp/migration*",
+					PreservePaths:     []string{"tmp/migration_coverage.md"},
+					UnreferencedFiles: 1,
+					Files:             2,
+				},
+			}},
+		},
+	}
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chdir(root); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		if err := os.Chdir(cwd); err != nil {
+			t.Fatalf("restore cwd: %v", err)
+		}
+	})
+
+	exec := ExecuteGeneratedCleanup(".", report, GeneratedCleanupExecutionOptions{
+		Apply:               true,
+		PruneReviewSiblings: true,
+		IncludeProducers:    []string{"migration_report"},
+	})
+	op := exec.Operations[0]
+	if op.Status != "deleted" {
+		t.Fatalf("op = %+v, want relative root wildcard prune to delete unreferenced file", op)
+	}
+	if !testPathExists(root, "tmp/migration_coverage.md") {
+		t.Fatalf("relative root wildcard prune removed preserve path")
+	}
+	if testPathExists(root, "tmp/migration_old.json") {
+		t.Fatalf("relative root wildcard prune kept unreferenced file")
 	}
 }
 
@@ -225,7 +294,18 @@ func writeGeneratedCleanupRegistry(t *testing.T, root string) {
 	writeJSON(t, root, "registry/evidence.json", map[string]any{
 		"schema_version": 1,
 		"evidence_sets": []map[string]any{
-			{"id": "matrix.text", "class": "generated_evidence", "artifact_path": "tmp/migration_matrix_text/matrix.json", "required": true, "workflows": []string{"migrate", "host_open"}},
+			{
+				"id":            "matrix.text",
+				"class":         "generated_evidence",
+				"artifact_path": "tmp/migration_matrix_text/matrix.json",
+				"required":      true,
+				"workflows":     []string{"migrate", "host_open"},
+				"producer": map[string]any{
+					"category": "version_matrix",
+					"command":  "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/text-basic.json -out tmp/migration_matrix_text",
+					"outputs":  []string{"tmp/migration_matrix_text/matrix.json"},
+				},
+			},
 		},
 	})
 }

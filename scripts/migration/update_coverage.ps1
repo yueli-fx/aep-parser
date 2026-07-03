@@ -5,7 +5,7 @@ param(
   [Parameter(Mandatory=$true)]
   [string]$MatrixPath,
 
-  [string]$CoveragePath = "flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json",
+  [string]$CoveragePath = "registry/versioned_aep_migration_coverage.json",
   [string]$Domain = "",
   [string]$Scope = "",
   [string]$WriterStatus = "",

@@ -34,7 +34,18 @@ func TestGeneratedCleanupClassifiesReferencedMixedAndUnreferencedGroups(t *testi
 	writeJSON(t, root, "registry/evidence.json", map[string]any{
 		"schema_version": 1,
 		"evidence_sets": []map[string]any{
-			{"id": "matrix.text", "class": "generated_evidence", "artifact_path": "tmp/migration_matrix_text/matrix.json", "required": true, "workflows": []string{"migrate", "host_open"}},
+			{
+				"id":            "matrix.text",
+				"class":         "generated_evidence",
+				"artifact_path": "tmp/migration_matrix_text/matrix.json",
+				"required":      true,
+				"workflows":     []string{"migrate", "host_open"},
+				"producer": map[string]any{
+					"category": "version_matrix",
+					"command":  "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/text-basic.json -out tmp/migration_matrix_text",
+					"outputs":  []string{"tmp/migration_matrix_text/matrix.json"},
+				},
+			},
 		},
 	})
 
@@ -178,6 +189,41 @@ func TestGeneratedCleanupSeparatesRegistryReportSelfNoise(t *testing.T) {
 	}
 	if group.UnreferencedFiles != 2 || group.StateReferencedFiles != 1 {
 		t.Fatalf("registry report refs = %+v, want two unreferenced report files and one state ref", group)
+	}
+}
+
+func TestGeneratedCleanupUsesEvidenceProducerForUnknownRetainedGroups(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "tmp/custom_probe/matrix.json", "{}\n")
+	writeValidRegistry(t, root, nil)
+	writeJSON(t, root, "registry/evidence.json", map[string]any{
+		"schema_version": 1,
+		"evidence_sets": []map[string]any{
+			{
+				"id":            "custom.matrix",
+				"class":         "generated_evidence",
+				"artifact_path": "tmp/custom_probe/matrix.json",
+				"required":      true,
+				"workflows":     []string{"migrate"},
+				"producer": map[string]any{
+					"category": "custom_probe",
+					"command":  "go run ./cmd/custom -out tmp/custom_probe",
+					"outputs":  []string{"tmp/custom_probe/matrix.json"},
+				},
+			},
+		},
+	})
+
+	report, err := GeneratedCleanupRepository(root, GeneratedCleanupOptions{SampleLimit: 2})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Summary.UnknownRetainedProducerGroups != 0 || report.Summary.UnknownRetainedProducerFiles != 0 {
+		t.Fatalf("unknown retained summary = %+v, want evidence producer metadata to classify retained group", report.Summary)
+	}
+	group := findGeneratedGroup(t, report, "tmp", "custom_probe")
+	if group.ProducerCategory != "custom_probe" || len(group.ProducerWorkflows) != 1 || group.ProducerWorkflows[0] != "migrate" {
+		t.Fatalf("producer metadata = %+v, want custom_probe/migrate", group)
 	}
 }
 

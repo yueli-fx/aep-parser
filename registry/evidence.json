@@ -5,7 +5,7 @@
     {
       "id": "migration.coverage.current",
       "class": "spec_registry",
-      "artifact_path": "flightdeck/work/versioned-aep-migration/versioned-aep-migration-coverage.json",
+      "artifact_path": "registry/versioned_aep_migration_coverage.json",
       "required": true,
       "workflows": [
         "migrate",
@@ -15,7 +15,7 @@
     {
       "id": "migration.current_state",
       "class": "spec_registry",
-      "artifact_path": "flightdeck/work/versioned-aep-migration/versioned-aep-migration-current.json",
+      "artifact_path": "registry/versioned_aep_migration_current.json",
       "required": true,
       "workflows": [
         "migrate",
@@ -30,7 +30,14 @@
       "workflows": [
         "migrate",
         "host_open"
-      ]
+      ],
+      "producer": {
+        "category": "version_matrix",
+        "command": "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/minimal-text-animator-*.json -out tmp/migration_matrix_text_animators_all_6x6",
+        "outputs": [
+          "tmp/migration_matrix_text_animators_all_6x6/matrix.json"
+        ]
+      }
     },
     {
       "id": "matrix.shape.all_6x6",
@@ -41,7 +48,14 @@
         "migrate",
         "host_open",
         "render_compare"
-      ]
+      ],
+      "producer": {
+        "category": "version_matrix",
+        "command": "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/minimal-shape-*.json -out tmp/migration_matrix_shape_all_6x6",
+        "outputs": [
+          "tmp/migration_matrix_shape_all_6x6/matrix.json"
+        ]
+      }
     },
     {
       "id": "matrix.shape_ellipse_fill.all_6x6",
@@ -51,7 +65,14 @@
       "workflows": [
         "migrate",
         "host_open"
-      ]
+      ],
+      "producer": {
+        "category": "version_matrix",
+        "command": "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/minimal-shape-ellipse-fill.json -out tmp/migration_matrix_shape_ellipse_fill_all_6x6",
+        "outputs": [
+          "tmp/migration_matrix_shape_ellipse_fill_all_6x6/matrix.json"
+        ]
+      }
     },
     {
       "id": "matrix.effect_param_keyframes",
@@ -61,7 +82,14 @@
       "workflows": [
         "migrate",
         "host_open"
-      ]
+      ],
+      "producer": {
+        "category": "version_matrix",
+        "command": "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/minimal-effect-param-keyframes.json -out tmp/migration_matrix_effect_param_keyframes",
+        "outputs": [
+          "tmp/migration_matrix_effect_param_keyframes/matrix.json"
+        ]
+      }
     },
     {
       "id": "matrix.effect_control_static_values.all_6x6",
@@ -70,7 +98,14 @@
       "required": true,
       "workflows": [
         "migrate"
-      ]
+      ],
+      "producer": {
+        "category": "version_matrix",
+        "command": "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/minimal-effect-control-static-values.json -out tmp/migration_matrix_effect_control_static_values_all_6x6",
+        "outputs": [
+          "tmp/migration_matrix_effect_control_static_values_all_6x6/matrix.json"
+        ]
+      }
     },
     {
       "id": "matrix.layer_matte",
@@ -80,7 +115,14 @@
       "workflows": [
         "migrate",
         "host_open"
-      ]
+      ],
+      "producer": {
+        "category": "version_matrix",
+        "command": "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/minimal-layer-track-matte.json -out tmp/migration_matrix_layer_matte",
+        "outputs": [
+          "tmp/migration_matrix_layer_matte/matrix.json"
+        ]
+      }
     },
     {
       "id": "matrix.explicit_matte.ae2025_contract",
@@ -90,7 +132,14 @@
       "workflows": [
         "migrate",
         "host_open"
-      ]
+      ],
+      "producer": {
+        "category": "version_matrix",
+        "command": "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/minimal-layer-explicit-matte.json -out tmp/migration_matrix_explicit_matte_ae2025",
+        "outputs": [
+          "tmp/migration_matrix_explicit_matte_ae2025/matrix.json"
+        ]
+      }
     },
     {
       "id": "host_open.text_animators.endpoint_chunk",
@@ -99,7 +148,14 @@
       "required": true,
       "workflows": [
         "host_open"
-      ]
+      ],
+      "producer": {
+        "category": "host_open_gap",
+        "command": "go run ./cmd/aepmigrate matrix -root . -recipes examples/recipes/minimal-text-animator-*.json -out tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-4 -ae-open -ae-root E:/adobe",
+        "outputs": [
+          "tmp/host_open_gaps/text-animators/non-representative-endpoint/chunk-4/matrix.json"
+        ]
+      }
     }
   ]
 }

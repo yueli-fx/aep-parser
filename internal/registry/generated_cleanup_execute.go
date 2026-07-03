@@ -159,8 +159,7 @@ func generatedCleanupExecutionOp(root string, locations []string, group Generate
 	reviewPrune := pruneReviewSiblings &&
 		group.CleanupOperation == "preserve_paths_then_review_unreferenced_siblings" &&
 		group.UnreferencedFiles > 0 &&
-		len(group.PreservePaths) > 0 &&
-		!strings.HasSuffix(group.CleanupTarget, "*")
+		len(group.PreservePaths) > 0
 	if len(include) > 0 && !include[group.ProducerCategory] {
 		op.Status = "skipped"
 		op.Reason = "producer_not_included"
@@ -259,6 +258,9 @@ func applyGeneratedCleanupOperation(root string, group GeneratedCleanupGroup) er
 		}
 		return nil
 	case "preserve_paths_then_review_unreferenced_siblings":
+		if strings.HasSuffix(group.CleanupTarget, "*") {
+			return applyGeneratedCleanupPreservePathPrefix(root, group)
+		}
 		return applyGeneratedCleanupPreservePaths(root, group)
 	default:
 		return fmt.Errorf("unsupported cleanup operation %q", group.CleanupOperation)
@@ -322,6 +324,54 @@ func applyGeneratedCleanupPreservePaths(root string, group GeneratedCleanupGroup
 			if err := os.Remove(dir); err != nil && !os.IsNotExist(err) {
 				return err
 			}
+		}
+	}
+	return nil
+}
+
+func applyGeneratedCleanupPreservePathPrefix(root string, group GeneratedCleanupGroup) error {
+	prefix := strings.TrimSuffix(group.CleanupTarget, "*")
+	if _, err := safeCleanupPath(root, prefix); err != nil {
+		return err
+	}
+	preserve := map[string]bool{}
+	for _, path := range group.PreservePaths {
+		clean := cleanRel(path)
+		if strings.HasPrefix(clean, cleanRel(prefix)) {
+			preserve[clean] = true
+			continue
+		}
+		return fmt.Errorf("preserve path %q is outside cleanup target %q", path, group.CleanupTarget)
+	}
+	rootAbs, err := filepath.Abs(root)
+	if err != nil {
+		return err
+	}
+	pattern := filepath.Join(rootAbs, filepath.FromSlash(group.CleanupTarget))
+	matches, err := filepath.Glob(pattern)
+	if err != nil {
+		return err
+	}
+	for _, match := range matches {
+		info, err := os.Stat(match)
+		if err != nil {
+			if os.IsNotExist(err) {
+				continue
+			}
+			return err
+		}
+		if info.IsDir() {
+			continue
+		}
+		rel, err := filepath.Rel(rootAbs, match)
+		if err != nil {
+			return err
+		}
+		if preserve[cleanRel(rel)] {
+			continue
+		}
+		if err := os.Remove(match); err != nil {
+			return err
 		}
 	}
 	return nil
