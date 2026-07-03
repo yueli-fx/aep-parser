@@ -3,6 +3,8 @@
 ## Start Here
 
 - Read `flightdeck/cockpit.md` for active work and next steps.
+- When exploring or editing a repository directory, read the nearest relevant
+  `README.md` first. Do not bulk-read every README at startup.
 - Do not bulk-read `flightdeck/knowledge/**`. Use
   `flightdeck/knowledge/INDEX.md`, then load only notes whose `READ WHEN`
   matches the task.
