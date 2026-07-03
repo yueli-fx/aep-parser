@@ -164,21 +164,21 @@ confidence: validated
 ```
 
 ### T8 particle-emit(粒子发射)
-发射大量小粒子(火星/雨滴/雪/火花)。
+发射大量小粒子(火星/雨滴/雪/火花/雨丝)。
 ```yaml
 id: particle-emit
 role: [particle]
 mechanism:
   - kind: effect
-    any_of: [CC Particle World]
+    any_of: [CC Particle World, tc Particular]
     signal: [{param: Birth Rate, direction: up}, {param: Velocity, direction: set}]
 reproducibility: {mechanism: cycore, requires_asset: none}
-proven_transfers: [fire]
+proven_transfers: [fire, rain]
 hypothesized_transfers: [rain, snow, transition]
 not_this: "噪声+阈值近似(弱替代,非真粒子)"
-evidence: [data/samples/ColorfulFireBall]
+evidence: [data/samples/ColorfulFireBall, data/samples/motionbox/generative/e8vfb9qjb9n0]
 confidence: observed
-# ⚠Cycore 自带(人人能渲)但非 native、未 gate;plugin-free 无原生粒子替代。
+# ⚠Cycore 自带(人人能渲)但非 native、未 gate;Trapcode Particular 是 rain 样本的精确路线,渲染需插件。
 ```
 
 ### T9 final-grade(收尾调色)
@@ -367,6 +367,31 @@ confidence: observed
 # ⚠ GlitchText 招牌跳变靠第三方 Videocopilot Twitch;纯 native 用 Posterize Time + Displacement Map(块状噪声驱动)近似。
 ```
 
+### T19 shape-repeater-rain-streaks(形状重复器雨线)⭐rain 催生
+用细长 shape path/细椭圆 + Repeater 做成成组下落雨线；可选 Trim Paths 做线段显隐/水花 arc。相比粒子插件,这是更可控的纯 native 雨丝骨架。
+```yaml
+id: shape-repeater-rain-streaks
+role: [form, motion]
+mechanism:
+  - kind: shape_operator
+    any_of: [ADBE Vector Shape - Group, ADBE Vector Graphic - Fill, ADBE Vector Repeater, ADBE Vector Filter - Trim, ADBE Vector Stroke]
+    signal:
+      - {param: Repeater Copies, direction: up}
+      - {param: Layer Position, direction: animated}
+      - {param: Path aspect, direction: tall_thin}
+      - {param: Trim Start/End, direction: optional}
+reproducibility: {mechanism: native, requires_asset: none}
+proven_transfers: [rain]
+hypothesized_transfers: [speed-lines, snow, hud, transition]
+not_this: "单个静态线段或粒子插件发射器;本条强调 shape path + repeater + 下落 keyframes 构成的可控雨丝骨架"
+evidence: [data/samples/motionbox/generative/e8vfb9qjb9n0, showcase/rain]
+confidence: validated
+# rain sample: `rain` comp 的 shape layers 同时出现 repeater copies/rotation、stroke width、trim start/end keyframes,
+# 且 `render` comp 继续用 ellipse/shape stacks 做水滴和场景装配。
+# showcase/rain: 纯 Go AE2020 native showcase 实渲通过;主体用细长填充 shape path + repeater + position keyframes,
+# 水花用 trim arcs。不是 Particular/Unmult reference exact clone。
+```
+
 ---
 
 ## 现象配方索引(技法的有序组合)
@@ -377,7 +402,7 @@ confidence: observed
 | 闪电(素材包) | 实证#2 Lightning Pack | ②素材+装配:footage-recolor + drop-shadow-as-glow + emissive-glow + mosaic-stylize + customizer-controller-rig。**电弧本体=外部素材** |
 | 闪电(程序化) | (待建,可行) | ①程序化:fractal-branch(ADBE Lightning 2) + emissive-glow + time-evolution。纯生成不靠素材 |
 | 风 | (待建) | noise-as-material + displacement-distortion(方向) + time-evolution + 运动模糊 |
-| 雨 | (待建) | particle-emit(条状) + time-evolution(下落) + 模糊 |
+| 雨 | `build-good-rain.md` | shape-repeater-rain-streaks + particle-emit(Particular 精确路线) + time-evolution(下落) + precomp-effect-pipeline + controller-rig + final-grade |
 | 转场 | (待建) | displacement-distortion/擦除 + time-evolution(时间扫过) |
 | glitch(纯 native·可复刻) | `build-good-glitch.md` | ①程序化:rgb-channel-split + displacement-distortion(块状噪声驱动) + scanlines-crt + temporal-glitch(Posterize Time) + emissive-glow。Booyah Glitch 全 native |
 | glitch(重度/datamosh) | 实证 GlitchText | 招牌跳变=**Videocopilot Twitch**(third-party,**可经 embed-template 采样本支持**,渲染需装)+ PEDG/Colorama 等;native 部分=temporal-glitch + rgb-channel-split + displacement(纯 native 也能自成一路,见上行) |

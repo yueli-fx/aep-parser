@@ -9,7 +9,9 @@ review and versioned migration take priority. Technique facts, portraits,
 corpus notes, and report specs now live in this package instead of the old
 monolithic AEP-understanding package.
 
-Current selected package `glitch-showcase-gate-v1` is implemented.
+Current selected package `rain-showcase-gate-v1` is implemented.
+`rain-reference-phenomenon-v1` is implemented.
+`glitch-showcase-gate-v1` is implemented.
 `glitch-reference-phenomenon-v1` is implemented.
 `expression-pseudo-behavior-boundary-v1` is implemented.
 `vector-pseudo-behavior-application-v1` is implemented.
@@ -25,14 +27,17 @@ machine-readable report artifacts.
 
 ## Next
 
-Recommended next package: another reference phenomenon package or a focused
-generator upgrade from the validated glitch recipe. Do not resume by selecting
-a single effect or field.
+Recommended next package: another reference phenomenon package, a richer rain
+generator upgrade from the native rain showcase, or a focused generator upgrade
+from the validated glitch recipe. Do not resume by selecting a single effect or
+field.
 
 ## Read now
 
 - `design.md` — pipeline, two-layer knowledge structure, sample findings, and next steps
 - `goal.md` — direct goal entry for the latest completed package and next package handoff
+- `rain-showcase-gate-v1.md` — spec for validating the rain recipe through a from-scratch native showcase
+- `rain-reference-phenomenon-v1.md` — spec for processing the Motionbox rain sample into JSON artifacts and a reusable recipe
 - `glitch-showcase-gate-v1.md` — spec for validating the glitch recipe through the from-scratch showcase
 - `glitch-reference-phenomenon-v1.md` — spec for processing Motionbox glitch samples into JSON artifacts and a reusable recipe
 - `expression-pseudo-behavior-boundary-v1.md` — spec for recording expression payloads as explicit deferred application facts
@@ -49,6 +54,7 @@ a single effect or field.
 - `technique-portrait-corpus-v1.md` — corpus notes and examples
 - `flightdeck/knowledge/techniques/understand-a-project.md` — current reusable checklist for processing each reference `.aep`
 - `flightdeck/knowledge/techniques/fx-techniques.md` — current technique library
+- `flightdeck/knowledge/techniques/build-good-rain.md` — rain phenomenon recipe distilled from Motionbox Rain Day
 - `flightdeck/knowledge/techniques/build-good-glitch.md` — glitch phenomenon recipe distilled from Booyah and GlitchText
 
 ## Read if
@@ -63,6 +69,13 @@ a single effect or field.
 ## Progress
 
 Done:
+- `rain-showcase-gate-v1` adds a plugin-free native rain showcase under
+  `flightdeck/showcase/rain`, with shape/repeater rain streaks, native mist,
+  Echo/Blur/Glow trail, AE2020 render output, and a TDD structure test.
+- `rain-reference-phenomenon-v1` adds Motionbox Rain Day reference artifacts
+  under `tmp/technique_reference_rain`, records the reusable rain recipe in
+  `flightdeck/knowledge/techniques/build-good-rain.md`, and links the rain
+  phenomenon plus `shape-repeater-rain-streaks` atom in `fx-techniques.md`.
 - The five-step internalization pipeline is defined.
 - Fire and lightning sample lessons are recorded.
 - The two element classes are recognized: procedural elements vs footage plus assembly.
@@ -107,9 +120,9 @@ Done:
 
 Current:
 - No active package is selected inside this topic. The latest completed package
-  regenerated the stock-AE glitch showcase, confirmed `analysis_ready` and no
-  third-party dependencies, rendered via AE2025 and AE2020, and recorded the
-  gate result in `tmp/technique_showcase_glitch/package_summary.json`.
+  regenerated the stock-AE rain showcase, confirmed no third-party dependencies,
+  rendered via AE2020, and recorded the package result in
+  `tmp/technique_showcase_rain/package_summary.json`.
 
 ## Open questions
 

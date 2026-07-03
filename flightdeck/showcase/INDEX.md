@@ -39,6 +39,7 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 | [3d-camera](3d-camera/INDEX.md) | 3D 图层 + 相机：Z 视差（同尺寸卡按深浅渲大小不同）+ Rotate Y 透视 tumble（梯形） | ✅ complete |
 | [procedural-fx](procedural-fx/INDEX.md) | 程序化火焰 v3（多层合成：黑底+3 火层 FractalNoise→Tritone→TurbulentDisplace+同心 mask 温度分区+Add 叠热芯+Glo2 Glow；技法 T3 additive-depth） | ✅ complete（用户真机验收过 2026-06-18；双版本 gate 绿、逐像素一致） |
 | [glitch](glitch/INDEX.md) | 纯 native glitch 技法门禁（RGB 色差 split + 噪声驱动位移撕裂 + 辉光；不是 Booyah 1:1 复刻；零插件） | 🔍 待review（2026-07-03 Go/parse gate + AE2025/AE2020 render 重跑通过；待真机复核） |
+| [rain](rain/INDEX.md) | 纯 native rain 技法门禁（shape/repeater 雨线 + 下落关键帧 + Fractal Noise 雾气 + Echo 拖尾 + trim 水花；不是 Particular/Unmult 精确复刻；零插件） | 🔍 待review（2026-07-04 Go/parse gate + AE2020 render 通过；待真机复核） |
 
 ## 📋 B 类 — 读值档（dump 值核对，不看图）
 

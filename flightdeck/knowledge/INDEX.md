@@ -21,6 +21,8 @@ header to load only the notes relevant to the task.
 | Internal package map | `architecture/internal-codebase-map.md` and `internal/README.md` |
 | Showcase generation, review-gate, visual eye-check workflow | `showcase/showcase.md` |
 | JSX generator cleanup | `workflow/jsx-generator-cleanup-provenance.md` |
+| Rain phenomenon recipe and plugin boundary | `techniques/build-good-rain.md` |
+| Glitch phenomenon recipe and plugin boundary | `techniques/build-good-glitch.md` |
 
 ## Domains
 
