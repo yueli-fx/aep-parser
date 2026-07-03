@@ -3,6 +3,7 @@ package selfhost
 import (
 	"encoding/csv"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -13,9 +14,10 @@ import (
 )
 
 type TechniqueReportRenderOptions struct {
-	OutDir    string
-	InputPath string
-	Limit     int
+	OutDir                       string
+	InputPath                    string
+	Limit                        int
+	EffectFieldUnderstandingPath string
 }
 
 type techniqueReportSummary struct {
@@ -87,6 +89,35 @@ type techniqueDashboardArtifact struct {
 	Description string `json:"description"`
 }
 
+type effectFieldReportSummary struct {
+	SchemaVersion       int                             `json:"schema_version"`
+	SourceUnderstanding string                          `json:"source_understanding"`
+	Summary             effectFieldReportSummaryMetrics `json:"summary"`
+	TopStudyTargets     []effectFieldReportStudyTarget  `json:"top_study_targets"`
+}
+
+type effectFieldReportSummaryMetrics struct {
+	EffectKinds        int        `json:"effect_kinds"`
+	EffectOccurrences  int        `json:"effect_occurrences"`
+	ParamKinds         int        `json:"param_kinds"`
+	ParamOccurrences   int        `json:"param_occurrences"`
+	Reproducibility    []CountRow `json:"reproducibility,omitempty"`
+	GenerationPolicies []CountRow `json:"generation_policies,omitempty"`
+	StudyActions       []CountRow `json:"study_actions,omitempty"`
+}
+
+type effectFieldReportStudyTarget struct {
+	MatchName        string   `json:"match_name"`
+	Class            string   `json:"class"`
+	Reproducibility  string   `json:"reproducibility"`
+	GenerationPolicy string   `json:"generation_policy"`
+	StudyPriority    int      `json:"study_priority"`
+	Occurrences      int      `json:"occurrences"`
+	ParamKinds       int      `json:"param_kinds"`
+	StudyActions     []string `json:"study_actions,omitempty"`
+	Boundary         string   `json:"boundary,omitempty"`
+}
+
 func RenderTechniqueReportArtifacts(opts TechniqueReportRenderOptions) error {
 	var summary techniqueReportSummary
 	if err := readIndentedJSON(filepath.Join(opts.OutDir, "summary.json"), &summary); err != nil {
@@ -124,11 +155,16 @@ func RenderTechniqueReportArtifacts(opts TechniqueReportRenderOptions) error {
 	if err := writeTechniqueJSONL(opts.OutDir, projects); err != nil {
 		return err
 	}
+	effectFieldArtifacts, err := writeEffectFieldReportSurface(opts)
+	if err != nil {
+		return err
+	}
 	dashboard := buildTechniqueDashboard(opts, summary, patterns, corpusRecords, projects)
+	dashboard.Artifacts = append(dashboard.Artifacts, effectFieldDashboardArtifacts(effectFieldArtifacts)...)
 	if err := writeTechniqueMarkdownAndHTML(opts.OutDir, opts.InputPath, summary, patterns, dashboard); err != nil {
 		return err
 	}
-	return writeTechniqueManifest(opts, summary, len(patterns))
+	return writeTechniqueManifest(opts, summary, len(patterns), effectFieldArtifacts)
 }
 
 func reportProjectPaths(records []map[string]any, count int) []string {
@@ -494,6 +530,103 @@ func techniqueDashboardArtifacts() []techniqueDashboardArtifact {
 	}
 }
 
+func effectFieldDashboardArtifacts(names []string) []techniqueDashboardArtifact {
+	if len(names) == 0 {
+		return nil
+	}
+	descriptions := map[string]string{
+		"effect_field_summary.json":    "Effect field reproducibility and generation policy summary.",
+		"effect_field_study_queue.csv": "Ranked effect field study queue.",
+	}
+	artifacts := make([]techniqueDashboardArtifact, 0, len(names))
+	for _, name := range names {
+		artifacts = append(artifacts, techniqueDashboardArtifact{Name: name, Description: descriptions[name]})
+	}
+	return artifacts
+}
+
+func writeEffectFieldReportSurface(opts TechniqueReportRenderOptions) ([]string, error) {
+	path := opts.EffectFieldUnderstandingPath
+	if path == "" {
+		path = filepath.Join("tmp", "effect_field_understanding", "understanding.json")
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("read effect field understanding %s: %w", path, err)
+	}
+	var understanding EffectFieldUnderstanding
+	if err := json.Unmarshal(data, &understanding); err != nil {
+		return nil, fmt.Errorf("parse effect field understanding %s: %w", path, err)
+	}
+	summary := buildEffectFieldReportSummary(understanding, path)
+	if err := writeIndentedJSON(filepath.Join(opts.OutDir, "effect_field_summary.json"), summary); err != nil {
+		return nil, err
+	}
+	if err := writeEffectFieldStudyQueue(filepath.Join(opts.OutDir, "effect_field_study_queue.csv"), understanding.Effects); err != nil {
+		return nil, err
+	}
+	return []string{"effect_field_summary.json", "effect_field_study_queue.csv"}, nil
+}
+
+func buildEffectFieldReportSummary(understanding EffectFieldUnderstanding, sourcePath string) effectFieldReportSummary {
+	summary := effectFieldReportSummary{
+		SchemaVersion:       1,
+		SourceUnderstanding: sourcePath,
+		Summary: effectFieldReportSummaryMetrics{
+			EffectKinds:        understanding.Summary.EffectKinds,
+			EffectOccurrences:  understanding.Summary.EffectOccurrences,
+			ParamKinds:         understanding.Summary.ParamKinds,
+			ParamOccurrences:   understanding.Summary.ParamOccurrences,
+			Reproducibility:    understanding.Summary.Reproducibility,
+			GenerationPolicies: understanding.Summary.GenerationPolicies,
+			StudyActions:       understanding.Summary.StudyActions,
+		},
+	}
+	if summary.Summary.EffectKinds == 0 {
+		summary.Summary.EffectKinds = len(understanding.Effects)
+	}
+	limit := len(understanding.Effects)
+	if limit > 20 {
+		limit = 20
+	}
+	for i := 0; i < limit; i++ {
+		effect := understanding.Effects[i]
+		summary.TopStudyTargets = append(summary.TopStudyTargets, effectFieldReportStudyTarget{
+			MatchName:        effect.MatchName,
+			Class:            effect.Class,
+			Reproducibility:  effect.Reproducibility,
+			GenerationPolicy: effect.GenerationPolicy,
+			StudyPriority:    effect.StudyPriority,
+			Occurrences:      effect.Occurrences,
+			ParamKinds:       effect.ParamKinds,
+			StudyActions:     append([]string(nil), effect.StudyActions...),
+			Boundary:         effect.Boundary,
+		})
+	}
+	return summary
+}
+
+func writeEffectFieldStudyQueue(path string, effects []EffectFieldUnderstandingEffect) error {
+	rows := make([][]string, 0, len(effects))
+	for _, effect := range effects {
+		rows = append(rows, []string{
+			effect.MatchName,
+			effect.Class,
+			effect.Reproducibility,
+			effect.GenerationPolicy,
+			strconv.Itoa(effect.StudyPriority),
+			strconv.Itoa(effect.Occurrences),
+			strconv.Itoa(effect.ParamKinds),
+			strings.Join(effect.StudyActions, ";"),
+			effect.Boundary,
+		})
+	}
+	return writeReportCSV(path, []string{"match_name", "class", "reproducibility", "generation_policy", "study_priority", "occurrences", "param_kinds", "study_actions", "boundary"}, rows)
+}
+
 func writeTechniqueMarkdownAndHTML(outDir, inputPath string, summary techniqueReportSummary, patterns []string, dashboard techniqueDashboard) error {
 	learning := "# Technique Learning Index\n\n## Study Queue\n\n- generated from `" + inputPath + "`\n\n## Learning Actions\n\n- Study representative project.\n\n## Pattern Playbook\n\n- " + strings.Join(patterns, ", ") + "\n\n## Plugin Risk Queue\n\n_none_\n\n## Readiness Queue\n\n- analysis_ready\nrecreation steps\n"
 	report := "# Technique Corpus Report\n\n## Pattern Representatives\n\n## Study Queue\n\nStep 1: Rebuild structure\n"
@@ -634,8 +767,9 @@ renderOverview(); renderPatterns(); renderProjectShell(); renderRecipes(); rende
 </html>`, nil
 }
 
-func writeTechniqueManifest(opts TechniqueReportRenderOptions, summary techniqueReportSummary, patternCount int) error {
+func writeTechniqueManifest(opts TechniqueReportRenderOptions, summary techniqueReportSummary, patternCount int, extraArtifacts []string) error {
 	artifacts := []string{"summary.json", "corpus.jsonl", "digest.json", "learning.md", "projects.csv", "project_playbooks.csv", "compositions.csv", "layers.csv", "recreation_steps.csv", "patterns.csv", "study_queue.csv", "study_tasks.csv", "recreation_blockers.csv", "signal_layers.csv", "effect_stacks.csv", "shape_operators.csv", "text_animators.csv", "dependency_edges.csv", "learning_actions.csv", "mechanisms.csv", "mechanism_examples.csv", "coverage_scorecard.csv", "reconstruction_blueprints.jsonl", "recipe_drafts.jsonl", "errors.csv", "report.md", "report.html"}
+	artifacts = append(artifacts, extraArtifacts...)
 	return writeIndentedJSON(filepath.Join(opts.OutDir, "manifest.json"), map[string]any{
 		"schema_version":   1,
 		"generated_at_utc": time.Now().UTC().Format(time.RFC3339Nano),

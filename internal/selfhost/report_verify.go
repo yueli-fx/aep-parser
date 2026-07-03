@@ -118,6 +118,12 @@ func VerifyTechniqueReport(opts ReportVerifyOptions) (ReportVerifyResult, error)
 	if len(digest.Patterns) == 0 {
 		return ReportVerifyResult{}, fmt.Errorf("digest has no pattern entries")
 	}
+	if err := verifyManifestArtifacts(opts.OutDir, manifest.Artifacts); err != nil {
+		return ReportVerifyResult{}, err
+	}
+	if err := verifyEffectFieldReportSurface(opts.OutDir, manifest.Artifacts); err != nil {
+		return ReportVerifyResult{}, err
+	}
 
 	if err := verifyReportRows(summary, digest, corpusRecords, csvRows, blueprints, recipeDrafts); err != nil {
 		return ReportVerifyResult{}, err
@@ -127,6 +133,68 @@ func VerifyTechniqueReport(opts ReportVerifyOptions) (ReportVerifyResult, error)
 	}
 
 	return ReportVerifyResult{ProjectCount: summary.ProjectCount, PatternCount: len(digest.Patterns)}, nil
+}
+
+func verifyManifestArtifacts(outDir string, artifacts []any) error {
+	for _, artifact := range artifacts {
+		name := stringAny(artifact)
+		if name == "" {
+			return fmt.Errorf("manifest contains invalid artifact entry: %s", compactJSON(artifact))
+		}
+		if _, err := os.Stat(filepath.Join(outDir, name)); err != nil {
+			return fmt.Errorf("missing manifest artifact %s: %w", name, err)
+		}
+	}
+	return nil
+}
+
+func verifyEffectFieldReportSurface(outDir string, artifacts []any) error {
+	hasSummary := manifestArtifactExists(artifacts, "effect_field_summary.json")
+	hasQueue := manifestArtifactExists(artifacts, "effect_field_study_queue.csv")
+	if !hasSummary && !hasQueue {
+		return nil
+	}
+	if hasSummary != hasQueue {
+		return fmt.Errorf("effect field report surface must include both summary and study queue artifacts")
+	}
+	var summary effectFieldReportSummary
+	if err := readIndentedJSON(filepath.Join(outDir, "effect_field_summary.json"), &summary); err != nil {
+		return fmt.Errorf("effect_field_summary.json: %w", err)
+	}
+	if summary.SchemaVersion != 1 {
+		return fmt.Errorf("effect_field_summary.json schema_version %d, want 1", summary.SchemaVersion)
+	}
+	if summary.Summary.EffectKinds <= 0 {
+		return fmt.Errorf("effect_field_summary.json has no effect kinds")
+	}
+	if len(summary.TopStudyTargets) == 0 {
+		return fmt.Errorf("effect_field_summary.json has no top study targets")
+	}
+	rows, err := readCSVRows(filepath.Join(outDir, "effect_field_study_queue.csv"))
+	if err != nil {
+		return fmt.Errorf("effect_field_study_queue.csv: %w", err)
+	}
+	if len(rows) == 0 {
+		return fmt.Errorf("effect_field_study_queue.csv has no rows")
+	}
+	for _, row := range rows {
+		if missing(row, "match_name", "class", "reproducibility", "generation_policy", "study_priority") {
+			return fmt.Errorf("effect_field_study_queue.csv contains incomplete row: %s", compactJSON(row))
+		}
+		if intRow(row, "study_priority") <= 0 {
+			return fmt.Errorf("effect_field_study_queue.csv row has invalid study_priority: %s", compactJSON(row))
+		}
+	}
+	return nil
+}
+
+func manifestArtifactExists(artifacts []any, name string) bool {
+	for _, artifact := range artifacts {
+		if stringAny(artifact) == name {
+			return true
+		}
+	}
+	return false
 }
 
 func verifyReportRows(summary reportVerifySummary, digest reportVerifyDigest, corpusRecords []map[string]any, rows map[string][]map[string]string, blueprints, recipeDrafts []map[string]any) error {

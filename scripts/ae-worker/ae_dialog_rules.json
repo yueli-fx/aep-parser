@@ -101,8 +101,18 @@
     "comment": "JSX threw 'Unable to execute script at line N. Permission denied' — the per-version preference is off (fresh AE install / prefs reset). No keystroke fixes this; Abort with exit 7 so the operator enables the pref instead of burning TimeoutSec. First seen 2026-06-11 on AE 2025 after its prefs were recreated."
   },
   {
+    "name": "cinema-4d-file-missing",
+    "windowTitle": [],
+    "windowClass": [],
+    "ocrMatch": ["No Cinema 4D file detected", "Cinema 4D Lite", "Please add the effect to an imported Cinema 4D file"],
+    "action": "SendKeys",
+    "keys": "{ENTER}",
+    "cooldownMs": 2000,
+    "comment": "Cineware/CINEMA 4D Effect warning when the effect is applied to a generic solid during template extraction. The JSX has already added/saved the effect; press OK so AE can finish and write .done. First captured 2026-07-03 during AE2020 default-effect fixture generation; this was previously misclassified by the broad scripting-plugin-unavailable title rule."
+  },
+  {
     "name": "scripting-plugin-unavailable",
-    "windowTitle": ["After Effects", "Adobe After Effects"],
+    "windowTitle": [],
     "windowClass": [],
     "ocrMatch": ["Unable to execute script", "Scripting plugin is not installed", "脚本插件未安装", "未安装脚本插件"],
     "action": "Abort",

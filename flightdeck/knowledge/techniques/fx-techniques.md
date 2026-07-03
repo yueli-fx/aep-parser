@@ -379,7 +379,7 @@ confidence: observed
 | 风 | (待建) | noise-as-material + displacement-distortion(方向) + time-evolution + 运动模糊 |
 | 雨 | (待建) | particle-emit(条状) + time-evolution(下落) + 模糊 |
 | 转场 | (待建) | displacement-distortion/擦除 + time-evolution(时间扫过) |
-| glitch(纯 native·可复刻) | (待建,Booyah 实证可行) | ①程序化:rgb-channel-split + displacement-distortion(块状噪声驱动) + scanlines-crt + temporal-glitch(Posterize Time) + emissive-glow。Booyah Glitch 全 native |
+| glitch(纯 native·可复刻) | `build-good-glitch.md` | ①程序化:rgb-channel-split + displacement-distortion(块状噪声驱动) + scanlines-crt + temporal-glitch(Posterize Time) + emissive-glow。Booyah Glitch 全 native |
 | glitch(重度/datamosh) | 实证 GlitchText | 招牌跳变=**Videocopilot Twitch**(third-party,**可经 embed-template 采样本支持**,渲染需装)+ PEDG/Colorama 等;native 部分=temporal-glitch + rgb-channel-split + displacement(纯 native 也能自成一路,见上行) |
 
 > 新增现象:`aepdissect` 解析 → 拆角色 → 按 schema 在此登记新技法/标已有技法新 `proven_transfers` → 写自包含的 `build-<现象>.md` 配方(负责技法间顺序)→ AE gate 验证升 confidence。

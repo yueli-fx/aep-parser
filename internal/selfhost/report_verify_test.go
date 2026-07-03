@@ -32,6 +32,19 @@ func TestVerifyTechniqueReportRejectsMissingArtifact(t *testing.T) {
 	}
 }
 
+func TestVerifyTechniqueReportRejectsMalformedEffectFieldSurface(t *testing.T) {
+	dir := writeMinimalTechniqueReport(t)
+	appendManifestArtifacts(t, filepath.Join(dir, "manifest.json"), "effect_field_summary.json", "effect_field_study_queue.csv")
+	writeFile(t, filepath.Join(dir, "effect_field_summary.json"), `{"schema_version":`)
+	writeCSV(t, filepath.Join(dir, "effect_field_study_queue.csv"), []string{"match_name", "class", "reproducibility", "generation_policy", "study_priority", "occurrences", "param_kinds", "study_actions", "boundary"}, [][]string{{"tc Particular", "third_party", "third_party_plugin_required", "preserve_as_dependency", "710", "8", "5", "preserve_plugin_dependency", "Rendering equivalence requires the plugin."}})
+
+	_, err := VerifyTechniqueReport(ReportVerifyOptions{OutDir: dir, MinProjects: 1})
+
+	if err == nil || !strings.Contains(err.Error(), "effect_field_summary.json") {
+		t.Fatalf("err = %v, want effect field summary error", err)
+	}
+}
+
 func writeMinimalTechniqueReport(t *testing.T) string {
 	t.Helper()
 	dir := t.TempDir()
@@ -112,6 +125,20 @@ func writeMinimalTechniqueReport(t *testing.T) string {
 		"reconstruction_blueprints.jsonl", "recipe_drafts.jsonl", "errors.csv",
 	}, "\n"))
 	return dir
+}
+
+func appendManifestArtifacts(t *testing.T, path string, names ...string) {
+	t.Helper()
+	var manifest map[string]any
+	if err := readIndentedJSON(path, &manifest); err != nil {
+		t.Fatalf("read manifest: %v", err)
+	}
+	artifacts, _ := manifest["artifacts"].([]any)
+	for _, name := range names {
+		artifacts = append(artifacts, name)
+	}
+	manifest["artifacts"] = artifacts
+	writeJSONFile(t, path, manifest)
 }
 
 func writeCSV(t *testing.T, path string, header []string, rows [][]string) {

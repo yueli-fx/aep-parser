@@ -32,6 +32,26 @@ func run(args []string, stdout, stderr io.Writer, platform host.Platform) int {
 		return runCompareReports(args[1:], stdout, stderr)
 	case "recipe-smoke":
 		return runRecipeSmoke(args[1:], stdout, stderr, platform)
+	case "sample-shell":
+		return runSampleShell(args[1:], stdout, stderr)
+	case "sample-shell-batch":
+		return runSampleShellBatch(args[1:], stdout, stderr)
+	case "extract-effect-templates":
+		return runExtractEffectTemplates(args[1:], stdout, stderr)
+	case "audit-effect-templates":
+		return runAuditEffectTemplates(args[1:], stdout, stderr)
+	case "effect-field-inventory":
+		return runEffectFieldInventory(args[1:], stdout, stderr)
+	case "effect-field-understanding":
+		return runEffectFieldUnderstanding(args[1:], stdout, stderr)
+	case "pseudo-controller-rebuild-proof":
+		return runPseudoControllerRebuildProof(args[1:], stdout, stderr)
+	case "pseudo-behavior-wiring-plan":
+		return runPseudoBehaviorWiringPlan(args[1:], stdout, stderr)
+	case "pseudo-behavior-payload-extract":
+		return runPseudoBehaviorPayloadExtract(args[1:], stdout, stderr)
+	case "pseudo-behavior-application":
+		return runPseudoBehaviorApplication(args[1:], stdout, stderr)
 	case "verify-report":
 		return runVerifyReport(args[1:], stdout, stderr)
 	case "technique-report":
@@ -50,6 +70,324 @@ func run(args []string, stdout, stderr io.Writer, platform host.Platform) int {
 		usage(stderr)
 		return 2
 	}
+}
+
+func runSampleShell(args []string, stdout, stderr io.Writer) int {
+	fs := flag.NewFlagSet("aepselfhost sample-shell", flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	inputPath := fs.String("input", "", "input .aep sample path")
+	outDir := fs.String("out", filepath.Join("tmp", "sample_shell"), "output directory")
+	targetVersion := fs.String("target", "AE2020", "recipe target version")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	if *inputPath == "" {
+		fmt.Fprintln(stderr, "usage: aepselfhost sample-shell -input sample.aep [-out dir] [-target AE2020]")
+		return 2
+	}
+	result, err := selfhost.RunSampleShell(selfhost.SampleShellOptions{
+		InputPath:     *inputPath,
+		OutDir:        *outDir,
+		TargetVersion: *targetVersion,
+	})
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	fmt.Fprintf(stdout, "recipe:        %s\n", result.RecipePath)
+	fmt.Fprintf(stdout, "aep:           %s\n", result.CompiledAEPPath)
+	fmt.Fprintf(stdout, "semantic diff: %s\n", result.SemanticDiffPath)
+	fmt.Fprintf(stdout, "raw diff:      %s\n", result.RawDiffPath)
+	fmt.Fprintf(stdout, "counts: comps %d/%d layers %d/%d shape_layers %d/%d effects %d/%d effect_params %d/%d\n",
+		result.SemanticDiff.Summary.CompCount.Generated,
+		result.SemanticDiff.Summary.CompCount.Original,
+		result.SemanticDiff.Summary.LayerCount.Generated,
+		result.SemanticDiff.Summary.LayerCount.Original,
+		result.SemanticDiff.Summary.ShapeLayerCount.Generated,
+		result.SemanticDiff.Summary.ShapeLayerCount.Original,
+		result.SemanticDiff.Summary.EffectCount.Generated,
+		result.SemanticDiff.Summary.EffectCount.Original,
+		result.SemanticDiff.Summary.EffectParamCount.Generated,
+		result.SemanticDiff.Summary.EffectParamCount.Original,
+	)
+	return 0
+}
+
+func runSampleShellBatch(args []string, stdout, stderr io.Writer) int {
+	fs := flag.NewFlagSet("aepselfhost sample-shell-batch", flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	root := fs.String("root", filepath.Join("data", "samples"), "root directory containing .aep samples")
+	outDir := fs.String("out", filepath.Join("tmp", "sample_shell_batch"), "output directory")
+	targetVersion := fs.String("target", "AE2020", "recipe target version")
+	limit := fs.Int("limit", 0, "maximum number of .aep samples to process; 0 means all")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	result, err := selfhost.RunSampleShellBatch(selfhost.SampleShellBatchOptions{
+		Root:          *root,
+		OutDir:        *outDir,
+		TargetVersion: *targetVersion,
+		Limit:         *limit,
+	})
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	fmt.Fprintf(stdout, "batch summary: %s\n", result.SummaryPath)
+	fmt.Fprintf(stdout, "samples: total %d succeeded %d failed %d\n", result.Summary.Total, result.Summary.Succeeded, result.Summary.Failed)
+	fmt.Fprintf(stdout, "counts: comps %d/%d layers %d/%d shape_layers %d/%d effects %d/%d effect_params %d/%d footage %d/%d raw_diff %d\n",
+		result.Summary.CompCount.Generated,
+		result.Summary.CompCount.Original,
+		result.Summary.LayerCount.Generated,
+		result.Summary.LayerCount.Original,
+		result.Summary.ShapeLayerCount.Generated,
+		result.Summary.ShapeLayerCount.Original,
+		result.Summary.EffectCount.Generated,
+		result.Summary.EffectCount.Original,
+		result.Summary.EffectParamCount.Generated,
+		result.Summary.EffectParamCount.Original,
+		result.Summary.FootageCount.Generated,
+		result.Summary.FootageCount.Original,
+		result.Summary.RawProfileDiffCount,
+	)
+	return 0
+}
+
+func runExtractEffectTemplates(args []string, stdout, stderr io.Writer) int {
+	fs := flag.NewFlagSet("aepselfhost extract-effect-templates", flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	summaryPath := fs.String("summary", filepath.Join("tmp", "sample_shell_batch_full", "batch_summary.json"), "sample-shell batch_summary.json")
+	root := fs.String("root", "", "root directory containing .aep samples; defaults to summary.root")
+	outDir := fs.String("out", filepath.Join("tmp", "effect_template_candidates"), "candidate template output directory")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	result, err := selfhost.RunSampleShellEffectTemplateExtraction(selfhost.SampleShellEffectTemplateExtractionOptions{
+		SummaryPath: *summaryPath,
+		Root:        *root,
+		OutDir:      *outDir,
+	})
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	fmt.Fprintf(stdout, "extraction summary: %s\n", result.ResultPath)
+	fmt.Fprintf(stdout, "requested %d hit %d missing %d\n", len(result.Requested), len(result.Hits), len(result.Missing))
+	return 0
+}
+
+func runAuditEffectTemplates(args []string, stdout, stderr io.Writer) int {
+	fs := flag.NewFlagSet("aepselfhost audit-effect-templates", flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	candidatesDir := fs.String("candidates", filepath.Join("tmp", "effect_template_candidates"), "candidate template directory")
+	outPath := fs.String("out", "", "audit output path; defaults to <candidates>/candidate_audit.json")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	result, err := selfhost.AuditSampleShellEffectTemplateCandidates(selfhost.SampleShellEffectTemplateAuditOptions{
+		CandidatesDir: *candidatesDir,
+		OutPath:       *outPath,
+	})
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	fmt.Fprintf(stdout, "candidate audit: %s\n", result.ResultPath)
+	fmt.Fprintf(stdout, "total %d candidate %d review %d reject %d parse_error %d\n",
+		result.Summary.Total,
+		result.Summary.Candidate,
+		result.Summary.Review,
+		result.Summary.Reject,
+		result.Summary.ParseError,
+	)
+	return 0
+}
+
+func runEffectFieldInventory(args []string, stdout, stderr io.Writer) int {
+	fs := flag.NewFlagSet("aepselfhost effect-field-inventory", flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	root := fs.String("root", filepath.Join("data", "samples"), "root directory containing .aep samples")
+	outPath := fs.String("out", filepath.Join("tmp", "effect_field_inventory", "inventory.json"), "effect field inventory JSON path")
+	limit := fs.Int("limit", 0, "maximum number of .aep samples to process; 0 means all")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	result, err := selfhost.RunEffectFieldInventory(selfhost.EffectFieldInventoryOptions{
+		Root:    *root,
+		OutPath: *outPath,
+		Limit:   *limit,
+	})
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	fmt.Fprintf(stdout, "effect field inventory: %s\n", result.OutputPath)
+	fmt.Fprintf(stdout, "projects: %d failed %d effects %d/%d params %d/%d\n",
+		result.Summary.ProjectCount,
+		result.Summary.FailedProjects,
+		result.Summary.EffectKinds,
+		result.Summary.EffectOccurrences,
+		result.Summary.ParamKinds,
+		result.Summary.ParamOccurrences,
+	)
+	return 0
+}
+
+func runEffectFieldUnderstanding(args []string, stdout, stderr io.Writer) int {
+	fs := flag.NewFlagSet("aepselfhost effect-field-understanding", flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	inventoryPath := fs.String("inventory", filepath.Join("tmp", "effect_field_inventory", "inventory.json"), "effect field inventory JSON path")
+	outPath := fs.String("out", filepath.Join("tmp", "effect_field_understanding", "understanding.json"), "effect field understanding JSON path")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	result, err := selfhost.RunEffectFieldUnderstanding(selfhost.EffectFieldUnderstandingOptions{
+		InventoryPath: *inventoryPath,
+		OutPath:       *outPath,
+	})
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	fmt.Fprintf(stdout, "effect field understanding: %s\n", result.OutputPath)
+	fmt.Fprintf(stdout, "effects %d/%d params %d/%d\n",
+		result.Summary.EffectKinds,
+		result.Summary.EffectOccurrences,
+		result.Summary.ParamKinds,
+		result.Summary.ParamOccurrences,
+	)
+	return 0
+}
+
+func runPseudoControllerRebuildProof(args []string, stdout, stderr io.Writer) int {
+	fs := flag.NewFlagSet("aepselfhost pseudo-controller-rebuild-proof", flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	inventoryPath := fs.String("inventory", filepath.Join("tmp", "effect_field_inventory", "inventory.json"), "effect field inventory JSON path")
+	understandingPath := fs.String("understanding", filepath.Join("tmp", "effect_field_understanding", "understanding.json"), "effect field understanding JSON path")
+	outDir := fs.String("out", filepath.Join("tmp", "pseudo_controller_rebuild"), "pseudo controller rebuild proof output directory")
+	maxFamilies := fs.Int("max", 10, "maximum pseudo families to plan")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	result, err := selfhost.RunPseudoControllerRebuildProof(selfhost.PseudoControllerRebuildOptions{
+		InventoryPath:     *inventoryPath,
+		UnderstandingPath: *understandingPath,
+		OutDir:            *outDir,
+		MaxFamilies:       *maxFamilies,
+	})
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	fmt.Fprintf(stdout, "pseudo controller rebuild proof: %s\n", result.OutputPath)
+	fmt.Fprintf(stdout, "families: pseudo %d selected %d generated %d controls %d unsupported %d\n",
+		result.Summary.PseudoFamilies,
+		result.Summary.SelectedFamilies,
+		result.Summary.GeneratedFamilies,
+		result.Summary.GeneratedControls,
+		result.Summary.UnsupportedControlCount,
+	)
+	if len(result.Families) > 0 && result.Families[0].GeneratedAEP != "" {
+		fmt.Fprintf(stdout, "generated aep: %s\n", result.Families[0].GeneratedAEP)
+	}
+	return 0
+}
+
+func runPseudoBehaviorWiringPlan(args []string, stdout, stderr io.Writer) int {
+	fs := flag.NewFlagSet("aepselfhost pseudo-behavior-wiring-plan", flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	proofPath := fs.String("proof", filepath.Join("tmp", "pseudo_controller_rebuild", "proof.json"), "pseudo controller rebuild proof JSON path")
+	outDir := fs.String("out", filepath.Join("tmp", "pseudo_behavior_wiring"), "pseudo behavior wiring output directory")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	result, err := selfhost.RunPseudoBehaviorWiringPlan(selfhost.PseudoBehaviorWiringOptions{
+		ProofPath: *proofPath,
+		OutDir:    *outDir,
+	})
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	fmt.Fprintf(stdout, "pseudo behavior wiring plan: %s\n", result.OutputPath)
+	fmt.Fprintf(stdout, "families: %d controls %d static %d keyframe %d expression %d conflicts %d\n",
+		result.Summary.Families,
+		result.Summary.Controls,
+		result.Summary.StaticControls,
+		result.Summary.KeyframeTasks,
+		result.Summary.ExpressionTasks,
+		result.Summary.ConflictTasks,
+	)
+	return 0
+}
+
+func runPseudoBehaviorPayloadExtract(args []string, stdout, stderr io.Writer) int {
+	fs := flag.NewFlagSet("aepselfhost pseudo-behavior-payload-extract", flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	planPath := fs.String("plan", filepath.Join("tmp", "pseudo_behavior_wiring", "plan.json"), "pseudo behavior wiring plan JSON path")
+	root := fs.String("root", filepath.Join("data", "samples"), "root directory containing .aep samples")
+	outDir := fs.String("out", filepath.Join("tmp", "pseudo_behavior_payloads"), "pseudo behavior payload output directory")
+	limit := fs.Int("limit", 0, "maximum number of .aep samples to process; 0 means all")
+	maxExamples := fs.Int("max-examples", 5, "maximum payload examples per control")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	result, err := selfhost.RunPseudoBehaviorPayloadExtraction(selfhost.PseudoBehaviorPayloadOptions{
+		PlanPath:    *planPath,
+		Root:        *root,
+		OutDir:      *outDir,
+		Limit:       *limit,
+		MaxExamples: *maxExamples,
+	})
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	fmt.Fprintf(stdout, "pseudo behavior payloads: %s\n", result.OutputPath)
+	fmt.Fprintf(stdout, "families: %d controls %d behavior %d payloads %d missing %d keyframe %d expression %d projects %d failed %d\n",
+		result.Summary.PlannedFamilies,
+		result.Summary.PlannedControls,
+		result.Summary.BehaviorTasks,
+		result.Summary.ControlsWithPayloads,
+		result.Summary.ControlsMissingPayloads,
+		result.Summary.KeyframePayloads,
+		result.Summary.ExpressionPayloads,
+		result.Summary.ScannedProjects,
+		result.Summary.FailedProjects,
+	)
+	return 0
+}
+
+func runPseudoBehaviorApplication(args []string, stdout, stderr io.Writer) int {
+	fs := flag.NewFlagSet("aepselfhost pseudo-behavior-application", flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	proofPath := fs.String("proof", filepath.Join("tmp", "pseudo_controller_rebuild", "proof.json"), "pseudo controller rebuild proof JSON path")
+	payloadPath := fs.String("payloads", filepath.Join("tmp", "pseudo_behavior_payloads", "payloads.json"), "pseudo behavior payload JSON path")
+	outDir := fs.String("out", filepath.Join("tmp", "pseudo_behavior_application"), "pseudo behavior application output directory")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	result, err := selfhost.RunPseudoBehaviorApplication(selfhost.PseudoBehaviorApplicationOptions{
+		ProofPath:   *proofPath,
+		PayloadPath: *payloadPath,
+		OutDir:      *outDir,
+	})
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	fmt.Fprintf(stdout, "pseudo behavior application: %s\n", result.OutputPath)
+	fmt.Fprintf(stdout, "families: %d generated %d skipped %d aeps %d applied %d verified %d deferred_expression %d errors %d\n",
+		result.Summary.Families,
+		result.Summary.GeneratedFamilies,
+		result.Summary.SkippedFamilies,
+		result.Summary.GeneratedAEPs,
+		result.Summary.AppliedControls,
+		result.Summary.VerifiedKeyframedControls,
+		result.Summary.ExpressionDeferredControls,
+		result.Summary.ErrorControls,
+	)
+	return 0
 }
 
 func runCompareReports(args []string, stdout, stderr io.Writer) int {
@@ -967,5 +1305,5 @@ func ptrIntValue(v *int) string {
 }
 
 func usage(stderr io.Writer) {
-	fmt.Fprintln(stderr, "usage: aepselfhost <verify|compare-reports|verify-report|technique-report|recipe-smoke|finalize-run|outcome|status|watch|start-watch> -out-root tmp\\technique_selfhost_gate")
+	fmt.Fprintln(stderr, "usage: aepselfhost <verify|compare-reports|verify-report|technique-report|recipe-smoke|sample-shell|sample-shell-batch|extract-effect-templates|audit-effect-templates|effect-field-inventory|effect-field-understanding|pseudo-controller-rebuild-proof|pseudo-behavior-wiring-plan|pseudo-behavior-payload-extract|pseudo-behavior-application|finalize-run|outcome|status|watch|start-watch> -out-root tmp\\technique_selfhost_gate")
 }

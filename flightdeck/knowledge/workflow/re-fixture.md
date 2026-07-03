@@ -132,6 +132,10 @@ pwsh -NoProfile -File scripts/ae-worker/ae_run.ps1 `
     -TimeoutSec 180
 ```
 
+`$jsxPath` 和 `$doneFile` 必须先解析成绝对路径。相对路径可能表现成
+AE 启动 / splash timeout：AE 没执行到目标 JSX，也不会写预期 `.done`，
+但同一命令改成绝对 `-Jsx` / `-Done` 会立即通过。
+
 退出码：
 
 - `0` — `.done` 出现且 stable，按 PASS contract 走

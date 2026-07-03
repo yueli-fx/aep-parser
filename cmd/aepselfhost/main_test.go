@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/yueli-fx/aep-parser/internal/host"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
 )
 
 func TestRunOutcomePrintsLatestOutcome(t *testing.T) {
@@ -349,6 +350,292 @@ func TestRunRecipeSmokeWritesArtifacts(t *testing.T) {
 	}
 }
 
+func TestRunSampleShellBatchWritesFailureSummary(t *testing.T) {
+	root := t.TempDir()
+	outDir := filepath.Join(root, "out")
+	sampleRoot := filepath.Join(root, "samples")
+	writeFile(t, filepath.Join(sampleRoot, "bad.aep"), "not an aep")
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"sample-shell-batch", "-root", sampleRoot, "-out", outDir, "-limit", "1"}, &stdout, &stderr, testPlatform())
+
+	if code != 0 {
+		t.Fatalf("run sample-shell-batch = %d, stderr=%s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "batch summary:") {
+		t.Fatalf("stdout missing batch summary:\n%s", stdout.String())
+	}
+	if !strings.Contains(stdout.String(), "effect_params 0/0") {
+		t.Fatalf("stdout missing effect param count:\n%s", stdout.String())
+	}
+	var summary struct {
+		Summary struct {
+			Total     int `json:"total"`
+			Succeeded int `json:"succeeded"`
+			Failed    int `json:"failed"`
+		} `json:"summary"`
+		Failures []struct {
+			InputPath string `json:"input_path"`
+			Error     string `json:"error"`
+		} `json:"failures"`
+	}
+	readFileJSON(t, filepath.Join(outDir, "batch_summary.json"), &summary)
+	if summary.Summary.Total != 1 || summary.Summary.Succeeded != 0 || summary.Summary.Failed != 1 {
+		t.Fatalf("summary = %+v", summary.Summary)
+	}
+	if len(summary.Failures) != 1 || summary.Failures[0].InputPath == "" || summary.Failures[0].Error == "" {
+		t.Fatalf("failures = %+v", summary.Failures)
+	}
+}
+
+func TestRunExtractEffectTemplatesWritesCandidates(t *testing.T) {
+	root := t.TempDir()
+	samplePath := filepath.Join(root, "samples", "one.aep")
+	writeMainTestAEPWithEffect(t, samplePath, "ADBE Missing FX")
+	summaryPath := filepath.Join(root, "batch_summary.json")
+	writeFile(t, summaryPath, `{
+  "schema_version": 1,
+  "effect_work_items": [
+    {"match_name":"ADBE Missing FX","count":1,"class":"native_template_gap","action":"add_effect_template"}
+  ]
+}`)
+	outDir := filepath.Join(root, "candidates")
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"extract-effect-templates", "-summary", summaryPath, "-root", filepath.Join(root, "samples"), "-out", outDir}, &stdout, &stderr, testPlatform())
+
+	if code != 0 {
+		t.Fatalf("run extract-effect-templates = %d, stderr=%s", code, stderr.String())
+	}
+	out := stdout.String()
+	for _, want := range []string{
+		"extraction summary:",
+		"requested 1 hit 1 missing 0",
+	} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("stdout missing %q:\n%s", want, out)
+		}
+	}
+	if _, err := os.Stat(filepath.Join(outDir, "effect_adbe_missing_fx.bin")); err != nil {
+		t.Fatalf("candidate missing: %v", err)
+	}
+}
+
+func TestRunAuditEffectTemplatesWritesSummary(t *testing.T) {
+	root := t.TempDir()
+	writeMainTestEffectTemplateCandidate(t, filepath.Join(root, "effect_adbe_demo.bin"))
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"audit-effect-templates", "-candidates", root}, &stdout, &stderr, testPlatform())
+
+	if code != 0 {
+		t.Fatalf("run audit-effect-templates = %d, stderr=%s", code, stderr.String())
+	}
+	out := stdout.String()
+	for _, want := range []string{
+		"candidate audit:",
+		"total 1 candidate 0 review 0 reject 1 parse_error 0",
+	} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("stdout missing %q:\n%s", want, out)
+		}
+	}
+	if _, err := os.Stat(filepath.Join(root, "candidate_audit.json")); err != nil {
+		t.Fatalf("candidate audit missing: %v", err)
+	}
+}
+
+func TestRunEffectFieldInventoryWritesJSON(t *testing.T) {
+	root := t.TempDir()
+	outPath := filepath.Join(root, "inventory.json")
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"effect-field-inventory", "-root", root, "-out", outPath}, &stdout, &stderr, testPlatform())
+
+	if code != 0 {
+		t.Fatalf("run effect-field-inventory = %d, stderr=%s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "effect field inventory:") {
+		t.Fatalf("stdout missing inventory path:\n%s", stdout.String())
+	}
+	var inventory struct {
+		SchemaVersion int `json:"schema_version"`
+		Summary       struct {
+			ProjectCount int `json:"project_count"`
+			EffectKinds  int `json:"effect_kinds"`
+		} `json:"summary"`
+		Effects []any `json:"effects"`
+	}
+	readFileJSON(t, outPath, &inventory)
+	if inventory.SchemaVersion != 1 {
+		t.Fatalf("schema_version = %d, want 1", inventory.SchemaVersion)
+	}
+	if inventory.Summary.ProjectCount != 0 || inventory.Summary.EffectKinds != 0 || len(inventory.Effects) != 0 {
+		t.Fatalf("inventory = %+v, want empty valid report", inventory)
+	}
+}
+
+func TestRunEffectFieldUnderstandingWritesJSON(t *testing.T) {
+	root := t.TempDir()
+	inventoryPath := filepath.Join(root, "inventory.json")
+	outPath := filepath.Join(root, "understanding.json")
+	writeFile(t, inventoryPath, `{
+  "schema_version": 1,
+  "summary": {
+    "effect_kinds": 1,
+    "effect_occurrences": 2,
+    "param_kinds": 3,
+    "param_occurrences": 4
+  },
+  "effects": [
+    {
+      "match_name": "tc Particular",
+      "class": "third_party",
+      "occurrences": 2,
+      "param_kinds": 3,
+      "param_occurrences": 4,
+      "inferred_capabilities": ["keyframes", "layer_ref", "scalar"]
+    }
+  ]
+}`)
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"effect-field-understanding", "-inventory", inventoryPath, "-out", outPath}, &stdout, &stderr, testPlatform())
+
+	if code != 0 {
+		t.Fatalf("run effect-field-understanding = %d, stderr=%s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "effect field understanding:") {
+		t.Fatalf("stdout missing understanding path:\n%s", stdout.String())
+	}
+	var understanding struct {
+		SchemaVersion int `json:"schema_version"`
+		Summary       struct {
+			EffectKinds int `json:"effect_kinds"`
+		} `json:"summary"`
+		Effects []struct {
+			MatchName        string `json:"match_name"`
+			Reproducibility  string `json:"reproducibility"`
+			GenerationPolicy string `json:"generation_policy"`
+		} `json:"effects"`
+	}
+	readFileJSON(t, outPath, &understanding)
+	if understanding.SchemaVersion != 1 || understanding.Summary.EffectKinds != 1 || len(understanding.Effects) != 1 {
+		t.Fatalf("understanding = %+v", understanding)
+	}
+	if understanding.Effects[0].Reproducibility != "third_party_plugin_required" || understanding.Effects[0].GenerationPolicy != "preserve_as_dependency" {
+		t.Fatalf("effect = %+v", understanding.Effects[0])
+	}
+}
+
+func TestRunPseudoControllerRebuildProofWritesArtifacts(t *testing.T) {
+	root := t.TempDir()
+	inventoryPath := filepath.Join(root, "inventory.json")
+	understandingPath := filepath.Join(root, "understanding.json")
+	outDir := filepath.Join(root, "pseudo-proof")
+	writeMainJSONFile(t, inventoryPath, selfhostPseudoControllerInventoryFixture())
+	writeMainJSONFile(t, understandingPath, selfhostPseudoControllerUnderstandingFixture())
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"pseudo-controller-rebuild-proof", "-inventory", inventoryPath, "-understanding", understandingPath, "-out", outDir, "-max", "2"}, &stdout, &stderr, testPlatform())
+
+	if code != 0 {
+		t.Fatalf("run pseudo-controller-rebuild-proof = %d, stderr=%s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "pseudo controller rebuild proof:") {
+		t.Fatalf("stdout missing proof path:\n%s", stdout.String())
+	}
+	if _, err := os.Stat(filepath.Join(outDir, "proof.json")); err != nil {
+		t.Fatalf("proof.json missing: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(outDir, "generated", "rig-a.aep")); err != nil {
+		t.Fatalf("generated proof AEP missing: %v", err)
+	}
+}
+
+func TestRunPseudoBehaviorWiringPlanWritesJSON(t *testing.T) {
+	root := t.TempDir()
+	proofPath := filepath.Join(root, "proof.json")
+	outDir := filepath.Join(root, "behavior")
+	writeMainJSONFile(t, proofPath, selfhostPseudoBehaviorProofFixture())
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"pseudo-behavior-wiring-plan", "-proof", proofPath, "-out", outDir}, &stdout, &stderr, testPlatform())
+
+	if code != 0 {
+		t.Fatalf("run pseudo-behavior-wiring-plan = %d, stderr=%s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "pseudo behavior wiring plan:") {
+		t.Fatalf("stdout missing plan path:\n%s", stdout.String())
+	}
+	if _, err := os.Stat(filepath.Join(outDir, "plan.json")); err != nil {
+		t.Fatalf("plan.json missing: %v", err)
+	}
+}
+
+func TestRunPseudoBehaviorPayloadExtractWritesJSON(t *testing.T) {
+	root := t.TempDir()
+	planPath := filepath.Join(root, "plan.json")
+	sampleRoot := filepath.Join(root, "samples")
+	outDir := filepath.Join(root, "payloads")
+	writeMainJSONFile(t, planPath, map[string]any{
+		"schema_version": 1,
+		"families": []any{
+			map[string]any{
+				"match_name": "Pseudo/Rig A",
+				"tasks": []any{
+					map[string]any{
+						"param_match_name": "Pseudo/Rig A-0002",
+						"action":           "extract_keyframes_then_apply",
+						"phase":            "keyframes",
+					},
+				},
+			},
+		},
+	})
+	if err := os.MkdirAll(sampleRoot, 0o755); err != nil {
+		t.Fatalf("MkdirAll: %v", err)
+	}
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"pseudo-behavior-payload-extract", "-plan", planPath, "-root", sampleRoot, "-out", outDir}, &stdout, &stderr, testPlatform())
+
+	if code != 0 {
+		t.Fatalf("run pseudo-behavior-payload-extract = %d, stderr=%s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "pseudo behavior payloads:") {
+		t.Fatalf("stdout missing payload path:\n%s", stdout.String())
+	}
+	if _, err := os.Stat(filepath.Join(outDir, "payloads.json")); err != nil {
+		t.Fatalf("payloads.json missing: %v", err)
+	}
+}
+
+func TestRunPseudoBehaviorApplicationWritesJSON(t *testing.T) {
+	root := t.TempDir()
+	proofPath := filepath.Join(root, "proof.json")
+	payloadPath := filepath.Join(root, "payloads.json")
+	outDir := filepath.Join(root, "application")
+	writeMainJSONFile(t, proofPath, selfhostPseudoBehaviorApplicationProofFixture())
+	writeMainJSONFile(t, payloadPath, selfhostPseudoBehaviorApplicationPayloadFixture())
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{"pseudo-behavior-application", "-proof", proofPath, "-payloads", payloadPath, "-out", outDir}, &stdout, &stderr, testPlatform())
+
+	if code != 0 {
+		t.Fatalf("run pseudo-behavior-application = %d, stderr=%s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "pseudo behavior application:") {
+		t.Fatalf("stdout missing application path:\n%s", stdout.String())
+	}
+	if _, err := os.Stat(filepath.Join(outDir, "application.json")); err != nil {
+		t.Fatalf("application.json missing: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(outDir, "generated", "rig-a.aep")); err != nil {
+		t.Fatalf("generated application AEP missing: %v", err)
+	}
+}
+
 func TestRunTechniqueReportWritesArtifacts(t *testing.T) {
 	root := t.TempDir()
 	outDir := filepath.Join(root, "report")
@@ -372,6 +659,140 @@ func TestRunTechniqueReportWritesArtifacts(t *testing.T) {
 			t.Fatalf("expected artifact %s: %v", path, err)
 		}
 	}
+}
+
+func selfhostPseudoControllerInventoryFixture() any {
+	return map[string]any{
+		"schema_version": 1,
+		"root":           "data/samples",
+		"summary": map[string]any{
+			"project_count":      1,
+			"effect_kinds":       1,
+			"effect_occurrences": 4,
+			"param_kinds":        4,
+			"param_occurrences":  16,
+		},
+		"effects": []any{
+			map[string]any{
+				"match_name":        "Pseudo/Rig A",
+				"class":             "pseudo",
+				"occurrences":       4,
+				"param_kinds":       4,
+				"param_occurrences": 16,
+				"params": []any{
+					map[string]any{"match_name": "Pseudo/Rig A-0000", "value_types": []any{map[string]any{"name": "layer_ref", "count": 4}}, "occurrences": 4, "layer_ref_occurrences": 4},
+					map[string]any{"match_name": "Pseudo/Rig A-0001", "value_types": []any{map[string]any{"name": "number", "count": 4}}, "occurrences": 4, "example_static_values": []any{50}},
+					map[string]any{"match_name": "Pseudo/Rig A-0002", "value_types": []any{map[string]any{"name": "vector4", "count": 4}}, "occurrences": 4, "example_static_values": []any{[]any{0, 1, 0, 1}}},
+					map[string]any{"match_name": "Pseudo/Rig A-0003", "value_types": []any{map[string]any{"name": "bool", "count": 4}}, "occurrences": 4, "example_static_values": []any{true}},
+				},
+			},
+		},
+	}
+}
+
+func selfhostPseudoControllerUnderstandingFixture() any {
+	return map[string]any{
+		"schema_version":    1,
+		"source_inventory":  "inventory.json",
+		"summary":           map[string]any{"effect_kinds": 1, "effect_occurrences": 4, "param_kinds": 4, "param_occurrences": 16},
+		"generation_policy": "rebuild_pseudo_controls",
+		"effects": []any{
+			map[string]any{
+				"match_name":          "Pseudo/Rig A",
+				"class":               "pseudo",
+				"occurrences":         4,
+				"param_kinds":         4,
+				"param_occurrences":   16,
+				"reproducibility":     "pseudo_rebuildable",
+				"generation_policy":   "rebuild_pseudo_controls",
+				"field_understanding": "param_names_and_values_parseable",
+				"study_priority":      100,
+			},
+		},
+	}
+}
+
+func selfhostPseudoBehaviorProofFixture() any {
+	return map[string]any{
+		"schema_version": 1,
+		"output_path":    "tmp/pseudo_controller_rebuild/proof.json",
+		"summary": map[string]any{
+			"pseudo_families":           1,
+			"selected_families":         1,
+			"generated_families":        1,
+			"generated_controls":        3,
+			"unsupported_control_count": 0,
+		},
+		"families": []any{
+			map[string]any{
+				"match_name":    "Pseudo/Rig A",
+				"uid":           "Rig A",
+				"status":        "generated",
+				"generated_aep": "tmp/pseudo_controller_rebuild/generated/rig-a.aep",
+				"controls": []any{
+					map[string]any{"param_match_name": "Pseudo/Rig A-0001", "label": "Static", "control_kind": "slider", "value_type": "number"},
+					map[string]any{"param_match_name": "Pseudo/Rig A-0002", "label": "Animated", "control_kind": "slider", "value_type": "number", "behavior_notes": []any{"keyframed"}},
+					map[string]any{"param_match_name": "Pseudo/Rig A-0003", "label": "Driven", "control_kind": "slider", "value_type": "number", "behavior_notes": []any{"expression"}},
+				},
+			},
+		},
+	}
+}
+
+func selfhostPseudoBehaviorApplicationProofFixture() any {
+	return map[string]any{
+		"schema_version": 1,
+		"families": []any{
+			map[string]any{
+				"match_name": "Pseudo/Rig A",
+				"uid":        "Rig A",
+				"status":     "generated",
+				"controls": []any{
+					map[string]any{"param_match_name": "Pseudo/Rig A-0001", "label": "Static", "control_kind": "slider", "value_type": "number", "default_value": 0},
+					map[string]any{"param_match_name": "Pseudo/Rig A-0002", "label": "Animated", "control_kind": "slider", "value_type": "number", "default_value": 0, "behavior_notes": []any{"keyframed"}},
+				},
+			},
+		},
+	}
+}
+
+func selfhostPseudoBehaviorApplicationPayloadFixture() any {
+	return map[string]any{
+		"schema_version": 1,
+		"families": []any{
+			map[string]any{
+				"match_name": "Pseudo/Rig A",
+				"status":     "generated",
+				"controls": []any{
+					map[string]any{
+						"param_match_name": "Pseudo/Rig A-0002",
+						"action":           "extract_keyframes_then_apply",
+						"phase":            "keyframes",
+						"status":           "payload_found",
+						"examples": []any{
+							map[string]any{
+								"effect_match_name": "Pseudo/Rig A",
+								"param_match_name":  "Pseudo/Rig A-0002",
+								"keyframes": []any{
+									map[string]any{"time_seconds": 0, "value": 0},
+									map[string]any{"time_seconds": 1, "value": 10},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func writeMainJSONFile(t *testing.T, path string, value any) {
+	t.Helper()
+	data, err := json.MarshalIndent(value, "", "  ")
+	if err != nil {
+		t.Fatalf("MarshalIndent: %v", err)
+	}
+	writeFile(t, path, string(data)+"\n")
 }
 
 func TestRunVerifyReportReturnsValidationError(t *testing.T) {
@@ -605,4 +1026,64 @@ func writeVerifyReportFixture(t *testing.T, outDir string, partial bool) {
 func writeCSVFile(t *testing.T, path, text string) {
 	t.Helper()
 	writeFile(t, path, text)
+}
+
+func writeMainTestAEPWithEffect(t *testing.T, path, effectMatchName string) {
+	t.Helper()
+	root := &rifx.Chunk{ID: rifx.IDRifx, FormType: rifx.IDEgg, Children: []*rifx.Chunk{
+		{
+			ID:       rifx.IDList,
+			FormType: rifx.IDTdgp,
+			Children: []*rifx.Chunk{
+				{ID: rifx.IDTdmn, Data: []byte("ADBE Effect Parade")},
+				{
+					ID:       rifx.IDList,
+					FormType: rifx.IDTdgp,
+					Children: []*rifx.Chunk{
+						{ID: rifx.IDTdmn, Data: []byte(effectMatchName)},
+						{ID: rifx.IDList, FormType: rifx.IDSspc, Children: []*rifx.Chunk{
+							{ID: rifx.IDFnam, Data: []byte("candidate")},
+						}},
+						{ID: rifx.IDTdmn, Data: []byte("ADBE Group End")},
+					},
+				},
+				{ID: rifx.IDTdmn, Data: []byte("ADBE Group End")},
+			},
+		},
+	}}
+	var buf bytes.Buffer
+	if err := root.Write(&buf); err != nil {
+		t.Fatalf("write rifx: %v", err)
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatalf("mkdir: %v", err)
+	}
+	if err := os.WriteFile(path, buf.Bytes(), 0o644); err != nil {
+		t.Fatalf("write aep: %v", err)
+	}
+}
+
+func writeMainTestEffectTemplateCandidate(t *testing.T, path string) {
+	t.Helper()
+	wrapper := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp, Children: []*rifx.Chunk{
+		{ID: rifx.IDTdmn, Data: []byte("ADBE Demo")},
+		{ID: rifx.IDList, FormType: rifx.IDSspc, Children: []*rifx.Chunk{
+			{ID: rifx.IDList, FormType: rifx.IDTdgp, Children: []*rifx.Chunk{
+				{ID: rifx.IDTdmn, Data: []byte("Param One")},
+				{ID: rifx.IDList, FormType: rifx.IDTdbs, Children: []*rifx.Chunk{
+					{ID: rifx.IDUtf8, Data: []byte("time")},
+				}},
+			}},
+		}},
+	}}
+	var buf bytes.Buffer
+	if err := wrapper.Write(&buf); err != nil {
+		t.Fatalf("write wrapper: %v", err)
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatalf("mkdir: %v", err)
+	}
+	if err := os.WriteFile(path, buf.Bytes(), 0o644); err != nil {
+		t.Fatalf("write candidate: %v", err)
+	}
 }

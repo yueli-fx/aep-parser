@@ -1,10 +1,10 @@
 ---
 showcase: glitch
-direction: 纯 native（plugin-free）glitch — 照 Booyah Glitch 全原生配方从零拼 RGB 色差 + 噪声驱动位移撕裂 + 辉光，AE 实渲验证 glitch 技法原子（docs/fx-techniques.md T16 + T2/T5 的 glitch 迁移）
+direction: 纯 native（plugin-free）glitch — 基于 Booyah/GlitchText 抽出的原生技法，从零拼 RGB 色差 + 噪声驱动位移撕裂 + 辉光，AE 实渲验证 glitch 技法原子（docs/fx-techniques.md T16 + T2/T5 的 glitch 迁移）
 capabilities: [rgb-channel-split, displacement-glitch, emissive-glow, add-blend, fill-effect, displacement-map, fractal-noise, glo2-glow, set-effect-layer-param, animate-effect-param, shape-fill-position, adjustment-layer]
 gates: []
 status: 待review
-last_updated: 2026-06-19
+last_updated: 2026-07-03
 regenerate: "go run ./flightdeck/showcase/glitch  +  scripts/ae-worker/ae_run.ps1 render.jsx"
 ---
 
@@ -12,7 +12,7 @@ regenerate: "go run ./flightdeck/showcase/glitch  +  scripts/ae-worker/ae_run.ps
 
 ## 这个方向测什么
 
-证 motionbox glitch 研究抽出的技法原子**能纯 native 渲出来**（Booyah Glitch 全 native 路，无第三方插件）。一帧里同时呈现 3 个空间 glitch 技法：
+证 motionbox glitch 研究抽出的技法原子**能纯 native 渲出来**。这是一个技法门禁/烟测，不是 `flightdeck/showcase/booyah-clone` 的 1:1 复刻；Booyah 复刻仍由 `booyah-clone` 目录承载。一帧里同时呈现 3 个空间 glitch 技法：
 
 主体 = 可读的「GLITCH」文字（在 `TXT` 预合成里，主合成实例化 3 份；点文字不能直接改色/位移，但预合成实例是普通 AV 层，用 Transform 效果缩放+定位、Fill 上色）。
 
@@ -38,12 +38,13 @@ regenerate: "go run ./flightdeck/showcase/glitch  +  scripts/ae-worker/ae_run.ps
 
 居中的「**GLITCH**」文字：字母**左缘青、右缘橙红**（RGB 色差），有横向切片撕裂错位，neon 辉光，**干净深色背景**（噪声仅作位移图源、不可见）。全 native，stock AE 即可渲（无需任何插件）。
 
-## 验证状态（2026-06-18）
+## 验证状态（2026-07-03）
 
 - **agent 实渲 + 眼验：✅**（AE 2025，`scripts/ae-worker/ae_run.ps1`，exit 0）。4 个技法肉眼全部可见、零第三方依赖（aepdissect: RENDER DEPENDENCIES = none）。
+- **本次 gate 重跑：✅**。`go run ./flightdeck/showcase/glitch` 重新生成 `glitch.aep`；`aeptechnique -mode explain` 读出 `analysis_ready`；`aepdissect` 仍为 no third-party。AE2025 与 AE2020 均用绝对 `-Jsx` / `-Done` 路径完成 render，`glitch.png` 已更新。初次相对路径调用曾表现为 startup timeout，已记录到 `tmp/technique_showcase_glitch/package_summary.json`。
 - **⚠ 待用户真机验收**：agent 眼验 ≠ 用户真机验收（showcase review-gate）。未建独立 `TestGlitch_AEShipGate`（底层 caps 已各自 gated；组合走 showcase 眼验）。
 - 升级路：若要把 T16 confidence 升 `validated`，补一个 `TestGlitch_AEShipGate_AE2020/AE2025`（双版本 + 像素采样）。
 
 ## 来源 / 配方
 
-照 `data/samples/motionbox/glitch/booyah-glitch`（全 native）的角色拆解。技法原子定义见 `docs/fx-techniques.md` T16/T2/T5；理解流程 `checklists/techniques/understand-a-project.md`（扫描线 T17 见样本，本配方已弃）。
+基于 `data/samples/motionbox/glitch/booyah-glitch` 与 GlitchText 样本抽出的角色/技法拆解。技法原子定义见 `docs/fx-techniques.md` T16/T2/T5；理解流程 `checklists/techniques/understand-a-project.md`（扫描线 T17 见样本，本配方已弃）。完整 Booyah 复刻看 `flightdeck/showcase/booyah-clone`。
