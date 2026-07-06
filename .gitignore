@@ -47,3 +47,7 @@ flightdeck/showcase/**/verify_timing.txt
 
 # FX 样本输入（用户提供的真实工程，供 Phase 2 解析学习，重二进制不入库）
 /data/samples/
+
+# Local/private corpus learning workspace. May contain private sample-derived
+# notes, generated reports, and non-public learning artifacts.
+/learning/
