@@ -2,13 +2,13 @@
 
 ## 状态
 
-初评已完成并获用户授权执行，控制计划见 `plan.md`。Slice 0–5 的技术工作已完成；LICENSE 仍等待用户授权选择。当前进入 Slice 6：采用与商业验证准备。
+Slice 0–6 已完成，Headless AEP Toolkit 的技术基线、公开 interface、统一 CLI、发布基础设施和采用/商业验证方案均已落地。唯一发布阻塞是用户尚未选择 LICENSE；外部设计伙伴验证需要真实团队参与。
 
 ## 下一步
 
-1. 定义三类设计伙伴、验证问题、试用输入和成功指标。
-2. 明确 OSS core 与 managed/on-prem 商业层边界。
-3. 准备 aerender/nexrender 前置 preflight 集成方案。
+1. 用户选择 LICENSE；推荐 Apache-2.0（明确专利授权），备选 MIT（更短更宽松）。
+2. 建立远端仓库并触发首次 CI，不自动 push。
+3. 按 `adoption-and-commercial-validation.md` 招募设计伙伴并运行六周验证。
 
 ## 立即读取
 
@@ -16,6 +16,7 @@
 - `../../knowledge/workflow/project-operating-rules.md`
 - `assessment.md`
 - `plan.md`
+- `adoption-and-commercial-validation.md`
 
 ## 按需读取
 
@@ -51,10 +52,12 @@
 - Slice 4 验证：真实 fixture CLI smoke、统一 runner tests、全仓测试、vet、capindex 和三平台构建全部通过。
 - Slice 5：新增 SECURITY、CONTRIBUTING、CHANGELOG、CI 和 tag release workflow；README 补充 pre-release、安装和许可证状态；跨平台 gate 覆盖根 SDK/统一 CLI。
 - Slice 5 验证：CI 等价命令全部通过，包括测试、vet、capindex、三平台构建、10 秒 fuzz（约 184 万输入）和 race tests。
+- Slice 6：定义模板市场、批量渲染、工作室/DAM 三类设计伙伴，六周验证节奏、OSS/商业边界、定价实验和继续/停止条件。
+- Slice 6：新增 Nexrender/aerender preflight 示例，明确本工具位于 render worker 之前而不替代渲染编排。
 
 当前：
 
-- Slice 6：采用与商业验证准备。
+- 等待 LICENSE 决策与真实外部设计伙伴验证。
 
 ## 未决问题
 

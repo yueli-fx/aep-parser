@@ -7,6 +7,8 @@ project-generation behavior.
 
 - `recipes/` contains JSON recipe examples used by recipe documentation,
   validation, and profile checks.
+- `integrations/` contains small public workflow examples for placing the
+  headless toolkit in existing pipelines.
 
 ## What Belongs Here
 
