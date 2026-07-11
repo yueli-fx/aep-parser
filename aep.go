@@ -13,6 +13,39 @@ import (
 
 const InspectionSchemaVersion = 1
 
+// Limits bounds resources consumed while parsing one AEP. Zero fields use the
+// corresponding default returned by DefaultLimits.
+type Limits struct {
+	MaxInputBytes     uint64
+	MaxChunkBytes     uint64
+	MaxAllocatedBytes uint64
+	MaxNodes          int
+	MaxDepth          int
+}
+
+// DefaultLimits returns budgets suitable for local project files. Services
+// handling uploads should normally pass tighter limits to ParseWithLimits.
+func DefaultLimits() Limits {
+	limits := internal.DefaultParseLimits()
+	return Limits{
+		MaxInputBytes:     limits.MaxInputBytes,
+		MaxChunkBytes:     limits.MaxChunkBytes,
+		MaxAllocatedBytes: limits.MaxAllocatedBytes,
+		MaxNodes:          limits.MaxNodes,
+		MaxDepth:          limits.MaxDepth,
+	}
+}
+
+func (l Limits) internal() internal.ParseLimits {
+	return internal.ParseLimits{
+		MaxInputBytes:     l.MaxInputBytes,
+		MaxChunkBytes:     l.MaxChunkBytes,
+		MaxAllocatedBytes: l.MaxAllocatedBytes,
+		MaxNodes:          l.MaxNodes,
+		MaxDepth:          l.MaxDepth,
+	}
+}
+
 // Document owns one parsed project. A Document is not safe for concurrent use.
 type Document struct {
 	project *internal.Project
@@ -53,10 +86,28 @@ func Open(path string) (*Document, error) {
 	return &Document{project: project, source: path}, nil
 }
 
+// OpenWithLimits reads and parses an AEP path with explicit resource budgets.
+func OpenWithLimits(path string, limits Limits) (*Document, error) {
+	project, err := internal.OpenWithLimits(path, limits.internal())
+	if err != nil {
+		return nil, err
+	}
+	return &Document{project: project, source: path}, nil
+}
+
 // Parse reads an AEP project from a seekable input using bounded parser
 // defaults.
 func Parse(r io.ReadSeeker) (*Document, error) {
 	project, err := internal.FromReader(r)
+	if err != nil {
+		return nil, err
+	}
+	return &Document{project: project}, nil
+}
+
+// ParseWithLimits parses a seekable AEP stream with explicit resource budgets.
+func ParseWithLimits(r io.ReadSeeker, limits Limits) (*Document, error) {
+	project, err := internal.FromReaderWithLimits(r, limits.internal())
 	if err != nil {
 		return nil, err
 	}

@@ -3,6 +3,7 @@ package aep_test
 import (
 	"bytes"
 	"encoding/json"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -53,5 +54,24 @@ func TestNilDocumentMethodsReturnStableErrors(t *testing.T) {
 	}
 	if got := document.Inspect().SchemaVersion; got != aep.InspectionSchemaVersion {
 		t.Fatalf("nil inspection schema = %d", got)
+	}
+}
+
+func TestExternalPackageCanTightenParseLimits(t *testing.T) {
+	path := filepath.Join("test_data", "fixtures", "v2_smoke_ae2020.aep")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("ReadFile: %v", err)
+	}
+	limits := aep.DefaultLimits()
+	if limits.MaxInputBytes == 0 || limits.MaxNodes == 0 || limits.MaxDepth == 0 {
+		t.Fatalf("DefaultLimits returned zero budgets: %+v", limits)
+	}
+	limits.MaxInputBytes = uint64(len(data) - 1)
+	if _, err := aep.ParseWithLimits(bytes.NewReader(data), limits); err == nil {
+		t.Fatal("ParseWithLimits accepted input above MaxInputBytes")
+	}
+	if _, err := aep.OpenWithLimits(path, limits); err == nil {
+		t.Fatal("OpenWithLimits accepted input above MaxInputBytes")
 	}
 }

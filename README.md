@@ -41,6 +41,8 @@ func main() {
 
 `Document` interface 有意保持精简：`Inspect` 返回稳定轻量清单，`ProfileJSON` 返回 diff/migration 使用的规范化 profile，`Write` 做保留未知 chunk 的 round-trip。底层 scene、serializer 和 back-reference 类型不属于公开 interface。
 
+处理不可信上传时，可用 `DefaultLimits` 作为起点并通过 `ParseWithLimits` / `OpenWithLimits` 收紧输入、单 chunk、累计分配、节点数和递归深度预算；字段为零时使用对应默认值。
+
 ## 统一 CLI
 
 面向用户的新入口是 `cmd/aep`，所有结果和错误都使用稳定 JSON envelope：

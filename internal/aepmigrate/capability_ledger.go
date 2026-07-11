@@ -35,16 +35,35 @@ type VersionCapabilityRule struct {
 var defaultCapabilityLedger = mustLoadCapabilityLedger(defaultCapabilityLedgerJSON)
 
 func DefaultCapabilityLedger() VersionCapabilityLedger {
-	return defaultCapabilityLedger
+	return cloneCapabilityLedger(defaultCapabilityLedger)
 }
 
 func (ledger VersionCapabilityLedger) RuleByID(id string) (VersionCapabilityRule, bool) {
 	for _, rule := range ledger.Rules {
 		if rule.ID == id {
-			return rule, true
+			return cloneCapabilityRule(rule), true
 		}
 	}
 	return VersionCapabilityRule{}, false
+}
+
+func cloneCapabilityLedger(ledger VersionCapabilityLedger) VersionCapabilityLedger {
+	clone := VersionCapabilityLedger{SchemaVersion: ledger.SchemaVersion}
+	clone.Rules = make([]VersionCapabilityRule, len(ledger.Rules))
+	for i, rule := range ledger.Rules {
+		clone.Rules[i] = cloneCapabilityRule(rule)
+	}
+	return clone
+}
+
+func cloneCapabilityRule(rule VersionCapabilityRule) VersionCapabilityRule {
+	clone := rule
+	clone.SourceVersions = append([]VersionLabel(nil), rule.SourceVersions...)
+	clone.TargetSupport = make(map[VersionLabel]CapabilitySupport, len(rule.TargetSupport))
+	for version, support := range rule.TargetSupport {
+		clone.TargetSupport[version] = support
+	}
+	return clone
 }
 
 func (rule VersionCapabilityRule) AppliesToSource(source VersionLabel) bool {

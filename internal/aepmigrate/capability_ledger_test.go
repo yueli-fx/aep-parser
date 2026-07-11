@@ -51,3 +51,29 @@ func TestAssessExplicitMatteBoundaryUsesCapabilityLedger(t *testing.T) {
 	}
 	t.Fatalf("no blocked entry found: %+v", report.Entries)
 }
+
+func TestDefaultCapabilityLedgerReturnsDetachedState(t *testing.T) {
+	first := DefaultCapabilityLedger()
+	originalSource := first.Rules[0].SourceVersions[0]
+	originalSupport := first.Rules[0].TargetSupport[VersionAE2020]
+	first.Rules[0].SourceVersions[0] = "mutated"
+	first.Rules[0].TargetSupport[VersionAE2020] = CapabilitySupport("mutated")
+
+	second := DefaultCapabilityLedger()
+	if second.Rules[0].SourceVersions[0] != originalSource {
+		t.Fatal("SourceVersions mutation leaked into the default ledger")
+	}
+	if second.Rules[0].TargetSupport[VersionAE2020] != originalSupport {
+		t.Fatal("TargetSupport mutation leaked into the default ledger")
+	}
+
+	rule, ok := second.RuleByID(second.Rules[0].ID)
+	if !ok {
+		t.Fatal("RuleByID did not find the first rule")
+	}
+	rule.TargetSupport[VersionAE2020] = CapabilitySupport("mutated")
+	again, _ := second.RuleByID(second.Rules[0].ID)
+	if again.TargetSupport[VersionAE2020] != originalSupport {
+		t.Fatal("RuleByID returned a shared TargetSupport map")
+	}
+}

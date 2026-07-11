@@ -10,8 +10,21 @@ package aep
 import (
 	"io"
 
+	"github.com/yueli-fx/aep-parser/internal/rifx"
 	"github.com/yueli-fx/aep-parser/internal/serializer"
 )
+
+// ParseLimits bounds resources consumed while parsing one AEP.
+type ParseLimits = rifx.Limits
+
+// @summary    Return the default parser resource budgets
+// @returns    default limits for local AEP files
+// @domain     meta
+// @stability  stable
+// @verify     roundtrip
+// @since      AE2020
+// @alias      parser limits,resource budget,解析限制
+func DefaultParseLimits() ParseLimits { return rifx.DefaultLimits }
 
 // @summary    Parse an .aep file by path
 // @param      path  filesystem path to the .aep file to read
@@ -23,6 +36,19 @@ import (
 // @alias      open,read,parse,读取,打开,加载 aep
 func Open(path string) (*Project, error) { return serializer.Open(path) }
 
+// @summary    Parse an .aep file by path with explicit resource budgets
+// @param      path  filesystem path to the .aep file to read
+// @param      limits  parser resource budgets; zero fields use defaults
+// @returns    the parsed Project
+// @domain     meta
+// @stability  stable
+// @verify     roundtrip
+// @since      AE2020
+// @alias      open with limits,bounded parse,受限解析
+func OpenWithLimits(path string, limits ParseLimits) (*Project, error) {
+	return serializer.OpenWithLimits(path, limits)
+}
+
 // @summary    Parse an .aep file from an io.ReadSeeker
 // @param      r  reader positioned at the start of the .aep byte stream
 // @returns    the parsed Project
@@ -33,22 +59,37 @@ func Open(path string) (*Project, error) { return serializer.Open(path) }
 // @alias      from reader,read,流读取,io.ReadSeeker
 func FromReader(r io.ReadSeeker) (*Project, error) { return serializer.FromReader(r) }
 
+// @summary    Parse an .aep stream with explicit resource budgets
+// @param      r  reader positioned at the start of the .aep byte stream
+// @param      limits  parser resource budgets; zero fields use defaults
+// @returns    the parsed Project
+// @domain     meta
+// @stability  stable
+// @verify     roundtrip
+// @since      AE2020
+// @alias      reader with limits,bounded stream parse,流式受限解析
+func FromReaderWithLimits(r io.ReadSeeker, limits ParseLimits) (*Project, error) {
+	return serializer.FromReaderWithLimits(r, limits)
+}
+
 // @summary    Serialize then re-parse a project to fully materialize built layers
 // @description Serializes the project to memory (WriteAEP) and re-parses the
-//   bytes (FromReader), returning a fresh Project. The receiver is left
-//   untouched; callers switch to the returned project and re-resolve item /
-//   layer handles (by name or ID — IDs are preserved by the round-trip).
 //
-//   Layers built by the structural New* APIs (NewShapeLayer / NewCameraLayer /
-//   NewLightLayer) exist only as pre-lowered chunks — they have no parsed
-//   property tree, so write paths that splice into a parsed layer (AddEffect's
-//   parade auto-create, the Camera / Light option setters) refuse them. One
-//   Reopen upgrades every built layer into a fully parsed layer, after which
-//   all parsed-layer APIs work with full fidelity.
+//	bytes (FromReader), returning a fresh Project. The receiver is left
+//	untouched; callers switch to the returned project and re-resolve item /
+//	layer handles (by name or ID — IDs are preserved by the round-trip).
 //
-//   The round-trip costs one serialize + parse of the whole project and returns
-//   a new object graph; any Layer / Composition pointers into the old project
-//   remain valid for the old project only.
+//	Layers built by the structural New* APIs (NewShapeLayer / NewCameraLayer /
+//	NewLightLayer) exist only as pre-lowered chunks — they have no parsed
+//	property tree, so write paths that splice into a parsed layer (AddEffect's
+//	parade auto-create, the Camera / Light option setters) refuse them. One
+//	Reopen upgrades every built layer into a fully parsed layer, after which
+//	all parsed-layer APIs work with full fidelity.
+//
+//	The round-trip costs one serialize + parse of the whole project and returns
+//	a new object graph; any Layer / Composition pointers into the old project
+//	remain valid for the old project only.
+//
 // @param      p  the project to serialize and re-parse
 // @returns    a fresh fully-parsed Project (the receiver is left unchanged)
 // @domain     meta
@@ -61,13 +102,15 @@ func Reopen(p *Project) (*Project, error) { return serializer.Reopen(p) }
 
 // @summary    Create a fresh empty Project from an embedded AE skeleton
 // @description Returns an empty Project parsed from the embedded AE skeleton
-//   matching the requested target. Zero args = TargetAE2020 (maximum
-//   compatibility); pass at most one target. Subsequent NewComposition calls
-//   populate it.
 //
-//   Never returns an error: the embedded templates are build-time trusted, so a
-//   parser failure panics with a "build bug" message rather than surfacing to
-//   the caller. Panics on multiple target args or an unknown AETarget value.
+//	matching the requested target. Zero args = TargetAE2020 (maximum
+//	compatibility); pass at most one target. Subsequent NewComposition calls
+//	populate it.
+//
+//	Never returns an error: the embedded templates are build-time trusted, so a
+//	parser failure panics with a "build bug" message rather than surfacing to
+//	the caller. Panics on multiple target args or an unknown AETarget value.
+//
 // @param      target  optional target AE version (default TargetAE2020)
 // @returns    the new empty Project
 // @domain     project
@@ -82,18 +125,20 @@ func NewProject(target ...AETarget) *Project { return serializer.NewProject(targ
 
 // @summary    Add an empty composition to the project's root folder
 // @description Appends a new empty composition to the project's root folder. The
-//   name must be non-empty; width and height must be 1..30000; FrameRateHz must
-//   be > 0 (in Hz, e.g. 29.97 — the whole+fraction encoding is handled
-//   internally); duration must be > 0 (in seconds, converted to whole frames via
-//   the frame rate).
 //
-//   Optional settings default to AE-typical values (background black, pixel
-//   aspect 1.0, full resolution, shutter 180°, motion blur defaults); override
-//   them with the Set* methods after the call. The composition ID is
-//   auto-assigned from the project's monotonic item-ID counter.
+//	name must be non-empty; width and height must be 1..30000; FrameRateHz must
+//	be > 0 (in Hz, e.g. 29.97 — the whole+fraction encoding is handled
+//	internally); duration must be > 0 (in seconds, converted to whole frames via
+//	the frame rate).
 //
-//   Atomic: if chunk parsing fails or any parser warning appears, the chunk
-//   tree, typed index, and warning list roll back to the pre-call state.
+//	Optional settings default to AE-typical values (background black, pixel
+//	aspect 1.0, full resolution, shutter 180°, motion blur defaults); override
+//	them with the Set* methods after the call. The composition ID is
+//	auto-assigned from the project's monotonic item-ID counter.
+//
+//	Atomic: if chunk parsing fails or any parser warning appears, the chunk
+//	tree, typed index, and warning list roll back to the pre-call state.
+//
 // @param      p            the project to add the composition to
 // @param      name         composition name (non-empty)
 // @param      width        composition width in pixels (1..30000)
@@ -120,19 +165,21 @@ func NewComposition(
 
 // @summary    Deep-clone a composition as a new sibling comp
 // @description Deep-clones src (a composition in this project) as a new sibling
-//   composition named name, appended to the project. The duplicate gets a fresh
-//   copy of every layer (with new layer IDs), and intra-comp parent and
-//   track-matte references are remapped to the duplicate's own layers. Layer
-//   sources (footage / precomp items) are shared verbatim, not duplicated —
-//   matching AE's CompItem.duplicate().
 //
-//   Refuses when src is nil, its project or item-list back-reference is missing,
-//   src is not in this project, the name is empty, the source item is not found
-//   in the root folder, or a layer record is too short to carry a parent ID.
+//	composition named name, appended to the project. The duplicate gets a fresh
+//	copy of every layer (with new layer IDs), and intra-comp parent and
+//	track-matte references are remapped to the duplicate's own layers. Layer
+//	sources (footage / precomp items) are shared verbatim, not duplicated —
+//	matching AE's CompItem.duplicate().
 //
-//   Atomic: snapshots the root folder, composition list, next-item-ID counter,
-//   and warning count; on any new parser warning during the re-parse, all of
-//   them roll back including the ID-counter bump.
+//	Refuses when src is nil, its project or item-list back-reference is missing,
+//	src is not in this project, the name is empty, the source item is not found
+//	in the root folder, or a layer record is too short to carry a parent ID.
+//
+//	Atomic: snapshots the root folder, composition list, next-item-ID counter,
+//	and warning count; on any new parser warning during the re-parse, all of
+//	them roll back including the ID-counter bump.
+//
 // @param      p     the project that owns src and will own the duplicate
 // @param      src   the composition to clone (must belong to p)
 // @param      name  name for the new duplicate composition (non-empty)
@@ -150,14 +197,16 @@ func DuplicateComposition(p *Project, src *Composition, name string) (*Compositi
 
 // @summary    Add an empty shape layer to a composition
 // @description Appends a new empty shape layer and returns the typed ShapeLayer
-//   wrapper; the embedded Layer is also appended to the comp's layer list so
-//   lookups by ID or name work immediately. The ID is auto-assigned from the
-//   project's monotonic item-ID counter (never reused; layer IDs share the
-//   item-ID namespace).
 //
-//   Atomic: if lowering fails or a downstream parse emits any warning, all state
-//   mutated by the call rolls back to the pre-call snapshot before the error is
-//   returned.
+//	wrapper; the embedded Layer is also appended to the comp's layer list so
+//	lookups by ID or name work immediately. The ID is auto-assigned from the
+//	project's monotonic item-ID counter (never reused; layer IDs share the
+//	item-ID namespace).
+//
+//	Atomic: if lowering fails or a downstream parse emits any warning, all state
+//	mutated by the call rolls back to the pre-call snapshot before the error is
+//	returned.
+//
 // @param      c     the composition to add the shape layer to
 // @param      name  shape layer name (non-empty)
 // @returns    the created ShapeLayer
@@ -175,15 +224,17 @@ func NewShapeLayer(c *Composition, name string) (*ShapeLayer, error) {
 
 // @summary    Add a Camera layer to a composition
 // @description Appends a new Camera layer and returns it. A camera is source-less:
-//   it is defined entirely by its layer record plus a Camera Options property
-//   group. The layer is cloned from an embedded AE-native Camera layer (so every
-//   AE-internal flag byte is faithful), with the layer ID, name, and time span
-//   (0 → comp duration) patched for this comp. Position / point of interest /
-//   options inherit the template's AE defaults; adjust them via the Camera*
-//   setters after the project is re-parsed (see Reopen).
 //
-//   Atomic (snapshot + rollback on any parser warning). AE accepts the Go-built
-//   camera, types it correctly, and preserves it on resave.
+//	it is defined entirely by its layer record plus a Camera Options property
+//	group. The layer is cloned from an embedded AE-native Camera layer (so every
+//	AE-internal flag byte is faithful), with the layer ID, name, and time span
+//	(0 → comp duration) patched for this comp. Position / point of interest /
+//	options inherit the template's AE defaults; adjust them via the Camera*
+//	setters after the project is re-parsed (see Reopen).
+//
+//	Atomic (snapshot + rollback on any parser warning). AE accepts the Go-built
+//	camera, types it correctly, and preserves it on resave.
+//
 // @param      c     the composition to add the camera to
 // @param      name  camera layer name (non-empty)
 // @returns    the created camera Layer
@@ -200,13 +251,15 @@ func NewCameraLayer(c *Composition, name string) (*Layer, error) {
 
 // @summary    Add a Light layer to a composition
 // @description Appends a new Light layer and returns it. Like a camera, a light is
-//   source-less (a layer record plus a Light Options group), cloned from an
-//   embedded AE-native Light layer with ID, name, and time span patched. Light
-//   kind / color / intensity inherit the template's AE defaults; adjust them via
-//   the Light* setters after the project is re-parsed (see Reopen).
 //
-//   Atomic (snapshot + rollback on any parser warning). AE accepts the Go-built
-//   light, types it correctly, and preserves it on resave.
+//	source-less (a layer record plus a Light Options group), cloned from an
+//	embedded AE-native Light layer with ID, name, and time span patched. Light
+//	kind / color / intensity inherit the template's AE defaults; adjust them via
+//	the Light* setters after the project is re-parsed (see Reopen).
+//
+//	Atomic (snapshot + rollback on any parser warning). AE accepts the Go-built
+//	light, types it correctly, and preserves it on resave.
+//
 // @param      c     the composition to add the light to
 // @param      name  light layer name (non-empty)
 // @returns    the created light Layer
@@ -223,18 +276,20 @@ func NewLightLayer(c *Composition, name string) (*Layer, error) {
 
 // @summary    Add a point-text layer to a composition
 // @description Appends a new point-text layer and returns it. A text layer is
-//   source-less: its content lives in the text-engine document inside the layer's
-//   Text Properties group. The layer is cloned from an embedded AE-native text
-//   layer (point text "A", a single styled run) with the layer ID, name, and time
-//   span (0 → comp duration) patched for this comp.
 //
-//   The returned layer reads its text source immediately and supports SetText
-//   without a Reopen (the text-source back-reference is wired at create time).
-//   SetText accepts arbitrary-length replacement text for the template's
-//   single-paragraph, single-run document (see Layer.SetText for the refuse set).
+//	source-less: its content lives in the text-engine document inside the layer's
+//	Text Properties group. The layer is cloned from an embedded AE-native text
+//	layer (point text "A", a single styled run) with the layer ID, name, and time
+//	span (0 → comp duration) patched for this comp.
 //
-//   Atomic (snapshot + rollback on any parser warning). AE types the Go-built
-//   layer as a text layer, reads back the text, and preserves it on resave.
+//	The returned layer reads its text source immediately and supports SetText
+//	without a Reopen (the text-source back-reference is wired at create time).
+//	SetText accepts arbitrary-length replacement text for the template's
+//	single-paragraph, single-run document (see Layer.SetText for the refuse set).
+//
+//	Atomic (snapshot + rollback on any parser warning). AE types the Go-built
+//	layer as a text layer, reads back the text, and preserves it on resave.
+//
 // @param      c     the composition to add the text layer to
 // @param      name  text layer name (non-empty)
 // @returns    the created text Layer
@@ -251,24 +306,26 @@ func NewTextLayer(c *Composition, name string) (*Layer, error) {
 
 // @summary    Replace a parsed layer's Transform Group with a lowering of t
 // @description Replaces a parsed layer's Transform Group — the from-scratch path
-//   for animated (or non-default static) transform on layers that are not shape
-//   layers (text / precomp / footage / solid / null).
 //
-//   Why a dedicated call: those layers come from embedded templates whose
-//   Transform Group elides default channels (AE default-omission). A fresh
-//   NewTextLayer has no "ADBE Position" / "ADBE Opacity" / "ADBE Anchor Point"
-//   chunk at all — only the per-axis Position, Orientation, rotation, and
-//   environment streams — so SetPosition (no materialized property) and the
-//   keyframe APIs (no value chunk to convert) cannot reach them.
-//   SetLayerTransform lowers the full canonical Transform Group and swaps it in,
-//   materializing every channel.
+//	for animated (or non-default static) transform on layers that are not shape
+//	layers (text / precomp / footage / solid / null).
 //
-//   Build t with NewLayerTransform (defaults: anchor 0,0; position 0,0; scale
-//   100,100; rotation 0; opacity 100), then set static values or keyframes on its
-//   streams: Position and AnchorPoint are pixels, Scale is percent, Rotation is
-//   degrees, Opacity is percent (0–100). The layer must be backed by a parsed
-//   layer structure; NewTextLayer/NewShapeLayer/NewSolidLayer return layers that
-//   satisfy that contract immediately.
+//	Why a dedicated call: those layers come from embedded templates whose
+//	Transform Group elides default channels (AE default-omission). A fresh
+//	NewTextLayer has no "ADBE Position" / "ADBE Opacity" / "ADBE Anchor Point"
+//	chunk at all — only the per-axis Position, Orientation, rotation, and
+//	environment streams — so SetPosition (no materialized property) and the
+//	keyframe APIs (no value chunk to convert) cannot reach them.
+//	SetLayerTransform lowers the full canonical Transform Group and swaps it in,
+//	materializing every channel.
+//
+//	Build t with NewLayerTransform (defaults: anchor 0,0; position 0,0; scale
+//	100,100; rotation 0; opacity 100), then set static values or keyframes on its
+//	streams: Position and AnchorPoint are pixels, Scale is percent, Rotation is
+//	degrees, Opacity is percent (0–100). The layer must be backed by a parsed
+//	layer structure; NewTextLayer/NewShapeLayer/NewSolidLayer return layers that
+//	satisfy that contract immediately.
+//
 // @param      layer  the parsed or generated layer to retarget
 // @param      t      the transform to lower into the layer's Transform Group
 // @domain     layer-set
@@ -285,18 +342,20 @@ func SetLayerTransform(layer *Layer, t *LayerTransform) error {
 
 // @summary    Add a solid-color layer to a composition
 // @description Appends a new solid-color layer and returns it. A solid is
-//   footage-backed: the call also creates a backing solid footage item (cloned
-//   from an embedded AE-native template so every AE-internal byte stays faithful)
-//   and points the layer's source at it. width and height must be 1..30000 (AE's
-//   solid ceiling); rgb components are 0..1 (stored as float32, so exact
-//   round-trips need float32-representable values such as 0.25 / 0.5). The
-//   layer's time span is re-homed to 0 → comp duration. The returned layer is
-//   fully parsed — all parsed-layer setters (transform, AddEffect, …) work
-//   immediately without a Reopen.
 //
-//   Atomic (the cross-project import snapshot + rollback covers both the footage
-//   import and the layer splice). AE reads back color / dimensions / flags and
-//   preserves them on resave.
+//	footage-backed: the call also creates a backing solid footage item (cloned
+//	from an embedded AE-native template so every AE-internal byte stays faithful)
+//	and points the layer's source at it. width and height must be 1..30000 (AE's
+//	solid ceiling); rgb components are 0..1 (stored as float32, so exact
+//	round-trips need float32-representable values such as 0.25 / 0.5). The
+//	layer's time span is re-homed to 0 → comp duration. The returned layer is
+//	fully parsed — all parsed-layer setters (transform, AddEffect, …) work
+//	immediately without a Reopen.
+//
+//	Atomic (the cross-project import snapshot + rollback covers both the footage
+//	import and the layer splice). AE reads back color / dimensions / flags and
+//	preserves them on resave.
+//
 // @param      c       the composition to add the solid to
 // @param      name    solid layer name (non-empty)
 // @param      width   solid width in pixels (1..30000)
@@ -316,12 +375,14 @@ func NewSolidLayer(c *Composition, name string, width, height int, rgb [3]float6
 
 // @summary    Add a null-object layer to a composition
 // @description Appends a new null-object layer and returns it. A null is a 100×100
-//   solid-backed layer with the null flag set — AE's standard parenting helper.
-//   The backing solid footage item is created alongside (see NewSolidLayer). The
-//   layer's time span is re-homed to 0 → comp duration. The returned layer is
-//   fully parsed.
 //
-//   Atomic (rides the gated solid-family creation path).
+//	solid-backed layer with the null flag set — AE's standard parenting helper.
+//	The backing solid footage item is created alongside (see NewSolidLayer). The
+//	layer's time span is re-homed to 0 → comp duration. The returned layer is
+//	fully parsed.
+//
+//	Atomic (rides the gated solid-family creation path).
+//
 // @param      c     the composition to add the null to
 // @param      name  null layer name (non-empty)
 // @returns    the created null Layer
@@ -338,13 +399,15 @@ func NewNullLayer(c *Composition, name string) (*Layer, error) {
 
 // @summary    Add an adjustment layer to a composition
 // @description Appends a new adjustment layer and returns it. An adjustment layer
-//   is a comp-sized white solid with the adjustment flag set: effects applied to
-//   it affect every layer below it. The backing solid footage item is created
-//   alongside, sized to the comp's current dimensions (see NewSolidLayer). The
-//   layer's time span is re-homed to 0 → comp duration. The returned layer is
-//   fully parsed.
 //
-//   Atomic (rides the gated solid-family creation path).
+//	is a comp-sized white solid with the adjustment flag set: effects applied to
+//	it affect every layer below it. The backing solid footage item is created
+//	alongside, sized to the comp's current dimensions (see NewSolidLayer). The
+//	layer's time span is re-homed to 0 → comp duration. The returned layer is
+//	fully parsed.
+//
+//	Atomic (rides the gated solid-family creation path).
+//
 // @param      c     the composition to add the adjustment layer to
 // @param      name  adjustment layer name (non-empty)
 // @returns    the created adjustment Layer
@@ -361,18 +424,20 @@ func NewAdjustmentLayer(c *Composition, name string) (*Layer, error) {
 
 // @summary    Add a precomp (nested-comp) layer to a composition
 // @description Adds a layer to parent whose source is the composition child (a
-//   nested / pre-composed comp) and returns it. A precomp layer is an ordinary AV
-//   layer whose source points at an existing comp item — the source comp already
-//   lives in the project, so (unlike the solid family) no backing footage item is
-//   created. An AE-native precomp layer is cloned and spliced in, its source
-//   repointed at child, and its time span re-homed to 0 → parent duration. The
-//   returned layer is fully parsed; its SourceComposition resolves to child.
 //
-//   Refuses when either comp is nil, the name is empty, parent == child, the two
-//   comps are in different projects, or the nesting would create a circular
-//   composition reference.
+//	nested / pre-composed comp) and returns it. A precomp layer is an ordinary AV
+//	layer whose source points at an existing comp item — the source comp already
+//	lives in the project, so (unlike the solid family) no backing footage item is
+//	created. An AE-native precomp layer is cloned and spliced in, its source
+//	repointed at child, and its time span re-homed to 0 → parent duration. The
+//	returned layer is fully parsed; its SourceComposition resolves to child.
 //
-//   Atomic (snapshot + rollback on any parser warning).
+//	Refuses when either comp is nil, the name is empty, parent == child, the two
+//	comps are in different projects, or the nesting would create a circular
+//	composition reference.
+//
+//	Atomic (snapshot + rollback on any parser warning).
+//
 // @param      parent  the composition that will contain the new layer
 // @param      child   the composition to use as the layer's source
 // @param      name    precomp layer name (non-empty)
@@ -390,19 +455,21 @@ func NewPrecompLayer(parent, child *Composition, name string) (*Layer, error) {
 
 // @summary    Remove a layer from a composition by index
 // @description Removes the layer at the given 0-based index in the comp's layer
-//   list. Returns an error on a refuse-case (index out of range, comp lacks its
-//   item-list back-reference, target is the last layer, target is not an AV
-//   layer, or back-reference corruption).
 //
-//   Reference cleanup mirrors AE's own delete behavior: any other layer whose
-//   parent is the deleted layer has its parent reset to none, and any layer using
-//   the deleted layer as a track-matte source has that reference cleared (when
-//   the layer record is long enough — AE 2022 and earlier did not write that
-//   field). The neighbor's track-matte intent flag is left untouched to match AE.
-//   String-level references (expressions, render queue, essential graphics) are
-//   out of scope — scrub them manually if needed.
+//	list. Returns an error on a refuse-case (index out of range, comp lacks its
+//	item-list back-reference, target is the last layer, target is not an AV
+//	layer, or back-reference corruption).
 //
-//   Atomic (snapshot + rollback on any parser warning).
+//	Reference cleanup mirrors AE's own delete behavior: any other layer whose
+//	parent is the deleted layer has its parent reset to none, and any layer using
+//	the deleted layer as a track-matte source has that reference cleared (when
+//	the layer record is long enough — AE 2022 and earlier did not write that
+//	field). The neighbor's track-matte intent flag is left untouched to match AE.
+//	String-level references (expressions, render queue, essential graphics) are
+//	out of scope — scrub them manually if needed.
+//
+//	Atomic (snapshot + rollback on any parser warning).
+//
 // @param      c      the composition to remove the layer from
 // @param      index  0-based index of the layer to remove
 // @domain     structural
@@ -416,24 +483,26 @@ func DeleteLayer(c *Composition, index int) error { return serializer.DeleteLaye
 
 // @summary    Clone a layer in place by index
 // @description Clones the layer at the given 0-based index and inserts the clone
-//   at that same position, pushing the source and everything below it down by one
-//   (mirrors AE's layer.duplicate()). Returns the cloned layer, or an error on a
-//   refuse-case.
 //
-//   Clone semantics: the clone gets a new monotonic layer ID; its chunk block is
-//   a deep byte-clone of the source's, with only the ID overwritten — source,
-//   parent, and track-matte references are copied verbatim (no footage
-//   duplication, no reference rewrites). The name is caller-supplied (an explicit
-//   name avoids silent duplicate-name confusion). Incoming references still
-//   resolve to the source, not the clone.
+//	at that same position, pushing the source and everything below it down by one
+//	(mirrors AE's layer.duplicate()). Returns the cloned layer, or an error on a
+//	refuse-case.
 //
-//   Refuses on: empty name, index out of range, comp lacking its item-list
-//   back-reference, a non-AV source (camera / light / audio behavior not yet
-//   reverse-engineered), a source with an implicit track matte, or back-reference
-//   corruption. An AE 23+ explicit track matte is allowed (the clone byte-copies
-//   the matte reference verbatim).
+//	Clone semantics: the clone gets a new monotonic layer ID; its chunk block is
+//	a deep byte-clone of the source's, with only the ID overwritten — source,
+//	parent, and track-matte references are copied verbatim (no footage
+//	duplication, no reference rewrites). The name is caller-supplied (an explicit
+//	name avoids silent duplicate-name confusion). Incoming references still
+//	resolve to the source, not the clone.
 //
-//   Atomic (snapshot + rollback on any parser warning, including the ID bump).
+//	Refuses on: empty name, index out of range, comp lacking its item-list
+//	back-reference, a non-AV source (camera / light / audio behavior not yet
+//	reverse-engineered), a source with an implicit track matte, or back-reference
+//	corruption. An AE 23+ explicit track matte is allowed (the clone byte-copies
+//	the matte reference verbatim).
+//
+//	Atomic (snapshot + rollback on any parser warning, including the ID bump).
+//
 // @param      c      the composition that owns the layer
 // @param      index  0-based index of the layer to clone
 // @param      name   name for the cloned layer (non-empty)
@@ -451,27 +520,29 @@ func DuplicateLayer(c *Composition, index int, name string) (*Layer, error) {
 
 // @summary    Deep-clone a layer into a composition at an index
 // @description Deep-clones src into the comp's layer list at atIdx (0-based;
-//   atIdx == len(layers) appends) and returns the inserted clone. src may live in
-//   a sibling comp of the same project or in a different project (cross-project).
 //
-//   Same-project: the clone gets a new monotonic layer ID; its block is a deep
-//   byte-clone of src with the ID set, the track matte reset (a cross-comp matte
-//   source is invalid), and the parent reset (src's parent named a layer in src's
-//   own comp). The source reference is verbatim (the shared footage / comp item);
-//   the name matches AE's copyToComp (verbatim).
+//	atIdx == len(layers) appends) and returns the inserted clone. src may live in
+//	a sibling comp of the same project or in a different project (cross-project).
 //
-//   Cross-project: additionally imports src's reachable item closure (footage +
-//   precomp, transitively) into the destination project at root level with fresh
-//   item IDs, then remaps the clone's source and alternate-source through that
-//   map. File-backed footage already present in the destination (matched by path)
-//   is reused, not re-cloned; comps and solids / placeholders are always cloned.
+//	Same-project: the clone gets a new monotonic layer ID; its block is a deep
+//	byte-clone of src with the ID set, the track matte reset (a cross-comp matte
+//	source is invalid), and the parent reset (src's parent named a layer in src's
+//	own comp). The source reference is verbatim (the shared footage / comp item);
+//	the name matches AE's copyToComp (verbatim).
 //
-//   Refuses on: nil src, missing destination back-reference, atIdx out of range,
-//   a detached or same-comp src, a non-AV src, a direct precomp loop (same-project
-//   only), or structural corruption. Cross-project also refuses a project with no
-//   root folder or a dangling closure source.
+//	Cross-project: additionally imports src's reachable item closure (footage +
+//	precomp, transitively) into the destination project at root level with fresh
+//	item IDs, then remaps the clone's source and alternate-source through that
+//	map. File-backed footage already present in the destination (matched by path)
+//	is reused, not re-cloned; comps and solids / placeholders are always cloned.
 //
-//   Atomic (snapshot + rollback on any parser warning, including the ID bump).
+//	Refuses on: nil src, missing destination back-reference, atIdx out of range,
+//	a detached or same-comp src, a non-AV src, a direct precomp loop (same-project
+//	only), or structural corruption. Cross-project also refuses a project with no
+//	root folder or a dangling closure source.
+//
+//	Atomic (snapshot + rollback on any parser warning, including the ID bump).
+//
 // @param      c      the composition to insert into
 // @param      src    the layer to clone (a sibling comp or another project)
 // @param      atIdx  0-based insertion index (len(layers) appends)
@@ -489,16 +560,18 @@ func InsertLayer(c *Composition, src *Layer, atIdx int) (*Layer, error) {
 
 // @summary    Reorder a layer within a composition
 // @description Moves the layer at from to position to in the comp's layer list
-//   (both 0-based). The source layer's entire chunk block is spliced out and
-//   re-inserted at the target slot; afterward every layer's index is refreshed to
-//   match its new position. from == to is a no-op.
 //
-//   Refuses when from or to is out of range, the comp lacks its item-list
-//   back-reference, or the source block is corrupt. Unlike DeleteLayer and
-//   DuplicateLayer, MoveLayer ignores layer type and track matte — a pure reorder
-//   works for AV / camera / light / audio / shape / text / matted layers alike.
+//	(both 0-based). The source layer's entire chunk block is spliced out and
+//	re-inserted at the target slot; afterward every layer's index is refreshed to
+//	match its new position. from == to is a no-op.
 //
-//   Atomic (snapshot + rollback on any parser warning).
+//	Refuses when from or to is out of range, the comp lacks its item-list
+//	back-reference, or the source block is corrupt. Unlike DeleteLayer and
+//	DuplicateLayer, MoveLayer ignores layer type and track matte — a pure reorder
+//	works for AV / camera / light / audio / shape / text / matted layers alike.
+//
+//	Atomic (snapshot + rollback on any parser warning).
+//
 // @param      c     the composition whose layers to reorder
 // @param      from  0-based current index of the layer to move
 // @param      to    0-based target index
@@ -513,7 +586,9 @@ func MoveLayer(c *Composition, from, to int) error { return serializer.MoveLayer
 
 // @summary    Move a layer to the top of the layer stack
 // @description Moves the layer to position 0 (top of the stack in AE's display,
-//   AE-index 1). A convenience wrapper over MoveLayer.
+//
+//	AE-index 1). A convenience wrapper over MoveLayer.
+//
 // @param      l  the layer to move to the top
 // @domain     structural
 // @stability  stable
@@ -526,7 +601,9 @@ func MoveToBeginning(l *Layer) error { return serializer.MoveToBeginning(l) }
 
 // @summary    Move a layer to the bottom of the layer stack
 // @description Moves the layer to the last position (bottom of the stack in AE's
-//   display). A convenience wrapper over MoveLayer.
+//
+//	display). A convenience wrapper over MoveLayer.
+//
 // @param      l  the layer to move to the bottom
 // @domain     structural
 // @stability  stable
@@ -539,9 +616,11 @@ func MoveToEnd(l *Layer) error { return serializer.MoveToEnd(l) }
 
 // @summary    Move a layer to just after another layer
 // @description Moves the layer to the slot immediately after other (the receiver
-//   lands just below other in the stack). Returns an error if other belongs to a
-//   different comp, other == l, or either layer lacks a comp back-reference. A
-//   convenience wrapper over MoveLayer.
+//
+//	lands just below other in the stack). Returns an error if other belongs to a
+//	different comp, other == l, or either layer lacks a comp back-reference. A
+//	convenience wrapper over MoveLayer.
+//
 // @param      l      the layer to move
 // @param      other  the layer to position l after
 // @domain     structural
@@ -555,7 +634,9 @@ func MoveAfter(l, other *Layer) error { return serializer.MoveAfter(l, other) }
 
 // @summary    Move a layer to just before another layer
 // @description Moves the layer to the slot immediately before other (the receiver
-//   lands just above other in the stack). A convenience wrapper over MoveLayer.
+//
+//	lands just above other in the stack). A convenience wrapper over MoveLayer.
+//
 // @param      l      the layer to move
 // @param      other  the layer to position l before
 // @domain     structural
@@ -569,15 +650,17 @@ func MoveBefore(l, other *Layer) error { return serializer.MoveBefore(l, other) 
 
 // @summary    Append a composition marker at a given time
 // @description Appends a new composition marker at the given time (in seconds) and
-//   returns it for further Set* calls. The new marker is a clean point marker: no
-//   duration, no label color, empty text fields.
 //
-//   To avoid reverse-engineering the canonical defaults of the marker's opaque
-//   metadata, the new marker clones an existing marker's block verbatim (opaque
-//   preservation), then resets the time plus the known semantic fields (duration,
-//   label) to zero. This means the comp must already have at least one marker to
-//   serve as the clone template; AddMarker returns an error otherwise. Markers
-//   are appended without re-sorting.
+//	returns it for further Set* calls. The new marker is a clean point marker: no
+//	duration, no label color, empty text fields.
+//
+//	To avoid reverse-engineering the canonical defaults of the marker's opaque
+//	metadata, the new marker clones an existing marker's block verbatim (opaque
+//	preservation), then resets the time plus the known semantic fields (duration,
+//	label) to zero. This means the comp must already have at least one marker to
+//	serve as the clone template; AddMarker returns an error otherwise. Markers
+//	are appended without re-sorting.
+//
 // @param      c        the composition to add the marker to
 // @param      seconds  marker time in seconds
 // @returns    the created Marker
@@ -594,13 +677,15 @@ func AddMarker(c *Composition, seconds float64) (*Marker, error) {
 
 // @summary    Remove a marker from its owning comp or layer
 // @description Deletes this marker from its owning composition or layer marker set:
-//   it splices out the marker's keyframe block, decrements the count, removes the
-//   marker's record, shifts the trailing markers' offsets down, and drops the
-//   marker from the public list. The receiver is detached afterward — a second
-//   RemoveMarker (or any Set*) errors.
 //
-//   Errors (project untouched) when the marker was built outside the parser, is
-//   already detached, or its chunk references are inconsistent.
+//	it splices out the marker's keyframe block, decrements the count, removes the
+//	marker's record, shifts the trailing markers' offsets down, and drops the
+//	marker from the public list. The receiver is detached afterward — a second
+//	RemoveMarker (or any Set*) errors.
+//
+//	Errors (project untouched) when the marker was built outside the parser, is
+//	already detached, or its chunk references are inconsistent.
+//
 // @param      m  the marker to remove
 // @domain     structural
 // @stability  stable
@@ -612,17 +697,19 @@ func RemoveMarker(m *Marker) error { return serializer.RemoveMarker(m) }
 
 // @summary    Insert a keyframe into a property's stream
 // @description Builds a new keyframe block and inserts it into the property's
-//   keyframe stream (time-sorted; ties land after existing keys at the same
-//   time), then updates the count header. Returns the new keyframe and its index
-//   in the property's keyframe list.
 //
-//   Requires the property to already have at least one keyframe so the new block
-//   can clone the existing layout. For properties without keyframes, use a static
-//   value or the Animate* APIs — synthesizing the keyframe chunks from scratch is
-//   not supported here. value follows the SetValue rules: a float64 for a 1D
-//   property, or a []float64 (length == component count) for a multi-component
-//   property. The new keyframe's interpolation is Linear/Linear with zeroed ease
-//   and tangents; refine it via the returned keyframe's setters.
+//	keyframe stream (time-sorted; ties land after existing keys at the same
+//	time), then updates the count header. Returns the new keyframe and its index
+//	in the property's keyframe list.
+//
+//	Requires the property to already have at least one keyframe so the new block
+//	can clone the existing layout. For properties without keyframes, use a static
+//	value or the Animate* APIs — synthesizing the keyframe chunks from scratch is
+//	not supported here. value follows the SetValue rules: a float64 for a 1D
+//	property, or a []float64 (length == component count) for a multi-component
+//	property. The new keyframe's interpolation is Linear/Linear with zeroed ease
+//	and tangents; refine it via the returned keyframe's setters.
+//
 // @param      p      the property to insert into (must already have >= 1 keyframe)
 // @param      time   keyframe time in seconds
 // @param      value  keyframe value (float64 for 1D, []float64 for multi-component)
@@ -640,8 +727,10 @@ func InsertKeyframe(p *Property, time float64, value any) (*Keyframe, int, error
 
 // @summary    Delete a keyframe from a property's stream by index
 // @description Removes the keyframe at index i from the property's keyframe stream
-//   and decrements the count header. Returns an error when i is out of range or
-//   the property has no keyframe stream.
+//
+//	and decrements the count header. Returns an error when i is out of range or
+//	the property has no keyframe stream.
+//
 // @param      p  the property to delete from
 // @param      i  0-based index of the keyframe to delete
 // @domain     keyframe
@@ -655,17 +744,19 @@ func DeleteKeyframe(p *Property, i int) error { return serializer.DeleteKeyframe
 
 // @summary    Toggle Separate Dimensions on a Position property
 // @description Toggles AE's "Separate Dimensions" on a Position leader, in both
-//   directions. Static Position (2D and 3D) and animated Position on 3D layers
-//   (near-linear leader path-ease) are double-version ship-gated. An animated
-//   leader routes to the keyframe-stream migration paths; animated cases outside
-//   that shipped subset — a 2D layer, or a leader carrying custom spatial-path
-//   temporal ease — are refused rather than written.
 //
-//   Separating migrates the leader's value into per-axis Position followers
-//   (X/Y, plus Z for 3D layers, which is synthesized) and resets the leader;
-//   merging takes the value back into the leader and removes the per-axis
-//   followers. The only fallible step (re-parsing a synthesized Z follower) runs
-//   before any in-place mutation, so a failure leaves the project untouched.
+//	directions. Static Position (2D and 3D) and animated Position on 3D layers
+//	(near-linear leader path-ease) are double-version ship-gated. An animated
+//	leader routes to the keyframe-stream migration paths; animated cases outside
+//	that shipped subset — a 2D layer, or a leader carrying custom spatial-path
+//	temporal ease — are refused rather than written.
+//
+//	Separating migrates the leader's value into per-axis Position followers
+//	(X/Y, plus Z for 3D layers, which is synthesized) and resets the leader;
+//	merging takes the value back into the leader and removes the per-axis
+//	followers. The only fallible step (re-parsing a synthesized Z follower) runs
+//	before any in-place mutation, so a failure leaves the project untouched.
+//
 // @param      p          the Position leader property to toggle
 // @param      separated  true to separate dimensions, false to merge them
 // @domain     structural
@@ -682,11 +773,13 @@ func SetDimensionsSeparated(p *Property, separated bool) error {
 
 // @summary    Remove a group from its parent indexed group
 // @description Deletes this group from its parent indexed group. The receiver must
-//   be a direct child of an indexed group (Effect Parade / Mask Parade / Root
-//   Vectors Group / Text Animators); RemovePropertyGroup returns an error
-//   otherwise, mirroring AE's refuse.
 //
-//   Atomic (snapshot + rollback on any parser warning).
+//	be a direct child of an indexed group (Effect Parade / Mask Parade / Root
+//	Vectors Group / Text Animators); RemovePropertyGroup returns an error
+//	otherwise, mirroring AE's refuse.
+//
+//	Atomic (snapshot + rollback on any parser warning).
+//
 // @param      g  the property group to remove (a direct child of an indexed group)
 // @domain     structural
 // @stability  alpha
@@ -700,9 +793,11 @@ func RemovePropertyGroup(g *AEPropertyGroup) error { return serializer.RemovePro
 
 // @summary    Reorder a group within its parent indexed group
 // @description Reorders this group to position index (0-based) among its parent
-//   indexed group's children; index is range-checked against the current child
-//   count. Mirrors AE's PropertyBase.moveTo (which is 1-based; this API is 0-based
-//   per project convention).
+//
+//	indexed group's children; index is range-checked against the current child
+//	count. Mirrors AE's PropertyBase.moveTo (which is 1-based; this API is 0-based
+//	per project convention).
+//
 // @param      g      the property group to reorder (a direct child of an indexed group)
 // @param      index  0-based target position among the parent's children
 // @domain     structural
@@ -719,21 +814,23 @@ func MovePropertyGroup(g *AEPropertyGroup, index int) error {
 
 // @summary    Duplicate a group within its parent indexed group
 // @description Inserts a copy of this group immediately after it among its parent
-//   indexed group's children — mirroring AE's PropertyBase.duplicate() — and
-//   returns the clone. The receiver must be a direct child of an indexed group
-//   (Effect Parade / Mask Parade / Root Vectors Group / Text Animators);
-//   DuplicatePropertyGroup returns an error otherwise.
 //
-//   The clone reuses the source's match-name and on-disk payload verbatim. AE's
-//   own duplicate additionally persists a deduplicated display name (the
-//   localized "<name> 2"); this call deliberately does NOT synthesize that suffix
-//   — it needs AE's localization database we do not carry, and a clone with no
-//   display-name override is byte-for-byte an "add the same effect twice"
-//   project, which AE accepts and re-derives the runtime dedup name from on open.
-//   The persisted suffix is cosmetic; the structural duplicate is faithful.
+//	indexed group's children — mirroring AE's PropertyBase.duplicate() — and
+//	returns the clone. The receiver must be a direct child of an indexed group
+//	(Effect Parade / Mask Parade / Root Vectors Group / Text Animators);
+//	DuplicatePropertyGroup returns an error otherwise.
 //
-//   Atomic (snapshot + rollback on any parser warning, or if the re-parse fails
-//   to reproduce exactly one clone).
+//	The clone reuses the source's match-name and on-disk payload verbatim. AE's
+//	own duplicate additionally persists a deduplicated display name (the
+//	localized "<name> 2"); this call deliberately does NOT synthesize that suffix
+//	— it needs AE's localization database we do not carry, and a clone with no
+//	display-name override is byte-for-byte an "add the same effect twice"
+//	project, which AE accepts and re-derives the runtime dedup name from on open.
+//	The persisted suffix is cosmetic; the structural duplicate is faithful.
+//
+//	Atomic (snapshot + rollback on any parser warning, or if the re-parse fails
+//	to reproduce exactly one clone).
+//
 // @param      g  the property group to duplicate (a direct child of an indexed group)
 // @returns    the cloned AEPropertyGroup
 // @domain     structural
@@ -750,25 +847,27 @@ func DuplicatePropertyGroup(g *AEPropertyGroup) (*AEPropertyGroup, error) {
 
 // @summary    Append a built-in effect to a layer
 // @description Appends an effect to the layer's Effect Parade and returns the
-//   parsed Effect, so the caller can immediately tune its parameters via
-//   SetEffectParam (or the property tree after a Reopen).
 //
-//   effectMatchName must be one of SupportedEffects(); the effect's full
-//   parameter sub-tree is supplied from an embedded AE-native template, which is
-//   why only reverse-engineered effects are addable. AE looks the effect up by
-//   match-name at load, so the named plugin must be installed in the opening AE —
-//   the seeded effects are built-ins present since before the AE 2020 read floor
-//   and are version-portable (the AE-2020-extracted bytes are accepted by AE
-//   2025).
+//	parsed Effect, so the caller can immediately tune its parameters via
+//	SetEffectParam (or the property tree after a Reopen).
 //
-//   A parsed layer with no effects has no Effect Parade group at all (AE only
-//   persists the parade once at least one effect exists); AddEffect splices an
-//   empty parade in the AE-native form, then adds the effect into it. Camera and
-//   light layers are refused (AE does not allow effects on them), as are layers
-//   built by the structural New* APIs that were never parsed — call Reopen first
-//   and add effects to the re-parsed layer.
+//	effectMatchName must be one of SupportedEffects(); the effect's full
+//	parameter sub-tree is supplied from an embedded AE-native template, which is
+//	why only reverse-engineered effects are addable. AE looks the effect up by
+//	match-name at load, so the named plugin must be installed in the opening AE —
+//	the seeded effects are built-ins present since before the AE 2020 read floor
+//	and are version-portable (the AE-2020-extracted bytes are accepted by AE
+//	2025).
 //
-//   Atomic (snapshot + rollback on any parser warning).
+//	A parsed layer with no effects has no Effect Parade group at all (AE only
+//	persists the parade once at least one effect exists); AddEffect splices an
+//	empty parade in the AE-native form, then adds the effect into it. Camera and
+//	light layers are refused (AE does not allow effects on them), as are layers
+//	built by the structural New* APIs that were never parsed — call Reopen first
+//	and add effects to the re-parsed layer.
+//
+//	Atomic (snapshot + rollback on any parser warning).
+//
 // @param      layer            the parsed layer to add the effect to
 // @param      effectMatchName  the effect match-name (one of SupportedEffects)
 // @returns    the created Effect
@@ -786,7 +885,9 @@ func AddEffect(layer *Layer, effectMatchName string) (*Effect, error) {
 
 // @summary    List the effect match-names AddEffect can add
 // @description Returns the sorted effect match-names AddEffect can add from an
-//   embedded template.
+//
+//	embedded template.
+//
 // @returns    the sorted list of supported effect match-names
 // @domain     meta
 // @stability  stable
@@ -797,26 +898,28 @@ func SupportedEffects() []string { return serializer.SupportedEffects() }
 
 // @summary    Apply an .ffx Animation Preset pseudo effect to a layer
 // @description Splices the pseudo effect carried by an After Effects Animation
-//   Preset (.ffx) into the layer's Effect Parade and returns the parsed Effect.
-//   ffxBytes is the raw .ffx file content.
 //
-//   A pseudo effect (built with the Pseudo Effect Maker) is a user-defined effect
-//   — a named group of standard controls (slider / color / checkbox / point /
-//   angle …) that looks like a native effect. Unlike a native effect (looked up
-//   by match-name in the opening AE), a pseudo effect's full control definition
-//   travels inside the .ffx, so it is self-contained: AE renders it from the
-//   saved .aep bytes without the preset ever being registered. This makes
-//   ApplyPseudoEffect the offline, pure-Go equivalent of AE's applyPreset — no
-//   running AE required.
+//	Preset (.ffx) into the layer's Effect Parade and returns the parsed Effect.
+//	ffxBytes is the raw .ffx file content.
 //
-//   The effect is spliced with its controls at their defined defaults — the
-//   authored values stored in the .ffx are not yet preserved (AE rejects the raw
-//   .ffx value entries spliced into a parade). All controls are present and
-//   tunable in AE; programmatic tuning via Set* after a Reopen is a future step.
+//	A pseudo effect (built with the Pseudo Effect Maker) is a user-defined effect
+//	— a named group of standard controls (slider / color / checkbox / point /
+//	angle …) that looks like a native effect. Unlike a native effect (looked up
+//	by match-name in the opening AE), a pseudo effect's full control definition
+//	travels inside the .ffx, so it is self-contained: AE renders it from the
+//	saved .aep bytes without the preset ever being registered. This makes
+//	ApplyPseudoEffect the offline, pure-Go equivalent of AE's applyPreset — no
+//	running AE required.
 //
-//   Refused (same as AddEffect): camera / light layers, and New*-built layers
-//   never parsed (call Reopen first). Returns an error for a malformed .ffx (not
-//   a RIFX FaFX form, missing payload, or no extractable match-name).
+//	The effect is spliced with its controls at their defined defaults — the
+//	authored values stored in the .ffx are not yet preserved (AE rejects the raw
+//	.ffx value entries spliced into a parade). All controls are present and
+//	tunable in AE; programmatic tuning via Set* after a Reopen is a future step.
+//
+//	Refused (same as AddEffect): camera / light layers, and New*-built layers
+//	never parsed (call Reopen first). Returns an error for a malformed .ffx (not
+//	a RIFX FaFX form, missing payload, or no extractable match-name).
+//
 // @param      layer     the parsed layer to apply the pseudo effect to
 // @param      ffxBytes  the raw .ffx Animation Preset file content
 // @returns    the created Effect
@@ -834,12 +937,14 @@ func ApplyPseudoEffect(layer *Layer, ffxBytes []byte) (*Effect, error) {
 
 // @summary    Apply an .ffx pseudo effect with a custom display name
 // @description ApplyPseudoEffect with a custom effect-instance display name (the
-//   label in AE's Effect Controls / timeline). displayName may be any UTF-8
-//   string — including CJK such as "伪效果" — because AE stores the name as a
-//   length-prefixed byte record and the library counts bytes, not runes, so
-//   multi-byte names round-trip exactly. An empty displayName keeps the .ffx's
-//   own name. The match-name (AE's ASCII lookup key) is unaffected. All other
-//   behavior matches ApplyPseudoEffect.
+//
+//	label in AE's Effect Controls / timeline). displayName may be any UTF-8
+//	string — including CJK such as "伪效果" — because AE stores the name as a
+//	length-prefixed byte record and the library counts bytes, not runes, so
+//	multi-byte names round-trip exactly. An empty displayName keeps the .ffx's
+//	own name. The match-name (AE's ASCII lookup key) is unaffected. All other
+//	behavior matches ApplyPseudoEffect.
+//
 // @param      layer        the parsed layer to apply the pseudo effect to
 // @param      ffxBytes     the raw .ffx Animation Preset file content
 // @param      displayName  custom instance display name (any UTF-8; empty keeps the .ffx name)
@@ -894,8 +999,10 @@ type pseudoConfig struct{ codepage PseudoLabelCodepage }
 
 // @summary    Set the ANSI codepage for a pseudo effect's control labels
 // @description Sets the ANSI codepage the effect's control labels are encoded in
-//   (default PseudoLabelGBK). Pass PseudoLabelShiftJIS for a Japanese effect.
-//   ASCII labels are unaffected. See BuildPseudoEffect for the rationale.
+//
+//	(default PseudoLabelGBK). Pass PseudoLabelShiftJIS for a Japanese effect.
+//	ASCII labels are unaffected. See BuildPseudoEffect for the rationale.
+//
 // @param      cp  the target label codepage
 // @returns    a PseudoOption for BuildPseudoEffect
 // @domain     effect
@@ -921,38 +1028,40 @@ type PseudoControl = serializer.PseudoControl
 
 // @summary    Build a pseudo effect from scratch in Go and apply it
 // @description Builds a Pseudo Effect entirely in Go — no .ffx file and no running
-//   AE — and splices it into the layer's Effect Parade. This is the authoring
-//   direction (what the Pseudo Effect Maker does in AE's UI), brought offline:
-//   name a set of controls and get a live, AE-accepted custom effect on the
-//   layer.
 //
-//   uid is the per-effect unique id (the "<uID>" in match-name
-//   "Pseudo/<uID>/<name>"); name is the match-name segment; displayName is the
-//   effect label (any UTF-8, incl. CJK — empty falls back to name); controls are
-//   the controls in order. Every control definition is synthesized field-by-field
-//   from the reverse-engineered layout, so the supported kinds are exactly what
-//   PseudoControlKind enumerates.
+//	AE — and splices it into the layer's Effect Parade. This is the authoring
+//	direction (what the Pseudo Effect Maker does in AE's UI), brought offline:
+//	name a set of controls and get a live, AE-accepted custom effect on the
+//	layer.
 //
-//   Per-control customization (verified by AE read-back): slider min/max +
-//   default, angle default, checkbox checked, color RGBA, dropdown options +
-//   selected index, point / 3D-point default, and layer-picker binding; zero
-//   values give AE's plain type defaults. A point default is a fraction of the
-//   host layer's coordinate space (e.g. {0.25, 0.125} on a 400×400 source-less
-//   layer reads back as [100, 50]). Group and Label kinds are flat marker
-//   controls — AE's pseudo-effect "groups" are a visual grouping in the Effect
-//   Controls panel, not a nested property group. A PseudoLabel with
-//   Dimmed=false is a normal bright label; Dimmed=true sets the AE panel's
-//   gray/dim label flag.
+//	uid is the per-effect unique id (the "<uID>" in match-name
+//	"Pseudo/<uID>/<name>"); name is the match-name segment; displayName is the
+//	effect label (any UTF-8, incl. CJK — empty falls back to name); controls are
+//	the controls in order. Every control definition is synthesized field-by-field
+//	from the reverse-engineered layout, so the supported kinds are exactly what
+//	PseudoControlKind enumerates.
 //
-//   Control labels are written into the name field, which AE decodes in the
-//   viewing machine's system ANSI codepage (not UTF-8). ASCII labels are exact
-//   everywhere; a CJK label is encoded in the codepage chosen by WithLabelCodepage
-//   (default GBK simplified-Chinese; Shift-JIS for Japanese) — byte-identical to
-//   AE's own output on that locale, so it displays correctly on a matching Windows
-//   and mojibakes elsewhere (an AE architecture limit).
+//	Per-control customization (verified by AE read-back): slider min/max +
+//	default, angle default, checkbox checked, color RGBA, dropdown options +
+//	selected index, point / 3D-point default, and layer-picker binding; zero
+//	values give AE's plain type defaults. A point default is a fraction of the
+//	host layer's coordinate space (e.g. {0.25, 0.125} on a 400×400 source-less
+//	layer reads back as [100, 50]). Group and Label kinds are flat marker
+//	controls — AE's pseudo-effect "groups" are a visual grouping in the Effect
+//	Controls panel, not a nested property group. A PseudoLabel with
+//	Dimmed=false is a normal bright label; Dimmed=true sets the AE panel's
+//	gray/dim label flag.
 //
-//   Refused (same as AddEffect): camera / light layers, and New*-built layers
-//   never parsed (call Reopen first).
+//	Control labels are written into the name field, which AE decodes in the
+//	viewing machine's system ANSI codepage (not UTF-8). ASCII labels are exact
+//	everywhere; a CJK label is encoded in the codepage chosen by WithLabelCodepage
+//	(default GBK simplified-Chinese; Shift-JIS for Japanese) — byte-identical to
+//	AE's own output on that locale, so it displays correctly on a matching Windows
+//	and mojibakes elsewhere (an AE architecture limit).
+//
+//	Refused (same as AddEffect): camera / light layers, and New*-built layers
+//	never parsed (call Reopen first).
+//
 // @param      layer        the parsed layer to add the pseudo effect to
 // @param      uid          per-effect unique id (the match-name "<uID>" segment)
 // @param      name         the match-name segment
@@ -978,16 +1087,18 @@ func BuildPseudoEffect(layer *Layer, uid, name, displayName string, controls []P
 
 // @summary    Add a per-character Opacity animator to a text layer
 // @description Adds a per-character Opacity animator with a Range Selector — the
-//   kinetic-typography primitive that fades / wipes text in or out one character
-//   at a time. opacity (0–100) is applied to the selected characters; rangeStart
-//   / rangeEnd / rangeOffset are the Range Selector bounds in percent. Animate the
-//   reveal over time by keyframing the Range Offset with AnimateTextRangeOffset.
 //
-//   Text animators live in the "ADBE Text Animators" indexed group nested inside
-//   the layer's Text Properties group. A fresh text layer carries no Animators
-//   group, so the first animator splices the whole group in; later animators
-//   append into it. Refused on non-text layers and on text layers built by New*
-//   that were never parsed (call Reopen first).
+//	kinetic-typography primitive that fades / wipes text in or out one character
+//	at a time. opacity (0–100) is applied to the selected characters; rangeStart
+//	/ rangeEnd / rangeOffset are the Range Selector bounds in percent. Animate the
+//	reveal over time by keyframing the Range Offset with AnimateTextRangeOffset.
+//
+//	Text animators live in the "ADBE Text Animators" indexed group nested inside
+//	the layer's Text Properties group. A fresh text layer carries no Animators
+//	group, so the first animator splices the whole group in; later animators
+//	append into it. Refused on non-text layers and on text layers built by New*
+//	that were never parsed (call Reopen first).
+//
 // @param      layer        the parsed text layer to add the animator to
 // @param      opacity      per-character opacity applied to the selection (0–100)
 // @param      rangeStart   Range Selector start bound, in percent
@@ -1008,12 +1119,14 @@ func AddTextOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, rangeOf
 
 // @summary    Add a per-character Position animator to a text layer
 // @description Adds a per-character Position 3D animator with a Range Selector —
-//   the kinetic-typography primitive that slides / drops characters into place one
-//   at a time. x / y / z is the position offset (pixels) applied to the selected
-//   characters; rangeStart / rangeEnd / rangeOffset are the Range Selector bounds
-//   in percent. Canonical reveal: offset (0, -100, 0), Start=0/End=100, then sweep
-//   the Range Offset 0→100 over time with AnimateTextRangeOffset. Refused on
-//   non-text layers and on un-Reopened New*-built text layers.
+//
+//	the kinetic-typography primitive that slides / drops characters into place one
+//	at a time. x / y / z is the position offset (pixels) applied to the selected
+//	characters; rangeStart / rangeEnd / rangeOffset are the Range Selector bounds
+//	in percent. Canonical reveal: offset (0, -100, 0), Start=0/End=100, then sweep
+//	the Range Offset 0→100 over time with AnimateTextRangeOffset. Refused on
+//	non-text layers and on un-Reopened New*-built text layers.
+//
 // @param      layer        the parsed text layer to add the animator to
 // @param      x            per-character X position offset, in pixels
 // @param      y            per-character Y position offset, in pixels
@@ -1036,13 +1149,15 @@ func AddTextPositionAnimator(layer *Layer, x, y, z, rangeStart, rangeEnd, rangeO
 
 // @summary    Add a per-character Scale animator to a text layer
 // @description Adds a per-character Scale 3D animator with a Range Selector — the
-//   kinetic-typography primitive that pops / grows characters into place one at a
-//   time. sx / sy / sz is the scale percent (100 = unchanged) applied to the
-//   selected characters; rangeStart / rangeEnd / rangeOffset are the Range
-//   Selector bounds in percent. Canonical reveal: scale (0, 0, 100) for a pop-in,
-//   Start=0/End=100, then sweep the Range Offset 0→100 over time with
-//   AnimateTextRangeOffset. Refused on non-text layers and on un-Reopened
-//   New*-built text layers.
+//
+//	kinetic-typography primitive that pops / grows characters into place one at a
+//	time. sx / sy / sz is the scale percent (100 = unchanged) applied to the
+//	selected characters; rangeStart / rangeEnd / rangeOffset are the Range
+//	Selector bounds in percent. Canonical reveal: scale (0, 0, 100) for a pop-in,
+//	Start=0/End=100, then sweep the Range Offset 0→100 over time with
+//	AnimateTextRangeOffset. Refused on non-text layers and on un-Reopened
+//	New*-built text layers.
+//
 // @param      layer        the parsed text layer to add the animator to
 // @param      sx           per-character X scale, in percent (100 = unchanged)
 // @param      sy           per-character Y scale, in percent (100 = unchanged)
@@ -1065,13 +1180,15 @@ func AddTextScaleAnimator(layer *Layer, sx, sy, sz, rangeStart, rangeEnd, rangeO
 
 // @summary    Add a per-character Rotation animator to a text layer
 // @description Adds a per-character Rotation animator with a Range Selector — the
-//   kinetic-typography primitive that spins characters into place one at a time.
-//   rotation is the angle in degrees applied to the selected characters (each
-//   rotates about its own anchor); rangeStart / rangeEnd / rangeOffset are the
-//   Range Selector bounds in percent. Canonical reveal: rotation 90,
-//   Start=0/End=100, then sweep the Range Offset 0→100 over time with
-//   AnimateTextRangeOffset. Refused on non-text layers and on un-Reopened
-//   New*-built text layers.
+//
+//	kinetic-typography primitive that spins characters into place one at a time.
+//	rotation is the angle in degrees applied to the selected characters (each
+//	rotates about its own anchor); rangeStart / rangeEnd / rangeOffset are the
+//	Range Selector bounds in percent. Canonical reveal: rotation 90,
+//	Start=0/End=100, then sweep the Range Offset 0→100 over time with
+//	AnimateTextRangeOffset. Refused on non-text layers and on un-Reopened
+//	New*-built text layers.
+//
 // @param      layer        the parsed text layer to add the animator to
 // @param      rotation     per-character rotation, in degrees
 // @param      rangeStart   Range Selector start bound, in percent
@@ -1092,12 +1209,14 @@ func AddTextRotationAnimator(layer *Layer, rotation, rangeStart, rangeEnd, range
 
 // @summary    Add a per-character Fill Color animator to a text layer
 // @description Adds a per-character Fill Color animator with a Range Selector — the
-//   kinetic-typography primitive that tints characters one at a time (e.g. a color
-//   wipe sweeping across the text). r / g / b / a is the target color applied to
-//   the selected characters (each channel 0..1); rangeStart / rangeEnd /
-//   rangeOffset are the Range Selector bounds in percent. Sweep the Range Offset
-//   0→100 over time with AnimateTextRangeOffset for the wipe. Refused on non-text
-//   layers and on un-Reopened New*-built text layers.
+//
+//	kinetic-typography primitive that tints characters one at a time (e.g. a color
+//	wipe sweeping across the text). r / g / b / a is the target color applied to
+//	the selected characters (each channel 0..1); rangeStart / rangeEnd /
+//	rangeOffset are the Range Selector bounds in percent. Sweep the Range Offset
+//	0→100 over time with AnimateTextRangeOffset for the wipe. Refused on non-text
+//	layers and on un-Reopened New*-built text layers.
+//
 // @param      layer        the parsed text layer to add the animator to
 // @param      r            target fill red channel (0..1)
 // @param      g            target fill green channel (0..1)
@@ -1121,11 +1240,13 @@ func AddTextColorAnimator(layer *Layer, r, g, b, a, rangeStart, rangeEnd, rangeO
 
 // @summary    Add a per-character Fill Opacity animator to a text layer
 // @description Adds a per-character Fill Opacity animator with a Range Selector —
-//   like AddTextOpacityAnimator, but it fades only the glyph fill (leaving any
-//   stroke intact). opacity (0–100) is applied to the selected characters;
-//   rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent.
-//   Sweep the Range Offset over time with AnimateTextRangeOffset for a fill-only
-//   reveal. Refused on non-text layers and on un-Reopened New*-built text layers.
+//
+//	like AddTextOpacityAnimator, but it fades only the glyph fill (leaving any
+//	stroke intact). opacity (0–100) is applied to the selected characters;
+//	rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent.
+//	Sweep the Range Offset over time with AnimateTextRangeOffset for a fill-only
+//	reveal. Refused on non-text layers and on un-Reopened New*-built text layers.
+//
 // @param      layer        the parsed text layer to add the animator to
 // @param      opacity      per-character fill opacity applied to the selection (0–100)
 // @param      rangeStart   Range Selector start bound, in percent
@@ -1146,11 +1267,13 @@ func AddTextFillOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, ran
 
 // @summary    Add a per-character Stroke Opacity animator to a text layer
 // @description Adds a per-character Stroke Opacity animator with a Range Selector —
-//   it fades only the glyph stroke. opacity (0–100) is applied to the selected
-//   characters' stroke; the text must carry a stroke (apply-stroke + non-zero
-//   stroke width) for the effect to be visible. rangeStart / rangeEnd /
-//   rangeOffset are the Range Selector bounds in percent. Refused on non-text
-//   layers and on un-Reopened New*-built text layers.
+//
+//	it fades only the glyph stroke. opacity (0–100) is applied to the selected
+//	characters' stroke; the text must carry a stroke (apply-stroke + non-zero
+//	stroke width) for the effect to be visible. rangeStart / rangeEnd /
+//	rangeOffset are the Range Selector bounds in percent. Refused on non-text
+//	layers and on un-Reopened New*-built text layers.
+//
 // @param      layer        the parsed text layer to add the animator to
 // @param      opacity      per-character stroke opacity applied to the selection (0–100)
 // @param      rangeStart   Range Selector start bound, in percent
@@ -1171,11 +1294,13 @@ func AddTextStrokeOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, r
 
 // @summary    Add a per-character Stroke Width animator to a text layer
 // @description Adds a per-character Stroke Width animator with a Range Selector —
-//   it grows / shrinks the glyph stroke. width (pixels) is applied to the selected
-//   characters' stroke; the text must carry a stroke (apply-stroke enabled) for
-//   the effect to be visible. rangeStart / rangeEnd / rangeOffset are the Range
-//   Selector bounds in percent. Refused on non-text layers and on un-Reopened
-//   New*-built text layers.
+//
+//	it grows / shrinks the glyph stroke. width (pixels) is applied to the selected
+//	characters' stroke; the text must carry a stroke (apply-stroke enabled) for
+//	the effect to be visible. rangeStart / rangeEnd / rangeOffset are the Range
+//	Selector bounds in percent. Refused on non-text layers and on un-Reopened
+//	New*-built text layers.
+//
 // @param      layer        the parsed text layer to add the animator to
 // @param      width        per-character stroke width, in pixels
 // @param      rangeStart   Range Selector start bound, in percent
@@ -1196,11 +1321,13 @@ func AddTextStrokeWidthAnimator(layer *Layer, width, rangeStart, rangeEnd, range
 
 // @summary    Add a per-character Skew animator to a text layer
 // @description Adds a per-character Skew animator with a Range Selector — the
-//   kinetic-typography primitive that shears characters into place. skew is the
-//   shear angle in degrees applied to the selected characters; rangeStart /
-//   rangeEnd / rangeOffset are the Range Selector bounds in percent. Sweep the
-//   Range Offset over time with AnimateTextRangeOffset for a shear-in. Refused on
-//   non-text layers and on un-Reopened New*-built text layers.
+//
+//	kinetic-typography primitive that shears characters into place. skew is the
+//	shear angle in degrees applied to the selected characters; rangeStart /
+//	rangeEnd / rangeOffset are the Range Selector bounds in percent. Sweep the
+//	Range Offset over time with AnimateTextRangeOffset for a shear-in. Refused on
+//	non-text layers and on un-Reopened New*-built text layers.
+//
 // @param      layer        the parsed text layer to add the animator to
 // @param      skew         per-character shear angle, in degrees
 // @param      rangeStart   Range Selector start bound, in percent
@@ -1221,12 +1348,14 @@ func AddTextSkewAnimator(layer *Layer, skew, rangeStart, rangeEnd, rangeOffset f
 
 // @summary    Add a per-character Tracking animator to a text layer
 // @description Adds a per-character Tracking animator with a Range Selector — the
-//   kinetic-typography primitive that spreads (or tightens) the spacing between
-//   the selected characters. tracking is the inter-character spacing in 1/1000 em
-//   applied to the selected characters; rangeStart / rangeEnd / rangeOffset are
-//   the Range Selector bounds in percent. Sweep the Range Offset over time with
-//   AnimateTextRangeOffset, or keyframe the value itself with AnimateTextTracking.
-//   Refused on non-text layers and on un-Reopened New*-built text layers.
+//
+//	kinetic-typography primitive that spreads (or tightens) the spacing between
+//	the selected characters. tracking is the inter-character spacing in 1/1000 em
+//	applied to the selected characters; rangeStart / rangeEnd / rangeOffset are
+//	the Range Selector bounds in percent. Sweep the Range Offset over time with
+//	AnimateTextRangeOffset, or keyframe the value itself with AnimateTextTracking.
+//	Refused on non-text layers and on un-Reopened New*-built text layers.
+//
 // @param      layer        the parsed text layer to add the animator to
 // @param      tracking     per-character spacing, in 1/1000 em
 // @param      rangeStart   Range Selector start bound, in percent
@@ -1247,12 +1376,14 @@ func AddTextTrackingAnimator(layer *Layer, tracking, rangeStart, rangeEnd, range
 
 // @summary    Add a per-character Character Offset animator to a text layer
 // @description Adds a per-character Character Offset animator with a Range Selector
-//   — the kinetic-typography primitive that shifts each selected glyph's code
-//   through the alphabet (the "scramble" / decode reveal). offset is the number of
-//   positions to shift the selected characters; rangeStart / rangeEnd / rangeOffset
-//   are the Range Selector bounds in percent. Keyframe the value over time with
-//   AnimateTextCharacterOffset for an animated decode. Refused on non-text layers
-//   and on un-Reopened New*-built text layers.
+//
+//	— the kinetic-typography primitive that shifts each selected glyph's code
+//	through the alphabet (the "scramble" / decode reveal). offset is the number of
+//	positions to shift the selected characters; rangeStart / rangeEnd / rangeOffset
+//	are the Range Selector bounds in percent. Keyframe the value over time with
+//	AnimateTextCharacterOffset for an animated decode. Refused on non-text layers
+//	and on un-Reopened New*-built text layers.
+//
 // @param      layer        the parsed text layer to add the animator to
 // @param      offset       per-character code shift (positions through the alphabet)
 // @param      rangeStart   Range Selector start bound, in percent
@@ -1273,11 +1404,13 @@ func AddTextCharacterOffsetAnimator(layer *Layer, offset, rangeStart, rangeEnd, 
 
 // @summary    Add a per-character Rotation X animator to a text layer
 // @description Adds a per-character Rotation X animator with a Range Selector — a
-//   3D rotation about each character's horizontal axis (the characters tumble
-//   forward / back). rotation is the angle in degrees applied to the selected
-//   characters; rangeStart / rangeEnd / rangeOffset are the Range Selector bounds
-//   in percent. Refused on non-text layers and on un-Reopened New*-built text
-//   layers.
+//
+//	3D rotation about each character's horizontal axis (the characters tumble
+//	forward / back). rotation is the angle in degrees applied to the selected
+//	characters; rangeStart / rangeEnd / rangeOffset are the Range Selector bounds
+//	in percent. Refused on non-text layers and on un-Reopened New*-built text
+//	layers.
+//
 // @param      layer        the parsed text layer to add the animator to
 // @param      rotation     per-character X-axis rotation, in degrees
 // @param      rangeStart   Range Selector start bound, in percent
@@ -1297,10 +1430,12 @@ func AddTextRotationXAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rang
 
 // @summary    Add a per-character Rotation Y animator to a text layer
 // @description Adds a per-character Rotation Y animator with a Range Selector — a
-//   3D rotation about each character's vertical axis (the characters swing left /
-//   right). rotation is the angle in degrees applied to the selected characters;
-//   rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent.
-//   Refused on non-text layers and on un-Reopened New*-built text layers.
+//
+//	3D rotation about each character's vertical axis (the characters swing left /
+//	right). rotation is the angle in degrees applied to the selected characters;
+//	rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent.
+//	Refused on non-text layers and on un-Reopened New*-built text layers.
+//
 // @param      layer        the parsed text layer to add the animator to
 // @param      rotation     per-character Y-axis rotation, in degrees
 // @param      rangeStart   Range Selector start bound, in percent
@@ -1320,11 +1455,13 @@ func AddTextRotationYAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rang
 
 // @summary    Add a per-character Stroke Color animator to a text layer
 // @description Adds a per-character Stroke Color animator with a Range Selector —
-//   it tints only the glyph stroke. r / g / b / a is the target color (each
-//   channel 0..1) applied to the selected characters' stroke; the text must carry
-//   a stroke (apply-stroke + non-zero stroke width) for the effect to be visible.
-//   rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent.
-//   Refused on non-text layers and on un-Reopened New*-built text layers.
+//
+//	it tints only the glyph stroke. r / g / b / a is the target color (each
+//	channel 0..1) applied to the selected characters' stroke; the text must carry
+//	a stroke (apply-stroke + non-zero stroke width) for the effect to be visible.
+//	rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent.
+//	Refused on non-text layers and on un-Reopened New*-built text layers.
+//
 // @param      layer        the parsed text layer to add the animator to
 // @param      r            target stroke red channel (0..1)
 // @param      g            target stroke green channel (0..1)
@@ -1348,12 +1485,14 @@ func AddTextStrokeColorAnimator(layer *Layer, r, g, b, a, rangeStart, rangeEnd, 
 
 // @summary    Add another Range Selector to a text animator
 // @description Adds another Range Selector to the layer's first text animator (a
-//   fresh animator carries one selector). Multiple selectors combine per each
-//   selector's Mode — the default is Add (union of the ranges); set a selector's
-//   Mode via SetTextRangeAdvanced. start / end / offset are the new selector's
-//   bounds in percent. Sweep any selector's Offset over time with
-//   AnimateTextRangeOffset (which targets the first selector). Refused on non-text
-//   layers, un-Reopened New*-built text layers, and layers with no text animator.
+//
+//	fresh animator carries one selector). Multiple selectors combine per each
+//	selector's Mode — the default is Add (union of the ranges); set a selector's
+//	Mode via SetTextRangeAdvanced. start / end / offset are the new selector's
+//	bounds in percent. Sweep any selector's Offset over time with
+//	AnimateTextRangeOffset (which targets the first selector). Refused on non-text
+//	layers, un-Reopened New*-built text layers, and layers with no text animator.
+//
 // @param      layer   the parsed text layer whose animator to extend
 // @param      start   selector start bound, in percent
 // @param      end     selector end bound, in percent
@@ -1373,13 +1512,15 @@ func AddTextRangeSelector(layer *Layer, start, end, offset float64) (*AEProperty
 
 // @summary    Add a Wiggly Selector to a text animator
 // @description Adds a Wiggly Selector to the layer's first text animator — a
-//   selector whose selection amount wobbles randomly (but deterministically per
-//   seed) over time, so the characters flicker / jitter in and out (the wiggle
-//   kinetic-typography primitive). The embedded selector uses AE's defaults
-//   (temporal frequency 2/s, max 100 / min 0), so it animates on its own with no
-//   keyframes; combine it with a range selector via Mode, or use an empty range so
-//   the wiggle drives selection alone. Refused on non-text layers, un-Reopened
-//   New*-built text layers, and layers with no text animator.
+//
+//	selector whose selection amount wobbles randomly (but deterministically per
+//	seed) over time, so the characters flicker / jitter in and out (the wiggle
+//	kinetic-typography primitive). The embedded selector uses AE's defaults
+//	(temporal frequency 2/s, max 100 / min 0), so it animates on its own with no
+//	keyframes; combine it with a range selector via Mode, or use an empty range so
+//	the wiggle drives selection alone. Refused on non-text layers, un-Reopened
+//	New*-built text layers, and layers with no text animator.
+//
 // @param      layer  the parsed text layer whose animator to extend
 // @returns    a stand-in group node referencing the spliced selector
 // @domain     text
@@ -1396,17 +1537,19 @@ func AddTextWigglySelector(layer *Layer) (*AEPropertyGroup, error) {
 
 // @summary    Add an expression-driven selector to a text animator
 // @description Adds an Expressible Selector to the layer's first text animator and
-//   drives its per-character selection with amountExpr, an expression returning
-//   the selection percentage (0..100). The expression (which can read textIndex /
-//   textTotal / time / selectorValue) decides which glyphs the animator affects
-//   and by how much.
 //
-//   Unlike the Range / Wiggly selectors, the Expressible Amount is
-//   expression-only — it has no usable static value, so amountExpr must be
-//   non-empty (an empty expression yields an inert selector). Typical idioms:
-//   "textIndex <= 3 ? 100 : 0" (first 3 glyphs), "selectorValue" (all glyphs), or
-//   a time-driven sweep. Refused on non-text layers, un-Reopened New*-built text
-//   layers, layers with no text animator, and an empty amountExpr.
+//	drives its per-character selection with amountExpr, an expression returning
+//	the selection percentage (0..100). The expression (which can read textIndex /
+//	textTotal / time / selectorValue) decides which glyphs the animator affects
+//	and by how much.
+//
+//	Unlike the Range / Wiggly selectors, the Expressible Amount is
+//	expression-only — it has no usable static value, so amountExpr must be
+//	non-empty (an empty expression yields an inert selector). Typical idioms:
+//	"textIndex <= 3 ? 100 : 0" (first 3 glyphs), "selectorValue" (all glyphs), or
+//	a time-driven sweep. Refused on non-text layers, un-Reopened New*-built text
+//	layers, layers with no text animator, and an empty amountExpr.
+//
 // @param      layer       the parsed text layer whose animator to extend
 // @param      amountExpr  expression returning the selection percentage (0..100)
 // @returns    a stand-in group node referencing the spliced selector
@@ -1430,9 +1573,11 @@ type TextRangeAdvanced = serializer.TextRangeAdvanced
 
 // @summary    Return the Range Advanced params at their AE defaults
 // @description Returns the Range Advanced params at their AE defaults
-//   (Units=Percentage, BasedOn=Characters, Mode=Add, Amount=100, Shape=Square,
-//   Smoothness=100, eases=0, no randomize). Tweak the fields you want, then pass
-//   the result to SetTextRangeAdvanced.
+//
+//	(Units=Percentage, BasedOn=Characters, Mode=Add, Amount=100, Shape=Square,
+//	Smoothness=100, eases=0, no randomize). Tweak the fields you want, then pass
+//	the result to SetTextRangeAdvanced.
+//
 // @returns    the Range Advanced params at their AE defaults
 // @domain     meta
 // @stability  stable
@@ -1443,14 +1588,16 @@ func DefaultTextRangeAdvanced() TextRangeAdvanced { return serializer.DefaultTex
 
 // @summary    Set the Range Advanced params on a text animator
 // @description Sets the Range Advanced params on the layer's first text animator's
-//   Range Selector — the selector-shaping controls behind a kinetic-typography
-//   reveal (how strongly the animator applies via Amount, the selection falloff
-//   Shape, the combination Mode for multi-selector setups, etc.). The Advanced
-//   group is elided on a fresh selector, so this materializes it from an embedded
-//   AE-native template, resets every slot to its AE default, then writes adv's
-//   values; it is idempotent. Build adv with DefaultTextRangeAdvanced and tweak
-//   fields. Refused on non-text layers, un-Reopened New*-built text layers, and
-//   layers with no text animator.
+//
+//	Range Selector — the selector-shaping controls behind a kinetic-typography
+//	reveal (how strongly the animator applies via Amount, the selection falloff
+//	Shape, the combination Mode for multi-selector setups, etc.). The Advanced
+//	group is elided on a fresh selector, so this materializes it from an embedded
+//	AE-native template, resets every slot to its AE default, then writes adv's
+//	values; it is idempotent. Build adv with DefaultTextRangeAdvanced and tweak
+//	fields. Refused on non-text layers, un-Reopened New*-built text layers, and
+//	layers with no text animator.
+//
 // @param      layer  the parsed text layer whose animator to configure
 // @param      adv    the Range Advanced params to write
 // @domain     text
@@ -1467,11 +1614,13 @@ func SetTextRangeAdvanced(layer *Layer, adv TextRangeAdvanced) error {
 
 // @summary    Keyframe a text animator's Range Selector Offset
 // @description Keyframes a text animator's Range Selector Offset, turning a static
-//   reveal into an animated sweep — the kinetic-typography payoff. Pair it with an
-//   Opacity-0 animator (Start=0/End=100): sweeping the Offset 0→100 over time
-//   reveals the characters one by one as the selection window slides off the text.
-//   Operates on the layer's first animator; needs >= 2 keyframes; tickRate <= 0
-//   uses the comp's.
+//
+//	reveal into an animated sweep — the kinetic-typography payoff. Pair it with an
+//	Opacity-0 animator (Start=0/End=100): sweeping the Offset 0→100 over time
+//	reveals the characters one by one as the selection window slides off the text.
+//	Operates on the layer's first animator; needs >= 2 keyframes; tickRate <= 0
+//	uses the comp's.
+//
 // @param      layer     the parsed text layer whose animator to keyframe
 // @param      tickRate  keyframe time base (<= 0 uses the comp's)
 // @param      kfs       the scalar keyframes (>= 2) for the Range Offset
@@ -1489,12 +1638,14 @@ func AnimateTextRangeOffset(layer *Layer, tickRate float64, kfs []ScalarKeyframe
 
 // @summary    Keyframe a text animator's per-character Opacity
 // @description Keyframes the per-character Opacity leaf of a text layer's first
-//   animator (added via AddTextOpacityAnimator) — animating the driven value
-//   itself rather than sweeping the Range Selector, so every selected character
-//   shares the curve and the text fades as one synchronized group (a pulse /
-//   blink). Needs >= 2 keyframes; tickRate <= 0 uses the comp's. Refused on
-//   non-text layers, layers without an Opacity-animator leaf, and an
-//   already-animated Opacity leaf.
+//
+//	animator (added via AddTextOpacityAnimator) — animating the driven value
+//	itself rather than sweeping the Range Selector, so every selected character
+//	shares the curve and the text fades as one synchronized group (a pulse /
+//	blink). Needs >= 2 keyframes; tickRate <= 0 uses the comp's. Refused on
+//	non-text layers, layers without an Opacity-animator leaf, and an
+//	already-animated Opacity leaf.
+//
 // @param      layer     the parsed text layer whose animator to keyframe
 // @param      tickRate  keyframe time base (<= 0 uses the comp's)
 // @param      kfs       the scalar keyframes (>= 2) for the Opacity leaf
@@ -1511,11 +1662,13 @@ func AnimateTextOpacity(layer *Layer, tickRate float64, kfs []ScalarKeyframe) er
 
 // @summary    Keyframe a text animator's per-character Fill Opacity
 // @description Keyframes the per-character Fill Opacity leaf of a text layer's
-//   first animator (added via AddTextFillOpacityAnimator) — animating the driven
-//   fill-alpha value itself, so every selected character shares the same fill
-//   fade curve while stroke opacity remains separate. Needs >= 2 keyframes;
-//   tickRate <= 0 uses the comp's. Refused on non-text layers, layers without a
-//   Fill Opacity animator leaf, and an already-animated Fill Opacity leaf.
+//
+//	first animator (added via AddTextFillOpacityAnimator) — animating the driven
+//	fill-alpha value itself, so every selected character shares the same fill
+//	fade curve while stroke opacity remains separate. Needs >= 2 keyframes;
+//	tickRate <= 0 uses the comp's. Refused on non-text layers, layers without a
+//	Fill Opacity animator leaf, and an already-animated Fill Opacity leaf.
+//
 // @param      layer     the parsed text layer whose animator to keyframe
 // @param      tickRate  keyframe time base (<= 0 uses the comp's)
 // @param      kfs       the scalar keyframes (>= 2) for the Fill Opacity leaf
@@ -1532,8 +1685,10 @@ func AnimateTextFillOpacity(layer *Layer, tickRate float64, kfs []ScalarKeyframe
 
 // @summary    Keyframe a text animator's per-character Stroke Opacity
 // @description Keyframes the per-character Stroke Opacity leaf of a text layer's
-//   first animator (added via AddTextStrokeOpacityAnimator). Needs >= 2
-//   keyframes; tickRate <= 0 uses the comp's.
+//
+//	first animator (added via AddTextStrokeOpacityAnimator). Needs >= 2
+//	keyframes; tickRate <= 0 uses the comp's.
+//
 // @param      layer     the parsed text layer whose animator to keyframe
 // @param      tickRate  keyframe time base (<= 0 uses the comp's)
 // @param      kfs       the scalar keyframes (>= 2) for the Stroke Opacity leaf
@@ -1550,8 +1705,10 @@ func AnimateTextStrokeOpacity(layer *Layer, tickRate float64, kfs []ScalarKeyfra
 
 // @summary    Keyframe a text animator's per-character Stroke Width
 // @description Keyframes the per-character Stroke Width leaf of a text layer's
-//   first animator (added via AddTextStrokeWidthAnimator). Needs >= 2 keyframes;
-//   tickRate <= 0 uses the comp's.
+//
+//	first animator (added via AddTextStrokeWidthAnimator). Needs >= 2 keyframes;
+//	tickRate <= 0 uses the comp's.
+//
 // @param      layer     the parsed text layer whose animator to keyframe
 // @param      tickRate  keyframe time base (<= 0 uses the comp's)
 // @param      kfs       the scalar keyframes (>= 2) for the Stroke Width leaf
@@ -1568,8 +1725,10 @@ func AnimateTextStrokeWidth(layer *Layer, tickRate float64, kfs []ScalarKeyframe
 
 // @summary    Keyframe a text animator's per-character Skew
 // @description Keyframes the per-character Skew leaf of a text layer's first
-//   animator (added via AddTextSkewAnimator). Needs >= 2 keyframes; tickRate <=
-//   0 uses the comp's.
+//
+//	animator (added via AddTextSkewAnimator). Needs >= 2 keyframes; tickRate <=
+//	0 uses the comp's.
+//
 // @param      layer     the parsed text layer whose animator to keyframe
 // @param      tickRate  keyframe time base (<= 0 uses the comp's)
 // @param      kfs       the scalar keyframes (>= 2) for the Skew leaf
@@ -1586,8 +1745,10 @@ func AnimateTextSkew(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error
 
 // @summary    Keyframe a text animator's per-character Rotation X
 // @description Keyframes the per-character Rotation X leaf of a text layer's
-//   first animator (added via AddTextRotationXAnimator). Needs >= 2 keyframes;
-//   tickRate <= 0 uses the comp's.
+//
+//	first animator (added via AddTextRotationXAnimator). Needs >= 2 keyframes;
+//	tickRate <= 0 uses the comp's.
+//
 // @param      layer     the parsed text layer whose animator to keyframe
 // @param      tickRate  keyframe time base (<= 0 uses the comp's)
 // @param      kfs       the scalar keyframes (>= 2) for the Rotation X leaf
@@ -1604,8 +1765,10 @@ func AnimateTextRotationX(layer *Layer, tickRate float64, kfs []ScalarKeyframe) 
 
 // @summary    Keyframe a text animator's per-character Rotation Y
 // @description Keyframes the per-character Rotation Y leaf of a text layer's
-//   first animator (added via AddTextRotationYAnimator). Needs >= 2 keyframes;
-//   tickRate <= 0 uses the comp's.
+//
+//	first animator (added via AddTextRotationYAnimator). Needs >= 2 keyframes;
+//	tickRate <= 0 uses the comp's.
+//
 // @param      layer     the parsed text layer whose animator to keyframe
 // @param      tickRate  keyframe time base (<= 0 uses the comp's)
 // @param      kfs       the scalar keyframes (>= 2) for the Rotation Y leaf
@@ -1622,11 +1785,13 @@ func AnimateTextRotationY(layer *Layer, tickRate float64, kfs []ScalarKeyframe) 
 
 // @summary    Keyframe a text animator's per-character Rotation
 // @description Keyframes the per-character Rotation leaf of a text layer's first
-//   animator (added via AddTextRotationAnimator) — animating the driven angle
-//   itself, so every selected character shares the curve and the text spins as one
-//   synchronized group (e.g. a continuous 0→360 spin). Needs >= 2 keyframes;
-//   tickRate <= 0 uses the comp's. Refused on non-text layers, layers without a
-//   Rotation-animator leaf, and an already-animated Rotation leaf.
+//
+//	animator (added via AddTextRotationAnimator) — animating the driven angle
+//	itself, so every selected character shares the curve and the text spins as one
+//	synchronized group (e.g. a continuous 0→360 spin). Needs >= 2 keyframes;
+//	tickRate <= 0 uses the comp's. Refused on non-text layers, layers without a
+//	Rotation-animator leaf, and an already-animated Rotation leaf.
+//
 // @param      layer     the parsed text layer whose animator to keyframe
 // @param      tickRate  keyframe time base (<= 0 uses the comp's)
 // @param      kfs       the scalar keyframes (>= 2) for the Rotation leaf
@@ -1644,11 +1809,13 @@ func AnimateTextRotation(layer *Layer, tickRate float64, kfs []ScalarKeyframe) e
 
 // @summary    Keyframe a text animator's per-character Tracking
 // @description Keyframes the Tracking Amount leaf of a text layer's first animator
-//   (added via AddTextTrackingAnimator) — animating the inter-character spacing
-//   itself over time, so every selected character shares the curve (e.g. letters
-//   spreading apart). Needs >= 2 keyframes; tickRate <= 0 uses the comp's. Refused
-//   on non-text layers, layers without a Tracking-animator leaf, and an already-
-//   animated Tracking leaf.
+//
+//	(added via AddTextTrackingAnimator) — animating the inter-character spacing
+//	itself over time, so every selected character shares the curve (e.g. letters
+//	spreading apart). Needs >= 2 keyframes; tickRate <= 0 uses the comp's. Refused
+//	on non-text layers, layers without a Tracking-animator leaf, and an already-
+//	animated Tracking leaf.
+//
 // @param      layer     the parsed text layer whose animator to keyframe
 // @param      tickRate  keyframe time base (<= 0 uses the comp's)
 // @param      kfs       the scalar keyframes (>= 2) for the Tracking leaf
@@ -1665,11 +1832,13 @@ func AnimateTextTracking(layer *Layer, tickRate float64, kfs []ScalarKeyframe) e
 
 // @summary    Keyframe a text animator's per-character Character Offset
 // @description Keyframes the Character Offset leaf of a text layer's first animator
-//   (added via AddTextCharacterOffsetAnimator) — animating the glyph-code shift
-//   over time, the animated "decode / scramble" reveal (codes settle toward 0).
-//   Needs >= 2 keyframes; tickRate <= 0 uses the comp's. Refused on non-text
-//   layers, layers without a Character-Offset-animator leaf, and an already-
-//   animated Character Offset leaf.
+//
+//	(added via AddTextCharacterOffsetAnimator) — animating the glyph-code shift
+//	over time, the animated "decode / scramble" reveal (codes settle toward 0).
+//	Needs >= 2 keyframes; tickRate <= 0 uses the comp's. Refused on non-text
+//	layers, layers without a Character-Offset-animator leaf, and an already-
+//	animated Character Offset leaf.
+//
 // @param      layer     the parsed text layer whose animator to keyframe
 // @param      tickRate  keyframe time base (<= 0 uses the comp's)
 // @param      kfs       the scalar keyframes (>= 2) for the Character Offset leaf
@@ -1686,12 +1855,14 @@ func AnimateTextCharacterOffset(layer *Layer, tickRate float64, kfs []ScalarKeyf
 
 // @summary    Keyframe a text animator's per-character Position
 // @description Keyframes the per-character Position 3D leaf of a text layer's first
-//   animator (added via AddTextPositionAnimator) — animating the driven offset
-//   itself, so every selected character shares the curve and the text glides as
-//   one synchronized group. Each keyframe value is the [x, y, z] offset in pixels.
-//   Needs >= 2 keyframes; tickRate <= 0 uses the comp's. Refused on non-text
-//   layers, layers without a Position-animator leaf, and an already-animated
-//   Position leaf.
+//
+//	animator (added via AddTextPositionAnimator) — animating the driven offset
+//	itself, so every selected character shares the curve and the text glides as
+//	one synchronized group. Each keyframe value is the [x, y, z] offset in pixels.
+//	Needs >= 2 keyframes; tickRate <= 0 uses the comp's. Refused on non-text
+//	layers, layers without a Position-animator leaf, and an already-animated
+//	Position leaf.
+//
 // @param      layer     the parsed text layer whose animator to keyframe
 // @param      tickRate  keyframe time base (<= 0 uses the comp's)
 // @param      kfs       the vector keyframes (>= 2; [x,y,z] pixels) for the Position leaf
@@ -1709,11 +1880,13 @@ func AnimateTextPosition(layer *Layer, tickRate float64, kfs []VectorKeyframe) e
 
 // @summary    Keyframe a text animator's per-character Scale
 // @description Keyframes the per-character Scale 3D leaf of a text layer's first
-//   animator (added via AddTextScaleAnimator) — animating the driven scale over
-//   time (e.g. a pulse / grow), which a Range-Offset sweep cannot express. Each
-//   keyframe value is the [sx, sy, sz] scale percent (100 = unchanged). Needs >= 2
-//   keyframes; tickRate <= 0 uses the comp's. Refused on non-text layers, layers
-//   without a Scale-animator leaf, and an already-animated Scale leaf.
+//
+//	animator (added via AddTextScaleAnimator) — animating the driven scale over
+//	time (e.g. a pulse / grow), which a Range-Offset sweep cannot express. Each
+//	keyframe value is the [sx, sy, sz] scale percent (100 = unchanged). Needs >= 2
+//	keyframes; tickRate <= 0 uses the comp's. Refused on non-text layers, layers
+//	without a Scale-animator leaf, and an already-animated Scale leaf.
+//
 // @param      layer     the parsed text layer whose animator to keyframe
 // @param      tickRate  keyframe time base (<= 0 uses the comp's)
 // @param      kfs       the vector keyframes (>= 2; [sx,sy,sz] percent) for the Scale leaf
@@ -1731,11 +1904,13 @@ func AnimateTextScale(layer *Layer, tickRate float64, kfs []VectorKeyframe) erro
 
 // @summary    Keyframe a text animator's per-character Fill Color
 // @description Keyframes the per-character Fill Color leaf of a text layer's first
-//   animator (added via AddTextColorAnimator) — animating the driven color over
-//   time (e.g. a red→blue cycle). Each keyframe value is an [r, g, b, a] color with
-//   channels 0..1. Needs >= 2 keyframes; tickRate <= 0 uses the comp's. Refused on
-//   non-text layers, layers without a Fill-Color-animator leaf, an already-animated
-//   leaf, and keyframe values that are not 4-channel.
+//
+//	animator (added via AddTextColorAnimator) — animating the driven color over
+//	time (e.g. a red→blue cycle). Each keyframe value is an [r, g, b, a] color with
+//	channels 0..1. Needs >= 2 keyframes; tickRate <= 0 uses the comp's. Refused on
+//	non-text layers, layers without a Fill-Color-animator leaf, an already-animated
+//	leaf, and keyframe values that are not 4-channel.
+//
 // @param      layer     the parsed text layer whose animator to keyframe
 // @param      tickRate  keyframe time base (<= 0 uses the comp's)
 // @param      kfs       the vector keyframes (>= 2; [r,g,b,a] in 0..1) for the Fill Color leaf
@@ -1753,9 +1928,11 @@ func AnimateTextColor(layer *Layer, tickRate float64, kfs []VectorKeyframe) erro
 
 // @summary    Keyframe a text animator's per-character Stroke Color
 // @description Keyframes the per-character Stroke Color leaf of a text layer's
-//   first animator (added via AddTextStrokeColorAnimator). Each keyframe value is
-//   [r, g, b, a] with channels 0..1. Needs >= 2 keyframes; tickRate <= 0 uses
-//   the comp's.
+//
+//	first animator (added via AddTextStrokeColorAnimator). Each keyframe value is
+//	[r, g, b, a] with channels 0..1. Needs >= 2 keyframes; tickRate <= 0 uses
+//	the comp's.
+//
 // @param      layer     the parsed text layer whose animator to keyframe
 // @param      tickRate  keyframe time base (<= 0 uses the comp's)
 // @param      kfs       the color keyframes (>= 2; [r,g,b,a]) for the Stroke Color leaf
@@ -1772,30 +1949,32 @@ func AnimateTextStrokeColor(layer *Layer, tickRate float64, kfs []VectorKeyframe
 
 // @summary    Set an effect parameter's static value by match-name
 // @description Sets an effect parameter's static value by full parameter match-name
-//   (e.g. "ADBE Gaussian Blur 2-0001") and returns the parameter's Property. It is
-//   the typed-parameter entry for AddEffect workflows.
 //
-//   AE persists an effect parameter only while its value differs from the default,
-//   so on a default instance the tunable params have no value stream at all. When
-//   the parameter is already present, SetEffectParam is exactly a static-value
-//   write; when it is default-elided, the parameter's value stream is first
-//   materialized from an embedded AE-native template (patched from the host
-//   effect's own definition), then the value is written — matching what AE itself
-//   persists for a touched parameter. Any scalar / enum / boolean / angle / color
-//   / 2D-point / 3D-point / slider parameter materializes via the generic path;
-//   rarer control types (curve, layer, …) return an error when elided, but params
-//   already present on the effect are settable regardless.
+//	(e.g. "ADBE Gaussian Blur 2-0001") and returns the parameter's Property. It is
+//	the typed-parameter entry for AddEffect workflows.
 //
-//   Values use the property's on-disk encoding: scalar / slider / angle (degrees)
-//   / enum / boolean as a float64; color as [A, R, G, B] each 0–255; a 2D/3D point
-//   as fractions of the layer's coordinate space (the source item's pixel size for
-//   footage/solid/precomp layers, the composition's for source-less layers, z
-//   divided by that space's height). A multi-component value (color, 2D/3D point)
-//   must be passed as a []float64 slice whose length equals the parameter's
-//   component count — NOT a fixed-size array such as [4]float64, which is rejected
-//   as an unsupported value type.
+//	AE persists an effect parameter only while its value differs from the default,
+//	so on a default instance the tunable params have no value stream at all. When
+//	the parameter is already present, SetEffectParam is exactly a static-value
+//	write; when it is default-elided, the parameter's value stream is first
+//	materialized from an embedded AE-native template (patched from the host
+//	effect's own definition), then the value is written — matching what AE itself
+//	persists for a touched parameter. Any scalar / enum / boolean / angle / color
+//	/ 2D-point / 3D-point / slider parameter materializes via the generic path;
+//	rarer control types (curve, layer, …) return an error when elided, but params
+//	already present on the effect are settable regardless.
 //
-//   Atomic (snapshot + rollback on any parser warning or encode failure).
+//	Values use the property's on-disk encoding: scalar / slider / angle (degrees)
+//	/ enum / boolean as a float64; color as [A, R, G, B] each 0–255; a 2D/3D point
+//	as fractions of the layer's coordinate space (the source item's pixel size for
+//	footage/solid/precomp layers, the composition's for source-less layers, z
+//	divided by that space's height). A multi-component value (color, 2D/3D point)
+//	must be passed as a []float64 slice whose length equals the parameter's
+//	component count — NOT a fixed-size array such as [4]float64, which is rejected
+//	as an unsupported value type.
+//
+//	Atomic (snapshot + rollback on any parser warning or encode failure).
+//
 // @param      layer           the parsed layer carrying the effect
 // @param      fx              the effect whose parameter to set
 // @param      paramMatchName  the full parameter match-name
@@ -1815,10 +1994,12 @@ func SetEffectParam(layer *Layer, fx *Effect, paramMatchName string, value any) 
 
 // @summary    List parameter match-names with a dedicated template
 // @description Returns the sorted parameter match-names that have a dedicated
-//   per-parameter template. SetEffectParam is not limited to this list — scalar /
-//   enum / boolean / angle / color / 2D / 3D / slider params of any effect
-//   materialize via the generic fallback, and already-present params are settable
-//   regardless.
+//
+//	per-parameter template. SetEffectParam is not limited to this list — scalar /
+//	enum / boolean / angle / color / 2D / 3D / slider params of any effect
+//	materialize via the generic fallback, and already-present params are settable
+//	regardless.
+//
 // @returns    the sorted list of parameter match-names with a dedicated template
 // @domain     meta
 // @stability  stable
@@ -1829,17 +2010,19 @@ func SupportedEffectParams() []string { return serializer.SupportedEffectParams(
 
 // @summary    Keyframe a 1D-scalar effect parameter over time
 // @description Keyframes a 1D-scalar effect parameter — N keyframes (>= 2), each a
-//   ScalarKeyframe with a time (seconds), value, and optional ease. It
-//   materializes the parameter if it is default-elided (like SetEffectParam), then
-//   converts its static value stream into an animated keyframe container from
-//   scratch — the case InsertKeyframe refuses (it requires a pre-existing
-//   keyframe). Returns the animated Property.
 //
-//   Drives the classic motion-graphics rigs — an animated blur amount, or a slider
-//   control whose value an expression reads. fx must be on a parsed layer
-//   (round-trip via Reopen after the structural New* / AddEffect APIs). Scalar
-//   (1D) params only — use AnimateEffectParamVec for color / 2D / 3D point params.
-//   Linear interpolation unless the keyframe ease is set.
+//	ScalarKeyframe with a time (seconds), value, and optional ease. It
+//	materializes the parameter if it is default-elided (like SetEffectParam), then
+//	converts its static value stream into an animated keyframe container from
+//	scratch — the case InsertKeyframe refuses (it requires a pre-existing
+//	keyframe). Returns the animated Property.
+//
+//	Drives the classic motion-graphics rigs — an animated blur amount, or a slider
+//	control whose value an expression reads. fx must be on a parsed layer
+//	(round-trip via Reopen after the structural New* / AddEffect APIs). Scalar
+//	(1D) params only — use AnimateEffectParamVec for color / 2D / 3D point params.
+//	Linear interpolation unless the keyframe ease is set.
+//
 // @param      layer           the parsed layer carrying the effect
 // @param      fx              the effect whose parameter to animate
 // @param      paramMatchName  the full parameter match-name (1D scalar)
@@ -1858,17 +2041,19 @@ func AnimateEffectParam(layer *Layer, fx *Effect, paramMatchName string, kfs []S
 
 // @summary    Keyframe a multi-component effect parameter over time
 // @description Keyframes a multi-component effect parameter — the color / 2D-point
-//   / 3D-point counterpart of AnimateEffectParam. Each VectorKeyframe carries a
-//   time (seconds), a []float64 value whose length matches the parameter's
-//   component count, and optional ease. Values are in the parameter's on-disk
-//   units, identical to SetEffectParam (a color is [A,R,G,B] in 0-255; a 2D/3D
-//   point is a fraction of the layer's coordinate space, z divided by its height).
 //
-//   Like the scalar form it materializes the parameter if default-elided, then
-//   replaces its static value with the spatial keyframe block layout AE writes for
-//   animated effect color/point params. Returns the animated Property. fx must be
-//   on a parsed layer (Reopen). Components 2/3/4 only (use AnimateEffectParam for
-//   1D scalars). Linear interpolation unless the ease is set.
+//	/ 3D-point counterpart of AnimateEffectParam. Each VectorKeyframe carries a
+//	time (seconds), a []float64 value whose length matches the parameter's
+//	component count, and optional ease. Values are in the parameter's on-disk
+//	units, identical to SetEffectParam (a color is [A,R,G,B] in 0-255; a 2D/3D
+//	point is a fraction of the layer's coordinate space, z divided by its height).
+//
+//	Like the scalar form it materializes the parameter if default-elided, then
+//	replaces its static value with the spatial keyframe block layout AE writes for
+//	animated effect color/point params. Returns the animated Property. fx must be
+//	on a parsed layer (Reopen). Components 2/3/4 only (use AnimateEffectParam for
+//	1D scalars). Linear interpolation unless the ease is set.
+//
 // @param      layer           the parsed layer carrying the effect
 // @param      fx              the effect whose parameter to animate
 // @param      paramMatchName  the full parameter match-name (color / 2D / 3D point)
@@ -1887,15 +2072,17 @@ func AnimateEffectParamVec(layer *Layer, fx *Effect, paramMatchName string, kfs 
 
 // @summary    Point a layer-reference effect parameter at a target layer
 // @description Points a layer-reference effect parameter at target — e.g. Set
-//   Matte's "Take Matte From Layer", which mattes the host layer with another
-//   layer's channel. AE stores the reference as target's layer ID in the
-//   parameter's binding chunk, so this is a length-preserving rewrite. target must
-//   be a layer in the same composition.
 //
-//   fx must be on a parsed layer (round-trip via Reopen). The parameter must
-//   already be present in the effect (Set Matte's -0001 ships materialized in the
-//   AddEffect template); materializing a default-elided layer-reference parameter
-//   is a follow-up.
+//	Matte's "Take Matte From Layer", which mattes the host layer with another
+//	layer's channel. AE stores the reference as target's layer ID in the
+//	parameter's binding chunk, so this is a length-preserving rewrite. target must
+//	be a layer in the same composition.
+//
+//	fx must be on a parsed layer (round-trip via Reopen). The parameter must
+//	already be present in the effect (Set Matte's -0001 ships materialized in the
+//	AddEffect template); materializing a default-elided layer-reference parameter
+//	is a follow-up.
+//
 // @param      layer           the parsed layer carrying the effect
 // @param      fx              the effect whose layer-reference parameter to set
 // @param      paramMatchName  the full layer-reference parameter match-name
@@ -1913,22 +2100,24 @@ func SetEffectLayerParam(layer *Layer, fx *Effect, paramMatchName string, target
 
 // @summary    Set a 3D layer's Material-Options property by match-name
 // @description Sets a 3D layer's Material-Options property by AE match-name (e.g.
-//   "ADBE Casts Shadows", "ADBE Accepts Lights") and returns the Property. It is
-//   the from-scratch entry for material properties — the sibling of SetEffectParam.
 //
-//   A from-scratch shape/solid layer made 3D emits an empty Material Options
-//   group: AE materializes the full material tree in its DOM on open, but on disk
-//   the leaves are elided, so the typed getters/setters report "property not
-//   present". When the property is already present SetMaterialOption is exactly a
-//   static-value write; when default-elided, the leaf is first materialized from
-//   an embedded AE-native template at its canonical position, then the value
-//   (non-default by intent) is written.
+//	"ADBE Casts Shadows", "ADBE Accepts Lights") and returns the Property. It is
+//	the from-scratch entry for material properties — the sibling of SetEffectParam.
 //
-//   The headline use is making a from-scratch 3D layer cast shadows (Casts Shadows
-//   defaults Off). The layer must be round-tripped via Reopen first (the material
-//   group chunk must exist to splice into). Values use the property's on-disk
-//   encoding: scalar / enum / boolean as float64; Shadow Color as [A,R,G,B] 0–255.
-//   Atomic (snapshot + rollback on any parser warning or encode failure).
+//	A from-scratch shape/solid layer made 3D emits an empty Material Options
+//	group: AE materializes the full material tree in its DOM on open, but on disk
+//	the leaves are elided, so the typed getters/setters report "property not
+//	present". When the property is already present SetMaterialOption is exactly a
+//	static-value write; when default-elided, the leaf is first materialized from
+//	an embedded AE-native template at its canonical position, then the value
+//	(non-default by intent) is written.
+//
+//	The headline use is making a from-scratch 3D layer cast shadows (Casts Shadows
+//	defaults Off). The layer must be round-tripped via Reopen first (the material
+//	group chunk must exist to splice into). Values use the property's on-disk
+//	encoding: scalar / enum / boolean as float64; Shadow Color as [A,R,G,B] 0–255.
+//	Atomic (snapshot + rollback on any parser warning or encode failure).
+//
 // @param      layer      the parsed 3D layer to configure (round-trip via Reopen first)
 // @param      matchName  the Material-Options property match-name
 // @param      value      the value, in the property's on-disk encoding
@@ -1946,25 +2135,27 @@ func SetMaterialOption(layer *Layer, matchName string, value any) (*Property, er
 
 // @summary     Expose an effect parameter in the Essential Graphics panel
 // @description Mirrors AE's "add to Essential Graphics" /
-//   Property.addToMotionGraphicsTemplate: the parameter becomes a controller in
-//   the owning composition's Essential Graphics panel and is appended to
-//   Composition.EssentialGraphicsControllers.
 //
-//   Supported control types in this slice: scalar / slider (min and max taken
-//   from the parameter definition), boolean (checkbox), and color (which
-//   requires the parameter to carry a materialized non-default value first,
-//   since AE stores no color default — set one via SetEffectParam). Point,
-//   dropdown, and text return an error for now.
+//	Property.addToMotionGraphicsTemplate: the parameter becomes a controller in
+//	the owning composition's Essential Graphics panel and is appended to
+//	Composition.EssentialGraphicsControllers.
 //
-//   Mechanics (three coordinated chunk sites): the comp item's three Essential
-//   Graphics panel generations each gain a controller entry (localized name,
-//   fresh UUID, a type-keyed value/default, and a property reference made of the
-//   comp item ID, host layer ID, and a JSON match-name path); the host layer's
-//   "ADBE Layer Overrides" parade gains a matching override value stream — a
-//   clone of the parameter's materialized value, or a template carrying the
-//   current value when the parameter is default-elided. Every mutated site is
-//   snapshotted and rolled back on any decode mismatch or parser warning. The
-//   gate also covers SetMotionGraphicsTemplateName.
+//	Supported control types in this slice: scalar / slider (min and max taken
+//	from the parameter definition), boolean (checkbox), and color (which
+//	requires the parameter to carry a materialized non-default value first,
+//	since AE stores no color default — set one via SetEffectParam). Point,
+//	dropdown, and text return an error for now.
+//
+//	Mechanics (three coordinated chunk sites): the comp item's three Essential
+//	Graphics panel generations each gain a controller entry (localized name,
+//	fresh UUID, a type-keyed value/default, and a property reference made of the
+//	comp item ID, host layer ID, and a JSON match-name path); the host layer's
+//	"ADBE Layer Overrides" parade gains a matching override value stream — a
+//	clone of the parameter's materialized value, or a template carrying the
+//	current value when the parameter is default-elided. Every mutated site is
+//	snapshotted and rolled back on any decode mismatch or parser warning. The
+//	gate also covers SetMotionGraphicsTemplateName.
+//
 // @param       layer           the layer owning the effect (round-trip via Reopen first)
 // @param       fx              the effect whose parameter is exposed
 // @param       paramMatchName  the match-name of the parameter to expose
@@ -1983,8 +2174,10 @@ func AddEssentialProperty(layer *Layer, fx *Effect, paramMatchName, displayName 
 
 // @summary     Remove the effect at the given index from a layer's Effect Parade
 // @description The inverse of AddEffect: a thin, index-validated wrapper over
-//   generic Effect-Parade child removal. Returns an error if the layer has no
-//   Effect Parade or the index is out of range.
+//
+//	generic Effect-Parade child removal. Returns an error if the layer has no
+//	Effect Parade or the index is out of range.
+//
 // @param       layer  the layer owning the effect
 // @param       index  the 0-based effect index to remove
 // @domain      effect
@@ -1999,33 +2192,35 @@ func RemoveEffect(layer *Layer, index int) error { return serializer.RemoveEffec
 
 // @summary     Append a vector mask to a layer
 // @description Appends a vector mask to the layer's "ADBE Mask Parade" and
-//   returns the parsed mask. It is created with the given display name (empty
-//   becomes "Mask N"), the given static Bezier path, and AE defaults everywhere
-//   else: mode Add, not inverted, zero feather, full opacity (Feather / Opacity
-//   / Expansion are default-elided on disk, exactly as AE persists an untouched
-//   mask).
 //
-//   The path is parameterizable at creation even though mutating an existing
-//   mask's path is a separate structural write: the atom is built from scratch,
-//   reusing the ship-gated shape-path encoding (mask paths share the byte layout
-//   of "ADBE Vector Shape"). path.Vertices are in layer-pixel coordinates;
-//   per-vertex tangents are relative to the anchor; path.Closed selects a closed
-//   region vs an open polyline. On disk AE stores mask coordinates as fractions
-//   of the source item's pixel space for footage/solid/precomp layers and as raw
-//   pixels for source-less layers — AddMask performs that conversion, so callers
-//   always pass pixels.
+//	returns the parsed mask. It is created with the given display name (empty
+//	becomes "Mask N"), the given static Bezier path, and AE defaults everywhere
+//	else: mode Add, not inverted, zero feather, full opacity (Feather / Opacity
+//	/ Expansion are default-elided on disk, exactly as AE persists an untouched
+//	mask).
 //
-//   Mechanics: each mask is a (tdmn "ADBE Mask Atom", mkif, LIST:tdgp) chunk
-//   triple inside the parade; the 48-byte mkif carries mode / inverted / locked
-//   / motion-blur / a monotonic per-layer index / the label color. A fresh
-//   triple is spliced in just before the "ADBE Group End" sentinel, and
-//   enclosing LIST sizes grow automatically. A parsed layer with no masks has no
-//   parade group at all, so an empty one is spliced in first (before "ADBE
-//   Effect Parade" when present, else before "ADBE Transform Group").
+//	The path is parameterizable at creation even though mutating an existing
+//	mask's path is a separate structural write: the atom is built from scratch,
+//	reusing the ship-gated shape-path encoding (mask paths share the byte layout
+//	of "ADBE Vector Shape"). path.Vertices are in layer-pixel coordinates;
+//	per-vertex tangents are relative to the anchor; path.Closed selects a closed
+//	region vs an open polyline. On disk AE stores mask coordinates as fractions
+//	of the source item's pixel space for footage/solid/precomp layers and as raw
+//	pixels for source-less layers — AddMask performs that conversion, so callers
+//	always pass pixels.
 //
-//   Refused: camera / light layers (AE disallows masks on them) and layers built
-//   by the structural New* APIs that were never parsed — call aep.Reopen first
-//   and add masks to the re-parsed layer.
+//	Mechanics: each mask is a (tdmn "ADBE Mask Atom", mkif, LIST:tdgp) chunk
+//	triple inside the parade; the 48-byte mkif carries mode / inverted / locked
+//	/ motion-blur / a monotonic per-layer index / the label color. A fresh
+//	triple is spliced in just before the "ADBE Group End" sentinel, and
+//	enclosing LIST sizes grow automatically. A parsed layer with no masks has no
+//	parade group at all, so an empty one is spliced in first (before "ADBE
+//	Effect Parade" when present, else before "ADBE Transform Group").
+//
+//	Refused: camera / light layers (AE disallows masks on them) and layers built
+//	by the structural New* APIs that were never parsed — call aep.Reopen first
+//	and add masks to the re-parsed layer.
+//
 // @param       layer  the layer to add the mask to (round-trip via Reopen first)
 // @param       name   the mask display name (empty becomes "Mask N")
 // @param       path   the static outline in layer-pixel coordinates
@@ -2043,17 +2238,19 @@ func AddMask(layer *Layer, name string, path BezierPath) (*Mask, error) {
 
 // @summary     Rewrite an existing mask's outline with a new static path
 // @description Replaces a mask's outline in place with a new static path
-//   (layer-pixel coordinates, the same space AddMask accepts). Unlike the
-//   length-preserving mask setters, the path is a variable-length subtree, so
-//   this rebuilds the "ADBE Mask Shape" value and swaps it in; WriteAEP
-//   recomputes the enclosing LIST sizes. The vertex count may differ from the
-//   original (e.g. reshape a 4-point rectangle into a 3-point triangle) — the
-//   mask-strictness patching AddMask uses is reused so AE accepts non-4-vertex
-//   masks.
 //
-//   mask must be one of layer.Masks obtained from a parsed project (it needs its
-//   atom-group chunk back-reference); call aep.Reopen first for masks built by
-//   the structural New*/AddMask APIs without an intervening parse.
+//	(layer-pixel coordinates, the same space AddMask accepts). Unlike the
+//	length-preserving mask setters, the path is a variable-length subtree, so
+//	this rebuilds the "ADBE Mask Shape" value and swaps it in; WriteAEP
+//	recomputes the enclosing LIST sizes. The vertex count may differ from the
+//	original (e.g. reshape a 4-point rectangle into a 3-point triangle) — the
+//	mask-strictness patching AddMask uses is reused so AE accepts non-4-vertex
+//	masks.
+//
+//	mask must be one of layer.Masks obtained from a parsed project (it needs its
+//	atom-group chunk back-reference); call aep.Reopen first for masks built by
+//	the structural New*/AddMask APIs without an intervening parse.
+//
 // @param       layer  the layer owning the mask
 // @param       mask   the mask to reshape (from a parsed project)
 // @param       path   the new outline in layer-pixel coordinates
@@ -2070,17 +2267,19 @@ func SetMaskPath(layer *Layer, mask *Mask, path BezierPath) error {
 
 // @summary     Replace a mask's outline with an animated, keyframed path
 // @description Replaces a mask's outline with an animated path — N keyframes
-//   (>= 2), each a BezierPath snapshot at a time in seconds (the layer-pixel
-//   space AddMask / SetMaskPath accept), with optional temporal ease per side
-//   (zero = linear). Vertex counts may differ between keyframes (AE interpolates
-//   the outline; the mask-strictness patching makes non-4-vertex frames safe).
 //
-//   On disk this is byte-isomorphic to AE's own animated mask/shape path: the
-//   "ADBE Mask Shape" value carries a time-table (one block per keyframe) plus
-//   one geometry block per keyframe. WriteAEP recomputes the enclosing LIST
-//   sizes. mask must come from a parsed project (it needs its atom-group chunk
-//   back-reference); call aep.Reopen first for masks built by the structural
-//   New*/AddMask APIs without an intervening parse.
+//	(>= 2), each a BezierPath snapshot at a time in seconds (the layer-pixel
+//	space AddMask / SetMaskPath accept), with optional temporal ease per side
+//	(zero = linear). Vertex counts may differ between keyframes (AE interpolates
+//	the outline; the mask-strictness patching makes non-4-vertex frames safe).
+//
+//	On disk this is byte-isomorphic to AE's own animated mask/shape path: the
+//	"ADBE Mask Shape" value carries a time-table (one block per keyframe) plus
+//	one geometry block per keyframe. WriteAEP recomputes the enclosing LIST
+//	sizes. mask must come from a parsed project (it needs its atom-group chunk
+//	back-reference); call aep.Reopen first for masks built by the structural
+//	New*/AddMask APIs without an intervening parse.
+//
 // @param       layer  the layer owning the mask
 // @param       mask   the mask to animate (from a parsed project)
 // @param       keys   the path keyframes (>= 2), in seconds, optionally eased
@@ -2097,23 +2296,25 @@ func SetMaskPathKeyframes(layer *Layer, mask *Mask, keys []MaskPathKey) error {
 
 // @summary     Remove a mask from a layer's Mask Parade
 // @description The inverse of AddMask. m must be one of layer.Masks obtained
-//   from a parsed project; pass the same layer the mask belongs to (masks carry
-//   no owning-layer back-reference).
 //
-//   Mechanics: each mask is a (tdmn "ADBE Mask Atom", mkif, LIST:tdgp) chunk
-//   triple — one chunk more than an effect's pair, which is why the generic
-//   indexed-group removal refuses a mask atom. RemoveMask is triple-aware: it
-//   anchors on the mask's own mkif, validates the framing "ADBE Mask Atom" tdmn
-//   and trailing atom tdgp, splices all three out, and drops the mask from the
-//   property tree and the flat layer.Masks slice. LIST sizes shrink
-//   automatically. The removed chunks ride out verbatim, so no opaque content is
-//   regenerated.
+//	from a parsed project; pass the same layer the mask belongs to (masks carry
+//	no owning-layer back-reference).
 //
-//   Refused (project untouched): a nil layer/mask, a mask not in layer.Masks
-//   (e.g. already removed), a mask built outside the parser (no mkif
-//   back-reference), or a layer with no Mask Parade. Removing the last mask
-//   leaves an empty parade group in place (AE tolerates it on reopen);
-//   collapsing the parade is a separate slice.
+//	Mechanics: each mask is a (tdmn "ADBE Mask Atom", mkif, LIST:tdgp) chunk
+//	triple — one chunk more than an effect's pair, which is why the generic
+//	indexed-group removal refuses a mask atom. RemoveMask is triple-aware: it
+//	anchors on the mask's own mkif, validates the framing "ADBE Mask Atom" tdmn
+//	and trailing atom tdgp, splices all three out, and drops the mask from the
+//	property tree and the flat layer.Masks slice. LIST sizes shrink
+//	automatically. The removed chunks ride out verbatim, so no opaque content is
+//	regenerated.
+//
+//	Refused (project untouched): a nil layer/mask, a mask not in layer.Masks
+//	(e.g. already removed), a mask built outside the parser (no mkif
+//	back-reference), or a layer with no Mask Parade. Removing the last mask
+//	leaves an empty parade group in place (AE tolerates it on reopen);
+//	collapsing the parade is a separate slice.
+//
 // @param       layer  the layer owning the mask
 // @param       m      the mask to remove (from a parsed project)
 // @domain      mask
@@ -2129,21 +2330,23 @@ func RemoveMask(layer *Layer, m *Mask) error {
 
 // @summary     Duplicate a mask in place within a layer's Mask Parade
 // @description Inserts a copy of mask m immediately after it in the layer's
-//   "ADBE Mask Parade" — mirroring AE's PropertyBase.duplicate() on a mask — and
-//   returns the clone. m must be one of layer.Masks from a parsed project; pass
-//   the layer it belongs to (masks carry no owning-layer back-reference).
 //
-//   Mechanics: triple-aware, like RemoveMask. A mask is a (tdmn "ADBE Mask
-//   Atom", mkif, LIST:tdgp) triple, so the generic group duplication refuses it.
-//   DuplicateMask deep-clones all three chunks (opaque content rides along
-//   verbatim), bumps only the clone's internal mask index (mkif @0x08) to max+1
-//   so it stays unique, splices the clone in just after the source, and re-parses
-//   it into a mask whose setters work immediately. The clone keeps the source's
-//   name, mode, color, inverted/locked flags, and path.
+//	"ADBE Mask Parade" — mirroring AE's PropertyBase.duplicate() on a mask — and
+//	returns the clone. m must be one of layer.Masks from a parsed project; pass
+//	the layer it belongs to (masks carry no owning-layer back-reference).
 //
-//   Refused (project untouched): a nil layer/mask, a mask not in layer.Masks, a
-//   mask built outside the parser (no mkif back-reference), or a layer with no
-//   Mask Parade.
+//	Mechanics: triple-aware, like RemoveMask. A mask is a (tdmn "ADBE Mask
+//	Atom", mkif, LIST:tdgp) triple, so the generic group duplication refuses it.
+//	DuplicateMask deep-clones all three chunks (opaque content rides along
+//	verbatim), bumps only the clone's internal mask index (mkif @0x08) to max+1
+//	so it stays unique, splices the clone in just after the source, and re-parses
+//	it into a mask whose setters work immediately. The clone keeps the source's
+//	name, mode, color, inverted/locked flags, and path.
+//
+//	Refused (project untouched): a nil layer/mask, a mask not in layer.Masks, a
+//	mask built outside the parser (no mkif back-reference), or a layer with no
+//	Mask Parade.
+//
 // @param       layer  the layer owning the mask
 // @param       m      the mask to duplicate (from a parsed project)
 // @returns     the cloned mask
@@ -2160,22 +2363,24 @@ func DuplicateMask(layer *Layer, m *Mask) (*Mask, error) {
 
 // @summary     Reorder a mask within a layer's Mask Parade
 // @description Reorders mask m to position toIndex (0-based) among the layer's
-//   masks, the other masks keeping their relative order — mirroring AE's
-//   PropertyBase.moveTo() on a mask. m must be one of layer.Masks from a parsed
-//   project; pass the layer it belongs to (masks carry no owning-layer
-//   back-reference). toIndex equal to m's current index is a no-op.
 //
-//   Mechanics: triple-aware, like RemoveMask / DuplicateMask. Each mask is a
-//   (tdmn "ADBE Mask Atom", mkif, LIST:tdgp) triple; MoveMask locates every
-//   mask's triple by its mkif, re-emits the contiguous triple run in the target
-//   order (the same chunk pointers — opaque content rides along unchanged), and
-//   applies the same permutation to the property tree and the flat layer.Masks
-//   slice. No chunk is created or destroyed, so no LIST size changes.
+//	masks, the other masks keeping their relative order — mirroring AE's
+//	PropertyBase.moveTo() on a mask. m must be one of layer.Masks from a parsed
+//	project; pass the layer it belongs to (masks carry no owning-layer
+//	back-reference). toIndex equal to m's current index is a no-op.
 //
-//   Refused (project untouched): a nil layer/mask, a mask not in layer.Masks,
-//   toIndex out of range, a mask built outside the parser (no mkif
-//   back-reference), a layer with no Mask Parade, or a parade whose mask triples
-//   are not contiguous.
+//	Mechanics: triple-aware, like RemoveMask / DuplicateMask. Each mask is a
+//	(tdmn "ADBE Mask Atom", mkif, LIST:tdgp) triple; MoveMask locates every
+//	mask's triple by its mkif, re-emits the contiguous triple run in the target
+//	order (the same chunk pointers — opaque content rides along unchanged), and
+//	applies the same permutation to the property tree and the flat layer.Masks
+//	slice. No chunk is created or destroyed, so no LIST size changes.
+//
+//	Refused (project untouched): a nil layer/mask, a mask not in layer.Masks,
+//	toIndex out of range, a mask built outside the parser (no mkif
+//	back-reference), a layer with no Mask Parade, or a parade whose mask triples
+//	are not contiguous.
+//
 // @param       layer    the layer owning the mask
 // @param       m        the mask to move (from a parsed project)
 // @param       toIndex  the 0-based destination position
@@ -2454,19 +2659,21 @@ const (
 
 // @summary     Append a render queue item for a composition
 // @description Mirrors ExtendScript RenderQueue.items.add(comp). Alpha /
-//   structural.
 //
-//   Strategy (clone + remap): the queue's last item is the template — its
-//   settings block, item group, and per-item flags block are deep-cloned, then
-//   the clone's comp ID is repointed at comp. The settings data, flags block,
-//   and item count grow in lock-step, mirroring AE's own items.add() delta. The
-//   cloned output module keeps the template's path/template (AE accepts it; a
-//   fresh add would name it after comp — deferred).
+//	structural.
 //
-//   Requires at least one existing item to clone from (an empty queue has no
-//   template). The grown settings data reallocates, so every item's settings
-//   alias is re-pointed afterward, and WriteAEP syncs the copies back. Free
-//   function (not a method).
+//	Strategy (clone + remap): the queue's last item is the template — its
+//	settings block, item group, and per-item flags block are deep-cloned, then
+//	the clone's comp ID is repointed at comp. The settings data, flags block,
+//	and item count grow in lock-step, mirroring AE's own items.add() delta. The
+//	cloned output module keeps the template's path/template (AE accepts it; a
+//	fresh add would name it after comp — deferred).
+//
+//	Requires at least one existing item to clone from (an empty queue has no
+//	template). The grown settings data reallocates, so every item's settings
+//	alias is re-pointed afterward, and WriteAEP syncs the copies back. Free
+//	function (not a method).
+//
 // @param       rq    the render queue to append to
 // @param       comp  the composition to enqueue
 // @returns     the created render queue item
@@ -2483,21 +2690,23 @@ func AddItem(rq *RenderQueue, comp *Composition) (*RenderQueueItem, error) {
 
 // @summary     Remove the render queue item at the given index
 // @description Mirrors ExtendScript RenderQueueItem.remove(). Alpha /
-//   structural. Free function (not a method) so the implementation can live in
-//   internal/serializer; the aep facade re-exports it.
 //
-//   Byte mechanics (from an AE 2020 2-item to 1-item diff): removing item i
-//   drops, in lock-step,
+//	structural. Free function (not a method) so the implementation can live in
+//	internal/serializer; the aep facade re-exports it.
 //
-//   - the item's group from its container,
-//   - the item's block from the render-settings data (decrementing the settings
-//     count), and
-//   - the item's per-item block from the flags chunk (decrementing its header
-//     proportionally).
+//	Byte mechanics (from an AE 2020 2-item to 1-item diff): removing item i
+//	drops, in lock-step,
 //
-//   The settings buffers are independent copies; surviving items' settings
-//   aliases are re-pointed to their new offsets after the splice, and WriteAEP
-//   syncs the copies back.
+//	- the item's group from its container,
+//	- the item's block from the render-settings data (decrementing the settings
+//	  count), and
+//	- the item's per-item block from the flags chunk (decrementing its header
+//	  proportionally).
+//
+//	The settings buffers are independent copies; surviving items' settings
+//	aliases are re-pointed to their new offsets after the splice, and WriteAEP
+//	syncs the copies back.
+//
 // @param       rq     the render queue to remove from
 // @param       index  the 0-based item index to remove
 // @domain      render-queue
@@ -2511,19 +2720,21 @@ func RemoveItem(rq *RenderQueue, index int) error { return serializer.RemoveItem
 
 // @summary     Switch a composition's 3D rendering engine
 // @description The name may be a binary prin match-name ("ADBE Escher" /
-//   "ADBE Calder" / "ADBE Ernst" / "ADBE Picasso") or an ExtendScript module
-//   name ("ADBE Advanced 3d" → "ADBE Escher"); it is normalized to the binary
-//   name. The binary match-name and display name are rewritten in the prin chunk
-//   (length-preserving) and the prda chunk is replaced with the engine's default
-//   options (structural). Returns an error for an unknown renderer, a comp built
-//   outside the parser (no prin/prda back-reference), a comp whose prin is not
-//   the expected 104 bytes, or if the mutation surfaces a parser warning (rolled
-//   back).
 //
-//   Which engines a given AE version exposes differs (AE 2020: Escher / Ernst
-//   plus a Standard variant; AE 2025: Calder / Ernst plus Picasso; AE 2025
-//   auto-promotes legacy Escher/Picasso to Advanced 3D on load). The binary
-//   match-name is the stable engine identity. Free function (not a method).
+//	"ADBE Calder" / "ADBE Ernst" / "ADBE Picasso") or an ExtendScript module
+//	name ("ADBE Advanced 3d" → "ADBE Escher"); it is normalized to the binary
+//	name. The binary match-name and display name are rewritten in the prin chunk
+//	(length-preserving) and the prda chunk is replaced with the engine's default
+//	options (structural). Returns an error for an unknown renderer, a comp built
+//	outside the parser (no prin/prda back-reference), a comp whose prin is not
+//	the expected 104 bytes, or if the mutation surfaces a parser warning (rolled
+//	back).
+//
+//	Which engines a given AE version exposes differs (AE 2020: Escher / Ernst
+//	plus a Standard variant; AE 2025: Calder / Ernst plus Picasso; AE 2025
+//	auto-promotes legacy Escher/Picasso to Advanced 3D on load). The binary
+//	match-name is the stable engine identity. Free function (not a method).
+//
 // @param       c     the composition to retarget
 // @param       name  the renderer match-name or ExtendScript module name
 // @domain      comp

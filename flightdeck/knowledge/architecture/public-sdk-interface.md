@@ -8,10 +8,11 @@ RECHECK WHEN: 首个外部 mutation workflow 要求扩大公开 interface，或 
 
 外部消费 seam 位于模块根 package `github.com/yueli-fx/aep-parser`（package name `aep`）。第一版 interface：
 
-- `Open(path)` / `Parse(io.ReadSeeker)` 返回 `*Document`。
+- `Open(path)` / `Parse(io.ReadSeeker)` 使用本地文件默认预算并返回 `*Document`。
+- `DefaultLimits` + `OpenWithLimits` / `ParseWithLimits` 允许不可信输入调用方收紧输入、chunk、累计分配、节点和深度预算；root `Limits` 是稳定值对象，不暴露 internal RIFX 类型。
 - `Document.Inspect()` 返回 detached、轻量、稳定的 `Inspection`。
 - `Document.ProfileJSON()` 返回内部 diff/migration 使用的规范化 profile JSON，不泄露内部 profile/scene 类型。
-- `Document.Write(io.Writer)` 做 opaque-preserving round-trip。
+- `Document.Write(io.Writer)` 做 opaque-preserving round-trip；底层拒绝 short write，不能在输出截断时返回成功。
 
 `Document` 隐藏 `internal/aep`、scene、serializer、RIFX chunk 和 back-reference。外部调用者不需要理解内部 497 项 capability surface，也不会因内部 package 重构被迫修改。
 

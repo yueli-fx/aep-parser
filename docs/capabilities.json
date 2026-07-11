@@ -3,7 +3,7 @@
     "symbol": "DuplicateComposition",
     "kind": "func",
     "signature": "func DuplicateComposition(p *Project, src *Composition, name string) (*Composition, error)",
-    "summary": "@summary    Deep-clone a composition as a new sibling comp @description Deep-clones src (a composition in this project) as a new sibling   composition named name, appended to the project.",
+    "summary": "@summary    Deep-clone a composition as a new sibling comp @description Deep-clones src (a composition in this project) as a new sibling",
     "has_cap": true,
     "cap": {
       "domain": "comp",
@@ -284,32 +284,6 @@
   {
     "symbol": "SetDuration",
     "kind": "method",
-    "recv": "*Marker",
-    "signature": "func (m *Marker) SetDuration(seconds float64) error",
-    "summary": "@summary     Set the marker's duration @description Encoded as a uint32 BE count of 600ths-of-a-second at NmHd   offset 0x08.",
-    "has_cap": true,
-    "cap": {
-      "domain": "comp",
-      "tier": "stable",
-      "verify": "ae-accept",
-      "minver": "2020",
-      "gate": [
-        "TestMarkerFields_AEShipGate_AE2020",
-        "TestMarkerFields_AEShipGate_AE2025"
-      ],
-      "boundary": "length-preserving (4 bytes); verified by reading the marker's\nduration back through the AE DOM",
-      "incident": null,
-      "alias": [
-        "marker duration",
-        "标记时长",
-        "cue duration",
-        "区间标记"
-      ]
-    }
-  },
-  {
-    "symbol": "SetDuration",
-    "kind": "method",
     "recv": "*Composition",
     "signature": "func (c *Composition) SetDuration(seconds float64) error",
     "summary": "@summary     Set the composition's duration @description Writes the duration as a uint32 frame count (round(seconds x   FrameRate)) and requires FrameRate to already be positive.",
@@ -331,6 +305,32 @@
         "comp duration",
         "时长",
         "持续时间"
+      ]
+    }
+  },
+  {
+    "symbol": "SetDuration",
+    "kind": "method",
+    "recv": "*Marker",
+    "signature": "func (m *Marker) SetDuration(seconds float64) error",
+    "summary": "@summary     Set the marker's duration @description Encoded as a uint32 BE count of 600ths-of-a-second at NmHd   offset 0x08.",
+    "has_cap": true,
+    "cap": {
+      "domain": "comp",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestMarkerFields_AEShipGate_AE2020",
+        "TestMarkerFields_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving (4 bytes); verified by reading the marker's\nduration back through the AE DOM",
+      "incident": null,
+      "alias": [
+        "marker duration",
+        "标记时长",
+        "cue duration",
+        "区间标记"
       ]
     }
   },
@@ -743,7 +743,7 @@
     "symbol": "SetRenderer",
     "kind": "func",
     "signature": "func SetRenderer(c *Composition, name string) error",
-    "summary": "@summary     Switch a composition's 3D rendering engine @description The name may be a binary prin match-name (\"ADBE Escher\" /   \"ADBE Calder\" / \"ADBE Ernst\" / \"ADBE Picasso\") or an ExtendScript module   name (\"ADBE Advanced 3d\" → \"ADBE Escher\"); it is normalized to the binary   name.",
+    "summary": "@summary     Switch a composition's 3D rendering engine @description The name may be a binary prin match-name (\"ADBE Escher\" /",
     "has_cap": true,
     "cap": {
       "domain": "comp",
@@ -1033,7 +1033,7 @@
     "symbol": "AddEffect",
     "kind": "func",
     "signature": "func AddEffect(layer *Layer, effectMatchName string) (*Effect, error)",
-    "summary": "@summary    Append a built-in effect to a layer @description Appends an effect to the layer's Effect Parade and returns the   parsed Effect, so the caller can immediately tune its parameters via   SetEffectParam (or the property tree after a Reopen).",
+    "summary": "@summary    Append a built-in effect to a layer @description Appends an effect to the layer's Effect Parade and returns the",
     "has_cap": true,
     "cap": {
       "domain": "effect",
@@ -1087,7 +1087,7 @@
     "symbol": "AnimateEffectParam",
     "kind": "func",
     "signature": "func AnimateEffectParam(layer *Layer, fx *Effect, paramMatchName string, kfs []ScalarKeyframe) (*Property, error)",
-    "summary": "@summary    Keyframe a 1D-scalar effect parameter over time @description Keyframes a 1D-scalar effect parameter — N keyframes (\u003e= 2), each a   ScalarKeyframe with a time (seconds), value, and optional ease.",
+    "summary": "@summary    Keyframe a 1D-scalar effect parameter over time @description Keyframes a 1D-scalar effect parameter — N keyframes (\u003e= 2), each a",
     "has_cap": true,
     "cap": {
       "domain": "effect",
@@ -1112,7 +1112,7 @@
     "symbol": "AnimateEffectParamVec",
     "kind": "func",
     "signature": "func AnimateEffectParamVec(layer *Layer, fx *Effect, paramMatchName string, kfs []VectorKeyframe) (*Property, error)",
-    "summary": "@summary    Keyframe a multi-component effect parameter over time @description Keyframes a multi-component effect parameter — the color / 2D-point   / 3D-point counterpart of AnimateEffectParam.",
+    "summary": "@summary    Keyframe a multi-component effect parameter over time @description Keyframes a multi-component effect parameter — the color / 2D-point",
     "has_cap": true,
     "cap": {
       "domain": "effect",
@@ -1136,7 +1136,7 @@
     "symbol": "ApplyPseudoEffect",
     "kind": "func",
     "signature": "func ApplyPseudoEffect(layer *Layer, ffxBytes []byte) (*Effect, error)",
-    "summary": "@summary    Apply an .ffx Animation Preset pseudo effect to a layer @description Splices the pseudo effect carried by an After Effects Animation   Preset (.ffx) into the layer's Effect Parade and returns the parsed Effect.",
+    "summary": "@summary    Apply an .ffx Animation Preset pseudo effect to a layer @description Splices the pseudo effect carried by an After Effects Animation",
     "has_cap": true,
     "cap": {
       "domain": "effect",
@@ -1168,7 +1168,7 @@
     "symbol": "ApplyPseudoEffectNamed",
     "kind": "func",
     "signature": "func ApplyPseudoEffectNamed(layer *Layer, ffxBytes []byte, displayName string) (*Effect, error)",
-    "summary": "@summary    Apply an .ffx pseudo effect with a custom display name @description ApplyPseudoEffect with a custom effect-instance display name (the   label in AE's Effect Controls / timeline).",
+    "summary": "@summary    Apply an .ffx pseudo effect with a custom display name @description ApplyPseudoEffect with a custom effect-instance display name (the",
     "has_cap": true,
     "cap": {
       "domain": "effect",
@@ -1197,7 +1197,7 @@
     "symbol": "BuildPseudoEffect",
     "kind": "func",
     "signature": "func BuildPseudoEffect(layer *Layer, uid, name, displayName string, controls []PseudoControl, opts ...PseudoOption) (*Effect, error)",
-    "summary": "@summary    Build a pseudo effect from scratch in Go and apply it @description Builds a Pseudo Effect entirely in Go — no .ffx file and no running   AE — and splices it into the layer's Effect Parade.",
+    "summary": "@summary    Build a pseudo effect from scratch in Go and apply it @description Builds a Pseudo Effect entirely in Go — no .ffx file and no running",
     "has_cap": true,
     "cap": {
       "domain": "effect",
@@ -1242,7 +1242,7 @@
     "symbol": "RemoveEffect",
     "kind": "func",
     "signature": "func RemoveEffect(layer *Layer, index int) error",
-    "summary": "@summary     Remove the effect at the given index from a layer's Effect Parade @description The inverse of AddEffect: a thin, index-validated wrapper over   generic Effect-Parade child removal.",
+    "summary": "@summary     Remove the effect at the given index from a layer's Effect Parade @description The inverse of AddEffect: a thin, index-validated wrapper over",
     "has_cap": true,
     "cap": {
       "domain": "effect",
@@ -1303,7 +1303,7 @@
     "symbol": "SetEffectParam",
     "kind": "func",
     "signature": "func SetEffectParam(layer *Layer, fx *Effect, paramMatchName string, value any) (*Property, error)",
-    "summary": "@summary    Set an effect parameter's static value by match-name @description Sets an effect parameter's static value by full parameter match-name   (e.g.",
+    "summary": "@summary    Set an effect parameter's static value by match-name @description Sets an effect parameter's static value by full parameter match-name",
     "has_cap": true,
     "cap": {
       "domain": "effect",
@@ -1330,7 +1330,7 @@
     "symbol": "WithLabelCodepage",
     "kind": "func",
     "signature": "func WithLabelCodepage(cp PseudoLabelCodepage) PseudoOption",
-    "summary": "@summary    Set the ANSI codepage for a pseudo effect's control labels @description Sets the ANSI codepage the effect's control labels are encoded in   (default PseudoLabelGBK).",
+    "summary": "@summary    Set the ANSI codepage for a pseudo effect's control labels @description Sets the ANSI codepage the effect's control labels are encoded in",
     "has_cap": true,
     "cap": {
       "domain": "effect",
@@ -1361,7 +1361,7 @@
     "symbol": "AddEssentialProperty",
     "kind": "func",
     "signature": "func AddEssentialProperty(layer *Layer, fx *Effect, paramMatchName, displayName string) (*EssentialGraphicsController, error)",
-    "summary": "@summary     Expose an effect parameter in the Essential Graphics panel @description Mirrors AE's \"add to Essential Graphics\" /   Property.addToMotionGraphicsTemplate: the parameter becomes a controller in   the owning composition's Essential Graphics panel and is appended to   Composition.EssentialGraphicsControllers.",
+    "summary": "@summary     Expose an effect parameter in the Essential Graphics panel @description Mirrors AE's \"add to Essential Graphics\" /",
     "has_cap": true,
     "cap": {
       "domain": "eg",
@@ -1653,32 +1653,6 @@
   {
     "symbol": "SetAlphaStops",
     "kind": "method",
-    "recv": "*GradientFillNode",
-    "signature": "func (n *GradientFillNode) SetAlphaStops(stops []GradientAlphaStop) error",
-    "summary": "@summary    Replace the gradient alpha stops @description Requires at least two stops; each offset, midpoint and alpha must   lie in zero to one.",
-    "has_cap": true,
-    "cap": {
-      "domain": "gradient",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestV2_2_GradientFill_AEShipGate_AE2020",
-        "TestV2_2_GradientFill_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "gradient alpha stops",
-        "渐变透明度色标",
-        "alpha stops",
-        "渐变不透明度"
-      ]
-    }
-  },
-  {
-    "symbol": "SetAlphaStops",
-    "kind": "method",
     "recv": "*GradientStrokeNode",
     "signature": "func (n *GradientStrokeNode) SetAlphaStops(stops []GradientAlphaStop) error",
     "summary": "@summary    Replace the gradient stroke alpha stops @description Requires at least two stops; each value must lie in zero to one.",
@@ -1702,11 +1676,11 @@
     }
   },
   {
-    "symbol": "SetColorStops",
+    "symbol": "SetAlphaStops",
     "kind": "method",
-    "recv": "*GradientStrokeNode",
-    "signature": "func (n *GradientStrokeNode) SetColorStops(stops []GradientColorStop) error",
-    "summary": "@summary    Replace the gradient stroke color stops @description Requires at least two stops; each value must lie in zero to one.",
+    "recv": "*GradientFillNode",
+    "signature": "func (n *GradientFillNode) SetAlphaStops(stops []GradientAlphaStop) error",
+    "summary": "@summary    Replace the gradient alpha stops @description Requires at least two stops; each offset, midpoint and alpha must   lie in zero to one.",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -1714,15 +1688,16 @@
       "verify": "render-pixel",
       "minver": "2020",
       "gate": [
-        "TestV2_2_GradientStroke_AEShipGate_AE2020",
-        "TestV2_2_GradientStroke_AEShipGate_AE2025"
+        "TestV2_2_GradientFill_AEShipGate_AE2020",
+        "TestV2_2_GradientFill_AEShipGate_AE2025"
       ],
       "boundary": "",
       "incident": null,
       "alias": [
-        "gradient stroke color stops",
-        "渐变描边色标",
-        "color stops"
+        "gradient alpha stops",
+        "渐变透明度色标",
+        "alpha stops",
+        "渐变不透明度"
       ]
     }
   },
@@ -1753,11 +1728,11 @@
     }
   },
   {
-    "symbol": "SetEndPoint",
+    "symbol": "SetColorStops",
     "kind": "method",
-    "recv": "*GradientFillNode",
-    "signature": "func (n *GradientFillNode) SetEndPoint(v [2]float64) error",
-    "summary": "@summary    Set the gradient ramp end point @param      v  the end point in shape-local coordinates @domain     gradient @stability  stable @verify     render-pixel @gate       TestMGGradientDir_AEShipGate_AE2020,TestMGGradientDir_AEShipGate_AE2025 @since      AE2020 @alias      gradient end point,渐变终点,gradient direction,渐变方向",
+    "recv": "*GradientStrokeNode",
+    "signature": "func (n *GradientStrokeNode) SetColorStops(stops []GradientColorStop) error",
+    "summary": "@summary    Replace the gradient stroke color stops @description Requires at least two stops; each value must lie in zero to one.",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -1765,16 +1740,15 @@
       "verify": "render-pixel",
       "minver": "2020",
       "gate": [
-        "TestMGGradientDir_AEShipGate_AE2020",
-        "TestMGGradientDir_AEShipGate_AE2025"
+        "TestV2_2_GradientStroke_AEShipGate_AE2020",
+        "TestV2_2_GradientStroke_AEShipGate_AE2025"
       ],
       "boundary": "",
       "incident": null,
       "alias": [
-        "gradient end point",
-        "渐变终点",
-        "gradient direction",
-        "渐变方向"
+        "gradient stroke color stops",
+        "渐变描边色标",
+        "color stops"
       ]
     }
   },
@@ -1804,11 +1778,11 @@
     }
   },
   {
-    "symbol": "SetGradientType",
+    "symbol": "SetEndPoint",
     "kind": "method",
     "recv": "*GradientFillNode",
-    "signature": "func (n *GradientFillNode) SetGradientType(t GradientType) error",
-    "summary": "@summary    Select the gradient ramp shape (linear or radial) @description For radial, StartPoint is the centre and EndPoint sets the outer   radius.",
+    "signature": "func (n *GradientFillNode) SetEndPoint(v [2]float64) error",
+    "summary": "@summary    Set the gradient ramp end point @param      v  the end point in shape-local coordinates @domain     gradient @stability  stable @verify     render-pixel @gate       TestMGGradientDir_AEShipGate_AE2020,TestMGGradientDir_AEShipGate_AE2025 @since      AE2020 @alias      gradient end point,渐变终点,gradient direction,渐变方向",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -1816,18 +1790,16 @@
       "verify": "render-pixel",
       "minver": "2020",
       "gate": [
-        "TestMGGradientRadial_AEShipGate_AE2020",
-        "TestMGGradientRadial_AEShipGate_AE2025"
+        "TestMGGradientDir_AEShipGate_AE2020",
+        "TestMGGradientDir_AEShipGate_AE2025"
       ],
       "boundary": "",
       "incident": null,
       "alias": [
-        "gradient type",
-        "渐变类型",
-        "linear",
-        "radial",
-        "线性",
-        "径向"
+        "gradient end point",
+        "渐变终点",
+        "gradient direction",
+        "渐变方向"
       ]
     }
   },
@@ -1852,6 +1824,34 @@
       "alias": [
         "gradient stroke type",
         "渐变描边类型",
+        "linear",
+        "radial",
+        "线性",
+        "径向"
+      ]
+    }
+  },
+  {
+    "symbol": "SetGradientType",
+    "kind": "method",
+    "recv": "*GradientFillNode",
+    "signature": "func (n *GradientFillNode) SetGradientType(t GradientType) error",
+    "summary": "@summary    Select the gradient ramp shape (linear or radial) @description For radial, StartPoint is the centre and EndPoint sets the outer   radius.",
+    "has_cap": true,
+    "cap": {
+      "domain": "gradient",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGGradientRadial_AEShipGate_AE2020",
+        "TestMGGradientRadial_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "gradient type",
+        "渐变类型",
         "linear",
         "radial",
         "线性",
@@ -1913,6 +1913,31 @@
   {
     "symbol": "SetHighlightLength",
     "kind": "method",
+    "recv": "*GradientStrokeNode",
+    "signature": "func (n *GradientStrokeNode) SetHighlightLength(v float64) error",
+    "summary": "@summary    Offset a radial gradient stroke's bright centre @description Shifts the bright centre off the geometric centre by a percent of   the radius (range -100 to 100; 0 = centred).",
+    "has_cap": true,
+    "cap": {
+      "domain": "gradient",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGGradStrokeGeom_AEShipGate_AE2020",
+        "TestMGGradStrokeGeom_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "gradient stroke highlight length",
+        "渐变描边高亮偏移",
+        "radial highlight stroke"
+      ]
+    }
+  },
+  {
+    "symbol": "SetHighlightLength",
+    "kind": "method",
     "recv": "*GradientFillNode",
     "signature": "func (n *GradientFillNode) SetHighlightLength(v float64) error",
     "summary": "@summary    Offset a radial gradient's bright centre @description Shifts the bright centre off the geometric centre by a percent of   the radius (range -100 to 100; 0 = centred).",
@@ -1933,31 +1958,6 @@
         "高亮偏移",
         "radial highlight",
         "渐变高亮"
-      ]
-    }
-  },
-  {
-    "symbol": "SetHighlightLength",
-    "kind": "method",
-    "recv": "*GradientStrokeNode",
-    "signature": "func (n *GradientStrokeNode) SetHighlightLength(v float64) error",
-    "summary": "@summary    Offset a radial gradient stroke's bright centre @description Shifts the bright centre off the geometric centre by a percent of   the radius (range -100 to 100; 0 = centred).",
-    "has_cap": true,
-    "cap": {
-      "domain": "gradient",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestMGGradStrokeGeom_AEShipGate_AE2020",
-        "TestMGGradStrokeGeom_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "gradient stroke highlight length",
-        "渐变描边高亮偏移",
-        "radial highlight stroke"
       ]
     }
   },
@@ -2222,7 +2222,7 @@
     "symbol": "DeleteKeyframe",
     "kind": "func",
     "signature": "func DeleteKeyframe(p *Property, i int) error",
-    "summary": "@summary    Delete a keyframe from a property's stream by index @description Removes the keyframe at index i from the property's keyframe stream   and decrements the count header.",
+    "summary": "@summary    Delete a keyframe from a property's stream by index @description Removes the keyframe at index i from the property's keyframe stream",
     "has_cap": true,
     "cap": {
       "domain": "keyframe",
@@ -2246,7 +2246,7 @@
     "symbol": "InsertKeyframe",
     "kind": "func",
     "signature": "func InsertKeyframe(p *Property, time float64, value any) (*Keyframe, int, error)",
-    "summary": "@summary    Insert a keyframe into a property's stream @description Builds a new keyframe block and inserts it into the property's   keyframe stream (time-sorted; ties land after existing keys at the same   time), then updates the count header.",
+    "summary": "@summary    Insert a keyframe into a property's stream @description Builds a new keyframe block and inserts it into the property's",
     "has_cap": true,
     "cap": {
       "domain": "keyframe",
@@ -2660,7 +2660,7 @@
     "symbol": "NewPrecompLayer",
     "kind": "func",
     "signature": "func NewPrecompLayer(parent, child *Composition, name string) (*Layer, error)",
-    "summary": "@summary    Add a precomp (nested-comp) layer to a composition @description Adds a layer to parent whose source is the composition child (a   nested / pre-composed comp) and returns it.",
+    "summary": "@summary    Add a precomp (nested-comp) layer to a composition @description Adds a layer to parent whose source is the composition child (a",
     "has_cap": true,
     "cap": {
       "domain": "layer-create",
@@ -2686,7 +2686,7 @@
     "symbol": "NewShapeLayer",
     "kind": "func",
     "signature": "func NewShapeLayer(c *Composition, name string) (*ShapeLayer, error)",
-    "summary": "@summary    Add an empty shape layer to a composition @description Appends a new empty shape layer and returns the typed ShapeLayer   wrapper; the embedded Layer is also appended to the comp's layer list so   lookups by ID or name work immediately.",
+    "summary": "@summary    Add an empty shape layer to a composition @description Appends a new empty shape layer and returns the typed ShapeLayer",
     "has_cap": true,
     "cap": {
       "domain": "layer-create",
@@ -3787,7 +3787,7 @@
     "symbol": "SetLayerTransform",
     "kind": "func",
     "signature": "func SetLayerTransform(layer *Layer, t *LayerTransform) error",
-    "summary": "@summary    Replace a parsed layer's Transform Group with a lowering of t @description Replaces a parsed layer's Transform Group — the from-scratch path   for animated (or non-default static) transform on layers that are not shape   layers (text / precomp / footage / solid / null).",
+    "summary": "@summary    Replace a parsed layer's Transform Group with a lowering of t @description Replaces a parsed layer's Transform Group — the from-scratch path",
     "has_cap": true,
     "cap": {
       "domain": "layer-set",
@@ -5243,7 +5243,7 @@
     "symbol": "AddMask",
     "kind": "func",
     "signature": "func AddMask(layer *Layer, name string, path BezierPath) (*Mask, error)",
-    "summary": "@summary     Append a vector mask to a layer @description Appends a vector mask to the layer's \"ADBE Mask Parade\" and   returns the parsed mask.",
+    "summary": "@summary     Append a vector mask to a layer @description Appends a vector mask to the layer's \"ADBE Mask Parade\" and",
     "has_cap": true,
     "cap": {
       "domain": "mask",
@@ -5269,7 +5269,7 @@
     "symbol": "DuplicateMask",
     "kind": "func",
     "signature": "func DuplicateMask(layer *Layer, m *Mask) (*Mask, error)",
-    "summary": "@summary     Duplicate a mask in place within a layer's Mask Parade @description Inserts a copy of mask m immediately after it in the layer's   \"ADBE Mask Parade\" — mirroring AE's PropertyBase.duplicate() on a mask — and   returns the clone.",
+    "summary": "@summary     Duplicate a mask in place within a layer's Mask Parade @description Inserts a copy of mask m immediately after it in the layer's",
     "has_cap": true,
     "cap": {
       "domain": "mask",
@@ -5292,7 +5292,7 @@
     "symbol": "MoveMask",
     "kind": "func",
     "signature": "func MoveMask(layer *Layer, m *Mask, toIndex int) error",
-    "summary": "@summary     Reorder a mask within a layer's Mask Parade @description Reorders mask m to position toIndex (0-based) among the layer's   masks, the other masks keeping their relative order — mirroring AE's   PropertyBase.moveTo() on a mask.",
+    "summary": "@summary     Reorder a mask within a layer's Mask Parade @description Reorders mask m to position toIndex (0-based) among the layer's",
     "has_cap": true,
     "cap": {
       "domain": "mask",
@@ -5544,7 +5544,7 @@
     "symbol": "SetMaskPath",
     "kind": "func",
     "signature": "func SetMaskPath(layer *Layer, mask *Mask, path BezierPath) error",
-    "summary": "@summary     Rewrite an existing mask's outline with a new static path @description Replaces a mask's outline in place with a new static path   (layer-pixel coordinates, the same space AddMask accepts).",
+    "summary": "@summary     Rewrite an existing mask's outline with a new static path @description Replaces a mask's outline in place with a new static path",
     "has_cap": true,
     "cap": {
       "domain": "mask",
@@ -5569,7 +5569,7 @@
     "symbol": "SetMaskPathKeyframes",
     "kind": "func",
     "signature": "func SetMaskPathKeyframes(layer *Layer, mask *Mask, keys []MaskPathKey) error",
-    "summary": "@summary     Replace a mask's outline with an animated, keyframed path @description Replaces a mask's outline with an animated path — N keyframes   (\u003e= 2), each a BezierPath snapshot at a time in seconds (the layer-pixel   space AddMask / SetMaskPath accept), with optional temporal ease per side   (zero = linear).",
+    "summary": "@summary     Replace a mask's outline with an animated, keyframed path @description Replaces a mask's outline with an animated path — N keyframes",
     "has_cap": true,
     "cap": {
       "domain": "mask",
@@ -5665,10 +5665,31 @@
     }
   },
   {
+    "symbol": "DefaultParseLimits",
+    "kind": "func",
+    "signature": "func DefaultParseLimits() ParseLimits",
+    "summary": "@summary    Return the default parser resource budgets @returns    default limits for local AEP files @domain     meta @stability  stable @verify     roundtrip @since      AE2020 @alias      parser limits,resource budget,解析限制",
+    "has_cap": true,
+    "cap": {
+      "domain": "meta",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "parser limits",
+        "resource budget",
+        "解析限制"
+      ]
+    }
+  },
+  {
     "symbol": "DefaultTextRangeAdvanced",
     "kind": "func",
     "signature": "func DefaultTextRangeAdvanced() TextRangeAdvanced",
-    "summary": "@summary    Return the Range Advanced params at their AE defaults @description Returns the Range Advanced params at their AE defaults   (Units=Percentage, BasedOn=Characters, Mode=Add, Amount=100, Shape=Square,   Smoothness=100, eases=0, no randomize).",
+    "summary": "@summary    Return the Range Advanced params at their AE defaults @description Returns the Range Advanced params at their AE defaults",
     "has_cap": true,
     "cap": {
       "domain": "meta",
@@ -5724,6 +5745,27 @@
         "read",
         "流读取",
         "io.ReadSeeker"
+      ]
+    }
+  },
+  {
+    "symbol": "FromReaderWithLimits",
+    "kind": "func",
+    "signature": "func FromReaderWithLimits(r io.ReadSeeker, limits ParseLimits) (*Project, error)",
+    "summary": "@summary    Parse an .aep stream with explicit resource budgets @param      r  reader positioned at the start of the .aep byte stream @param      limits  parser resource budgets; zero fields use defaults @returns    the parsed Project @domain     meta @stability  stable @verify     roundtrip @since      AE2020 @alias      reader with limits,bounded stream parse,流式受限解析",
+    "has_cap": true,
+    "cap": {
+      "domain": "meta",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "reader with limits",
+        "bounded stream parse",
+        "流式受限解析"
       ]
     }
   },
@@ -5791,6 +5833,27 @@
         "读取",
         "打开",
         "加载 aep"
+      ]
+    }
+  },
+  {
+    "symbol": "OpenWithLimits",
+    "kind": "func",
+    "signature": "func OpenWithLimits(path string, limits ParseLimits) (*Project, error)",
+    "summary": "@summary    Parse an .aep file by path with explicit resource budgets @param      path  filesystem path to the .aep file to read @param      limits  parser resource budgets; zero fields use defaults @returns    the parsed Project @domain     meta @stability  stable @verify     roundtrip @since      AE2020 @alias      open with limits,bounded parse,受限解析",
+    "has_cap": true,
+    "cap": {
+      "domain": "meta",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "open with limits",
+        "bounded parse",
+        "受限解析"
       ]
     }
   },
@@ -5863,7 +5926,7 @@
     "symbol": "Reopen",
     "kind": "func",
     "signature": "func Reopen(p *Project) (*Project, error)",
-    "summary": "@summary    Serialize then re-parse a project to fully materialize built layers @description Serializes the project to memory (WriteAEP) and re-parses the   bytes (FromReader), returning a fresh Project.",
+    "summary": "@summary    Serialize then re-parse a project to fully materialize built layers @description Serializes the project to memory (WriteAEP) and re-parses the",
     "has_cap": true,
     "cap": {
       "domain": "meta",
@@ -5886,7 +5949,7 @@
     "symbol": "SupportedEffectParams",
     "kind": "func",
     "signature": "func SupportedEffectParams() []string",
-    "summary": "@summary    List parameter match-names with a dedicated template @description Returns the sorted parameter match-names that have a dedicated   per-parameter template.",
+    "summary": "@summary    List parameter match-names with a dedicated template @description Returns the sorted parameter match-names that have a dedicated",
     "has_cap": true,
     "cap": {
       "domain": "meta",
@@ -5907,7 +5970,7 @@
     "symbol": "SupportedEffects",
     "kind": "func",
     "signature": "func SupportedEffects() []string",
-    "summary": "@summary    List the effect match-names AddEffect can add @description Returns the sorted effect match-names AddEffect can add from an   embedded template.",
+    "summary": "@summary    List the effect match-names AddEffect can add @description Returns the sorted effect match-names AddEffect can add from an",
     "has_cap": true,
     "cap": {
       "domain": "meta",
@@ -5993,7 +6056,7 @@
     "symbol": "NewProject",
     "kind": "func",
     "signature": "func NewProject(target ...AETarget) *Project",
-    "summary": "@summary    Create a fresh empty Project from an embedded AE skeleton @description Returns an empty Project parsed from the embedded AE skeleton   matching the requested target.",
+    "summary": "@summary    Create a fresh empty Project from an embedded AE skeleton @description Returns an empty Project parsed from the embedded AE skeleton",
     "has_cap": true,
     "cap": {
       "domain": "project",
@@ -8515,9 +8578,9 @@
   {
     "symbol": "SetAmount",
     "kind": "method",
-    "recv": "*OffsetPathsNode",
-    "signature": "func (n *OffsetPathsNode) SetAmount(v float64) error",
-    "summary": "@summary    Set the offset amount @description A positive amount grows the paths, a negative amount shrinks them.",
+    "recv": "*StrokeWave",
+    "signature": "func (w *StrokeWave) SetAmount(v float64) error",
+    "summary": "@summary    Set the stroke wave amount @param      v  the wave amount in percent @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025 @since      AE2020 @alias      wave amount,波浪幅度,stroke wave amount",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8525,16 +8588,15 @@
       "verify": "render-pixel",
       "minver": "2020",
       "gate": [
-        "TestMGOffset_AEShipGate_AE2020",
-        "TestMGOffset_AEShipGate_AE2025"
+        "TestV2_2_StrokeTaperWave_AEShipGate_AE2020",
+        "TestV2_2_StrokeTaperWave_AEShipGate_AE2025"
       ],
       "boundary": "",
       "incident": null,
       "alias": [
-        "offset amount",
-        "偏移量",
-        "grow shrink",
-        "offset paths amount"
+        "wave amount",
+        "波浪幅度",
+        "stroke wave amount"
       ]
     }
   },
@@ -8567,9 +8629,9 @@
   {
     "symbol": "SetAmount",
     "kind": "method",
-    "recv": "*StrokeWave",
-    "signature": "func (w *StrokeWave) SetAmount(v float64) error",
-    "summary": "@summary    Set the stroke wave amount @param      v  the wave amount in percent @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025 @since      AE2020 @alias      wave amount,波浪幅度,stroke wave amount",
+    "recv": "*OffsetPathsNode",
+    "signature": "func (n *OffsetPathsNode) SetAmount(v float64) error",
+    "summary": "@summary    Set the offset amount @description A positive amount grows the paths, a negative amount shrinks them.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8577,15 +8639,16 @@
       "verify": "render-pixel",
       "minver": "2020",
       "gate": [
-        "TestV2_2_StrokeTaperWave_AEShipGate_AE2020",
-        "TestV2_2_StrokeTaperWave_AEShipGate_AE2025"
+        "TestMGOffset_AEShipGate_AE2020",
+        "TestMGOffset_AEShipGate_AE2025"
       ],
       "boundary": "",
       "incident": null,
       "alias": [
-        "wave amount",
-        "波浪幅度",
-        "stroke wave amount"
+        "offset amount",
+        "偏移量",
+        "grow shrink",
+        "offset paths amount"
       ]
     }
   },
@@ -8667,31 +8730,6 @@
   {
     "symbol": "SetBlendMode",
     "kind": "method",
-    "recv": "*StrokeNode",
-    "signature": "func (s *StrokeNode) SetBlendMode(v ShapeBlendMode) error",
-    "summary": "@summary    Set the stroke blend mode @param      v  the blend mode as AE's 1-based index @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025 @since      AE2020 @alias      stroke blend mode,描边混合模式,blend mode",
-    "has_cap": true,
-    "cap": {
-      "domain": "shape",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestV2_2_ShapeEnums_AEShipGate_AE2020",
-        "TestV2_2_ShapeEnums_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "stroke blend mode",
-        "描边混合模式",
-        "blend mode"
-      ]
-    }
-  },
-  {
-    "symbol": "SetBlendMode",
-    "kind": "method",
     "recv": "*FillNode",
     "signature": "func (f *FillNode) SetBlendMode(v ShapeBlendMode) error",
     "summary": "@summary    Set the fill blend mode @param      v  the blend mode as AE's 1-based index @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025 @since      AE2020 @alias      fill blend mode,填充混合模式,blend mode",
@@ -8710,6 +8748,31 @@
       "alias": [
         "fill blend mode",
         "填充混合模式",
+        "blend mode"
+      ]
+    }
+  },
+  {
+    "symbol": "SetBlendMode",
+    "kind": "method",
+    "recv": "*StrokeNode",
+    "signature": "func (s *StrokeNode) SetBlendMode(v ShapeBlendMode) error",
+    "summary": "@summary    Set the stroke blend mode @param      v  the blend mode as AE's 1-based index @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025 @since      AE2020 @alias      stroke blend mode,描边混合模式,blend mode",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestV2_2_ShapeEnums_AEShipGate_AE2020",
+        "TestV2_2_ShapeEnums_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "stroke blend mode",
+        "描边混合模式",
         "blend mode"
       ]
     }
@@ -8821,31 +8884,6 @@
   {
     "symbol": "SetCompositeOrder",
     "kind": "method",
-    "recv": "*FillNode",
-    "signature": "func (f *FillNode) SetCompositeOrder(v ShapeCompositeOrder) error",
-    "summary": "@summary    Set the fill composite order @param      v  whether the fill composites above or below the previous @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025 @since      AE2020 @alias      fill composite order,填充合成顺序,composite order",
-    "has_cap": true,
-    "cap": {
-      "domain": "shape",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestV2_2_ShapeEnums_AEShipGate_AE2020",
-        "TestV2_2_ShapeEnums_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "fill composite order",
-        "填充合成顺序",
-        "composite order"
-      ]
-    }
-  },
-  {
-    "symbol": "SetCompositeOrder",
-    "kind": "method",
     "recv": "*StrokeNode",
     "signature": "func (s *StrokeNode) SetCompositeOrder(v ShapeCompositeOrder) error",
     "summary": "@summary    Set the stroke composite order @param      v  whether the stroke composites above or below the previous @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025 @since      AE2020 @alias      stroke composite order,描边合成顺序,composite order",
@@ -8864,6 +8902,31 @@
       "alias": [
         "stroke composite order",
         "描边合成顺序",
+        "composite order"
+      ]
+    }
+  },
+  {
+    "symbol": "SetCompositeOrder",
+    "kind": "method",
+    "recv": "*FillNode",
+    "signature": "func (f *FillNode) SetCompositeOrder(v ShapeCompositeOrder) error",
+    "summary": "@summary    Set the fill composite order @param      v  whether the fill composites above or below the previous @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025 @since      AE2020 @alias      fill composite order,填充合成顺序,composite order",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestV2_2_ShapeEnums_AEShipGate_AE2020",
+        "TestV2_2_ShapeEnums_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "fill composite order",
+        "填充合成顺序",
         "composite order"
       ]
     }
@@ -8947,30 +9010,6 @@
   {
     "symbol": "SetCorrelation",
     "kind": "method",
-    "recv": "*WiggleTransformNode",
-    "signature": "func (n *WiggleTransformNode) SetCorrelation(v float64) error",
-    "summary": "@summary    Set how correlated the random transform jitter is @description Range 0 to 100 (default 50); a non-default value materializes the   leaf.",
-    "has_cap": true,
-    "cap": {
-      "domain": "shape",
-      "tier": "alpha",
-      "verify": "ae-accept",
-      "minver": "2020",
-      "gate": [
-        "TestMGWiggleModRT_AEShipGate_AE2020",
-        "TestMGWiggleModRT_AEShipGate_AE2025"
-      ],
-      "boundary": "a time-varying jitter modulation that cannot be single-frame pixel-gated; AE accepts and reads back the value",
-      "incident": null,
-      "alias": [
-        "wiggle transform correlation",
-        "变换抖动相关性"
-      ]
-    }
-  },
-  {
-    "symbol": "SetCorrelation",
-    "kind": "method",
     "recv": "*WigglePathsNode",
     "signature": "func (n *WigglePathsNode) SetCorrelation(v float64) error",
     "summary": "@summary    Set how correlated successive random displacements are @description Range 0 to 100: 0 means each point jitters independently   (jagged), 100 means neighbours move together (smooth coherent boil).",
@@ -8990,6 +9029,30 @@
         "wiggle correlation",
         "路径抖动相关性",
         "roughen correlation"
+      ]
+    }
+  },
+  {
+    "symbol": "SetCorrelation",
+    "kind": "method",
+    "recv": "*WiggleTransformNode",
+    "signature": "func (n *WiggleTransformNode) SetCorrelation(v float64) error",
+    "summary": "@summary    Set how correlated the random transform jitter is @description Range 0 to 100 (default 50); a non-default value materializes the   leaf.",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "alpha",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestMGWiggleModRT_AEShipGate_AE2020",
+        "TestMGWiggleModRT_AEShipGate_AE2025"
+      ],
+      "boundary": "a time-varying jitter modulation that cannot be single-frame pixel-gated; AE accepts and reads back the value",
+      "incident": null,
+      "alias": [
+        "wiggle transform correlation",
+        "变换抖动相关性"
       ]
     }
   },
@@ -9022,31 +9085,6 @@
   {
     "symbol": "SetDetail",
     "kind": "method",
-    "recv": "*ZigZagNode",
-    "signature": "func (n *ZigZagNode) SetDetail(v float64) error",
-    "summary": "@summary    Set the number of ridges per path segment @param      v  the ridge count per segment (must be non-negative) @domain     shape @stability  stable @verify     render-pixel @gate       TestMGZigZag_AEShipGate_AE2020,TestMGZigZag_AEShipGate_AE2025 @since      AE2020 @alias      zigzag detail,锯齿密度,ridges per segment",
-    "has_cap": true,
-    "cap": {
-      "domain": "shape",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestMGZigZag_AEShipGate_AE2020",
-        "TestMGZigZag_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "zigzag detail",
-        "锯齿密度",
-        "ridges per segment"
-      ]
-    }
-  },
-  {
-    "symbol": "SetDetail",
-    "kind": "method",
     "recv": "*WigglePathsNode",
     "signature": "func (n *WigglePathsNode) SetDetail(v float64) error",
     "summary": "@summary    Set the wiggle detail @description Higher detail produces finer, more frequent ridges.",
@@ -9070,28 +9108,27 @@
     }
   },
   {
-    "symbol": "SetDirection",
+    "symbol": "SetDetail",
     "kind": "method",
-    "recv": "*RectNode",
-    "signature": "func (r *RectNode) SetDirection(v ShapeDirection) error",
-    "summary": "@summary    Set the rectangle path direction @param      v  the path direction (Normal or Reversed) @domain     shape @stability  stable @verify     ae-accept @gate       TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025 @since      AE2020 @boundary   length-preserving; AE accepts Reversed and it survives a re-save @alias      rect direction,路径方向,shape direction,正向反向",
+    "recv": "*ZigZagNode",
+    "signature": "func (n *ZigZagNode) SetDetail(v float64) error",
+    "summary": "@summary    Set the number of ridges per path segment @param      v  the ridge count per segment (must be non-negative) @domain     shape @stability  stable @verify     render-pixel @gate       TestMGZigZag_AEShipGate_AE2020,TestMGZigZag_AEShipGate_AE2025 @since      AE2020 @alias      zigzag detail,锯齿密度,ridges per segment",
     "has_cap": true,
     "cap": {
       "domain": "shape",
       "tier": "stable",
-      "verify": "ae-accept",
+      "verify": "render-pixel",
       "minver": "2020",
       "gate": [
-        "TestV2_2_ShapeEnums_AEShipGate_AE2020",
-        "TestV2_2_ShapeEnums_AEShipGate_AE2025"
+        "TestMGZigZag_AEShipGate_AE2020",
+        "TestMGZigZag_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving; AE accepts Reversed and it survives a re-save",
+      "boundary": "",
       "incident": null,
       "alias": [
-        "rect direction",
-        "路径方向",
-        "shape direction",
-        "正向反向"
+        "zigzag detail",
+        "锯齿密度",
+        "ridges per segment"
       ]
     }
   },
@@ -9117,6 +9154,32 @@
         "ellipse direction",
         "椭圆方向",
         "path direction",
+        "正向反向"
+      ]
+    }
+  },
+  {
+    "symbol": "SetDirection",
+    "kind": "method",
+    "recv": "*RectNode",
+    "signature": "func (r *RectNode) SetDirection(v ShapeDirection) error",
+    "summary": "@summary    Set the rectangle path direction @param      v  the path direction (Normal or Reversed) @domain     shape @stability  stable @verify     ae-accept @gate       TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025 @since      AE2020 @boundary   length-preserving; AE accepts Reversed and it survives a re-save @alias      rect direction,路径方向,shape direction,正向反向",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestV2_2_ShapeEnums_AEShipGate_AE2020",
+        "TestV2_2_ShapeEnums_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving; AE accepts Reversed and it survives a re-save",
+      "incident": null,
+      "alias": [
+        "rect direction",
+        "路径方向",
+        "shape direction",
         "正向反向"
       ]
     }
@@ -9436,31 +9499,6 @@
   {
     "symbol": "SetMiterLimit",
     "kind": "method",
-    "recv": "*OffsetPathsNode",
-    "signature": "func (n *OffsetPathsNode) SetMiterLimit(v float64) error",
-    "summary": "@summary    Set the offset miter clip ratio @description A sharp corner whose miter would extend past limit times width is   clipped flat to a bevel.",
-    "has_cap": true,
-    "cap": {
-      "domain": "shape",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestMGOffsetExtras_AEShipGate_AE2020",
-        "TestMGOffsetExtras_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "offset miter limit",
-        "偏移斜接限制",
-        "miter limit"
-      ]
-    }
-  },
-  {
-    "symbol": "SetMiterLimit",
-    "kind": "method",
     "recv": "*StrokeNode",
     "signature": "func (s *StrokeNode) SetMiterLimit(v float64) error",
     "summary": "@summary    Set the stroke miter limit @description AE only applies it when the corner join is Miter, but the value   is stored regardless.",
@@ -9479,6 +9517,31 @@
       "alias": [
         "stroke miter limit",
         "描边斜接限制",
+        "miter limit"
+      ]
+    }
+  },
+  {
+    "symbol": "SetMiterLimit",
+    "kind": "method",
+    "recv": "*OffsetPathsNode",
+    "signature": "func (n *OffsetPathsNode) SetMiterLimit(v float64) error",
+    "summary": "@summary    Set the offset miter clip ratio @description A sharp corner whose miter would extend past limit times width is   clipped flat to a bevel.",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGOffsetExtras_AEShipGate_AE2020",
+        "TestMGOffsetExtras_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "offset miter limit",
+        "偏移斜接限制",
         "miter limit"
       ]
     }
@@ -9537,31 +9600,6 @@
   {
     "symbol": "SetOpacity",
     "kind": "method",
-    "recv": "*StrokeNode",
-    "signature": "func (s *StrokeNode) SetOpacity(v float64) error",
-    "summary": "@summary    Set the stroke opacity @param      v  the opacity in percent @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_StrokeKf_AEShipGate_AE2020,TestV2_2_StrokeKf_AEShipGate_AE2025 @since      AE2020 @alias      stroke opacity,描边不透明度,set opacity",
-    "has_cap": true,
-    "cap": {
-      "domain": "shape",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestV2_2_StrokeKf_AEShipGate_AE2020",
-        "TestV2_2_StrokeKf_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "stroke opacity",
-        "描边不透明度",
-        "set opacity"
-      ]
-    }
-  },
-  {
-    "symbol": "SetOpacity",
-    "kind": "method",
     "recv": "*FillNode",
     "signature": "func (f *FillNode) SetOpacity(v float64) error",
     "summary": "@summary    Set the fill opacity @param      v  the opacity in percent @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_FillKf_AEShipGate_AE2020,TestV2_2_FillKf_AEShipGate_AE2025 @since      AE2020 @alias      fill opacity,填充不透明度,set opacity",
@@ -9580,6 +9618,31 @@
       "alias": [
         "fill opacity",
         "填充不透明度",
+        "set opacity"
+      ]
+    }
+  },
+  {
+    "symbol": "SetOpacity",
+    "kind": "method",
+    "recv": "*StrokeNode",
+    "signature": "func (s *StrokeNode) SetOpacity(v float64) error",
+    "summary": "@summary    Set the stroke opacity @param      v  the opacity in percent @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_StrokeKf_AEShipGate_AE2020,TestV2_2_StrokeKf_AEShipGate_AE2025 @since      AE2020 @alias      stroke opacity,描边不透明度,set opacity",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestV2_2_StrokeKf_AEShipGate_AE2020",
+        "TestV2_2_StrokeKf_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "stroke opacity",
+        "描边不透明度",
         "set opacity"
       ]
     }
@@ -9767,6 +9830,31 @@
   {
     "symbol": "SetPosition",
     "kind": "method",
+    "recv": "*WigglerTransform",
+    "signature": "func (t *WigglerTransform) SetPosition(v [2]float64) error",
+    "summary": "@summary    Set the position wiggle amplitude @param      v  the position wiggle amplitude in pixels @domain     shape @stability  stable @verify     render-pixel @gate       TestMGWiggleTransform_AEShipGate_AE2020,TestMGWiggleTransform_AEShipGate_AE2025 @since      AE2020 @alias      wiggler position amplitude,抖动位置幅度,position wiggle",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGWiggleTransform_AEShipGate_AE2020",
+        "TestMGWiggleTransform_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "wiggler position amplitude",
+        "抖动位置幅度",
+        "position wiggle"
+      ]
+    }
+  },
+  {
+    "symbol": "SetPosition",
+    "kind": "method",
     "recv": "*RectNode",
     "signature": "func (r *RectNode) SetPosition(v [2]float64) error",
     "summary": "@summary    Set the rectangle position @param      v  the local position offset in pixels @domain     shape @stability  stable @verify     ae-accept @gate       TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 @since      AE2020 @boundary   length-preserving; AE accepts the value and it survives a re-save @alias      rect position,矩形位置,set position",
@@ -9786,6 +9874,31 @@
         "rect position",
         "矩形位置",
         "set position"
+      ]
+    }
+  },
+  {
+    "symbol": "SetPosition",
+    "kind": "method",
+    "recv": "*StarNode",
+    "signature": "func (n *StarNode) SetPosition(v [2]float64) error",
+    "summary": "@summary    Set the star local position offset @param      v  the local position offset in pixels @domain     shape @stability  stable @verify     ae-accept @gate       TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 @since      AE2020 @boundary   length-preserving; AE accepts the value and it survives a re-save @alias      star position,星形位置,polystar position",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestShapeGeom_AEShipGate_AE2020",
+        "TestShapeGeom_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving; AE accepts the value and it survives a re-save",
+      "incident": null,
+      "alias": [
+        "star position",
+        "星形位置",
+        "polystar position"
       ]
     }
   },
@@ -9837,56 +9950,6 @@
         "ellipse position",
         "椭圆位置",
         "set position"
-      ]
-    }
-  },
-  {
-    "symbol": "SetPosition",
-    "kind": "method",
-    "recv": "*StarNode",
-    "signature": "func (n *StarNode) SetPosition(v [2]float64) error",
-    "summary": "@summary    Set the star local position offset @param      v  the local position offset in pixels @domain     shape @stability  stable @verify     ae-accept @gate       TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 @since      AE2020 @boundary   length-preserving; AE accepts the value and it survives a re-save @alias      star position,星形位置,polystar position",
-    "has_cap": true,
-    "cap": {
-      "domain": "shape",
-      "tier": "stable",
-      "verify": "ae-accept",
-      "minver": "2020",
-      "gate": [
-        "TestShapeGeom_AEShipGate_AE2020",
-        "TestShapeGeom_AEShipGate_AE2025"
-      ],
-      "boundary": "length-preserving; AE accepts the value and it survives a re-save",
-      "incident": null,
-      "alias": [
-        "star position",
-        "星形位置",
-        "polystar position"
-      ]
-    }
-  },
-  {
-    "symbol": "SetPosition",
-    "kind": "method",
-    "recv": "*WigglerTransform",
-    "signature": "func (t *WigglerTransform) SetPosition(v [2]float64) error",
-    "summary": "@summary    Set the position wiggle amplitude @param      v  the position wiggle amplitude in pixels @domain     shape @stability  stable @verify     render-pixel @gate       TestMGWiggleTransform_AEShipGate_AE2020,TestMGWiggleTransform_AEShipGate_AE2025 @since      AE2020 @alias      wiggler position amplitude,抖动位置幅度,position wiggle",
-    "has_cap": true,
-    "cap": {
-      "domain": "shape",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestMGWiggleTransform_AEShipGate_AE2020",
-        "TestMGWiggleTransform_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "wiggler position amplitude",
-        "抖动位置幅度",
-        "position wiggle"
       ]
     }
   },
@@ -10120,6 +10183,32 @@
   {
     "symbol": "SetSize",
     "kind": "method",
+    "recv": "*RectNode",
+    "signature": "func (r *RectNode) SetSize(v [2]float64) error",
+    "summary": "@summary    Set the rectangle size @param      v  the width and height in pixels @domain     shape @stability  stable @verify     render-pixel @gate       TestMGTrim_AEShipGate_AE2020,TestMGTrim_AEShipGate_AE2025 @since      AE2020 @alias      rect size,矩形尺寸,set size,宽高",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGTrim_AEShipGate_AE2020",
+        "TestMGTrim_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "rect size",
+        "矩形尺寸",
+        "set size",
+        "宽高"
+      ]
+    }
+  },
+  {
+    "symbol": "SetSize",
+    "kind": "method",
     "recv": "*ZigZagNode",
     "signature": "func (n *ZigZagNode) SetSize(v float64) error",
     "summary": "@summary    Set the zigzag amplitude @param      v  the zigzag amplitude in pixels (must be non-negative) @domain     shape @stability  stable @verify     render-pixel @gate       TestMGZigZag_AEShipGate_AE2020,TestMGZigZag_AEShipGate_AE2025 @since      AE2020 @alias      zigzag size,锯齿幅度,amplitude",
@@ -10170,32 +10259,6 @@
   {
     "symbol": "SetSize",
     "kind": "method",
-    "recv": "*RectNode",
-    "signature": "func (r *RectNode) SetSize(v [2]float64) error",
-    "summary": "@summary    Set the rectangle size @param      v  the width and height in pixels @domain     shape @stability  stable @verify     render-pixel @gate       TestMGTrim_AEShipGate_AE2020,TestMGTrim_AEShipGate_AE2025 @since      AE2020 @alias      rect size,矩形尺寸,set size,宽高",
-    "has_cap": true,
-    "cap": {
-      "domain": "shape",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestMGTrim_AEShipGate_AE2020",
-        "TestMGTrim_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "rect size",
-        "矩形尺寸",
-        "set size",
-        "宽高"
-      ]
-    }
-  },
-  {
-    "symbol": "SetSize",
-    "kind": "method",
     "recv": "*EllipseNode",
     "signature": "func (e *EllipseNode) SetSize(v [2]float64) error",
     "summary": "@summary    Set the ellipse size @param      v  the width and height in pixels @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_Ellipse_AEShipGate_AE2020,TestV2_2_Ellipse_AEShipGate_AE2025 @since      AE2020 @alias      ellipse size,椭圆尺寸,set size,宽高",
@@ -10222,6 +10285,30 @@
   {
     "symbol": "SetSpatialPhase",
     "kind": "method",
+    "recv": "*WiggleTransformNode",
+    "signature": "func (n *WiggleTransformNode) SetSpatialPhase(v float64) error",
+    "summary": "@summary    Set the transform-wiggle spatial phase @description This selects a different spatial offset of the seeded random   pattern.",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "alpha",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestMGWiggleModRT_AEShipGate_AE2020",
+        "TestMGWiggleModRT_AEShipGate_AE2025"
+      ],
+      "boundary": "a procedural noise-phase sample that cannot be pixel-gated; AE accepts and reads back the value",
+      "incident": null,
+      "alias": [
+        "wiggle transform spatial phase",
+        "变换抖动空间相位"
+      ]
+    }
+  },
+  {
+    "symbol": "SetSpatialPhase",
+    "kind": "method",
     "recv": "*WigglePathsNode",
     "signature": "func (n *WigglePathsNode) SetSpatialPhase(v float64) error",
     "summary": "@summary    Set the spatial phase into the noise field @description This selects a different spatial offset of the same seeded random   pattern.",
@@ -10241,30 +10328,6 @@
         "wiggle spatial phase",
         "路径抖动空间相位",
         "roughen spatial phase"
-      ]
-    }
-  },
-  {
-    "symbol": "SetSpatialPhase",
-    "kind": "method",
-    "recv": "*WiggleTransformNode",
-    "signature": "func (n *WiggleTransformNode) SetSpatialPhase(v float64) error",
-    "summary": "@summary    Set the transform-wiggle spatial phase @description This selects a different spatial offset of the seeded random   pattern.",
-    "has_cap": true,
-    "cap": {
-      "domain": "shape",
-      "tier": "alpha",
-      "verify": "ae-accept",
-      "minver": "2020",
-      "gate": [
-        "TestMGWiggleModRT_AEShipGate_AE2020",
-        "TestMGWiggleModRT_AEShipGate_AE2025"
-      ],
-      "boundary": "a procedural noise-phase sample that cannot be pixel-gated; AE accepts and reads back the value",
-      "incident": null,
-      "alias": [
-        "wiggle transform spatial phase",
-        "变换抖动空间相位"
       ]
     }
   },
@@ -10605,6 +10668,31 @@
   {
     "symbol": "SetWigglesPerSecond",
     "kind": "method",
+    "recv": "*WiggleTransformNode",
+    "signature": "func (n *WiggleTransformNode) SetWigglesPerSecond(v float64) error",
+    "summary": "@summary    Set the wiggle-transform temporal frequency @description This is how fast the transform churns over time.",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "alpha",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestMGWiggleTransform_AEShipGate_AE2020",
+        "TestMGWiggleTransform_AEShipGate_AE2025"
+      ],
+      "boundary": "a procedural modulation parameter that cannot be pixel-gated; AE accepts and reads back the value",
+      "incident": null,
+      "alias": [
+        "wiggle transform frequency",
+        "变换抖动频率",
+        "wiggles per second"
+      ]
+    }
+  },
+  {
+    "symbol": "SetWigglesPerSecond",
+    "kind": "method",
     "recv": "*WigglePathsNode",
     "signature": "func (n *WigglePathsNode) SetWigglesPerSecond(v float64) error",
     "summary": "@summary    Set the wiggle temporal frequency @description This is how fast the random edge churns over time.",
@@ -10629,35 +10717,10 @@
     }
   },
   {
-    "symbol": "SetWigglesPerSecond",
-    "kind": "method",
-    "recv": "*WiggleTransformNode",
-    "signature": "func (n *WiggleTransformNode) SetWigglesPerSecond(v float64) error",
-    "summary": "@summary    Set the wiggle-transform temporal frequency @description This is how fast the transform churns over time.",
-    "has_cap": true,
-    "cap": {
-      "domain": "shape",
-      "tier": "alpha",
-      "verify": "ae-accept",
-      "minver": "2020",
-      "gate": [
-        "TestMGWiggleTransform_AEShipGate_AE2020",
-        "TestMGWiggleTransform_AEShipGate_AE2025"
-      ],
-      "boundary": "a procedural modulation parameter that cannot be pixel-gated; AE accepts and reads back the value",
-      "incident": null,
-      "alias": [
-        "wiggle transform frequency",
-        "变换抖动频率",
-        "wiggles per second"
-      ]
-    }
-  },
-  {
     "symbol": "AddMarker",
     "kind": "func",
     "signature": "func AddMarker(c *Composition, seconds float64) (*Marker, error)",
-    "summary": "@summary    Append a composition marker at a given time @description Appends a new composition marker at the given time (in seconds) and   returns it for further Set* calls.",
+    "summary": "@summary    Append a composition marker at a given time @description Appends a new composition marker at the given time (in seconds) and",
     "has_cap": true,
     "cap": {
       "domain": "structural",
@@ -10682,7 +10745,7 @@
     "symbol": "DeleteLayer",
     "kind": "func",
     "signature": "func DeleteLayer(c *Composition, index int) error",
-    "summary": "@summary    Remove a layer from a composition by index @description Removes the layer at the given 0-based index in the comp's layer   list.",
+    "summary": "@summary    Remove a layer from a composition by index @description Removes the layer at the given 0-based index in the comp's layer",
     "has_cap": true,
     "cap": {
       "domain": "structural",
@@ -10707,7 +10770,7 @@
     "symbol": "DuplicateLayer",
     "kind": "func",
     "signature": "func DuplicateLayer(c *Composition, index int, name string) (*Layer, error)",
-    "summary": "@summary    Clone a layer in place by index @description Clones the layer at the given 0-based index and inserts the clone   at that same position, pushing the source and everything below it down by one   (mirrors AE's layer.duplicate()).",
+    "summary": "@summary    Clone a layer in place by index @description Clones the layer at the given 0-based index and inserts the clone",
     "has_cap": true,
     "cap": {
       "domain": "structural",
@@ -10730,7 +10793,7 @@
     "symbol": "DuplicatePropertyGroup",
     "kind": "func",
     "signature": "func DuplicatePropertyGroup(g *AEPropertyGroup) (*AEPropertyGroup, error)",
-    "summary": "@summary    Duplicate a group within its parent indexed group @description Inserts a copy of this group immediately after it among its parent   indexed group's children — mirroring AE's PropertyBase.duplicate() — and   returns the clone.",
+    "summary": "@summary    Duplicate a group within its parent indexed group @description Inserts a copy of this group immediately after it among its parent",
     "has_cap": true,
     "cap": {
       "domain": "structural",
@@ -10756,7 +10819,7 @@
     "symbol": "InsertLayer",
     "kind": "func",
     "signature": "func InsertLayer(c *Composition, src *Layer, atIdx int) (*Layer, error)",
-    "summary": "@summary    Deep-clone a layer into a composition at an index @description Deep-clones src into the comp's layer list at atIdx (0-based;   atIdx == len(layers) appends) and returns the inserted clone.",
+    "summary": "@summary    Deep-clone a layer into a composition at an index @description Deep-clones src into the comp's layer list at atIdx (0-based;",
     "has_cap": true,
     "cap": {
       "domain": "structural",
@@ -10781,7 +10844,7 @@
     "symbol": "MoveAfter",
     "kind": "func",
     "signature": "func MoveAfter(l, other *Layer) error",
-    "summary": "@summary    Move a layer to just after another layer @description Moves the layer to the slot immediately after other (the receiver   lands just below other in the stack).",
+    "summary": "@summary    Move a layer to just after another layer @description Moves the layer to the slot immediately after other (the receiver",
     "has_cap": true,
     "cap": {
       "domain": "structural",
@@ -10804,7 +10867,7 @@
     "symbol": "MoveBefore",
     "kind": "func",
     "signature": "func MoveBefore(l, other *Layer) error",
-    "summary": "@summary    Move a layer to just before another layer @description Moves the layer to the slot immediately before other (the receiver   lands just above other in the stack).",
+    "summary": "@summary    Move a layer to just before another layer @description Moves the layer to the slot immediately before other (the receiver",
     "has_cap": true,
     "cap": {
       "domain": "structural",
@@ -10827,7 +10890,7 @@
     "symbol": "MoveLayer",
     "kind": "func",
     "signature": "func MoveLayer(c *Composition, from, to int) error",
-    "summary": "@summary    Reorder a layer within a composition @description Moves the layer at from to position to in the comp's layer list   (both 0-based).",
+    "summary": "@summary    Reorder a layer within a composition @description Moves the layer at from to position to in the comp's layer list",
     "has_cap": true,
     "cap": {
       "domain": "structural",
@@ -10852,7 +10915,7 @@
     "symbol": "MovePropertyGroup",
     "kind": "func",
     "signature": "func MovePropertyGroup(g *AEPropertyGroup, index int) error",
-    "summary": "@summary    Reorder a group within its parent indexed group @description Reorders this group to position index (0-based) among its parent   indexed group's children; index is range-checked against the current child   count.",
+    "summary": "@summary    Reorder a group within its parent indexed group @description Reorders this group to position index (0-based) among its parent",
     "has_cap": true,
     "cap": {
       "domain": "structural",
@@ -10878,7 +10941,7 @@
     "symbol": "MoveToBeginning",
     "kind": "func",
     "signature": "func MoveToBeginning(l *Layer) error",
-    "summary": "@summary    Move a layer to the top of the layer stack @description Moves the layer to position 0 (top of the stack in AE's display,   AE-index 1).",
+    "summary": "@summary    Move a layer to the top of the layer stack @description Moves the layer to position 0 (top of the stack in AE's display,",
     "has_cap": true,
     "cap": {
       "domain": "structural",
@@ -10902,7 +10965,7 @@
     "symbol": "MoveToEnd",
     "kind": "func",
     "signature": "func MoveToEnd(l *Layer) error",
-    "summary": "@summary    Move a layer to the bottom of the layer stack @description Moves the layer to the last position (bottom of the stack in AE's   display).",
+    "summary": "@summary    Move a layer to the bottom of the layer stack @description Moves the layer to the last position (bottom of the stack in AE's",
     "has_cap": true,
     "cap": {
       "domain": "structural",
@@ -10926,7 +10989,7 @@
     "symbol": "RemoveMarker",
     "kind": "func",
     "signature": "func RemoveMarker(m *Marker) error",
-    "summary": "@summary    Remove a marker from its owning comp or layer @description Deletes this marker from its owning composition or layer marker set:   it splices out the marker's keyframe block, decrements the count, removes the   marker's record, shifts the trailing markers' offsets down, and drops the   marker from the public list.",
+    "summary": "@summary    Remove a marker from its owning comp or layer @description Deletes this marker from its owning composition or layer marker set:",
     "has_cap": true,
     "cap": {
       "domain": "structural",
@@ -10976,7 +11039,7 @@
     "symbol": "SetDimensionsSeparated",
     "kind": "func",
     "signature": "func SetDimensionsSeparated(p *Property, separated bool) error",
-    "summary": "@summary    Toggle Separate Dimensions on a Position property @description Toggles AE's \"Separate Dimensions\" on a Position leader, in both   directions.",
+    "summary": "@summary    Toggle Separate Dimensions on a Position property @description Toggles AE's \"Separate Dimensions\" on a Position leader, in both",
     "has_cap": true,
     "cap": {
       "domain": "structural",
@@ -11032,7 +11095,7 @@
     "symbol": "AddTextCharacterOffsetAnimator",
     "kind": "func",
     "signature": "func AddTextCharacterOffsetAnimator(layer *Layer, offset, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
-    "summary": "@summary    Add a per-character Character Offset animator to a text layer @description Adds a per-character Character Offset animator with a Range Selector   — the kinetic-typography primitive that shifts each selected glyph's code   through the alphabet (the \"scramble\" / decode reveal).",
+    "summary": "@summary    Add a per-character Character Offset animator to a text layer @description Adds a per-character Character Offset animator with a Range Selector",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11059,7 +11122,7 @@
     "symbol": "AddTextColorAnimator",
     "kind": "func",
     "signature": "func AddTextColorAnimator(layer *Layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
-    "summary": "@summary    Add a per-character Fill Color animator to a text layer @description Adds a per-character Fill Color animator with a Range Selector — the   kinetic-typography primitive that tints characters one at a time (e.g.",
+    "summary": "@summary    Add a per-character Fill Color animator to a text layer @description Adds a per-character Fill Color animator with a Range Selector — the",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11086,7 +11149,7 @@
     "symbol": "AddTextExpressibleSelector",
     "kind": "func",
     "signature": "func AddTextExpressibleSelector(layer *Layer, amountExpr string) (*AEPropertyGroup, error)",
-    "summary": "@summary    Add an expression-driven selector to a text animator @description Adds an Expressible Selector to the layer's first text animator and   drives its per-character selection with amountExpr, an expression returning   the selection percentage (0..100).",
+    "summary": "@summary    Add an expression-driven selector to a text animator @description Adds an Expressible Selector to the layer's first text animator and",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11115,7 +11178,7 @@
     "symbol": "AddTextFillOpacityAnimator",
     "kind": "func",
     "signature": "func AddTextFillOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
-    "summary": "@summary    Add a per-character Fill Opacity animator to a text layer @description Adds a per-character Fill Opacity animator with a Range Selector —   like AddTextOpacityAnimator, but it fades only the glyph fill (leaving any   stroke intact).",
+    "summary": "@summary    Add a per-character Fill Opacity animator to a text layer @description Adds a per-character Fill Opacity animator with a Range Selector —",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11140,7 +11203,7 @@
     "symbol": "AddTextOpacityAnimator",
     "kind": "func",
     "signature": "func AddTextOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
-    "summary": "@summary    Add a per-character Opacity animator to a text layer @description Adds a per-character Opacity animator with a Range Selector — the   kinetic-typography primitive that fades / wipes text in or out one character   at a time.",
+    "summary": "@summary    Add a per-character Opacity animator to a text layer @description Adds a per-character Opacity animator with a Range Selector — the",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11168,7 +11231,7 @@
     "symbol": "AddTextPositionAnimator",
     "kind": "func",
     "signature": "func AddTextPositionAnimator(layer *Layer, x, y, z, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
-    "summary": "@summary    Add a per-character Position animator to a text layer @description Adds a per-character Position 3D animator with a Range Selector —   the kinetic-typography primitive that slides / drops characters into place one   at a time.",
+    "summary": "@summary    Add a per-character Position animator to a text layer @description Adds a per-character Position 3D animator with a Range Selector —",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11195,7 +11258,7 @@
     "symbol": "AddTextRangeSelector",
     "kind": "func",
     "signature": "func AddTextRangeSelector(layer *Layer, start, end, offset float64) (*AEPropertyGroup, error)",
-    "summary": "@summary    Add another Range Selector to a text animator @description Adds another Range Selector to the layer's first text animator (a   fresh animator carries one selector).",
+    "summary": "@summary    Add another Range Selector to a text animator @description Adds another Range Selector to the layer's first text animator (a",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11222,7 +11285,7 @@
     "symbol": "AddTextRotationAnimator",
     "kind": "func",
     "signature": "func AddTextRotationAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
-    "summary": "@summary    Add a per-character Rotation animator to a text layer @description Adds a per-character Rotation animator with a Range Selector — the   kinetic-typography primitive that spins characters into place one at a time.",
+    "summary": "@summary    Add a per-character Rotation animator to a text layer @description Adds a per-character Rotation animator with a Range Selector — the",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11249,7 +11312,7 @@
     "symbol": "AddTextRotationXAnimator",
     "kind": "func",
     "signature": "func AddTextRotationXAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
-    "summary": "@summary    Add a per-character Rotation X animator to a text layer @description Adds a per-character Rotation X animator with a Range Selector — a   3D rotation about each character's horizontal axis (the characters tumble   forward / back).",
+    "summary": "@summary    Add a per-character Rotation X animator to a text layer @description Adds a per-character Rotation X animator with a Range Selector — a",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11272,7 +11335,7 @@
     "symbol": "AddTextRotationYAnimator",
     "kind": "func",
     "signature": "func AddTextRotationYAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
-    "summary": "@summary    Add a per-character Rotation Y animator to a text layer @description Adds a per-character Rotation Y animator with a Range Selector — a   3D rotation about each character's vertical axis (the characters swing left /   right).",
+    "summary": "@summary    Add a per-character Rotation Y animator to a text layer @description Adds a per-character Rotation Y animator with a Range Selector — a",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11295,7 +11358,7 @@
     "symbol": "AddTextScaleAnimator",
     "kind": "func",
     "signature": "func AddTextScaleAnimator(layer *Layer, sx, sy, sz, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
-    "summary": "@summary    Add a per-character Scale animator to a text layer @description Adds a per-character Scale 3D animator with a Range Selector — the   kinetic-typography primitive that pops / grows characters into place one at a   time.",
+    "summary": "@summary    Add a per-character Scale animator to a text layer @description Adds a per-character Scale 3D animator with a Range Selector — the",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11322,7 +11385,7 @@
     "symbol": "AddTextSkewAnimator",
     "kind": "func",
     "signature": "func AddTextSkewAnimator(layer *Layer, skew, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
-    "summary": "@summary    Add a per-character Skew animator to a text layer @description Adds a per-character Skew animator with a Range Selector — the   kinetic-typography primitive that shears characters into place.",
+    "summary": "@summary    Add a per-character Skew animator to a text layer @description Adds a per-character Skew animator with a Range Selector — the",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11348,7 +11411,7 @@
     "symbol": "AddTextStrokeColorAnimator",
     "kind": "func",
     "signature": "func AddTextStrokeColorAnimator(layer *Layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
-    "summary": "@summary    Add a per-character Stroke Color animator to a text layer @description Adds a per-character Stroke Color animator with a Range Selector —   it tints only the glyph stroke.",
+    "summary": "@summary    Add a per-character Stroke Color animator to a text layer @description Adds a per-character Stroke Color animator with a Range Selector —",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11373,7 +11436,7 @@
     "symbol": "AddTextStrokeOpacityAnimator",
     "kind": "func",
     "signature": "func AddTextStrokeOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
-    "summary": "@summary    Add a per-character Stroke Opacity animator to a text layer @description Adds a per-character Stroke Opacity animator with a Range Selector —   it fades only the glyph stroke.",
+    "summary": "@summary    Add a per-character Stroke Opacity animator to a text layer @description Adds a per-character Stroke Opacity animator with a Range Selector —",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11398,7 +11461,7 @@
     "symbol": "AddTextStrokeWidthAnimator",
     "kind": "func",
     "signature": "func AddTextStrokeWidthAnimator(layer *Layer, width, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
-    "summary": "@summary    Add a per-character Stroke Width animator to a text layer @description Adds a per-character Stroke Width animator with a Range Selector —   it grows / shrinks the glyph stroke.",
+    "summary": "@summary    Add a per-character Stroke Width animator to a text layer @description Adds a per-character Stroke Width animator with a Range Selector —",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11423,7 +11486,7 @@
     "symbol": "AddTextTrackingAnimator",
     "kind": "func",
     "signature": "func AddTextTrackingAnimator(layer *Layer, tracking, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
-    "summary": "@summary    Add a per-character Tracking animator to a text layer @description Adds a per-character Tracking animator with a Range Selector — the   kinetic-typography primitive that spreads (or tightens) the spacing between   the selected characters.",
+    "summary": "@summary    Add a per-character Tracking animator to a text layer @description Adds a per-character Tracking animator with a Range Selector — the",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11449,7 +11512,7 @@
     "symbol": "AddTextWigglySelector",
     "kind": "func",
     "signature": "func AddTextWigglySelector(layer *Layer) (*AEPropertyGroup, error)",
-    "summary": "@summary    Add a Wiggly Selector to a text animator @description Adds a Wiggly Selector to the layer's first text animator — a   selector whose selection amount wobbles randomly (but deterministically per   seed) over time, so the characters flicker / jitter in and out (the wiggle   kinetic-typography primitive).",
+    "summary": "@summary    Add a Wiggly Selector to a text animator @description Adds a Wiggly Selector to the layer's first text animator — a",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11477,7 +11540,7 @@
     "symbol": "AnimateTextCharacterOffset",
     "kind": "func",
     "signature": "func AnimateTextCharacterOffset(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error",
-    "summary": "@summary    Keyframe a text animator's per-character Character Offset @description Keyframes the Character Offset leaf of a text layer's first animator   (added via AddTextCharacterOffsetAnimator) — animating the glyph-code shift   over time, the animated \"decode / scramble\" reveal (codes settle toward 0).",
+    "summary": "@summary    Keyframe a text animator's per-character Character Offset @description Keyframes the Character Offset leaf of a text layer's first animator",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11500,7 +11563,7 @@
     "symbol": "AnimateTextColor",
     "kind": "func",
     "signature": "func AnimateTextColor(layer *Layer, tickRate float64, kfs []VectorKeyframe) error",
-    "summary": "@summary    Keyframe a text animator's per-character Fill Color @description Keyframes the per-character Fill Color leaf of a text layer's first   animator (added via AddTextColorAnimator) — animating the driven color over   time (e.g.",
+    "summary": "@summary    Keyframe a text animator's per-character Fill Color @description Keyframes the per-character Fill Color leaf of a text layer's first",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11527,7 +11590,7 @@
     "symbol": "AnimateTextFillOpacity",
     "kind": "func",
     "signature": "func AnimateTextFillOpacity(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error",
-    "summary": "@summary    Keyframe a text animator's per-character Fill Opacity @description Keyframes the per-character Fill Opacity leaf of a text layer's   first animator (added via AddTextFillOpacityAnimator) — animating the driven   fill-alpha value itself, so every selected character shares the same fill   fade curve while stroke opacity remains separate.",
+    "summary": "@summary    Keyframe a text animator's per-character Fill Opacity @description Keyframes the per-character Fill Opacity leaf of a text layer's",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11550,7 +11613,7 @@
     "symbol": "AnimateTextOpacity",
     "kind": "func",
     "signature": "func AnimateTextOpacity(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error",
-    "summary": "@summary    Keyframe a text animator's per-character Opacity @description Keyframes the per-character Opacity leaf of a text layer's first   animator (added via AddTextOpacityAnimator) — animating the driven value   itself rather than sweeping the Range Selector, so every selected character   shares the curve and the text fades as one synchronized group (a pulse /   blink).",
+    "summary": "@summary    Keyframe a text animator's per-character Opacity @description Keyframes the per-character Opacity leaf of a text layer's first",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11574,7 +11637,7 @@
     "symbol": "AnimateTextPosition",
     "kind": "func",
     "signature": "func AnimateTextPosition(layer *Layer, tickRate float64, kfs []VectorKeyframe) error",
-    "summary": "@summary    Keyframe a text animator's per-character Position @description Keyframes the per-character Position 3D leaf of a text layer's first   animator (added via AddTextPositionAnimator) — animating the driven offset   itself, so every selected character shares the curve and the text glides as   one synchronized group.",
+    "summary": "@summary    Keyframe a text animator's per-character Position @description Keyframes the per-character Position 3D leaf of a text layer's first",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11600,7 +11663,7 @@
     "symbol": "AnimateTextRangeOffset",
     "kind": "func",
     "signature": "func AnimateTextRangeOffset(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error",
-    "summary": "@summary    Keyframe a text animator's Range Selector Offset @description Keyframes a text animator's Range Selector Offset, turning a static   reveal into an animated sweep — the kinetic-typography payoff.",
+    "summary": "@summary    Keyframe a text animator's Range Selector Offset @description Keyframes a text animator's Range Selector Offset, turning a static",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11628,7 +11691,7 @@
     "symbol": "AnimateTextRotation",
     "kind": "func",
     "signature": "func AnimateTextRotation(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error",
-    "summary": "@summary    Keyframe a text animator's per-character Rotation @description Keyframes the per-character Rotation leaf of a text layer's first   animator (added via AddTextRotationAnimator) — animating the driven angle   itself, so every selected character shares the curve and the text spins as one   synchronized group (e.g.",
+    "summary": "@summary    Keyframe a text animator's per-character Rotation @description Keyframes the per-character Rotation leaf of a text layer's first",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11655,7 +11718,7 @@
     "symbol": "AnimateTextRotationX",
     "kind": "func",
     "signature": "func AnimateTextRotationX(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error",
-    "summary": "@summary    Keyframe a text animator's per-character Rotation X @description Keyframes the per-character Rotation X leaf of a text layer's   first animator (added via AddTextRotationXAnimator).",
+    "summary": "@summary    Keyframe a text animator's per-character Rotation X @description Keyframes the per-character Rotation X leaf of a text layer's",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11677,7 +11740,7 @@
     "symbol": "AnimateTextRotationY",
     "kind": "func",
     "signature": "func AnimateTextRotationY(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error",
-    "summary": "@summary    Keyframe a text animator's per-character Rotation Y @description Keyframes the per-character Rotation Y leaf of a text layer's   first animator (added via AddTextRotationYAnimator).",
+    "summary": "@summary    Keyframe a text animator's per-character Rotation Y @description Keyframes the per-character Rotation Y leaf of a text layer's",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11699,7 +11762,7 @@
     "symbol": "AnimateTextScale",
     "kind": "func",
     "signature": "func AnimateTextScale(layer *Layer, tickRate float64, kfs []VectorKeyframe) error",
-    "summary": "@summary    Keyframe a text animator's per-character Scale @description Keyframes the per-character Scale 3D leaf of a text layer's first   animator (added via AddTextScaleAnimator) — animating the driven scale over   time (e.g.",
+    "summary": "@summary    Keyframe a text animator's per-character Scale @description Keyframes the per-character Scale 3D leaf of a text layer's first",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11726,7 +11789,7 @@
     "symbol": "AnimateTextSkew",
     "kind": "func",
     "signature": "func AnimateTextSkew(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error",
-    "summary": "@summary    Keyframe a text animator's per-character Skew @description Keyframes the per-character Skew leaf of a text layer's first   animator (added via AddTextSkewAnimator).",
+    "summary": "@summary    Keyframe a text animator's per-character Skew @description Keyframes the per-character Skew leaf of a text layer's first",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11748,7 +11811,7 @@
     "symbol": "AnimateTextStrokeColor",
     "kind": "func",
     "signature": "func AnimateTextStrokeColor(layer *Layer, tickRate float64, kfs []VectorKeyframe) error",
-    "summary": "@summary    Keyframe a text animator's per-character Stroke Color @description Keyframes the per-character Stroke Color leaf of a text layer's   first animator (added via AddTextStrokeColorAnimator).",
+    "summary": "@summary    Keyframe a text animator's per-character Stroke Color @description Keyframes the per-character Stroke Color leaf of a text layer's",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11770,7 +11833,7 @@
     "symbol": "AnimateTextStrokeOpacity",
     "kind": "func",
     "signature": "func AnimateTextStrokeOpacity(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error",
-    "summary": "@summary    Keyframe a text animator's per-character Stroke Opacity @description Keyframes the per-character Stroke Opacity leaf of a text layer's   first animator (added via AddTextStrokeOpacityAnimator).",
+    "summary": "@summary    Keyframe a text animator's per-character Stroke Opacity @description Keyframes the per-character Stroke Opacity leaf of a text layer's",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11792,7 +11855,7 @@
     "symbol": "AnimateTextStrokeWidth",
     "kind": "func",
     "signature": "func AnimateTextStrokeWidth(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error",
-    "summary": "@summary    Keyframe a text animator's per-character Stroke Width @description Keyframes the per-character Stroke Width leaf of a text layer's   first animator (added via AddTextStrokeWidthAnimator).",
+    "summary": "@summary    Keyframe a text animator's per-character Stroke Width @description Keyframes the per-character Stroke Width leaf of a text layer's",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11814,7 +11877,7 @@
     "symbol": "AnimateTextTracking",
     "kind": "func",
     "signature": "func AnimateTextTracking(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error",
-    "summary": "@summary    Keyframe a text animator's per-character Tracking @description Keyframes the Tracking Amount leaf of a text layer's first animator   (added via AddTextTrackingAnimator) — animating the inter-character spacing   itself over time, so every selected character shares the curve (e.g.",
+    "summary": "@summary    Keyframe a text animator's per-character Tracking @description Keyframes the Tracking Amount leaf of a text layer's first animator",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -12736,7 +12799,7 @@
     "symbol": "SetTextRangeAdvanced",
     "kind": "func",
     "signature": "func SetTextRangeAdvanced(layer *Layer, adv TextRangeAdvanced) error",
-    "summary": "@summary    Set the Range Advanced params on a text animator @description Sets the Range Advanced params on the layer's first text animator's   Range Selector — the selector-shaping controls behind a kinetic-typography   reveal (how strongly the animator applies via Amount, the selection falloff   Shape, the combination Mode for multi-selector setups, etc.).",
+    "summary": "@summary    Set the Range Advanced params on a text animator @description Sets the Range Advanced params on the layer's first text animator's",
     "has_cap": true,
     "cap": {
       "domain": "text",

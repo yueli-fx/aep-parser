@@ -20,14 +20,26 @@ import (
 // raw *os.File issues thousands of syscalls (≈97% of parse time on an 8 MB
 // project). An in-memory reader turns those into pointer moves — ~100× faster.
 func Open(path string) (*Project, error) {
-	data, err := readFileBounded(path, rifx.DefaultLimits.MaxInputBytes)
+	return OpenWithLimits(path, rifx.DefaultLimits)
+}
+
+// OpenWithLimits parses an .aep path with explicit RIFX resource budgets.
+func OpenWithLimits(path string, limits rifx.Limits) (*Project, error) {
+	maxInputBytes := limits.MaxInputBytes
+	if maxInputBytes == 0 {
+		maxInputBytes = rifx.DefaultLimits.MaxInputBytes
+	}
+	data, err := readFileBounded(path, maxInputBytes)
 	if err != nil {
 		return nil, fmt.Errorf("aep: open %q: %w", path, err)
 	}
-	return FromReader(bytes.NewReader(data))
+	return FromReaderWithLimits(bytes.NewReader(data), limits)
 }
 
 func readFileBounded(path string, maxBytes uint64) ([]byte, error) {
+	if maxBytes > uint64(math.MaxInt64-1) {
+		return nil, fmt.Errorf("max input bytes %d exceeds supported file-read limit %d", maxBytes, int64(math.MaxInt64-1))
+	}
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -45,7 +57,12 @@ func readFileBounded(path string, maxBytes uint64) ([]byte, error) {
 
 // FromReader parses an .aep file from an io.ReadSeeker.
 func FromReader(r io.ReadSeeker) (*Project, error) {
-	root, err := rifx.Parse(r)
+	return FromReaderWithLimits(r, rifx.DefaultLimits)
+}
+
+// FromReaderWithLimits parses an .aep stream with explicit RIFX resource budgets.
+func FromReaderWithLimits(r io.ReadSeeker, limits rifx.Limits) (*Project, error) {
+	root, err := rifx.ParseWithLimits(r, limits)
 	if err != nil {
 		return nil, fmt.Errorf("aep: parse RIFX: %w", err)
 	}

@@ -45,9 +45,11 @@ pwsh -File scripts/migration/verify_matrix.ps1
 
 This recurring no-AE gate runs the full W2020-source migration matrix across
 all writer targets and the valid AE2025 explicit-matte contract matrix. It
-fails if the reviewed totals drift from 846 total / 840 pass / 0 blocked /
+fails if the reviewed totals drift from 906 total / 900 pass / 0 blocked /
 0 failed / 6 skipped for the full matrix or 1 total / 1 pass for the explicit
-matte AE2025 contract.
+matte AE2025 contract. The full baseline is 151 reviewed recipes × 6 writer
+targets; adding or removing recipes requires reviewing and updating both the
+script assertion and this truth-source note.
 
 ## 跑单个测试
 

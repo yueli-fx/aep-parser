@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "out_root": "registry/evidence/versioned-aep-migration/migration_matrix_verify/smoke_all",
+  "out_root": "registry\\evidence\\versioned-aep-migration\\migration_matrix_verify\\smoke_all",
   "summary": {
     "total": 906,
     "passed": 900,

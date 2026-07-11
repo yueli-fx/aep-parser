@@ -11,6 +11,8 @@
 
 尚未发布的历史 commit、研究脚本和 AE 自动化 worker 不承诺独立安全维护周期。
 
+构建与 release 必须使用 `go.mod` 声明的 Go patch 版本，或同一 release family 中更新且无已知可达漏洞的 patch。CI 固定运行 `govulncheck`、RIFX/serializer fuzz smoke、核心 race tests 和全仓测试；降低工具链版本属于安全敏感变更。
+
 ## 报告漏洞
 
 仓库公开后，请使用 GitHub Private Vulnerability Reporting / Security Advisory 私下报告。不要在公开 issue 中附加恶意 `.aep`、宿主机路径、凭证或可直接利用的复现细节。

@@ -96,8 +96,8 @@ try {
     Assert-MatrixSummary `
         -Name "full W2020 no-AE matrix" `
         -MatrixPath (Join-Path $fullOut "matrix.json") `
-        -Total 858 `
-        -Passed 852 `
+        -Total 906 `
+        -Passed 900 `
         -Blocked 0 `
         -Failed 0 `
         -Skipped 6
