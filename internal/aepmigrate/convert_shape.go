@@ -83,5 +83,8 @@ func materializeRectGraphicShapeLayer(comp *aep.Composition, source profile.Laye
 			return nil, err
 		}
 	}
+	if err := populateLayerTransformFromProfile(shapeLayer.Transform(), source); err != nil {
+		return nil, err
+	}
 	return shapeLayer.Layer, nil
 }

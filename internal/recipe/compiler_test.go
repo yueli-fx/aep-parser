@@ -5102,6 +5102,71 @@ func TestCompileToFileChecksExpectedKeyframeProfile(t *testing.T) {
 	assertProfileCheck(t, report, "expected_profile.keyframes[0].keyframes[1]", true)
 }
 
+func TestCompileToFilePersistsShapeLayerTransform(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "Shape transform"},
+		"comps": [{
+			"name": "Main",
+			"width": 640,
+			"height": 640,
+			"frame_rate": 30,
+			"duration": 1,
+			"background_color": [0, 0, 0],
+			"layers": [{
+				"type": "shape",
+				"name": "Pulse",
+				"shape": {
+					"kind": "ellipse",
+					"size": [120, 120],
+					"fill_color": [255, 255, 255]
+				},
+				"transform": {
+					"position": [320, 320],
+					"scale_keyframes": [
+						{"time": 0, "value": [80, 80]},
+						{"time": 1, "value": [120, 120]}
+					],
+					"opacity_keyframes": [
+						{"time": 0, "value": 0},
+						{"time": 1, "value": 100}
+					]
+				}
+			}]
+		}]
+	}`)
+	outPath := filepath.Join(t.TempDir(), "shape-transform.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	layer := project.Compositions[0].Layers[0]
+	position := layer.Position()
+	if position == nil {
+		t.Fatal("Position() nil after compiling shape transform")
+	}
+	gotPosition, ok := position.StaticValue.([]float64)
+	if !ok || len(gotPosition) < 2 || math.Abs(gotPosition[0]-320) > 1e-9 || math.Abs(gotPosition[1]-320) > 1e-9 {
+		t.Fatalf("Position static value = %#v, want [320 320 ...]", position.StaticValue)
+	}
+	scale := layer.Scale()
+	if scale == nil || len(scale.Keyframes) != 2 {
+		t.Fatalf("Scale keyframes = %+v, want 2", scale)
+	}
+	opacity := layer.Opacity()
+	if opacity == nil || len(opacity.Keyframes) != 2 {
+		t.Fatalf("Opacity keyframes = %+v, want 2", opacity)
+	}
+}
+
 func TestCompileToFileChecksExpectedMaskProfile(t *testing.T) {
 	rec := mustUnmarshalRecipe(t, `{
 		"schema_version": 1,

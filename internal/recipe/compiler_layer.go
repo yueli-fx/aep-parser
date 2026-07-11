@@ -13,6 +13,7 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) (*aep.La
 
 func compileLayerWithSources(comp *aep.Composition, spec Layer, compSpec CompSpec, compsByName map[string]*aep.Composition) (*aep.Layer, error) {
 	var layer *aep.Layer
+	var shapeLayer *aep.ShapeLayer
 	switch spec.Type {
 	case "text":
 		l, err := aep.NewTextLayer(comp, spec.Name)
@@ -55,6 +56,7 @@ func compileLayerWithSources(comp *aep.Composition, spec Layer, compSpec CompSpe
 				return nil, fmt.Errorf("recipe: shape layer %q: %w", spec.Name, err)
 			}
 		}
+		shapeLayer = l
 		layer = l.Layer
 	case "solid":
 		color := [3]float64{0, 0, 0}
@@ -369,8 +371,14 @@ func compileLayerWithSources(comp *aep.Composition, spec Layer, compSpec CompSpe
 				return nil, fmt.Errorf("recipe: layer %q stretch: %w", spec.Name, err)
 			}
 		}
-		if err := applyTransform(layer, spec.Transform); err != nil {
-			return nil, fmt.Errorf("recipe: layer %q transform: %w", spec.Name, err)
+		if shapeLayer != nil {
+			if err := applyShapeLayerTransform(shapeLayer, spec.Transform); err != nil {
+				return nil, fmt.Errorf("recipe: layer %q transform: %w", spec.Name, err)
+			}
+		} else {
+			if err := applyTransform(layer, spec.Transform); err != nil {
+				return nil, fmt.Errorf("recipe: layer %q transform: %w", spec.Name, err)
+			}
 		}
 	}
 	return layer, nil

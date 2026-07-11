@@ -6,6 +6,17 @@ import (
 
 func applyTransform(layer *aep.Layer, spec Transform) error {
 	t := aep.NewLayerTransform()
+	if err := applyTransformStreams(t, spec); err != nil {
+		return err
+	}
+	return aep.SetLayerTransform(layer, t)
+}
+
+func applyShapeLayerTransform(layer *aep.ShapeLayer, spec Transform) error {
+	return applyTransformStreams(layer.Transform(), spec)
+}
+
+func applyTransformStreams(t *aep.LayerTransform, spec Transform) error {
 	if len(spec.AnchorPoint) == 2 {
 		if err := t.AnchorPoint().SetStaticValue([2]float64{spec.AnchorPoint[0], spec.AnchorPoint[1]}); err != nil {
 			return err
@@ -79,7 +90,7 @@ func applyTransform(layer *aep.Layer, spec Transform) error {
 			return err
 		}
 	}
-	return aep.SetLayerTransform(layer, t)
+	return nil
 }
 
 func hasKeyframeEase(in, out *TemporalEase) bool {

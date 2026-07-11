@@ -12,6 +12,9 @@ func rebuildDefaultShapeLayer(compName string, targetComp *aep.Composition, laye
 	if err != nil {
 		return nil, fmt.Errorf("comp %q shape layer %q: %w", compName, layer.Name, err)
 	}
+	if err := populateLayerTransformFromProfile(dstLayer.Transform(), layer); err != nil {
+		return nil, fmt.Errorf("comp %q shape layer %q transform: %w", compName, layer.Name, err)
+	}
 	if err := materializeLayerTiming(dstLayer.Layer, layer); err != nil {
 		return nil, fmt.Errorf("comp %q shape layer %q timing: %w", compName, layer.Name, err)
 	}
