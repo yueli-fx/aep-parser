@@ -1,86 +1,62 @@
-# flightdeck briefing — aep-parser
+# Flightdeck 简报 — aep-parser
 
-## Start Here
+## 语言规则
 
-- Read `flightdeck/cockpit.md` for active work and next steps.
-- When exploring or editing a repository directory, read the nearest relevant
-  `README.md` first. Do not bulk-read every README at startup.
-- Do not bulk-read `flightdeck/knowledge/**`. Use
-  `flightdeck/knowledge/INDEX.md`, then load only notes whose `READ WHEN`
-  matches the task.
-- Keep durable knowledge self-contained: future action rules go in
-  `flightdeck/knowledge/<domain>/`, not in temporary specs or work notes.
+- 对话、任务说明、Flightdeck 工作记录、计划、知识沉淀、交付总结一律使用中文。
+- 之前已经存在的英文内容不强制追溯清理；后续新增和更新优先中文。
+- 例外：导出的公共 API 注释、代码标识符、命令、错误信息、外部原文引用可保留英文。`internal/aep` 导出符号的公共 API 注释是 `cmd/docgen` 的英文源文本，不要为了中文化而改写。
 
-## Repository Rules
+## 启动入口
 
-- Work on the current branch/mainline directly. Do not create routine feature
-  branches unless the user asks.
-- Never push to a remote.
-- `data/samples/` is approved local corpus, not a cleanup target.
-- `tmp/` is disposable. Durable generated evidence belongs in tracked truth
-  locations such as `registry/evidence/<topic>/`, `data/reference/<topic>/`,
-  committed fixtures, or embedded templates.
-- Large plans use total -> slices -> total: define the control ledger first,
-  execute slices, then summarize status and gaps back into the ledger.
-- Completed large work efforts are archived out of `flightdeck/work/` to
-  `~/.flightdeck/projects/<slug>/archive/` and removed from cockpit's in-flight
-  list.
+- 先读 `flightdeck/cockpit.md`，了解当前活跃工作和下一步。
+- 探索或编辑仓库目录时，先读最近且相关的 `README.md`。不要启动时批量读取所有 README。
+- 不要批量读取 `flightdeck/knowledge/**`。先看 `flightdeck/knowledge/INDEX.md`，再只加载 `READ WHEN` 与当前任务匹配的笔记。
+- 持久知识必须自洽完整：未来行动规则写入 `flightdeck/knowledge/<domain>/`，不要只留在临时规格或工作笔记里。
 
-## Commit Policy
+## 仓库规则
 
-- Commit code, tests, fixtures, generated docs, or a meaningful completed
-  checkpoint.
-- Do not commit exploratory markdown churn. Draft specs, plans, knowledge
-  sketches, and cockpit/index wording can stay uncommitted while they are still
-  being discussed or shaped.
-- Commit documentation-only work only when the user explicitly asks to commit,
-  explicitly says the document is finalized, or it is shipped with a completed
-  code/test/fixture change as part of the same landed unit.
-- Do not commit cockpit/work/spec/plan/knowledge drafts just because the user
-  asked to record, park, explore, or start shaping a future task.
-- Keep commits atomic by landed unit. Code plus its required tests, fixtures,
-  docs, and Flightdeck sync can be one commit; unrelated cleanup should be
-  separate.
-- Use the global commit checklist in `knowledge/git/commits.md` before staging
-  or writing commit messages.
+- 直接在当前 branch/mainline 上工作。除非用户要求，不要例行创建 feature branch。
+- 永远不要 push 到远端。
+- `data/samples/` 是获准使用的本地语料库，不是清理目标。
+- `learning/` 是私有学习区，已忽略，不要提交其中内容。
+- `tmp/` 是一次性目录。可持久复用的生成证据应放到受跟踪的真相位置，例如 `registry/evidence/<topic>/`、`data/reference/<topic>/`、已提交 fixture 或嵌入模板。
+- 大型计划使用 total -> slices -> total：先定义控制台账，再执行切片，最后把状态和缺口汇总回台账。
+- 已完成的大型工作从 `flightdeck/work/` 归档到 `~/.flightdeck/projects/<slug>/archive/`，并从 cockpit 的进行中列表移除。
 
-## Public API And Docs
+## 提交策略
 
-- Public API comments on exported `internal/aep` symbols are the doc source.
-  They are English source text for `cmd/docgen`; generated docs are not edited
-  by hand.
-- Public API changes must sync docs/docgen registration where relevant and
-  align with capindex.
-- Capability truth source: `go run ./cmd/capindex -q "<term>"`.
-- API stability, package boundaries, write semantics, comments, and delivery
-  rules live in `flightdeck/knowledge/workflow/project-operating-rules.md`.
+- 提交代码、测试、fixture、生成文档，或有意义的已完成检查点。
+- 不要提交探索性 Markdown 抖动。草稿规格、计划、知识草图、cockpit/index 措辞在讨论或塑形阶段可以保持未提交。
+- 纯文档工作只有在用户明确要求提交、明确表示文档已定稿，或它随同一个已落地的代码/测试/fixture 变更一起交付时才提交。
+- 不要因为用户说“记录一下”“先放着”“探索一下”“开始设计后续任务”就提交 cockpit/work/spec/plan/knowledge 草稿。
+- 提交按已落地单元保持原子性。代码及其必要测试、fixture、文档、Flightdeck 同步可以放在一个提交；无关清理应分开。
+- stage 或写 commit message 前，使用 `knowledge/git/commits.md` 中的全局提交检查清单。
 
-## Verification Routes
+## 公共 API 与文档
 
-- General verification and artifact placement:
-  `flightdeck/knowledge/workflow/verify.md`.
-- AE ship-gates, fixture regeneration, and JSX reverse-engineering:
-  `flightdeck/knowledge/workflow/re-fixture.md`.
-- Delivery/shippability claims:
-  `flightdeck/knowledge/workflow/delivery-contract.md`.
-- Showcase generation and visual review:
-  `flightdeck/knowledge/showcase/showcase.md`.
+- `internal/aep` 导出符号的公共 API 注释是文档源。它们是 `cmd/docgen` 使用的英文源文本；生成文档不要手改。
+- 公共 API 变更必须同步相关 docs/docgen 注册，并与 capindex 对齐。
+- 能力真相源：`go run ./cmd/capindex -q "<term>"`。
+- API 稳定性、包边界、写入语义、注释和交付规则见 `flightdeck/knowledge/workflow/project-operating-rules.md`。
 
-## Project Commit Types
+## 验证路径
 
-The global commit conventions apply, with these project-specific additions:
+- 通用验证和产物放置：`flightdeck/knowledge/workflow/verify.md`。
+- AE ship-gate、fixture 再生成、JSX 逆向：`flightdeck/knowledge/workflow/re-fixture.md`。
+- 交付/可发布声明：`flightdeck/knowledge/workflow/delivery-contract.md`。
+- Showcase 生成和视觉 review：`flightdeck/knowledge/showcase/showcase.md`。
 
-- `re`: pure reverse-engineering finding or fixture evidence before a shipped
-  setter/API exists.
-- Common scopes: `layer`, `comp`, `text`, `mask`, `keyframe`, `shape`,
-  `property`, `marker`, `footage`, `project`, `aep`, `flightdeck`.
-- `feat` means new shipped field R/W, setter, structure API, or fixture-backed
-  capability.
-- `fix` means wrong read/write bytes, broken setter behavior, or round-trip /
-  AE-acceptance regression.
-- `docs` means public API docs or Flightdeck documentation.
+## 项目提交类型
 
-## Subscriptions
+沿用全局提交约定，并补充以下项目特定规则：
+
+- `re`：纯逆向发现或 fixture 证据，尚未形成已交付 setter/API。
+- 常见 scope：`layer`、`comp`、`text`、`mask`、`keyframe`、`shape`、`property`、`marker`、`footage`、`project`、`aep`、`flightdeck`。
+- `feat`：新的已交付字段读写、setter、结构 API，或 fixture 支撑的能力。
+- `fix`：错误读写字节、setter 行为错误、round-trip / AE-acceptance 回归。
+- `docs`：公共 API 文档或 Flightdeck 文档。
+
+## 订阅
 
 <!-- Global knowledge subscriptions, one ~/.flightdeck-relative path per line. -->
 knowledge/coding/comments.md
