@@ -1,10 +1,9 @@
 # Cockpit — aep-parser
 
-当前焦点：优先执行代码质量与架构综合升级，从核心 parse/write 数据链排查 correctness、安全性、module 深度、测试证据和知识真相源。商业化与 Toolkit 产品化 work 已建档但暂停；复刻、technique research 和 ontology 保持冻结，不自动继续扩张。
+当前焦点：代码质量与架构综合升级已完成并归档。商业化与 Toolkit 产品化 work 已建档但暂停；复刻、technique research 和 ontology 保持冻结，不自动继续扩张。当前等待商业化方向决策、远端首次 CI 与真实设计伙伴验证。
 
 ## 进行中
 
-- **codebase-quality-and-architecture-upgrade**（`work/codebase-quality-and-architecture-upgrade/index.md`）— 当前主线；按 P0–P3 台账依次审查 RIFX、serializer、scene/facade、profile/recipe/migration、服务与知识治理，并直接修复首批高风险问题。
 - **commercialization-and-toolkit-productization**（`work/commercialization-and-toolkit-productization/index.md`）— 总目标、产品承诺、开放核心/商业边界和六个分支目标已建档；按用户要求暂停，不自动执行。
 - **project-strategy-and-quality-review**（`work/project-strategy-and-quality-review/index.md`）— 安全 parser、服务加固、公开 Go SDK、统一 CLI、CI/release、Apache-2.0 和商业验证方案均已完成；等待远端首次 CI 与真实设计伙伴验证后关闭。
 - **booyah-glitch-replication**（`work/booyah-glitch-replication/index.md`）— 12-comp from-scratch 复刻已建成并通过 agent AE gate；按 showcase review-gate，只有用户真机确认后才算 complete。①②③⑧ 已 complete；④⑤⑥⑦⑨⑩⑪⑫ 仍待用户 review，下一批优先 ⑩⑪⑫。
