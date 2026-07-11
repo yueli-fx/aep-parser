@@ -1,11 +1,11 @@
 # Cockpit — aep-parser
 
-当前焦点：代码质量与架构综合升级已完成并归档。商业化与 Toolkit 产品化 work 已建档但暂停；复刻、technique research 和 ontology 保持冻结，不自动继续扩张。当前等待商业化方向决策、远端首次 CI 与真实设计伙伴验证。
+当前焦点：代码质量、架构升级及项目战略技术评审均已完成并归档。首次发布与设计伙伴验证已拆为独立 topic；商业化与 Toolkit 产品化 work 继续暂停，复刻、technique research 和 ontology 保持冻结，不自动扩张。
 
 ## 进行中
 
 - **commercialization-and-toolkit-productization**（`work/commercialization-and-toolkit-productization/index.md`）— 总目标、产品承诺、开放核心/商业边界和六个分支目标已建档；按用户要求暂停，不自动执行。
-- **project-strategy-and-quality-review**（`work/project-strategy-and-quality-review/index.md`）— 安全 parser、服务加固、公开 Go SDK、统一 CLI、CI/release、Apache-2.0 和商业验证方案均已完成；等待远端首次 CI 与真实设计伙伴验证后关闭。
+- **release-and-design-partner-validation**（`work/release-and-design-partner-validation/index.md`）— 尚未执行；独立承接远端首次 CI、版本/tag、设计伙伴招募、六周采用/商业验证及最终路线决策，不自动 push。
 - **booyah-glitch-replication**（`work/booyah-glitch-replication/index.md`）— 12-comp from-scratch 复刻已建成并通过 agent AE gate；按 showcase review-gate，只有用户真机确认后才算 complete。①②③⑧ 已 complete；④⑤⑥⑦⑨⑩⑪⑫ 仍待用户 review，下一批优先 ⑩⑪⑫。
 - **fx-technique-internalization**（`work/fx-technique-internalization/index.md`）— 活跃研究线：参考 `.aep` → 拆角色/技法/机制 → 技法库/现象配方；effect-field understanding v1、report surface v1、pseudo/controller rebuild proof v1、pseudo behavior wiring proof v1、sample-fact behavior extraction v1、pseudo behavior payload application proof v1、multi-family pseudo application proof v1、vector pseudo behavior application v1、expression pseudo behavior boundary v1、glitch reference phenomenon v1、glitch showcase gate v1、rain reference phenomenon v1、rain showcase gate v1 已完成。下一步推荐另一个 reference phenomenon 包、richer rain generator，或基于 glitch recipe 的生成器升级。
 - **technique-ontology**（`work/technique-ontology/index.md`）— 已暂停的配套研究：角色/技法/机制三轴 ontology + schema v2。火焰/闪电/控制器样本已压测；大规模词表稳定性未验证。
