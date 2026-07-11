@@ -47,7 +47,7 @@ func (f *Footage) SspcData() []byte {
 	if f.back == nil {
 		return nil
 	}
-	return f.back.SspcData()
+	return append([]byte(nil), f.back.SspcData()...)
 }
 
 // FootageMissing reports whether the footage source file was missing

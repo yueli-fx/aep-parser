@@ -302,7 +302,7 @@
       "anchor": "#compositioncdtarawbytes",
       "signature": "func (c *Composition) CdtaRawBytes() []byte",
       "rw": "read-only",
-      "summary": "CdtaRawBytes returns the comp's cdta chunk Data slice, or nil if the comp has no cdta. Read-only access for debugging / RE tools — the underlying byte slice is the live chunk data; do not mutate."
+      "summary": "CdtaRawBytes returns a detached copy of the comp's cdta chunk data, or nil if the comp has no cdta. It is intended for debugging and RE tools."
     },
     "Composition.Comment": {
       "kind": "field",
@@ -571,7 +571,7 @@
       "anchor": "#compositionprdarawbytes",
       "signature": "func (c *Composition) PrdaRawBytes() []byte",
       "rw": "read-only",
-      "summary": "PrdaRawBytes returns the comp's prda chunk Data slice (renderer-specific options), or nil if the comp has no PRin LIST. Read-only access for debugging / RE tools — the underlying byte slice is the live chunk data; do not mutate."
+      "summary": "PrdaRawBytes returns the comp's prda chunk Data slice (renderer-specific options), or nil if the comp has no PRin LIST. The returned bytes are a detached debugging snapshot."
     },
     "Composition.Renderer": {
       "kind": "field",
@@ -1793,7 +1793,7 @@
       "anchor": "#layerhasalternatesourceslot",
       "signature": "func (l *Layer) HasAlternateSourceSlot() bool",
       "rw": "read-only",
-      "summary": "The slot exists when AE persisted an \"ADBE Layer Overrides\" + \"ADBE Layer Source Alternate\" pattern, typically created by calling addToMotionGraphicsTemplateAs() on the source-side layer while the parent composition uses the precomp as a layer. Without the slot, the alternate-source setter cannot length-preservingly write a new id."
+      "summary": "The slot exists when AE persisted an \"ADBE Layer Overrides\" +"
     },
     "Layer.HasAudio": {
       "kind": "getter",
@@ -1998,7 +1998,7 @@
       "anchor": "#layerldtarawbytes",
       "signature": "func (l *Layer) LdtaRawBytes() []byte",
       "rw": "read-only",
-      "summary": "LdtaRawBytes returns the layer's ldta chunk Data slice, or nil if the layer has no ldta. Read-only access for debugging / RE tools — the underlying byte slice is the live chunk data; do not mutate."
+      "summary": "LdtaRawBytes returns a detached copy of the layer's ldta chunk data, or nil if the layer has no ldta. It is intended for debugging and RE tools."
     },
     "Layer.LightCastsShadows": {
       "kind": "getter",
@@ -2408,7 +2408,7 @@
       "file": "layer.md",
       "anchor": "#layerreplacesource",
       "signature": "func (l *Layer) ReplaceSource(target AVItem, fixExpressions bool) error",
-      "summary": "Internally calls the id-based source setter with the target item's id."
+      "summary": "Internally calls the id-based source setter with the target"
     },
     "Layer.RotateX": {
       "kind": "getter",
@@ -3019,7 +3019,7 @@
       "file": "layer.md",
       "anchor": "#layersetrotation",
       "signature": "func (l *Layer) SetRotation(deg float64) error",
-      "summary": "Available on both 2D and 3D layers — it's the only rotation axis 2D layers have."
+      "summary": "Available on both 2D and 3D layers — it's the only rotation"
     },
     "Layer.SetRunApplyStroke": {
       "kind": "method",
@@ -3233,7 +3233,7 @@
       "file": "layer.md",
       "anchor": "#layersettimeremapenabled",
       "signature": "func (l *Layer) SetTimeRemapEnabled(enabled bool) error",
-      "summary": "Enabling sets a static value of 0.0 (identity mapping). For full remapping, call TimeRemap().SetStaticValue() or insert keyframes after enabling. Disabling clears the static value."
+      "summary": "Enabling sets a static value of 0.0 (identity mapping). For"
     },
     "Layer.SetTrackMatte": {
       "kind": "method",

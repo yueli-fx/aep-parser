@@ -326,7 +326,7 @@ read-only
 func (c *Composition) CdtaRawBytes() []byte
 ```
 
-CdtaRawBytes returns the comp's cdta chunk Data slice, or nil if the comp has no cdta. Read-only access for debugging / RE tools — the underlying byte slice is the live chunk data; do not mutate.
+CdtaRawBytes returns a detached copy of the comp's cdta chunk data, or nil if the comp has no cdta. It is intended for debugging and RE tools.
 
 read-only
 
@@ -488,7 +488,7 @@ read-only
 func (c *Composition) PrdaRawBytes() []byte
 ```
 
-PrdaRawBytes returns the comp's prda chunk Data slice (renderer-specific options), or nil if the comp has no PRin LIST. Read-only access for debugging / RE tools — the underlying byte slice is the live chunk data; do not mutate.
+PrdaRawBytes returns the comp's prda chunk Data slice (renderer-specific options), or nil if the comp has no PRin LIST. The returned bytes are a detached debugging snapshot.
 
 read-only
 

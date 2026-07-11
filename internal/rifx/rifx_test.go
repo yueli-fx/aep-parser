@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"io"
 	"testing"
 )
 
@@ -79,6 +80,22 @@ func TestChunkAccessorsRejectNegativeOffsets(t *testing.T) {
 	if _, err := chunk.U32(-1); err == nil {
 		t.Fatal("U32(-1) succeeded")
 	}
+}
+
+func TestChunkWriteRejectsShortWrites(t *testing.T) {
+	root := &Chunk{ID: IDRifx, FormType: IDEgg}
+	if err := root.Write(shortWriter{}); !errors.Is(err, io.ErrShortWrite) {
+		t.Fatalf("Write error = %v, want io.ErrShortWrite", err)
+	}
+}
+
+type shortWriter struct{}
+
+func (shortWriter) Write(p []byte) (int, error) {
+	if len(p) == 0 {
+		return 0, nil
+	}
+	return len(p) - 1, nil
 }
 
 func FuzzParseNeverPanics(f *testing.F) {

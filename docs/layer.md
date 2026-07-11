@@ -716,7 +716,9 @@ func (l *Layer) HasAlternateSourceSlot() bool
 
 Report whether a layer has an Essential Properties media-replacement slot
 
-The slot exists when AE persisted an "ADBE Layer Overrides" + "ADBE Layer Source Alternate" pattern, typically created by calling addToMotionGraphicsTemplateAs() on the source-side layer while the parent composition uses the precomp as a layer. Without the slot, the alternate-source setter cannot length-preservingly write a new id.
+The slot exists when AE persisted an "ADBE Layer Overrides" +
+
+"ADBE Layer Source Alternate" pattern, typically created by calling addToMotionGraphicsTemplateAs() on the source-side layer while the parent composition uses the precomp as a layer. Without the slot, the alternate-source setter cannot length-preservingly write a new id.
 
 **Returns:** true when the media-replacement slot is present
 
@@ -900,7 +902,7 @@ read-only
 func (l *Layer) LdtaRawBytes() []byte
 ```
 
-LdtaRawBytes returns the layer's ldta chunk Data slice, or nil if the layer has no ldta. Read-only access for debugging / RE tools — the underlying byte slice is the live chunk data; do not mutate.
+LdtaRawBytes returns a detached copy of the layer's ldta chunk data, or nil if the layer has no ldta. It is intended for debugging and RE tools.
 
 read-only
 
@@ -1489,7 +1491,9 @@ func (l *Layer) ReplaceSource(target AVItem, fixExpressions bool) error
 
 Replace a layer's source with another AV item
 
-Internally calls the id-based source setter with the target item's id.
+Internally calls the id-based source setter with the target
+
+item's id.
 
 | Parameter | Description |
 |---|---|
@@ -2651,7 +2655,9 @@ func (l *Layer) SetRotation(deg float64) error
 
 Set a layer's Z-axis rotation
 
-Available on both 2D and 3D layers — it's the only rotation axis 2D layers have.
+Available on both 2D and 3D layers — it's the only rotation
+
+axis 2D layers have.
 
 | Parameter | Description |
 |---|---|
@@ -3101,7 +3107,9 @@ func (l *Layer) SetTimeRemapEnabled(enabled bool) error
 
 Enable or disable time remapping on a layer
 
-Enabling sets a static value of 0.0 (identity mapping). For full remapping, call TimeRemap().SetStaticValue() or insert keyframes after enabling. Disabling clears the static value.
+Enabling sets a static value of 0.0 (identity mapping). For
+
+full remapping, call TimeRemap().SetStaticValue() or insert keyframes after enabling. Disabling clears the static value.
 
 | Parameter | Description |
 |---|---|

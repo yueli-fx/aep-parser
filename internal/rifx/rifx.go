@@ -272,6 +272,7 @@ func (c *Chunk) PayloadSize() uint32 {
 // PayloadSize. Trailing bytes (if any) are appended verbatim after the
 // chunk slot.
 func (c *Chunk) Write(w io.Writer) error {
+	w = exactWriter{Writer: w}
 	size := c.PayloadSize()
 	if _, err := w.Write(c.ID[:]); err != nil {
 		return err
@@ -315,6 +316,18 @@ func (c *Chunk) Write(w io.Writer) error {
 		}
 	}
 	return nil
+}
+
+type exactWriter struct {
+	io.Writer
+}
+
+func (w exactWriter) Write(p []byte) (int, error) {
+	n, err := w.Writer.Write(p)
+	if err == nil && n != len(p) {
+		return n, io.ErrShortWrite
+	}
+	return n, err
 }
 
 // Parse reads a RIFX file from r and returns the root chunk. Any bytes

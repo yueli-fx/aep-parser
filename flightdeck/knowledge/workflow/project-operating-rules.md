@@ -63,6 +63,10 @@ for the current package map.
 - Unknown or not-yet-modeled chunks are opaque preservation data. Parser paths
   must round-trip them byte-identically unless a deliberate mutation owns the
   bytes.
+- Read-only/debug views of chunk bytes return detached snapshots. Do not expose
+  live `Chunk.Data` slices through scene/facade accessors; all byte mutation
+  must stay behind serializer writer methods so state and validation remain
+  local to one module.
 - Embedded serializer resources live under
   `internal/serializer/templates/` because Go `//go:embed` requires package
   local files.

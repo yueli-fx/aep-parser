@@ -2,13 +2,13 @@
 
 ## 状态
 
-当前优先 work。总目标、分支目标和 review 台账已建立；核心数据链第一轮排查已修复 serializer 固定记录 table 与 RenderQueue mutation 的两个 P0，以及跨 Project composition 所有权 P1（CQ-001–003）。
+当前优先 work。核心数据链已关闭两个 P0、两个 P1 和一个 P2（CQ-001–005）：固定记录 table、RenderQueue mutation/ownership、short write 和 live raw-byte 泄漏。
 
 ## 下一步
 
-1. 审查 scene/runtime 与 serializer/chunk 双重状态，找出 setter 只更新一侧或暴露可变底层 slice 的路径。
-2. 审查根 SDK 与 internal facade interface 深度、稳定性等级和 error contract。
-3. 回到 remaining serializer mutation，抽查 unknown chunk 保留、parent size reflow 和 ID/reference 原子性。
+1. 审查根 SDK 与 internal facade interface 深度、稳定性等级和 error contract，形成可执行结论。
+2. 审查 profile、recipe、migration 是否绕过统一 mutation seam，以及 evidence 等级是否匹配承诺。
+3. 完成 race、coverage、容量/benchmark 和依赖/规范基线，回到总台账复审 P0/P1。
 
 ## 立即读取
 
@@ -41,10 +41,13 @@
 - 新增 serializer 结构化 fuzz surface，种子覆盖最小工程和带关键帧工程，而不只 fuzz 外层 RIFX。
 - CQ-002：RenderQueue AddItem 可被短 lhd3 触发 panic；Add/Remove 未验证 header count、stride 与 payload 的一致性。现在两者在 commit 前共用完整 table 验证，失败无 mutation。
 - CQ-003：RenderQueue AddItem 曾接受另一 Project 的 Composition；backref 现在携带 owner Project 并按对象身份拒绝跨项目引用。
+- CQ-004：RIFX Write 曾把 short write 当成功；exact writer 现在返回 `io.ErrShortWrite`，保护根 `Document.Write` 输出完整性。
+- CQ-005：scene raw-byte debug accessor 曾暴露 live chunk slice；现在返回 detached snapshot，字节 mutation 留在 serializer seam。
+- 评估并撤回 PropertyStream keyframe 浅拷贝方案：它无法深拷贝 BezierPath 内部 slice，却会给 lowering 热路径增加分配；留待完整 immutable value/interface 设计，不作为当前修复。
 
 当前：
 
-- scene/runtime 双重状态与 facade interface review。
+- facade、profile/recipe/migration 与证据体系 review。
 
 ## 验证
 

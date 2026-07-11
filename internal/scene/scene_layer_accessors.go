@@ -6,14 +6,13 @@ import (
 	"github.com/yueli-fx/aep-parser/internal/codec"
 )
 
-// LdtaRawBytes returns the layer's ldta chunk Data slice, or nil if the
-// layer has no ldta. Read-only access for debugging / RE tools — the
-// underlying byte slice is the live chunk data; do not mutate.
+// LdtaRawBytes returns a detached copy of the layer's ldta chunk data, or nil
+// if the layer has no ldta. It is intended for debugging and RE tools.
 func (l *Layer) LdtaRawBytes() []byte {
 	if l.runtime.back == nil {
 		return nil
 	}
-	return l.runtime.back.LdtaRaw()
+	return append([]byte(nil), l.runtime.back.LdtaRaw()...)
 }
 
 // This file adds typed convenience accessors for properties unique to
@@ -29,18 +28,18 @@ func (l *Layer) LdtaRawBytes() []byte {
 // the camera layer's property tree; AE writes these match-names
 // regardless of the comp's render engine.
 const (
-	MatchNameCameraZoom                    = "ADBE Camera Zoom"
-	MatchNameCameraDepthOfField            = "ADBE Camera Depth of Field"
-	MatchNameCameraFocusDistance           = "ADBE Camera Focus Distance"
-	MatchNameCameraAperture                = "ADBE Camera Aperture"
-	MatchNameCameraBlurLevel               = "ADBE Camera Blur Level"
-	MatchNameCameraIrisShape               = "ADBE Iris Shape"
-	MatchNameCameraIrisRotation            = "ADBE Iris Rotation"
-	MatchNameCameraIrisRoundness           = "ADBE Iris Roundness"
-	MatchNameCameraIrisAspectRatio         = "ADBE Iris Aspect Ratio"
-	MatchNameCameraIrisDiffractionFringe   = "ADBE Iris Diffraction Fringe"
-	MatchNameCameraIrisHighlightGain       = "ADBE Iris Highlight Gain"
-	MatchNameCameraIrisHighlightThreshold  = "ADBE Iris Highlight Threshold"
+	MatchNameCameraZoom                   = "ADBE Camera Zoom"
+	MatchNameCameraDepthOfField           = "ADBE Camera Depth of Field"
+	MatchNameCameraFocusDistance          = "ADBE Camera Focus Distance"
+	MatchNameCameraAperture               = "ADBE Camera Aperture"
+	MatchNameCameraBlurLevel              = "ADBE Camera Blur Level"
+	MatchNameCameraIrisShape              = "ADBE Iris Shape"
+	MatchNameCameraIrisRotation           = "ADBE Iris Rotation"
+	MatchNameCameraIrisRoundness          = "ADBE Iris Roundness"
+	MatchNameCameraIrisAspectRatio        = "ADBE Iris Aspect Ratio"
+	MatchNameCameraIrisDiffractionFringe  = "ADBE Iris Diffraction Fringe"
+	MatchNameCameraIrisHighlightGain      = "ADBE Iris Highlight Gain"
+	MatchNameCameraIrisHighlightThreshold = "ADBE Iris Highlight Threshold"
 	// NB: Adobe misspelled this match-name as "Hightlight" — it is the real
 	// on-disk name (verified via a generated camera-iris probe script); the
 	// correct spelling never matches, so the accessor was silently
@@ -210,19 +209,23 @@ func (l *Layer) TimeRemapEnabled() bool {
 
 // @summary     Enable or disable time remapping on a layer
 // @description Enabling sets a static value of 0.0 (identity mapping). For
-//   full remapping, call TimeRemap().SetStaticValue() or insert keyframes
-//   after enabling. Disabling clears the static value.
+//
+//	full remapping, call TimeRemap().SetStaticValue() or insert keyframes
+//	after enabling. Disabling clears the static value.
+//
 // @param       enabled  the new time-remap enabled state
 // @domain      layer-set
 // @stability   alpha
 // @verify      roundtrip
 // @since       AE2020
 // @boundary    suspected false green — setting a bare static value of 0.0
-//   does not match how AE (and this library's TimeRemapEnabled getter)
-//   detects enablement, which is "TimeRemap property carries 2 identity
-//   keyframes". AE may read timeRemapEnabled back as false. Enabling
-//   correctly likely requires synthesizing 2 keyframes (at the in/out
-//   points) plus the enable flag, not a bare static value.
+//
+//	does not match how AE (and this library's TimeRemapEnabled getter)
+//	detects enablement, which is "TimeRemap property carries 2 identity
+//	keyframes". AE may read timeRemapEnabled back as false. Enabling
+//	correctly likely requires synthesizing 2 keyframes (at the in/out
+//	points) plus the enable flag, not a bare static value.
+//
 // @incident    layer-settimeremapenabled-needs-keyframes
 // @alias       time remap,time remapping,时间重映射,帧速率重映射
 func (l *Layer) SetTimeRemapEnabled(enabled bool) error {
@@ -255,8 +258,10 @@ func (l *Layer) SetTimeRemapEnabled(enabled bool) error {
 // @gate        TestLayerAudio_AEShipGate_AE2020,TestLayerAudio_AEShipGate_AE2025
 // @since       AE2020
 // @boundary    length-preserving static-value write; errors when the layer
-//   has no audio track, since the Audio Levels property is elided by
-//   default and must already be materialized
+//
+//	has no audio track, since the Audio Levels property is elided by
+//	default and must already be materialized
+//
 // @alias       audio levels,audio gain,音频电平,声道增益,音量
 func (l *Layer) SetAudioLevels(lr []float64) error {
 	p := l.AudioLevels()
@@ -276,7 +281,9 @@ func (l *Layer) SetAudioLevels(lr []float64) error {
 // @gate        TestLayerXform_AEShipGate_AE2020,TestLayerXform_AEShipGate_AE2025
 // @since       AE2020
 // @boundary    length-preserving; v's length must match the property's
-//   component count (2D or 3D); the property must already be materialized
+//
+//	component count (2D or 3D); the property must already be materialized
+//
 // @alias       anchor point,锚点,中心点
 func (l *Layer) SetAnchorPoint(v []float64) error {
 	p := l.AnchorPoint()
@@ -294,7 +301,9 @@ func (l *Layer) SetAnchorPoint(v []float64) error {
 // @gate        TestLayerXform_AEShipGate_AE2020,TestLayerXform_AEShipGate_AE2025
 // @since       AE2020
 // @boundary    length-preserving; v's length must match the property's
-//   component count; the property must already be materialized
+//
+//	component count; the property must already be materialized
+//
 // @alias       position,位置,坐标,移动,平移
 func (l *Layer) SetPosition(v []float64) error {
 	p := l.Position()
@@ -312,7 +321,9 @@ func (l *Layer) SetPosition(v []float64) error {
 // @gate        TestLayerXform_AEShipGate_AE2020,TestLayerXform_AEShipGate_AE2025
 // @since       AE2020
 // @boundary    length-preserving; v's length must match the property's
-//   component count; the property must already be materialized
+//
+//	component count; the property must already be materialized
+//
 // @alias       scale,缩放,大小,尺寸
 func (l *Layer) SetScale(v []float64) error {
 	p := l.Scale()
@@ -324,7 +335,9 @@ func (l *Layer) SetScale(v []float64) error {
 
 // @summary     Set a layer's Z-axis rotation
 // @description Available on both 2D and 3D layers — it's the only rotation
-//   axis 2D layers have.
+//
+//	axis 2D layers have.
+//
 // @param       deg  the new rotation in degrees
 // @domain      layer-set
 // @stability   stable
@@ -345,7 +358,9 @@ func (l *Layer) SetRotation(deg float64) error {
 // @gate        TestLayer3DRotateX_AEShipGate_AE2020,TestLayer3DRotateX_AEShipGate_AE2025
 // @since       AE2020
 // @boundary    length-preserving; 3D layers only — errors with "property not
-//   present" on 2D layers
+//
+//	present" on 2D layers
+//
 // @alias       rotate x,3D X 旋转,X 轴旋转
 func (l *Layer) SetRotateX(deg float64) error {
 	return setScalarProperty(l.RotateX(), l.Name, "Rotate X", deg)
@@ -359,7 +374,9 @@ func (l *Layer) SetRotateX(deg float64) error {
 // @gate        TestLayer3DRotateY_AEShipGate_AE2020,TestLayer3DRotateY_AEShipGate_AE2025
 // @since       AE2020
 // @boundary    length-preserving; 3D layers only — errors with "property not
-//   present" on 2D layers
+//
+//	present" on 2D layers
+//
 // @alias       rotate y,3D Y 旋转,Y 轴旋转
 func (l *Layer) SetRotateY(deg float64) error {
 	return setScalarProperty(l.RotateY(), l.Name, "Rotate Y", deg)
@@ -373,8 +390,10 @@ func (l *Layer) SetRotateY(deg float64) error {
 // @gate        TestLayer3DOrientation_AEShipGate_AE2020,TestLayer3DOrientation_AEShipGate_AE2025
 // @since       AE2020
 // @boundary    length-preserving; 3D layers only (errors on 2D layers); the
-//   static value must be written to both cdat (little-endian) and otda
-//   (big-endian), otherwise AE renders the orientation as zero
+//
+//	static value must be written to both cdat (little-endian) and otda
+//	(big-endian), otherwise AE renders the orientation as zero
+//
 // @alias       orientation,方向,3D 朝向,定向
 func (l *Layer) SetOrientation(v []float64) error {
 	p := l.Orientation()
@@ -393,7 +412,9 @@ func (l *Layer) SetOrientation(v []float64) error {
 // @gate        TestLayerXform_AEShipGate_AE2020,TestLayerXform_AEShipGate_AE2025
 // @since       AE2020
 // @boundary    length-preserving scalar write; the property must already be
-//   materialized
+//
+//	materialized
+//
 // @alias       opacity,不透明度,透明度,layer opacity,淡入淡出
 func (l *Layer) SetOpacity(v float64) error {
 	return setScalarProperty(l.Opacity(), l.Name, "Opacity", v)
@@ -401,10 +422,12 @@ func (l *Layer) SetOpacity(v float64) error {
 
 // @summary     Report whether a layer has an Essential Properties media-replacement slot
 // @description The slot exists when AE persisted an "ADBE Layer Overrides" +
-//   "ADBE Layer Source Alternate" pattern, typically created by calling
-//   addToMotionGraphicsTemplateAs() on the source-side layer while the parent
-//   composition uses the precomp as a layer. Without the slot, the
-//   alternate-source setter cannot length-preservingly write a new id.
+//
+//	"ADBE Layer Source Alternate" pattern, typically created by calling
+//	addToMotionGraphicsTemplateAs() on the source-side layer while the parent
+//	composition uses the precomp as a layer. Without the slot, the
+//	alternate-source setter cannot length-preservingly write a new id.
+//
 // @domain      meta
 // @stability   stable
 // @verify      roundtrip
@@ -514,12 +537,16 @@ func (l *Layer) CanSetTimeRemapEnabled() bool {
 
 // @summary     Replace a layer's source with another AV item
 // @description Internally calls the id-based source setter with the target
-//   item's id.
+//
+//	item's id.
+//
 // @param       target          the new source (a Composition or Footage)
 // @param       fixExpressions  accepted for API compatibility but not
-//   implemented — symbolic rewriting of expressions referencing the old
-//   source is out of scope; when true, a warning is appended to the
-//   project's warnings instead
+//
+//	implemented — symbolic rewriting of expressions referencing the old
+//	source is out of scope; when true, a warning is appended to the
+//	project's warnings instead
+//
 // @domain      layer-set
 // @stability   stable
 // @verify      ae-accept

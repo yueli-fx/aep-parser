@@ -2840,7 +2840,7 @@
     "kind": "method",
     "recv": "*Layer",
     "signature": "func (l *Layer) ReplaceSource(target AVItem, fixExpressions bool) error",
-    "summary": "@summary     Replace a layer's source with another AV item @description Internally calls the id-based source setter with the target   item's id.",
+    "summary": "@summary     Replace a layer's source with another AV item @description Internally calls the id-based source setter with the target",
     "has_cap": true,
     "cap": {
       "domain": "layer-set",
@@ -2892,7 +2892,7 @@
     "kind": "method",
     "recv": "*Layer",
     "signature": "func (l *Layer) SetAnchorPoint(v []float64) error",
-    "summary": "@summary     Set a layer's static anchor point @param       v  the new anchor-point components (2 for 2D, 3 for 3D) @domain      layer-set @stability   stable @verify      ae-accept @gate        TestLayerXform_AEShipGate_AE2020,TestLayerXform_AEShipGate_AE2025 @since       AE2020 @boundary    length-preserving; v's length must match the property's   component count (2D or 3D); the property must already be materialized @alias       anchor point,锚点,中心点",
+    "summary": "@summary     Set a layer's static anchor point @param       v  the new anchor-point components (2 for 2D, 3 for 3D) @domain      layer-set @stability   stable @verify      ae-accept @gate        TestLayerXform_AEShipGate_AE2020,TestLayerXform_AEShipGate_AE2025 @since       AE2020 @boundary    length-preserving; v's length must match the property's",
     "has_cap": true,
     "cap": {
       "domain": "layer-set",
@@ -2903,7 +2903,7 @@
         "TestLayerXform_AEShipGate_AE2020",
         "TestLayerXform_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving; v's length must match the property's\ncomponent count (2D or 3D); the property must already be materialized",
+      "boundary": "length-preserving; v's length must match the property's\n\ncomponent count (2D or 3D); the property must already be materialized",
       "incident": null,
       "alias": [
         "anchor point",
@@ -2943,7 +2943,7 @@
     "kind": "method",
     "recv": "*Layer",
     "signature": "func (l *Layer) SetAudioLevels(lr []float64) error",
-    "summary": "@summary     Set a layer's per-channel audio gain @param       lr  the [left, right] gain in dB @domain      layer-set @stability   stable @verify      ae-accept @gate        TestLayerAudio_AEShipGate_AE2020,TestLayerAudio_AEShipGate_AE2025 @since       AE2020 @boundary    length-preserving static-value write; errors when the layer   has no audio track, since the Audio Levels property is elided by   default and must already be materialized @alias       audio levels,audio gain,音频电平,声道增益,音量",
+    "summary": "@summary     Set a layer's per-channel audio gain @param       lr  the [left, right] gain in dB @domain      layer-set @stability   stable @verify      ae-accept @gate        TestLayerAudio_AEShipGate_AE2020,TestLayerAudio_AEShipGate_AE2025 @since       AE2020 @boundary    length-preserving static-value write; errors when the layer",
     "has_cap": true,
     "cap": {
       "domain": "layer-set",
@@ -2954,7 +2954,7 @@
         "TestLayerAudio_AEShipGate_AE2020",
         "TestLayerAudio_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving static-value write; errors when the layer\nhas no audio track, since the Audio Levels property is elided by\ndefault and must already be materialized",
+      "boundary": "length-preserving static-value write; errors when the layer\n\nhas no audio track, since the Audio Levels property is elided by\ndefault and must already be materialized",
       "incident": null,
       "alias": [
         "audio levels",
@@ -4676,7 +4676,7 @@
         "TestLayerXform_AEShipGate_AE2020",
         "TestLayerXform_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving scalar write; the property must already be\nmaterialized",
+      "boundary": "length-preserving scalar write; the property must already be\n\nmaterialized",
       "incident": null,
       "alias": [
         "opacity",
@@ -4692,7 +4692,7 @@
     "kind": "method",
     "recv": "*Layer",
     "signature": "func (l *Layer) SetOrientation(v []float64) error",
-    "summary": "@summary     Set a layer's 3D orientation @param       v  the new orientation, 3 components in degrees per axis @domain      layer-set @stability   stable @verify      render-pixel @gate        TestLayer3DOrientation_AEShipGate_AE2020,TestLayer3DOrientation_AEShipGate_AE2025 @since       AE2020 @boundary    length-preserving; 3D layers only (errors on 2D layers); the   static value must be written to both cdat (little-endian) and otda   (big-endian), otherwise AE renders the orientation as zero @alias       orientation,方向,3D 朝向,定向",
+    "summary": "@summary     Set a layer's 3D orientation @param       v  the new orientation, 3 components in degrees per axis @domain      layer-set @stability   stable @verify      render-pixel @gate        TestLayer3DOrientation_AEShipGate_AE2020,TestLayer3DOrientation_AEShipGate_AE2025 @since       AE2020 @boundary    length-preserving; 3D layers only (errors on 2D layers); the",
     "has_cap": true,
     "cap": {
       "domain": "layer-set",
@@ -4703,7 +4703,7 @@
         "TestLayer3DOrientation_AEShipGate_AE2020",
         "TestLayer3DOrientation_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving; 3D layers only (errors on 2D layers); the\nstatic value must be written to both cdat (little-endian) and otda\n(big-endian), otherwise AE renders the orientation as zero",
+      "boundary": "length-preserving; 3D layers only (errors on 2D layers); the\n\nstatic value must be written to both cdat (little-endian) and otda\n(big-endian), otherwise AE renders the orientation as zero",
       "incident": null,
       "alias": [
         "orientation",
@@ -4771,7 +4771,7 @@
     "kind": "method",
     "recv": "*Layer",
     "signature": "func (l *Layer) SetPosition(v []float64) error",
-    "summary": "@summary     Set a layer's static position @param       v  the new position components (2 for 2D, 3 for 3D) @domain      layer-set @stability   stable @verify      ae-accept @gate        TestLayerXform_AEShipGate_AE2020,TestLayerXform_AEShipGate_AE2025 @since       AE2020 @boundary    length-preserving; v's length must match the property's   component count; the property must already be materialized @alias       position,位置,坐标,移动,平移",
+    "summary": "@summary     Set a layer's static position @param       v  the new position components (2 for 2D, 3 for 3D) @domain      layer-set @stability   stable @verify      ae-accept @gate        TestLayerXform_AEShipGate_AE2020,TestLayerXform_AEShipGate_AE2025 @since       AE2020 @boundary    length-preserving; v's length must match the property's",
     "has_cap": true,
     "cap": {
       "domain": "layer-set",
@@ -4782,7 +4782,7 @@
         "TestLayerXform_AEShipGate_AE2020",
         "TestLayerXform_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving; v's length must match the property's\ncomponent count; the property must already be materialized",
+      "boundary": "length-preserving; v's length must match the property's\n\ncomponent count; the property must already be materialized",
       "incident": null,
       "alias": [
         "position",
@@ -4851,7 +4851,7 @@
     "kind": "method",
     "recv": "*Layer",
     "signature": "func (l *Layer) SetRotateX(deg float64) error",
-    "summary": "@summary     Set a layer's X-axis 3D rotation @param       deg  the new rotation in degrees @domain      layer-set @stability   stable @verify      render-pixel @gate        TestLayer3DRotateX_AEShipGate_AE2020,TestLayer3DRotateX_AEShipGate_AE2025 @since       AE2020 @boundary    length-preserving; 3D layers only — errors with \"property not   present\" on 2D layers @alias       rotate x,3D X 旋转,X 轴旋转",
+    "summary": "@summary     Set a layer's X-axis 3D rotation @param       deg  the new rotation in degrees @domain      layer-set @stability   stable @verify      render-pixel @gate        TestLayer3DRotateX_AEShipGate_AE2020,TestLayer3DRotateX_AEShipGate_AE2025 @since       AE2020 @boundary    length-preserving; 3D layers only — errors with \"property not",
     "has_cap": true,
     "cap": {
       "domain": "layer-set",
@@ -4862,7 +4862,7 @@
         "TestLayer3DRotateX_AEShipGate_AE2020",
         "TestLayer3DRotateX_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving; 3D layers only — errors with \"property not\npresent\" on 2D layers",
+      "boundary": "length-preserving; 3D layers only — errors with \"property not\n\npresent\" on 2D layers",
       "incident": null,
       "alias": [
         "rotate x",
@@ -4876,7 +4876,7 @@
     "kind": "method",
     "recv": "*Layer",
     "signature": "func (l *Layer) SetRotateY(deg float64) error",
-    "summary": "@summary     Set a layer's Y-axis 3D rotation @param       deg  the new rotation in degrees @domain      layer-set @stability   stable @verify      render-pixel @gate        TestLayer3DRotateY_AEShipGate_AE2020,TestLayer3DRotateY_AEShipGate_AE2025 @since       AE2020 @boundary    length-preserving; 3D layers only — errors with \"property not   present\" on 2D layers @alias       rotate y,3D Y 旋转,Y 轴旋转",
+    "summary": "@summary     Set a layer's Y-axis 3D rotation @param       deg  the new rotation in degrees @domain      layer-set @stability   stable @verify      render-pixel @gate        TestLayer3DRotateY_AEShipGate_AE2020,TestLayer3DRotateY_AEShipGate_AE2025 @since       AE2020 @boundary    length-preserving; 3D layers only — errors with \"property not",
     "has_cap": true,
     "cap": {
       "domain": "layer-set",
@@ -4887,7 +4887,7 @@
         "TestLayer3DRotateY_AEShipGate_AE2020",
         "TestLayer3DRotateY_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving; 3D layers only — errors with \"property not\npresent\" on 2D layers",
+      "boundary": "length-preserving; 3D layers only — errors with \"property not\n\npresent\" on 2D layers",
       "incident": null,
       "alias": [
         "rotate y",
@@ -4901,7 +4901,7 @@
     "kind": "method",
     "recv": "*Layer",
     "signature": "func (l *Layer) SetRotation(deg float64) error",
-    "summary": "@summary     Set a layer's Z-axis rotation @description Available on both 2D and 3D layers — it's the only rotation   axis 2D layers have.",
+    "summary": "@summary     Set a layer's Z-axis rotation @description Available on both 2D and 3D layers — it's the only rotation",
     "has_cap": true,
     "cap": {
       "domain": "layer-set",
@@ -4955,7 +4955,7 @@
     "kind": "method",
     "recv": "*Layer",
     "signature": "func (l *Layer) SetScale(v []float64) error",
-    "summary": "@summary     Set a layer's static scale @param       v  the new scale components, normalized (1.0 = 100%) @domain      layer-set @stability   stable @verify      ae-accept @gate        TestLayerXform_AEShipGate_AE2020,TestLayerXform_AEShipGate_AE2025 @since       AE2020 @boundary    length-preserving; v's length must match the property's   component count; the property must already be materialized @alias       scale,缩放,大小,尺寸",
+    "summary": "@summary     Set a layer's static scale @param       v  the new scale components, normalized (1.0 = 100%) @domain      layer-set @stability   stable @verify      ae-accept @gate        TestLayerXform_AEShipGate_AE2020,TestLayerXform_AEShipGate_AE2025 @since       AE2020 @boundary    length-preserving; v's length must match the property's",
     "has_cap": true,
     "cap": {
       "domain": "layer-set",
@@ -4966,7 +4966,7 @@
         "TestLayerXform_AEShipGate_AE2020",
         "TestLayerXform_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving; v's length must match the property's\ncomponent count; the property must already be materialized",
+      "boundary": "length-preserving; v's length must match the property's\n\ncomponent count; the property must already be materialized",
       "incident": null,
       "alias": [
         "scale",
@@ -5120,7 +5120,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "suspected false green — setting a bare static value of 0.0\ndoes not match how AE (and this library's TimeRemapEnabled getter)\ndetects enablement, which is \"TimeRemap property carries 2 identity\nkeyframes\". AE may read timeRemapEnabled back as false. Enabling\ncorrectly likely requires synthesizing 2 keyframes (at the in/out\npoints) plus the enable flag, not a bare static value.",
+      "boundary": "suspected false green — setting a bare static value of 0.0\n\ndoes not match how AE (and this library's TimeRemapEnabled getter)\ndetects enablement, which is \"TimeRemap property carries 2 identity\nkeyframes\". AE may read timeRemapEnabled back as false. Enabling\ncorrectly likely requires synthesizing 2 keyframes (at the in/out\npoints) plus the enable flag, not a bare static value.",
       "incident": [
         "layer-settimeremapenabled-needs-keyframes"
       ],
@@ -5732,7 +5732,7 @@
     "kind": "method",
     "recv": "*Layer",
     "signature": "func (l *Layer) HasAlternateSourceSlot() bool",
-    "summary": "@summary     Report whether a layer has an Essential Properties media-replacement slot @description The slot exists when AE persisted an \"ADBE Layer Overrides\" +   \"ADBE Layer Source Alternate\" pattern, typically created by calling   addToMotionGraphicsTemplateAs() on the source-side layer while the parent   composition uses the precomp as a layer.",
+    "summary": "@summary     Report whether a layer has an Essential Properties media-replacement slot @description The slot exists when AE persisted an \"ADBE Layer Overrides\" +",
     "has_cap": true,
     "cap": {
       "domain": "meta",

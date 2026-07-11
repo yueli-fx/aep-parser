@@ -126,25 +126,23 @@ type Composition struct {
 	back CompositionWriter
 }
 
-// CdtaRawBytes returns the comp's cdta chunk Data slice, or nil if the
-// comp has no cdta. Read-only access for debugging / RE tools — the
-// underlying byte slice is the live chunk data; do not mutate.
+// CdtaRawBytes returns a detached copy of the comp's cdta chunk data, or nil
+// if the comp has no cdta. It is intended for debugging and RE tools.
 func (c *Composition) CdtaRawBytes() []byte {
 	if c.back == nil {
 		return nil
 	}
-	return c.back.CdtaData()
+	return append([]byte(nil), c.back.CdtaData()...)
 }
 
 // PrdaRawBytes returns the comp's prda chunk Data slice (renderer-specific
-// options), or nil if the comp has no PRin LIST. Read-only access for
-// debugging / RE tools — the underlying byte slice is the live chunk data;
-// do not mutate.
+// options), or nil if the comp has no PRin LIST. The returned bytes are a
+// detached debugging snapshot.
 func (c *Composition) PrdaRawBytes() []byte {
 	if c.back == nil {
 		return nil
 	}
-	return c.back.PrdaData()
+	return append([]byte(nil), c.back.PrdaData()...)
 }
 
 // LayerByID returns the first layer in this composition whose ID matches
