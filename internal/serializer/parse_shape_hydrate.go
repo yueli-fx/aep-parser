@@ -550,8 +550,8 @@ func decodeBezierVertices(shph, lhd3, ldat *rifx.Chunk) [][2]float64 {
 	if lhd3 == nil || ldat == nil || len(lhd3.Data) < 0x10 {
 		return nil
 	}
-	n := int(binary.BigEndian.Uint32(lhd3.Data[0x0C:0x10]))
-	if n <= 0 || len(ldat.Data) < n*24 {
+	n, _, ok := checkedTableLayout(binary.BigEndian.Uint32(lhd3.Data[0x0C:0x10]), 24, len(ldat.Data), 24)
+	if !ok {
 		return nil
 	}
 	var minX, minY, maxX, maxY float64

@@ -328,9 +328,10 @@ func readMaskPathTimes(tdbs *rifx.Chunk, ctx *parseCtx) []maskPathTime {
 	if lhd3 == nil || ldat == nil || len(lhd3.Data) < 0x14 {
 		return nil
 	}
-	count := int(binary.BigEndian.Uint32(lhd3.Data[0x08:0x0C]))
-	bpk := int(binary.BigEndian.Uint32(lhd3.Data[0x10:0x14]))
-	if count <= 0 || bpk <= 0 || count*bpk > len(ldat.Data) {
+	countRaw := binary.BigEndian.Uint32(lhd3.Data[0x08:0x0C])
+	bpkRaw := binary.BigEndian.Uint32(lhd3.Data[0x10:0x14])
+	count, bpk, ok := checkedTableLayout(countRaw, bpkRaw, len(ldat.Data), 6)
+	if !ok {
 		return nil
 	}
 	out := make([]maskPathTime, count)
@@ -364,9 +365,10 @@ func decodeMaskVertices(kfl *rifx.Chunk) []MaskVertex {
 	if lhd3 == nil || ldat == nil || len(lhd3.Data) < 0x14 {
 		return nil
 	}
-	count := int(binary.BigEndian.Uint32(lhd3.Data[0x08:0x0C]))
-	bpk := int(binary.BigEndian.Uint32(lhd3.Data[0x10:0x14]))
-	if count <= 0 || bpk != 8 || count*bpk > len(ldat.Data) {
+	countRaw := binary.BigEndian.Uint32(lhd3.Data[0x08:0x0C])
+	bpkRaw := binary.BigEndian.Uint32(lhd3.Data[0x10:0x14])
+	count, bpk, ok := checkedTableLayout(countRaw, bpkRaw, len(ldat.Data), 8)
+	if !ok || bpk != 8 {
 		return nil
 	}
 	// 3 entries per vertex (anchor, in-tangent, out-tangent).

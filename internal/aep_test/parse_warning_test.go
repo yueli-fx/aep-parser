@@ -84,6 +84,58 @@ func TestParseEmitsWarningOnInconsistentKeyframeStream(t *testing.T) {
 			t.Errorf("Opacity should have 0 keyframes after corrupt parse, got %d", len(op.Keyframes))
 		}
 	})
+
+	// Case C: the table fits arithmetically, but each record is too short
+	// for the parser's fixed header reads. This must degrade to a warning,
+	// not a slice-bounds panic on untrusted input.
+	t.Run("bytes_per_keyframe_too_small", func(t *testing.T) {
+		rb := &rifxBuilder{}
+		leaf := rb.buildCorruptKeyframedLeaf("ADBE Opacity", 0x01, []byte{0},
+			buildLhd3(1, 1))
+		var tdgpBody []byte
+		tdgpBody = append(tdgpBody, leaf...)
+		tdgpBody = append(tdgpBody, rb.chunk("tdmn", []byte("ADBE Group End"))...)
+		data := wrapAsLayer(tdgpBody)
+
+		proj, err := aep.FromReader(bytes.NewReader(data))
+		if err != nil {
+			t.Fatalf("FromReader: %v", err)
+		}
+		if len(proj.Warnings) == 0 {
+			t.Fatalf("expected a warning for undersized keyframe records, got none")
+		}
+		op := proj.Compositions[0].Layers[0].Opacity()
+		if op == nil {
+			t.Fatal("Opacity property should still surface")
+		}
+		if len(op.Keyframes) != 0 {
+			t.Errorf("Opacity should have 0 keyframes after corrupt parse, got %d", len(op.Keyframes))
+		}
+	})
+
+	// Case D: multiplication in a naive count*bpk bounds check overflows
+	// native int on 64-bit systems. Reject the header before allocation.
+	t.Run("table_size_integer_overflow", func(t *testing.T) {
+		rb := &rifxBuilder{}
+		leaf := rb.buildCorruptKeyframedLeaf("ADBE Opacity", 0x01, make([]byte, 8),
+			buildLhd3(^uint32(0), ^uint32(0)))
+		var tdgpBody []byte
+		tdgpBody = append(tdgpBody, leaf...)
+		tdgpBody = append(tdgpBody, rb.chunk("tdmn", []byte("ADBE Group End"))...)
+		data := wrapAsLayer(tdgpBody)
+
+		proj, err := aep.FromReader(bytes.NewReader(data))
+		if err != nil {
+			t.Fatalf("FromReader: %v", err)
+		}
+		if len(proj.Warnings) == 0 {
+			t.Fatalf("expected a warning for overflowing keyframe table, got none")
+		}
+		op := proj.Compositions[0].Layers[0].Opacity()
+		if op == nil || len(op.Keyframes) != 0 {
+			t.Fatalf("Opacity should surface without keyframes, got %#v", op)
+		}
+	})
 }
 
 // TestParseWarnsOnBpkLayoutMismatch pins the pre-flight bpk-vs-layout check.

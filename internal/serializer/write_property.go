@@ -378,10 +378,11 @@ func reparseKeyframes(p *Property, tickRate float64) error {
 	if len(pb.lhd3.Data) < 0x14 {
 		return fmt.Errorf("property %q: lhd3 too short (%d bytes)", p.MatchName, len(pb.lhd3.Data))
 	}
-	count := int(binary.BigEndian.Uint32(pb.lhd3.Data[0x08:0x0C]))
-	bpk := int(binary.BigEndian.Uint32(pb.lhd3.Data[0x10:0x14]))
-	if count < 0 || bpk <= 0 || count*bpk > len(pb.ldat.Data) {
-		return fmt.Errorf("property %q: lhd3 says count=%d bpk=%d but ldat has %d bytes", p.MatchName, count, bpk, len(pb.ldat.Data))
+	countRaw := binary.BigEndian.Uint32(pb.lhd3.Data[0x08:0x0C])
+	bpkRaw := binary.BigEndian.Uint32(pb.lhd3.Data[0x10:0x14])
+	count, bpk, ok := checkedTableLayout(countRaw, bpkRaw, len(pb.ldat.Data), 8)
+	if !ok {
+		return fmt.Errorf("property %q: lhd3 says count=%d bpk=%d but ldat has %d bytes", p.MatchName, countRaw, bpkRaw, len(pb.ldat.Data))
 	}
 	pb.bytesPerKF = bpk
 	p.Keyframes = make([]*Keyframe, 0, count)

@@ -14,6 +14,13 @@ RECHECK WHEN: parser limits、server isolation 或 path-input 模型发生变化
 - `Chunk.U8/U16/U32` 对负 offset 和上界统一返回错误。
 - `FuzzParseNeverPanics` 是畸形输入的持续 gate。
 
+RIFX 结构合法不代表内部 AEP table 合法。`internal/serializer` 中任何来自 chunk 的 `count` / `recordSize` 都必须在转换为 `int`、分配或切片前统一验证：
+
+- 不使用可能溢出的 `count * recordSize <= len(data)`；使用除法形式的 `checkedTableLayout`。
+- 除总长度外还要验证单条记录的最小读取尺寸，避免 `recordSize=1` 通过总长度检查后发生 slice-bounds panic。
+- keyframe、marker、mask path 和 shape path table 共用这一不变量；新 table parser 不应复制局部乘法检查。
+- `FuzzFromReaderNeverPanics` 使用结构化 AEP seed 穿过 serializer；只 fuzz 外层 RIFX 无法覆盖内部字段解码。
+
 `aepserver` 已提供服务层防护：
 
 1. 上传 body 上限与 parser 默认预算共同生效；畸形 chunk 不能借声明尺寸越过实际输入。

@@ -19,7 +19,7 @@
 
 | ID | 严重度 | Module / seam | 状态 | 发现与影响 | 证据 | 关闭条件 |
 |---|---|---|---|---|---|---|
-| — | — | — | — | 第一轮 review 尚未登记发现 | — | — |
+| CQ-001 | P0 | serializer fixed-record table seam | verified | keyframe 等 table 使用 `count*bpk` 检查，可整数溢出；`bpk` 小于固定读取尺寸时会通过总长度检查并 slice panic。公开 `FromReader` 可由结构合法的畸形 AEP 触发。 | `TestParseEmitsWarningOnInconsistentKeyframeStream/bytes_per_keyframe_too_small` 修复前稳定 panic；overflow case、目标包测试和 10 秒 serializer fuzz 修复后通过。 | keyframe、marker、mask/shape path 和重解析共用溢出安全、含最小记录尺寸的检查；结构化 parser fuzz 持续运行。 |
 
 ## Review 维度
 

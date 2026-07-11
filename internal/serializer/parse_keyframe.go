@@ -31,11 +31,12 @@ func parseKeyframes(prop *Property, lhd3, ldat *rifx.Chunk, ctx *parseCtx) {
 			prop.MatchName, len(lhd3.Data))
 		return
 	}
-	count := int(binary.BigEndian.Uint32(lhd3.Data[0x08:0x0C]))
-	bpk := int(binary.BigEndian.Uint32(lhd3.Data[0x10:0x14]))
-	if count <= 0 || bpk <= 0 || count*bpk > len(ldat.Data) {
+	countRaw := binary.BigEndian.Uint32(lhd3.Data[0x08:0x0C])
+	bpkRaw := binary.BigEndian.Uint32(lhd3.Data[0x10:0x14])
+	count, bpk, ok := checkedTableLayout(countRaw, bpkRaw, len(ldat.Data), 8)
+	if !ok {
 		ctx.warn("keyframe stream for property %q inconsistent (count=%d, bytes_per_kf=%d, ldat=%d bytes); skipping keyframes",
-			prop.MatchName, count, bpk, len(ldat.Data))
+			prop.MatchName, countRaw, bpkRaw, len(ldat.Data))
 		return
 	}
 	if propertyBack(prop) == nil {
