@@ -8,6 +8,7 @@ otherwise.
 
 | Command | Purpose |
 |---|---|
+| `aep` | Unified product CLI for headless `inspect`, `profile`, `diff`, `migrate`, and `capabilities`; prefer this for new external workflows. |
 | `aeprecipe` | Compile/inspect recipe-level JSON into generated AEP projects. This is the main from-scratch generation entry point for recipe experiments. |
 | `aepmigrate` | Convert AEPs across supported AE writer versions and run version-matrix migration checks. Uses `internal/aepmigrate`. |
 | `aepregistry` | Registry governance tool for asset locations, capability atoms, evidence, version coverage, cleanup policy, and gates. It owns commands such as `audit`, `coverage`, `current`, `gate`, `layout`, `ownership`, and `cleanup`. |
@@ -51,3 +52,6 @@ otherwise.
   may require installed After Effects versions and the AE worker scripts.
 - Generator commands (`capindex`, `docgen`, `recipedocgen`) update tracked docs;
   run the matching tests/checks before committing generated output.
+- Existing focused commands remain compatibility and advanced-maintenance
+  surfaces; new user workflows should enter through `cmd/aep` unless they need
+  a capability the unified CLI has not adopted yet.

@@ -36,6 +36,20 @@ func main() {
 
 `Document` interface 有意保持精简：`Inspect` 返回稳定轻量清单，`ProfileJSON` 返回 diff/migration 使用的规范化 profile，`Write` 做保留未知 chunk 的 round-trip。底层 scene、serializer 和 back-reference 类型不属于公开 interface。
 
+## 统一 CLI
+
+面向用户的新入口是 `cmd/aep`，所有结果和错误都使用稳定 JSON envelope：
+
+```powershell
+go run ./cmd/aep inspect -in project.aep
+go run ./cmd/aep profile -in project.aep
+go run ./cmd/aep diff -expected before.aep -actual after.aep
+go run ./cmd/aep migrate -in source.aep -target AE2025 -out migrated.aep
+go run ./cmd/aep capabilities
+```
+
+这些命令都不启动 AE。原有 `aepdiff`、`aepmigrate`、`aepsearch`、`aeoracle` 等聚焦命令继续保留，用于兼容和高级维护工作流。
+
 ## 跨平台构建验证
 
 解析、profile、diff、search、recipe、technique report 和自托管编排的 Go 入口应保持跨平台可构建；AE 自动化是可选 worker 能力，Linux/macOS 服务节点不应因为没有 AE 或 PowerShell 而阻断纯解析工作。

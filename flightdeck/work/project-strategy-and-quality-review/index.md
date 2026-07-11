@@ -2,13 +2,13 @@
 
 ## 状态
 
-初评已完成并获用户授权执行，控制计划见 `plan.md`。Slice 0–3 已完成；当前进入 Slice 4：单一 CLI 产品面。
+初评已完成并获用户授权执行，控制计划见 `plan.md`。Slice 0–4 已完成；当前进入 Slice 5：开源发布面（许可证选择除外）。
 
 ## 下一步
 
-1. 新增统一 `cmd/aep`，先收口 `inspect`、`profile`、`diff`、`migrate`、`capabilities`。
-2. 复用公开 SDK 与现有深层 module，统一 JSON envelope、错误和退出码。
-3. 保留原命令兼容，不在本切片删除研究/治理工具。
+1. 补齐 SECURITY、CONTRIBUTING、CHANGELOG、CI 和 release workflow。
+2. 整理 README 的安装、五分钟示例、支持范围和 WIP 表述。
+3. LICENSE 必须由用户确认许可证后单独落地，不替用户作授权决定。
 
 ## 立即读取
 
@@ -46,10 +46,12 @@
 - Slice 2 验证：`go test ./...`、`go vet ./...` 和三平台构建全部通过。
 - Slice 3：根 package 新增可被模块外导入的 `Document` interface，提供 `Open/Parse`、`Inspect`、`ProfileJSON` 和 `Write`；内部 scene/serializer/backref 不外泄。
 - Slice 3 验证：外部测试 package 通过公开 import path 完成 inspect/profile/roundtrip；全仓测试、vet、三平台构建通过。
+- Slice 4：新增 `cmd/aep` 与 `internal/toolkitcli`，统一 inspect/profile/diff/migrate/capabilities、JSON envelope 和退出码；旧命令保留兼容。
+- Slice 4 验证：真实 fixture CLI smoke、统一 runner tests、全仓测试、vet、capindex 和三平台构建全部通过。
 
 当前：
 
-- Slice 4：单一 CLI 产品面。
+- Slice 5：开源发布面（LICENSE 等待用户确认）。
 
 ## 未决问题
 
