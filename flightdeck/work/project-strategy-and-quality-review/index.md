@@ -2,12 +2,12 @@
 
 ## 状态
 
-Slice 0–6 已完成，Headless AEP Toolkit 的技术基线、公开 interface、统一 CLI、发布基础设施和采用/商业验证方案均已落地。唯一发布阻塞是用户尚未选择 LICENSE；外部设计伙伴验证需要真实团队参与。
+Slice 0–6 与 Apache-2.0 许可证均已完成，Headless AEP Toolkit 的技术基线、公开 interface、统一 CLI、发布基础设施和采用/商业验证方案均已落地。仓库已达到技术预发布状态；首次公开发布仍需建立远端、运行真实 CI 并确定版本号，外部设计伙伴验证需要真实团队参与。
 
 ## 下一步
 
-1. 用户选择 LICENSE；推荐 Apache-2.0（明确专利授权），备选 MIT（更短更宽松）。
-2. 建立远端仓库并触发首次 CI，不自动 push。
+1. 建立远端仓库并触发首次 CI，不自动 push。
+2. 确定首个版本号和发布日期，再创建 tag。
 3. 按 `adoption-and-commercial-validation.md` 招募设计伙伴并运行六周验证。
 
 ## 立即读取
@@ -25,6 +25,7 @@ Slice 0–6 已完成，Headless AEP Toolkit 的技术基线、公开 interface�
 - `../../knowledge/security/untrusted-aep-input.md` — 审查 parser/server 的不可信输入边界时
 - `../../knowledge/shape/shape-layer-transform-runtime-sync.md` — 修改 recipe/migration 的 ShapeLayer transform 时
 - `../../knowledge/workflow/gofmt-baseline-scope.md` — 修改 CI 格式门禁或计划全仓 gofmt 时
+- `../../knowledge/workflow/open-source-license.md` — 准备发布、调整贡献条款或开源/商业边界时
 - `../fx-technique-internalization/index.md` — 评价技法学习线是否值得继续时
 - `../arbitrary-aep-version-migration/index.md` — 评价版本迁移方向时
 
@@ -54,15 +55,15 @@ Slice 0–6 已完成，Headless AEP Toolkit 的技术基线、公开 interface�
 - Slice 5 验证：CI 等价命令全部通过，包括测试、vet、capindex、三平台构建、10 秒 fuzz（约 184 万输入）和 race tests。
 - Slice 6：定义模板市场、批量渲染、工作室/DAM 三类设计伙伴，六周验证节奏、OSS/商业边界、定价实验和继续/停止条件。
 - Slice 6：新增 Nexrender/aerender preflight 示例，明确本工具位于 render worker 之前而不替代渲染编排。
+- 许可证：采用 Apache License 2.0，README、CHANGELOG 与长期贡献/商业边界规则已同步。
 
 当前：
 
-- 等待 LICENSE 决策与真实外部设计伙伴验证。
+- 技术预发布基线已完成；等待远端首次 CI、版本/tag 决策与真实外部设计伙伴验证。
 
 ## 未决问题
 
 - 最合适的核心用户是谁：开发者、AE 自动化团队、模板/素材平台，还是数字资产分析与迁移工具作者？
 - 是否接受“Headless AEP Toolkit”作为核心承诺，而不是继续以技法学习/视觉复刻为主线？
 - 哪些实验性研究应继续，哪些应冻结为案例或证据？
-- 开源前采用哪种许可证，以及哪些企业能力保留为商业层？
-- LICENSE 需要用户在 Apache-2.0、MIT 或其他策略之间作最终授权决定；未确认前不创建。
+- 哪些企业能力应在设计伙伴验证后保留为商业层？

@@ -6,6 +6,7 @@
 
 ### Added
 
+- 项目以 Apache License 2.0 开源，包含明确的贡献者专利授权。
 - 可从模块外导入的根 Go package：`Open`、`Parse`、`Inspect`、`ProfileJSON`、`Write`。
 - 统一 `aep` CLI：`inspect`、`profile`、`diff`、`migrate`、`capabilities`。
 - RIFX parser 资源预算、typed format/limit errors、畸形输入测试和 fuzz gate。
@@ -22,4 +23,4 @@
 
 ## Release policy
 
-首次版本号、发布日期和许可证将在公开发布前确定。发布后使用 Keep a Changelog 风格，并为每个 tag 增加对应版本段。
+首次版本号和发布日期将在公开发布前确定；许可证已确定为 Apache License 2.0。发布后使用 Keep a Changelog 风格，并为每个 tag 增加对应版本段。

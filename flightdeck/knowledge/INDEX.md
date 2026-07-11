@@ -26,6 +26,7 @@ header to load only the notes relevant to the task.
 | Rain phenomenon recipe and plugin boundary | `techniques/build-good-rain.md` |
 | Glitch phenomenon recipe and plugin boundary | `techniques/build-good-glitch.md` |
 | Public/untrusted AEP upload safety | `security/untrusted-aep-input.md` |
+| Open-source license, contributions, and commercial boundary | `workflow/open-source-license.md` |
 
 ## Domains
 
