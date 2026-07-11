@@ -16,17 +16,15 @@ go test ./...      # 必须全绿
 
 ## 当前基线
 
-PASS count 见 `../cockpit.md` `Last updated` 行（**唯一权威**）。
+公开 API 黑盒测试位于 `internal/aep_test`；全仓基线以 `go test ./...` 是否全绿为准，不在 cockpit 维护易漂移的 PASS 数量。
 
 校对命令：
 
 ```bash
-go test -count=1 ./internal/aep/... -v | grep -c '^--- PASS'    # 应等于 cockpit.md 写的数字
-go test -count=1 ./internal/aep/... -v | grep -c '^--- FAIL'    # 应 = 0
-go vet ./...                                                       # 应 clean
+go test -count=1 ./internal/aep_test -v
+go test ./...
+go vet ./...
 ```
-
-如果 PASS 数对不上 cockpit.md，先查最近改动是否漏了同步。
 
 ## 全量 AE gate 回归 / fixture 完整性
 
@@ -54,8 +52,8 @@ matte AE2025 contract.
 ## 跑单个测试
 
 ```bash
-go test ./internal/aep/ -run 'TestSetManualKerning' -v
-go test ./internal/aep/ -run 'TestMaterialOptionsTypedSettersRoundtrip' -v
+go test ./internal/aep_test -run 'TestSetManualKerning' -v
+go test ./internal/aep_test -run 'TestMaterialOptionsTypedSettersRoundtrip' -v
 ```
 
 跑 real-file fixture 测试时，对应 `test_data/re_*.aep` 缺失 → `t.Skipf(...)`，不阻塞 CI。
@@ -63,7 +61,7 @@ go test ./internal/aep/ -run 'TestMaterialOptionsTypedSettersRoundtrip' -v
 ## 用 -aep 标志跑外部文件
 
 ```bash
-go test ./internal/aep -run TestManualFile -aep "C:/path/to/your.aep" -v
+go test ./internal/aep_test -run TestManualFile -aep "C:/path/to/your.aep" -v
 ```
 
 会 dump 整个 Project 结构供肉眼核对。

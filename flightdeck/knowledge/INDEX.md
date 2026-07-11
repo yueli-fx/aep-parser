@@ -23,6 +23,7 @@ header to load only the notes relevant to the task.
 | JSX generator cleanup | `workflow/jsx-generator-cleanup-provenance.md` |
 | Rain phenomenon recipe and plugin boundary | `techniques/build-good-rain.md` |
 | Glitch phenomenon recipe and plugin boundary | `techniques/build-good-glitch.md` |
+| Public/untrusted AEP upload safety | `security/untrusted-aep-input.md` |
 
 ## Domains
 
@@ -49,6 +50,7 @@ header to load only the notes relevant to the task.
 - `techniques/`: high-level technique internalization, procedural FX, and sample
   analysis.
 - `showcase/`: showcase contract and visual review workflow.
+- `security/`: untrusted binary input, parser budgets, and service isolation.
 
 ## Loading Policy
 
