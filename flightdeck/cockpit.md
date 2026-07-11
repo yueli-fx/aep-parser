@@ -1,24 +1,21 @@
 # Cockpit — aep-parser
 
-当前焦点：代码质量、架构升级及项目战略技术评审均已完成并归档。首次发布与设计伙伴验证已拆为独立 topic；商业化与 Toolkit 产品化 work 继续暂停，复刻、technique research 和 ontology 保持冻结，不自动扩张。
+当前焦点：技术建设、代码质量升级和研究型工作均已完成或归档。唯一保留的活跃主线是首次发布与真实设计伙伴验证，用外部采用证据决定公开开源、私有 Toolkit 或商业交付方向。
 
 ## 进行中
 
-- **commercialization-and-toolkit-productization**（`work/commercialization-and-toolkit-productization/index.md`）— 总目标、产品承诺、开放核心/商业边界和六个分支目标已建档；按用户要求暂停，不自动执行。
-- **release-and-design-partner-validation**（`work/release-and-design-partner-validation/index.md`）— 尚未执行；独立承接远端首次 CI、版本/tag、设计伙伴招募、六周采用/商业验证及最终路线决策，不自动 push。
-- **booyah-glitch-replication**（`work/booyah-glitch-replication/index.md`）— 12-comp from-scratch 复刻已建成并通过 agent AE gate；按 showcase review-gate，只有用户真机确认后才算 complete。①②③⑧ 已 complete；④⑤⑥⑦⑨⑩⑪⑫ 仍待用户 review，下一批优先 ⑩⑪⑫。
-- **fx-technique-internalization**（`work/fx-technique-internalization/index.md`）— 活跃研究线：参考 `.aep` → 拆角色/技法/机制 → 技法库/现象配方；effect-field understanding v1、report surface v1、pseudo/controller rebuild proof v1、pseudo behavior wiring proof v1、sample-fact behavior extraction v1、pseudo behavior payload application proof v1、multi-family pseudo application proof v1、vector pseudo behavior application v1、expression pseudo behavior boundary v1、glitch reference phenomenon v1、glitch showcase gate v1、rain reference phenomenon v1、rain showcase gate v1 已完成。下一步推荐另一个 reference phenomenon 包、richer rain generator，或基于 glitch recipe 的生成器升级。
-- **technique-ontology**（`work/technique-ontology/index.md`）— 已暂停的配套研究：角色/技法/机制三轴 ontology + schema v2。火焰/闪电/控制器样本已压测；大规模词表稳定性未验证。
+- **release-and-design-partner-validation**（`work/release-and-design-partner-validation/index.md`）— 尚未执行；承接远端首次 CI、版本/tag、设计伙伴招募、六周采用/商业验证及最终路线决策。除非用户明确要求，永远不自动 push。
 
 ## 下一步
 
-- **任意 AEP 版本迁移**（`work/arbitrary-aep-version-migration/index.md`）— 已暂停的未来任务，用于升级/降级任意 AE 工程。后续工作如果发现 high-version-only 字段、版本特定字段布局或 downgrade fallback 需求，记录到这个包里，不要散落到临时笔记。
-- **Fixture 再生成 follow-up**：如后续需要恢复 `test_data/generated/fixtures`，为 `scripts/fixtures/regen_fixtures.ps1 -CheckOnly` 的 47 个 missing outputs 单独开包；不要混入已完成的 hygiene survey cleanup。
-- **Booyah 用户真机验收 ⑩⑪⑫**：用户确认后更新 `flightdeck/showcase/booyah-clone/INDEX.md`，再按 review-gate 翻 complete；未确认前不要关闭 Booyah topic。
-- **Technique research**：rain reference phenomenon v1 已完成并记录 `build-good-rain.md`；rain showcase gate v1 已完成，Go/parse gate + AE2020 render gate 通过；glitch showcase gate v1 已完成，Go/parse gate + AE2025/AE2020 render gate 均通过。下一步推荐另一个 reference phenomenon 包、richer rain generator，或基于 glitch recipe 的生成器升级。不要按单个字段继续。
+- 建立或确认远端并运行首次真实 CI。
+- 确定首个版本号、发布日期、兼容承诺和发布/私有交付方式。
+- 招募至少 3 个设计伙伴，以真实 corpus 和 workflow 数据运行六周验证。
 
 ## 未决问题
 
-- Booyah documented deltas 是否接受为限制，还是后续开 polish 包：Noise2、Curves arbitrary data、eased Position builder、颜色/撕裂强度细调。
-- technique ontology 的大规模 N>>3 词表稳定性何时验证。
-- 能力真相源仍是 `go run ./cmd/capindex -q <词>`；不要恢复单独 coverage 表。
+- 首发采用公开开源、私有 Toolkit，还是两者并行。
+- 首批核心用户选择模板平台、批量渲染团队，还是工作室/DAM。
+- 是否存在足够的生产采用和付费信号支持托管或企业商业层。
+
+能力真相源仍是 `go run ./cmd/capindex -q <词>`；不要恢复单独 coverage 表。

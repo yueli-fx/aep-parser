@@ -20,15 +20,16 @@
 
 ## 按需读取
 
-- `../commercialization-and-toolkit-productization/index.md` — 用户决定恢复商业化/Toolkit work 时
 - `../../knowledge/security/untrusted-aep-input.md` — 设计公开服务或托管输入边界时
 - `../../knowledge/architecture/public-sdk-interface.md` — 调整首发 SDK 承诺时
+- `../../knowledge/architecture/unified-cli-interface.md` — 调整 CLI JSON contract 或集成入口时
 
 ## 已具备前提
 
 - 根 Go SDK、统一 CLI、CI/release workflow、SECURITY、CONTRIBUTING、CHANGELOG 和 Apache-2.0 已落地。
 - 代码质量综合升级已关闭全部 P0/P1，并建立 race、fuzz、漏洞与迁移矩阵门禁。
 - OSS core、managed/on-prem 商业层边界已有初步方案。
+- 原 `commercialization-and-toolkit-productization` 的产品承诺、Toolkit contract、交付、采用、商业验证与生态决策已合并到 `validation-plan.md`，旧 topic 不再单独恢复。
 
 ## 完成标准
 
@@ -36,6 +37,7 @@
 - 首个版本号、发布日期和 tag 已确定并执行。
 - 至少 3 个外部团队真实试用，至少 1 个进入日常 preflight，或明确记录未达到此门槛。
 - 形成可量化的 adoption/成本/付费结论，并据此记录继续或停止决策。
+- 明确首批核心用户、公开承诺、交付模型以及开源核心与商业层边界。
 - 完成后压缩结果并归档；在外部参与尚未发生前保持活跃，不伪装为完成。
 
 ## 未决问题
