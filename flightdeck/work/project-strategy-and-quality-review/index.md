@@ -2,13 +2,13 @@
 
 ## 状态
 
-初评已完成并获用户授权执行，控制计划见 `plan.md`。Slice 0–4 已完成；当前进入 Slice 5：开源发布面（许可证选择除外）。
+初评已完成并获用户授权执行，控制计划见 `plan.md`。Slice 0–5 的技术工作已完成；LICENSE 仍等待用户授权选择。当前进入 Slice 6：采用与商业验证准备。
 
 ## 下一步
 
-1. 补齐 SECURITY、CONTRIBUTING、CHANGELOG、CI 和 release workflow。
-2. 整理 README 的安装、五分钟示例、支持范围和 WIP 表述。
-3. LICENSE 必须由用户确认许可证后单独落地，不替用户作授权决定。
+1. 定义三类设计伙伴、验证问题、试用输入和成功指标。
+2. 明确 OSS core 与 managed/on-prem 商业层边界。
+3. 准备 aerender/nexrender 前置 preflight 集成方案。
 
 ## 立即读取
 
@@ -23,6 +23,7 @@
 - `../../knowledge/workflow/delivery-contract.md` — 判断哪些能力可以公开宣称可用时
 - `../../knowledge/security/untrusted-aep-input.md` — 审查 parser/server 的不可信输入边界时
 - `../../knowledge/shape/shape-layer-transform-runtime-sync.md` — 修改 recipe/migration 的 ShapeLayer transform 时
+- `../../knowledge/workflow/gofmt-baseline-scope.md` — 修改 CI 格式门禁或计划全仓 gofmt 时
 - `../fx-technique-internalization/index.md` — 评价技法学习线是否值得继续时
 - `../arbitrary-aep-version-migration/index.md` — 评价版本迁移方向时
 
@@ -48,10 +49,12 @@
 - Slice 3 验证：外部测试 package 通过公开 import path 完成 inspect/profile/roundtrip；全仓测试、vet、三平台构建通过。
 - Slice 4：新增 `cmd/aep` 与 `internal/toolkitcli`，统一 inspect/profile/diff/migrate/capabilities、JSON envelope 和退出码；旧命令保留兼容。
 - Slice 4 验证：真实 fixture CLI smoke、统一 runner tests、全仓测试、vet、capindex 和三平台构建全部通过。
+- Slice 5：新增 SECURITY、CONTRIBUTING、CHANGELOG、CI 和 tag release workflow；README 补充 pre-release、安装和许可证状态；跨平台 gate 覆盖根 SDK/统一 CLI。
+- Slice 5 验证：CI 等价命令全部通过，包括测试、vet、capindex、三平台构建、10 秒 fuzz（约 184 万输入）和 race tests。
 
 当前：
 
-- Slice 5：开源发布面（LICENSE 等待用户确认）。
+- Slice 6：采用与商业验证准备。
 
 ## 未决问题
 
@@ -59,3 +62,4 @@
 - 是否接受“Headless AEP Toolkit”作为核心承诺，而不是继续以技法学习/视觉复刻为主线？
 - 哪些实验性研究应继续，哪些应冻结为案例或证据？
 - 开源前采用哪种许可证，以及哪些企业能力保留为商业层？
+- LICENSE 需要用户在 Apache-2.0、MIT 或其他策略之间作最终授权决定；未确认前不创建。

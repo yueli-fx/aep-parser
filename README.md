@@ -2,8 +2,9 @@
 
 从头实现的 Adobe After Effects `.aep` 项目文件解析器 + length-preserving 写回库，纯 Go，无需 AE 运行实例。
 
-> ⚠️ **开发中（WIP）** —— 功能仍在扩展，详细能力清单待项目成熟后再补。
-> 当前 API 以自动生成的 [docs/](docs/) 为准。
+> **首次发布前（pre-release）** —— 核心解析、profile、diff、迁移和生成能力已有广泛测试，但公开 interface 和发布策略仍可能调整。当前详细能力以自动生成的 [docs/](docs/) 为准。
+
+当前尚未选择开源许可证；在 `LICENSE` 落地前，本仓库不构成公开复制、修改或再分发授权。
 
 **兼容下限：After Effects 2020（CC 17.0）**。新版本写的 .aep 也能读；AE 24+ 才引入的字段本库不主动解码，对调用方返回 nil 而非报错。
 
@@ -15,6 +16,10 @@
 ## Go SDK
 
 外部 Go 项目可以直接导入仓库根 package，完成无 AE 的 inspect、profile 和 round-trip：
+
+```powershell
+go get github.com/yueli-fx/aep-parser
+```
 
 ```go
 package main
@@ -39,6 +44,12 @@ func main() {
 ## 统一 CLI
 
 面向用户的新入口是 `cmd/aep`，所有结果和错误都使用稳定 JSON envelope：
+
+仓库发布并打 tag 后可安装：
+
+```powershell
+go install github.com/yueli-fx/aep-parser/cmd/aep@latest
+```
 
 ```powershell
 go run ./cmd/aep inspect -in project.aep

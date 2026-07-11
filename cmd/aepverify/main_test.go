@@ -33,8 +33,10 @@ func TestRunCrossPlatformUsesGoBuildTargets(t *testing.T) {
 	if !slices.Contains(runner.commands[2].Env, "GOOS=linux") {
 		t.Fatalf("third env = %#v", runner.commands[2].Env)
 	}
-	if !slices.Contains(runner.commands[0].Args, "./cmd/aepserver") || !slices.Contains(runner.commands[0].Args, "./internal/server") {
-		t.Fatalf("cross-platform packages missing server entries: %#v", runner.commands[0].Args)
+	for _, want := range []string{".", "./cmd/aep", "./internal/toolkitcli", "./cmd/aepserver", "./internal/server"} {
+		if !slices.Contains(runner.commands[0].Args, want) {
+			t.Fatalf("cross-platform packages missing %s: %#v", want, runner.commands[0].Args)
+		}
 	}
 }
 

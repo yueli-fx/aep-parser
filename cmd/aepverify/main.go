@@ -114,6 +114,8 @@ func crossPlatformTargets() []buildTarget {
 
 func crossPlatformPackages() []string {
 	return []string{
+		".",
+		"./cmd/aep",
 		"./cmd/aepserver",
 		"./cmd/aepdiff",
 		"./cmd/aeprecipe",
@@ -130,6 +132,7 @@ func crossPlatformPackages() []string {
 		"./internal/recipe",
 		"./internal/server",
 		"./internal/technique",
+		"./internal/toolkitcli",
 	}
 }
 
