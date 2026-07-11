@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"path/filepath"
 	"strings"
 
 	"github.com/yueli-fx/aep-parser/internal/aep"
@@ -13,13 +14,16 @@ import (
 )
 
 const (
-	SchemaVersion       = 1
-	defaultMaxBodyBytes = 256 << 20
+	SchemaVersion        = 1
+	defaultMaxBodyBytes  = 256 << 20
+	defaultMaxConcurrent = 32
 )
 
 type Options struct {
-	MaxBodyBytes   int64
-	AllowPathInput bool
+	MaxBodyBytes     int64
+	MaxConcurrent    int
+	AllowPathInput   bool
+	AllowedPathRoots []string
 }
 
 type CapabilityReport struct {
@@ -65,13 +69,16 @@ func NewHandler(opts Options) http.Handler {
 	if opts.MaxBodyBytes <= 0 {
 		opts.MaxBodyBytes = defaultMaxBodyBytes
 	}
+	if opts.MaxConcurrent <= 0 {
+		opts.MaxConcurrent = defaultMaxConcurrent
+	}
 	mux := http.NewServeMux()
 	h := handler{opts: opts}
 	mux.HandleFunc("/health", h.health)
 	mux.HandleFunc("/capabilities", h.capabilities)
 	mux.HandleFunc("/parse", h.parse)
 	mux.HandleFunc("/profile", h.profile)
-	return mux
+	return recoverHTTP(limitConcurrent(mux, opts.MaxConcurrent))
 }
 
 func (h handler) health(w http.ResponseWriter, r *http.Request) {
@@ -151,11 +158,15 @@ func (h handler) readProject(r *http.Request) (*aep.Project, Source, error) {
 		if input.Path == "" {
 			return nil, Source{}, fmt.Errorf("path is required")
 		}
-		project, err := aep.Open(input.Path)
+		path, err := allowedPath(input.Path, h.opts.AllowedPathRoots)
 		if err != nil {
-			return nil, Source{}, fmt.Errorf("open %q: %w", input.Path, err)
+			return nil, Source{}, err
 		}
-		return project, Source{Path: input.Path, Mode: "path"}, nil
+		project, err := aep.Open(path)
+		if err != nil {
+			return nil, Source{}, fmt.Errorf("open %q: %w", path, err)
+		}
+		return project, Source{Path: path, Mode: "path"}, nil
 	}
 	data, err := io.ReadAll(io.LimitReader(r.Body, h.opts.MaxBodyBytes+1))
 	if err != nil {
@@ -172,6 +183,58 @@ func (h handler) readProject(r *http.Request) (*aep.Project, Source, error) {
 		return nil, Source{}, fmt.Errorf("parse upload: %w", err)
 	}
 	return project, Source{Path: r.Header.Get("X-AEP-Path"), Mode: "upload"}, nil
+}
+
+func allowedPath(path string, roots []string) (string, error) {
+	if len(roots) == 0 {
+		return "", fmt.Errorf("path input requires at least one allowed root")
+	}
+	resolvedPath, err := filepath.Abs(path)
+	if err != nil {
+		return "", fmt.Errorf("resolve path: %w", err)
+	}
+	resolvedPath, err = filepath.EvalSymlinks(resolvedPath)
+	if err != nil {
+		return "", fmt.Errorf("resolve path symlinks: %w", err)
+	}
+	for _, root := range roots {
+		resolvedRoot, err := filepath.Abs(root)
+		if err != nil {
+			continue
+		}
+		if evaluated, err := filepath.EvalSymlinks(resolvedRoot); err == nil {
+			resolvedRoot = evaluated
+		}
+		rel, err := filepath.Rel(resolvedRoot, resolvedPath)
+		if err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)) && !filepath.IsAbs(rel) {
+			return resolvedPath, nil
+		}
+	}
+	return "", fmt.Errorf("path %q is outside allowed roots", path)
+}
+
+func recoverHTTP(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if recover() != nil {
+				writeError(w, http.StatusInternalServerError, fmt.Errorf("internal server error"))
+			}
+		}()
+		next.ServeHTTP(w, r)
+	})
+}
+
+func limitConcurrent(next http.Handler, max int) http.Handler {
+	semaphore := make(chan struct{}, max)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		select {
+		case semaphore <- struct{}{}:
+			defer func() { <-semaphore }()
+			next.ServeHTTP(w, r)
+		default:
+			writeError(w, http.StatusServiceUnavailable, fmt.Errorf("server is busy"))
+		}
+	})
 }
 
 func summarizeProject(project *aep.Project) ProjectSummary {

@@ -2,13 +2,13 @@
 
 ## 状态
 
-初评已完成并获用户授权执行，控制计划见 `plan.md`。Slice 0–1 已完成；当前进入 Slice 2：服务安全与运维基线。
+初评已完成并获用户授权执行，控制计划见 `plan.md`。Slice 0–2 已完成；当前进入 Slice 3：公开 Go interface。
 
 ## 下一步
 
-1. 为 HTTP server 增加 timeout、panic recovery 和收紧的 parser limits。
-2. 为 path input 增加 allowed roots，并覆盖目录逃逸测试。
-3. 完成 Slice 2 全量门禁后设计公开 Go interface。
+1. 设计模块外可导入的最小 `aep` package，避免机械导出内部 facade。
+2. 以 inspect/profile/roundtrip 为第一版 interface 和外部测试面。
+3. 完成 Slice 3 全量门禁后合并单一 CLI 产品入口。
 
 ## 立即读取
 
@@ -42,10 +42,12 @@
 - Slice 0 验证：`go test ./...`、`go vet ./...`、`go run ./cmd/capindex -check`、`go run ./cmd/aepverify cross-platform` 全部通过。
 - Slice 1：RIFX parse seam 增加输入、chunk、累计分配、节点和深度预算，增加 typed `LimitError`/`FormatError`、父子边界校验、负 offset 防御和 bounded file read。
 - Slice 1 验证：全仓测试、vet、三平台构建通过；5 秒 fuzz 执行约 103 万次输入无 panic。
+- Slice 2：HTTP server 增加默认 32 并发、读写/idle timeout、panic recovery；path input 强制 allowed roots，并拒绝目录与 symlink 逃逸。
+- Slice 2 验证：`go test ./...`、`go vet ./...` 和三平台构建全部通过。
 
 当前：
 
-- Slice 2：服务安全与运维基线。
+- Slice 3：公开 Go interface。
 
 ## 未决问题
 

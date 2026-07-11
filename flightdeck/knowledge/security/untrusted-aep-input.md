@@ -14,10 +14,10 @@ RECHECK WHEN: parser limits、server isolation 或 path-input 模型发生变化
 - `Chunk.U8/U16/U32` 对负 offset 和上界统一返回错误。
 - `FuzzParseNeverPanics` 是畸形输入的持续 gate。
 
-公开服务还必须完成：
+`aepserver` 已提供服务层防护：
 
-1. 为公网场景传入比 parser 默认值更小的 Limits，而不是只依赖 HTTP body 大小。
-2. 设置请求 timeout、并发/内存限制和 panic recovery；更高风险部署使用独立 worker 进程。
-3. path input 若启用，必须限制在配置的 storage roots 内，不能接受任意宿主机路径。
+1. 上传 body 上限与 parser 默认预算共同生效；畸形 chunk 不能借声明尺寸越过实际输入。
+2. CLI 配置 read-header/read/write/idle timeout，handler 有并发上限和 panic recovery。
+3. path input 默认关闭；启用时 CLI 强制 `-allowed-path-roots`，解析 real path 后拒绝目录和 symlink 逃逸。
 
-在服务层条件满足前，`aepserver` 仍只定义为受信环境/本地实验入口。
+更高风险或多租户部署仍应使用独立 worker 进程、操作系统级资源限制，并按业务文件规模收紧 HTTP body 和 parser Limits；进程内 recovery 不是内存耗尽的隔离替代品。

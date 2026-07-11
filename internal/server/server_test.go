@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/yueli-fx/aep-parser/internal/aep"
 )
@@ -61,7 +62,7 @@ func TestHandlerCapabilitiesReportsPureServiceAndUnavailableAE(t *testing.T) {
 
 func TestHandlerParseAcceptsJSONPath(t *testing.T) {
 	path := writeMinimalAEP(t)
-	handler := NewHandler(Options{AllowPathInput: true})
+	handler := NewHandler(Options{AllowPathInput: true, AllowedPathRoots: []string{filepath.Dir(path)}})
 	body := bytes.NewBufferString(`{"path":` + strconvQuote(path) + `}`)
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodPost, "/parse", body)
@@ -83,6 +84,79 @@ func TestHandlerParseAcceptsJSONPath(t *testing.T) {
 	if got.Project == nil {
 		t.Fatal("project JSON missing")
 	}
+}
+
+func TestHandlerRejectsPathOutsideAllowedRoots(t *testing.T) {
+	path := writeMinimalAEP(t)
+	handler := NewHandler(Options{AllowPathInput: true, AllowedPathRoots: []string{t.TempDir()}})
+	body := bytes.NewBufferString(`{"path":` + strconvQuote(path) + `}`)
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/parse", body)
+	req.Header.Set("Content-Type", "application/json")
+
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest || !bytes.Contains(rec.Body.Bytes(), []byte("outside allowed roots")) {
+		t.Fatalf("status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestHandlerRejectsSymlinkEscapingAllowedRoot(t *testing.T) {
+	outside := writeMinimalAEP(t)
+	root := t.TempDir()
+	link := filepath.Join(root, "escape.aep")
+	if err := os.Symlink(outside, link); err != nil {
+		t.Skipf("symlink unavailable: %v", err)
+	}
+	handler := NewHandler(Options{AllowPathInput: true, AllowedPathRoots: []string{root}})
+	body := bytes.NewBufferString(`{"path":` + strconvQuote(link) + `}`)
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/parse", body)
+	req.Header.Set("Content-Type", "application/json")
+
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest || !bytes.Contains(rec.Body.Bytes(), []byte("outside allowed roots")) {
+		t.Fatalf("status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestRecoverHTTPContainsPanics(t *testing.T) {
+	handler := recoverHTTP(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+		panic("sensitive detail")
+	}))
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/", nil))
+	if rec.Code != http.StatusInternalServerError || bytes.Contains(rec.Body.Bytes(), []byte("sensitive detail")) {
+		t.Fatalf("status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestLimitConcurrentRejectsExcessRequests(t *testing.T) {
+	entered := make(chan struct{})
+	release := make(chan struct{})
+	handler := limitConcurrent(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		close(entered)
+		<-release
+		w.WriteHeader(http.StatusNoContent)
+	}), 1)
+	firstDone := make(chan struct{})
+	go func() {
+		defer close(firstDone)
+		handler.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodGet, "/", nil))
+	}()
+	select {
+	case <-entered:
+	case <-time.After(time.Second):
+		t.Fatal("first request did not enter handler")
+	}
+	second := httptest.NewRecorder()
+	handler.ServeHTTP(second, httptest.NewRequest(http.MethodGet, "/", nil))
+	if second.Code != http.StatusServiceUnavailable {
+		t.Fatalf("second status = %d, want 503", second.Code)
+	}
+	close(release)
+	<-firstDone
 }
 
 func TestHandlerRejectsJSONPathByDefault(t *testing.T) {
