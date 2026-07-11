@@ -15,16 +15,32 @@ import (
 
 // Open parses an .aep file by path and returns the Project.
 //
-// The whole file is read into memory first and parsed from a bytes.Reader:
+// The file is read into bounded memory first and parsed from a bytes.Reader:
 // rifx.readChunk does many small Read+Seek calls per chunk, so handing it the
 // raw *os.File issues thousands of syscalls (≈97% of parse time on an 8 MB
 // project). An in-memory reader turns those into pointer moves — ~100× faster.
 func Open(path string) (*Project, error) {
-	data, err := os.ReadFile(path)
+	data, err := readFileBounded(path, rifx.DefaultLimits.MaxInputBytes)
 	if err != nil {
 		return nil, fmt.Errorf("aep: open %q: %w", path, err)
 	}
 	return FromReader(bytes.NewReader(data))
+}
+
+func readFileBounded(path string, maxBytes uint64) ([]byte, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	data, err := io.ReadAll(io.LimitReader(file, int64(maxBytes)+1))
+	if err != nil {
+		return nil, err
+	}
+	if uint64(len(data)) > maxBytes {
+		return nil, &rifx.LimitError{Resource: "input bytes", Limit: maxBytes, Actual: uint64(len(data))}
+	}
+	return data, nil
 }
 
 // FromReader parses an .aep file from an io.ReadSeeker.

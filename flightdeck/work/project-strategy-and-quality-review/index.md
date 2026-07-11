@@ -2,13 +2,13 @@
 
 ## 状态
 
-初评已完成并获用户授权执行，控制计划见 `plan.md`。Slice 0 已完成；当前进入 Slice 1：RIFX 安全解析 module。
+初评已完成并获用户授权执行，控制计划见 `plan.md`。Slice 0–1 已完成；当前进入 Slice 2：服务安全与运维基线。
 
 ## 下一步
 
-1. 为 `internal/rifx` 设计统一解析预算和 typed errors。
-2. 增加 malformed input 单元测试与 fuzz target，再实现防御。
-3. 完成 Slice 1 全量门禁后进入服务安全切片。
+1. 为 HTTP server 增加 timeout、panic recovery 和收紧的 parser limits。
+2. 为 path input 增加 allowed roots，并覆盖目录逃逸测试。
+3. 完成 Slice 2 全量门禁后设计公开 Go interface。
 
 ## 立即读取
 
@@ -40,10 +40,12 @@
 - 完成外部生态对比与初步产品/变现路线，见 `assessment.md`。
 - Slice 0：修复 shape migration 漏写 runtime transform；原有 recipe transform 在途改动由回归变为完整闭环。
 - Slice 0 验证：`go test ./...`、`go vet ./...`、`go run ./cmd/capindex -check`、`go run ./cmd/aepverify cross-platform` 全部通过。
+- Slice 1：RIFX parse seam 增加输入、chunk、累计分配、节点和深度预算，增加 typed `LimitError`/`FormatError`、父子边界校验、负 offset 防御和 bounded file read。
+- Slice 1 验证：全仓测试、vet、三平台构建通过；5 秒 fuzz 执行约 103 万次输入无 panic。
 
 当前：
 
-- Slice 1：RIFX 安全解析 module。
+- Slice 2：服务安全与运维基线。
 
 ## 未决问题
 

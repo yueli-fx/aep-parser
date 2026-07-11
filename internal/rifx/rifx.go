@@ -205,7 +205,7 @@ func (c *Chunk) FindAllList(ft ChunkID) []*Chunk {
 
 // U8 reads one byte from Data at offset.
 func (c *Chunk) U8(offset int) (byte, error) {
-	if offset >= len(c.Data) {
+	if offset < 0 || offset >= len(c.Data) {
 		return 0, fmt.Errorf("rifx: U8 offset %d OOB (len=%d)", offset, len(c.Data))
 	}
 	return c.Data[offset], nil
@@ -213,7 +213,7 @@ func (c *Chunk) U8(offset int) (byte, error) {
 
 // U16 reads a big-endian uint16 from Data at offset.
 func (c *Chunk) U16(offset int) (uint16, error) {
-	if offset+2 > len(c.Data) {
+	if offset < 0 || offset > len(c.Data)-2 {
 		return 0, fmt.Errorf("rifx: U16 offset %d OOB (len=%d)", offset, len(c.Data))
 	}
 	return binary.BigEndian.Uint16(c.Data[offset:]), nil
@@ -221,7 +221,7 @@ func (c *Chunk) U16(offset int) (uint16, error) {
 
 // U32 reads a big-endian uint32 from Data at offset.
 func (c *Chunk) U32(offset int) (uint32, error) {
-	if offset+4 > len(c.Data) {
+	if offset < 0 || offset > len(c.Data)-4 {
 		return 0, fmt.Errorf("rifx: U32 offset %d OOB (len=%d)", offset, len(c.Data))
 	}
 	return binary.BigEndian.Uint32(c.Data[offset:]), nil
@@ -322,7 +322,16 @@ func (c *Chunk) Write(w io.Writer) error {
 // that Write can re-emit them — real .aep files carry opaque tail data
 // there that AE expects to find.
 func Parse(r io.ReadSeeker) (*Chunk, error) {
-	root, err := readChunk(r)
+	return ParseWithLimits(r, DefaultLimits)
+}
+
+// ParseWithLimits reads a RIFX file while enforcing explicit resource limits.
+func ParseWithLimits(r io.ReadSeeker, limits Limits) (*Chunk, error) {
+	p, err := newParser(r, limits)
+	if err != nil {
+		return nil, err
+	}
+	root, err := p.readChunk(0, p.inputEnd)
 	if err != nil {
 		return nil, fmt.Errorf("rifx: read root: %w", err)
 	}
@@ -345,76 +354,13 @@ func Parse(r io.ReadSeeker) (*Chunk, error) {
 // ReadChunk parses a single chunk (header + body) from r, recursing into
 // LIST containers. Unlike Parse, the input is not required to be a RIFX
 // root — useful for embedded resource blobs that store a single LIST chunk.
-func ReadChunk(r io.ReadSeeker) (*Chunk, error) { return readChunk(r) }
+func ReadChunk(r io.ReadSeeker) (*Chunk, error) { return ReadChunkWithLimits(r, DefaultLimits) }
 
-func readChunk(r io.ReadSeeker) (*Chunk, error) {
-	var id ChunkID
-	if _, err := io.ReadFull(r, id[:]); err != nil {
-		return nil, fmt.Errorf("read chunk ID: %w", err)
+// ReadChunkWithLimits parses one chunk while enforcing explicit resource limits.
+func ReadChunkWithLimits(r io.ReadSeeker, limits Limits) (*Chunk, error) {
+	p, err := newParser(r, limits)
+	if err != nil {
+		return nil, err
 	}
-
-	var size uint32
-	if err := binary.Read(r, binary.BigEndian, &size); err != nil {
-		return nil, fmt.Errorf("chunk %q: read size: %w", id, err)
-	}
-
-	chunk := &Chunk{ID: id, Size: size}
-
-	if id == IDList || id == IDRifx {
-		if _, err := io.ReadFull(r, chunk.FormType[:]); err != nil {
-			return nil, fmt.Errorf("chunk %q: read form type: %w", id, err)
-		}
-		// Opaque LIST types (e.g. text-source btds/btdk) hold non-chunk
-		// binary — read entire payload as Data, no recursion.
-		if opaqueListTypes[chunk.FormType] {
-			data := make([]byte, int(size)-4)
-			if _, err := io.ReadFull(r, data); err != nil {
-				return nil, fmt.Errorf("chunk %q/%q: read opaque payload (size=%d): %w", id, chunk.FormType, size, err)
-			}
-			chunk.Data = data
-			if size%2 != 0 {
-				if _, err := r.Seek(1, io.SeekCurrent); err != nil {
-					return nil, err
-				}
-			}
-			return chunk, nil
-		}
-		start, err := r.Seek(0, io.SeekCurrent)
-		if err != nil {
-			return nil, err
-		}
-		end := start + int64(size) - 4
-		for {
-			pos, err := r.Seek(0, io.SeekCurrent)
-			if err != nil {
-				return nil, err
-			}
-			if pos >= end {
-				break
-			}
-			child, err := readChunk(r)
-			if err != nil {
-				if err == io.EOF || err == io.ErrUnexpectedEOF {
-					break
-				}
-				return nil, fmt.Errorf("child of %q/%q: %w", id, chunk.FormType, err)
-			}
-			chunk.Children = append(chunk.Children, child)
-		}
-		if _, err := r.Seek(end, io.SeekStart); err != nil {
-			return nil, err
-		}
-	} else {
-		data := make([]byte, size)
-		if _, err := io.ReadFull(r, data); err != nil {
-			return nil, fmt.Errorf("chunk %q: read data (size=%d): %w", id, size, err)
-		}
-		chunk.Data = data
-		if size%2 != 0 {
-			if _, err := r.Seek(1, io.SeekCurrent); err != nil {
-				return nil, err
-			}
-		}
-	}
-	return chunk, nil
+	return p.readChunk(0, p.inputEnd)
 }
