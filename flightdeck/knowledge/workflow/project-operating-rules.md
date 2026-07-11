@@ -53,6 +53,13 @@ for the current package map.
 - Structural operations must maintain atomic invariants: warnings-as-failure,
   rollback to the pre-call state on failure, and AE gate coverage before being
   claimed as shipped.
+- Mutations that combine project-owned objects must verify identity ownership
+  before touching scene or chunk state. Matching numeric IDs is insufficient:
+  a Composition, Layer, Effect, Mask, queue item, or property from another
+  Project/owner can carry the same ID while referring to unrelated chunks.
+- Validate every fallible back-reference, table header, count, stride, and
+  target membership before the commit point. A structural method must not
+  discover malformed backing data after it has started appending or splicing.
 - Unknown or not-yet-modeled chunks are opaque preservation data. Parser paths
   must round-trip them byte-identically unless a deliberate mutation owns the
   bytes.

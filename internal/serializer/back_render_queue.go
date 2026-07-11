@@ -15,6 +15,7 @@ type renderQueueBackrefs struct {
 	// LRdr-level settings list (lhd3 + ldat of 2246B blocks) and the Rout
 	// per-item flags chunk through it.
 	lrdr *rifx.Chunk
+	proj *Project
 }
 
 // renderQueueItemBackrefs holds the RIFX chunk references that power the

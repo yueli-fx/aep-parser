@@ -25,7 +25,7 @@ func parseRenderQueue(root *rifx.Chunk, proj *Project) {
 		return
 	}
 	rq := &RenderQueue{}
-	scene.SetRenderQueueBack(rq, &renderQueueBackrefs{lrdr: lrdr})
+	scene.SetRenderQueueBack(rq, &renderQueueBackrefs{lrdr: lrdr, proj: proj})
 	proj.RenderQueue = rq
 
 	settingsBlocks := renderSettingsBlocks(lrdr)

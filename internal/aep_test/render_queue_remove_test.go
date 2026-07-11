@@ -2,9 +2,11 @@ package aep_test
 
 import (
 	"bytes"
+	"encoding/binary"
 	"testing"
 
 	"github.com/yueli-fx/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
 )
 
 // TestRenderQueueRemoveItem removes one of two render queue items and confirms
@@ -133,6 +135,81 @@ func TestRenderQueueAddItem_Refuse(t *testing.T) {
 	}
 	if _, err := aep.AddItem(proj.RenderQueue, nil); err == nil {
 		t.Error("AddItem(nil) should refuse")
+	}
+
+	other, err := aep.Open("../../test_data/fixtures/re_rq_add_before.aep")
+	if err != nil {
+		t.Fatalf("open second project: %v", err)
+	}
+	foreign := compByName(other, "RQB")
+	before := proj.RenderQueue.NumItems()
+	if _, err := aep.AddItem(proj.RenderQueue, foreign); err == nil {
+		t.Error("AddItem should refuse a composition from another project")
+	}
+	if got := proj.RenderQueue.NumItems(); got != before {
+		t.Fatalf("failed cross-project AddItem changed queue size: got %d, want %d", got, before)
+	}
+}
+
+func TestRenderQueueAddItem_RefusesShortSettingsHeader(t *testing.T) {
+	root := parseAEP(t, "../../test_data/fixtures/re_rq_add_before.aep")
+	lrdr := findShipListByForm(root, rifx.IDLRdr)
+	if lrdr == nil {
+		t.Fatal("fixture: LRdr missing")
+	}
+	settings := lrdr.FindFirstList(rifx.IDkfl)
+	if settings == nil {
+		t.Fatal("fixture: render settings list missing")
+	}
+	lhd3 := settings.FindFirst(rifx.IDLhd3)
+	if lhd3 == nil {
+		t.Fatal("fixture: render settings lhd3 missing")
+	}
+	lhd3.Data = append([]byte(nil), lhd3.Data[:8]...)
+
+	var data bytes.Buffer
+	if err := root.Write(&data); err != nil {
+		t.Fatalf("serialize corrupt fixture: %v", err)
+	}
+	proj, err := aep.FromReader(bytes.NewReader(data.Bytes()))
+	if err != nil {
+		t.Fatalf("parse corrupt fixture: %v", err)
+	}
+	comp := compByName(proj, "RQB")
+	before := proj.RenderQueue.NumItems()
+	if _, err := aep.AddItem(proj.RenderQueue, comp); err == nil {
+		t.Fatal("AddItem should refuse a short render settings header")
+	}
+	if got := proj.RenderQueue.NumItems(); got != before {
+		t.Fatalf("failed AddItem changed queue size: got %d, want %d", got, before)
+	}
+}
+
+func TestRenderQueueMutationsRefuseInconsistentSettingsCounts(t *testing.T) {
+	root := parseAEP(t, "../../test_data/fixtures/re_rq_add_before.aep")
+	lrdr := findShipListByForm(root, rifx.IDLRdr)
+	settings := lrdr.FindFirstList(rifx.IDkfl)
+	lhd3 := settings.FindFirst(rifx.IDLhd3)
+	binary.BigEndian.PutUint32(lhd3.Data[0x08:0x0C], 0)
+	binary.BigEndian.PutUint32(lhd3.Data[0x0C:0x10], 0)
+
+	var data bytes.Buffer
+	if err := root.Write(&data); err != nil {
+		t.Fatalf("serialize corrupt fixture: %v", err)
+	}
+	proj, err := aep.FromReader(bytes.NewReader(data.Bytes()))
+	if err != nil {
+		t.Fatalf("parse corrupt fixture: %v", err)
+	}
+	before := proj.RenderQueue.NumItems()
+	if _, err := aep.AddItem(proj.RenderQueue, compByName(proj, "RQB")); err == nil {
+		t.Fatal("AddItem should refuse inconsistent settings counts")
+	}
+	if err := aep.RemoveItem(proj.RenderQueue, 0); err == nil {
+		t.Fatal("RemoveItem should refuse inconsistent settings counts")
+	}
+	if got := proj.RenderQueue.NumItems(); got != before {
+		t.Fatalf("failed mutations changed queue size: got %d, want %d", got, before)
 	}
 }
 

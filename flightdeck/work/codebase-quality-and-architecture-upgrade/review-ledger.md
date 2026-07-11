@@ -20,6 +20,8 @@
 | ID | 严重度 | Module / seam | 状态 | 发现与影响 | 证据 | 关闭条件 |
 |---|---|---|---|---|---|---|
 | CQ-001 | P0 | serializer fixed-record table seam | verified | keyframe 等 table 使用 `count*bpk` 检查，可整数溢出；`bpk` 小于固定读取尺寸时会通过总长度检查并 slice panic。公开 `FromReader` 可由结构合法的畸形 AEP 触发。 | `TestParseEmitsWarningOnInconsistentKeyframeStream/bytes_per_keyframe_too_small` 修复前稳定 panic；overflow case、目标包测试和 10 秒 serializer fuzz 修复后通过。 | keyframe、marker、mask/shape path 和重解析共用溢出安全、含最小记录尺寸的检查；结构化 parser fuzz 持续运行。 |
+| CQ-002 | P0 | RenderQueue mutation seam | verified | `AddItem` 只检查 lhd3 存在，随后直接切 `Data[0x08:]`；结构合法但短 header 可从公开 mutation 触发 panic。header count/stride 与 scene item 数不一致时 Add/Remove 还会写出损坏 table。 | `TestRenderQueueAddItem_RefusesShortSettingsHeader`、`TestRenderQueueMutationsRefuseInconsistentSettingsCounts`。 | Add/Remove 在 commit 前统一验证双 count、固定 stride、payload 长度和 scene item 数，失败无 observable mutation。 |
+| CQ-003 | P1 | RenderQueue ownership interface | verified | `AddItem` 接受属于另一 Project 的 Composition，只写入碰巧相同命名空间的数值 ID，可能生成错误或悬空 comp reference。 | `TestRenderQueueAddItem_Refuse` 增加双 Project 用例并确认 queue size 不变。 | RenderQueue backref 记录 owner Project，AddItem 使用对象身份拒绝跨 Project composition。 |
 
 ## Review 维度
 

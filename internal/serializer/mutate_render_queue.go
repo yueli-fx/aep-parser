@@ -56,6 +56,9 @@ func RemoveItem(rq *RenderQueue, index int) error {
 	if ldat == nil || lhd3 == nil {
 		return fmt.Errorf("RemoveItem: settings ldat/lhd3 missing")
 	}
+	if err := validateRenderQueueSettingsTable(len(rq.Items), lhd3, ldat); err != nil {
+		return fmt.Errorf("RemoveItem: %w", err)
+	}
 	off := index * codec.RenderSettingsItemSize
 	if off+codec.RenderSettingsItemSize > len(ldat.Data) {
 		return fmt.Errorf("RemoveItem: settings ldat too short for item %d (len=%d)", index, len(ldat.Data))
@@ -147,6 +150,9 @@ func AddItem(rq *RenderQueue, comp *Composition) (*RenderQueueItem, error) {
 	if rqb == nil || rqb.lrdr == nil {
 		return nil, fmt.Errorf("AddItem: render queue built outside parser (no LRdr back-ref)")
 	}
+	if rqb.proj == nil || scene.CompositionProj(comp) != rqb.proj {
+		return nil, fmt.Errorf("AddItem: comp belongs to a different project")
+	}
 	if len(rq.Items) == 0 {
 		return nil, fmt.Errorf("AddItem: empty queue has no template item to clone")
 	}
@@ -180,6 +186,9 @@ func AddItem(rq *RenderQueue, comp *Composition) (*RenderQueueItem, error) {
 	lhd3 := settingsList.FindFirst(rifx.IDLhd3)
 	if ldat == nil || lhd3 == nil {
 		return nil, fmt.Errorf("AddItem: settings ldat/lhd3 missing")
+	}
+	if err := validateRenderQueueSettingsTable(len(rq.Items), lhd3, ldat); err != nil {
+		return nil, fmt.Errorf("AddItem: %w", err)
 	}
 	n := len(rq.Items)
 	tOff := (n - 1) * codec.RenderSettingsItemSize
@@ -229,4 +238,23 @@ func AddItem(rq *RenderQueue, comp *Composition) (*RenderQueueItem, error) {
 		}
 	}
 	return newItem, nil
+}
+
+func validateRenderQueueSettingsTable(itemCount int, lhd3, ldat *rifx.Chunk) error {
+	if len(lhd3.Data) < 0x14 {
+		return fmt.Errorf("settings lhd3 too short (%d bytes, need >=20)", len(lhd3.Data))
+	}
+	countA := binary.BigEndian.Uint32(lhd3.Data[0x08:0x0C])
+	countB := binary.BigEndian.Uint32(lhd3.Data[0x0C:0x10])
+	recordSize := binary.BigEndian.Uint32(lhd3.Data[0x10:0x14])
+	if uint64(itemCount) != uint64(countA) || countA != countB {
+		return fmt.Errorf("settings counts inconsistent (items=%d, header=%d/%d)", itemCount, countA, countB)
+	}
+	if recordSize != codec.RenderSettingsItemSize {
+		return fmt.Errorf("settings record size is %d, want %d", recordSize, codec.RenderSettingsItemSize)
+	}
+	if _, _, ok := checkedTableLayout(countA, recordSize, len(ldat.Data), codec.RenderSettingsItemSize); !ok {
+		return fmt.Errorf("settings payload inconsistent (count=%d, record_size=%d, ldat=%d bytes)", countA, recordSize, len(ldat.Data))
+	}
+	return nil
 }
