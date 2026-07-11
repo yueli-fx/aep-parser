@@ -2,13 +2,13 @@
 
 ## 状态
 
-初评已完成并获用户授权执行，控制计划见 `plan.md`。Slice 0–2 已完成；当前进入 Slice 3：公开 Go interface。
+初评已完成并获用户授权执行，控制计划见 `plan.md`。Slice 0–3 已完成；当前进入 Slice 4：单一 CLI 产品面。
 
 ## 下一步
 
-1. 设计模块外可导入的最小 `aep` package，避免机械导出内部 facade。
-2. 以 inspect/profile/roundtrip 为第一版 interface 和外部测试面。
-3. 完成 Slice 3 全量门禁后合并单一 CLI 产品入口。
+1. 新增统一 `cmd/aep`，先收口 `inspect`、`profile`、`diff`、`migrate`、`capabilities`。
+2. 复用公开 SDK 与现有深层 module，统一 JSON envelope、错误和退出码。
+3. 保留原命令兼容，不在本切片删除研究/治理工具。
 
 ## 立即读取
 
@@ -44,10 +44,12 @@
 - Slice 1 验证：全仓测试、vet、三平台构建通过；5 秒 fuzz 执行约 103 万次输入无 panic。
 - Slice 2：HTTP server 增加默认 32 并发、读写/idle timeout、panic recovery；path input 强制 allowed roots，并拒绝目录与 symlink 逃逸。
 - Slice 2 验证：`go test ./...`、`go vet ./...` 和三平台构建全部通过。
+- Slice 3：根 package 新增可被模块外导入的 `Document` interface，提供 `Open/Parse`、`Inspect`、`ProfileJSON` 和 `Write`；内部 scene/serializer/backref 不外泄。
+- Slice 3 验证：外部测试 package 通过公开 import path 完成 inspect/profile/roundtrip；全仓测试、vet、三平台构建通过。
 
 当前：
 
-- Slice 3：公开 Go interface。
+- Slice 4：单一 CLI 产品面。
 
 ## 未决问题
 
