@@ -53,6 +53,7 @@ func DuplicateComposition(p *Project, src *Composition, name string) (*Compositi
 	// === Snapshot for rollback ===
 	oldRootChildren := append([]*rifx.Chunk(nil), rootChildren...)
 	oldComps := append([]*Composition(nil), p.Compositions...)
+	oldItems := append([]ProjectItem(nil), p.Items...)
 	oldNextItemID := scene.ProjectNextItemID(p)
 	oldWarningsLen := len(p.Warnings)
 
@@ -149,6 +150,13 @@ func DuplicateComposition(p *Project, src *Composition, name string) (*Compositi
 		newWarnings := append([]string(nil), p.Warnings[oldWarningsLen:]...)
 		p.Warnings = p.Warnings[:oldWarningsLen]
 		return nil, fmt.Errorf("DuplicateComposition: produced %d parser warning(s), rolled back: %v", len(newWarnings), newWarnings)
+	}
+	if err := rebuildProjectItems(p); err != nil {
+		pb.rootFold.Children = oldRootChildren
+		p.Compositions = oldComps
+		p.Items = oldItems
+		scene.SetProjectNextItemID(p, oldNextItemID)
+		return nil, fmt.Errorf("DuplicateComposition: rebuild project items: %w", err)
 	}
 
 	return dupComp, nil

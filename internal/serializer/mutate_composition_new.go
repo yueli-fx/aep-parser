@@ -386,6 +386,7 @@ func NewComposition(
 	}
 	oldChildLen := len(pb.rootFold.Children)
 	oldWarningsLen := len(p.Warnings)
+	oldItems := append([]ProjectItem(nil), p.Items...)
 
 	// 5. Append to rootFold + reparse closed loop。
 	// AE 在 Fold 里要求每个 Item LIST 后面都跟 8 个 sibling chunks
@@ -414,6 +415,12 @@ func NewComposition(
 	scene.SetCompositionProj(comp, p)
 	// comp.itemList 已由 parseComposition 设置
 	p.Compositions = append(p.Compositions, comp)
+	if err := rebuildProjectItems(p); err != nil {
+		pb.rootFold.Children = pb.rootFold.Children[:oldChildLen]
+		p.Compositions = p.Compositions[:len(p.Compositions)-1]
+		p.Items = oldItems
+		return nil, fmt.Errorf("internal: rebuilding project items: %w", err)
+	}
 
 	// 8. Bump nextItemID past the template's service-layer IDs (DLay/SLay/
 	// CLay/SecL hold 2..12 in the same head-counter namespace; they never

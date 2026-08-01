@@ -119,6 +119,7 @@ func insertLayerCrossProject(c *Composition, src *Layer, atIdx, srcLayrIdx int, 
 	oldRootChildren := append([]*rifx.Chunk(nil), rootFold.Children...)
 	oldComps := append([]*Composition(nil), destProj.Compositions...)
 	oldFootage := append([]*Footage(nil), destProj.Footage...)
+	oldItems := append([]ProjectItem(nil), destProj.Items...)
 	destCompCb := compositionBack(c)
 	if destCompCb == nil || destCompCb.itemList == nil {
 		return nil, fmt.Errorf("InsertLayer: dest comp %q has no itemList back-ref", c.Name)
@@ -131,6 +132,7 @@ func insertLayerCrossProject(c *Composition, src *Layer, atIdx, srcLayrIdx int, 
 		rootFold.Children = oldRootChildren
 		destProj.Compositions = oldComps
 		destProj.Footage = oldFootage
+		destProj.Items = oldItems
 		destCompCb.itemList.Children = oldDestItemList
 		c.Layers = oldDestLayers
 		scene.SetProjectNextItemID(destProj, oldNextItemID)
@@ -274,6 +276,10 @@ func insertLayerCrossProject(c *Composition, src *Layer, atIdx, srcLayrIdx int, 
 		newWarnings := append([]string(nil), destProj.Warnings[oldWarningsLen:]...)
 		rollback()
 		return nil, fmt.Errorf("InsertLayer: cross-Project produced %d parser warning(s), rolled back: %v", len(newWarnings), newWarnings)
+	}
+	if err := rebuildProjectItems(destProj); err != nil {
+		rollback()
+		return nil, fmt.Errorf("InsertLayer: cross-Project rebuild project items: %w", err)
 	}
 
 	return clone, nil

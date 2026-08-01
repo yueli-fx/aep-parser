@@ -179,8 +179,20 @@ const (
 	ItemTypeUnknown     ItemType = "unknown"
 )
 
+// ProjectItem describes one entry in the After Effects project panel.
+// Items are stored in project-panel traversal order. ParentID is zero for a
+// root item, and Order is the item's zero-based position among its siblings.
+// The type-specific payload remains in Compositions, Footage, or Folders.
+type ProjectItem struct {
+	ID       uint32
+	Kind     ItemType
+	ParentID uint32
+	Order    int
+}
+
 // Project holds the fully parsed contents of an .aep file.
 type Project struct {
+	Items          []ProjectItem  // canonical project-panel hierarchy and mixed item order
 	Compositions   []*Composition // all compositions in the project
 	Footage        []*Footage     // all footage items (files / solids / placeholders)
 	Folders        []*Folder      // project-panel folders

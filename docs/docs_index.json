@@ -4244,6 +4244,14 @@
       "rw": "read-only",
       "summary": "GpuAccelType returns the project's GPU acceleration device id (UUID-style string inside the gpuG LIST → Utf8 child). We surface the raw string since AE writes a runtime-resolved device UUID. Empty string when the chunk is absent."
     },
+    "Project.Items": {
+      "kind": "field",
+      "file": "project.md",
+      "anchor": "#projectitems",
+      "signature": "Items []ProjectItem",
+      "rw": "read-only",
+      "summary": "canonical project-panel hierarchy and mixed item order"
+    },
     "Project.LayerByID": {
       "kind": "method",
       "file": "project.md",

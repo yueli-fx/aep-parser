@@ -13,10 +13,19 @@ import (
 
 // JSONProject is the JSON representation of a Project.
 type JSONProject struct {
+	Items        []JSONProjectItem  `json:"items"`
 	Compositions []*JSONComposition `json:"compositions"`
 	Footage      []*JSONFootage     `json:"footage"`
 	Folders      []*JSONFolder      `json:"folders"`
 	RenderQueue  *JSONRenderQueue   `json:"render_queue,omitempty"`
+}
+
+// JSONProjectItem is the project-panel topology entry for one item.
+type JSONProjectItem struct {
+	ID       uint32 `json:"id"`
+	Kind     string `json:"kind"`
+	ParentID uint32 `json:"parent_id"`
+	Order    int    `json:"order"`
 }
 
 // JSONRenderQueue is the JSON representation of a RenderQueue (read-only).
@@ -404,6 +413,14 @@ type JSONFolder struct {
 func (p *Project) ToJSON() *JSONProject {
 	jp := &JSONProject{}
 
+	for _, item := range p.Items {
+		jp.Items = append(jp.Items, JSONProjectItem{
+			ID:       item.ID,
+			Kind:     string(item.Kind),
+			ParentID: item.ParentID,
+			Order:    item.Order,
+		})
+	}
 	for _, c := range p.Compositions {
 		jp.Compositions = append(jp.Compositions, compToJSON(c))
 	}

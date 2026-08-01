@@ -41,6 +41,7 @@ type (
 	GuideOrientation                = scene.GuideOrientation
 	InterpType                      = scene.InterpType
 	ItemType                        = scene.ItemType
+	ProjectItem                     = scene.ProjectItem
 	JSONComposition                 = scene.JSONComposition
 	JSONEGController                = scene.JSONEGController
 	JSONEffect                      = scene.JSONEffect
@@ -57,6 +58,7 @@ type (
 	JSONOutputModule                = scene.JSONOutputModule
 	JSONOutputModuleSettings        = scene.JSONOutputModuleSettings
 	JSONProject                     = scene.JSONProject
+	JSONProjectItem                 = scene.JSONProjectItem
 	JSONProperty                    = scene.JSONProperty
 	JSONRenderQueue                 = scene.JSONRenderQueue
 	JSONRenderQueueItem             = scene.JSONRenderQueueItem

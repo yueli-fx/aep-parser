@@ -151,31 +151,83 @@ func parseProject(root *rifx.Chunk) (*Project, error) {
 		}
 	}
 
-	// In real .aep files, Item lists are nested inside Fold/Sfdr containers,
-	// not direct children of the root. Walk the whole tree.
-	var walk func(c *rifx.Chunk) error
-	walk = func(c *rifx.Chunk) error {
-		for _, child := range c.Children {
-			if !child.IsList() {
-				continue
-			}
-			if child.FormType == rifx.IDItem {
-				if err := parseItem(child, proj); err != nil {
-					return err
-				}
-			}
-			if err := walk(child); err != nil {
-				return err
-			}
-		}
-		return nil
-	}
-	if err := walk(root); err != nil {
+	// Project items live as direct Item children of the root Fold and nested
+	// folder Sfdr containers. Traverse only those containers so the parent
+	// relationship and mixed sibling order remain intact.
+	if err := parseProjectItems(root, proj); err != nil {
 		return nil, err
 	}
 	initDerived(proj, root)
 	parseRenderQueue(root, proj)
 	return proj, nil
+}
+
+// parseProjectItems builds both the type-specific payload indexes and the
+// canonical project-panel topology from the same traversal.
+func parseProjectItems(root *rifx.Chunk, proj *Project) error {
+	rootFold := root.FindFirstList(rifx.IDFold)
+	if rootFold == nil {
+		return nil
+	}
+	proj.Items = proj.Items[:0]
+	return walkProjectItems(rootFold, 0, func(item *rifx.Chunk, entry ProjectItem) error {
+		if err := parseItem(item, proj); err != nil {
+			return err
+		}
+		proj.Items = append(proj.Items, entry)
+		return nil
+	})
+}
+
+// rebuildProjectItems refreshes the topology after a structural mutation.
+// The raw Fold/Sfdr tree is authoritative, so mutation code does not maintain
+// a second incremental copy of parent/order state.
+func rebuildProjectItems(proj *Project) error {
+	pb := projectBack(proj)
+	if pb == nil || pb.rootFold == nil {
+		return fmt.Errorf("project has no root Fold back-ref")
+	}
+	items := make([]ProjectItem, 0, len(proj.Items))
+	if err := walkProjectItems(pb.rootFold, 0, func(_ *rifx.Chunk, entry ProjectItem) error {
+		items = append(items, entry)
+		return nil
+	}); err != nil {
+		return err
+	}
+	proj.Items = items
+	return nil
+}
+
+// walkProjectItems visits project items in panel preorder. Order is local to
+// each Fold/Sfdr container and counts every recognized project item sibling.
+func walkProjectItems(container *rifx.Chunk, parentID uint32, visit func(*rifx.Chunk, ProjectItem) error) error {
+	order := 0
+	for _, child := range container.Children {
+		if !isItemList(child) {
+			continue
+		}
+		kind, id, err := classifyItem(child)
+		if err != nil {
+			return err
+		}
+		itemOrder := order
+		order++
+		if kind == ItemTypeUnknown {
+			continue
+		}
+		entry := ProjectItem{ID: id, Kind: kind, ParentID: parentID, Order: itemOrder}
+		if err := visit(child, entry); err != nil {
+			return err
+		}
+		if kind == ItemTypeFolder {
+			if sfdr := child.FindFirstList(rifx.IDSfdr); sfdr != nil {
+				if err := walkProjectItems(sfdr, id, visit); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
 }
 
 // initDerived 在 parseProject 收尾时调用，初始化 Project 的 derived state：

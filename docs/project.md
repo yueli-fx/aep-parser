@@ -19,6 +19,16 @@ Project holds the fully parsed contents of an .aep file.
 
 ## Attributes
 
+### Project.Items
+
+```go
+Items []ProjectItem
+```
+
+canonical project-panel hierarchy and mixed item order
+
+read-only
+
 ### Project.Compositions
 
 ```go
