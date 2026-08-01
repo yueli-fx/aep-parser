@@ -1,9 +1,6 @@
 # ⚠ Camera FilmSize 在 ldta @0x98 但 ScriptingAPI 不可写
 
-SUMMARY: Camera FilmSize 在 ldta @0x98 但 ScriptingAPI 不可写
-READ WHEN: adding Camera layer setter; RE'ing ldta @0x98..0x9F; tempted to ship a SetFilmSize / SetSensorSize API
-
----
+Camera FilmSize 在 ldta @0x98 但 ScriptingAPI 不可写
 
 ## 现象
 

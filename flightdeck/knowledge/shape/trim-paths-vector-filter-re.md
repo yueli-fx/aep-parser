@@ -1,9 +1,6 @@
 # ⚠ Trim Paths (`ADBE Vector Filter - Trim`) — 矢量滤镜走既有 shape-body 模板 vein
 
-SUMMARY: Trim Paths (`ADBE Vector Filter - Trim`) — 矢量滤镜走既有 shape-body 模板 vein
-READ WHEN: implementing or extending any shape vector-filter (Trim / Repeater / Round Corners / Offset / Merge / ZigZag / Pucker & Bloat / Twist / Wiggle Paths / Wiggle Transform) via AddTrim/AddRepeater/AddRoundCorners/AddOffsetPaths/AddMergePaths/AddPuckerBloat/AddTwist/AddWigglePaths/AddWiggleTransform/TrimNode/RepeaterNode/RoundCornersNode/OffsetPathsNode/MergePathsNode/PuckerBloatNode/TwistNode/WigglePathsNode/WiggleTransformNode; needing a UI-name↔match-name mismatch (Wiggle Paths = `ADBE Vector Filter - Roughen`, Wiggle Transform = `ADBE Vector Filter - Wiggler`); using canAddProperty to discover an unknown filter match-name; descending into a filter's nested Transform sub-group (Repeater / Wiggle Transform); needing the shape-stack render order (why a filter cuts/duplicates/rounds/grows/combines/bloats the shapes, incl. why a COMBINE filter needs the fill ABOVE it) or AE's ellipse path start vertex / winding; descending into a filter's nested group (Repeater Transform); deciding from-scratch vs embed-template for a new shape filter; reasoning about which filter sub-streams AE elides; a Repeater/Trim/RC/Offset/Merge/PB match-name that returns null; an ExtendScript addProperty live-ref going stale / ReferenceError when building a multi-shape fixture
-
----
+Trim Paths (`ADBE Vector Filter - Trim`) — 矢量滤镜走既有 shape-body 模板 vein
 
 ## Signature
 - symptom: 无 bug（clean slice）。本条是 RE 记录 + 后续 shape-filter（Repeater/Merge/Offset/Round/ZigZag）的复用蓝本

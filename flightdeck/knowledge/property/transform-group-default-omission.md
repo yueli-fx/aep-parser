@@ -1,9 +1,6 @@
 # ⚠ Transform Group 属性比 py-aep 少 = AE 默认值省略，不是 parser bug
 
-SUMMARY: Transform Group 属性比 py-aep 少 = AE 默认值省略，不是 parser bug
-READ WHEN: 我们解出的 Transform Group 属性比 py-aep golden 少；以为 parser 截断/desync；ADBE Orientation 在 tree 里是空 group
-
----
+Transform Group 属性比 py-aep 少 = AE 默认值省略，不是 parser bug
 
 ## 结论（先纠一个误判）
 

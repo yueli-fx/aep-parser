@@ -1,9 +1,6 @@
 # ⚠ Text Animators (kinetic typography) — create-from-scratch RE + 落地
 
-SUMMARY: Text Animators (kinetic typography) — create-from-scratch RE + 落地
-READ WHEN: implementing/extending text animators (AddTextOpacityAnimator / AnimateTextRangeOffset); adding a new animator property type (Position/Scale/Color); wondering where Text Animators live vs btdk; building a property *Property over a spliced chunk to reuse AnimateScalarKeyframes
-
----
+Text Animators (kinetic typography) — create-from-scratch RE + 落地
 
 RE'd + shipped 2026-06-15 (用户加项「effects 之后做文字」的真前沿——文字基础早 ship，
 真缺的是 Text Animators 引擎)。`AddTextOpacityAnimator` + `AnimateTextRangeOffset`，

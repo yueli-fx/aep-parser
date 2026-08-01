@@ -1,9 +1,6 @@
 # Recipe Fill Blend Mode Profile Enum
 
-SUMMARY: Recipe support note for Fill Blend Mode Profile Enum.
-READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for shape fields related to Fill Blend Mode Profile Enum
-
----
+Recipe support note for Fill Blend Mode Profile Enum.
 
 Context: recipe `shape.fill_blend_mode` support, proven with
 `examples/recipes/minimal-shape-fill-blend-mode.json`.

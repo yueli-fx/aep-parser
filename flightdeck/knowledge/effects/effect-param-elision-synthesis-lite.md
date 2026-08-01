@@ -1,9 +1,6 @@
 # ⚠ Effect param elision — value-keyed persistence + synthesis-lite path
 
-SUMMARY: Effect param elision — value-keyed persistence + synthesis-lite path
-READ WHEN: implementing per-effect typed param helpers / EnsureEffectParameter; animating an effect param from scratch (AnimateEffectParam — InsertKeyframe refuses static→animated); wondering why a default effect instance exposes only the -0000 param; needing AE's param-persistence rule (value!=default, not touched-flag); splicing a materialized param tdbs into an effect sspc; needing effect point-param coordinate units (fraction-of-what) or color cdat ARGB encoding; verify JSX throws "数字结果无效（除以零？）" on a log line
-
----
+Effect param elision — value-keyed persistence + synthesis-lite path
 
 ## Signature
 - symptom: `SetStaticValue cannot target an effect parameter that is not in Effect.Parameters (default-elided); a default effect instance surfaces only the "<matchname>-0000" param`

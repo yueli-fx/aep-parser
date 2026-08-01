@@ -1,9 +1,6 @@
 # ⚠ DeleteLayer RE — AE 行为契约
 
-SUMMARY: DeleteLayer RE — AE 行为契约
-READ WHEN: implementing Composition.DeleteLayer or any layer-removal mutation; debugging "AE drops a layer we wrote" or "AE complains after we delete"; reasoning about what chunks make up a layer's serialized unit; deciding orphan-reference cleanup strategy (ParentID / TrackMatteLayerID / matte type byte)
-
----
+DeleteLayer RE — AE 行为契约
 
 V3 Phase 2 DeleteLayer 实现 reference。**所有数字来自 AE 自己 save 的 4 个 fixture diff，不是猜的**。
 

@@ -1,9 +1,6 @@
 # 往 data/samples/ 加参考工程 — 文件夹约定 + 分类 — checklist
 
-SUMMARY: 往 data/samples/ 加参考工程 — 文件夹约定 + 分类
-READ WHEN: 往 data/samples/ 加参考工程当学习样本（建文件夹该长啥样、放哪些文件、怎么分类、readme 写啥）；批量采集后做归置；纠结某工程算哪个题材
-
----
+往 data/samples/ 加参考工程 — 文件夹约定 + 分类
 
 > 给 [[understand-a-project]] 流水线攒原料的**通用归置约定**（与具体站点无关）。站点专属的「怎么扒下载链」见 `references/<站点>-harvest.md`（如 [[motionbox-harvest]]）。
 

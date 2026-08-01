@@ -1,9 +1,6 @@
 # ⚠ Property.ValueText（§3H）—— 通用实现不可达，need external schema DB
 
-SUMMARY: Property.ValueText（§3H）—— 通用实现不可达，need external schema DB
-READ WHEN: 想给 Property 加 ValueText / propertyParameters；以为 dropdown 选项 label 能从字节 RE；评估 py-aep parity P3 §3H 是否值得做
-
----
+Property.ValueText（§3H）—— 通用实现不可达，need external schema DB
 
 ## 结论（2026-06-04 决策：整个 3H defer / won't-implement）
 

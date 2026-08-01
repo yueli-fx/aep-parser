@@ -1,9 +1,6 @@
 # Recipe Stroke Wave Profile Fields
 
-SUMMARY: Recipe support note for Stroke Wave Profile Fields.
-READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for shape fields related to Stroke Wave Profile Fields
-
----
+Recipe support note for Stroke Wave Profile Fields.
 
 Context: recipe `shape.stroke.wave` support, proven with
 `examples/recipes/minimal-shape-stroke-wave.json`.

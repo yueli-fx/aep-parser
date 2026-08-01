@@ -1,9 +1,6 @@
 # ⚠ 手动 kerning 首次启用 = 结构性添加
 
-SUMMARY: 手动 kerning 首次启用 = 结构性添加
-READ WHEN: implementing or debugging Layer.SetManualKerning; deciding between length-preserving splice and structural-add for text setters
-
----
+手动 kerning 首次启用 = 结构性添加
 
 ## 症状
 

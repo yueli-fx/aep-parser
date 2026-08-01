@@ -1,9 +1,6 @@
 # ⚠ Pseudo control labels are bound to AE's system ANSI codepage (CJK not portable)
 
-SUMMARY: AE reads a pseudo control's label from the pard @0x10 name in the system ANSI codepage (value-entry tdsn does NOT override it, gate-disproven). Encoding is a selectable codepage — WithLabelCodepage: GBK (default) / Shift-JIS (Japanese).
-READ WHEN: building/labeling pseudo-effect controls, especially CJK/Japanese labels via BuildPseudoEffect + WithLabelCodepage
-
----
+AE reads a pseudo control's label from the pard @0x10 name in the system ANSI codepage (value-entry tdsn does NOT override it, gate-disproven). Encoding is a selectable codepage — WithLabelCodepage: GBK (default) / Shift-JIS (Japanese).
 
 ## Signature
 - symptom: pseudo-effect control label reads back mojibake in AE (e.g. `勾选`→`name.codes=37717,40515,8364,63`, the UTF-8 bytes misread as the system ANSI codepage; 8364=€ ⇒ cp1252)

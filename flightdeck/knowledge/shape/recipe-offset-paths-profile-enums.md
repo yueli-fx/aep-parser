@@ -1,9 +1,6 @@
 # ⚠ Recipe Offset Paths line_join authors as string, profile reads numeric enum
 
-SUMMARY: Recipe `shape.offset_paths.line_join` uses `"miter"`, `"round"`, or `"bevel"`, but `expected_profile.properties[]` for `ADBE Vector Offset Line Join` must compare against AE's numeric enum values `1`, `2`, or `3`.
-READ WHEN: adding or debugging recipe Offset Paths support; writing `expected_profile.properties[]` for `ADBE Vector Offset Line Join`; a profile check reports `3` instead of `"bevel"`
-
----
+Recipe `shape.offset_paths.line_join` uses `"miter"`, `"round"`, or `"bevel"`, but `expected_profile.properties[]` for `ADBE Vector Offset Line Join` must compare against AE's numeric enum values `1`, `2`, or `3`.
 
 The recipe schema keeps Offset Paths join style readable:
 

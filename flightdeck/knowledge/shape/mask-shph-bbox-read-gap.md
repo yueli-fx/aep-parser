@@ -1,9 +1,6 @@
 # ⚠ Mask 真几何在 shph bbox，`Mask.Vertices` 只 surface 归一化 ldat（读侧 gap）
 
-SUMMARY: Mask 真几何在 shph bbox，`Mask.Vertices` 只 surface 归一化 ldat（读侧 gap）
-READ WHEN: replicating / copying an existing layer's masks from-scratch and every mask reads as the SAME unit square (anchors all 0/1) while the original clearly has distinct, positioned masks; Mask.Vertices looks normalized not pixel; reconstructing real mask geometry from a parsed mask; deciding what coordinate the parser surfaces for a mask outline; copying many masks (tearing slices) faithfully via AddMask; wondering why mask feather/opacity/expansion don't survive a from-scratch mask copy
-
----
+Mask 真几何在 shph bbox，`Mask.Vertices` 只 surface 归一化 ldat（读侧 gap）
 
 ## Signature
 - symptom: 读一个真实层的多个 mask，`Mask.Vertices` 全部返回**同一个 unit square**（anchor ∈ {0,1}，如 (1,0)(0,0)(0,1)(1,1)），无论原版那些 mask 在画面上明显是不同位置/大小的切片；以为 parser 漏解或 mask 都一样

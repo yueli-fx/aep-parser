@@ -1,9 +1,6 @@
 # ⚠ AddMask — Mask Parade from-scratch atom RE + ship findings
 
-SUMMARY: AddMask — Mask Parade from-scratch atom RE + ship findings
-READ WHEN: implementing or extending AddMask / mask-atom creation; debugging AE crash (0 :: 42) or 参数值无效 on a Go-written mask; reasoning about mask shape coordinate units (fraction vs pixel) or the shph open/closed flag; touching encodeBezier lhd3 fields for non-4-vertex paths; needing the (tdmn, mkif, tdgp) atom triple layout; implementing SetMaskPath / SetMaskPathKeyframes (static + animated mask path write); needing the static-mask-tdb4 == animated-shape-tdb4 base finding (differs only at 3 static→animated flag offsets) for a mask path time-table tdbs
-
----
+AddMask — Mask Parade from-scratch atom RE + ship findings
 
 ## Signature
 - symptom: `After Effects 无法继续: 抱歉，After Effects 已崩溃。(0 :: 42)` on opening a Go-written mask file; or JSX `EXC Error: 参数值无效` reading a mask shape; or mask vertices read back ×layer-size / ÷layer-size off

@@ -1,9 +1,6 @@
 # ⚠ From-scratch shape layer renders blank: layer Position defaults to (0,0), not comp-center
 
-SUMMARY: From-scratch shape layer renders blank: layer Position defaults to (0,0), not comp-center
-READ WHEN: a from-scratch NewShapeLayer renders blank/empty in AE while verify.jsx shows every shape/value correct; shapes appear off-screen (top-left); Layer.SetPosition on a from-scratch shape layer returns "Position property not present"; deciding whether to center a new shape layer; reasoning about layer Transform vs shape-node positions; replicating a layer that uses SEPARATED Position dimensions (Position_0/Position_1) whose parser-read 0,0 disagrees with the original's visually-centered position
-
----
+From-scratch shape layer renders blank: layer Position defaults to (0,0), not comp-center
 
 ## Signature
 - symptom: `from-scratch shape layer renders blank in AE; verify.jsx shows all shapes+values correct; Layer.SetPosition → "Position property not present"`

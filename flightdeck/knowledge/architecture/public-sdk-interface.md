@@ -1,10 +1,6 @@
 # Public Go SDK interface
 
-SUMMARY: 根 `aep` package 通过 `Document` 提供小而深的 inspect/profile/write interface；不要把 `internal/aep` 的大量 facade 符号机械 alias 到外部。
-READ WHEN: adding any exported root-package SDK capability, changing `Document`, or deciding whether an internal scene/serializer type should become public
-RECHECK WHEN: 首个外部 mutation workflow 要求扩大公开 interface，或 profile schema 进入版本升级时
-
----
+根 `aep` package 通过 `Document` 提供小而深的 inspect/profile/write interface；不要把 `internal/aep` 的大量 facade 符号机械 alias 到外部。
 
 外部消费 seam 位于模块根 package `github.com/yueli-fx/aep-parser`（package name `aep`）。第一版 interface：
 

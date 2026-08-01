@@ -1,9 +1,6 @@
 # Recipe Adjustment Layer
 
-SUMMARY: Recipe support note for Adjustment Layer.
-READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for layer fields related to Adjustment Layer
-
----
+Recipe support note for Adjustment Layer.
 
 Context: recipe `type: "adjustment"` support, proven with
 `examples/recipes/minimal-adjustment-layer.json`.

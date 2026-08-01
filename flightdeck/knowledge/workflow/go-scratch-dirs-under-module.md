@@ -1,8 +1,6 @@
 # ⚠ Go scratch dirs under the module are included in ./...
-SUMMARY: Ordinary scratch directories such as `tmp_debug/` are still Go packages under this module, so stale imports or broken probes can make `go test ./...` fail.
-READ WHEN: adding or keeping temporary Go probes/debug programs under the repo; `go test ./...` fails in a tmp/debug directory; renaming the module path or internal imports
 
----
+Ordinary scratch directories such as `tmp_debug/` are still Go packages under this module, so stale imports or broken probes can make `go test ./...` fail.
 
 Go's `./...` package pattern walks ordinary subdirectories under the module,
 regardless of whether those paths are tracked by git. A directory named

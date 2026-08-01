@@ -1,9 +1,6 @@
 # ⚠ cdta @0xB0 是 shutter 角度 360° 参考常量，**不是 duration**
 
-SUMMARY: cdta @0xB0 是 shutter 角度 360° 参考常量，**不是 duration**
-READ WHEN: 调查 comp.Duration 与真实 AE 不符；AE 打开 Go 生成工程后 shutterAngle/shutterPhase 显示被放大（×duration/360）；以为 cdta @0xB0 是 duration；改 NewComposition / SetDuration / SetFrameRate 的时长写法；新增任何依赖 cdta 时间基的 setter
-
----
+cdta @0xB0 是 shutter 角度 360° 参考常量，**不是 duration**
 
 ## 结论（RE 实证，2026-06-14）
 

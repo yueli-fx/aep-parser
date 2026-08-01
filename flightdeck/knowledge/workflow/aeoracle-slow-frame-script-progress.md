@@ -1,9 +1,6 @@
 # aeoracle slow frames need request-level frame timeout and progress-dialog ignore
 
-SUMMARY: `cmd/aeoracle render` can have a large CLI timeout while the JSX per-frame PNG wait is much shorter; slow AE frames also keep an `Executing Script ...` progress dialog visible long enough to trip unknown-modal handling unless it is explicitly ignored.
-READ WHEN: `aeoracle render` reports `rendered frame missing or empty`; AE shows an `Executing Script ...` dialog for more than 30 seconds; adding render-heavy recipe examples or shape filters; handling the `Scripting plugin is not installed` dialog
-
----
+`cmd/aeoracle render` can have a large CLI timeout while the JSX per-frame PNG wait is much shorter; slow AE frames also keep an `Executing Script ...` progress dialog visible long enough to trip unknown-modal handling unless it is explicitly ignored.
 
 Root cause from the Wiggle Paths recipe slice:
 

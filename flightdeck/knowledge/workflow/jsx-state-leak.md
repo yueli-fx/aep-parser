@@ -1,9 +1,6 @@
 # ⚠ JSX -r 多轮累积 duplicate comps
 
-SUMMARY: JSX -r 多轮累积 duplicate comps
-READ WHEN: writing new JSX RE fixture; rerunning AfterFX -r against existing .aep; Go test finding stale field values
-
----
+JSX -r 多轮累积 duplicate comps
 
 ## 症状
 

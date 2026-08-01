@@ -1,9 +1,6 @@
 # Recipe Fill Rule Profile Enums
 
-SUMMARY: Recipe support note for Fill Rule Profile Enums.
-READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for shape fields related to Fill Rule Profile Enums
-
----
+Recipe support note for Fill Rule Profile Enums.
 
 Context: recipe `shape.fill_rule` support, proven with
 `examples/recipes/minimal-shape-fill-rule.json`.

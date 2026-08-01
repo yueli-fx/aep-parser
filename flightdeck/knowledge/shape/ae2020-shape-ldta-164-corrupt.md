@@ -1,9 +1,6 @@
 # ⚠ AE 2020 把 164B ShapeLayer ldta 判为损坏并跳过该层
 
-SUMMARY: AE 2020 把 164B ShapeLayer ldta 判为损坏并跳过该层
-READ WHEN: adding any NewX layer/structural write path; debugging AE 2020 "项目文件似乎已损坏（跳过部分）" / silent layer skip; touching buildLdtaBytes or the capability matrix
-
----
+AE 2020 把 164B ShapeLayer ldta 判为损坏并跳过该层
 
 **ShapeLayer 的 ldta 大小必须按 target 分支：AE 2020/2022 = 160B，AE 2025 = 164B。** 写错会让 AE 2020 把整个图层判为损坏并静默跳过。
 

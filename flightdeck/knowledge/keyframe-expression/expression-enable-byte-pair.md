@@ -1,9 +1,6 @@
 # ⚠ 表达式激活 = tdb4 @0x77/@0x78 字节对 — 历史反语义解读翻案
 
-SUMMARY: 表达式激活 = tdb4 @0x77/@0x78 字节对 — 历史反语义解读翻案
-READ WHEN: SetExpression 写入后 AE 不求值/expressionEnabled 读回 false；AE 打开后表达式文本被丢；给 effect param（或任何带 tdum/tduM 的属性）挂表达式后 AE 判损坏跳过该层；touching tdb4 @0x77/@0x78 or SetExpression/SetExpressionEnabled or 表达式 Utf8 在 tdbs 里的插入位置；评估「Go round-trip 绿但 AE 行为不对」的表达式类症状
-
----
+表达式激活 = tdb4 @0x77/@0x78 字节对 — 历史反语义解读翻案
 
 ## Signature
 - symptom: Go SetExpression 写入的表达式 AE 不求值（JSX 读 expressionEnabled=false / valueAtTime 不变）；写「disabled 表达式」时 AE 打开后表达式文本整个被丢（expression 读回空串）；Go 自读回全程正常（假绿）

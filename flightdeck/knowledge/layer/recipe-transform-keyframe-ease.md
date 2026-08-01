@@ -1,9 +1,6 @@
 # ⚠ Recipe keyframe ease influence is a fraction, not AE UI percent
 
-SUMMARY: Recipe transform keyframes can set optional `in_ease` / `out_ease` objects, but `influence` is authored as the writer fraction `0..1`, not AE UI percent `0..100`.
-READ WHEN: adding recipe transform keyframe easing; copying temporal ease into recipe JSON; a recipe validation error mentions `invalid_keyframe_ease_influence`
-
----
+Recipe transform keyframes can set optional `in_ease` / `out_ease` objects, but `influence` is authored as the writer fraction `0..1`, not AE UI percent `0..100`.
 
 Recipe transform keyframes support optional easing:
 

@@ -1,46 +1,41 @@
-# Index — 首次发布与设计伙伴验证
+# 首次发布与设计伙伴验证
 
-## 状态
+## Goal
 
-已建档，尚未执行。技术预发布基线已经完成；本 topic 只负责需要远端状态、版本决策和真实外部团队参与的工作。
+完成首次真实发布验证，并用六周外部设计伙伴证据判断 aep-parser 应继续商业化、保持开源或私有 Toolkit，还是停止产品化扩张。
 
-## 下一步
+## Status
 
-1. 建立或确认远端仓库，运行首次真实 CI；除非用户明确要求，永远不自动 push。
-2. 根据 CI 结果和兼容性承诺确定首个版本号、发布日期与 tag。
-3. 按 `validation-plan.md` 招募至少 3 个外部团队并运行六周验证。
-4. 用采用、节省成本和付费意愿证据决定继续商业化、保持开源 Toolkit，或停止产品化扩张。
+Open
 
-## 立即读取
+## Current
 
-- `validation-plan.md`
-- `../../knowledge/workflow/delivery-contract.md`
-- `../../knowledge/workflow/open-source-license.md`
-- `../../knowledge/workflow/verify.md`
+技术预发布基线已经完成，根 Go SDK、统一 CLI、CI/release workflow、安全与贡献文档、CHANGELOG 和 Apache-2.0 均已落地。当前分支为 `mainline/aep-understanding`，仓库尚未配置 remote；真实 CI、版本/tag 与外部团队验证尚未开始。
 
-## 按需读取
+## Next
 
-- `../../knowledge/security/untrusted-aep-input.md` — 设计公开服务或托管输入边界时
-- `../../knowledge/architecture/public-sdk-interface.md` — 调整首发 SDK 承诺时
-- `../../knowledge/architecture/unified-cli-interface.md` — 调整 CLI JSON contract 或集成入口时
+与用户确认首发采用公开开源、私有 Toolkit 或并行路径，并取得要绑定的 remote 信息；随后从 [阶段 A](plan.md) 开始，按 [验证流程](../../knowledge/workflow/verify.md) 核对本地基线，再依 [交付契约](../../knowledge/workflow/delivery-contract.md) 运行首次真实 CI。除非用户明确授权，不要 push、创建 tag 或发布。
 
-## 已具备前提
+## Execution pointer
 
-- 根 Go SDK、统一 CLI、CI/release workflow、SECURITY、CONTRIBUTING、CHANGELOG 和 Apache-2.0 已落地。
-- 代码质量综合升级已关闭全部 P0/P1，并建立 race、fuzz、漏洞与迁移矩阵门禁。
-- OSS core、managed/on-prem 商业层边界已有初步方案。
-- 原 `commercialization-and-toolkit-productization` 的产品承诺、Toolkit contract、交付、采用、商业验证与生态决策已合并到 `validation-plan.md`，旧 topic 不再单独恢复。
+`plan.md` → 阶段 A「首次发布准备」→ 确认交付路径与 remote。
 
-## 完成标准
+## Progress
 
-- 远端首次 CI 通过，失败项均有关闭或明确接受记录。
-- 首个版本号、发布日期和 tag 已确定并执行。
-- 至少 3 个外部团队真实试用，至少 1 个进入日常 preflight，或明确记录未达到此门槛。
-- 形成可量化的 adoption/成本/付费结论，并据此记录继续或停止决策。
-- 明确首批核心用户、公开承诺、交付模型以及开源核心与商业层边界。
-- 完成后压缩结果并归档；在外部参与尚未发生前保持活跃，不伪装为完成。
+- 技术预发布基线及 P0/P1 质量升级已经完成。
+- OSS core 与 managed/on-prem 商业层已有初步边界。
+- 原 `commercialization-and-toolkit-productization` 的产品承诺、交付、采用、商业验证与生态决策已合并到本 Work。
 
-## 未决问题
+## References
+
+- [稳定背景与决策边界](context.md)
+- [完整执行计划](plan.md)
+- [开源许可边界](../../knowledge/workflow/open-source-license.md)
+- [不受信任 AEP 输入](../../knowledge/security/untrusted-aep-input.md)
+- [公共 SDK 接口](../../knowledge/architecture/public-sdk-interface.md)
+- [统一 CLI 接口](../../knowledge/architecture/unified-cli-interface.md)
+
+## Open questions
 
 - 首发是公开开源发布、私有 Toolkit 交付，还是两者并行？
 - 首个版本采用 `v0.x` 预发布还是更保守的内部版本标识？

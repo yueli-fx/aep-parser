@@ -1,9 +1,6 @@
 # Build Good Glitch — glitch phenomenon recipe
-SUMMARY: Good glitch recipe distilled from Motionbox Booyah and GlitchText samples; separates stock-AE native glitch from plugin-heavy glitch while preserving reusable technique atoms.
-READ WHEN: building or analyzing glitch, CRT, cyberpunk text, datamosh-like transitions, RGB split looks, noisy displacement cuts, or deciding whether a glitch reference can be reproduced plugin-free
-RECHECK WHEN: a new glitch sample is added; Twitch/PEDG/Colorama embed-template support lands; showcase/glitch is user-reviewed; expression runtime support changes
 
----
+Good glitch recipe distilled from Motionbox Booyah and GlitchText samples; separates stock-AE native glitch from plugin-heavy glitch while preserving reusable technique atoms.
 
 ## Sources
 

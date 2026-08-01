@@ -1,9 +1,6 @@
 # ⚠ Pseudo controls: AE renders the PANEL from the pard — the decoded field map + the render rules
 
-SUMMARY: Pseudo controls: AE renders the PANEL from the pard — the decoded field map + the render rules
-READ WHEN: a from-scratch BuildPseudoEffect control does not RENDER in AE's Effect Controls panel (the value round-trips / DOM reads fine but the row is missing); implementing/RE'ing any pseudo control's pard or value-entry bytes; deciding which controls need a value entry vs build from the pard; debugging slider value shown ×255 or with a % sign; a pseudo gate that passes on DOM/round-trip but the panel is wrong (false-green); needing the decoded pard/tdb4 field map
-
----
+Pseudo controls: AE renders the PANEL from the pard — the decoded field map + the render rules
 
 ## Signature
 - symptom: a from-scratch `BuildPseudoEffect` control (point / 3D point / slider / layer-picker) is **missing from AE's Effect Controls panel** even though `WriteAEP`→reparse round-trips clean and ExtendScript DOM reads the value.

@@ -1,9 +1,6 @@
 # ⚠ SetStretch false-green: AE recomputes stretch from in/out span
 
-SUMMARY: SetStretch false-green: AE recomputes stretch from in/out span
-READ WHEN: 实现/调试 Layer.SetStretch;给层设时间拉伸 Go round-trip 绿但 AE 读 layer.stretch=100;以为 @0x08/0x6C 分子分母够;评估 time-stretch 是否要协调 in/out
-
----
+SetStretch false-green: AE recomputes stretch from in/out span
 
 ## Signature
 - symptom: `Layer.SetStretch(0.5) → Go round-trip 读回 0.5,但 AE 打开后 layer.stretch=100`

@@ -1,9 +1,6 @@
 # Pseudo Effect 从零生成 — 支线完成记录 + RE 参考
 
-SUMMARY: BuildPseudoEffect 支线已全部完成(Dropdown/Group/Label/Point 坐标/3DPoint 坐标/Layer-picker 均双版本 AE gate 绿)。仅剩 CJK 控件标签的 AE 架构限制(byte-equiv-only,不可 ship-gate)。下方保留 RE 字节布局与 ship-gate 技巧作参考。
-READ WHEN: 维护 BuildPseudoEffect、新增伪控件类型、或复用 pard/value-entry 字节布局 + ship-gate 技巧时
-
----
+BuildPseudoEffect 支线已全部完成(Dropdown/Group/Label/Point 坐标/3DPoint 坐标/Layer-picker 均双版本 AE gate 绿)。仅剩 CJK 控件标签的 AE 架构限制(byte-equiv-only,不可 ship-gate)。下方保留 RE 字节布局与 ship-gate 技巧作参考。
 
 > 冷启动顺序:先读本篇即可恢复 pseudo-effect 支线结论；从零生成 RE 布局、CJK 标签限制、splice 机制的关键结论都已在下文摘录。能力真相源:`go run ./cmd/capindex -q "pseudo"`。
 

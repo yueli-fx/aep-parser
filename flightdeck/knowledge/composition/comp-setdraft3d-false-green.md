@@ -1,9 +1,6 @@
 # ⚠ SetDraft3D false-green: 字节与 AE 原生逐位一致,AE DOM 仍读 draft3d=false
 
-SUMMARY: SetDraft3D false-green: 字节与 AE 原生逐位一致,AE DOM 仍读 draft3d=false
-READ WHEN: 实现/调试 Composition.SetDraft3D;设 draft3d 后 AE 读 comp.draft3d=false;以为 cdta @0x8A bit0 写对就够;字节与 AE 原生一致却 DOM 读不回
-
----
+SetDraft3D false-green: 字节与 AE 原生逐位一致,AE DOM 仍读 draft3d=false
 
 ## Signature
 - symptom: `Composition.SetDraft3D(true)` 写 cdta @0x8A bit0 = 1,Go round-trip 绿,但 AE reopen 读 `comp.draft3d=false`

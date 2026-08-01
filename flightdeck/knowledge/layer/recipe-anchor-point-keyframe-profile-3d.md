@@ -1,9 +1,6 @@
 # ⚠ Recipe 2D Anchor Point keyframes profile as 3D `[x,y,0]`
 
-SUMMARY: Recipe `transform.anchor_point_keyframes` accepts 2D `[x,y]` values, but `expected_profile.keyframes[]` for `ADBE Anchor Point` must compare against profile-read 3D `[x,y,0]` values.
-READ WHEN: adding recipe transform anchor point keyframe checks; writing `expected_profile.keyframes[]` for `ADBE Anchor Point`; a recipe keyframe profile check fails with actual `[x y 0]`
-
----
+Recipe `transform.anchor_point_keyframes` accepts 2D `[x,y]` values, but `expected_profile.keyframes[]` for `ADBE Anchor Point` must compare against profile-read 3D `[x,y,0]` values.
 
 The recipe schema writes layer Anchor Point keyframes as 2D values:
 

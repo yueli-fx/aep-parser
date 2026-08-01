@@ -1,9 +1,6 @@
 # ⚠ //nolint:jargon on exported doc comments leaks into docgen public docs
 
-SUMMARY: //nolint:jargon on exported doc comments leaks into docgen public docs
-READ WHEN: 给导出符号 doc comment 加 //nolint:jargon 压制 jargon 前;TestDocsUpToDate 报 docs stale 且 docs 里出现 nolint:jargon / 内部 codename;docgen 公开文档泄漏内部术语(py-aep 等);设计任何注释 jargon linter + 抑制机制时
-
----
+//nolint:jargon on exported doc comments leaks into docgen public docs
 
 ## Signature
 - symptom: `TestDocsUpToDate` fails (`property.md is stale — run go generate ./cmd/docgen`); generated `docs/*.md` + `docs_index.json` contain the literal `//nolint:jargon` directive AND the codename it was meant to hide (e.g. `... mirrors py-aep's `comp.time_scale` //nolint:jargon naming ...`)

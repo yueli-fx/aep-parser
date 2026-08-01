@@ -1,9 +1,6 @@
 # ⚠ New layer types — scoping → ALL SHIPPED (2026-06-10)
 
-SUMMARY: New layer types — scoping → ALL SHIPPED (2026-06-10)
-READ WHEN: implementing NewSolidLayer / NewNullLayer / NewAdjustmentLayer / NewCameraLayer / NewLightLayer; scoping a new from-scratch layer-creation path; deciding embed-template vs from-scratch for a footage-backed layer; RE'ing the solid footage Item (opti "Soli" / Pin / sspc); patching solid color / dimensions / footage name
-
----
+New layer types — scoping → ALL SHIPPED (2026-06-10)
 
 Camera/Light shipped first ([[camera-light-layer-create-re]]); Solid/Null/
 Adjustment shipped same day — AE 2020 + 2025 ship-gate PASS

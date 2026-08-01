@@ -1,9 +1,6 @@
 # Recipe Layer Motion Blur
 
-SUMMARY: Recipe support note for Layer Motion Blur.
-READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for layer fields related to Layer Motion Blur
-
----
+Recipe support note for Layer Motion Blur.
 
 Context: recipe `layer.motion_blur` support, proven with
 `examples/recipes/minimal-layer-motion-blur.json`.

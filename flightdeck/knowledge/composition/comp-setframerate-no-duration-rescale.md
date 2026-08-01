@@ -1,9 +1,6 @@
 # ⚠ comp SetFrameRate 不 rescale duration ticks (与 SetDuration 同 comp → AE 读错时长)
 
-SUMMARY: comp SetFrameRate 不 rescale duration ticks (与 SetDuration 同 comp → AE 读错时长)
-READ WHEN: 实现/调试 Composition.SetFrameRate 或 SetDuration;AE 打开后合成时长被 newFps/oldFps 缩放;给 comp 同时改帧率+时长;批量 comp-settings fixture
-
----
+comp SetFrameRate 不 rescale duration ticks (与 SetDuration 同 comp → AE 读错时长)
 
 ## Signature
 - symptom: `AE comp.duration 读回被 newFps/oldFps 缩放;SetFrameRate(24)→SetDuration(8) 同 comp,AE DOM duration=6.41666 而非 8`

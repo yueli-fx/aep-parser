@@ -1,9 +1,6 @@
 # ⚠ Text btdk length-variable write — scoping findings
 
-SUMMARY: Text btdk length-variable write — scoping findings
-READ WHEN: implementing arbitrary-length SetText / NewTextLayer text param; editing btds bytes and wondering which counters must stay in sync; debugging text layout after a btds edit; assuming the btdk layout cache must be kept accurate
-
----
+Text btdk length-variable write — scoping findings
 
 ## Signature
 - symptom: `SetText length mismatch (new=N bytes, old=M bytes — length-preserving only; pad input to match)`

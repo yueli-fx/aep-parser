@@ -1,9 +1,6 @@
 # Recipe Comp Preserve Nested Resolution
 
-SUMMARY: Recipe support note for Comp Preserve Nested Resolution.
-READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for composition fields related to Comp Preserve Nested Resolution
-
----
+Recipe support note for Comp Preserve Nested Resolution.
 
 Context: recipe `comp.preserve_nested_resolution` support, proven with
 `examples/recipes/minimal-comp-preserve-nested-resolution.json`.

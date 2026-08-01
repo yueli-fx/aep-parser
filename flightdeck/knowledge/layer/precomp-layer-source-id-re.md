@@ -1,9 +1,6 @@
 # ⚠ Precomp 层 = AV 层 + ldta @0x28 SourceID → CompItem（复用 newTemplatedLayer）
 
-SUMMARY: Precomp 层 = AV 层 + ldta @0x28 SourceID → CompItem（复用 newTemplatedLayer）
-READ WHEN: implementing or extending NewPrecompLayer / nested-comp layers; debugging "precomp renders wrong/empty comp" or "AE drops the nested comp"; reasoning about how a layer references a comp source (ldta @0x28 SourceID); adding any newTemplatedLayer-based layer that needs a post-clone ldta setter (SetSource/SetParent); building a coincidence-proof source-ID gate
-
----
+Precomp 层 = AV 层 + ldta @0x28 SourceID → CompItem（复用 newTemplatedLayer）
 
 ## Signature
 - symptom: 无外部 bug；一个内部 false-green 险些发生（见下「ldta backref 坑」）

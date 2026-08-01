@@ -1,9 +1,6 @@
 # ⚠ material-advanced + 3D-geometry props 脚本不可 setValue(父级隐藏)→ 双版本不可达 AE-gate
 
-SUMMARY: material-advanced + 3D-geometry props 脚本不可 setValue(父级隐藏)→ 双版本不可达 AE-gate
-READ WHEN: 想给 ray-traced material(Reflection/Glossiness/Fresnel/Transparency/TranspRolloff/IOR/AppearsInReflections/ShadowColor)或 3D geometry(BevelDirection/PlaneCurvature/PlaneSubdivision)setter 补 AE gate;纠结这些 roundtrip 项是否能升 ae-accept;被 capindex 里 .enabled=true 误导以为可设
-
----
+material-advanced + 3D-geometry props 脚本不可 setValue(父级隐藏)→ 双版本不可达 AE-gate
 
 ## Signature
 - symptom: `After Effects错误: 无法将"set value"与此属性一起使用，因为属性或父级属性被隐藏。`

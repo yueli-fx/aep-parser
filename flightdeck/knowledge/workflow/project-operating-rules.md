@@ -1,12 +1,10 @@
 # Project operating rules
 
-SUMMARY: Core aep-parser operating rules: API stability, package boundaries, write/delivery gates, comments/docs, and truth-source priority.
-READ WHEN: changing public API, parser/writer internals, package dependencies, structural write operations, docs generated from API comments, or claiming a feature is shippable
+Core aep-parser operating rules: API stability, package boundaries, write/delivery gates, comments/docs, and truth-source priority.
 
----
-
-Durable project rules live in Flightdeck briefing for session essentials and in
-routed knowledge files for task-specific detail.
+Project rules are organized as focused topics under `flightdeck/knowledge/`.
+Use the current task, Work Goal, Current and Next to select only the applicable
+topics.
 
 ## API Stability
 

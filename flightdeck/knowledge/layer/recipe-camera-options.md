@@ -1,9 +1,6 @@
 # Recipe Camera Options
 
-SUMMARY: Recipe support note for Camera Options.
-READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for layer fields related to Camera Options
-
----
+Recipe support note for Camera Options.
 
 Context: recipe camera option support, starting with
 `examples/recipes/minimal-camera-zoom.json` and

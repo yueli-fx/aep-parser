@@ -1,10 +1,6 @@
 # Unified CLI interface
 
-SUMMARY: 新用户工作流统一进入 `cmd/aep`，由 `internal/toolkitcli` 集中提供 JSON envelope、退出码和 inspect/profile/diff/migrate/capabilities；旧命令仅保留兼容与高级用途。
-READ WHEN: adding a user-facing CLI workflow, changing command output/error contracts, or deciding whether to create another `cmd/*` entrypoint
-RECHECK WHEN: 旧聚焦命令迁移到统一 runner，或 JSON envelope schema 升级时
-
----
+新用户工作流统一进入 `cmd/aep`，由 `internal/toolkitcli` 集中提供 JSON envelope、退出码和 inspect/profile/diff/migrate/capabilities；旧命令仅保留兼容与高级用途。
 
 统一 CLI 的进程 adapter 是 `cmd/aep`，实现 module 是 `internal/toolkitcli`。module interface 只有 `Run(args, stdout, stderr) int`，因此命令解析、JSON 输出和退出码可以在不启动子进程的情况下集中测试。
 

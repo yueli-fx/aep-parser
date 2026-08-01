@@ -1,9 +1,6 @@
 # ⚠ SetLayerTransform encodes an AV/precomp layer's Anchor Point as fraction-of-source, not pixels
 
-SUMMARY: SetLayerTransform encodes an AV/precomp layer's Anchor Point as fraction-of-source, not pixels
-READ WHEN: setting a non-zero Anchor Point on a precomp / footage / AV layer via SetLayerTransform; a precomp/footage layer renders off-screen or blank while a shape/text layer with the same anchor renders fine; AE DOM reads a layer's anchor as ~value×source-dimension (e.g. 960 → 1843200); deciding anchor units for SetLayerTransform on different layer kinds
-
----
+SetLayerTransform encodes an AV/precomp layer's Anchor Point as fraction-of-source, not pixels
 
 ## Signature
 - symptom: `precomp/footage layer renders blank/off-screen after SetLayerTransform sets a non-zero anchor; AE DOM reads anchor ≈ value × source-dimension (960 → 1843200, 540 → 583200); parser round-trip reads the anchor back correctly`

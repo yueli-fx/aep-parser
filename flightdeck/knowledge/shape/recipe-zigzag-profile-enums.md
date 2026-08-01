@@ -1,9 +1,6 @@
 # ⚠ Recipe ZigZag points authors as string, profile reads numeric enum
 
-SUMMARY: Recipe `shape.zigzag.points` uses `"corner"` or `"smooth"`, but `expected_profile.properties[]` for `ADBE Vector Zigzag Points` must compare against AE's numeric enum values `1` or `2`.
-READ WHEN: adding or debugging recipe ZigZag support; writing `expected_profile.properties[]` for `ADBE Vector Zigzag Points`; a profile check reports `2` instead of `"smooth"`
-
----
+Recipe `shape.zigzag.points` uses `"corner"` or `"smooth"`, but `expected_profile.properties[]` for `ADBE Vector Zigzag Points` must compare against AE's numeric enum values `1` or `2`.
 
 The recipe schema keeps ZigZag points readable:
 

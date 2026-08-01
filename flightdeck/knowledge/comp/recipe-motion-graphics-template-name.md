@@ -1,9 +1,6 @@
 # Recipe comp Motion Graphics template name
 
-SUMMARY: Recipe `comp.motion_graphics_template_name` writes the Essential Graphics template name and `expected_profile.motion_graphics_template_name` checks the parsed comp profile.
-READ WHEN: adding Essential Graphics recipe fields; deciding whether template-name support implies `AddEssentialProperty`; debugging Motion Graphics template profile checks
-
----
+Recipe `comp.motion_graphics_template_name` writes the Essential Graphics template name and `expected_profile.motion_graphics_template_name` checks the parsed comp profile.
 
 Recipe syntax:
 

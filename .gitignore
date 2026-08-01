@@ -35,7 +35,6 @@ _tmp_debug/
 .superpowers/
 
 flightdeck/references
-flightdeck/archive
 
 # Showcase: keep INDEX.md + gen.go + render.jsx tracked, ignore heavy outputs
 flightdeck/showcase/**/*.aep

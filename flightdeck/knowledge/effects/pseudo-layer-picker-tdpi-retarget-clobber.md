@@ -1,9 +1,6 @@
 # ⚠ Pseudo layer-picker tdpi clobbered by shared-core retarget; false-green gate from 0/1-based index
 
-SUMMARY: Pseudo layer-picker tdpi clobbered by shared-core retarget; false-green gate from 0/1-based index
-READ WHEN: implementing/debugging a pseudo or effect layer-picker / layer-reference binding that resolves to the WRONG layer (host instead of the chosen one); touching addEffectFromChunks / retargetEffectHostLayer / the effect-splice core; adding a BuildPseudoEffect control that synthesizes a tdpi; writing or reviewing a ship-gate that compares AE's 1-based layer .value/.index against the parser's 0-based Layer.Index; a pseudo/effect gate that passes for the wrong reason
-
----
+Pseudo layer-picker tdpi clobbered by shared-core retarget; false-green gate from 0/1-based index
 
 ## Signature
 - symptom: `BuildPseudoEffect layer-picker resolves to the host layer instead of the chosen layer (tdpi = host id, not the picked layer's id)`

@@ -1,9 +1,6 @@
 # Recipe Comp Frame Blending
 
-SUMMARY: Recipe support note for Comp Frame Blending.
-READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for composition fields related to Comp Frame Blending
-
----
+Recipe support note for Comp Frame Blending.
 
 Context: recipe `comp.frame_blending` support, proven with
 `examples/recipes/minimal-comp-frame-blending.json`.

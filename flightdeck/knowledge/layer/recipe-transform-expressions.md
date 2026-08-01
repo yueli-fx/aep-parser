@@ -1,9 +1,6 @@
 # ⚠ Recipe transform expressions require a reopen-backed property
 
-SUMMARY: Recipe `transform.expressions` writes expression source to parsed transform properties after a project reopen; do not call `SetExpression` on freshly generated properties without backrefs.
-READ WHEN: adding recipe expression support; moving expression writes inside recipe compilation; debugging `no tdbs reference` from `Property.SetExpression`
-
----
+Recipe `transform.expressions` writes expression source to parsed transform properties after a project reopen; do not call `SetExpression` on freshly generated properties without backrefs.
 
 Recipe transform expressions are authored under `transform.expressions`:
 

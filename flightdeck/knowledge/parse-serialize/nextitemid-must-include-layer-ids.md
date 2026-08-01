@@ -1,9 +1,6 @@
 # ⚠ initDerived must walk LAYER IDs when computing nextItemID
 
-SUMMARY: initDerived must walk LAYER IDs when computing nextItemID
-READ WHEN: implementing any allocItemID / monotonic-ID logic; computing max(used IDs) across a parsed project; debugging head-counter collisions after structural mutation; reviewing initDerived or any function summing IDs across project state; AE 2025 rejects a Go-built file with "unexpected match name searched for in group"
-
----
+initDerived must walk LAYER IDs when computing nextItemID
 
 显式 track matte duplicate 暴露的隐患：`Project.initDerived` 只走 `Compositions / Footage / Folders` 求 `max(ID) + 1` 当 `nextItemID`，**漏了 layer**。AE 把 layer ID 也分配在同一个 head counter 下 —— 一个 comp 内 layer ID 普遍 `> footage ID`（因为 AE 添加 solid 时是先建 footage 再建 layer，layer 拿后一个号），所以 `max(layer)` 可能 `>` `max(folder/comp/footage)`。
 

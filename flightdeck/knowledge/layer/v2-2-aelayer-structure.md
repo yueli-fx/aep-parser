@@ -1,9 +1,6 @@
 # ⚠ V2.2 ship gate FAIL — Layr 结构 + Transform schema + tdum/tduM 缺
 
-SUMMARY: V2.2 ship gate FAIL — Layr 结构 + Transform schema + tdum/tduM 缺
-READ WHEN: building / debugging ShapeLayer write path; AE accepts file but layers.length=0 (silent drop); considering byte-level patches to Layr Transform Group or shape body emit
-
----
+V2.2 ship gate FAIL — Layr 结构 + Transform schema + tdum/tduM 缺
 
 Path note: this is a historical RE/debug log from before the facade split. Historical prose may name old implementation paths such as `internal/aep/lower_layer.go` or `internal/aep/templates/*`; the current implementation lives mostly under `internal/serializer/*`, `internal/serializer/templates/*`, `internal/codec/*`, and `internal/aep_test/*`. Preserve old paths inside dated incident notes as evidence context; when using this as an action guide, confirm the current file with `rg` first.
 

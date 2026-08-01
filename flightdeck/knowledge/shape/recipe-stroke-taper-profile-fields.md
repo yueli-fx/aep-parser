@@ -1,9 +1,6 @@
 # Recipe Stroke Taper Profile Fields
 
-SUMMARY: Recipe support note for Stroke Taper Profile Fields.
-READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for shape fields related to Stroke Taper Profile Fields
-
----
+Recipe support note for Stroke Taper Profile Fields.
 
 Context: recipe `shape.stroke.taper` support, proven with
 `examples/recipes/minimal-shape-stroke-taper.json`.

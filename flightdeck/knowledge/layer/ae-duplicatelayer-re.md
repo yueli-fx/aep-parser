@@ -1,9 +1,6 @@
 # ⚠ DuplicateLayer RE — AE 行为契约
 
-SUMMARY: DuplicateLayer RE — AE 行为契约
-READ WHEN: implementing Composition.DuplicateLayer or any layer-clone mutation; understanding what AE's layer.duplicate() actually does at the chunk level; deciding whether to match AE's matte-preservation positioning quirk; tracking which fields get copied verbatim vs reset on clone
-
----
+DuplicateLayer RE — AE 行为契约
 
 V3 Phase 3 DuplicateLayer 实现 reference。**数字来自 AE 2020 17.7x45 自己 save 的 4 个 fixture diff**。
 

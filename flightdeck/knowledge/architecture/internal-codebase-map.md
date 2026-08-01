@@ -1,10 +1,6 @@
 # Internal codebase map
 
-SUMMARY: `internal/` is layered around AEP binary parsing/writing, typed scene state, public facade exports, verification gates, registry governance, version migration, recipes, and technique internalization.
-READ WHEN: onboarding to this repo, planning a broad refactor, deciding where a new internal package belongs, or reviewing codebase-scale cleanup under `internal/`
-RECHECK WHEN: packages are moved across `internal/`, public API facade ownership changes, registry/recipe/technique pipelines are split, or README architecture is updated
-
----
+`internal/` is layered around AEP binary parsing/writing, typed scene state, public facade exports, verification gates, registry governance, version migration, recipes, and technique internalization.
 
 `internal/` is no longer only the original RIFX parser stack. Treat it as five
 working layers:

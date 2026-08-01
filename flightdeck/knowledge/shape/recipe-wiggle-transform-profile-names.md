@@ -1,9 +1,6 @@
 # Recipe Wiggle Transform profile names mix Xform and shared modulation names
 
-SUMMARY: Recipe `shape.wiggle_transform` maps nested transform amplitudes to `ADBE Vector Wiggler ...`; only wiggles-per-second profiles as `ADBE Vector Xform Temporal Freq`, while seed/correlation/phase use shared `ADBE Vector ...` modulation names.
-READ WHEN: adding or debugging recipe Wiggle Transform support; writing `expected_profile.properties[]` for `shape.wiggle_transform`; a profile check cannot find `ADBE Vector Xform Random Seed`
-
----
+Recipe `shape.wiggle_transform` maps nested transform amplitudes to `ADBE Vector Wiggler ...`; only wiggles-per-second profiles as `ADBE Vector Xform Temporal Freq`, while seed/correlation/phase use shared `ADBE Vector ...` modulation names.
 
 The recipe keeps Wiggle Transform authoring grouped under one field:
 

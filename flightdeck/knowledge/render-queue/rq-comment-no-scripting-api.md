@@ -1,9 +1,6 @@
 # ⚠ RenderQueueItem.comment 无 ScriptingAPI — ship-gate 走"接受+保留"而非 readback
 
-SUMMARY: RenderQueueItem.comment 无 ScriptingAPI — ship-gate 走"接受+保留"而非 readback
-READ WHEN: 给 RenderQueueItem 加 comment/字段 setter；设计某个"无 ScriptingAPI 的二进制字段"的 ship-gate；想用 JSX readback 验证 RQ 字段却拿到 undefined
-
----
+RenderQueueItem.comment 无 ScriptingAPI — ship-gate 走"接受+保留"而非 readback
 
 ## 事实
 

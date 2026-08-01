@@ -1,9 +1,6 @@
 # ⚠ AE 接受自建 .aep 的多阶段 gate + canonical seed 策略
 
-SUMMARY: AE 接受自建 .aep 的多阶段 gate + canonical seed 策略
-READ WHEN: building .aep from scratch targeting AE 24+/25 acceptance; debugging "AfterFX crash" or "文件数据丢失" on builder output
-
----
+AE 接受自建 .aep 的多阶段 gate + canonical seed 策略
 
 Phase 6 ship gate 2026-05-22。从零构造 .aep 走 AE 的"接受"检查时，遇到 5 道梯度症状。每修一道 AE 给一个新症状信号，最终用 **单一 canonical seed (AE 2020)** 加 fps/duration 计算字段收敛。
 

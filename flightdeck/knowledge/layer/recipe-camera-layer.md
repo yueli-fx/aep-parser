@@ -1,9 +1,6 @@
 # Recipe Camera Layer
 
-SUMMARY: Recipe support note for Camera Layer.
-READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for layer fields related to Camera Layer
-
----
+Recipe support note for Camera Layer.
 
 Context: recipe `type: "camera"` support, proven with
 `examples/recipes/minimal-camera-layer.json`.

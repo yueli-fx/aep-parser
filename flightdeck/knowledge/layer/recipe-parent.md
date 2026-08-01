@@ -1,9 +1,6 @@
 # Recipe Layer Parent
 
-SUMMARY: Recipe support note for Layer Parent.
-READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for layer fields related to Layer Parent
-
----
+Recipe support note for Layer Parent.
 
 Context: recipe `layer.parent` support, proven with
 `examples/recipes/minimal-layer-parent.json`.

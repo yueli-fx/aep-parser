@@ -1,9 +1,6 @@
 # ⚠ btdk point-measurement setter 必须 FormatPSReal 否则 AE 读成 value/65536 (假绿)
 
-SUMMARY: btdk point-measurement setter 必须 FormatPSReal 否则 AE 读成 value/65536 (假绿)
-READ WHEN: 新增/调试任何写 btdk PostScript point/measurement 值的 text setter(run 或 paragraph 的 indent/spacing/shift/scale/width/tsume);Go round-trip 绿但 AE DOM 读回的值≈写入值/65536;判断某 btdk key 该用 FormatPSReal 还是 FormatPSNumber
-
----
+btdk point-measurement setter 必须 FormatPSReal 否则 AE 读成 value/65536 (假绿)
 
 ## Signature
 - symptom: `AE DOM 读回的 text 属性值 ≈ 写入值/65536(如写 20 → AE 读 0.000305=20/65536);Go round-trip 却绿`

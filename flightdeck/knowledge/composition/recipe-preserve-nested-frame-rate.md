@@ -1,9 +1,6 @@
 # Recipe Comp Preserve Nested Frame Rate
 
-SUMMARY: Recipe support note for Comp Preserve Nested Frame Rate.
-READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for composition fields related to Comp Preserve Nested Frame Rate
-
----
+Recipe support note for Comp Preserve Nested Frame Rate.
 
 Context: recipe `comp.preserve_nested_frame_rate` support, proven with
 `examples/recipes/minimal-comp-preserve-nested-frame-rate.json`.

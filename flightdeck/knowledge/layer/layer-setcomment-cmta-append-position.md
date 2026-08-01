@@ -1,9 +1,6 @@
 # ⚠ Layer.SetComment from-scratch 层 AE 读回空 — 真因 = ldta @0x3C has-comment flag(+cmta double-NUL),非插入位置
 
-SUMMARY: Layer.SetComment from-scratch 层 AE 读回空 — 真因 = ldta @0x3C has-comment flag(+cmta double-NUL),非插入位置
-READ WHEN: 实现/调试 Layer.SetComment;给 from-scratch 层(NewSolidLayer/NewShapeLayer 等无原生 cmta 的层)设 comment 后 AE 读回空;排查"Go round-trip 绿但 AE DOM comment 丢";给任意层级插入新 cmta/任何 sibling chunk 时纠结插入位置;评估 item-level SetComment(comp/footage)是否同坑
-
----
+Layer.SetComment from-scratch 层 AE 读回空 — 真因 = ldta @0x3C has-comment flag(+cmta double-NUL),非插入位置
 
 ## Signature
 - symptom: `NewSolidLayer` 等 from-scratch 层调 `SetComment("x")` 后 WriteAEP,AE 打开 DOM `layer.comment` 读回**空串**;Go 自 parse 读回正确(假绿)。同一 fixture 里 `SetName`(也是 length-variable)、`SetStartTime`、`SetParent` 全部 AE 接受 + DOM 正确——单单 comment 丢。

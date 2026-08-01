@@ -1,9 +1,6 @@
 # ⚠ 外部 AE 版本降级器 CEP 工具 RE
 
-SUMMARY: 外部 AE 版本降级器 CEP 工具 RE
-READ WHEN: 判断某 chunk/字段属于哪个 AE 版本的版本门禁；想用 head 字节判 AE 版本；调查 ldta 160/164 尾长之谜；评估或参考外部 AE 降级工具的可信度与已知 bug；需要 AE ship-gate 自动化的 prefs/occlusion 注意事项；想知道降级器砍 ldta 尾 4 字节会丢什么内容（@0xA0=track-matte 显式源）；自己复现一次降级（head 指纹 2020 + 删 ppSn/pdvc + trim ldta）
-
----
+外部 AE 版本降级器 CEP 工具 RE
 
 ## Signature
 - symptom: `某 chunk/字段是哪个 AE 版本引入的？head 怎么判版本？ldta 为何有 160/164 两种长度？外部降级器可信吗？`

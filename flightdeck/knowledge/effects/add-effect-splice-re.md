@@ -1,9 +1,6 @@
 # ⚠ AddEffect — Effect Parade splice RE + ship findings
 
-SUMMARY: AddEffect — Effect Parade splice RE + ship findings
-READ WHEN: implementing or extending AddEffect / the effect-template library; adding a new effect to the embedded set; debugging "AE drops/rejects a Go-added effect" or "cannot find layer ID=N in composition" on open; deciding whether an effect is splice-portable; extending parade auto-create to another group kind (Mask Parade); reasoning about the (tdmn, sspc) effect chunk unit or the tdpi host-layer binding
-
----
+AddEffect — Effect Parade splice RE + ship findings
 
 `aep.AddEffect(layer, matchName)` appends a built-in effect to a layer's
 `ADBE Effect Parade`. Shipped 2026-06-10 (two commits: core mechanic + 12-effect

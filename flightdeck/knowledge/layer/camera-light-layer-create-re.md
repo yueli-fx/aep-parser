@@ -1,9 +1,6 @@
 # ⚠ NewCameraLayer / NewLightLayer — embed-whole-Layr create
 
-SUMMARY: NewCameraLayer / NewLightLayer — embed-whole-Layr create
-READ WHEN: implementing/extending source-less layer creation (NewCameraLayer / NewLightLayer); adding a new embed-whole-Layr layer type; debugging "AE drops/mis-types a Go-created camera/light"; deciding embed-whole-Layr vs from-scratch for a new layer kind
-
----
+NewCameraLayer / NewLightLayer — embed-whole-Layr create
 
 Shipped 2026-06-10. AE 2020 + AE 2025 ship-gate PASS (`TestNewCameraLight_AEShipGate_AE20{20,25}`):
 AE accepts a Go-created Camera + Light in a fresh comp, types them correctly

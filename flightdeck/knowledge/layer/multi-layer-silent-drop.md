@@ -1,9 +1,6 @@
 # ⚠ 单合成多 ShapeLayer 被 AE silent-drop（layer-level sibling chunks 缺失）
 
-SUMMARY: 单合成多 ShapeLayer 被 AE silent-drop（layer-level sibling chunks 缺失）
-READ WHEN: implementing any NewX layer-creation path that inserts a Layr into a comp Item LIST; debugging "AE accepts the file but comp.layers shows only 1 of N layers" silent-drop; adding multiple user layers to one composition; reviewing what sibling chunks delimit a layer's serialized unit
-
----
+单合成多 ShapeLayer 被 AE silent-drop（layer-level sibling chunks 缺失）
 
 ## 症状
 

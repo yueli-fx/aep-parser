@@ -1,8 +1,6 @@
 # JSX generator cleanup provenance
-SUMMARY: JSX generator cleanup requires checking fixture manifest entries, produced fixture names, tracked generated outputs, and baseline/evidence references before deleting a zero-reference script.
-READ WHEN: cleaning `test_data/generators/*.jsx`, interpreting generator ledger delete candidates, pruning tracked fixtures, editing `scripts/fixtures/fixtures_manifest.json`, or removing split-roundtrip baseline hashes
 
----
+JSX generator cleanup requires checking fixture manifest entries, produced fixture names, tracked generated outputs, and baseline/evidence references before deleting a zero-reference script.
 
 A `.jsx` generator can have zero direct references by filename and still be active provenance. The common cases:
 

@@ -1,9 +1,6 @@
 # Recipe Comp Label
 
-SUMMARY: Recipe support note for Comp Label.
-READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for composition fields related to Comp Label
-
----
+Recipe support note for Comp Label.
 
 Context: recipe `comp.label` support, proven with
 `examples/recipes/minimal-comp-label.json`.

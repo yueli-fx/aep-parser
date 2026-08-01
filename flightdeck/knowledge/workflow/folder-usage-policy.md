@@ -1,8 +1,6 @@
 # Folder usage policy for generated evidence
-SUMMARY: `tmp/` is disposable; durable generated evidence and long-lived registry truth must be promoted to owned tracked locations before it becomes a dependency.
-READ WHEN: adding generated artifacts, referencing generated files from registry/current/coverage JSON, cleaning tmp/data/examples/test_data, or deciding where batch evidence should live
 
----
+`tmp/` is disposable; durable generated evidence and long-lived registry truth must be promoted to owned tracked locations before it becomes a dependency.
 
 Use directories by lifecycle, not by convenience:
 
@@ -10,6 +8,7 @@ Use directories by lifecycle, not by convenience:
 - `registry/`: machine-readable truth sources and governance ledgers. State that the tools read to decide status belongs here.
 - `registry/evidence/<topic>/`: durable generated evidence that is required by registry state, coverage ledgers, contract gates, or future continuation. These files are generated, but they are tracked because they are proof artifacts.
 - `data/samples/`: user-approved local corpus for broad sample validation. It is not a cleanup target and should not be promoted implicitly into truth ledgers.
+- `learning/`: ignored private learning area. Do not commit its contents or treat them as project truth.
 - `examples/recipes/`: tracked atomic recipe specs used to generate deterministic evidence.
 - `test_data/fixtures/` and `test_data/generators/`: tracked regression fixtures and their generators.
 - `test_data/generated/`: rebuildable generated test data; keep it out of truth ledgers unless a file is explicitly promoted elsewhere.

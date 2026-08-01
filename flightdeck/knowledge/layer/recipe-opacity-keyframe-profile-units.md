@@ -1,9 +1,6 @@
 # ⚠ Recipe opacity keyframes author as percent, profile as unit opacity
 
-SUMMARY: Recipe `transform.opacity_keyframes` values are authored in AE-style percent `0..100`, but `expected_profile.keyframes[]` for `ADBE Opacity` must compare against profile-read unit values `0..1`.
-READ WHEN: adding recipe transform opacity keyframes; writing `expected_profile.keyframes[]` for `ADBE Opacity`; a recipe keyframe profile check reports values like `0.2` instead of `20`
-
----
+Recipe `transform.opacity_keyframes` values are authored in AE-style percent `0..100`, but `expected_profile.keyframes[]` for `ADBE Opacity` must compare against profile-read unit values `0..1`.
 
 The recipe schema writes layer Opacity keyframes in percent:
 

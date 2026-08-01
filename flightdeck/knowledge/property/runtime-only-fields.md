@@ -1,9 +1,6 @@
 # ⚠ Runtime-only fields（AE 不持久化到 .aep）
 
-SUMMARY: Runtime-only fields（AE 不持久化到 .aep）
-READ WHEN: tempted to add a setter for a "weird" field; ScriptingAPI doc says read-only or "from system registry"; diff baseline shows zero byte change
-
----
+Runtime-only fields（AE 不持久化到 .aep）
 
 ## 现状名单
 

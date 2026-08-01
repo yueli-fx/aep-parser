@@ -1,9 +1,6 @@
 # ⚠ Shape-path keyframe write — Phase 0 RE
 
-SUMMARY: Shape-path keyframe write — Phase 0 RE
-READ WHEN: implementing shape-path keyframe write (animated ADBE Vector Shape); wiring LowerPathStream into lowerPathNode; emitting multi-frame om-s (tdbs time table + N shap); debugging "AE drops animated path" / wrong vertices on a keyframed shape path; deciding from-scratch vs embed-template for animated path lower
-
----
+Shape-path keyframe write — Phase 0 RE
 
 逐帧 bezier path 动画的磁盘结构。fixture `test_data/generators/re_path_anim.jsx`（3 个 LINEAR 关键帧，各帧顶点数/bbox 不同）→ AE 2020 + AE 2025 双版本存盘 → `tmp_debug/dump_path_anim`。
 

@@ -1,9 +1,6 @@
 # ⚠ Variable fonts axes 写 = ScriptingAPI 不存在该字段
 
-SUMMARY: Variable fonts axes 写 = ScriptingAPI 不存在该字段
-READ WHEN: implementing TextDocument variable-fonts setter; JSX-side property assignment shows zero byte diff in btdk; assuming any ExtendScript assignment that does not throw is effective
-
----
+Variable fonts axes 写 = ScriptingAPI 不存在该字段
 
 ## 症状
 

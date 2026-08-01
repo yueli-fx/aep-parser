@@ -1,9 +1,6 @@
 # Recipe Essential Graphics controller slice
 
-SUMMARY: Recipe `effects[].params[].essential_graphics` exposes a static effect parameter as an Essential Graphics controller through `AddEssentialProperty`.
-READ WHEN: adding recipe Essential Graphics fields; debugging `expected_profile.essential_graphics[]`; deciding whether keyframed, expression, layer, or point params are in scope
-
----
+Recipe `effects[].params[].essential_graphics` exposes a static effect parameter as an Essential Graphics controller through `AddEssentialProperty`.
 
 Recipe syntax:
 

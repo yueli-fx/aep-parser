@@ -1,9 +1,6 @@
 # ⚠ Recipe scale keyframes author as percent, profile as 3D unit scale
 
-SUMMARY: Recipe `transform.scale_keyframes` values are authored as 2D AE percent `[x,y]`, but `expected_profile.keyframes[]` for `ADBE Scale` must compare against profile-read 3D unit values `[x/100,y/100,1]`.
-READ WHEN: adding recipe transform scale keyframes; writing `expected_profile.keyframes[]` for `ADBE Scale`; a recipe keyframe profile check reports values like `[0.8,0.8,1]` instead of `[80,80]`
-
----
+Recipe `transform.scale_keyframes` values are authored as 2D AE percent `[x,y]`, but `expected_profile.keyframes[]` for `ADBE Scale` must compare against profile-read 3D unit values `[x/100,y/100,1]`.
 
 The recipe schema writes layer Scale keyframes as 2D percent values:
 

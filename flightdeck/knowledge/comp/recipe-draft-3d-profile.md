@@ -1,9 +1,6 @@
 # ⚠ Recipe comp `draft_3d` is profile/roundtrip evidence, not AE DOM evidence
 
-SUMMARY: Recipe `comp.draft_3d` writes the cdta Draft 3D flag and `profile.Composition.draft_3d` reads that flag back, but AE 2025 DOM readback is not a reliable oracle for this setting.
-READ WHEN: adding comp Draft 3D recipe/profile tests; deciding whether `draft_3d` needs an AE render/DOM gate; debugging why AE scripting does not reflect a written Draft 3D flag
-
----
+Recipe `comp.draft_3d` writes the cdta Draft 3D flag and `profile.Composition.draft_3d` reads that flag back, but AE 2025 DOM readback is not a reliable oracle for this setting.
 
 Recipe syntax:
 

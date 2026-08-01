@@ -1,9 +1,6 @@
 # ⚠ From-scratch layer replication silently drops static non-default transform channels
 
-SUMMARY: From-scratch layer replication silently drops static non-default transform channels
-READ WHEN: replicating a real layer's transform from-scratch (precomp / AV / shape / text) and the clone renders too big / un-rotated / off-position vs the original while the ANIMATED channels (Position/Opacity keyframes) look right; a nested-comp composite spreads wider or sits differently than the source though keyframe times match; deciding which transform channels to copy when mirroring an original layer; SetLayerTransform leaves Scale 100% / Rotation 0 because the gen never set them
-
----
+From-scratch layer replication silently drops static non-default transform channels
 
 ## Signature
 - symptom: a replicated precomp/AV layer renders FULL-SIZE (Scale 100%) and un-rotated while the original is scaled-down / rotated; the nested composite's glitch spreads far wider than the original even though every keyframe TIME and the leaf source match pixel-for-pixel

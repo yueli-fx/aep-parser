@@ -1,9 +1,6 @@
 # ⚠ Project/Composition/Layer/Property/Keyframe 全部 mutate 共享 chunk bytes
 
-SUMMARY: Project/Composition/Layer/Property/Keyframe 全部 mutate 共享 chunk bytes
-READ WHEN: writing concurrent code touching aep.Project / Composition / Layer / Property / Keyframe; debugging race conditions in Set* calls
-
----
+Project/Composition/Layer/Property/Keyframe 全部 mutate 共享 chunk bytes
 
 所有 Go 类型（Project / Composition / Layer / Property / Keyframe）都是 `rifx.Chunk.Data` 字节的视图 / mutator。**Set\* 直接改共享底层字节**，没有 copy-on-write。
 

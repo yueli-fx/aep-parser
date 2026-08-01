@@ -1,9 +1,6 @@
 # ⚠ Layer Styles tdsb bit0 = render-time enabled bit
 
-SUMMARY: Layer Styles tdsb bit0 = render-time enabled bit
-READ WHEN: debugging wrong RENDERED colours/styles on a Go-built layer while every stored value and JSX DOM readback looks correct; touching appendLayerStylesPlaceholder / makeTdsb flag words; adding any layer-level property-group placeholder; building a render-pixel gate
-
----
+Layer Styles tdsb bit0 = render-time enabled bit
 
 ## Signature
 - symptom: Go-built shape layers render collapsed into dark red (red solid-fill overlay + bevel/emboss relief on every shape) while every stored value、Go round-trip、AE resave、JSX DOM readback (fill/stroke color、opacity、blend mode) 全部正确；32bpc 下额外整体偏暗

@@ -1,9 +1,6 @@
 # ⚠ SetTimeRemapEnabled false-green: AE needs 2 identity keyframes, not a static value
 
-SUMMARY: SetTimeRemapEnabled false-green: AE needs 2 identity keyframes, not a static value
-READ WHEN: 实现/调试 Layer.SetTimeRemapEnabled;启用时间重映射 Go 不报错但 AE 读 timeRemapEnabled=false;以为设静态值 0.0 够;TimeRemapEnabled getter 与 SetTimeRemapEnabled 不自洽
-
----
+SetTimeRemapEnabled false-green: AE needs 2 identity keyframes, not a static value
 
 ## Signature
 - symptom: `SetTimeRemapEnabled(true) 不报错,但 AE DOM layer.timeRemapEnabled=false`

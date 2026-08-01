@@ -1,9 +1,6 @@
 # ⚠ Recipe 2D Position keyframes profile as 3D `[x,y,0]`
 
-SUMMARY: Recipe `transform.position_keyframes` accepts 2D `[x,y]` values, but `expected_profile.keyframes[]` for `ADBE Position` must compare against profile-read 3D `[x,y,0]` values.
-READ WHEN: adding recipe transform keyframe checks; writing `expected_profile.keyframes[]` for `ADBE Position`; a recipe keyframe profile check fails with actual `[x y 0]`
-
----
+Recipe `transform.position_keyframes` accepts 2D `[x,y]` values, but `expected_profile.keyframes[]` for `ADBE Position` must compare against profile-read 3D `[x,y,0]` values.
 
 The recipe schema writes layer Position keyframes as 2D values:
 

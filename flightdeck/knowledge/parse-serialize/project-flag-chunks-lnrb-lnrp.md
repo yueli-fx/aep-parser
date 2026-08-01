@@ -1,9 +1,6 @@
 # ⚠ lnrb / lnrp flag chunks — 不是空 chunk，位置敏感；lnrp ScriptingAPI readback quirk
 
-SUMMARY: lnrb / lnrp flag chunks — 不是空 chunk，位置敏感；lnrp ScriptingAPI readback quirk
-READ WHEN: implementing or debugging project-level flag chunks (lnrb / lnrp / similar presence-encoded settings); AE rejects writer output with "文件数据丢失"
-
----
+lnrb / lnrp flag chunks — 不是空 chunk，位置敏感；lnrp ScriptingAPI readback quirk
 
 ## Symptom
 

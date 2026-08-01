@@ -1,9 +1,6 @@
 # ⚠ AE drops unknown RIFX chunks on resave (custom metadata stash)
 
-SUMMARY: AE drops unknown RIFX chunks on resave (custom metadata stash)
-READ WHEN: 想往 .aep 嵌入自定义数据/作者元数据/版权/任意 stash;纠结自定义 RIFX chunk 会不会被 AE 保留;评估 lib-write→lib-read vs AE-resave 的数据存活;选元数据通道(comment/marker/XMP/自定义chunk)
-
----
+AE drops unknown RIFX chunks on resave (custom metadata stash)
 
 ## Signature
 - symptom: `自定义 RIFX chunk 注入 .aep,AE 能正常打开,但 AE 保存(resave)后该 chunk 消失`

@@ -1,9 +1,6 @@
 # Recipe Wiggle Paths points authors as string, profile reads numeric enum
 
-SUMMARY: Recipe `shape.wiggle_paths.points` uses `"corner"` or `"smooth"`, but `expected_profile.properties[]` for `ADBE Vector Roughen Points` must compare against AE's numeric enum values `1` or `2`.
-READ WHEN: adding or debugging recipe Wiggle Paths support; writing `expected_profile.properties[]` for `ADBE Vector Roughen Points`; a profile check reports `2` instead of `"smooth"`
-
----
+Recipe `shape.wiggle_paths.points` uses `"corner"` or `"smooth"`, but `expected_profile.properties[]` for `ADBE Vector Roughen Points` must compare against AE's numeric enum values `1` or `2`.
 
 The recipe schema keeps Wiggle Paths points readable:
 

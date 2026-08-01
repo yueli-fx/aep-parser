@@ -1,10 +1,6 @@
 # 不可信 AEP 输入安全 checklist
 
-SUMMARY: 对外处理任何不可信 AEP 前，始终启用 parser 资源预算、fuzz gate、HTTP timeout、panic 隔离和受限 path roots。
-READ WHEN: before exposing any AEP upload/parser service to untrusted input, or changing `internal/rifx` / `internal/server` safety controls
-RECHECK WHEN: parser limits、server isolation 或 path-input 模型发生变化时
-
----
+对外处理任何不可信 AEP 前，始终启用 parser 资源预算、fuzz gate、HTTP timeout、panic 隔离和受限 path roots。
 
 `internal/rifx` 已通过统一 parse seam 提供默认预算和可配置的 `Limits`：
 

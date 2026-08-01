@@ -1,9 +1,6 @@
 # ⚠ Stroke Line Cap / Line Join / Miter Limit — RE findings
 
-SUMMARY: Stroke Line Cap / Line Join / Miter Limit — RE findings
-READ WHEN: implementing Stroke Line Cap / Line Join / Miter Limit setters; enriching the embedded stroke body template; debugging why a stroke enum slot is missing from a saved .aep; setting Miter Limit via JSX and hitting a "hidden property" throw
-
----
+Stroke Line Cap / Line Join / Miter Limit — RE findings
 
 RE'd via `test_data/generators/re_stroke_linecap.jsx` (AE 2020) → `re_stroke_linecap.aep`.
 Dump tool: `go run ./tmp_debug/dump_named_cdat <aep> "Stroke Line Cap" ...`.

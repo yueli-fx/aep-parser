@@ -1,9 +1,6 @@
 # ⚠ Recipe effect param expressions need a materializing value
 
-SUMMARY: Recipe effect params can set an optional `expression`, but `value` is still required so `SetEffectParam` can materialize the parameter before `SetExpression` runs.
-READ WHEN: adding recipe effect-parameter expressions; debugging `unsupported_effect_param_value`; writing `expected_profile.effects[].params[]` expression checks
-
----
+Recipe effect params can set an optional `expression`, but `value` is still required so `SetEffectParam` can materialize the parameter before `SetExpression` runs.
 
 Effect parameters are usually elided until a writer materializes them. Recipe
 expression support therefore keeps `value` required:

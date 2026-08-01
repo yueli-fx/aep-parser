@@ -1,9 +1,6 @@
 # ⚠ Render Queue delete 写机制 — RE findings
 
-SUMMARY: Render Queue delete 写机制 — RE findings
-READ WHEN: implementing RenderQueue add/insert; debugging Rout chunk layout; extending RQ structural ops; reviewing mutate_render_queue.go
-
----
+Render Queue delete 写机制 — RE findings
 
 `RenderQueue.RemoveItem(index)`（P3 §3A，结构性）。RE 来源：AE 2020 受控 2-item→1-item（`test_data/generators/re_rq_delete.jsx`，`renderQueue.item(2).remove()`），`tmp_debug/dump_lrdr` diff。
 

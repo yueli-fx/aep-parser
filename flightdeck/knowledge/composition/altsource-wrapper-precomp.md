@@ -1,9 +1,6 @@
 # ⚠ setAlternateSource 自动包 wrapper precomp（AE 脚本 quirk）
 
-SUMMARY: setAlternateSource 自动包 wrapper precomp（AE 脚本 quirk）
-READ WHEN: implementing or debugging Layer.SetAlternateSource; touching Essential Properties slot / blsi chunk; comparing JSX-saved vs Go-built media-replacement layers
-
----
+setAlternateSource 自动包 wrapper precomp（AE 脚本 quirk）
 
 ## 症状
 

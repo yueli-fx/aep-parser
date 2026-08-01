@@ -1,9 +1,6 @@
 # ⚠ nnhd display settings: AE reads legacy nhed, not nnhd (+ feet = frames-per-foot)
 
-SUMMARY: nnhd display settings: AE reads legacy nhed, not nnhd (+ feet = frames-per-foot)
-READ WHEN: 实现/调试 project 显示设置 setter（SetTimeDisplayType / SetFramesCountType / SetFeetFramesFilmType / SetFramesUseFeetFrames / SetFootageTimecodeDisplayStartType / SetTimecodeDefaultBase / SetTransparencyGridThumbnails）；写了 nnhd 字节 Go round-trip 绿但 AE DOM 不反映；以为 nnhd 是唯一 display-settings 来源；以为 feetFramesFilmType 是 nnhd byte8 bit7；新增任何 nhed/nnhd 双写头字段
-
----
+nnhd display settings: AE reads legacy nhed, not nnhd (+ feet = frames-per-foot)
 
 ## Signature
 - symptom: `Go writes nnhd display-setting bytes, round-trip green, but AE DOM reads back the default (timeDisplayType/framesCountType/feetFramesFilmType/framesUseFeetFrames unchanged on reopen)`

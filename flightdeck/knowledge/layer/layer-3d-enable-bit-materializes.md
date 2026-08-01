@@ -1,9 +1,6 @@
 # ⚠ 3D-enable: flipping the Is3D bit alone makes AE materialize a full 3D layer
 
-SUMMARY: 3D-enable: flipping the Is3D bit alone makes AE materialize a full 3D layer
-READ WHEN: implementing 3D-layer support (roadmap priority 2); making a 2D AV/shape/solid layer 3D; wondering whether flipping Is3D needs companion Z-position / Orientation / X·Y-rotation / Material-Options channel synthesis; debugging "AE accepts my 3D-flagged layer but the 3D channels are missing on resave"; planning the visible-3D (camera/Z) render gate
-
----
+3D-enable: flipping the Is3D bit alone makes AE materialize a full 3D layer
 
 ## TL;DR
 

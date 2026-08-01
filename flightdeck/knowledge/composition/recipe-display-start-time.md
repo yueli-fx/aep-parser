@@ -1,9 +1,6 @@
 # Recipe Comp Display Start Time
 
-SUMMARY: Recipe support note for Comp Display Start Time.
-READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for composition fields related to Comp Display Start Time
-
----
+Recipe support note for Comp Display Start Time.
 
 Context: recipe `comp.display_start_time` support, proven with
 `examples/recipes/minimal-comp-display-start-time.json`.

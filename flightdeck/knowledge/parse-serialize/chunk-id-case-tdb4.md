@@ -1,9 +1,6 @@
 # ⚠ Chunk ID 大小写敏感 — Tdb4 ≠ tdb4
 
-SUMMARY: Chunk ID 大小写敏感 — Tdb4 ≠ tdb4
-READ WHEN: looking up a chunk ID constant in rifx; debugging "field reads OK on file X but nil on file Y"; adding a new chunk ID
-
----
+Chunk ID 大小写敏感 — Tdb4 ≠ tdb4
 
 RIFX chunk ID 是 4 字节 ASCII，**大小写敏感**。`Tdb4` (uppercase, legacy) 跟 `tdb4` (lowercase, modern) 是**两个不同的 chunk**。同义但不同名。
 

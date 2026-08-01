@@ -1,9 +1,6 @@
 # ⚠ shutter setter 在 AE 端触发 work-area divisor 重编码
 
-SUMMARY: shutter setter 在 AE 端触发 work-area divisor 重编码
-READ WHEN: implementing Comp.SetShutterAngle / SetShutterPhase; debugging unexpected cdta @0x18/@0x20/@0x28 changes after shutter setter
-
----
+shutter setter 在 AE 端触发 work-area divisor 重编码
 
 ## 现象
 

@@ -1,9 +1,6 @@
 # ⚠ docgen 单包扫描 + 类型别名 → 静默空文档（且对账测试假绿）
 
-SUMMARY: docgen 单包扫描 + 类型别名 → 静默空文档（且对账测试假绿）
-READ WHEN: 改 cmd/docgen 的包扫描/类型抽取；新增任何 facade/别名层（type X = pkg.Y）后发现 docs 段变空；写「生成物 vs 已提交」对账型测试时想确认它能不能抓回归；排查「docgen test 绿但 docs 实际不对」
-
----
+docgen 单包扫描 + 类型别名 → 静默空文档（且对账测试假绿）
 
 ## 症状
 

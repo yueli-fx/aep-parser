@@ -1,9 +1,6 @@
 # 验证流程 — checklist
 
-SUMMARY: 验证流程
-READ WHEN: preparing to commit; verifying tests + vet pass; reconciling PASS count against cockpit.md; writing a new test (conventions for fixture / corruption / AE 24 fields); needing a debug tool to inspect chunks / layers / properties; deciding where temporary outputs belong
-
----
+验证流程
 
 ## 提交前自查
 
@@ -16,7 +13,7 @@ go test ./...      # 必须全绿
 
 ## 当前基线
 
-公开 API 黑盒测试位于 `internal/aep_test`；全仓基线以 `go test ./...` 是否全绿为准，不在 cockpit 维护易漂移的 PASS 数量。
+公开 API 黑盒测试位于 `internal/aep_test`；全仓基线以 `go test ./...` 是否全绿为准，不在 Flightdeck Work 中维护易漂移的 PASS 数量。
 
 校对命令：
 

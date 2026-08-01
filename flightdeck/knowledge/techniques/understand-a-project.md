@@ -1,9 +1,6 @@
 # 内化一个参考工程 — 5 步流水线（每喂一个 .aep 跑一遍） — checklist
 
-SUMMARY: 内化一个参考工程 — 5 步流水线（每喂一个 .aep 跑一遍）
-READ WHEN: 拿到一个参考 .aep 要「理解/内化」它(抽可复用技法,而非只读懂这一个);要把某现象工程拆成三轴本体(角色/技法/机制);纠结理解的产出该长什么样、存哪;给学习引擎/生成引擎喂新样本前
-
----
+内化一个参考工程 — 5 步流水线（每喂一个 .aep 跑一遍）
 
 > **这是干嘛的**：把任意参考 `.aep` 系统地「内化」成**可复用、可迁移**的技法，而不是只读懂这一个怎么做的。每喂一个样本跑一遍，技法库单调增长 → 新现象越来越便宜。
 > **契约**：产出形态是三轴 schema / project_profile；本文件是执行型流程。技法库实例 = `fx-techniques.md`。已跑过的实例 = `build-good-fire.md`（火焰，本区）。
@@ -47,7 +44,7 @@ READ WHEN: 拿到一个参考 .aep 要「理解/内化」它(抽可复用技法,
    - 技法原子 → `fx-techniques.md`（跨域、读懂型）。
    - 现象配方 → 自包含的 `build-<现象>.md`（技法的**有序**组合，顺序/依赖归这层，不归技法）。
    - project_profile（每工程一份，可跨工程对齐）→ 暂存进该现象的 `build-<现象>.md`（火焰范例见 build-good-fire.md § 源工程真实结构）。
-   - preflight 扫 routing header 建知识地图；当 `READ WHEN` 命中时再读正文 = 下个会话能恢复这套知识，而不是靠聊天记忆。
+   - 使用自然主题路径和标题做有界发现；下个会话只需读取与当前 Goal、Current、Next 明确相关的知识正文，不依赖聊天记忆。
 6. **VALIDATE（金标准 = 能复现）**：按配方 build（`NewSolidLayer`×N + `AddEffect` + `SetEffectParam`/`AnimateEffectParam` + `SetBlendingMode` + `SetEffectLayerParam`，全 gated）→ AE 渲 → render-diff 对照原图。只有渲过的技法/配方升 `confidence: validated`。**理解引擎 = 生成引擎**（能复现才算真懂）。
 
 ## 第三方插件：支持，不是跳过（2026-06-18 用户定调）

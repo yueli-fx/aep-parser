@@ -1,9 +1,6 @@
 # Recipe Gradient Fill Profile Enums
 
-SUMMARY: Recipe support note for Gradient Fill Profile Enums.
-READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for shape fields related to Gradient Fill Profile Enums
-
----
+Recipe support note for Gradient Fill Profile Enums.
 
 Context: recipe `shape.gradient_fill` support, proven with
 `examples/recipes/minimal-shape-gradient-fill.json`.

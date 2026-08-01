@@ -1,9 +1,6 @@
 # ⚠ TickRate 是 per-composition 的，不是全局常量
 
-SUMMARY: TickRate 是 per-composition 的，不是全局常量
-READ WHEN: writing keyframe / marker time arithmetic; debugging "time off by factor"; adding new time-based setter
-
----
+TickRate 是 per-composition 的，不是全局常量
 
 **不要假设统一 8000**。`Composition.TickRate` 由 cdta `@0x08` / `@0xA8` 推导，**每个 comp 自己一份**。Keyframe / Marker 时间换算都必须用 owning comp 的 TickRate。
 

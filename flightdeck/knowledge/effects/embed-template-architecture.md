@@ -1,10 +1,6 @@
 # Embedded-template architecture, v2_2 naming & version portability
 
-SUMMARY: Embedded-template architecture, v2_2 naming & version portability
-READ WHEN: 想理解库怎么造形状/效果(为什么必须基于 .bin);看到 v2_2/v22 命名困惑;纠结 effect/shape 跨 AE 版本要不要分版本号;评估从零生成 vs embed-body
-RECHECK WHEN: embed-template 模板布局重组(2026-06-17 已分子目录),或写策略从 embed-body 转向从零生成,或 per-version 模板机制落地
-
----
+Embedded-template architecture, v2_2 naming & version portability
 
 > 三个会话调查的合并总结(2026-06-17,用户提问驱动)。本条保留为架构知识：模板命名、版本分裂触发条件、以及为什么从真实 AE 输出克隆模板比逐字节手搓安全。
 

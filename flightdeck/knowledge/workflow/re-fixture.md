@@ -1,9 +1,6 @@
 # JSX RE 工作流 + ship-gate — checklist
 
-SUMMARY: JSX RE 工作流 + ship-gate
-READ WHEN: writing a new RE JSX fixture; debugging field locations via byte-diff against AE-saved baseline; setting up cross-version AE comparison; running a ship-gate against AE (modified .aep accepted/rejected); diagnosing why AE rejects a builder-written file; looking up "which AE version introduced field X"; invoking ae_run.ps1 wrapper for unattended ship-gate; deciding which AE version to use for a new fixture
-
----
+JSX RE 工作流 + ship-gate
 
 ## 总览
 

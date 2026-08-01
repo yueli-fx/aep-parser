@@ -1,9 +1,6 @@
 # ⚠ deriveTickRate 3× off for NTSC modern-AE files (×1000/scale was bogus)
 
-SUMMARY: deriveTickRate 3× off for NTSC modern-AE files (×1000/scale was bogus)
-READ WHEN: from-scratch keyframe replication renders shapes at wrong times (3× too late on read, or 1.281× too fast in AE on a NTSC clone); a NTSC/29.97 comp's kf.Time / marker seconds read 3× too large; from-scratch keyframes on a fractional-fps comp evaluate early in AE while the stored ticks look right; touching deriveTickRate / cdta @0x08 / @0xA8 / tdb4 @0x0C; makeTdb4 / injectAnimatedStream; NewComposition for fractional (29.97/59.94) fps
-
----
+deriveTickRate 3× off for NTSC modern-AE files (×1000/scale was bogus)
 
 ## Signature
 - symptom: from-scratch clone shape keyframes play over 2.7 s instead of the original's 0.9 s visible window; NTSC comp kf.Time reads 3× too large (0.8 s where AE says 0.2669 s)

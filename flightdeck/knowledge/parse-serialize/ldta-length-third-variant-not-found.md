@@ -1,9 +1,6 @@
 # ⚠ AE 24/25 ldta 第三种长度 — 找不到 (negative finding)
 
-SUMMARY: AE 24/25 ldta 第三种长度 — 找不到 (negative finding)
-READ WHEN: hypothesizing AE 24+/25 added bytes to ldta tail; planning a "new long ldta" RE pass
-
----
+AE 24/25 ldta 第三种长度 — 找不到 (negative finding)
 
 ## 症状
 

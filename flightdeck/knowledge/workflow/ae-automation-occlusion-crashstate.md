@@ -1,9 +1,6 @@
 # ⚠ AE ship-gate flakes in interactive sessions: occlusion + crash-recovery cascade
 
-SUMMARY: AE ship-gate flakes in interactive sessions: occlusion + crash-recovery cascade
-READ WHEN: running AE ship-gates in an interactive session and hitting ae_run.ps1 exit 2 / unknown-modal; AE shows a dialog that OCR can't read; "崩溃修复选项" safe-mode dialog on launch (including on MANUAL launch after automated runs); writing PowerShell that touches WinRT/UWP (Windows.Media.Ocr) or "Unable to find type" from pwsh; ocrMatch rules failing on CJK text
-
----
+AE ship-gate flakes in interactive sessions: occlusion + crash-recovery cascade
 
 ## Operator context（2026-06-17，用户立规）
 

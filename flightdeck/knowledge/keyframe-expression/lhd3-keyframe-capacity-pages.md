@@ -1,9 +1,6 @@
 # ⚠ lhd3 容量字段按 4-keyframe 分页 — AE 2025 校验 reject
 
-SUMMARY: lhd3 容量字段按 4-keyframe 分页 — AE 2025 校验 reject
-READ WHEN: AE 2025 rejects a Go-written project as corrupt (项目文件似乎已损坏/读取无效) when a property has >4 keyframes; touching encodeKeyframes lhd3 header fields; assuming lhd3 @0x0C/@0x1C are constants; extending any keyframe-list writer (path time table / mask om-s); editing parse_keyframe.go / write_keyframe.go; adding a new keyframe property type; debugging "ease/value at wrong offset"
-
----
+lhd3 容量字段按 4-keyframe 分页 — AE 2025 校验 reject
 
 ## Signature
 - symptom: AE 2025 打开 Go 写的工程报「该项目文件似乎已损坏 (读取……无效)」；同一文件 AE 2020 正常打开；属性带 >4 个关键帧时触发，≤4 个不触发

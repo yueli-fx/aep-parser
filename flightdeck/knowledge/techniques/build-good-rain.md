@@ -1,9 +1,6 @@
 # Build Good Rain — rain phenomenon recipe
-SUMMARY: Rain recipe distilled from Motionbox Rain Day sample; separates native shape/repeater rain construction from Trapcode Particular exact-render dependencies.
-READ WHEN: building or analyzing rain, falling streaks, particle rain, umbrella/water-scene motion graphics, or deciding whether a rain reference can be reproduced plugin-free
-RECHECK WHEN: a new rain sample is added; native rain showcase generation lands; Particular/Unmult embed-template support lands; expression/runtime behavior support changes
 
----
+Rain recipe distilled from Motionbox Rain Day sample; separates native shape/repeater rain construction from Trapcode Particular exact-render dependencies.
 
 ## Sources
 

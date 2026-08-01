@@ -1,9 +1,6 @@
 # ⚠ Gradient fill write (SetGradient) — RE + ship findings
 
-SUMMARY: Gradient fill write (SetGradient) — RE + ship findings
-READ WHEN: implementing or extending gradient write (SetGradient / GradientFillNode / GradientStroke / gradient ramp direction Start·End Pt / radial type / radial HiLite Length·Angle highlight); encoding AE gradient prop.map XML; debugging "AE drops the gradient" or stops/direction/highlight not surviving resave; deciding whether a gradient fixture is AE-version-portable; wanting to control the linear ramp angle/direction or shift a radial gradient's bright centre
-
----
+Gradient fill write (SetGradient) — RE + ship findings
 
 V2.2.1 子项⑭. Gradient **read** already existed (`ParseGradientXML` + the
 GCst→GCky→Utf8 parse path). This is the **write** path: a from-scratch gradient

@@ -1,9 +1,6 @@
 # ⚠ PropertyBase Remove / Duplicate / MoveTo — AE 行为契约 + chunk 机制
 
-SUMMARY: PropertyBase Remove / Duplicate / MoveTo — AE 行为契约 + chunk 机制
-READ WHEN: implementing PropertyBase.Remove / Duplicate / MoveTo or any structural mutation of a property group's children; deciding whether a given property group permits add/remove/reorder; wiring the INDEXED_GROUP predicate
-
----
+PropertyBase Remove / Duplicate / MoveTo — AE 行为契约 + chunk 机制
 
 RE'd 2026-06-03 (AE 2020, `17.7x45`) via `test_data/generators/re_property_struct.jsx`
 （modes: baseline / remove / duplicate / move）。目标域 = canonical indexed

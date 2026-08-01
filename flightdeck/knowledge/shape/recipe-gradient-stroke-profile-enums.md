@@ -1,9 +1,6 @@
 # Recipe Gradient Stroke Profile Enums
 
-SUMMARY: Recipe support note for Gradient Stroke Profile Enums.
-READ WHEN: working on recipe schema, compiler, profile validation, examples, or docs for shape fields related to Gradient Stroke Profile Enums
-
----
+Recipe support note for Gradient Stroke Profile Enums.
 
 Context: recipe `shape.gradient_stroke` support, proven with
 `examples/recipes/minimal-shape-gradient-stroke.json`.
