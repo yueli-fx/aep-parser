@@ -10,6 +10,72 @@ type PropertyBase interface {
 	PropertyName() string
 }
 
+// AEPropertyType mirrors the semantic PropertyBase.propertyType values AE
+// exposes. Unknown is a parser extension used when the binary wrapper is
+// preserved but its AE runtime role has not been established.
+type AEPropertyType uint8
+
+const (
+	AEPropertyTypeUnknown AEPropertyType = iota
+	AEPropertyTypeProperty
+	AEPropertyTypeNamedGroup
+	AEPropertyTypeIndexedGroup
+)
+
+func (t AEPropertyType) String() string {
+	switch t {
+	case AEPropertyTypeProperty:
+		return "PROPERTY"
+	case AEPropertyTypeNamedGroup:
+		return "NAMED_GROUP"
+	case AEPropertyTypeIndexedGroup:
+		return "INDEXED_GROUP"
+	default:
+		return "UNKNOWN"
+	}
+}
+
+// AEOpaqueProperty preserves an on-disk named node that the parser cannot
+// materialize as Property yet. Keeping it in the semantic tree makes loss
+// explicit while the original RIFX subtree remains available for round-trip.
+type AEOpaqueProperty struct {
+	MatchName    string
+	Name         string
+	NameSource   string
+	SemanticType AEPropertyType
+	ValueType    PropertyValueType
+
+	decodeEvidence propertyDecodeEvidenceProvider
+}
+
+func (p *AEOpaqueProperty) PropertyMatchName() string { return p.MatchName }
+func (p *AEOpaqueProperty) PropertyName() string      { return p.Name }
+func (p *AEOpaqueProperty) PropertyType() AEPropertyType {
+	if p.SemanticType == AEPropertyTypeUnknown {
+		return AEPropertyTypeUnknown
+	}
+	return p.SemanticType
+}
+func (p *AEOpaqueProperty) ValuePropertyType() PropertyValueType {
+	return p.ValueType
+}
+func (p *AEOpaqueProperty) DecodeEvidence() PropertyDecodeEvidence {
+	if p == nil || p.decodeEvidence == nil {
+		return PropertyDecodeEvidence{}
+	}
+	return p.decodeEvidence.DecodeEvidence()
+}
+
+// SetOpaquePropertyDecodeEvidence wires serializer-owned parse evidence onto
+// an opaque semantic node without exposing binary chunks to scene.
+func SetOpaquePropertyDecodeEvidence(p *AEOpaqueProperty, provider interface {
+	DecodeEvidence() PropertyDecodeEvidence
+}) {
+	if p != nil {
+		p.decodeEvidence = provider
+	}
+}
+
 // PropertyMatchName returns the property's AE match-name (e.g.
 // "ADBE Position"). Implements PropertyBase.
 func (p *Property) PropertyMatchName() string { return p.MatchName }
@@ -31,7 +97,12 @@ func (p *Property) PropertyName() string { return p.Name }
 type AEPropertyGroup struct {
 	MatchName string
 	Name      string
-	Children  []PropertyBase
+	// NameSource distinguishes an on-disk instance name from a parser fallback.
+	NameSource string
+	Children   []PropertyBase
+	// SemanticType is assigned by the parser from the property-group grammar.
+	// Unknown is retained when a wrapper does not establish AE's group role.
+	SemanticType AEPropertyType
 
 	parent *AEPropertyGroup
 	back   PropertyGroupWriter // underlying tdgp LIST shard, interface-typed (concrete via propertyGroupBack); see back_property_group.go
@@ -45,8 +116,8 @@ type AEPropertyGroup struct {
 
 // OwnerLayer walks from a parsed leaf up to the synthetic property-tree root
 // and returns the owning Layer, or nil when the property was built outside
-// the parser / lives under an Effect or Mask subtree (those roots carry no
-// layer back-ref). Exported for the serializer stage (internal/aep).
+// the parser or is not attached to a layer property tree. Exported for the
+// serializer stage (internal/aep).
 func (p *Property) OwnerLayer() *Layer {
 	g := p.parentTreeGroup
 	for g != nil {
@@ -138,8 +209,8 @@ func (g *AEPropertyGroup) PropertyByPath(matchNames ...string) *Property {
 
 // ParentGroup returns the AEPropertyGroup that contains this property in
 // the layer's hierarchical property tree, or nil when the property was
-// built outside the parser, lives inside an Effect/Mask (not the
-// layer-level tdgp), or hasn't been wired through wirePropertyTreeLeaves.
+// built outside the parser or hasn't been wired through
+// wirePropertyTreeLeaves.
 func (p *Property) ParentGroup() *AEPropertyGroup { return p.parentTreeGroup }
 
 // indexedGroupMatchNames are AE's INDEXED_GROUP container match-names whose
@@ -152,12 +223,83 @@ var indexedGroupMatchNames = map[string]bool{
 	"ADBE Root Vectors Group": true,
 }
 
+// namedGroupMatchNames contains tdgp-backed groups whose fixed-child,
+// NAMED_GROUP semantics have been established. Unknown tdgp wrappers stay
+// UNKNOWN instead of being guessed from the absence of indexed semantics.
+var namedGroupMatchNames = map[string]bool{
+	"ADBE Transform Group":        true,
+	"ADBE Audio Group":            true,
+	"ADBE Text Properties":        true,
+	"ADBE Camera Options Group":   true,
+	"ADBE Light Options Group":    true,
+	"ADBE Material Options Group": true,
+	"ADBE Extrsn Options Group":   true,
+	"ADBE Layer Sets":             true,
+	"ADBE Source Options Group":   true,
+	"ADBE Blend Options Group":    true,
+	"ADBE Adv Blend Group":        true,
+	"ADBE Vector Transform Group": true,
+	"ADBE Vector Materials Group": true,
+}
+
+// ParsedPropertyGroupType classifies a tdgp-backed AE group using the
+// parser's established semantic catalog. Wrapper grammar establishes that the
+// node is a group; the catalog distinguishes AE's indexed containers from
+// fixed named groups.
+func ParsedPropertyGroupType(matchName string) AEPropertyType {
+	if indexedGroupMatchNames[matchName] {
+		return AEPropertyTypeIndexedGroup
+	}
+	if namedGroupMatchNames[matchName] {
+		return AEPropertyTypeNamedGroup
+	}
+	return AEPropertyTypeUnknown
+}
+
 // IsIndexedGroup reports whether this group is one of AE's INDEXED_GROUP
 // containers, i.e. whether its direct children support structural Remove /
 // MoveTo / Duplicate. Named groups (Transform, Material Options, …) and leaf
 // properties return false.
 func (g *AEPropertyGroup) IsIndexedGroup() bool {
-	return g != nil && indexedGroupMatchNames[g.MatchName]
+	if g == nil {
+		return false
+	}
+	if g.SemanticType != AEPropertyTypeUnknown {
+		return g.SemanticType == AEPropertyTypeIndexedGroup
+	}
+	// Mutation-created groups have no parsed semantic metadata. Retain the
+	// established structural API behaviour for those in-memory objects.
+	return indexedGroupMatchNames[g.MatchName]
+}
+
+// PropertyType reports AE's semantic group type, or UNKNOWN for a preserved
+// binary wrapper that has not been classified as an AE property group.
+func (g *AEPropertyGroup) PropertyType() AEPropertyType {
+	if g == nil {
+		return AEPropertyTypeUnknown
+	}
+	if g.SemanticType != AEPropertyTypeUnknown {
+		return g.SemanticType
+	}
+	return AEPropertyTypeUnknown
+}
+
+type propertyGroupIntegrityProvider interface {
+	ChildIntegrity() (observed, preserved int)
+}
+
+// ChildIntegrity returns parser preservation evidence for the group's direct
+// children when its serializer-owned backing provides it. In-memory groups
+// without parser backing return zero values.
+func (g *AEPropertyGroup) ChildIntegrity() (observed, preserved int) {
+	if g == nil || g.back == nil {
+		return 0, 0
+	}
+	provider, ok := g.back.(propertyGroupIntegrityProvider)
+	if !ok {
+		return 0, 0
+	}
+	return provider.ChildIntegrity()
 }
 
 // PropertyIndex returns the position of child within this group's

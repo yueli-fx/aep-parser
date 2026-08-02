@@ -244,3 +244,74 @@ func TestAEPropertyGroup_LeafResolutionByTdbsIdentity(t *testing.T) {
 		t.Errorf("flat Position (%p) and tree Position (%p) are different instances", flat, tree)
 	}
 }
+
+func TestAEPropertyGroup_SpecialWrapperLeavesKeepSemanticIdentity(t *testing.T) {
+	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")
+	if err != nil {
+		t.Skipf("re_cameralight.aep not present: %v", err)
+	}
+	for _, c := range proj.Compositions {
+		for _, layer := range c.Layers {
+			var flat *aep.Property
+			for _, property := range layer.Properties {
+				if property.MatchName == "ADBE Orientation" {
+					flat = property
+					break
+				}
+			}
+			if flat == nil {
+				continue
+			}
+			tree := layer.PropertyByPath(aep.MatchNameGroupTransform, "ADBE Orientation")
+			if tree != flat {
+				t.Fatalf("Orientation tree leaf = %p, flat leaf = %p", tree, flat)
+			}
+			return
+		}
+	}
+	t.Skip("fixture contains no Orientation property")
+}
+
+func TestAEPropertyGroup_EffectParametersAreLinkedLeaves(t *testing.T) {
+	proj, err := aep.Open("../../test_data/fixtures/re_batch.aep")
+	if err != nil {
+		t.Skipf("re_batch.aep not present: %v", err)
+	}
+	for _, c := range proj.Compositions {
+		for _, layer := range c.Layers {
+			if len(layer.Effects) == 0 || len(layer.Effects[0].Parameters) == 0 {
+				continue
+			}
+			parade := layer.EffectsParade()
+			if parade == nil {
+				t.Fatal("layer with effects has no Effects Parade")
+			}
+			effectGroup := parade.Group(layer.Effects[0].MatchName)
+			if effectGroup == nil {
+				t.Fatalf("effect group %q missing", layer.Effects[0].MatchName)
+			}
+			want := layer.Effects[0].Parameters[0]
+			if got := findPropertyRecursive(effectGroup, want.MatchName); got != want {
+				t.Fatalf("effect param tree leaf = %p, flat param = %p", got, want)
+			}
+			return
+		}
+	}
+	t.Skip("fixture contains no effect parameters")
+}
+
+func findPropertyRecursive(group *aep.AEPropertyGroup, matchName string) *aep.Property {
+	for i := 0; i < group.NumProperties(); i++ {
+		switch child := group.ChildByIndex(i).(type) {
+		case *aep.Property:
+			if child.MatchName == matchName {
+				return child
+			}
+		case *aep.AEPropertyGroup:
+			if found := findPropertyRecursive(child, matchName); found != nil {
+				return found
+			}
+		}
+	}
+	return nil
+}

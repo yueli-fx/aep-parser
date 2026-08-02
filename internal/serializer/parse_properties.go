@@ -101,8 +101,8 @@ func parseGradientStopsProperty(matchName string, gcst *rifx.Chunk, ctx *parseCt
 		// Even when the inner tdbs has no decodable cdat (the placeholder
 		// in real fixtures is only 4 bytes), we still want to surface the
 		// gradient. Fabricate a minimal Property carrying the XML.
-		prop = &Property{MatchName: matchName, Name: matchName, Components: 1}
-		scene.SetPropertyBack(prop, &propertyBackrefs{tdbs: innerTdbs})
+		prop = &Property{MatchName: matchName, Name: matchName, NameSource: "fallback", Components: 1}
+		scene.SetPropertyBack(prop, &propertyBackrefs{tdbs: innerTdbs, decodeStatus: "partially-decoded"})
 	}
 	gcky := gcst.FindFirstList(rifx.IDGCky)
 	if gcky == nil {
@@ -139,28 +139,34 @@ func parseOrientationProperty(matchName string, otst *rifx.Chunk, ctx *parseCtx)
 	}
 	prop := parseLeafProperty(matchName, tdbs, ctx)
 	if prop == nil {
-		prop = &Property{MatchName: matchName, Name: matchName}
-		scene.SetPropertyBack(prop, &propertyBackrefs{tdbs: tdbs})
+		prop = &Property{MatchName: matchName, Name: matchName, NameSource: "fallback"}
+		scene.SetPropertyBack(prop, &propertyBackrefs{tdbs: tdbs, decodeStatus: "partially-decoded"})
 	}
 	prop.Components = 3
 
 	if len(prop.Keyframes) > 0 {
 		// Animated: replace the (zero) ldat values with the real per-keyframe
 		// X/Y/Z from otda, in order.
+		if pb := propertyBack(prop); pb != nil {
+			pb.keyframeValuesExternal = true
+		}
+		decodedValues := 0
 		if otky := otst.FindFirstList(rifx.IDOtky); otky != nil {
-			ki := 0
 			for _, ch := range otky.Children {
 				if ch.ID != rifx.IDOtda || len(ch.Data) < 24 {
 					continue
 				}
-				if ki >= len(prop.Keyframes) {
+				if decodedValues >= len(prop.Keyframes) {
 					break
 				}
-				prop.Keyframes[ki].Value = decodeCdatValue(ch.Data, 3) // otda is big-endian
-				ki++
+				prop.Keyframes[decodedValues].Value = decodeCdatValue(ch.Data, 3) // otda is big-endian
+				decodedValues++
 			}
 		}
-	} else if cdat := tdbs.FindFirst(rifx.IDCdat); cdat != nil && len(cdat.Data) >= 24 {
+		if decodedValues < len(prop.Keyframes) {
+			setPropertyDecodeEvidence(prop, "partially-decoded", "")
+		}
+	} else if cdat := tdbs.FindFirst(rifx.IDCdat); cdat != nil {
 		// Static: the cdat value is little-endian inside an otst.
 		if pb := propertyBack(prop); pb != nil {
 			pb.cdat = cdat
@@ -173,7 +179,12 @@ func parseOrientationProperty(matchName string, otst *rifx.Chunk, ctx *parseCtx)
 				}
 			}
 		}
-		prop.StaticValue = decodeCdatValueLE(cdat.Data, 3)
+		if len(cdat.Data) >= 8 {
+			prop.StaticValue = decodeCdatValueLE(cdat.Data, 3)
+		}
+		if len(cdat.Data) < 24 {
+			setPropertyDecodeEvidence(prop, "partially-decoded", "")
+		}
 	}
 	return prop
 }
@@ -182,13 +193,13 @@ func parseOrientationProperty(matchName string, otst *rifx.Chunk, ctx *parseCtx)
 // chunk. Always returns []float64 (orientation is multi-component); the
 // big-endian counterpart is decodeCdatValue.
 func decodeCdatValueLE(d []byte, components int) any {
-	vals := make([]float64, components)
+	vals := make([]float64, 0, components)
 	for i := 0; i < components; i++ {
 		v, ok := readFloat64LE(d, i*8)
 		if !ok {
 			break
 		}
-		vals[i] = v
+		vals = append(vals, v)
 	}
 	return vals
 }
@@ -238,8 +249,8 @@ func applyPardDefs(params []*Property, defs map[string]*pardParamDef) {
 		}
 		// Override control type when pard provides a more precise value.
 		if def.controlType != PCTLUnknown {
-			// Store on property for ControlType() to use.
-			// We reuse the tdb4-derived value as fallback; pard is authoritative.
+			p.DeclaredControlType = def.controlType
+			p.HasDeclaredControlType = true
 		}
 	}
 }
@@ -269,8 +280,8 @@ func descend(c *rifx.Chunk, parentName string, out *[]*Property, ctx *parseCtx) 
 // expression source (JavaScript). If present, it's surfaced as
 // Property.Expression.
 func parseLeafProperty(matchName string, tdbs *rifx.Chunk, ctx *parseCtx) *Property {
-	prop := &Property{MatchName: matchName, Name: matchName, Components: 1}
-	scene.SetPropertyBack(prop, &propertyBackrefs{})
+	prop := &Property{MatchName: matchName, Name: matchName, NameSource: "fallback", Components: 1}
+	scene.SetPropertyBack(prop, &propertyBackrefs{decodeStatus: "decoded"})
 	pb := propertyBack(prop)
 
 	if tdb4 := tdbs.FindFirst(rifx.IDtdb4); tdb4 != nil {
@@ -299,6 +310,7 @@ func parseLeafProperty(matchName string, tdbs *rifx.Chunk, ctx *parseCtx) *Prope
 	for _, ch := range tdbs.Children {
 		if ch.ID == rifx.IDTdpi && len(ch.Data) >= 4 {
 			prop.LayerRefID = binary.BigEndian.Uint32(ch.Data[:4])
+			prop.LayerRefPresent = true
 			break
 		}
 	}
@@ -341,13 +353,20 @@ func parseLeafProperty(matchName string, tdbs *rifx.Chunk, ctx *parseCtx) *Prope
 		ldat := kfList.FindFirst(rifx.IDLdat)
 		if lhd3 != nil && ldat != nil {
 			parseKeyframes(prop, lhd3, ldat, ctx)
+		} else {
+			setPropertyDecodeEvidence(prop, "partially-decoded", "invalid-preserved")
 		}
 	} else if cdat != nil && len(cdat.Data) >= 8 {
 		pb.cdat = cdat
 		prop.StaticValue = decodeCdatValue(cdat.Data, prop.Components)
+		if prop.Components <= 0 || len(cdat.Data) < prop.Components*8 {
+			setPropertyDecodeEvidence(prop, "partially-decoded", "")
+		}
 	} else if prop.Expression == "" {
 		// Nothing useful in this tdbs.
 		return nil
+	} else {
+		setPropertyDecodeEvidence(prop, "partially-decoded", "")
 	}
 	return prop
 }
@@ -388,16 +407,19 @@ func decodeTdb4Components(d []byte) int {
 // actual values live at the very start.
 func decodeCdatValue(d []byte, components int) any {
 	if components <= 1 {
-		v, _ := readFloat64BE(d, 0)
+		v, ok := readFloat64BE(d, 0)
+		if !ok {
+			return nil
+		}
 		return v
 	}
-	vals := make([]float64, components)
+	vals := make([]float64, 0, components)
 	for i := 0; i < components; i++ {
 		v, ok := readFloat64BE(d, i*8)
 		if !ok {
 			break
 		}
-		vals[i] = v
+		vals = append(vals, v)
 	}
 	return vals
 }

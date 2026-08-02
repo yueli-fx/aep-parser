@@ -17,11 +17,30 @@ import (
 type propertyGroupBackrefs struct {
 	// chunk is the group's underlying tdgp LIST; nil for the synthetic root.
 	chunk *rifx.Chunk
+
+	observedChildCount  int
+	preservedChildCount int
 }
 
 var _ PropertyGroupWriter = (*propertyGroupBackrefs)(nil)
 
 func (b *propertyGroupBackrefs) IsPropertyGroupWriter() {}
+
+func (b *propertyGroupBackrefs) ChildIntegrity() (observed, preserved int) {
+	if b == nil {
+		return 0, 0
+	}
+	return b.observedChildCount, b.preservedChildCount
+}
+
+func addPropertyGroupChildIntegrity(g *AEPropertyGroup, observed, preserved int) {
+	b := propertyGroupBack(g)
+	if b == nil {
+		return
+	}
+	b.observedChildCount += observed
+	b.preservedChildCount += preserved
+}
 
 // propertyGroupBack returns the concrete backrefs behind an AEPropertyGroup's
 // writer interface for serializer-stage (parse_/mutate_) tdgp LIST access.

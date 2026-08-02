@@ -1,6 +1,7 @@
 package serializer
 
 import (
+	"encoding/binary"
 	"fmt"
 
 	"github.com/yueli-fx/aep-parser/internal/rifx"
@@ -66,8 +67,76 @@ type propertyBackrefs struct {
 	// bytesPerKF mirrors the lhd3 @0x10 keyframe stride (decoded once during
 	// parse, cached so write paths don't re-read the header on every setter).
 	bytesPerKF int
+	// keyframeValuesExternal marks streams whose authoritative values live
+	// outside ldat (currently Orientation otky/otda). Generic keyframe writers
+	// do not synchronize that external storage and must not claim support.
+	keyframeValuesExternal bool
+
+	decodeStatus       string
+	temporalEaseStatus string
 
 	opaque map[rifx.ChunkID]*rifx.Chunk
+}
+
+func (b *propertyBackrefs) DecodeEvidence() scene.PropertyDecodeEvidence {
+	if b == nil {
+		return scene.PropertyDecodeEvidence{}
+	}
+	return scene.PropertyDecodeEvidence{DecodeStatus: b.decodeStatus, TemporalEaseStatus: b.temporalEaseStatus}
+}
+
+type opaquePropertyDecodeEvidence struct {
+	decodeStatus       string
+	temporalEaseStatus string
+}
+
+func (e *opaquePropertyDecodeEvidence) DecodeEvidence() scene.PropertyDecodeEvidence {
+	if e == nil {
+		return scene.PropertyDecodeEvidence{}
+	}
+	return scene.PropertyDecodeEvidence{DecodeStatus: e.decodeStatus, TemporalEaseStatus: e.temporalEaseStatus}
+}
+
+func setPropertyDecodeEvidence(p *Property, decodeStatus, temporalEaseStatus string) {
+	b := propertyBack(p)
+	if b == nil {
+		return
+	}
+	if decodeStatus != "" {
+		b.decodeStatus = decodeStatus
+	}
+	if temporalEaseStatus != "" {
+		b.temporalEaseStatus = temporalEaseStatus
+	}
+}
+
+func (b *propertyBackrefs) MutationCapabilities(components, keyframeCount int) scene.PropertyMutationCapabilities {
+	if b == nil {
+		return scene.PropertyMutationCapabilities{}
+	}
+	staticBytes := components * 8
+	staticValue := components > 0 && b.cdat != nil && len(b.cdat.Data) >= staticBytes
+	if b.cdatLE {
+		staticValue = staticValue && b.otda != nil && len(b.otda.Data) >= staticBytes
+	}
+	expression := b.tdbs != nil && b.tdb4 != nil && len(b.tdb4.Data) > 0x78
+	keyframeValues, keyframeStructure := false, false
+	if !b.keyframeValuesExternal && keyframeCount > 0 && components > 0 && b.ldat != nil && b.lhd3 != nil && b.bytesPerKF >= 8 && len(b.lhd3.Data) >= 0x14 {
+		declaredCount := int(binary.BigEndian.Uint32(b.lhd3.Data[0x08:0x0c]))
+		declaredStride := int(binary.BigEndian.Uint32(b.lhd3.Data[0x10:0x14]))
+		if declaredCount == keyframeCount && declaredStride == b.bytesPerKF && declaredCount <= len(b.ldat.Data)/b.bytesPerKF {
+			layout := layoutFor(b.ldat.Data[0x07], components)
+			keyframeValues = layout.valueOff+components*8 <= b.bytesPerKF
+			keyframeStructure = keyframeValues
+		}
+	}
+	return scene.PropertyMutationCapabilities{
+		Known:             true,
+		StaticValue:       staticValue,
+		KeyframeValues:    keyframeValues,
+		KeyframeStructure: keyframeStructure,
+		Expression:        expression,
+	}
 }
 
 var _ PropertyWriter = (*propertyBackrefs)(nil)

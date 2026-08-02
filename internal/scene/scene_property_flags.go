@@ -175,29 +175,72 @@ func (p *Property) determinePropertyTypes() (PropertyControlType, PropertyValueT
 	pct := PCTLUnknown
 	pvt := PVTUnknown
 
+	if p.HasDeclaredControlType {
+		pct = p.DeclaredControlType
+		switch pct {
+		case PCTLLayer:
+			return pct, PVTLayerIndex
+		case PCTLMask:
+			return pct, PVTMaskIndex
+		case PCTLCurve, PCTLPaintGroup:
+			return pct, PVTCustomValue
+		case PCTLGroup:
+			return pct, PVTNoValue
+		case PCTLColor:
+			return pct, PVTColor
+		case PCTLTwoD:
+			if p.IsSpatial() {
+				return pct, PVTTwoDSpatial
+			}
+			return pct, PVTTwoD
+		case PCTLThreeD:
+			if p.IsSpatial() {
+				return pct, PVTThreeDSpatial
+			}
+			return pct, PVTThreeD
+		case PCTLInteger, PCTLScalar, PCTLAngle, PCTLBoolean, PCTLEnum, PCTLSlider:
+			return pct, PVTOneD
+		}
+	}
+	if p.LayerRefPresent {
+		return PCTLLayer, PVTLayerIndex
+	}
+	if p.Gradient != nil {
+		return PCTLCurve, PVTCustomValue
+	}
 	if p.IsNoValue() {
 		pvt = PVTNoValue
 	}
 	if p.IsColor() {
-		pct = PCTLColor
+		if !p.HasDeclaredControlType {
+			pct = PCTLColor
+		}
 		pvt = PVTColor
 	} else if p.IsInteger() && p.Components <= 1 {
-		pct = PCTLBoolean
+		if !p.HasDeclaredControlType {
+			pct = PCTLBoolean
+		}
 		pvt = PVTOneD
 	} else if p.IsVector() || (p.IsInteger() && p.Components > 1) {
 		switch p.Components {
 		case 1:
-			pct = PCTLScalar
+			if !p.HasDeclaredControlType {
+				pct = PCTLScalar
+			}
 			pvt = PVTOneD
 		case 2:
-			pct = PCTLTwoD
+			if !p.HasDeclaredControlType {
+				pct = PCTLTwoD
+			}
 			if p.IsSpatial() {
 				pvt = PVTTwoDSpatial
 			} else {
 				pvt = PVTTwoD
 			}
 		case 3:
-			pct = PCTLThreeD
+			if !p.HasDeclaredControlType {
+				pct = PCTLThreeD
+			}
 			if p.IsSpatial() {
 				pvt = PVTThreeDSpatial
 			} else {

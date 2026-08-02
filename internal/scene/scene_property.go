@@ -17,14 +17,20 @@ import (
 // keyframed/static value. Presence of an expression does not preclude
 // keyframes or a static value — they coexist in the file.
 type Property struct {
-	MatchName         string // ADBE identifier, e.g. "ADBE Position", "ADBE Opacity"
-	Name              string // display name (often empty)
-	Components        int    // 1 for scalar, 2 for 2D point, 3 for 3D point, etc.
-	Keyframes         []*Keyframe
-	StaticValue       any
-	LayerRefID        uint32 // tdpi-bound layer reference for layer-picker effect params
-	Expression        string // JS expression source, "" when no expression set
-	ExpressionEnabled bool   // tdb4 @0x77 disabled byte (0 = AE evaluates; @0x78 is the has-expression marker). Always true for properties without an expression (AE's default state)
+	MatchName string // ADBE identifier, e.g. "ADBE Position", "ADBE Opacity"
+	Name      string // display name (often empty)
+	// NameSource records whether Name came from an on-disk instance-name
+	// record or is the parser's match-name fallback.
+	NameSource             string
+	Components             int // 1 for scalar, 2 for 2D point, 3 for 3D point, etc.
+	Keyframes              []*Keyframe
+	StaticValue            any
+	LayerRefID             uint32              // tdpi-bound layer reference for layer-picker effect params
+	LayerRefPresent        bool                // true when a tdpi chunk exists, including its valid zero/null value
+	DeclaredControlType    PropertyControlType // authoritative effect pard control type, when present
+	HasDeclaredControlType bool
+	Expression             string // JS expression source, "" when no expression set
+	ExpressionEnabled      bool   // tdb4 @0x77 disabled byte (0 = AE evaluates; @0x78 is the has-expression marker). Always true for properties without an expression (AE's default state)
 
 	// DefaultValue is the property's default value (what AE considers
 	// the "unmodified" state). For transform properties, set from
@@ -57,6 +63,70 @@ type Property struct {
 	// mask sub-properties — those live in Effect.Parameters / Mask, not
 	// in the layer's top-level tdgp tree).
 	parentTreeGroup *AEPropertyGroup
+}
+
+// PropertyMutationCapabilities reports writer operations proven available by
+// the concrete parsed-property backing. False never means the value was not
+// preserved; it only means structured mutation is not established.
+type PropertyMutationCapabilities struct {
+	Known             bool
+	StaticValue       bool
+	KeyframeValues    bool
+	KeyframeStructure bool
+	Expression        bool
+}
+
+// PropertyDecodeEvidence reports serializer-owned parse completeness without
+// storing parser bookkeeping in the scene model. Empty fields mean no backing
+// supplied evidence.
+type PropertyDecodeEvidence struct {
+	DecodeStatus       string
+	TemporalEaseStatus string
+}
+
+type propertyDecodeEvidenceProvider interface {
+	DecodeEvidence() PropertyDecodeEvidence
+}
+
+// DecodeEvidence returns parse completeness supplied by the concrete backing.
+func (p *Property) DecodeEvidence() PropertyDecodeEvidence {
+	if p == nil || p.back == nil {
+		return PropertyDecodeEvidence{}
+	}
+	provider, ok := p.back.(propertyDecodeEvidenceProvider)
+	if !ok {
+		return PropertyDecodeEvidence{}
+	}
+	return provider.DecodeEvidence()
+}
+
+type propertyMutationCapabilityProvider interface {
+	MutationCapabilities(components, keyframeCount int) PropertyMutationCapabilities
+}
+
+// MutationCapabilities returns operations supported by this property's
+// concrete writer backing. Properties built without parser backing return an
+// unknown capability set.
+func (p *Property) MutationCapabilities() PropertyMutationCapabilities {
+	if p == nil || p.back == nil {
+		return PropertyMutationCapabilities{}
+	}
+	provider, ok := p.back.(propertyMutationCapabilityProvider)
+	if !ok {
+		return PropertyMutationCapabilities{}
+	}
+	capabilities := provider.MutationCapabilities(p.Components, len(p.Keyframes))
+	for _, keyframe := range p.Keyframes {
+		if keyframe == nil {
+			capabilities.KeyframeValues = false
+			capabilities.KeyframeStructure = false
+			continue
+		}
+		if keyframe.back == nil {
+			capabilities.KeyframeValues = false
+		}
+	}
+	return capabilities
 }
 
 // PropertyControlType identifies the UI control type for a property
@@ -130,6 +200,12 @@ const (
 	PVTTwoD          PropertyValueType = 6416
 	PVTOneD          PropertyValueType = 6417
 	PVTColor         PropertyValueType = 6418
+	PVTCustomValue   PropertyValueType = 6419
+	PVTMarker        PropertyValueType = 6420
+	PVTLayerIndex    PropertyValueType = 6421
+	PVTMaskIndex     PropertyValueType = 6422
+	PVTShape         PropertyValueType = 6423
+	PVTTextDocument  PropertyValueType = 6424
 )
 
 func (p PropertyValueType) String() string {
@@ -150,6 +226,18 @@ func (p PropertyValueType) String() string {
 		return "one_d"
 	case PVTColor:
 		return "color"
+	case PVTCustomValue:
+		return "custom_value"
+	case PVTMarker:
+		return "marker"
+	case PVTLayerIndex:
+		return "layer_index"
+	case PVTMaskIndex:
+		return "mask_index"
+	case PVTShape:
+		return "shape"
+	case PVTTextDocument:
+		return "text_document"
 	default:
 		return fmt.Sprintf("unknown(%d)", uint16(p))
 	}

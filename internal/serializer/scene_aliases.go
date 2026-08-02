@@ -9,7 +9,9 @@ import "github.com/yueli-fx/aep-parser/internal/scene"
 
 type (
 	AECapabilities                  = scene.AECapabilities
+	AEOpaqueProperty                = scene.AEOpaqueProperty
 	AEPropertyGroup                 = scene.AEPropertyGroup
+	AEPropertyType                  = scene.AEPropertyType
 	AETarget                        = scene.AETarget
 	AVItem                          = scene.AVItem
 	AutoOrientType                  = scene.AutoOrientType
@@ -104,8 +106,10 @@ type (
 	Property                        = scene.Property
 	PropertyBase                    = scene.PropertyBase
 	PropertyControlType             = scene.PropertyControlType
+	PropertyDecodeEvidence          = scene.PropertyDecodeEvidence
 	PropertyGroup                   = scene.PropertyGroup
 	PropertyGroupWriter             = scene.PropertyGroupWriter
+	PropertyMutationCapabilities    = scene.PropertyMutationCapabilities
 	PropertyValueType               = scene.PropertyValueType
 	PropertyWriter                  = scene.PropertyWriter
 	RectNode                        = scene.RectNode
@@ -163,6 +167,10 @@ type (
 )
 
 const (
+	AEPropertyTypeUnknown                         = scene.AEPropertyTypeUnknown
+	AEPropertyTypeProperty                        = scene.AEPropertyTypeProperty
+	AEPropertyTypeNamedGroup                      = scene.AEPropertyTypeNamedGroup
+	AEPropertyTypeIndexedGroup                    = scene.AEPropertyTypeIndexedGroup
 	AutoOrientAlongPath                           = scene.AutoOrientAlongPath
 	AutoOrientCameraOrPointOfInterest             = scene.AutoOrientCameraOrPointOfInterest
 	AutoOrientCharactersTowardCamera              = scene.AutoOrientCharactersTowardCamera
@@ -365,10 +373,16 @@ const (
 	PCTLTwoD                                      = scene.PCTLTwoD
 	PCTLUnknown                                   = scene.PCTLUnknown
 	PVTColor                                      = scene.PVTColor
+	PVTCustomValue                                = scene.PVTCustomValue
+	PVTLayerIndex                                 = scene.PVTLayerIndex
+	PVTMarker                                     = scene.PVTMarker
+	PVTMaskIndex                                  = scene.PVTMaskIndex
 	PVTNoValue                                    = scene.PVTNoValue
 	PVTOneD                                       = scene.PVTOneD
+	PVTShape                                      = scene.PVTShape
 	PVTThreeD                                     = scene.PVTThreeD
 	PVTThreeDSpatial                              = scene.PVTThreeDSpatial
+	PVTTextDocument                               = scene.PVTTextDocument
 	PVTTwoD                                       = scene.PVTTwoD
 	PVTTwoDSpatial                                = scene.PVTTwoDSpatial
 	PVTUnknown                                    = scene.PVTUnknown

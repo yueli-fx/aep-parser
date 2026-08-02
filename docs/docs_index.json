@@ -4563,6 +4563,22 @@
       "rw": "read-only",
       "summary": "ControlType returns the UI control type for the property (scalar slider, color picker, angle dial, etc.). Derived from tdb4 flags."
     },
+    "Property.DeclaredControlType": {
+      "kind": "field",
+      "file": "property.md",
+      "anchor": "#propertydeclaredcontroltype",
+      "signature": "DeclaredControlType PropertyControlType",
+      "rw": "read-only",
+      "summary": "authoritative effect pard control type, when present"
+    },
+    "Property.DecodeEvidence": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertydecodeevidence",
+      "signature": "func (p *Property) DecodeEvidence() PropertyDecodeEvidence",
+      "rw": "read-only",
+      "summary": "DecodeEvidence returns parse completeness supplied by the concrete backing."
+    },
     "Property.DefaultValue": {
       "kind": "field",
       "file": "property.md",
@@ -4618,6 +4634,13 @@
       "signature": "Gradient *Gradient",
       "rw": "read-only",
       "summary": "Gradient holds the parsed gradient data for \"ADBE Vector Grad Colors\" properties. The XML is stored in the cdat chunk and parsed during property initialization. nil for non-gradient properties."
+    },
+    "Property.HasDeclaredControlType": {
+      "kind": "field",
+      "file": "property.md",
+      "anchor": "#propertyhasdeclaredcontroltype",
+      "signature": "HasDeclaredControlType bool",
+      "rw": "read-only"
     },
     "Property.IsAnimated": {
       "kind": "getter",
@@ -4722,6 +4745,14 @@
       "rw": "read-only",
       "summary": "tdpi-bound layer reference for layer-picker effect params"
     },
+    "Property.LayerRefPresent": {
+      "kind": "field",
+      "file": "property.md",
+      "anchor": "#propertylayerrefpresent",
+      "signature": "LayerRefPresent bool",
+      "rw": "read-only",
+      "summary": "true when a tdpi chunk exists, including its valid zero/null value"
+    },
     "Property.LockedRatio": {
       "kind": "getter",
       "file": "property.md",
@@ -4754,6 +4785,14 @@
       "rw": "read-only",
       "summary": "MinValue returns the minimum permitted value for the property, or nil if no tdum chunk is present. Type depends on property kind: float64 for scalars, []float64 for multi-component, float64 (from uint32) for integer properties."
     },
+    "Property.MutationCapabilities": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertymutationcapabilities",
+      "signature": "func (p *Property) MutationCapabilities() PropertyMutationCapabilities",
+      "rw": "read-only",
+      "summary": "MutationCapabilities returns operations supported by this property's concrete writer backing. Properties built without parser backing return an unknown capability set."
+    },
     "Property.Name": {
       "kind": "field",
       "file": "property.md",
@@ -4761,6 +4800,14 @@
       "signature": "Name string",
       "rw": "read-only",
       "summary": "display name (often empty)"
+    },
+    "Property.NameSource": {
+      "kind": "field",
+      "file": "property.md",
+      "anchor": "#propertynamesource",
+      "signature": "NameSource string",
+      "rw": "read-only",
+      "summary": "NameSource records whether Name came from an on-disk instance-name record or is the parser's match-name fallback."
     },
     "Property.NbOptions": {
       "kind": "field",
@@ -4776,7 +4823,7 @@
       "anchor": "#propertyownerlayer",
       "signature": "func (p *Property) OwnerLayer() *Layer",
       "rw": "read-only",
-      "summary": "OwnerLayer walks from a parsed leaf up to the synthetic property-tree root and returns the owning Layer, or nil when the property was built outside the parser / lives under an Effect or Mask subtree (those roots carry no layer back-ref). Exported for the serializer stage (internal/aep)."
+      "summary": "OwnerLayer walks from a parsed leaf up to the synthetic property-tree root and returns the owning Layer, or nil when the property was built outside the parser or is not attached to a layer property tree. Exported for the serializer stage (internal/aep)."
     },
     "Property.ParentGroup": {
       "kind": "getter",
@@ -4784,7 +4831,7 @@
       "anchor": "#propertyparentgroup",
       "signature": "func (p *Property) ParentGroup() *AEPropertyGroup",
       "rw": "read-only",
-      "summary": "ParentGroup returns the AEPropertyGroup that contains this property in the layer's hierarchical property tree, or nil when the property was built outside the parser, lives inside an Effect/Mask (not the layer-level tdgp), or hasn't been wired through wirePropertyTreeLeaves."
+      "summary": "ParentGroup returns the AEPropertyGroup that contains this property in the layer's hierarchical property tree, or nil when the property was built outside the parser or hasn't been wired through wirePropertyTreeLeaves."
     },
     "Property.PropertyDepth": {
       "kind": "getter",

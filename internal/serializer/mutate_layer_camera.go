@@ -281,7 +281,7 @@ func newTemplatedLayer(c *Composition, name string, templateBytes []byte, typ La
 	ptree := buildAEPropertyGroupTree(layrChunk)
 	scene.SetLayerPropertyTree(base, ptree)
 	scene.SetPropertyGroupLayer(ptree, base)
-	wirePropertyTreeLeaves(ptree, base.Properties)
+	wirePropertyTreeLeaves(ptree, layerTreeProperties(base))
 
 	// Reset the spliced Light Color leaf to AE's default white (the embedded
 	// template carries the extraction fixture's authored colour). AE stores

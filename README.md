@@ -11,6 +11,7 @@
 ## 文档
 
 - **API 参考**：[docs/](docs/) —— 每个核心类型一个 markdown，由 `cmd/docgen` 从导出符号的 doc comment **自动生成**（`go generate ./cmd/docgen`）。
+- **在线解析快照协议**：[ProjectJSON v2](docs/project-json-v2.md) —— 属性树身份、值类型、解码/保留/写回状态和完整性门禁。
 - **能力覆盖矩阵 / 暂搁 / 不可达 / negative findings**：[docs/capabilities.md](docs/capabilities.md)。
 
 ## Go SDK

@@ -42,6 +42,16 @@ display name (often empty)
 
 read-only
 
+### Property.NameSource
+
+```go
+NameSource string
+```
+
+NameSource records whether Name came from an on-disk instance-name record or is the parser's match-name fallback.
+
+read-only
+
 ### Property.Components
 
 ```go
@@ -75,6 +85,34 @@ LayerRefID uint32
 ```
 
 tdpi-bound layer reference for layer-picker effect params
+
+read-only
+
+### Property.LayerRefPresent
+
+```go
+LayerRefPresent bool
+```
+
+true when a tdpi chunk exists, including its valid zero/null value
+
+read-only
+
+### Property.DeclaredControlType
+
+```go
+DeclaredControlType PropertyControlType
+```
+
+authoritative effect pard control type, when present
+
+read-only
+
+### Property.HasDeclaredControlType
+
+```go
+HasDeclaredControlType bool
+```
 
 read-only
 
@@ -165,6 +203,16 @@ func (p *Property) ControlType() PropertyControlType
 ```
 
 ControlType returns the UI control type for the property (scalar slider, color picker, angle dial, etc.). Derived from tdb4 flags.
+
+read-only
+
+### Property.DecodeEvidence
+
+```go
+func (p *Property) DecodeEvidence() PropertyDecodeEvidence
+```
+
+DecodeEvidence returns parse completeness supplied by the concrete backing.
 
 read-only
 
@@ -328,13 +376,23 @@ MinValue returns the minimum permitted value for the property, or nil if no tdum
 
 read-only
 
+### Property.MutationCapabilities
+
+```go
+func (p *Property) MutationCapabilities() PropertyMutationCapabilities
+```
+
+MutationCapabilities returns operations supported by this property's concrete writer backing. Properties built without parser backing return an unknown capability set.
+
+read-only
+
 ### Property.OwnerLayer
 
 ```go
 func (p *Property) OwnerLayer() *Layer
 ```
 
-OwnerLayer walks from a parsed leaf up to the synthetic property-tree root and returns the owning Layer, or nil when the property was built outside the parser / lives under an Effect or Mask subtree (those roots carry no layer back-ref). Exported for the serializer stage (internal/aep).
+OwnerLayer walks from a parsed leaf up to the synthetic property-tree root and returns the owning Layer, or nil when the property was built outside the parser or is not attached to a layer property tree. Exported for the serializer stage (internal/aep).
 
 read-only
 
@@ -344,7 +402,7 @@ read-only
 func (p *Property) ParentGroup() *AEPropertyGroup
 ```
 
-ParentGroup returns the AEPropertyGroup that contains this property in the layer's hierarchical property tree, or nil when the property was built outside the parser, lives inside an Effect/Mask (not the layer-level tdgp), or hasn't been wired through wirePropertyTreeLeaves.
+ParentGroup returns the AEPropertyGroup that contains this property in the layer's hierarchical property tree, or nil when the property was built outside the parser or hasn't been wired through wirePropertyTreeLeaves.
 
 read-only
 

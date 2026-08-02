@@ -193,7 +193,7 @@ func parseLayer(layr *rifx.Chunk, index int, ctx *parseCtx) (*Layer, error) {
 	tree := buildAEPropertyGroupTree(layr)
 	scene.SetLayerPropertyTree(layer, tree)
 	scene.SetPropertyGroupLayer(tree, layer)
-	wirePropertyTreeLeaves(tree, layer.Properties)
+	wirePropertyTreeLeaves(tree, layerTreeProperties(layer))
 	lb.btdsChunk = findTextSourceChunk(layr)
 	if lb.btdsChunk != nil {
 		layer.TextSourceRaw = lb.btdsChunk.Data

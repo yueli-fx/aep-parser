@@ -33,8 +33,8 @@ func TestProjectJSONPreservesProjectPanelHierarchyAndOrder(t *testing.T) {
 	if err := json.Unmarshal(payload, &snapshot); err != nil {
 		t.Fatalf("decode ProjectJSON: %v", err)
 	}
-	if snapshot.SchemaVersion != 1 {
-		t.Fatalf("schema_version = %d, want 1", snapshot.SchemaVersion)
+	if snapshot.SchemaVersion != aep.ProjectJSONSchemaVersion {
+		t.Fatalf("schema_version = %d, want %d", snapshot.SchemaVersion, aep.ProjectJSONSchemaVersion)
 	}
 
 	want := []projectItemSnapshot{

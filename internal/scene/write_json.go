@@ -277,6 +277,7 @@ type JSONTextParagraph struct {
 
 // JSONProperty is the JSON representation of a Property.
 type JSONProperty struct {
+	PropertyRef       string          `json:"property_ref,omitempty"`
 	Name              string          `json:"name"`
 	MatchName         string          `json:"match_name,omitempty"`
 	Keyframes         []*JSONKeyframe `json:"keyframes,omitempty"`
@@ -324,6 +325,7 @@ type JSONMask struct {
 	Expansion      float64                 `json:"expansion,omitempty"`
 	Vertices       []JSONMaskVertex        `json:"vertices,omitempty"`
 	PathKeyframes  []*JSONMaskPathKeyframe `json:"path_keyframes,omitempty"`
+	Properties     []*JSONProperty         `json:"properties,omitempty"`
 }
 
 // JSONMaskPathKeyframe mirrors MaskPathKeyframe.
@@ -340,6 +342,33 @@ type JSONMaskPathKeyframe struct {
 type JSONTemporalEase struct {
 	Speed     float64 `json:"speed"`
 	Influence float64 `json:"influence"`
+}
+
+// MarshalJSON keeps damaged non-finite ease values representable instead of
+// making one corrupt keyframe reject the entire detached project snapshot.
+func (e JSONTemporalEase) MarshalJSON() ([]byte, error) {
+	type encodedEase struct {
+		Speed        *float64 `json:"speed"`
+		Influence    *float64 `json:"influence"`
+		SpeedRaw     string   `json:"speed_raw,omitempty"`
+		InfluenceRaw string   `json:"influence_raw,omitempty"`
+	}
+	speed, speedRaw := jsonFiniteFloat(e.Speed)
+	influence, influenceRaw := jsonFiniteFloat(e.Influence)
+	return json.Marshal(encodedEase{Speed: speed, Influence: influence, SpeedRaw: speedRaw, InfluenceRaw: influenceRaw})
+}
+
+func jsonFiniteFloat(value float64) (*float64, string) {
+	switch {
+	case math.IsNaN(value):
+		return nil, "NaN"
+	case math.IsInf(value, 1):
+		return nil, "+Infinity"
+	case math.IsInf(value, -1):
+		return nil, "-Infinity"
+	default:
+		return &value, ""
+	}
 }
 
 // JSONMaskVertex mirrors MaskVertex.
@@ -733,6 +762,9 @@ func layerToJSON(l *Layer) *JSONLayer {
 				})
 			}
 			jm.PathKeyframes = append(jm.PathKeyframes, jpk)
+		}
+		for _, property := range m.Properties {
+			jm.Properties = append(jm.Properties, propertyToJSON(property))
 		}
 		jl.Masks = append(jl.Masks, jm)
 	}

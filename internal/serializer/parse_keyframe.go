@@ -27,6 +27,7 @@ import (
 // See decodeEasing for the per-style ease/tangent layouts.
 func parseKeyframes(prop *Property, lhd3, ldat *rifx.Chunk, ctx *parseCtx) {
 	if len(lhd3.Data) < 0x14 {
+		setPropertyDecodeEvidence(prop, "partially-decoded", "invalid-preserved")
 		ctx.warn("keyframe header (lhd3) for property %q is %d bytes, need >= 20; skipping keyframes",
 			prop.MatchName, len(lhd3.Data))
 		return
@@ -35,6 +36,7 @@ func parseKeyframes(prop *Property, lhd3, ldat *rifx.Chunk, ctx *parseCtx) {
 	bpkRaw := binary.BigEndian.Uint32(lhd3.Data[0x10:0x14])
 	count, bpk, ok := checkedTableLayout(countRaw, bpkRaw, len(ldat.Data), 8)
 	if !ok {
+		setPropertyDecodeEvidence(prop, "partially-decoded", "invalid-preserved")
 		ctx.warn("keyframe stream for property %q inconsistent (count=%d, bytes_per_kf=%d, ldat=%d bytes); skipping keyframes",
 			prop.MatchName, countRaw, bpkRaw, len(ldat.Data))
 		return
@@ -63,6 +65,7 @@ func parseKeyframes(prop *Property, lhd3, ldat *rifx.Chunk, ctx *parseCtx) {
 			layoutName = "spatial-style"
 		}
 		if bpk < need {
+			setPropertyDecodeEvidence(prop, "partially-decoded", "invalid-preserved")
 			ctx.warn("keyframe block for property %q is %d bytes, %s %dD layout expects >= %d; easing/tangents will be skipped",
 				prop.MatchName, bpk, layoutName, prop.Components, need)
 		}
@@ -188,13 +191,19 @@ func readKFValue(d []byte, kfOffset, components int) any {
 	}
 	l := layoutFor(d[kfOffset+0x07], components)
 	if components <= 1 {
-		v, _ := readFloat64BE(d, kfOffset+l.valueOff)
+		v, ok := readFloat64BE(d, kfOffset+l.valueOff)
+		if !ok {
+			return nil
+		}
 		return v
 	}
-	vals := make([]float64, components)
+	vals := make([]float64, 0, components)
 	for i := 0; i < components; i++ {
-		v, _ := readFloat64BE(d, kfOffset+l.valueOff+i*8)
-		vals[i] = v
+		v, ok := readFloat64BE(d, kfOffset+l.valueOff+i*8)
+		if !ok {
+			break
+		}
+		vals = append(vals, v)
 	}
 	return vals
 }
