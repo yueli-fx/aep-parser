@@ -3,6 +3,7 @@ package recipe
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -11,15 +12,44 @@ import (
 )
 
 func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, error) {
+	var compiled bytes.Buffer
+	report, err := CompileToWriter(rec, &compiled, outPath, caps)
+	if err != nil || !report.Valid {
+		return report, err
+	}
+	if err := os.MkdirAll(filepath.Dir(outPath), 0o755); err != nil {
+		return report, err
+	}
+	out, err := os.Create(outPath)
+	if err != nil {
+		return report, err
+	}
+	if _, err := io.Copy(out, &compiled); err != nil {
+		_ = out.Close()
+		return report, err
+	}
+	if err := out.Close(); err != nil {
+		return report, err
+	}
+	return report, nil
+}
+
+// CompileToWriter validates and compiles rec, verifies that the generated AEP
+// can be parsed again, then copies the verified bytes to w. outputName is used
+// only in validation/profile reports and must be non-empty.
+func CompileToWriter(rec Recipe, w io.Writer, outputName string, caps CapabilityIndex) (Report, error) {
 	report := ValidateWithCapabilities(rec, caps)
-	report.OutputPath = outPath
+	report.OutputPath = outputName
 	if !report.Valid {
 		return report, nil
 	}
-	if outPath == "" {
+	if outputName == "" {
 		report.Valid = false
 		report.Refusals = append(report.Refusals, Refusal{Code: "missing_output_path", Path: "output_path", Message: "output path is required"})
 		return report, nil
+	}
+	if w == nil {
+		return report, fmt.Errorf("recipe: nil output writer")
 	}
 
 	projectTarget, err := parseRecipeProjectTarget(rec.Project.TargetVersion)
@@ -177,7 +207,7 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 		}
 	}
 	if hasExpectedProfile(rec.ExpectedProfile) {
-		prof, err := buildWrittenProfile(project, outPath)
+		prof, err := buildWrittenProfile(project, outputName)
 		if err != nil {
 			return report, fmt.Errorf("recipe: build profile for expected_profile: %w", err)
 		}
@@ -197,15 +227,14 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 		}
 	}
 
-	if err := os.MkdirAll(filepath.Dir(outPath), 0o755); err != nil {
+	var compiled bytes.Buffer
+	if err := project.WriteAEP(&compiled); err != nil {
 		return report, err
 	}
-	out, err := os.Create(outPath)
-	if err != nil {
-		return report, err
+	if _, err := aep.FromReader(bytes.NewReader(compiled.Bytes())); err != nil {
+		return report, fmt.Errorf("recipe: reparse compiled AEP: %w", err)
 	}
-	defer out.Close()
-	if err := project.WriteAEP(out); err != nil {
+	if _, err := io.Copy(w, &compiled); err != nil {
 		return report, err
 	}
 	return report, nil

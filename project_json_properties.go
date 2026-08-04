@@ -20,14 +20,18 @@ type projectPropertyRegistry struct {
 	recordIndexes map[string]int
 	records       []projectPropertyRecord
 	next          int
+	documentRef   string
 }
 
-func newProjectPropertyRegistry(project *internal.Project, jsonProject *internal.JSONProject) *projectPropertyRegistry {
+func newProjectPropertyRegistry(project *internal.Project, jsonProject *internal.JSONProject, documentRef ...string) *projectPropertyRegistry {
 	r := &projectPropertyRegistry{
 		refs:          map[*internal.Property]string{},
 		locations:     map[string]projectPropertyLocation{},
 		recordIndexes: map[string]int{},
 		next:          1,
+	}
+	if len(documentRef) > 0 {
+		r.documentRef = documentRef[0]
 	}
 	if project == nil || jsonProject == nil {
 		return r
@@ -128,6 +132,13 @@ func (r *projectPropertyRegistry) setOrigin(ref string, evidence *projectPropert
 		return
 	}
 	r.records[index].OriginEvidence = evidence
+	location := r.locations[ref]
+	if r.documentRef != "" && location.compositionID != 0 && location.layerID != 0 && evidence.PreservationStatus == "preserved" {
+		r.records[index].WriteTarget = &WriteTarget{
+			DocumentRef: r.documentRef, CompositionID: location.compositionID,
+			LayerID: location.layerID, CanonicalPath: evidence.CanonicalPath,
+		}
+	}
 }
 
 func (r *projectPropertyRegistry) nextRef() string {

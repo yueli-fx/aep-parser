@@ -106,6 +106,7 @@ type projectPropertyRecord struct {
 	CompositionID  uint32                         `json:"composition_id,omitempty"`
 	LayerID        uint32                         `json:"layer_id,omitempty"`
 	OriginEvidence *projectPropertyOriginEvidence `json:"origin_evidence,omitempty"`
+	WriteTarget    *WriteTarget                   `json:"write_target,omitempty"`
 	*projectPropertyFacts
 }
 
@@ -184,8 +185,12 @@ func (d *Document) ProjectJSON() ([]byte, error) {
 	if d == nil || d.project == nil {
 		return nil, fmt.Errorf("aep: nil document")
 	}
+	documentRef, err := projectDocumentRef(d.project)
+	if err != nil {
+		return nil, fmt.Errorf("aep: build project document ref: %w", err)
+	}
 	project := d.project.ToJSON()
-	propertyRegistry := newProjectPropertyRegistry(d.project, project)
+	propertyRegistry := newProjectPropertyRegistry(d.project, project, documentRef)
 	for _, footage := range project.Footage {
 		if footage != nil {
 			footage.Path = ""

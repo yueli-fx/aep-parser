@@ -16,7 +16,7 @@
 
 ## Go SDK
 
-外部 Go 项目可以直接导入仓库根 package，完成无 AE 的 inspect、profile 和 round-trip：
+外部 Go 项目可以直接导入仓库根 package，完成无 AE 的 inspect、profile、round-trip 和保留式导出：
 
 ```powershell
 go get github.com/yueli-fx/aep-parser
@@ -40,7 +40,34 @@ func main() {
 }
 ```
 
-`Document` interface 有意保持精简：`Inspect` 返回稳定轻量清单，`ProfileJSON` 返回 diff/migration 使用的规范化 profile，`Write` 做保留未知 chunk 的 round-trip。底层 scene、serializer 和 back-reference 类型不属于公开 interface。
+`Document` interface 有意保持精简：`Inspect` 返回稳定轻量清单，`ProfileJSON` 返回 diff/migration 使用的规范化 profile，`Write` 做未修改工程的原样 round-trip；`ProjectJSON` 为可写属性提供文档作用域的 `write_target`，`Export` 在私有副本上应用版本化变更、重新解析验证，并证明声明修改字节以外的 RIFX 数据与未知 chunk 未变。底层 scene、serializer、Recipe 和 back-reference 类型不属于公开 interface。
+
+```go
+snapshot, err := doc.ProjectJSON()
+// 从 snapshot 的 property_records[*].write_target 选择目标；property_ref
+// 只负责快照关联，不能当作写回定位符。
+_ = snapshot
+
+report, err := doc.Export(context.Background(), aep.ExportRequest{
+	SchemaVersion: aep.ExportSchemaVersion,
+	Changes: []aep.ExportChange{{
+		ID: "position",
+		Operation: aep.ExportSetStaticValue,
+		Target: target,
+		Value: []float64{640, 360},
+	}},
+}, output)
+```
+
+当前公开 Export v1 只接受有真实 writer backing、无关键帧的数值静态属性，并采用全有或全无批次。成功报告的 preservation mode 为 `byte-exact-outside-claimed-ranges`；这表示未知领域可从原工程保留，但不表示仅凭归一化 JSON 就能重新推导未知语义。
+
+从规范输入新建工程使用版本化 Recipe JSON 和 `Compile`。它会严格校验 schema、隐藏内部 Recipe/scene、在交付输出前重新 Parse，并返回 capability downgrade 与 rejection 报告：
+
+```go
+report, err := aep.Compile(context.Background(), recipeJSON, output)
+```
+
+`Compile` 负责“从已知规范生成新 AEP”；`Document.Export` 负责“在原 AEP 上修改并保留未知领域”，两条路径不会混用。
 
 处理不可信上传时，可用 `DefaultLimits` 作为起点并通过 `ParseWithLimits` / `OpenWithLimits` 收紧输入、单 chunk、累计分配、节点数和递归深度预算；字段为零时使用对应默认值。
 
