@@ -66,7 +66,7 @@ func buildVecAnimRenderDemo(t *testing.T, target aep.AETarget) *aep.Project {
 	if err != nil {
 		t.Fatalf("AddEffect(Fill): %v", err)
 	}
-	if _, err := aep.AnimateEffectParamVec(fl, ffx, "ADBE Fill-0002", []aep.VectorKeyframe{
+	if _, err := aep.AnimateEffectParamVec(fl, ffx, "Color", []aep.VectorKeyframe{
 		{Time: 0, Value: []float64{255, 255, 0, 0}}, // red
 		{Time: 2, Value: []float64{255, 0, 0, 255}}, // blue
 	}); err != nil {
@@ -86,11 +86,11 @@ func buildVecAnimRenderDemo(t *testing.T, target aep.AETarget) *aep.Project {
 			t.Fatalf("SetEffectParam(%s): %v", mn, err)
 		}
 	}
-	set("ADBE Ramp-0002", []float64{255, 255, 255, 255}) // Start Color white
-	set("ADBE Ramp-0004", []float64{255, 0, 0, 0})       // End Color black
-	set("ADBE Ramp-0005", 2.0)                           // Ramp Shape = Radial
-	set("ADBE Ramp-0003", []float64{0.5, 1.0})           // End of Ramp = (960,1080) → radius
-	if _, err := aep.AnimateEffectParamVec(rl, rfx, "ADBE Ramp-0001", []aep.VectorKeyframe{
+	set("Start Color", []float64{255, 255, 255, 255}) // Start Color white
+	set("End Color", []float64{255, 0, 0, 0})         // End Color black
+	set("Ramp Shape", 2.0)                            // Ramp Shape = Radial
+	set("End of Ramp", []float64{0.5, 1.0})           // End of Ramp = (960,1080) → radius
+	if _, err := aep.AnimateEffectParamVec(rl, rfx, "Start of Ramp", []aep.VectorKeyframe{
 		{Time: 0, Value: []float64{0.25, 0.5}}, // left  (480,540)
 		{Time: 2, Value: []float64{0.75, 0.5}}, // right (1440,540)
 	}); err != nil {

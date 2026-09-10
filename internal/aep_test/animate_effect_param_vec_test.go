@@ -10,6 +10,7 @@ package aep_test
 
 import (
 	"encoding/binary"
+	"github.com/yueli-fx/aep-parser/internal/serializer"
 	"math"
 	"os"
 	"path/filepath"
@@ -58,7 +59,7 @@ func TestAnimateEffectParamVec_RoundTrip(t *testing.T) {
 		if err != nil {
 			t.Fatalf("AddEffect(%s): %v", c.effect, err)
 		}
-		if _, err := aep.AnimateEffectParamVec(l, fx, c.param, c.kfs); err != nil {
+		if _, err := serializer.AnimateEffectParamVec(l, fx, c.param, c.kfs); err != nil {
 			t.Fatalf("AnimateEffectParamVec(%s): %v", c.param, err)
 		}
 	}

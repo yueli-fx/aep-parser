@@ -60,7 +60,7 @@ func buildAnimEffectDemo(t *testing.T, target aep.AETarget) *aep.Project {
 	if err != nil {
 		t.Fatalf("AddEffect: %v", err)
 	}
-	if _, err := aep.AnimateEffectParam(l, fx, "ADBE Gaussian Blur 2-0001",
+	if _, err := aep.AnimateEffectParam(l, fx, "Blurriness",
 		[]aep.ScalarKeyframe{{Time: 0, Value: 0}, {Time: 2, Value: 100}}); err != nil {
 		t.Fatalf("AnimateEffectParam: %v", err)
 	}

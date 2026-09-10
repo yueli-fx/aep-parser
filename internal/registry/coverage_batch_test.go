@@ -10,7 +10,7 @@ func TestListCoverageBatchesReportsEntries(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeCoverageBatchFixture(t, root, 2)
 
-	report, err := ListCoverageBatches(root, "flightdeck/work/aep-understanding-generation/current.json")
+	report, err := ListCoverageBatches(root, "registry/workflows/aep-understanding-generation/current.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -26,7 +26,7 @@ func TestCheckCoverageBatchSkipRunPassesForMatchingArtifacts(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeCoverageBatchFixture(t, root, 2)
 
-	report, err := CheckCoverageBatch(root, "flightdeck/work/aep-understanding-generation/current.json", "flightdeck/work/aep-understanding-generation/coverage.json", "all")
+	report, err := CheckCoverageBatch(root, "registry/workflows/aep-understanding-generation/current.json", "registry/workflows/aep-understanding-generation/coverage.json", "all")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -39,7 +39,7 @@ func TestCheckCoverageBatchReportsCoverageTotalsDrift(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeCoverageBatchFixture(t, root, 3)
 
-	report, err := CheckCoverageBatch(root, "flightdeck/work/aep-understanding-generation/current.json", "flightdeck/work/aep-understanding-generation/coverage.json", "all")
+	report, err := CheckCoverageBatch(root, "registry/workflows/aep-understanding-generation/current.json", "registry/workflows/aep-understanding-generation/coverage.json", "all")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -53,7 +53,7 @@ func TestSyncCoverageBatchFromMatricesUpdatesCoverageCandidate(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeCoverageBatchFixture(t, root, 0)
 
-	report, err := SyncCoverageBatchFromMatrices(root, "flightdeck/work/aep-understanding-generation/current.json", "flightdeck/work/aep-understanding-generation/coverage.json", "all")
+	report, err := SyncCoverageBatchFromMatrices(root, "registry/workflows/aep-understanding-generation/current.json", "registry/workflows/aep-understanding-generation/coverage.json", "all")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -61,7 +61,7 @@ func TestSyncCoverageBatchFromMatricesUpdatesCoverageCandidate(t *testing.T) {
 		t.Fatalf("report = %+v, want passing synced batch", report)
 	}
 
-	check, err := CheckCoverageBatch(root, "flightdeck/work/aep-understanding-generation/current.json", "flightdeck/work/aep-understanding-generation/coverage.json", "all")
+	check, err := CheckCoverageBatch(root, "registry/workflows/aep-understanding-generation/current.json", "registry/workflows/aep-understanding-generation/coverage.json", "all")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,7 +73,7 @@ func TestSyncCoverageBatchFromMatricesUpdatesCoverageCandidate(t *testing.T) {
 func TestSyncCoverageBatchFromMatricesAcceptsAbsoluteCoveragePath(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeCoverageBatchFixture(t, root, 0)
-	source := filepath.Join(root, filepath.FromSlash("flightdeck/work/aep-understanding-generation/coverage.json"))
+	source := filepath.Join(root, filepath.FromSlash("registry/workflows/aep-understanding-generation/coverage.json"))
 	data, err := os.ReadFile(source)
 	if err != nil {
 		t.Fatal(err)
@@ -86,7 +86,7 @@ func TestSyncCoverageBatchFromMatricesAcceptsAbsoluteCoveragePath(t *testing.T) 
 		t.Fatal(err)
 	}
 
-	report, err := SyncCoverageBatchFromMatrices(root, "flightdeck/work/aep-understanding-generation/current.json", absoluteCoverage, "all")
+	report, err := SyncCoverageBatchFromMatrices(root, "registry/workflows/aep-understanding-generation/current.json", absoluteCoverage, "all")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -100,7 +100,7 @@ func TestPlanCoverageBatchMatricesBuildsStableCommands(t *testing.T) {
 	writeCoverageBatchFixture(t, root, 2)
 	writeFile(t, root, "examples/recipes/glob-b.json", "{}\n")
 	writeFile(t, root, "examples/recipes/glob-a.json", "{}\n")
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/current.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/current.json", map[string]any{
 		"coverage_batches": []map[string]any{
 			{
 				"id": "all",
@@ -123,7 +123,7 @@ func TestPlanCoverageBatchMatricesBuildsStableCommands(t *testing.T) {
 		},
 	})
 
-	plan, err := PlanCoverageBatchMatrices(root, "flightdeck/work/aep-understanding-generation/current.json", "all")
+	plan, err := PlanCoverageBatchMatrices(root, "registry/workflows/aep-understanding-generation/current.json", "all")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -149,7 +149,7 @@ func writeCoverageBatchFixture(t *testing.T, root string, coverageTotal int) {
 		"total": 2, "passed": 2, "blocked": 0, "failed": 0, "skipped": 0,
 	})
 	writeFile(t, root, "tmp/matrix/text/ledger.md", "# ledger\n")
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", map[string]any{
 		"schema_version": 1,
 		"coverage": []map[string]any{
 			{
@@ -161,10 +161,10 @@ func writeCoverageBatchFixture(t *testing.T, root string, coverageTotal int) {
 			},
 		},
 	})
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/current.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/current.json", map[string]any{
 		"truth_sources": map[string]any{
-			"current":  "flightdeck/work/aep-understanding-generation/current.json",
-			"coverage": "flightdeck/work/aep-understanding-generation/coverage.json",
+			"current":  "registry/workflows/aep-understanding-generation/current.json",
+			"coverage": "registry/workflows/aep-understanding-generation/coverage.json",
 		},
 		"coverage_batches": []map[string]any{
 			{

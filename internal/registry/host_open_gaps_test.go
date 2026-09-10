@@ -4,7 +4,7 @@ import "testing"
 
 func TestPlanHostOpenGapsChunksPendingAndRepresentativeRecords(t *testing.T) {
 	root := newTestRegistryRoot(t)
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", map[string]any{
 		"schema_version": 1,
 		"host_open_policy": map[string]any{
 			"matrix_command_status": "available",
@@ -42,7 +42,7 @@ func TestPlanHostOpenGapsChunksPendingAndRepresentativeRecords(t *testing.T) {
 		},
 	})
 
-	report, err := PlanHostOpenGaps(root, "flightdeck/work/aep-understanding-generation/coverage.json", HostOpenGapPlanOptions{
+	report, err := PlanHostOpenGaps(root, "registry/workflows/aep-understanding-generation/coverage.json", HostOpenGapPlanOptions{
 		AERoot:         "E:/adobe",
 		MaxAEOpenCases: 8,
 	})
@@ -74,7 +74,7 @@ func TestPlanHostOpenGapsChunksPendingAndRepresentativeRecords(t *testing.T) {
 
 func TestPlanHostOpenGapsReportsZeroWhenCoverageIsComplete(t *testing.T) {
 	root := newTestRegistryRoot(t)
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", map[string]any{
 		"schema_version": 1,
 		"host_open_policy": map[string]any{
 			"endpoint_inference": map[string]any{
@@ -92,7 +92,7 @@ func TestPlanHostOpenGapsReportsZeroWhenCoverageIsComplete(t *testing.T) {
 		},
 	})
 
-	report, err := PlanHostOpenGaps(root, "flightdeck/work/aep-understanding-generation/coverage.json", HostOpenGapPlanOptions{MaxAEOpenCases: 24})
+	report, err := PlanHostOpenGaps(root, "registry/workflows/aep-understanding-generation/coverage.json", HostOpenGapPlanOptions{MaxAEOpenCases: 24})
 	if err != nil {
 		t.Fatal(err)
 	}

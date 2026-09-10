@@ -1,0 +1,7 @@
+# Public source archives contain code, documentation and examples, not the work desk.
+/flightdeck export-ignore
+
+# Generated documentation comparisons use LF on every platform.
+/docs/*.md text eol=lf
+/docs/*.json text eol=lf
+/cmd/docgen/testdata/golden/*.md text eol=lf

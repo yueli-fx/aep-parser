@@ -141,9 +141,9 @@ func layerRefRoundTrip(t *testing.T, compName, fxMatch, refParam, amtParam strin
 }
 
 func TestLayerRef_GoRoundTrip(t *testing.T) {
-	layerRefRoundTrip(t, "DISPMAP", aep.EffectDisplacementMap, aep.EffectDisplacementMapLayer, "ADBE Displacement Map-0003", 180)
-	layerRefRoundTrip(t, "CMPBLUR", aep.EffectCompoundBlur, aep.EffectCompoundBlurLayer, "ADBE Compound Blur-0002", 90)
-	layerRefRoundTrip(t, "VECBLUR", aep.EffectCCVectorBlur, aep.EffectCCVectorBlurMap, "CC Vector Blur-0002", 120)
+	layerRefRoundTrip(t, "DISPMAP", aep.EffectDisplacementMap, aep.EffectDisplacementMapLayer, "Max Horizontal Displacement", 180)
+	layerRefRoundTrip(t, "CMPBLUR", aep.EffectCompoundBlur, aep.EffectCompoundBlurLayer, "Maximum Blur", 90)
+	layerRefRoundTrip(t, "VECBLUR", aep.EffectCCVectorBlur, aep.EffectCCVectorBlurMap, "Amount", 120)
 }
 
 // Wave 11 layer-ref effects: each materialized layer-ref param's tdpi must
@@ -275,22 +275,22 @@ func compoundBlurPixelCheck(t *testing.T, img image.Image, ver string) {
 }
 
 func TestLayerRefDispMap_AEShipGate_AE2020(t *testing.T) {
-	runLayerRefGate(t, ae2020(), "AE2020", aep.TargetAE2020, "DISPMAP", aep.EffectDisplacementMap, aep.EffectDisplacementMapLayer, "ADBE Displacement Map-0003", 180, dispMapPixelCheck)
+	runLayerRefGate(t, ae2020(), "AE2020", aep.TargetAE2020, "DISPMAP", aep.EffectDisplacementMap, aep.EffectDisplacementMapLayer, "Max Horizontal Displacement", 180, dispMapPixelCheck)
 }
 func TestLayerRefDispMap_AEShipGate_AE2025(t *testing.T) {
-	runLayerRefGate(t, ae2025(), "AE2025", aep.TargetAE2025, "DISPMAP", aep.EffectDisplacementMap, aep.EffectDisplacementMapLayer, "ADBE Displacement Map-0003", 180, dispMapPixelCheck)
+	runLayerRefGate(t, ae2025(), "AE2025", aep.TargetAE2025, "DISPMAP", aep.EffectDisplacementMap, aep.EffectDisplacementMapLayer, "Max Horizontal Displacement", 180, dispMapPixelCheck)
 }
 func TestLayerRefCompoundBlur_AEShipGate_AE2020(t *testing.T) {
-	runLayerRefGate(t, ae2020(), "AE2020", aep.TargetAE2020, "CMPBLUR", aep.EffectCompoundBlur, aep.EffectCompoundBlurLayer, "ADBE Compound Blur-0002", 90, compoundBlurPixelCheck)
+	runLayerRefGate(t, ae2020(), "AE2020", aep.TargetAE2020, "CMPBLUR", aep.EffectCompoundBlur, aep.EffectCompoundBlurLayer, "Maximum Blur", 90, compoundBlurPixelCheck)
 }
 func TestLayerRefCompoundBlur_AEShipGate_AE2025(t *testing.T) {
-	runLayerRefGate(t, ae2025(), "AE2025", aep.TargetAE2025, "CMPBLUR", aep.EffectCompoundBlur, aep.EffectCompoundBlurLayer, "ADBE Compound Blur-0002", 90, compoundBlurPixelCheck)
+	runLayerRefGate(t, ae2025(), "AE2025", aep.TargetAE2025, "CMPBLUR", aep.EffectCompoundBlur, aep.EffectCompoundBlurLayer, "Maximum Blur", 90, compoundBlurPixelCheck)
 }
 
 // CC Vector Blur: accept + round-trip + resave only (render-pixel deferred).
 func TestLayerRefVectorBlur_AEShipGate_AE2020(t *testing.T) {
-	runLayerRefGate(t, ae2020(), "AE2020", aep.TargetAE2020, "VECBLUR", aep.EffectCCVectorBlur, aep.EffectCCVectorBlurMap, "CC Vector Blur-0002", 120, nil)
+	runLayerRefGate(t, ae2020(), "AE2020", aep.TargetAE2020, "VECBLUR", aep.EffectCCVectorBlur, aep.EffectCCVectorBlurMap, "Amount", 120, nil)
 }
 func TestLayerRefVectorBlur_AEShipGate_AE2025(t *testing.T) {
-	runLayerRefGate(t, ae2025(), "AE2025", aep.TargetAE2025, "VECBLUR", aep.EffectCCVectorBlur, aep.EffectCCVectorBlurMap, "CC Vector Blur-0002", 120, nil)
+	runLayerRefGate(t, ae2025(), "AE2025", aep.TargetAE2025, "VECBLUR", aep.EffectCCVectorBlur, aep.EffectCCVectorBlurMap, "Amount", 120, nil)
 }

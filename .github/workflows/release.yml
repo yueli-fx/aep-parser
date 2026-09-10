@@ -37,20 +37,40 @@ jobs:
           GOARCH: ${{ matrix.goarch }}
           CGO_ENABLED: "0"
         run: go build -trimpath -o aep-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }} ./cmd/aep
+      - name: Package binary and license notices
+        shell: bash
+        run: >-
+          tar -czf aep-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
+          aep-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}
+          LICENSE LICENSING.md THIRD_PARTY_NOTICES.md licenses README.md README.en.md README.ja.md
       - uses: actions/upload-artifact@v4
         with:
           name: aep-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: aep-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}
+          path: aep-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
 
   publish:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           path: dist
           merge-multiple: true
+      - name: Include corresponding source and build instructions
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          git archive --format=tar.gz --prefix=aep-parser/ -o "dist/aep-parser-${RELEASE_TAG}-source.tar.gz" HEAD
+          cp LICENSE LICENSING.md THIRD_PARTY_NOTICES.md dist/
+          cat > release-notes.md <<'EOF'
+          Source-available under PolyForm Noncommercial 1.0.0. Permitted noncommercial uses are free; other commercial uses require a separate written commercial license.
+          Each binary archive includes LICENSE, LICENSING.md, and third-party notices. See LICENSING.md for permitted uses, organizational exceptions, and commercial license inquiries.
+          The matching `aep-parser-<tag>-source.tar.gz` asset contains the project source, embedded templates, and build workflow for this release.
+          Extract it, install the Go toolchain specified in `go.mod`, and run `go mod download` followed by `CGO_ENABLED=0 go build -trimpath -o aep ./cmd/aep` (set the environment variable using your shell's syntax on Windows).
+          Dependency versions and checksums are recorded in `go.mod` and `go.sum`; Go toolchains and their source are available from https://go.dev/dl/.
+          EOF
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" dist/* --generate-notes --verify-tag
+        run: gh release create "$GITHUB_REF_NAME" dist/* --notes-file release-notes.md --generate-notes --verify-tag

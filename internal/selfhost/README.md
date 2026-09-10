@@ -19,4 +19,4 @@ local AEP sample corpora.
   or technique packages.
 
 This package may summarize sample behavior, but durable rules extracted from it
-belong in `flightdeck/knowledge/` or `registry/evidence/`.
+belong in `docs/knowledge/` or `registry/evidence/`.

@@ -354,6 +354,74 @@ func SetEffectParam(layer *Layer, fx *Effect, paramMatchName string, value any) 
 	return prop, nil
 }
 
+// ResolveEffectParamName resolves an unambiguous display name for the authoring facade.
+// Raw match-names are rejected; serializer writers operate on the resolved IDs.
+// Read parT as well as materialized properties: fresh effects omit parameters
+// whose values still equal their defaults. Resolve before making any edits.
+func ResolveEffectParamName(layer *Layer, fx *Effect, name string) (string, error) {
+	if layer == nil || fx == nil {
+		return "", fmt.Errorf("effect parameter: layer/effect is nil")
+	}
+	if strings.HasPrefix(strings.ToLower(name), strings.ToLower(fx.MatchName)+"-") {
+		return "", fmt.Errorf("effect parameter: raw match-name %q is not accepted; use a parameter name", name)
+	}
+	matches := map[string]bool{}
+	addCandidate := func(matchName, displayName string) {
+		if name == "" {
+			return
+		}
+		if strings.EqualFold(displayName, name) {
+			matches[matchName] = true
+		}
+		for _, alias := range effectParamNameAliases[fx.MatchName][matchName] {
+			if strings.EqualFold(alias, name) {
+				matches[matchName] = true
+			}
+		}
+	}
+	for _, param := range fx.Parameters {
+		if strings.EqualFold(param.MatchName, name) {
+			return "", fmt.Errorf("effect parameter: raw match-name %q is not accepted; use a parameter name", name)
+		}
+		addCandidate(param.MatchName, param.Name)
+	}
+	for i, effect := range layer.Effects {
+		if effect != fx {
+			continue
+		}
+		parade := layer.EffectsParade()
+		if parade == nil || i >= parade.NumProperties() {
+			break
+		}
+		group, ok := parade.ChildByIndex(i).(*AEPropertyGroup)
+		if !ok {
+			break
+		}
+		back := propertyGroupBack(group)
+		if back == nil {
+			break
+		}
+		for matchName, def := range parsePardParams(back.chunk) {
+			addCandidate(matchName, def.name)
+		}
+		break
+	}
+	if len(matches) == 1 {
+		for matchName := range matches {
+			return matchName, nil
+		}
+	}
+	if len(matches) > 1 {
+		candidates := make([]string, 0, len(matches))
+		for matchName := range matches {
+			candidates = append(candidates, matchName)
+		}
+		sort.Strings(candidates)
+		return "", fmt.Errorf("SetEffectParam: parameter name %q is ambiguous in effect %q; use a unique parameter display name (conflicting internal IDs: %v)", name, fx.MatchName, candidates)
+	}
+	return "", fmt.Errorf("SetEffectParam: parameter %q does not belong to effect %q (no matching parameter name)", name, fx.MatchName)
+}
+
 // SetEffectLayerParam points a layer-reference effect parameter (e.g. Set
 // Matte's "Take Matte From Layer", ADBE Set Matte3-0001) at target. AE stores
 // the reference as the target layer's ID in the parameter's own tdpi chunk —

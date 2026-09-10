@@ -106,7 +106,7 @@ func TestGeneratedCleanupProtectsStateReferencedGeneratedFiles(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeFile(t, root, "tmp/migration_matrix_old/matrix.json", "{}\n")
 	writeFile(t, root, "tmp/migration_matrix_old/log.txt", "log\n")
-	writeFile(t, root, "flightdeck/work/aep-understanding-generation/current.json", `{"matrix":"tmp/migration_matrix_old/matrix.json","out":"tmp/migration_matrix_old"}`)
+	writeFile(t, root, "registry/workflows/aep-understanding-generation/current.json", `{"matrix":"tmp/migration_matrix_old/matrix.json","out":"tmp/migration_matrix_old"}`)
 	writeJSON(t, root, "registry/locations.json", map[string]any{
 		"schema_version": 1,
 		"locations": []map[string]any{
@@ -128,7 +128,7 @@ func TestGeneratedCleanupProtectsStateReferencedGeneratedFiles(t *testing.T) {
 
 	report, err := GeneratedCleanupRepository(root, GeneratedCleanupOptions{
 		SampleLimit:         2,
-		StateReferenceFiles: []string{"flightdeck/work/aep-understanding-generation/current.json"},
+		StateReferenceFiles: []string{"registry/workflows/aep-understanding-generation/current.json"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -153,7 +153,7 @@ func TestGeneratedCleanupSeparatesRegistryReportSelfNoise(t *testing.T) {
 	writeFile(t, root, "tmp/registry_audit.json", "{}\n")
 	writeFile(t, root, "tmp/registry_gate.json", "{}\n")
 	writeFile(t, root, "tmp/registry_version_boundaries.json", "{}\n")
-	writeFile(t, root, "flightdeck/work/aep-understanding-generation/current.json", `{"boundary":"tmp/registry_version_boundaries.json"}`)
+	writeFile(t, root, "registry/workflows/aep-understanding-generation/current.json", `{"boundary":"tmp/registry_version_boundaries.json"}`)
 	writeJSON(t, root, "registry/locations.json", map[string]any{
 		"schema_version": 1,
 		"locations": []map[string]any{
@@ -175,7 +175,7 @@ func TestGeneratedCleanupSeparatesRegistryReportSelfNoise(t *testing.T) {
 
 	report, err := GeneratedCleanupRepository(root, GeneratedCleanupOptions{
 		SampleLimit:         2,
-		StateReferenceFiles: []string{"flightdeck/work/aep-understanding-generation/current.json"},
+		StateReferenceFiles: []string{"registry/workflows/aep-understanding-generation/current.json"},
 	})
 	if err != nil {
 		t.Fatal(err)

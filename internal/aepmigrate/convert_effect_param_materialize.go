@@ -2,6 +2,7 @@ package aepmigrate
 
 import (
 	"fmt"
+	"github.com/yueli-fx/aep-parser/internal/serializer"
 
 	"github.com/yueli-fx/aep-parser/internal/aep"
 	"github.com/yueli-fx/aep-parser/internal/profile"
@@ -52,7 +53,7 @@ func materializeEffectValueParam(targetLayer *aep.Layer, targetEffect *aep.Effec
 		}
 		return nil, nil
 	}
-	property, err := aep.SetEffectParam(targetLayer, targetEffect, param.MatchName, value)
+	property, err := serializer.SetEffectParam(targetLayer, targetEffect, param.MatchName, value)
 	if err != nil {
 		return nil, fmt.Errorf("param %q static value: %w", param.MatchName, err)
 	}

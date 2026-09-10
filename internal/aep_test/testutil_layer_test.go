@@ -241,4 +241,3 @@ func buildLdtaFullLengthAEP() []byte {
 	root.Write(foldList)
 	return root.Bytes()
 }
-

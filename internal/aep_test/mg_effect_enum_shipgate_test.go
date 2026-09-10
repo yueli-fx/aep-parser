@@ -93,7 +93,7 @@ func buildEffectEnumDemo(t *testing.T, target aep.AETarget) *aep.Project {
 		if err != nil {
 			t.Fatalf("%s AddEffect(Invert): %v", c.name, err)
 		}
-		if _, err := aep.SetEffectParam(l, fx, "ADBE Invert-0001", c.channel); err != nil {
+		if _, err := aep.SetEffectParam(l, fx, "Channel", c.channel); err != nil {
 			t.Fatalf("%s SetEffectParam(Channel=%v): %v", c.name, c.channel, err)
 		}
 	}

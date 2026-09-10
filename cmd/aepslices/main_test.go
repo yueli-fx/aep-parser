@@ -16,7 +16,7 @@ func TestRunPlanWritesJSONReport(t *testing.T) {
 	out := filepath.Join(t.TempDir(), "slices.json")
 	code := run([]string{
 		"plan",
-		"-aep", filepath.Join(root, "flightdeck", "showcase", "text", "text.aep"),
+		"-aep", filepath.Join(root, "test_data", "fixtures", "showcase", "text.aep"),
 		"-dict", "",
 		"-max", "1",
 		"-json",
@@ -40,8 +40,8 @@ func TestRunDiagnoseReturnsOneForDifferentAEPs(t *testing.T) {
 	out := filepath.Join(t.TempDir(), "diagnose.json")
 	code := run([]string{
 		"diagnose",
-		"-expected", filepath.Join(root, "flightdeck", "showcase", "text", "text.aep"),
-		"-actual", filepath.Join(root, "flightdeck", "showcase", "effects", "effects.aep"),
+		"-expected", filepath.Join(root, "test_data", "fixtures", "showcase", "text.aep"),
+		"-actual", filepath.Join(root, "test_data", "fixtures", "showcase", "effects.aep"),
 		"-dict", "",
 		"-json",
 		"-out", out,
@@ -65,7 +65,7 @@ func TestRunDiagnoseMergesRenderSetReport(t *testing.T) {
 	renderSetPath := filepath.Join(dir, "render_set.json")
 	writeFrameSetReport(t, renderSetPath)
 	out := filepath.Join(dir, "diagnose.json")
-	fixture := filepath.Join(root, "flightdeck", "showcase", "text", "text.aep")
+	fixture := filepath.Join(root, "test_data", "fixtures", "showcase", "text.aep")
 	code := run([]string{
 		"diagnose",
 		"-expected", fixture,

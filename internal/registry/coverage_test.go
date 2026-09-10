@@ -7,10 +7,10 @@ import (
 
 func TestValidateCoveragePassesWhenArtifactTotalsMatch(t *testing.T) {
 	root := newTestRegistryRoot(t)
-	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 2)
+	writeCoverageFixture(t, root, "registry/workflows/aep-understanding-generation/coverage.json", 2)
 	writeMatrixFixture(t, root, "tmp/matrix/text/matrix.json", 2)
 
-	report, err := ValidateCoverage(root, "flightdeck/work/aep-understanding-generation/coverage.json")
+	report, err := ValidateCoverage(root, "registry/workflows/aep-understanding-generation/coverage.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -24,10 +24,10 @@ func TestValidateCoveragePassesWhenArtifactTotalsMatch(t *testing.T) {
 
 func TestValidateCoverageFailsWhenArtifactTotalsDrift(t *testing.T) {
 	root := newTestRegistryRoot(t)
-	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 3)
+	writeCoverageFixture(t, root, "registry/workflows/aep-understanding-generation/coverage.json", 3)
 	writeMatrixFixture(t, root, "tmp/matrix/text/matrix.json", 2)
 
-	report, err := ValidateCoverage(root, "flightdeck/work/aep-understanding-generation/coverage.json")
+	report, err := ValidateCoverage(root, "registry/workflows/aep-understanding-generation/coverage.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -39,12 +39,12 @@ func TestValidateCoverageFailsWhenArtifactTotalsDrift(t *testing.T) {
 
 func TestValidateCoverageChecksContractGates(t *testing.T) {
 	root := newTestRegistryRoot(t)
-	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 2)
+	writeCoverageFixture(t, root, "registry/workflows/aep-understanding-generation/coverage.json", 2)
 	writeMatrixFixture(t, root, "tmp/matrix/text/matrix.json", 2)
 	writeBoundaryGateReport(t, root, VersionBoundaryCheckSummary{Boundaries: 1, Matched: 1, CheckedCells: 3})
 	addBoundaryContractGate(t, root, VersionBoundaryCheckSummary{Boundaries: 1, Matched: 1, CheckedCells: 3})
 
-	report, err := ValidateCoverage(root, "flightdeck/work/aep-understanding-generation/coverage.json")
+	report, err := ValidateCoverage(root, "registry/workflows/aep-understanding-generation/coverage.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -58,12 +58,12 @@ func TestValidateCoverageChecksContractGates(t *testing.T) {
 
 func TestValidateCoverageReportsContractGateDrift(t *testing.T) {
 	root := newTestRegistryRoot(t)
-	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 2)
+	writeCoverageFixture(t, root, "registry/workflows/aep-understanding-generation/coverage.json", 2)
 	writeMatrixFixture(t, root, "tmp/matrix/text/matrix.json", 2)
 	writeBoundaryGateReport(t, root, VersionBoundaryCheckSummary{Boundaries: 1, Matched: 1, CheckedCells: 2})
 	addBoundaryContractGate(t, root, VersionBoundaryCheckSummary{Boundaries: 1, Matched: 1, CheckedCells: 3})
 
-	report, err := ValidateCoverage(root, "flightdeck/work/aep-understanding-generation/coverage.json")
+	report, err := ValidateCoverage(root, "registry/workflows/aep-understanding-generation/coverage.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -75,7 +75,7 @@ func TestValidateCoverageReportsContractGateDrift(t *testing.T) {
 
 func TestValidateCoverageReportsRecordRecipeVersionAndAtomLinks(t *testing.T) {
 	root := newTestRegistryRoot(t)
-	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 4)
+	writeCoverageFixture(t, root, "registry/workflows/aep-understanding-generation/coverage.json", 4)
 	writeMatrixFixtureWithCases(t, root, "tmp/matrix/text/matrix.json", []map[string]any{
 		{"recipe_name": "minimal-text-a", "source_version": "AE2020", "target_version": "AE2020", "status": "pass"},
 		{"recipe_name": "minimal-text-a", "source_version": "AE2020", "target_version": "AE2025", "status": "pass"},
@@ -104,7 +104,7 @@ func TestValidateCoverageReportsRecordRecipeVersionAndAtomLinks(t *testing.T) {
 		},
 	})
 
-	report, err := ValidateCoverage(root, "flightdeck/work/aep-understanding-generation/coverage.json")
+	report, err := ValidateCoverage(root, "registry/workflows/aep-understanding-generation/coverage.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -129,7 +129,7 @@ func TestValidateCoverageReportsRecordRecipeVersionAndAtomLinks(t *testing.T) {
 
 func TestValidateCoverageReportsAtomRowsWithHostOpenEvidenceLabels(t *testing.T) {
 	root := newTestRegistryRoot(t)
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", map[string]any{
 		"schema_version":   1,
 		"host_open_policy": validHostOpenPolicyFixture(),
 		"coverage": []map[string]any{
@@ -182,7 +182,7 @@ func TestValidateCoverageReportsAtomRowsWithHostOpenEvidenceLabels(t *testing.T)
 		},
 	})
 
-	report, err := ValidateCoverage(root, "flightdeck/work/aep-understanding-generation/coverage.json")
+	report, err := ValidateCoverage(root, "registry/workflows/aep-understanding-generation/coverage.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -212,7 +212,7 @@ func TestValidateCoverageReportsAtomRowsWithHostOpenEvidenceLabels(t *testing.T)
 
 func TestValidateCoverageReportsAtomRowBoundaryLabels(t *testing.T) {
 	root := newTestRegistryRoot(t)
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", map[string]any{
 		"schema_version":   1,
 		"host_open_policy": validHostOpenPolicyFixture(),
 		"coverage": []map[string]any{
@@ -257,7 +257,7 @@ func TestValidateCoverageReportsAtomRowBoundaryLabels(t *testing.T) {
 		},
 	})
 
-	report, err := ValidateCoverage(root, "flightdeck/work/aep-understanding-generation/coverage.json")
+	report, err := ValidateCoverage(root, "registry/workflows/aep-understanding-generation/coverage.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -278,7 +278,7 @@ func TestValidateCoverageReportsAtomRowBoundaryLabels(t *testing.T) {
 
 func TestCoverageCellsReportsSourceTargetCasesWithBoundaryLabels(t *testing.T) {
 	root := newTestRegistryRoot(t)
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", map[string]any{
 		"schema_version":   1,
 		"host_open_policy": validHostOpenPolicyFixture(),
 		"coverage": []map[string]any{
@@ -320,7 +320,7 @@ func TestCoverageCellsReportsSourceTargetCasesWithBoundaryLabels(t *testing.T) {
 		},
 	})
 
-	report, err := CoverageCells(root, "flightdeck/work/aep-understanding-generation/coverage.json", CoverageCellFilter{
+	report, err := CoverageCells(root, "registry/workflows/aep-understanding-generation/coverage.json", CoverageCellFilter{
 		AtomID: "layer.track_matte.explicit_source",
 	})
 	if err != nil {
@@ -343,7 +343,7 @@ func TestCoverageCellsReportsSourceTargetCasesWithBoundaryLabels(t *testing.T) {
 		t.Fatalf("blocked reason = %q", blocked.Reason)
 	}
 
-	filtered, err := CoverageCells(root, "flightdeck/work/aep-understanding-generation/coverage.json", CoverageCellFilter{
+	filtered, err := CoverageCells(root, "registry/workflows/aep-understanding-generation/coverage.json", CoverageCellFilter{
 		AtomID:     "layer.track_matte.explicit_source",
 		CaseStatus: "skipped",
 	})
@@ -354,7 +354,7 @@ func TestCoverageCellsReportsSourceTargetCasesWithBoundaryLabels(t *testing.T) {
 		t.Fatalf("filtered cells = %+v, want one skipped cell", filtered.Cells)
 	}
 
-	domainFiltered, err := CoverageCells(root, "flightdeck/work/aep-understanding-generation/coverage.json", CoverageCellFilter{
+	domainFiltered, err := CoverageCells(root, "registry/workflows/aep-understanding-generation/coverage.json", CoverageCellFilter{
 		Domain: "layer",
 	})
 	if err != nil {
@@ -498,7 +498,7 @@ func TestSummarizeCoverageReportsObservedRecipesWithoutDeclaration(t *testing.T)
 
 func TestCoverageAxisSummarizesVersionAxisAndHostLabels(t *testing.T) {
 	root := newTestRegistryRoot(t)
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", map[string]any{
 		"schema_version":   1,
 		"host_open_policy": validHostOpenPolicyFixture(),
 		"coverage": []map[string]any{
@@ -577,7 +577,7 @@ func TestCoverageAxisSummarizesVersionAxisAndHostLabels(t *testing.T) {
 		},
 	})
 
-	axis, err := CoverageAxis(root, "flightdeck/work/aep-understanding-generation/coverage.json", []string{"AE2020", "AE2025"})
+	axis, err := CoverageAxis(root, "registry/workflows/aep-understanding-generation/coverage.json", []string{"AE2020", "AE2025"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -621,7 +621,7 @@ func TestCoverageAxisSummarizesVersionAxisAndHostLabels(t *testing.T) {
 
 func TestCoverageAxisWithFilterNarrowsRowsAndCells(t *testing.T) {
 	root := newTestRegistryRoot(t)
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", map[string]any{
 		"schema_version":   1,
 		"host_open_policy": validHostOpenPolicyFixture(),
 		"coverage": []map[string]any{
@@ -687,7 +687,7 @@ func TestCoverageAxisWithFilterNarrowsRowsAndCells(t *testing.T) {
 		},
 	})
 
-	axis, err := CoverageAxisWithFilter(root, "flightdeck/work/aep-understanding-generation/coverage.json", []string{"AE2024", "AE2025"}, CoverageAxisFilter{
+	axis, err := CoverageAxisWithFilter(root, "registry/workflows/aep-understanding-generation/coverage.json", []string{"AE2024", "AE2025"}, CoverageAxisFilter{
 		AtomID: "layer.track_matte.explicit_source",
 	})
 	if err != nil {
@@ -703,7 +703,7 @@ func TestCoverageAxisWithFilterNarrowsRowsAndCells(t *testing.T) {
 		t.Fatalf("filter not preserved: %+v", axis.Filter)
 	}
 
-	blockedOnly, err := CoverageAxisWithFilter(root, "flightdeck/work/aep-understanding-generation/coverage.json", []string{"AE2024", "AE2025"}, CoverageAxisFilter{
+	blockedOnly, err := CoverageAxisWithFilter(root, "registry/workflows/aep-understanding-generation/coverage.json", []string{"AE2024", "AE2025"}, CoverageAxisFilter{
 		AtomID:     "layer.track_matte.explicit_source",
 		CaseStatus: "blocked",
 	})
@@ -714,7 +714,7 @@ func TestCoverageAxisWithFilterNarrowsRowsAndCells(t *testing.T) {
 		t.Fatalf("blocked-only summary = %+v", blockedOnly.Summary)
 	}
 
-	boundaryAxisOnly, err := CoverageAxisWithFilter(root, "flightdeck/work/aep-understanding-generation/coverage.json", []string{"AE2024", "AE2025"}, CoverageAxisFilter{
+	boundaryAxisOnly, err := CoverageAxisWithFilter(root, "registry/workflows/aep-understanding-generation/coverage.json", []string{"AE2024", "AE2025"}, CoverageAxisFilter{
 		WriterAxisStatus: "boundary_source_contract",
 	})
 	if err != nil {
@@ -727,7 +727,7 @@ func TestCoverageAxisWithFilterNarrowsRowsAndCells(t *testing.T) {
 		t.Fatalf("boundary-axis cell summary = %+v", boundaryAxisOnly.Summary)
 	}
 
-	missingHostOnly, err := CoverageAxisWithFilter(root, "flightdeck/work/aep-understanding-generation/coverage.json", []string{"AE2024", "AE2025"}, CoverageAxisFilter{
+	missingHostOnly, err := CoverageAxisWithFilter(root, "registry/workflows/aep-understanding-generation/coverage.json", []string{"AE2024", "AE2025"}, CoverageAxisFilter{
 		HostAxisStatus: "missing_host_axis",
 	})
 	if err != nil {
@@ -737,7 +737,7 @@ func TestCoverageAxisWithFilterNarrowsRowsAndCells(t *testing.T) {
 		t.Fatalf("missing-host summary = %+v", missingHostOnly.Summary)
 	}
 
-	textOnly, err := CoverageAxisWithFilter(root, "flightdeck/work/aep-understanding-generation/coverage.json", []string{"AE2024", "AE2025"}, CoverageAxisFilter{
+	textOnly, err := CoverageAxisWithFilter(root, "registry/workflows/aep-understanding-generation/coverage.json", []string{"AE2024", "AE2025"}, CoverageAxisFilter{
 		Domain: "text",
 	})
 	if err != nil {
@@ -750,7 +750,7 @@ func TestCoverageAxisWithFilterNarrowsRowsAndCells(t *testing.T) {
 		t.Fatalf("text-domain summary = %+v filter=%+v", textOnly.Summary, textOnly.Filter)
 	}
 
-	textMissingTarget, err := CoverageAxisWithFilter(root, "flightdeck/work/aep-understanding-generation/coverage.json", []string{"AE2024", "AE2025"}, CoverageAxisFilter{
+	textMissingTarget, err := CoverageAxisWithFilter(root, "registry/workflows/aep-understanding-generation/coverage.json", []string{"AE2024", "AE2025"}, CoverageAxisFilter{
 		Domain:               "text",
 		MissingTargetVersion: "AE2025",
 	})
@@ -764,7 +764,7 @@ func TestCoverageAxisWithFilterNarrowsRowsAndCells(t *testing.T) {
 		t.Fatalf("text missing-target summary = %+v filter=%+v", textMissingTarget.Summary, textMissingTarget.Filter)
 	}
 
-	missingHostAE2025, err := CoverageAxisWithFilter(root, "flightdeck/work/aep-understanding-generation/coverage.json", []string{"AE2024", "AE2025"}, CoverageAxisFilter{
+	missingHostAE2025, err := CoverageAxisWithFilter(root, "registry/workflows/aep-understanding-generation/coverage.json", []string{"AE2024", "AE2025"}, CoverageAxisFilter{
 		MissingHostVersion: "AE2025",
 	})
 	if err != nil {
@@ -863,12 +863,12 @@ func TestFilterCoverageRowsSelectsAtomRowsForFocusedQueries(t *testing.T) {
 
 func TestValidateCoverageFailsWhenDeclaredRecipesDoNotMatchMatrix(t *testing.T) {
 	root := newTestRegistryRoot(t)
-	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 1)
+	writeCoverageFixture(t, root, "registry/workflows/aep-understanding-generation/coverage.json", 1)
 	writeMatrixFixtureWithCases(t, root, "tmp/matrix/text/matrix.json", []map[string]any{
 		{"recipe_name": "minimal-text-c", "source_version": "AE2020", "target_version": "AE2020", "status": "pass"},
 	})
 
-	report, err := ValidateCoverage(root, "flightdeck/work/aep-understanding-generation/coverage.json")
+	report, err := ValidateCoverage(root, "registry/workflows/aep-understanding-generation/coverage.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -881,7 +881,7 @@ func TestValidateCoverageFailsWhenDeclaredRecipesDoNotMatchMatrix(t *testing.T) 
 
 func TestValidateCoverageRequiresHostOpenPolicy(t *testing.T) {
 	root := newTestRegistryRoot(t)
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", map[string]any{
 		"schema_version": 1,
 		"coverage": []map[string]any{
 			{
@@ -894,14 +894,14 @@ func TestValidateCoverageRequiresHostOpenPolicy(t *testing.T) {
 	})
 	writeMatrixFixture(t, root, "tmp/matrix/text/matrix.json", 2)
 
-	report, err := ValidateCoverage(root, "flightdeck/work/aep-understanding-generation/coverage.json")
+	report, err := ValidateCoverage(root, "registry/workflows/aep-understanding-generation/coverage.json")
 	if err != nil {
 		t.Fatal(err)
 	}
 	if report.Status != StatusFail {
 		t.Fatalf("status = %q, want %q", report.Status, StatusFail)
 	}
-	assertCoverageIssue(t, report, "missing_host_open_policy", "", "flightdeck/work/aep-understanding-generation/coverage.json")
+	assertCoverageIssue(t, report, "missing_host_open_policy", "", "registry/workflows/aep-understanding-generation/coverage.json")
 }
 
 func TestValidateCoverageReportsUncoveredRecipes(t *testing.T) {
@@ -909,7 +909,7 @@ func TestValidateCoverageReportsUncoveredRecipes(t *testing.T) {
 	writeFile(t, root, "examples/recipes/minimal-text-a.json", "{}")
 	writeFile(t, root, "examples/recipes/minimal-text-b.json", "{}")
 	writeFile(t, root, "examples/recipes/minimal-text-c.json", "{}")
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", map[string]any{
 		"schema_version":   1,
 		"host_open_policy": validHostOpenPolicyFixture(),
 		"coverage": []map[string]any{
@@ -923,7 +923,7 @@ func TestValidateCoverageReportsUncoveredRecipes(t *testing.T) {
 	})
 	writeMatrixFixture(t, root, "tmp/matrix/text/matrix.json", 2)
 
-	report, err := ValidateCoverageWithOptions(root, "flightdeck/work/aep-understanding-generation/coverage.json", CoverageValidationOptions{
+	report, err := ValidateCoverageWithOptions(root, "registry/workflows/aep-understanding-generation/coverage.json", CoverageValidationOptions{
 		RequireAllRecipes: true,
 	})
 	if err != nil {
@@ -937,7 +937,7 @@ func TestValidateCoverageReportsUncoveredRecipes(t *testing.T) {
 
 func TestValidateCoverageCanRequireLedgers(t *testing.T) {
 	root := newTestRegistryRoot(t)
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", map[string]any{
 		"schema_version":   1,
 		"host_open_policy": validHostOpenPolicyFixture(),
 		"coverage": []map[string]any{
@@ -952,7 +952,7 @@ func TestValidateCoverageCanRequireLedgers(t *testing.T) {
 	})
 	writeMatrixFixture(t, root, "tmp/matrix/text/matrix.json", 2)
 
-	report, err := ValidateCoverageWithOptions(root, "flightdeck/work/aep-understanding-generation/coverage.json", CoverageValidationOptions{
+	report, err := ValidateCoverageWithOptions(root, "registry/workflows/aep-understanding-generation/coverage.json", CoverageValidationOptions{
 		RequireLedgers: true,
 	})
 	if err != nil {
@@ -1010,7 +1010,7 @@ func validHostOpenPolicyFixture() map[string]any {
 
 func addBoundaryContractGate(t *testing.T, root string, summary VersionBoundaryCheckSummary) {
 	t.Helper()
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", map[string]any{
 		"schema_version":   1,
 		"host_open_policy": validHostOpenPolicyFixture(),
 		"contract_gates": []map[string]any{

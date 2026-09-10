@@ -18,7 +18,7 @@
   Idempotent: if no crash flag is set, AE launches, runs the quit script, and
   exits with no dialog — a harmless no-op.
 
-  Background: flightdeck/incidents/ae-automation-occlusion-crashstate.md §2 / §2c.
+  Background: docs/knowledge/workflow/ae-automation-occlusion-crashstate.md §2 / §2c.
 
 .PARAMETER AeExe
   Absolute path to AfterFX.exe. If omitted, probes the known installs

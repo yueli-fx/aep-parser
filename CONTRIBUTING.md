@@ -53,3 +53,13 @@ feat(cli): add unified inspect command
 ```
 
 不要添加 AI 署名或无关格式化改动。
+
+## 贡献许可 / Contribution license
+
+新贡献须按 **PolyForm Noncommercial 1.0.0** 提供。贡献者保留版权，确认自己有权提交，保留第三方声明并说明来源。完整条款见 [LICENSE](LICENSE)，授权方式见 [LICENSING.md](LICENSING.md)。
+
+本项目还可能提供单独的商业授权。**仅提交或合并 PR，不视为贡献者已授权维护者将其贡献用于商业再授权。** 拟纳入商业授权版本的外部贡献，维护者须在纳入前另行取得明确的书面许可，覆盖所需的商业使用、修改、分发及再许可权；保留授权记录，必要时使用单独的贡献者协议。没有相应权利的贡献，不得宣称已被项目商业许可证覆盖。
+
+Contributions must be offered under **PolyForm Noncommercial 1.0.0**. Contributors retain copyright, must have the necessary rights, and must preserve third-party notices and disclose provenance. See [LICENSE](LICENSE) and [LICENSING.md](LICENSING.md).
+
+The project may also offer separate commercial licenses. **Submitting or merging a PR does not by itself grant maintainers commercial sublicensing rights to that contribution.** Before incorporating external contributions into commercially licensed versions, maintainers must obtain and retain explicit written permission covering the necessary commercial use, modification, distribution, and sublicensing rights, using a separate contributor agreement where appropriate. Contributions lacking those rights must not be represented as covered by the project's commercial license.

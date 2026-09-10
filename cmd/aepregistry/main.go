@@ -1082,7 +1082,7 @@ func runVersionMatrixGate(root, coveragePath string, axis []string, addStep func
 }
 
 func checkMainlineSpecCoverageSummary(root string, summary registry.CoverageSummaryReport) (mainlineSpecCoverageSummaryReport, bool, error) {
-	specPath := "flightdeck/work/versioned-aep-migration/mainline-spec.json"
+	specPath := "registry/workflows/versioned-aep-migration/mainline-spec.json"
 	absPath := filepath.Join(root, filepath.FromSlash(specPath))
 	if _, err := os.Stat(absPath); err != nil {
 		if os.IsNotExist(err) {
@@ -1175,7 +1175,7 @@ func coverageSummaryTotalsMap(summary registry.CoverageSummaryTotals) map[string
 }
 
 func checkMainlineSpecCoverageAxis(root string, axisReport registry.CoverageAxisReport) (mainlineSpecCoverageAxisReport, bool, error) {
-	specPath := "flightdeck/work/versioned-aep-migration/mainline-spec.json"
+	specPath := "registry/workflows/versioned-aep-migration/mainline-spec.json"
 	absPath := filepath.Join(root, filepath.FromSlash(specPath))
 	if _, err := os.Stat(absPath); err != nil {
 		if os.IsNotExist(err) {

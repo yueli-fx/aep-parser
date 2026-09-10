@@ -6,7 +6,7 @@ func TestValidateCurrentPassesForReferencedArtifacts(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeCurrentValidationFixture(t, root)
 
-	report, err := ValidateCurrent(root, "flightdeck/work/aep-understanding-generation/current.json")
+	report, err := ValidateCurrent(root, "registry/workflows/aep-understanding-generation/current.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -29,9 +29,9 @@ func TestValidateCurrentReportsUnknownCoverageBatchID(t *testing.T) {
 			"recipe_paths": []string{"examples/recipes/text-basic.json"},
 		},
 	}
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/current.json", current)
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/current.json", current)
 
-	report, err := ValidateCurrent(root, "flightdeck/work/aep-understanding-generation/current.json")
+	report, err := ValidateCurrent(root, "registry/workflows/aep-understanding-generation/current.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -44,16 +44,16 @@ func TestValidateCurrentReportsUnknownCoverageBatchID(t *testing.T) {
 func TestValidateCurrentReportsCanonicalCoverageBatchMismatch(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	current := writeCurrentValidationFixture(t, root)
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", map[string]any{
 		"schema_version": 1,
 		"coverage": []map[string]any{
 			{"id": "text", "artifact": "tmp/matrix/text/matrix.json"},
 			{"id": "shape", "artifact": "tmp/matrix/shape/matrix.json"},
 		},
 	})
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/current.json", current)
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/current.json", current)
 
-	report, err := ValidateCurrent(root, "flightdeck/work/aep-understanding-generation/current.json")
+	report, err := ValidateCurrent(root, "registry/workflows/aep-understanding-generation/current.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -65,8 +65,8 @@ func TestValidateCurrentReportsCanonicalCoverageBatchMismatch(t *testing.T) {
 
 func writeCurrentValidationFixture(t *testing.T, root string) map[string]any {
 	t.Helper()
-	currentPath := "flightdeck/work/aep-understanding-generation/current.json"
-	coveragePath := "flightdeck/work/aep-understanding-generation/coverage.json"
+	currentPath := "registry/workflows/aep-understanding-generation/current.json"
+	coveragePath := "registry/workflows/aep-understanding-generation/coverage.json"
 	writeJSON(t, root, coveragePath, map[string]any{
 		"schema_version": 1,
 		"coverage": []map[string]any{
@@ -79,7 +79,7 @@ func writeCurrentValidationFixture(t *testing.T, root string) map[string]any {
 	writeFile(t, root, "tmp/matrix/text/ledger.md", "# ledger\n")
 	writeFile(t, root, "examples/recipes/text-basic.json", "{}\n")
 	writeFile(t, root, "scripts/migration/tool.ps1", "")
-	writeFile(t, root, "flightdeck/work/aep-understanding-generation/frozen.md", "# frozen\n")
+	writeFile(t, root, "registry/workflows/aep-understanding-generation/frozen.md", "# frozen\n")
 
 	current := map[string]any{
 		"truth_sources": map[string]any{
@@ -93,7 +93,7 @@ func writeCurrentValidationFixture(t *testing.T, root string) map[string]any {
 			},
 		},
 		"frozen_markdown": []map[string]any{
-			{"path": "flightdeck/work/aep-understanding-generation/frozen.md"},
+			{"path": "registry/workflows/aep-understanding-generation/frozen.md"},
 		},
 		"tooling": []map[string]any{
 			{"id": "tool", "script": "scripts/migration/tool.ps1"},

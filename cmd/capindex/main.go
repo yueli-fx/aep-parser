@@ -36,7 +36,7 @@ func main() {
 		fatal(err)
 	}
 	pkgDirs := capindexPkgDirs(root)
-	incidentsDir := filepath.Join(root, "flightdeck", "incidents")
+	incidentsDir := filepath.Join(root, "docs", "incidents")
 	docgenPath := filepath.Join(root, "docs", "docgen.json")
 	jsonPath := filepath.Join(root, "docs", "capabilities.json")
 	mdPath := filepath.Join(root, "docs", "capabilities.md")

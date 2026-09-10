@@ -681,7 +681,7 @@ func verifySelfhost(opts verifyOptions, stdout, stderr io.Writer, platform host.
 		fmt.Fprintln(stderr, err)
 		return 1
 	}
-	if err := copyFile(resolveRepoPath(filepath.Join("flightdeck", "showcase", "text", "text.aep")), filepath.Join(partialInputDir, "good.aep")); err != nil {
+	if err := copyFile(resolveRepoPath(filepath.Join("test_data", "fixtures", "showcase", "text.aep")), filepath.Join(partialInputDir, "good.aep")); err != nil {
 		fmt.Fprintln(stderr, err)
 		return 1
 	}

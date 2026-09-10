@@ -152,14 +152,14 @@
       "kind": "func",
       "file": "effect.md",
       "anchor": "#animateeffectparam",
-      "signature": "func AnimateEffectParam(layer *Layer, fx *Effect, paramMatchName string, kfs []ScalarKeyframe) (*Property, error)",
+      "signature": "func AnimateEffectParam(layer *Layer, fx *Effect, paramName string, kfs []ScalarKeyframe) (*Property, error)",
       "summary": "Keyframes a 1D-scalar effect parameter — N keyframes (\u003e= 2), each a"
     },
     "AnimateEffectParamVec": {
       "kind": "func",
       "file": "effect.md",
       "anchor": "#animateeffectparamvec",
-      "signature": "func AnimateEffectParamVec(layer *Layer, fx *Effect, paramMatchName string, kfs []VectorKeyframe) (*Property, error)",
+      "signature": "func AnimateEffectParamVec(layer *Layer, fx *Effect, paramName string, kfs []VectorKeyframe) (*Property, error)",
       "summary": "Keyframes a multi-component effect parameter — the color / 2D-point"
     },
     "AnimateTextCharacterOffset": {
@@ -5017,8 +5017,8 @@
       "kind": "func",
       "file": "effect.md",
       "anchor": "#seteffectparam",
-      "signature": "func SetEffectParam(layer *Layer, fx *Effect, paramMatchName string, value any) (*Property, error)",
-      "summary": "Sets an effect parameter's static value by full parameter match-name"
+      "signature": "func SetEffectParam(layer *Layer, fx *Effect, paramName string, value any) (*Property, error)",
+      "summary": "Sets an effect parameter's static value by parameter name"
     },
     "SetMaskPath": {
       "kind": "func",

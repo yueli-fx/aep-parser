@@ -94,9 +94,9 @@ func buildFlameDemo(t *testing.T, target aep.AETarget) *aep.Project {
 	if err != nil {
 		t.Fatalf("AddEffect Glo2: %v", err)
 	}
-	set("Glow Threshold", glowL, gl, "ADBE Glo2-0002", 50.0)
-	set("Glow Radius", glowL, gl, "ADBE Glo2-0003", 55.0)
-	set("Glow Intensity", glowL, gl, "ADBE Glo2-0004", 1.5)
+	set("Glow Threshold", glowL, gl, "Glow Threshold", 50.0)
+	set("Glow Radius", glowL, gl, "Glow Radius", 55.0)
+	set("Glow Intensity", glowL, gl, "Glow Intensity", 1.5)
 
 	flamePath := aep.BezierPath{
 		Vertices: [][2]float64{
@@ -117,27 +117,27 @@ func buildFlameDemo(t *testing.T, target aep.AETarget) *aep.Project {
 		if err != nil {
 			t.Fatalf("AddEffect FractalNoise %s: %v", c.name, err)
 		}
-		set("FN Contrast", l, fn, "ADBE Fractal Noise-0004", c.contrast)
-		set("FN Brightness", l, fn, "ADBE Fractal Noise-0005", c.brightness)
-		set("FN UniformScale", l, fn, "ADBE Fractal Noise-0009", 0.0)
-		set("FN ScaleW", l, fn, "ADBE Fractal Noise-0011", c.scaleW)
-		set("FN ScaleH", l, fn, "ADBE Fractal Noise-0012", c.scaleH)
-		set("FN Complexity", l, fn, "ADBE Fractal Noise-0015", c.complexity)
+		set("FN Contrast", l, fn, "Contrast", c.contrast)
+		set("FN Brightness", l, fn, "Brightness", c.brightness)
+		set("FN UniformScale", l, fn, "Uniform Scaling", 0.0)
+		set("FN ScaleW", l, fn, "Scale Width", c.scaleW)
+		set("FN ScaleH", l, fn, "Scale Height", c.scaleH)
+		set("FN Complexity", l, fn, "Complexity", c.complexity)
 
 		tr, err := aep.AddEffect(l, "ADBE Tritone")
 		if err != nil {
 			t.Fatalf("AddEffect Tritone %s: %v", c.name, err)
 		}
-		set("Tritone Hi", l, tr, "ADBE Tritone-0001", c.tHigh)
-		set("Tritone Mid", l, tr, "ADBE Tritone-0002", c.tMid)
-		set("Tritone Sh", l, tr, "ADBE Tritone-0003", c.tShadow)
+		set("Tritone Hi", l, tr, "Highlights", c.tHigh)
+		set("Tritone Mid", l, tr, "Midtones", c.tMid)
+		set("Tritone Sh", l, tr, "Shadows", c.tShadow)
 
 		td, err := aep.AddEffect(l, aep.EffectTurbulentDisplace)
 		if err != nil {
 			t.Fatalf("AddEffect TurbulentDisplace %s: %v", c.name, err)
 		}
-		set("TD Amount", l, td, "ADBE Turbulent Displace-0002", c.dispAmt)
-		set("TD Size", l, td, "ADBE Turbulent Displace-0003", c.dispSize)
+		set("TD Amount", l, td, "Amount", c.dispAmt)
+		set("TD Size", l, td, "Size", c.dispSize)
 
 		// Concentric mask -> outer/mid/inner temperature zones (layered, not solid fill).
 		mp := flameScalePath(flamePath, 540, 1080, c.maskScale)
@@ -157,15 +157,15 @@ func buildFlameDemo(t *testing.T, target aep.AETarget) *aep.Project {
 			t.Fatalf("SetBlendingMode %s: %v", c.name, err)
 		}
 
-		if _, err := aep.AnimateEffectParam(l, fn, "ADBE Fractal Noise-0023",
+		if _, err := aep.AnimateEffectParam(l, fn, "Evolution",
 			[]aep.ScalarKeyframe{{Time: 0, Value: 0}, {Time: 4, Value: evoEnd}}); err != nil {
 			t.Fatalf("Animate FN Evolution %s: %v", c.name, err)
 		}
-		if _, err := aep.AnimateEffectParamVec(l, fn, "ADBE Fractal Noise-0013",
+		if _, err := aep.AnimateEffectParamVec(l, fn, "Offset Turbulence",
 			[]aep.VectorKeyframe{{Time: 0, Value: []float64{540, 960}}, {Time: 4, Value: []float64{540, offEndY}}}); err != nil {
 			t.Fatalf("Animate FN Offset %s: %v", c.name, err)
 		}
-		if _, err := aep.AnimateEffectParam(l, td, "ADBE Turbulent Displace-0006",
+		if _, err := aep.AnimateEffectParam(l, td, "Evolution",
 			[]aep.ScalarKeyframe{{Time: 0, Value: 0}, {Time: 4, Value: tdEvoEnd}}); err != nil {
 			t.Fatalf("Animate TD Evolution %s: %v", c.name, err)
 		}

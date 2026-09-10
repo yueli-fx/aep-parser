@@ -71,32 +71,32 @@ func runSetEffectParamGate(t *testing.T, aeExe, label string, target aep.AETarge
 			t.Fatalf("SetEffectParam(%s): %v", mn, err)
 		}
 	}
-	set(fx, "ADBE Gaussian Blur 2-0001", 25.0)
-	set(fx, "ADBE Gaussian Blur 2-0002", 2.0)
-	set(fx, "ADBE Gaussian Blur 2-0003", 1.0)
-	set(ds, "ADBE Drop Shadow-0001", []float64{255, 51, 102, 153}) // Shadow Color (color, generic)
-	set(ds, "ADBE Drop Shadow-0003", 90.0)                         // Direction (angle, generic)
-	set(ds, "ADBE Drop Shadow-0004", 20.0)                         // Distance (scalar, generic)
-	set(ds, "ADBE Drop Shadow-0005", 10.0)                         // Softness (scalar, generic)
-	set(ds, "ADBE Drop Shadow-0006", 1.0)                          // Shadow Only (boolean, generic)
+	set(fx, "Blurriness", 25.0)
+	set(fx, "Blur Dimensions", 2.0)
+	set(fx, "Repeat Edge Pixels", 1.0)
+	set(ds, "Shadow Color", []float64{255, 51, 102, 153}) // Shadow Color (color, generic)
+	set(ds, "Direction", 90.0)                            // Direction (angle, generic)
+	set(ds, "Distance", 20.0)                             // Distance (scalar, generic)
+	set(ds, "Softness", 10.0)                             // Softness (scalar, generic)
+	set(ds, "Shadow Only", 1.0)                           // Shadow Only (boolean, generic)
 
 	// Expression-control effects: per-param templates for the remaining control
 	// types (angle / color / 2D / 3D / slider). Point values are fractions of
 	// the layer's coordinate space — the COMP's 1920x1080 for a source-less
 	// shape layer — so JSX reads them back in pixels.
-	addAndSet := func(effectMN string, v any) {
+	addAndSet := func(effectMN, paramName string, v any) {
 		t.Helper()
 		e, err := aep.AddEffect(l, effectMN)
 		if err != nil {
 			t.Fatalf("AddEffect(%s): %v", effectMN, err)
 		}
-		set(e, effectMN+"-0001", v)
+		set(e, paramName, v)
 	}
-	addAndSet(aep.EffectAngleControl, 33.0)
-	addAndSet(aep.EffectColorControl, []float64{255, 51, 102, 153})
-	addAndSet(aep.EffectPointControl, []float64{0.25, 0.75})
-	addAndSet(aep.EffectPoint3DControl, []float64{0.25, 0.75, 0.5})
-	addAndSet(aep.EffectSliderControl, 12.25)
+	addAndSet(aep.EffectAngleControl, "Angle", 33.0)
+	addAndSet(aep.EffectColorControl, "Color", []float64{255, 51, 102, 153})
+	addAndSet(aep.EffectPointControl, "Point", []float64{0.25, 0.75})
+	addAndSet(aep.EffectPoint3DControl, "3D Point", []float64{0.25, 0.75, 0.5})
+	addAndSet(aep.EffectSliderControl, "Slider", 12.25)
 
 	tempDir := t.TempDir()
 	inputAEP := filepath.Join(tempDir, "setparam_in.aep")

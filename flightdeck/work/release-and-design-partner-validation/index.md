@@ -10,15 +10,17 @@ Open
 
 ## Current
 
-技术预发布基线已经完成，根 Go SDK、统一 CLI、CI/release workflow、安全与贡献文档、CHANGELOG 和 Apache-2.0 均已落地。当前分支为 `mainline/aep-understanding`，仓库尚未配置 remote；真实 CI、版本/tag 与外部团队验证尚未开始。
+公开资料已迁至 `showcase/` 和 `docs/knowledge/`；4 篇内部协作笔记留在工作站。新增 5 个公开 SDK 示例和 3 个组合工程配方。公开源码不依赖工作站文件，归档排除由 `.gitattributes` 控制。不含 Git/工作站/本地展示产物的干净源码已在 Go 1.25.12 下通过全仓测试；8 个新增示例、capindex、资源目录 gate、vet 和跨平台构建已通过。
+
+技术预发布基线已经完成，根 Go SDK、统一 CLI、CI/release workflow、安全与贡献文档、CHANGELOG 均已落地；2026-09-11 按用户要求将许可证调整为 GPL-3.0-only 并补齐双语 README。当前分支为 `main`，仓库已配置 GitHub origin；本次未执行远端 CI、创建版本/tag 或开展外部团队验证；本地概览审核的发现见下方记录。
 
 ## Next
 
-与用户确认首发采用公开开源、私有 Toolkit 或并行路径，并取得要绑定的 remote 信息；随后从 [阶段 A](plan.md) 开始，按 [验证流程](../../knowledge/workflow/verify.md) 核对本地基线，再依 [交付契约](../../knowledge/workflow/delivery-contract.md) 运行首次真实 CI。除非用户明确授权，不要 push、创建 tag 或发布。
+用户已确认准备公开开源；先处理 [开源审核记录](../../../docs/open-source-audit.md) 中实际复现的测试基线问题及具体参考材料说明，再从 [阶段 A](plan.md) 开始，按 [验证流程](../../../docs/knowledge/workflow/verify.md) 核对本地基线，再依 [交付契约](../../../docs/knowledge/workflow/delivery-contract.md) 运行首次真实 CI。除非用户明确授权，不要 push、创建 tag 或发布。
 
 ## Execution pointer
 
-`plan.md` → 阶段 A「首次发布准备」→ 确认交付路径与 remote。
+`plan.md` → 阶段 A「首次发布准备」→ 核对 Go 补丁版本对文档生成的影响，并运行首次真实 CI。
 
 ## Progress
 
@@ -30,13 +32,12 @@ Open
 
 - [稳定背景与决策边界](context.md)
 - [完整执行计划](plan.md)
-- [开源许可边界](../../knowledge/workflow/open-source-license.md)
-- [不受信任 AEP 输入](../../knowledge/security/untrusted-aep-input.md)
-- [公共 SDK 接口](../../knowledge/architecture/public-sdk-interface.md)
-- [统一 CLI 接口](../../knowledge/architecture/unified-cli-interface.md)
+- [开源许可边界](../../../docs/knowledge/workflow/open-source-license.md)
+- [不受信任 AEP 输入](../../../docs/knowledge/security/untrusted-aep-input.md)
+- [公共 SDK 接口](../../../docs/knowledge/architecture/public-sdk-interface.md)
+- [统一 CLI 接口](../../../docs/knowledge/architecture/unified-cli-interface.md)
 
 ## Open questions
 
-- 首发是公开开源发布、私有 Toolkit 交付，还是两者并行？
 - 首个版本采用 `v0.x` 预发布还是更保守的内部版本标识？
 - 哪类设计伙伴最容易先提供合法 corpus 与真实失败标签？

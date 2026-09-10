@@ -17,7 +17,7 @@ func repoPath(t *testing.T, parts ...string) string {
 }
 
 func TestBuildTextFixtureIncludesSchemaPathsEvidenceAndText(t *testing.T) {
-	path := repoPath(t, "flightdeck", "showcase", "text", "text.aep")
+	path := repoPath(t, "test_data", "fixtures", "showcase", "text.aep")
 	project, err := aep.Open(path)
 	if err != nil {
 		t.Fatalf("open fixture: %v", err)
@@ -93,7 +93,7 @@ func TestBuildCopiesStructuredParseWarnings(t *testing.T) {
 }
 
 func TestBuildEffectsFixtureIncludesEffectUsageAndTunedParams(t *testing.T) {
-	path := repoPath(t, "flightdeck", "showcase", "effects", "effects.aep")
+	path := repoPath(t, "test_data", "fixtures", "showcase", "effects.aep")
 	project, err := aep.Open(path)
 	if err != nil {
 		t.Fatalf("open fixture: %v", err)

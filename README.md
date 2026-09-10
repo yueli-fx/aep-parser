@@ -1,190 +1,145 @@
 # aep-parser
 
-从头实现的 Adobe After Effects `.aep` 项目文件解析器 + length-preserving 写回库，纯 Go，无需 AE 运行实例。
+**不启动 After Effects，用 Go 创建、修改和生成真正的 `.aep` 工程。**
 
-> **首次发布前（pre-release）** —— 核心解析、profile、diff、迁移和生成能力已有广泛测试，但公开 interface 和发布策略仍可能调整。当前详细能力以自动生成的 [docs/](docs/) 为准。
+**中文** · [English](README.en.md) · [日本語](README.ja.md)
 
-本项目采用 [Apache License 2.0](LICENSE)，包含明确的贡献者专利授权；商业支持、托管服务和企业能力可以在开源核心之外继续发展。
+## 几行代码，做一个带动画的 AE 工程
 
-**兼容下限：After Effects 2020（CC 17.0）**。新版本写的 .aep 也能读；AE 24+ 才引入的字段本库不主动解码，对调用方返回 nil 而非报错。
+下面是[完整可运行示例](examples/authoring/main.go)的核心代码。在本仓库中运行，使用 `internal/aep` 创作 API；`must` / `check` 是示例自定义的错误处理辅助函数，定义见下方。
 
-## 文档
-
-- **API 参考**：[docs/](docs/) —— 每个核心类型一个 markdown，由 `cmd/docgen` 从导出符号的 doc comment **自动生成**（`go generate ./cmd/docgen`）。
-- **在线解析快照协议**：[ProjectJSON v2](docs/project-json-v2.md) —— 属性树身份、值类型、解码/保留/写回状态和完整性门禁。
-- **能力覆盖矩阵 / 暂搁 / 不可达 / negative findings**：[docs/capabilities.md](docs/capabilities.md)。
-
-## Go SDK
-
-外部 Go 项目可以直接导入仓库根 package，完成无 AE 的 inspect、profile、round-trip 和保留式导出：
-
-```powershell
-go get github.com/yueli-fx/aep-parser
-```
+### 创建工程，添加文字和色块
 
 ```go
-package main
+import "github.com/yueli-fx/aep-parser/internal/aep"
 
-import (
-	"fmt"
+project := aep.NewProject(aep.TargetAE2020)
+comp := must(aep.NewComposition(project, "Hello AEP", 1920, 1080, 30, 5))
 
-	aep "github.com/yueli-fx/aep-parser"
-)
+must(aep.NewTextLayer(comp, "Title"))
+must(aep.NewSolidLayer(comp, "Card", 640, 360, [3]float64{0.1, 0.8, 0.7}))
+must(aep.NewSolidLayer(comp, "Draft", 100, 100, [3]float64{1, 0, 0}))
+```
 
-func main() {
-	doc, err := aep.Open("project.aep")
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("%+v\n", doc.Inspect())
+一个 **1080p、30 fps、5 秒**的合成，三个图层。接下来直接改文字、加效果。
+
+上面的 `must` 接收 `(返回值, error)`，检查错误后取出返回值；`check` 用于只返回 `error` 的操作。这两个函数定义在 `main` 外，不属于 Go 内置函数或本库 API：
+
+```go
+// 示例脚本遇到错误就停止，避免带着错误继续写工程。
+func must[T any](value T, err error) T {
+    check(err)
+    return value
+}
+
+func check(err error) {
+    if err != nil {
+        panic(err)
+    }
 }
 ```
 
-`Document` interface 有意保持精简：`Inspect` 返回稳定轻量清单，`ProfileJSON` 返回 diff/migration 使用的规范化 profile，`Write` 做未修改工程的原样 round-trip；`ProjectJSON` 为可写属性提供文档作用域的 `write_target`，`Export` 在私有副本上应用版本化变更、重新解析验证，并证明声明修改字节以外的 RIFX 数据与未知 chunk 未变。底层 scene、serializer、Recipe 和 back-reference 类型不属于公开 interface。
+### 添加高斯模糊，修改文字和效果参数
 
 ```go
-snapshot, err := doc.ProjectJSON()
-// 从 snapshot 的 property_records[*].write_target 选择目标；property_ref
-// 只负责快照关联，不能当作写回定位符。
-_ = snapshot
+// 在内存中重新解析，让新建图层进入可编辑状态，无需启动 AE。
+project = must(aep.Reopen(project))
+comp = project.Compositions[0]
+check(comp.LayerByName("Title").SetText("HELLO, AEP"))
 
-report, err := doc.Export(context.Background(), aep.ExportRequest{
-	SchemaVersion: aep.ExportSchemaVersion,
-	Changes: []aep.ExportChange{{
-		ID: "position",
-		Operation: aep.ExportSetStaticValue,
-		Target: target,
-		Value: []float64{640, 360},
-	}},
-}, output)
+card := comp.LayerByName("Card")
+blur := must(aep.AddEffect(card, aep.EffectGaussianBlur))
+must(aep.SetEffectParam(card, blur, "Blurriness", 30.0))
 ```
 
-当前公开 Export v1 只接受有真实 writer backing、无关键帧的数值静态属性，并采用全有或全无批次。成功报告的 preservation mode 为 `byte-exact-outside-claimed-ranges`；这表示未知领域可从原工程保留，但不表示仅凭归一化 JSON 就能重新推导未知语义。
+这里把模糊量设为 **30**。参数可直接写英文 `"Blurriness"` 或中文 `"模糊度"`，库会解析为对应的内部标识。接口仅接受参数名称，不接受内部编号。高斯模糊只是 [231 种可添加效果模板](internal/serializer/mutate_effect_add.go)之一；[效果示例](showcase/effects/gen.go)还展示了阴影、描边、调色等参数写法。
 
-从规范输入新建工程使用版本化 Recipe JSON 和 `Compile`。它会严格校验 schema、隐藏内部 Recipe/scene、在交付输出前重新 Parse，并返回 capability downgrade 与 rejection 报告：
+### 让模糊动起来，删除草稿层，保存工程
 
 ```go
-report, err := aep.Compile(context.Background(), recipeJSON, output)
+// 第一秒从模糊 30 变成 0。
+must(aep.AnimateEffectParam(card, blur, "Blurriness",
+    []aep.ScalarKeyframe{{Time: 0, Value: 30}, {Time: 1, Value: 0}}))
+
+for index, layer := range comp.Layers {
+    if layer.Name == "Draft" {
+        check(aep.DeleteLayer(comp, index)) // 从 0 开始的索引；这里删除 Solid 图层。
+        break
+    }
+}
+
+file := must(os.Create("hello.aep"))
+check(project.WriteAEP(file))
+check(file.Close())
 ```
 
-`Compile` 负责“从已知规范生成新 AEP”；`Document.Export` 负责“在原 AEP 上修改并保留未知领域”，两条路径不会混用。
+得到一个包含文字、色块和模糊关键帧的 `.aep`。**创建、修改和写文件全程不需要安装 AE**；打开编辑与画面渲染交给 AE。完整程序另含写后回读检查，并拒绝覆盖已有文件。
 
-处理不可信上传时，可用 `DefaultLimits` 作为起点并通过 `ParseWithLimits` / `OpenWithLimits` 收紧输入、单 chunk、累计分配、节点数和递归深度预算；字段为零时使用对应默认值。
+### 现在就跑
 
-## 统一 CLI
-
-面向用户的新入口是 `cmd/aep`，所有结果和错误都使用稳定 JSON envelope：
-
-仓库发布并打 tag 后可安装：
-
-```powershell
-go install github.com/yueli-fx/aep-parser/cmd/aep@latest
+```sh
+git clone https://github.com/yueli-fx/aep-parser.git
+cd aep-parser
+go run ./examples/authoring -out tmp/hello.aep
+go run ./cmd/aep inspect -in tmp/hello.aep
 ```
 
-```powershell
-go run ./cmd/aep inspect -in project.aep
+需要 Go 1.25.12 或同系列更新补丁版本。上面的创作 API 用于仓库内程序；接入自己的 Go module 时，使用[公开 SDK 示例](examples/sdk/README.md)中的 `Open`、`Export`、`Compile` 等入口。
+
+## 不止一个模糊色块
+
+- **[程序化火焰](showcase/procedural-fx/gen.go)**：三层噪声火舌、分层色温、羽化遮罩、Add 合成与 Glow，生成持续翻腾的火焰工程。[验收记录](showcase/procedural-fx/INDEX.md)
+- **[3D 相机场景](showcase/3d-camera/gen.go)**：从零创建相机和不同深度的 3D 卡片，控制 Z 视差与 Y 轴透视旋转。[验收记录](showcase/3d-camera/INDEX.md)
+- **[矢量形状动画](showcase/shape-filters/INDEX.md)**：Trim Paths、Repeater、ZigZag、Wiggle 等 11 类滤镜及组合。
+- **[表达式驱动](showcase/expressions/INDEX.md)**：跨层引用、loopOut、wiggle 与 slider 控制动画。
+
+[全部 25 个 showcase →](showcase/README.md) · [人物信息条、动态标题、进度条配方 →](examples/projects/README.md)
+
+不想写 Go，也可以直接编译 JSON 配方：
+
+```sh
+go run ./cmd/aeprecipe compile -recipe examples/projects/animated-title.json -out tmp/title.aep -json
+```
+
+## 已有工程也能读、比较和迁移
+
+```sh
+# 列出合成、图层、效果、关键帧等工程信息
 go run ./cmd/aep profile -in project.aep
+
+# 比较修改前后的工程
 go run ./cmd/aep diff -expected before.aep -actual after.aep
-go run ./cmd/aep migrate -in source.aep -target AE2025 -out migrated.aep
-go run ./cmd/aep capabilities
+
+# 将支持的工程语义迁移到 AE2025
+go run ./cmd/aep migrate -in source.aep -target AE2025 -out tmp/migrated.aep
 ```
 
-这些命令都不启动 AE。原有 `aepdiff`、`aepmigrate`、`aepsearch`、`aeoracle` 等聚焦命令继续保留，用于兼容和高级维护工作流。
+批量盘点、提取属性、保留式修改数值参数，见[五个公开 SDK 程序](examples/sdk/README.md)。想读懂一个复杂工程用了哪些技法，可以生成[HTML 技法报告](docs/self-hosted-reports.md)，查看逐层效果栈、复刻步骤和学习任务。
 
-## 跨平台构建验证
+## 这背后实现了多少
 
-解析、profile、diff、search、recipe、technique report 和自托管编排的 Go 入口应保持跨平台可构建；AE 自动化是可选 worker 能力，Linux/macOS 服务节点不应因为没有 AE 或 PowerShell 而阻断纯解析工作。
+**500 个函数/方法能力条目 · 231 种效果模板 · 16 个能力领域 · AE2020–AE2025 六个写入目标。**
 
-```powershell
-go run ./cmd/aepverify cross-platform
-```
+从 RIFX 容器、嵌套 chunk 和字节布局，到图层结构、2D/3D 变换、文字样式、形状与渐变、关键帧与缓动、表达式、效果和遮罩，都已有对应实现。逆向发现和踩过的坑整理成了 **151 篇公开知识笔记**，另有 **151 个原子 Recipe 示例**可运行。
 
-Recipe 示例的 expected profile 覆盖也走同一个 Go 验证入口：
+统计来自[能力索引](docs/capabilities.json)与[效果注册表](internal/serializer/mutate_effect_add.go)：382 个方法 + 118 个函数，其中 438 项标记 stable、62 项 alpha；266 项标注 ae-accept，163 项标注 render-pixel。这些数字统计底层能力和已有验证记录，具体接口与边界见[能力矩阵](docs/capabilities.md)。[迁移回归记录](registry/evidence/versioned-aep-migration/migration_matrix_verify/smoke_all/ledger.md)包含 906 个组合：900 通过、6 跳过、0 失败。
 
-```powershell
-go run ./cmd/aepverify recipe-profiles
-```
+## 继续探索
 
-## 纯解析服务
+| 想做什么 | 入口 |
+| --- | --- |
+| 用 Go / HTTP 集成 | [使用指南](docs/usage.md) · [SDK 示例](examples/sdk/README.md) |
+| 用 JSON 批量生成工程 | [Recipe 示例](examples/recipes) · [字段参考](docs/recipe.md) · [Schema](docs/recipe_schema.json) |
+| 学习 AEP 逆向 | [知识库](docs/knowledge/README.md) · [API 参考](docs/README.md) |
+| 查支持范围与兼容性 | [能力矩阵](docs/capabilities.md) · [兼容与限制](docs/usage.md#兼容范围与限制) |
+| 参与开发 | [贡献指南](CONTRIBUTING.md) · [验证流程](docs/knowledge/workflow/verify.md) · [发布审核](docs/open-source-audit.md) |
 
-`cmd/aepserver` 提供不依赖 AE 的 HTTP 服务入口，适合放在 Windows、macOS 或 Linux 节点上做解析、profile 和能力探测：
+项目处于预发布阶段。解析与生成核心为纯 Go，可构建于 Windows、macOS、Linux。知识笔记主要为中文，生成的 API / Recipe 参考主要为英文。新增组合示例已通过生成与回读检查，尚未单独做 AE 画面验收；各 showcase 的宿主验证情况见各自记录。
 
-```powershell
-go run ./cmd/aepserver -addr 127.0.0.1:8080
-```
+## 许可证
 
-当前 endpoint：
+**[PolyForm Noncommercial 1.0.0](LICENSE)**。许可范围内的非商业用途免费；商业使用、收费转售或商业集成等超出免费许可的用途，须先取得单独书面商业授权。
 
-- `GET /health`
-- `GET /capabilities`
-- `POST /parse`
-- `POST /profile`
+本项目公开源码，属于 **source-available**。免费范围、机构例外、商业授权申请和生成内容说明见 **[使用与商业授权](LICENSING.md)**。第三方声明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)，安全问题见 [SECURITY.md](SECURITY.md)。
 
-`/parse` 和 `/profile` 默认支持 `application/octet-stream` 直接上传 `.aep` 字节；上传时可用 `X-AEP-Path` 标记来源路径。本地批处理需要直接读取服务端路径时，必须同时指定 `-allow-path-input -allowed-path-roots <root1,root2>`，再发送 `application/json` 的 `{"path":"data/samples/.../file.aep"}`；服务会拒绝目录逃逸和 symlink 逃逸。服务默认限制 32 个并发请求并配置 HTTP 读写超时，不会启动 AE，`render` / `ae_readback` 在 capabilities 中会报告为 unavailable。
-
-## 自托管技法报告
-
-对本地 `.aep` 语料生成可浏览的 technique learning report：
-
-```powershell
-go run ./cmd/aepselfhost technique-report -input data\samples -out tmp\technique_samples_report -verify
-```
-
-输出包括 `manifest.json`、`learning.md`、`report.html`、`projects.csv`、`project_playbooks.csv`、`compositions.csv`、`layers.csv`、`recreation_steps.csv`、`patterns.csv`、`study_queue.csv`、`study_tasks.csv`、`recreation_blockers.csv`、`signal_layers.csv`、`effect_stacks.csv`、`shape_operators.csv`、`text_animators.csv`、`dependency_edges.csv`、`learning_actions.csv`、`mechanisms.csv`、`mechanism_examples.csv`、`coverage_scorecard.csv`、`reconstruction_blueprints.jsonl`、`recipe_drafts.jsonl`、`errors.csv`、`digest.json`、`summary.json`、`corpus.jsonl` 和 `report.md`。`report.html` 是自包含入口，支持按路径、readiness、pattern、effect、plugin、mechanism、study task 搜索，并展示每个项目的确定性复刻步骤、artifact 覆盖状态、复刻蓝图和安全 recipe 草稿；`manifest.json` 记录输入、git 版本、耗时和 artifact 清单；`learning.md` 是更短的人工学习索引；CSV/JSONL 文件适合直接用表格或流式脚本筛项目、项目级复刻 playbook、逐项复刻步骤、合成/图层结构、逐层 effect stack、shape/text 操作项、依赖边、技法模式、学习顺序、学习任务、复刻阻塞项、关键层、学习动作、机制目录、机制代表项目、覆盖计分卡、代码生成蓝图、recipe 骨架草稿、错误项目和 pattern 级复刻步骤分布。
-
-对比两次报告：
-
-```powershell
-go run ./cmd/aepselfhost compare-reports -base tmp\old_report -new tmp\technique_samples_report
-```
-
-一键跑完整自托管验收：
-
-```powershell
-go run ./cmd/aepselfhost verify -out-root tmp\technique_selfhost_gate
-go run ./cmd/aepselfhost outcome -out-root tmp\technique_selfhost_gate
-go run ./cmd/aepselfhost status -out-root tmp\technique_selfhost_gate
-go run ./cmd/aepselfhost watch -out-root tmp\technique_selfhost_gate -duration-minutes 60 -interval-seconds 300
-go run ./cmd/aepselfhost start-watch -out-root tmp\technique_selfhost_gate -duration-minutes 60 -interval-seconds 300
-```
-
-想跑完后立刻查看最短成效页，可以加 `-open`，它会打开 `latest_outcome.html`。Go CLI 是唯一维护入口：`aepselfhost verify` 跑验收，`aepselfhost status` 看进程、watch 状态、最新 outcome 和日志路径，`aepselfhost outcome` 看最短结论，`aepselfhost watch` 前台守着，`aepselfhost start-watch` 后台启动。后台入口会写 `watch_process.json`，stdout/stderr 会落在 `watch_logs`。watch 会按间隔重复刷新同一组 `latest_outcome.*` 并写 `watch_status.json`。验收完成后也可直接打开 `tmp\technique_selfhost_gate\latest_outcome.html`、`tmp\technique_selfhost_gate\latest_outcome.md`、`tmp\technique_selfhost_gate\latest_outcome.json`、`tmp\technique_selfhost_gate\latest_effectiveness.md`、`tmp\technique_selfhost_gate\latest_effectiveness.json`、`tmp\technique_selfhost_gate\latest_index.html` 或 `tmp\technique_selfhost_gate\latest_acceptance.md` 查看最近一次结果；`latest_outcome.html` 是最短浏览器结论页，直接展示状态、Effectiveness Headline、数字、Next Actions、复刻 readiness、当前 blocker、Top Plugin Blockers、最近运行趋势和下一步学习信号，`latest_outcome.md` 是同一批关键信号的最短文本结论，包含 Effectiveness Headline、Next Actions、复刻 readiness 和当前 blocker，`latest_outcome.json` 是同一批关键信号的紧凑机器结论，适合前端、状态面板和批处理直接读，`latest_effectiveness.md` 是更完整的人工成效摘要，`latest_effectiveness.json` 是给脚本、前端和批处理消费的完整成效快照，包含 `outcome_status`、`outcome_summary.headline`、`action_plan.next_actions`、`reconstruction_status`、语料统计、闭环复刻结果、关键 artifact 路径、下一步学习信号、相对上次运行的 `history_delta` 和最近运行 `history_recent`；其中 `reconstruction_status.plugin_blockers_top` 汇总当前最影响复刻 readiness 的第三方效果。每次验收还会追加 `history.jsonl` 和 `history.csv`，用于观察多次运行之间的项目数、pattern 数、闭环复刻和 batch smoke 趋势。HTML 入口会直接显示 Outcome Status、History Delta、Effectiveness History、Study Queue、Pattern Playbook、Coverage Scorecard、Reconstruction Blueprint 和 Recipe Draft 预览，并链接由 recipe draft 自动批量 validate/compile/reparse 出来的 smoke artifacts。
-
-## 原理与分层
-
-`.aep` 是 **RIFX**（Big-Endian RIFF）格式（魔数 `RIFX` + `Egg!`），内部为嵌套 Chunk 树；本库通过逆向工程已知偏移量提取数据。核心代码仍按单向 DAG 分层，但现在已经扩展出迁移、配方、治理和技法内化几条工作面：
-
-```text
-internal/rifx          通用 RIFX/Chunk 二进制读写器（无 AEP 语义）
-internal/codec         纯值/字节编解码与 layout helper
-
-internal/scene         运行时模型（Project/Composition/Layer/…）+ writer 接口
-internal/serializer    chunk ⇄ scene（parse / lower / write / back / mutate）
-internal/aep           公开 API facade（Open / FromReader / New* / 类型别名）
-
-internal/aep_test      public API + AE ship-gate 测试面
-internal/aehost        AE host 调用与发现
-internal/aeoracle      AE render / frame / pixel compare 证据
-internal/profile       解析工程的稳定 profile，用于 diff / migration / recipe
-
-internal/aepmigrate    AE 版本迁移：profile → rebuild → verify / matrix
-internal/recipe        JSON recipe 校验与编译，走 internal/aep facade 生成工程
-internal/recipedoc     recipe schema / capability 文档生成
-
-internal/apidoc        public API 注释词表真相源
-internal/capindex      capability 索引与查询
-internal/registry      位置 / 证据 / coverage / ownership / cleanup 治理
-
-internal/technique     从 profile 抽取技法事实、画像、解释
-internal/selfhost      技法内化的报告与验收面
-internal/server        HTTP parse/profile 服务
-```
-
-新增 public 能力时通常沿这条线落地：`internal/aep` facade doc comment + cap tag → `internal/serializer` 实现 → `internal/scene` 状态 / writer contract → `internal/aep_test` gate → docgen/capindex。字节布局知识沉淀到 `flightdeck/knowledge/<domain>/`；长期引用的机器证据进入 `registry/` 或 `registry/evidence/<topic>/`，不把 `tmp/` 当真相源。
-
-## 参考
-
-- RIFX 规范：[RIFF/RIFX on Wikipedia](https://en.wikipedia.org/wiki/Resource_Interchange_File_Format)
-- Go 实现参考：[boltframe/aftereffects-aep-parser](https://github.com/boltframe/aftereffects-aep-parser)
-- Python 实现参考：[forticheprod/py-aep](https://github.com/forticheprod/py-aep)
-- API 文档风格参考：[docsforadobe/after-effects-scripting-guide](https://github.com/docsforadobe/after-effects-scripting-guide)
+本项目不隶属于 Adobe。Adobe、After Effects 及相关商标属于各自权利人。

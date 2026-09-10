@@ -46,7 +46,7 @@ func TestValidateEntries_ParseErr(t *testing.T) {
 
 func TestValidateEntries_IncidentUnderKnowledgeTree(t *testing.T) {
 	root := t.TempDir()
-	knowledgeDir := filepath.Join(root, "flightdeck", "knowledge", "effects")
+	knowledgeDir := filepath.Join(root, "docs", "knowledge", "effects")
 	if err := os.MkdirAll(knowledgeDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -66,7 +66,7 @@ func TestValidateEntries_IncidentUnderKnowledgeTree(t *testing.T) {
 		},
 	}
 	gates := map[string]bool{"TestGood": false}
-	incidentsDir := filepath.Join(root, "flightdeck", "incidents")
+	incidentsDir := filepath.Join(root, "docs", "incidents")
 
 	if errs := validateEntries([]Entry{entry}, gates, incidentsDir); len(errs) != 0 {
 		t.Fatalf("expected knowledge-tree incident to validate, got %v", errs)

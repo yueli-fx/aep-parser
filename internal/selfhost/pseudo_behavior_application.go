@@ -3,6 +3,7 @@ package selfhost
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/yueli-fx/aep-parser/internal/serializer"
 	"os"
 	"path/filepath"
 
@@ -259,7 +260,7 @@ func applyPseudoBehaviorControls(layer *aep.Layer, fx *aep.Effect, payloadFamily
 				rows = append(rows, row)
 				continue
 			}
-			if _, err := aep.AnimateEffectParamVec(layer, fx, payloadControl.ParamMatchName, vector); err != nil {
+			if _, err := serializer.AnimateEffectParamVec(layer, fx, payloadControl.ParamMatchName, vector); err != nil {
 				row.Status = "error"
 				row.Error = err.Error()
 				rows = append(rows, row)
@@ -270,7 +271,7 @@ func applyPseudoBehaviorControls(layer *aep.Layer, fx *aep.Effect, payloadFamily
 			rows = append(rows, row)
 			continue
 		}
-		if _, err := aep.AnimateEffectParam(layer, fx, payloadControl.ParamMatchName, scalar); err != nil {
+		if _, err := serializer.AnimateEffectParam(layer, fx, payloadControl.ParamMatchName, scalar); err != nil {
 			row.Status = "error"
 			row.Error = err.Error()
 			rows = append(rows, row)

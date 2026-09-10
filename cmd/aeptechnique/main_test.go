@@ -12,7 +12,7 @@ import (
 )
 
 func TestRunEmitsTechniqueFactsJSON(t *testing.T) {
-	input := filepath.Join("..", "..", "flightdeck", "showcase", "text", "text.aep")
+	input := filepath.Join("..", "..", "test_data", "fixtures", "showcase", "text.aep")
 	var stdout, stderr bytes.Buffer
 
 	code := run([]string{"-in", input}, &stdout, &stderr)
@@ -36,7 +36,7 @@ func TestRunEmitsTechniqueFactsJSON(t *testing.T) {
 }
 
 func TestRunAcceptsJSONFlag(t *testing.T) {
-	input := filepath.Join("..", "..", "flightdeck", "showcase", "text", "text.aep")
+	input := filepath.Join("..", "..", "test_data", "fixtures", "showcase", "text.aep")
 	var stdout, stderr bytes.Buffer
 
 	code := run([]string{"-in", input, "-json"}, &stdout, &stderr)
@@ -49,7 +49,7 @@ func TestRunAcceptsJSONFlag(t *testing.T) {
 }
 
 func TestRunEmitsPortraitJSONWithMode(t *testing.T) {
-	input := filepath.Join("..", "..", "flightdeck", "showcase", "text", "text.aep")
+	input := filepath.Join("..", "..", "test_data", "fixtures", "showcase", "text.aep")
 	var stdout, stderr bytes.Buffer
 
 	code := run([]string{"-in", input, "-mode", "portrait"}, &stdout, &stderr)
@@ -73,7 +73,7 @@ func TestRunEmitsPortraitJSONWithMode(t *testing.T) {
 }
 
 func TestRunEmitsExplanationJSONWithMode(t *testing.T) {
-	input := filepath.Join("..", "..", "flightdeck", "showcase", "text", "text.aep")
+	input := filepath.Join("..", "..", "test_data", "fixtures", "showcase", "text.aep")
 	var stdout, stderr bytes.Buffer
 
 	code := run([]string{"-in", input, "-mode", "explain"}, &stdout, &stderr)
@@ -94,7 +94,7 @@ func TestRunEmitsExplanationJSONWithMode(t *testing.T) {
 }
 
 func TestRunAcceptsPortraitFlag(t *testing.T) {
-	input := filepath.Join("..", "..", "flightdeck", "showcase", "text", "text.aep")
+	input := filepath.Join("..", "..", "test_data", "fixtures", "showcase", "text.aep")
 	var stdout, stderr bytes.Buffer
 
 	code := run([]string{"-in", input, "-portrait"}, &stdout, &stderr)
@@ -112,7 +112,7 @@ func TestRunAcceptsPortraitFlag(t *testing.T) {
 }
 
 func TestRunEmitsCorpusPortraitJSONL(t *testing.T) {
-	fixture := filepath.Join("..", "..", "flightdeck", "showcase", "text", "text.aep")
+	fixture := filepath.Join("..", "..", "test_data", "fixtures", "showcase", "text.aep")
 	root := t.TempDir()
 	writeFixtureCopy(t, fixture, filepath.Join(root, "b.aep"))
 	nested := filepath.Join(root, "nested")
@@ -158,7 +158,7 @@ func TestRunRejectsDirectoryCorpusWithoutRecursive(t *testing.T) {
 }
 
 func TestRunEmitsCorpusSummary(t *testing.T) {
-	fixture := filepath.Join("..", "..", "flightdeck", "showcase", "text", "text.aep")
+	fixture := filepath.Join("..", "..", "test_data", "fixtures", "showcase", "text.aep")
 	root := t.TempDir()
 	writeFixtureCopy(t, fixture, filepath.Join(root, "one.aep"))
 	writeFixtureCopy(t, fixture, filepath.Join(root, "two.aep"))
@@ -185,7 +185,7 @@ func TestRunEmitsCorpusSummary(t *testing.T) {
 }
 
 func TestRunEmitsCorpusExplanationSummary(t *testing.T) {
-	fixture := filepath.Join("..", "..", "flightdeck", "showcase", "text", "text.aep")
+	fixture := filepath.Join("..", "..", "test_data", "fixtures", "showcase", "text.aep")
 	root := t.TempDir()
 	writeFixtureCopy(t, fixture, filepath.Join(root, "one.aep"))
 
@@ -246,7 +246,7 @@ func TestRunEmitsCorpusExplanationSummary(t *testing.T) {
 }
 
 func TestRunEmitsCorpusExplanationRecordsWithFacts(t *testing.T) {
-	fixture := filepath.Join("..", "..", "flightdeck", "showcase", "pseudo-effect", "pseudo_default.aep")
+	fixture := filepath.Join("..", "..", "test_data", "fixtures", "showcase", "pseudo_default.aep")
 	root := t.TempDir()
 	writeFixtureCopy(t, fixture, filepath.Join(root, "pseudo_default.aep"))
 
@@ -273,7 +273,7 @@ func TestRunEmitsCorpusExplanationRecordsWithFacts(t *testing.T) {
 }
 
 func TestRunEmitsPatternPluginProfiles(t *testing.T) {
-	fixture := filepath.Join("..", "..", "flightdeck", "showcase", "pseudo-effect", "pseudo_default.aep")
+	fixture := filepath.Join("..", "..", "test_data", "fixtures", "showcase", "pseudo_default.aep")
 	root := t.TempDir()
 	writeFixtureCopy(t, fixture, filepath.Join(root, "pseudo_default.aep"))
 
@@ -297,7 +297,7 @@ func TestRunEmitsPatternPluginProfiles(t *testing.T) {
 }
 
 func TestRunWritesOutputFile(t *testing.T) {
-	input := filepath.Join("..", "..", "flightdeck", "showcase", "text", "text.aep")
+	input := filepath.Join("..", "..", "test_data", "fixtures", "showcase", "text.aep")
 	outPath := filepath.Join(t.TempDir(), "portrait.json")
 	var stdout, stderr bytes.Buffer
 
@@ -322,7 +322,7 @@ func TestRunWritesOutputFile(t *testing.T) {
 }
 
 func TestRunWritesCorpusSummaryOutputFile(t *testing.T) {
-	fixture := filepath.Join("..", "..", "flightdeck", "showcase", "text", "text.aep")
+	fixture := filepath.Join("..", "..", "test_data", "fixtures", "showcase", "text.aep")
 	root := t.TempDir()
 	writeFixtureCopy(t, fixture, filepath.Join(root, "one.aep"))
 	outPath := filepath.Join(t.TempDir(), "summary.json")
@@ -349,7 +349,7 @@ func TestRunWritesCorpusSummaryOutputFile(t *testing.T) {
 }
 
 func TestRunWritesCorpusJSONLAndSummaryInOnePass(t *testing.T) {
-	fixture := filepath.Join("..", "..", "flightdeck", "showcase", "text", "text.aep")
+	fixture := filepath.Join("..", "..", "test_data", "fixtures", "showcase", "text.aep")
 	root := t.TempDir()
 	writeFixtureCopy(t, fixture, filepath.Join(root, "one.aep"))
 	writeFixtureCopy(t, fixture, filepath.Join(root, "two.aep"))

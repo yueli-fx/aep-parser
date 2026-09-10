@@ -2,6 +2,7 @@ package aepmigrate
 
 import (
 	"fmt"
+	"github.com/yueli-fx/aep-parser/internal/serializer"
 
 	"github.com/yueli-fx/aep-parser/internal/aep"
 	"github.com/yueli-fx/aep-parser/internal/profile"
@@ -13,13 +14,13 @@ func materializeEffectParamKeyframes(layer *aep.Layer, effect *aep.Effect, param
 		if err != nil {
 			return nil, err
 		}
-		return aep.AnimateEffectParam(layer, effect, param.MatchName, keyframes)
+		return serializer.AnimateEffectParam(layer, effect, param.MatchName, keyframes)
 	}
 	keyframes, err := effectParamVectorKeyframes(param.Keyframes)
 	if err != nil {
 		return nil, err
 	}
-	return aep.AnimateEffectParamVec(layer, effect, param.MatchName, keyframes)
+	return serializer.AnimateEffectParamVec(layer, effect, param.MatchName, keyframes)
 }
 
 func effectParamScalarKeyframes(in []profile.Keyframe) ([]aep.ScalarKeyframe, error) {

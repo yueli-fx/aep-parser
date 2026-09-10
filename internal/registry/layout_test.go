@@ -86,7 +86,7 @@ func TestLayoutUsesGeneratedCleanupClassificationForStateReferencedGroups(t *tes
 	root := newTestRegistryRoot(t)
 	writeFile(t, root, "tmp/migration_matrix_old/matrix.json", "{}\n")
 	writeFile(t, root, "tmp/migration_matrix_old/log.txt", "log\n")
-	writeFile(t, root, "flightdeck/work/aep-understanding-generation/current.json", `{"matrix":"tmp/migration_matrix_old/matrix.json"}`)
+	writeFile(t, root, "registry/workflows/aep-understanding-generation/current.json", `{"matrix":"tmp/migration_matrix_old/matrix.json"}`)
 	writeJSON(t, root, "registry/locations.json", map[string]any{
 		"schema_version": 1,
 		"locations": []map[string]any{
@@ -108,7 +108,7 @@ func TestLayoutUsesGeneratedCleanupClassificationForStateReferencedGroups(t *tes
 
 	report, err := LayoutRepository(root, LayoutOptions{
 		SampleLimit:         1,
-		StateReferenceFiles: []string{"flightdeck/work/aep-understanding-generation/current.json"},
+		StateReferenceFiles: []string{"registry/workflows/aep-understanding-generation/current.json"},
 	})
 	if err != nil {
 		t.Fatal(err)

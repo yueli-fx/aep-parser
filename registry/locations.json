@@ -145,6 +145,38 @@
       "tracked": true,
       "required": true,
       "lifecycle": "automation"
+    },
+    {
+      "id": "showcase",
+      "path": "showcase",
+      "class": "source_contract",
+      "tracked": true,
+      "required": true,
+      "lifecycle": "source_contract"
+    },
+    {
+      "id": "public_knowledge",
+      "path": "docs/knowledge",
+      "class": "source_contract",
+      "tracked": true,
+      "required": true,
+      "lifecycle": "source_contract"
+    },
+    {
+      "id": "sdk_examples",
+      "path": "examples/sdk",
+      "class": "source_contract",
+      "tracked": true,
+      "required": true,
+      "lifecycle": "source_contract"
+    },
+    {
+      "id": "project_examples",
+      "path": "examples/projects",
+      "class": "source_contract",
+      "tracked": true,
+      "required": true,
+      "lifecycle": "source_contract"
     }
   ]
 }

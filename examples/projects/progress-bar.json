@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "project": {
+    "target_version": "AE2020",
+    "name": "progress-bar"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 5,
+      "layers": [
+        {
+          "type": "text",
+          "name": "Label",
+          "text": "BUILDING SOMETHING GOOD",
+          "text_style": {
+            "font_size": 42,
+            "fill_color": [
+              255,
+              255,
+              255,
+              255
+            ]
+          },
+          "transform": {
+            "position": [
+              560,
+              555
+            ]
+          }
+        },
+        {
+          "type": "shape",
+          "name": "Progress",
+          "shape": {
+            "kind": "rect",
+            "size": [
+              800,
+              24
+            ],
+            "fill_color": [
+              90,
+              220,
+              175
+            ],
+            "position": [
+              400,
+              0
+            ]
+          },
+          "transform": {
+            "position": [
+              560,
+              610
+            ],
+            "scale_keyframes": [
+              {
+                "time": 0,
+                "value": [
+                  0,
+                  100
+                ]
+              },
+              {
+                "time": 4,
+                "value": [
+                  100,
+                  100
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "type": "shape",
+          "name": "Track",
+          "shape": {
+            "kind": "rect",
+            "size": [
+              800,
+              24
+            ],
+            "fill_color": [
+              42,
+              52,
+              65
+            ]
+          },
+          "transform": {
+            "position": [
+              960,
+              610
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 3,
+    "text_layer_count": 1
+  }
+}

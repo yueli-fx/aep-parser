@@ -63,7 +63,7 @@ func TestValidate_RealTree_WarnClean(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	ctx := apidoc.Context{Gates: gates, IncidentsDir: filepath.Join(root, "flightdeck", "incidents")}
+	ctx := apidoc.Context{Gates: gates, IncidentsDir: filepath.Join(root, "docs", "incidents")}
 	if errs := runValidate(entries, surface, ctx, apidoc.ModeWarn); len(errs) != 0 {
 		for _, e := range errs {
 			t.Errorf("validate: %v", e)

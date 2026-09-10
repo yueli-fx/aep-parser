@@ -9,7 +9,7 @@ import (
 
 func TestUpdateCoverageFromMatrixPreservesRecordFields(t *testing.T) {
 	root := newTestRegistryRoot(t)
-	coveragePath := "flightdeck/work/aep-understanding-generation/coverage.json"
+	coveragePath := "registry/workflows/aep-understanding-generation/coverage.json"
 	matrixPath := "tmp/matrix/text/matrix.json"
 	writeJSON(t, root, coveragePath, map[string]any{
 		"schema_version": 1,
@@ -85,7 +85,7 @@ func TestUpdateCoverageFromMatrixPreservesRecordFields(t *testing.T) {
 
 func TestUpdateCoverageFromMatrixCreatesRecordWhenDomainAndScopeProvided(t *testing.T) {
 	root := newTestRegistryRoot(t)
-	coveragePath := "flightdeck/work/aep-understanding-generation/coverage.json"
+	coveragePath := "registry/workflows/aep-understanding-generation/coverage.json"
 	matrixPath := "tmp/matrix/effects/matrix.json"
 	writeJSON(t, root, coveragePath, map[string]any{
 		"schema_version": 1,

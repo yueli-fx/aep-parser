@@ -64,7 +64,7 @@ func buildExprEffectDemo(t *testing.T, target aep.AETarget) *aep.Project {
 		t.Fatalf("AddEffect: %v", err)
 	}
 	// Materialize the Blurriness param (static), then drive it by expression.
-	blur, err := aep.SetEffectParam(l, fx, "ADBE Gaussian Blur 2-0001", 0.0)
+	blur, err := aep.SetEffectParam(l, fx, "Blurriness", 0.0)
 	if err != nil {
 		t.Fatalf("SetEffectParam: %v", err)
 	}

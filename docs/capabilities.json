@@ -1086,7 +1086,7 @@
   {
     "symbol": "AnimateEffectParam",
     "kind": "func",
-    "signature": "func AnimateEffectParam(layer *Layer, fx *Effect, paramMatchName string, kfs []ScalarKeyframe) (*Property, error)",
+    "signature": "func AnimateEffectParam(layer *Layer, fx *Effect, paramName string, kfs []ScalarKeyframe) (*Property, error)",
     "summary": "@summary    Keyframe a 1D-scalar effect parameter over time @description Keyframes a 1D-scalar effect parameter — N keyframes (\u003e= 2), each a",
     "has_cap": true,
     "cap": {
@@ -1111,7 +1111,7 @@
   {
     "symbol": "AnimateEffectParamVec",
     "kind": "func",
-    "signature": "func AnimateEffectParamVec(layer *Layer, fx *Effect, paramMatchName string, kfs []VectorKeyframe) (*Property, error)",
+    "signature": "func AnimateEffectParamVec(layer *Layer, fx *Effect, paramName string, kfs []VectorKeyframe) (*Property, error)",
     "summary": "@summary    Keyframe a multi-component effect parameter over time @description Keyframes a multi-component effect parameter — the color / 2D-point",
     "has_cap": true,
     "cap": {
@@ -1302,8 +1302,8 @@
   {
     "symbol": "SetEffectParam",
     "kind": "func",
-    "signature": "func SetEffectParam(layer *Layer, fx *Effect, paramMatchName string, value any) (*Property, error)",
-    "summary": "@summary    Set an effect parameter's static value by match-name @description Sets an effect parameter's static value by full parameter match-name",
+    "signature": "func SetEffectParam(layer *Layer, fx *Effect, paramName string, value any) (*Property, error)",
+    "summary": "@summary    Set an effect parameter's static value by match-name @description Sets an effect parameter's static value by parameter name",
     "has_cap": true,
     "cap": {
       "domain": "effect",

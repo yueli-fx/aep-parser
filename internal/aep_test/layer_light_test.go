@@ -133,7 +133,7 @@ func TestTimeRemapEnabledReal(t *testing.T) {
 
 // TestCameraLightAccessorsReal exercises Layer.CameraZoom() and friends
 // against test_data/fixtures/re_cameralight.aep (built by /tmp/re_cameralight.jsx
-// in AE 2020 — see flightdeck/knowledge/workflow/re-fixture.md for fixture regeneration). Skips silently
+// in AE 2020 — see docs/knowledge/workflow/re-fixture.md for fixture regeneration). Skips silently
 // if the fixture is absent.
 func TestCameraLightAccessorsReal(t *testing.T) {
 	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")

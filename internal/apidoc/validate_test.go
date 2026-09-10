@@ -107,7 +107,7 @@ func TestValidate_GateRequiredAndExists(t *testing.T) {
 
 func TestValidate_IncidentUnderKnowledgeTree(t *testing.T) {
 	root := t.TempDir()
-	knowledgeDir := filepath.Join(root, "flightdeck", "knowledge", "effects")
+	knowledgeDir := filepath.Join(root, "docs", "knowledge", "effects")
 	if err := os.MkdirAll(knowledgeDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -118,7 +118,7 @@ func TestValidate_IncidentUnderKnowledgeTree(t *testing.T) {
 	a := goodAnn()
 	a.Incident = []string{"known-incident"}
 	c := ctx()
-	c.IncidentsDir = filepath.Join(root, "flightdeck", "incidents")
+	c.IncidentsDir = filepath.Join(root, "docs", "incidents")
 
 	if errs := Validate(a, goodSym(), c, ModeStrict); len(errs) != 0 {
 		t.Fatalf("expected knowledge-tree incident to validate, got:\n%s", msgs(errs))

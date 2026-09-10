@@ -7,7 +7,7 @@ import (
 
 func TestRenderCoverageMarkdownMirrorsLegacyCoverageSummary(t *testing.T) {
 	root := newTestRegistryRoot(t)
-	coveragePath := "flightdeck/work/aep-understanding-generation/coverage.json"
+	coveragePath := "registry/workflows/aep-understanding-generation/coverage.json"
 	writeJSON(t, root, coveragePath, map[string]any{
 		"schema_version": 1,
 		"host_open_policy": map[string]any{
@@ -49,7 +49,7 @@ func TestRenderCoverageMarkdownMirrorsLegacyCoverageSummary(t *testing.T) {
 	}
 	for _, want := range []string{
 		"# Versioned AEP Migration Coverage",
-		"Generated from `flightdeck/work/aep-understanding-generation/coverage.json`.",
+		"Generated from `registry/workflows/aep-understanding-generation/coverage.json`.",
 		"- Matrix command: go_primary",
 		"- Endpoint inference: direct=AE2020,AE2025; inferred=AE2021,AE2022,AE2023,AE2024; label=edge-hosts",
 		"| `smoke` | pass | 2/2 pass, blocked=0, failed=0, skipped=0 | `tmp/matrix/smoke/matrix.json` |",

@@ -7,6 +7,7 @@ package aep_test
 
 import (
 	"bytes"
+	"github.com/yueli-fx/aep-parser/internal/serializer"
 	"testing"
 
 	"github.com/yueli-fx/aep-parser/internal/aep"
@@ -55,13 +56,13 @@ func TestSetEffectParam_MaterializesElidedParams(t *testing.T) {
 
 	// Materialize out of definition order on purpose (order must still land
 	// sorted in both chunk and mirror).
-	if _, err := aep.SetEffectParam(l, fx, "ADBE Gaussian Blur 2-0003", 1.0); err != nil {
+	if _, err := aep.SetEffectParam(l, fx, "Repeat Edge Pixels", 1.0); err != nil {
 		t.Fatalf("SetEffectParam(-0003): %v", err)
 	}
-	if _, err := aep.SetEffectParam(l, fx, "ADBE Gaussian Blur 2-0001", 25.0); err != nil {
+	if _, err := aep.SetEffectParam(l, fx, "Blurriness", 25.0); err != nil {
 		t.Fatalf("SetEffectParam(-0001): %v", err)
 	}
-	if _, err := aep.SetEffectParam(l, fx, "ADBE Gaussian Blur 2-0002", 2.0); err != nil {
+	if _, err := aep.SetEffectParam(l, fx, "Blur Dimensions", 2.0); err != nil {
 		t.Fatalf("SetEffectParam(-0002): %v", err)
 	}
 
@@ -116,11 +117,11 @@ func TestSetEffectParam_MaterializesElidedParams(t *testing.T) {
 
 func TestSetEffectParam_ExistingParamFastPath(t *testing.T) {
 	_, l, fx := gbDefaultInstanceLayer(t)
-	if _, err := aep.SetEffectParam(l, fx, "ADBE Gaussian Blur 2-0001", 10.0); err != nil {
+	if _, err := aep.SetEffectParam(l, fx, "Blurriness", 10.0); err != nil {
 		t.Fatal(err)
 	}
 	n := len(fx.Parameters)
-	p, err := aep.SetEffectParam(l, fx, "ADBE Gaussian Blur 2-0001", 30.0)
+	p, err := aep.SetEffectParam(l, fx, "Blurriness", 30.0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -135,16 +136,16 @@ func TestSetEffectParam_ExistingParamFastPath(t *testing.T) {
 func TestSetEffectParam_Refusals(t *testing.T) {
 	_, l, fx := gbDefaultInstanceLayer(t)
 
-	if _, err := aep.SetEffectParam(l, fx, "ADBE Tint-0001", 1.0); err == nil {
+	if _, err := aep.SetEffectParam(l, fx, "Map Black To", 1.0); err == nil {
 		t.Error("foreign-effect param: want error, got nil")
 	}
 	if _, err := aep.SetEffectParam(l, fx, "ADBE Gaussian Blur 2-0042", 1.0); err == nil {
 		t.Error("unknown param without template: want error, got nil")
 	}
-	if _, err := aep.SetEffectParam(nil, fx, "ADBE Gaussian Blur 2-0001", 1.0); err == nil {
+	if _, err := aep.SetEffectParam(nil, fx, "Blurriness", 1.0); err == nil {
 		t.Error("nil layer: want error, got nil")
 	}
-	if _, err := aep.SetEffectParam(l, nil, "ADBE Gaussian Blur 2-0001", 1.0); err == nil {
+	if _, err := aep.SetEffectParam(l, nil, "Blurriness", 1.0); err == nil {
 		t.Error("nil effect: want error, got nil")
 	}
 }
@@ -167,7 +168,7 @@ func TestSetEffectParam_ParsedFixtureLayer(t *testing.T) {
 	if gb == nil {
 		t.Skip("baseline has no Gaussian Blur instance")
 	}
-	p, err := aep.SetEffectParam(l, gb, "ADBE Gaussian Blur 2-0001", 12.5)
+	p, err := aep.SetEffectParam(l, gb, "Blurriness", 12.5)
 	if err != nil {
 		t.Fatalf("SetEffectParam on parsed fixture layer: %v", err)
 	}
@@ -204,7 +205,7 @@ func TestSetEffectParam_GenericControlTypeFallback(t *testing.T) {
 		{"ADBE Drop Shadow-0006", 1.0},                          // Shadow Only (boolean)
 	}
 	for _, c := range cases {
-		p, err := aep.SetEffectParam(l, ds, c.mn, c.v)
+		p, err := serializer.SetEffectParam(l, ds, c.mn, c.v)
 		if err != nil {
 			t.Fatalf("SetEffectParam(%s): %v", c.mn, err)
 		}
@@ -292,7 +293,7 @@ func TestSetEffectParam_ExpressionControlTypes(t *testing.T) {
 		if err != nil {
 			t.Fatalf("AddEffect(%s): %v", c.effectMN, err)
 		}
-		p, err := aep.SetEffectParam(l, fx, c.effectMN+"-0001", c.v)
+		p, err := serializer.SetEffectParam(l, fx, c.effectMN+"-0001", c.v)
 		if err != nil {
 			t.Fatalf("SetEffectParam(%s-0001): %v", c.effectMN, err)
 		}

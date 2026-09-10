@@ -148,7 +148,7 @@ func buildExprVocabDemo(t *testing.T, target aep.AETarget) *aep.Project {
 	if err != nil {
 		t.Fatalf("AddEffect Slider Control: %v", err)
 	}
-	if _, err := aep.SetEffectParam(sldLayer, fx, "ADBE Slider Control-0001", 880.0); err != nil {
+	if _, err := aep.SetEffectParam(sldLayer, fx, "Slider", 880.0); err != nil {
 		t.Fatalf("SetEffectParam slider: %v", err)
 	}
 

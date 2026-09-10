@@ -1,5 +1,0 @@
-e:/projects/tools/aep-parser/data/samples/motionbox/glitch/booyah-glitch/Booyah Glitch.aep
-e:/projects/tools/aep-parser/flightdeck/showcase/booyah-clone/booyah-clone.aep
-プリコンポジション 1
-18
-e:/projects/tools/aep-parser/tmp_debug/solo_layers/

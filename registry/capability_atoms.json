@@ -5997,6 +5997,84 @@
       "boundaries": [
         "Verified against registry/evidence/versioned-aep-migration/migration_matrix_static_effects_all_6x6/matrix.json; host-open evidence is tracked by the coverage ledger."
       ]
+    },
+    {
+      "id": "learning.public_examples_and_knowledge",
+      "domain": "learning",
+      "tier": "source_contract",
+      "status": "verified",
+      "platform": {
+        "host_required": false,
+        "os": [
+          "windows",
+          "macos",
+          "linux"
+        ]
+      },
+      "workflows": [
+        "learn",
+        "generate"
+      ],
+      "dependencies": [
+        {
+          "kind": "source",
+          "path": "docs/knowledge",
+          "required": true
+        },
+        {
+          "kind": "source",
+          "path": "showcase",
+          "required": true
+        },
+        {
+          "kind": "source",
+          "path": "examples/sdk",
+          "required": true
+        },
+        {
+          "kind": "source",
+          "path": "examples/projects",
+          "required": true
+        },
+        {
+          "kind": "source",
+          "path": "examples/authoring",
+          "required": true
+        },
+        {
+          "kind": "source",
+          "path": "LICENSING.md",
+          "required": true
+        },
+        {
+          "kind": "source",
+          "path": "README.ja.md",
+          "required": true
+        },
+        {
+          "kind": "source",
+          "path": "registry/README.md",
+          "required": true
+        },
+        {
+          "kind": "source",
+          "path": "registry/evidence/README.md",
+          "required": true
+        },
+        {
+          "kind": "source",
+          "path": "examples/recipes/README.md",
+          "required": true
+        },
+        {
+          "kind": "source",
+          "path": "test_data/generators/README.md",
+          "required": true
+        }
+      ],
+      "boundaries": [
+        "Owns public documentation and runnable example sources, including preserved local showcase outputs. Per-example host acceptance remains documented separately; this source contract does not certify every showcase render."
+      ]
     }
   ]
 }

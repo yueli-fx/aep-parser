@@ -2,7 +2,7 @@
 //
 // Automated AE ship gate for the from-scratch-writable PROJECT-level settings
 // (Project.Set*). These were proven AE2020+AE2025 DOM-readback-correct by the
-// project-settings showcase (flightdeck/showcase/project-settings, RE-fixed
+// project-settings showcase (showcase/project-settings, RE-fixed
 // 2026-06-14 for the nnhd→legacy-nhed display group) but had no automated Go
 // _AEShipGate test, so the caps were capped at verify=roundtrip — a
 // verification-hygiene hole. This gate sets a NON-DEFAULT value for each and

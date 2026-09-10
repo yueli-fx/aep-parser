@@ -1,0 +1,159 @@
+{
+  "schema_version": 1,
+  "project": {
+    "target_version": "AE2020",
+    "name": "lower-third"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 4,
+      "layers": [
+        {
+          "type": "text",
+          "name": "Name",
+          "text": "YUELI",
+          "text_style": {
+            "font_size": 68,
+            "fill_color": [
+              255,
+              255,
+              255,
+              255
+            ]
+          },
+          "transform": {
+            "position": [
+              180,
+              850
+            ],
+            "position_keyframes": [
+              {
+                "time": 0,
+                "value": [
+                  100,
+                  850
+                ]
+              },
+              {
+                "time": 0.7,
+                "value": [
+                  180,
+                  850
+                ]
+              }
+            ],
+            "opacity_keyframes": [
+              {
+                "time": 0,
+                "value": 0
+              },
+              {
+                "time": 0.7,
+                "value": 100
+              }
+            ]
+          }
+        },
+        {
+          "type": "text",
+          "name": "Role",
+          "text": "CREATIVE DEVELOPER",
+          "text_style": {
+            "font_size": 30,
+            "fill_color": [
+              255,
+              255,
+              255,
+              255
+            ]
+          },
+          "transform": {
+            "position": [
+              182,
+              910
+            ],
+            "position_keyframes": [
+              {
+                "time": 0.15,
+                "value": [
+                  102,
+                  910
+                ]
+              },
+              {
+                "time": 0.85,
+                "value": [
+                  182,
+                  910
+                ]
+              }
+            ],
+            "opacity_keyframes": [
+              {
+                "time": 0.15,
+                "value": 0
+              },
+              {
+                "time": 0.85,
+                "value": 100
+              }
+            ]
+          }
+        },
+        {
+          "type": "shape",
+          "name": "Accent",
+          "shape": {
+            "kind": "rect",
+            "size": [
+              8,
+              136
+            ],
+            "fill_color": [
+              90,
+              220,
+              175
+            ]
+          },
+          "transform": {
+            "position": [
+              145,
+              855
+            ]
+          }
+        },
+        {
+          "type": "shape",
+          "name": "Panel",
+          "shape": {
+            "kind": "rect",
+            "size": [
+              780,
+              210
+            ],
+            "fill_color": [
+              20,
+              26,
+              36
+            ]
+          },
+          "transform": {
+            "position": [
+              490,
+              850
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 4,
+    "text_layer_count": 2
+  }
+}

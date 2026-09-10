@@ -4,7 +4,7 @@ import "testing"
 
 func TestBuildMigrationCoverageSummaryIndexesRecipesDomainsAndHostEvidence(t *testing.T) {
 	root := newTestRegistryRoot(t)
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", migrationCoverageSummaryFixture())
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", migrationCoverageSummaryFixture())
 	writeMatrixFixtureWithCases(t, root, "tmp/matrix/text/matrix.json", []map[string]any{
 		{"recipe_name": "minimal-text-a", "source_version": "AE2020", "target_version": "AE2020", "status": "pass"},
 		{"recipe_name": "minimal-text-a", "source_version": "AE2020", "target_version": "AE2025", "status": "blocked"},
@@ -19,11 +19,11 @@ func TestBuildMigrationCoverageSummaryIndexesRecipesDomainsAndHostEvidence(t *te
 		{"recipe_name": "minimal-shape-a", "source_version": "AE2020", "target_version": "AE2020", "status": "pass"},
 	})
 
-	summary, err := BuildMigrationCoverageSummary(root, "flightdeck/work/aep-understanding-generation/coverage.json")
+	summary, err := BuildMigrationCoverageSummary(root, "registry/workflows/aep-understanding-generation/coverage.json")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if summary.SchemaVersion != 1 || summary.GeneratedFrom != "flightdeck/work/aep-understanding-generation/coverage.json" {
+	if summary.SchemaVersion != 1 || summary.GeneratedFrom != "registry/workflows/aep-understanding-generation/coverage.json" {
 		t.Fatalf("summary identity = %d/%q", summary.SchemaVersion, summary.GeneratedFrom)
 	}
 	if summary.Totals.CoverageRecords != 2 || summary.Totals.Domains != 2 || summary.Totals.Recipes != 3 {
@@ -60,18 +60,18 @@ func TestBuildMigrationCoverageSummaryIndexesRecipesDomainsAndHostEvidence(t *te
 
 func TestCheckMigrationCoverageSummaryReportsDrift(t *testing.T) {
 	root := newTestRegistryRoot(t)
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", migrationCoverageSummaryFixture())
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", migrationCoverageSummaryFixture())
 	writeMatrixFixtureWithCases(t, root, "tmp/matrix/text/matrix.json", nil)
 	writeMatrixFixtureWithCases(t, root, "tmp/host/text/matrix.json", nil)
 	writeMatrixFixtureWithCases(t, root, "tmp/matrix/shape/matrix.json", nil)
-	summary, err := BuildMigrationCoverageSummary(root, "flightdeck/work/aep-understanding-generation/coverage.json")
+	summary, err := BuildMigrationCoverageSummary(root, "registry/workflows/aep-understanding-generation/coverage.json")
 	if err != nil {
 		t.Fatal(err)
 	}
 	summary.Totals.Recipes = 99
 	writeJSON(t, root, "tmp/migration_coverage_summary.json", summary)
 
-	report, err := CheckMigrationCoverageSummary(root, "flightdeck/work/aep-understanding-generation/coverage.json", "tmp/migration_coverage_summary.json")
+	report, err := CheckMigrationCoverageSummary(root, "registry/workflows/aep-understanding-generation/coverage.json", "tmp/migration_coverage_summary.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -82,7 +82,7 @@ func TestCheckMigrationCoverageSummaryReportsDrift(t *testing.T) {
 
 func TestQueryMigrationCoverageSummaryFiltersTotalsRecipeAndEvidenceLevel(t *testing.T) {
 	root := newTestRegistryRoot(t)
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", migrationCoverageSummaryFixture())
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", migrationCoverageSummaryFixture())
 	writeMatrixFixtureWithCases(t, root, "tmp/matrix/text/matrix.json", []map[string]any{
 		{"recipe_name": "minimal-text-a", "source_version": "AE2020", "target_version": "AE2020", "status": "pass"},
 		{"recipe_name": "minimal-text-b", "source_version": "AE2025", "target_version": "AE2025", "status": "pass"},
@@ -93,7 +93,7 @@ func TestQueryMigrationCoverageSummaryFiltersTotalsRecipeAndEvidenceLevel(t *tes
 	writeMatrixFixtureWithCases(t, root, "tmp/matrix/shape/matrix.json", []map[string]any{
 		{"recipe_name": "minimal-shape-a", "source_version": "AE2020", "target_version": "AE2020", "status": "pass"},
 	})
-	summary, err := BuildMigrationCoverageSummary(root, "flightdeck/work/aep-understanding-generation/coverage.json")
+	summary, err := BuildMigrationCoverageSummary(root, "registry/workflows/aep-understanding-generation/coverage.json")
 	if err != nil {
 		t.Fatal(err)
 	}

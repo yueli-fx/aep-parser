@@ -23,7 +23,7 @@ func TestGeneratedUpToDate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if errs := validateEntries(entries, gates, filepath.Join(root, "flightdeck", "incidents")); len(errs) > 0 {
+	if errs := validateEntries(entries, gates, filepath.Join(root, "docs", "incidents")); len(errs) > 0 {
 		for _, e := range errs {
 			t.Error(e)
 		}

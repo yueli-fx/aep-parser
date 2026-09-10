@@ -2,6 +2,7 @@ package recipe
 
 import (
 	"fmt"
+	"github.com/yueli-fx/aep-parser/internal/serializer"
 
 	"github.com/yueli-fx/aep-parser/internal/aep"
 )
@@ -230,19 +231,19 @@ func applyEffectParam(layer *aep.Layer, fx *aep.Effect, param EffectParam) (*aep
 			if err != nil {
 				return nil, err
 			}
-			return aep.AnimateEffectParam(layer, fx, param.MatchName, keyframes)
+			return serializer.AnimateEffectParam(layer, fx, param.MatchName, keyframes)
 		}
 		keyframes, err := effectParamVectorKeyframes(param.Keyframes)
 		if err != nil {
 			return nil, err
 		}
-		return aep.AnimateEffectParamVec(layer, fx, param.MatchName, keyframes)
+		return serializer.AnimateEffectParamVec(layer, fx, param.MatchName, keyframes)
 	}
 	value, err := normalizeEffectParamValue(param.Value)
 	if err != nil {
 		return nil, err
 	}
-	return aep.SetEffectParam(layer, fx, param.MatchName, value)
+	return serializer.SetEffectParam(layer, fx, param.MatchName, value)
 }
 
 func effectParamScalarKeyframes(in []ValueKeyframe) ([]aep.ScalarKeyframe, error) {

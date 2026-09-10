@@ -22,7 +22,7 @@ asset ownership, evidence, workflows, and version coverage.
 
 ## What Does Not Belong Here
 
-- Human-only planning drafts. Use `flightdeck/work/`.
+- Human-only planning drafts. Keep these in the maintainer’s work desk, outside the public documentation.
 - Temporary dumps or scratch command output. Use `tmp/`.
 - Public prose documentation generated from source comments. Use `docs/`.
 

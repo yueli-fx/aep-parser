@@ -76,7 +76,7 @@ func TestRunCurrentWritesValidationReport(t *testing.T) {
 	code := run([]string{
 		"current",
 		"-root", root,
-		"-current", "flightdeck/work/aep-understanding-generation/current.json",
+		"-current", "registry/workflows/aep-understanding-generation/current.json",
 		"-out", out,
 	})
 	if code != 0 {
@@ -98,9 +98,9 @@ func TestRunCurrentWritesValidationReport(t *testing.T) {
 func TestRunCurrentReturnsOneForValidationFailure(t *testing.T) {
 	root := newRegistryRoot(t)
 	writeCurrentCommandFixture(t, root)
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/current.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/current.json", map[string]any{
 		"truth_sources": map[string]any{
-			"current":  "flightdeck/work/aep-understanding-generation/current.json",
+			"current":  "registry/workflows/aep-understanding-generation/current.json",
 			"coverage": "missing/coverage.json",
 		},
 	})
@@ -109,7 +109,7 @@ func TestRunCurrentReturnsOneForValidationFailure(t *testing.T) {
 	code := run([]string{
 		"current",
 		"-root", root,
-		"-current", "flightdeck/work/aep-understanding-generation/current.json",
+		"-current", "registry/workflows/aep-understanding-generation/current.json",
 		"-out", out,
 	})
 	if code != 1 {
@@ -119,7 +119,7 @@ func TestRunCurrentReturnsOneForValidationFailure(t *testing.T) {
 
 func TestRunHostOpenGapsWritesPlannerReport(t *testing.T) {
 	root := newRegistryRoot(t)
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", map[string]any{
 		"schema_version": 1,
 		"host_open_policy": map[string]any{
 			"endpoint_inference": map[string]any{
@@ -141,7 +141,7 @@ func TestRunHostOpenGapsWritesPlannerReport(t *testing.T) {
 	code := run([]string{
 		"host-open-gaps",
 		"-root", root,
-		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-coverage", "registry/workflows/aep-understanding-generation/coverage.json",
 		"-out", out,
 		"-ae-root", "E:/adobe",
 		"-max-ae-open-cases", "8",
@@ -167,7 +167,7 @@ func TestRunHostOpenGapsWritesPlannerReport(t *testing.T) {
 
 func TestRunMigrationSummaryWritesAndChecksReport(t *testing.T) {
 	root := newRegistryRoot(t)
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", map[string]any{
 		"schema_version":   1,
 		"writer_axes":      map[string]any{"source_writers": []string{"AE2020"}, "target_writers": []string{"AE2025"}},
 		"host_open_axis":   map[string]any{"hosts": []string{"AE2020", "AE2025"}},
@@ -194,7 +194,7 @@ func TestRunMigrationSummaryWritesAndChecksReport(t *testing.T) {
 	})
 	out := filepath.Join(root, "tmp", "migration_coverage_summary.json")
 
-	code := run([]string{"migration-summary", "-root", root, "-coverage", "flightdeck/work/aep-understanding-generation/coverage.json", "-out", out})
+	code := run([]string{"migration-summary", "-root", root, "-coverage", "registry/workflows/aep-understanding-generation/coverage.json", "-out", out})
 	if code != 0 {
 		t.Fatalf("run(migration-summary) = %d, want 0", code)
 	}
@@ -210,7 +210,7 @@ func TestRunMigrationSummaryWritesAndChecksReport(t *testing.T) {
 		t.Fatalf("summary totals/index = %+v/%+v", summary.Totals, summary.RecipeIndex)
 	}
 
-	code = run([]string{"migration-summary", "-root", root, "-coverage", "flightdeck/work/aep-understanding-generation/coverage.json", "-out", out, "-check"})
+	code = run([]string{"migration-summary", "-root", root, "-coverage", "registry/workflows/aep-understanding-generation/coverage.json", "-out", out, "-check"})
 	if code != 0 {
 		t.Fatalf("run(migration-summary -check) = %d, want 0", code)
 	}
@@ -218,7 +218,7 @@ func TestRunMigrationSummaryWritesAndChecksReport(t *testing.T) {
 
 func TestRunMigrationSummaryQueriesExistingReport(t *testing.T) {
 	root := newRegistryRoot(t)
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", map[string]any{
 		"schema_version":   1,
 		"writer_axes":      map[string]any{"source_writers": []string{"AE2020"}, "target_writers": []string{"AE2025"}},
 		"host_open_axis":   map[string]any{"hosts": []string{"AE2020", "AE2025"}},
@@ -244,7 +244,7 @@ func TestRunMigrationSummaryQueriesExistingReport(t *testing.T) {
 		},
 	})
 	out := filepath.Join(root, "tmp", "migration_coverage_summary.json")
-	if code := run([]string{"migration-summary", "-root", root, "-coverage", "flightdeck/work/aep-understanding-generation/coverage.json", "-out", out}); code != 0 {
+	if code := run([]string{"migration-summary", "-root", root, "-coverage", "registry/workflows/aep-understanding-generation/coverage.json", "-out", out}); code != 0 {
 		t.Fatalf("render migration summary = %d, want 0", code)
 	}
 
@@ -336,14 +336,14 @@ func TestRunLayoutWritesCleanupGuardrailReport(t *testing.T) {
 	writeFile(t, root, "examples/recipes/unowned.json", "{}\n")
 	writeFile(t, root, "tmp/orphan/matrix.json", "{}\n")
 	writeFile(t, root, "tmp/orphan/log.txt", "log\n")
-	writeFile(t, root, "flightdeck/work/aep-understanding-generation/current.json", `{"matrix":"tmp/orphan/matrix.json"}`)
+	writeFile(t, root, "registry/workflows/aep-understanding-generation/current.json", `{"matrix":"tmp/orphan/matrix.json"}`)
 	out := filepath.Join(root, "tmp", "registry_layout.json")
 
 	code := run([]string{
 		"layout",
 		"-root", root,
 		"-out", out,
-		"-state-ref", "flightdeck/work/aep-understanding-generation/current.json",
+		"-state-ref", "registry/workflows/aep-understanding-generation/current.json",
 		"-sample-limit", "1",
 	})
 	if code != 0 {
@@ -466,14 +466,14 @@ func TestRunCleanupRejectsPruneReviewApplyWithoutProducer(t *testing.T) {
 
 func TestRunCoverageWritesReportAndReturnsOneForDrift(t *testing.T) {
 	root := newRegistryRoot(t)
-	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 3)
+	writeCoverageFixture(t, root, "registry/workflows/aep-understanding-generation/coverage.json", 3)
 	writeMatrixFixture(t, root, "tmp/matrix/text/matrix.json", 2)
 	out := filepath.Join(root, "tmp", "registry_coverage.json")
 
 	code := run([]string{
 		"coverage",
 		"-root", root,
-		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-coverage", "registry/workflows/aep-understanding-generation/coverage.json",
 		"-out", out,
 	})
 	if code != 1 {
@@ -495,7 +495,7 @@ func TestRunCoverageWritesReportAndReturnsOneForDrift(t *testing.T) {
 
 func TestRunCoverageCanRequireLedgers(t *testing.T) {
 	root := newRegistryRoot(t)
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", map[string]any{
 		"schema_version":   1,
 		"host_open_policy": validHostOpenPolicyFixture(),
 		"coverage": []map[string]any{
@@ -514,7 +514,7 @@ func TestRunCoverageCanRequireLedgers(t *testing.T) {
 	code := run([]string{
 		"coverage",
 		"-root", root,
-		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-coverage", "registry/workflows/aep-understanding-generation/coverage.json",
 		"-out", out,
 		"-require-ledgers",
 	})
@@ -542,7 +542,7 @@ func TestRunCoverageBatchCanListBatches(t *testing.T) {
 	code := run([]string{
 		"coverage-batch",
 		"-root", root,
-		"-current", "flightdeck/work/aep-understanding-generation/current.json",
+		"-current", "registry/workflows/aep-understanding-generation/current.json",
 		"-out", out,
 		"-list",
 	})
@@ -570,8 +570,8 @@ func TestRunCoverageBatchSkipRunWritesReport(t *testing.T) {
 	code := run([]string{
 		"coverage-batch",
 		"-root", root,
-		"-current", "flightdeck/work/aep-understanding-generation/current.json",
-		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-current", "registry/workflows/aep-understanding-generation/current.json",
+		"-coverage", "registry/workflows/aep-understanding-generation/coverage.json",
 		"-out", out,
 		"-batch-id", "all",
 		"-skip-run",
@@ -600,8 +600,8 @@ func TestRunCoverageBatchSyncUpdatesCoverageCandidate(t *testing.T) {
 	code := run([]string{
 		"coverage-batch",
 		"-root", root,
-		"-current", "flightdeck/work/aep-understanding-generation/current.json",
-		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-current", "registry/workflows/aep-understanding-generation/current.json",
+		"-coverage", "registry/workflows/aep-understanding-generation/coverage.json",
 		"-out", out,
 		"-batch-id", "all",
 		"-skip-run",
@@ -627,7 +627,7 @@ func TestRunCoverageBatchSyncUpdatesCoverageCandidate(t *testing.T) {
 			Totals registry.CoverageTotals `json:"totals"`
 		} `json:"coverage"`
 	}
-	data, err = os.ReadFile(filepath.Join(root, filepath.FromSlash("flightdeck/work/aep-understanding-generation/coverage.json")))
+	data, err = os.ReadFile(filepath.Join(root, filepath.FromSlash("registry/workflows/aep-understanding-generation/coverage.json")))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -654,8 +654,8 @@ func TestRunCoverageBatchRunMatricesExecutesGoPlanAndSyncs(t *testing.T) {
 	code := run([]string{
 		"coverage-batch",
 		"-root", root,
-		"-current", "flightdeck/work/aep-understanding-generation/current.json",
-		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-current", "registry/workflows/aep-understanding-generation/current.json",
+		"-coverage", "registry/workflows/aep-understanding-generation/coverage.json",
 		"-out", out,
 		"-batch-id", "all",
 		"-run-matrices",
@@ -686,7 +686,7 @@ func TestRunCoverageBatchRunMatricesExecutesGoPlanAndSyncs(t *testing.T) {
 			Totals registry.CoverageTotals `json:"totals"`
 		} `json:"coverage"`
 	}
-	data, err = os.ReadFile(filepath.Join(root, filepath.FromSlash("flightdeck/work/aep-understanding-generation/coverage.json")))
+	data, err = os.ReadFile(filepath.Join(root, filepath.FromSlash("registry/workflows/aep-understanding-generation/coverage.json")))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -706,8 +706,8 @@ func TestRunCheckpointWritesOrderedReport(t *testing.T) {
 	code := run([]string{
 		"checkpoint",
 		"-root", root,
-		"-current", "flightdeck/work/aep-understanding-generation/current.json",
-		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-current", "registry/workflows/aep-understanding-generation/current.json",
+		"-coverage", "registry/workflows/aep-understanding-generation/coverage.json",
 		"-summary", "tmp/migration_coverage_summary.json",
 		"-out", out,
 		"-skip-diff-check",
@@ -740,8 +740,8 @@ func TestRunCheckpointWritesVersionBoundaryGateBeforeCoverageValidation(t *testi
 	code := run([]string{
 		"checkpoint",
 		"-root", root,
-		"-current", "flightdeck/work/aep-understanding-generation/current.json",
-		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-current", "registry/workflows/aep-understanding-generation/current.json",
+		"-coverage", "registry/workflows/aep-understanding-generation/coverage.json",
 		"-summary", "tmp/migration_coverage_summary.json",
 		"-out", out,
 		"-skip-diff-check",
@@ -773,8 +773,8 @@ func TestRunCheckpointCanReplayCoverageBatchWithGoSync(t *testing.T) {
 	code := run([]string{
 		"checkpoint",
 		"-root", root,
-		"-current", "flightdeck/work/aep-understanding-generation/current.json",
-		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-current", "registry/workflows/aep-understanding-generation/current.json",
+		"-coverage", "registry/workflows/aep-understanding-generation/coverage.json",
 		"-summary", "tmp/migration_coverage_summary.json",
 		"-out", out,
 		"-include-coverage-batch",
@@ -814,8 +814,8 @@ func TestRunCheckpointCanRerunCoverageBatchMatrices(t *testing.T) {
 	code := run([]string{
 		"checkpoint",
 		"-root", root,
-		"-current", "flightdeck/work/aep-understanding-generation/current.json",
-		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-current", "registry/workflows/aep-understanding-generation/current.json",
+		"-coverage", "registry/workflows/aep-understanding-generation/coverage.json",
 		"-summary", "tmp/migration_coverage_summary.json",
 		"-out", out,
 		"-include-coverage-batch",
@@ -844,8 +844,8 @@ func TestRunCheckpointCanRerunCoverageBatchMatrices(t *testing.T) {
 func TestRunCheckpointTreatsHostOpenGapsAsPlannedWork(t *testing.T) {
 	root := newRegistryRoot(t)
 	writeCheckpointCommandFixture(t, root, 2)
-	currentPath := "flightdeck/work/aep-understanding-generation/current.json"
-	coveragePath := "flightdeck/work/aep-understanding-generation/coverage.json"
+	currentPath := "registry/workflows/aep-understanding-generation/current.json"
+	coveragePath := "registry/workflows/aep-understanding-generation/coverage.json"
 	var current map[string]any
 	if err := readJSONFile(filepath.Join(root, filepath.FromSlash(currentPath)), &current); err != nil {
 		t.Fatal(err)
@@ -888,7 +888,7 @@ func TestRunCheckpointTreatsHostOpenGapsAsPlannedWork(t *testing.T) {
 
 func TestRunCoverageCanWriteSummaryReport(t *testing.T) {
 	root := newRegistryRoot(t)
-	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 2)
+	writeCoverageFixture(t, root, "registry/workflows/aep-understanding-generation/coverage.json", 2)
 	writeJSON(t, root, "tmp/matrix/text/matrix.json", map[string]any{
 		"schema_version": 1,
 		"summary":        map[string]any{"total": 2, "passed": 2, "blocked": 0, "failed": 0, "skipped": 0},
@@ -902,7 +902,7 @@ func TestRunCoverageCanWriteSummaryReport(t *testing.T) {
 	code := run([]string{
 		"coverage",
 		"-root", root,
-		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-coverage", "registry/workflows/aep-understanding-generation/coverage.json",
 		"-out", out,
 		"-summary",
 	})
@@ -931,7 +931,7 @@ func TestRunCoverageCanWriteSummaryReport(t *testing.T) {
 
 func TestRunCoverageCanWriteVersionAxisReport(t *testing.T) {
 	root := newRegistryRoot(t)
-	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 2)
+	writeCoverageFixture(t, root, "registry/workflows/aep-understanding-generation/coverage.json", 2)
 	writeJSON(t, root, "tmp/matrix/text/matrix.json", map[string]any{
 		"schema_version": 1,
 		"summary":        map[string]any{"total": 2, "passed": 2, "blocked": 0, "failed": 0, "skipped": 0},
@@ -945,7 +945,7 @@ func TestRunCoverageCanWriteVersionAxisReport(t *testing.T) {
 	code := run([]string{
 		"coverage",
 		"-root", root,
-		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-coverage", "registry/workflows/aep-understanding-generation/coverage.json",
 		"-out", out,
 		"-axis",
 		"-versions", "AE2020,AE2025",
@@ -969,7 +969,7 @@ func TestRunCoverageCanWriteVersionAxisReport(t *testing.T) {
 
 func TestRunCoverageAxisSupportsFocusedFilters(t *testing.T) {
 	root := newRegistryRoot(t)
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", map[string]any{
 		"schema_version":   1,
 		"host_open_policy": validHostOpenPolicyFixture(),
 		"coverage": []map[string]any{
@@ -995,7 +995,7 @@ func TestRunCoverageAxisSupportsFocusedFilters(t *testing.T) {
 	code := run([]string{
 		"coverage",
 		"-root", root,
-		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-coverage", "registry/workflows/aep-understanding-generation/coverage.json",
 		"-out", out,
 		"-axis",
 		"-atom", "text.source.default",
@@ -1022,7 +1022,7 @@ func TestRunCoverageAxisSupportsFocusedFilters(t *testing.T) {
 	code = run([]string{
 		"coverage",
 		"-root", root,
-		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-coverage", "registry/workflows/aep-understanding-generation/coverage.json",
 		"-out", axisStatusOut,
 		"-axis",
 		"-writer-axis-status", "partial_source_target_axis",
@@ -1047,7 +1047,7 @@ func TestRunCoverageAxisSupportsFocusedFilters(t *testing.T) {
 	code = run([]string{
 		"coverage",
 		"-root", root,
-		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-coverage", "registry/workflows/aep-understanding-generation/coverage.json",
 		"-out", domainOut,
 		"-axis",
 		"-domain", "text",
@@ -1071,7 +1071,7 @@ func TestRunCoverageAxisSupportsFocusedFilters(t *testing.T) {
 	code = run([]string{
 		"coverage",
 		"-root", root,
-		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-coverage", "registry/workflows/aep-understanding-generation/coverage.json",
 		"-out", missingTargetOut,
 		"-axis",
 		"-missing-target-version", "AE2025",
@@ -1100,7 +1100,7 @@ func TestRunBoundariesWritesBoundaryCheckReport(t *testing.T) {
 	code := run([]string{
 		"boundaries",
 		"-root", root,
-		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-coverage", "registry/workflows/aep-understanding-generation/coverage.json",
 		"-out", out,
 		"-versions", "AE2020,AE2025",
 	})
@@ -1129,7 +1129,7 @@ func TestRunBoundariesReturnsOneForBoundaryDrift(t *testing.T) {
 	code := run([]string{
 		"boundaries",
 		"-root", root,
-		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-coverage", "registry/workflows/aep-understanding-generation/coverage.json",
 		"-out", out,
 		"-versions", "AE2020,AE2025",
 	})
@@ -1147,7 +1147,7 @@ func TestRunGateWritesOrderedReports(t *testing.T) {
 	code := run([]string{
 		"gate",
 		"-root", root,
-		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-coverage", "registry/workflows/aep-understanding-generation/coverage.json",
 		"-out", out,
 		"-versions", "AE2020,AE2025",
 	})
@@ -1198,14 +1198,14 @@ func TestRunGateWritesOrderedReports(t *testing.T) {
 
 func TestRunGateDefaultsVersionAxisInReport(t *testing.T) {
 	root := newRegistryRoot(t)
-	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 0)
+	writeCoverageFixture(t, root, "registry/workflows/aep-understanding-generation/coverage.json", 0)
 	writeMatrixFixture(t, root, "tmp/matrix/text/matrix.json", 0)
 	out := filepath.Join(root, "tmp", "registry_gate.json")
 
 	code := run([]string{
 		"gate",
 		"-root", root,
-		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-coverage", "registry/workflows/aep-understanding-generation/coverage.json",
 		"-out", out,
 	})
 	if code != 0 {
@@ -1237,7 +1237,7 @@ func TestRunGateReturnsOneForFailedStep(t *testing.T) {
 	code := run([]string{
 		"gate",
 		"-root", root,
-		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-coverage", "registry/workflows/aep-understanding-generation/coverage.json",
 		"-out", out,
 		"-versions", "AE2020,AE2025",
 	})
@@ -1281,7 +1281,7 @@ func TestRunGateReturnsOneForStaleMainlineSpecCoverageAxisSummary(t *testing.T) 
 	code := run([]string{
 		"gate",
 		"-root", root,
-		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-coverage", "registry/workflows/aep-understanding-generation/coverage.json",
 		"-out", out,
 		"-versions", "AE2020,AE2025",
 	})
@@ -1317,7 +1317,7 @@ func TestRunGateReturnsOneForStaleMainlineSpecCoverageAxisSummary(t *testing.T) 
 
 func TestRunGateReturnsOneForStaleMainlineSpecCoverageSummaryTotals(t *testing.T) {
 	root := newRegistryRoot(t)
-	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 2)
+	writeCoverageFixture(t, root, "registry/workflows/aep-understanding-generation/coverage.json", 2)
 	writeJSON(t, root, "tmp/matrix/text/matrix.json", map[string]any{
 		"schema_version": 1,
 		"summary":        map[string]any{"total": 2, "passed": 2, "blocked": 0, "failed": 0, "skipped": 0},
@@ -1346,7 +1346,7 @@ func TestRunGateReturnsOneForStaleMainlineSpecCoverageSummaryTotals(t *testing.T
 	code := run([]string{
 		"gate",
 		"-root", root,
-		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-coverage", "registry/workflows/aep-understanding-generation/coverage.json",
 		"-out", out,
 		"-versions", "AE2020,AE2025",
 	})
@@ -1382,7 +1382,7 @@ func TestRunGateReturnsOneForStaleMainlineSpecCoverageSummaryTotals(t *testing.T
 
 func TestRunGateReturnsOneForStaleMainlineSpecUndeclaredRecipeTotals(t *testing.T) {
 	root := newRegistryRoot(t)
-	writeCoverageFixture(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", 1)
+	writeCoverageFixture(t, root, "registry/workflows/aep-understanding-generation/coverage.json", 1)
 	writeJSON(t, root, "tmp/matrix/text/matrix.json", map[string]any{
 		"schema_version": 1,
 		"summary":        map[string]any{"total": 1, "passed": 1, "blocked": 0, "failed": 0, "skipped": 0},
@@ -1412,7 +1412,7 @@ func TestRunGateReturnsOneForStaleMainlineSpecUndeclaredRecipeTotals(t *testing.
 	code := run([]string{
 		"gate",
 		"-root", root,
-		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-coverage", "registry/workflows/aep-understanding-generation/coverage.json",
 		"-out", out,
 		"-versions", "AE2020,AE2025",
 	})
@@ -1435,7 +1435,7 @@ func TestRunGateReturnsOneForStaleMainlineSpecUndeclaredRecipeTotals(t *testing.
 
 func TestRunGateReturnsOneForRecipeAtomCoverageGaps(t *testing.T) {
 	root := newRegistryRoot(t)
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", map[string]any{
 		"schema_version":   1,
 		"host_open_policy": validHostOpenPolicyFixture(),
 		"coverage": []map[string]any{
@@ -1461,7 +1461,7 @@ func TestRunGateReturnsOneForRecipeAtomCoverageGaps(t *testing.T) {
 	code := run([]string{
 		"gate",
 		"-root", root,
-		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-coverage", "registry/workflows/aep-understanding-generation/coverage.json",
 		"-out", out,
 		"-versions", "AE2020,AE2025",
 	})
@@ -1630,7 +1630,7 @@ func TestRunGateAssetPolicyReturnsOneForLayoutBlockers(t *testing.T) {
 
 func TestRunCoverageCanWriteFilteredAtomRows(t *testing.T) {
 	root := newRegistryRoot(t)
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", map[string]any{
 		"schema_version":   1,
 		"host_open_policy": validHostOpenPolicyFixture(),
 		"coverage": []map[string]any{
@@ -1655,7 +1655,7 @@ func TestRunCoverageCanWriteFilteredAtomRows(t *testing.T) {
 	code := run([]string{
 		"coverage",
 		"-root", root,
-		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-coverage", "registry/workflows/aep-understanding-generation/coverage.json",
 		"-out", out,
 		"-rows",
 		"-record", "text",
@@ -1679,7 +1679,7 @@ func TestRunCoverageCanWriteFilteredAtomRows(t *testing.T) {
 
 func TestRunCoverageCanWriteFilteredMatrixCells(t *testing.T) {
 	root := newRegistryRoot(t)
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", map[string]any{
 		"schema_version":   1,
 		"host_open_policy": validHostOpenPolicyFixture(),
 		"coverage": []map[string]any{
@@ -1705,7 +1705,7 @@ func TestRunCoverageCanWriteFilteredMatrixCells(t *testing.T) {
 	code := run([]string{
 		"coverage",
 		"-root", root,
-		"-coverage", "flightdeck/work/aep-understanding-generation/coverage.json",
+		"-coverage", "registry/workflows/aep-understanding-generation/coverage.json",
 		"-out", out,
 		"-cells",
 		"-atom", "text.source.default",
@@ -1842,7 +1842,7 @@ func writeFile(t *testing.T, root, rel, body string) {
 
 func writeMainlineSpecSummary(t *testing.T, root string, summary map[string]any) {
 	t.Helper()
-	writeJSON(t, root, "flightdeck/work/versioned-aep-migration/mainline-spec.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/versioned-aep-migration/mainline-spec.json", map[string]any{
 		"schema_version": 1,
 		"current_execution": map[string]any{
 			"last_completed_target": map[string]any{
@@ -1856,11 +1856,11 @@ func writeMainlineSpecSummary(t *testing.T, root string, summary map[string]any)
 
 func writeMainlineSpecCoverageSummaryTotals(t *testing.T, root string, totals map[string]any) {
 	t.Helper()
-	axis, err := registry.CoverageAxisWithFilter(root, "flightdeck/work/aep-understanding-generation/coverage.json", []string{"AE2020", "AE2025"}, registry.CoverageAxisFilter{})
+	axis, err := registry.CoverageAxisWithFilter(root, "registry/workflows/aep-understanding-generation/coverage.json", []string{"AE2020", "AE2025"}, registry.CoverageAxisFilter{})
 	if err != nil {
 		t.Fatal(err)
 	}
-	writeJSON(t, root, "flightdeck/work/versioned-aep-migration/mainline-spec.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/versioned-aep-migration/mainline-spec.json", map[string]any{
 		"schema_version": 1,
 		"current_execution": map[string]any{
 			"last_completed_target": map[string]any{
@@ -1980,7 +1980,7 @@ func writeMatrixFixture(t *testing.T, root, rel string, total int) {
 
 func writeBoundaryCommandFixture(t *testing.T, root string, expectedCells map[string]any) {
 	t.Helper()
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", map[string]any{
 		"schema_version":   1,
 		"host_open_policy": validHostOpenPolicyFixture(),
 		"coverage": []map[string]any{
@@ -2031,8 +2031,8 @@ func writeBoundaryCommandFixture(t *testing.T, root string, expectedCells map[st
 
 func writeCurrentCommandFixture(t *testing.T, root string) {
 	t.Helper()
-	currentPath := "flightdeck/work/aep-understanding-generation/current.json"
-	coveragePath := "flightdeck/work/aep-understanding-generation/coverage.json"
+	currentPath := "registry/workflows/aep-understanding-generation/current.json"
+	coveragePath := "registry/workflows/aep-understanding-generation/coverage.json"
 	writeJSON(t, root, coveragePath, map[string]any{
 		"schema_version": 1,
 		"coverage": []map[string]any{
@@ -2046,7 +2046,7 @@ func writeCurrentCommandFixture(t *testing.T, root string) {
 	})
 	writeFile(t, root, "tmp/matrix/text/ledger.md", "# ledger\n")
 	writeFile(t, root, "scripts/migration/tool.ps1", "")
-	writeFile(t, root, "flightdeck/work/aep-understanding-generation/frozen.md", "# frozen\n")
+	writeFile(t, root, "registry/workflows/aep-understanding-generation/frozen.md", "# frozen\n")
 	writeJSON(t, root, currentPath, map[string]any{
 		"truth_sources": map[string]any{
 			"current":  currentPath,
@@ -2058,7 +2058,7 @@ func writeCurrentCommandFixture(t *testing.T, root string) {
 				"totals":   map[string]any{"total": 2, "pass": 2, "blocked": 0, "failed": 0, "skipped": 0},
 			},
 		},
-		"frozen_markdown": []map[string]any{{"path": "flightdeck/work/aep-understanding-generation/frozen.md"}},
+		"frozen_markdown": []map[string]any{{"path": "registry/workflows/aep-understanding-generation/frozen.md"}},
 		"tooling":         []map[string]any{{"id": "tool", "script": "scripts/migration/tool.ps1"}},
 		"coverage_batches": []map[string]any{
 			{
@@ -2079,8 +2079,8 @@ func writeCurrentCommandFixture(t *testing.T, root string) {
 
 func writeCoverageBatchCommandFixture(t *testing.T, root string, coverageTotal int) {
 	t.Helper()
-	currentPath := "flightdeck/work/aep-understanding-generation/current.json"
-	coveragePath := "flightdeck/work/aep-understanding-generation/coverage.json"
+	currentPath := "registry/workflows/aep-understanding-generation/current.json"
+	coveragePath := "registry/workflows/aep-understanding-generation/coverage.json"
 	writeJSON(t, root, coveragePath, map[string]any{
 		"schema_version": 1,
 		"coverage": []map[string]any{
@@ -2124,8 +2124,8 @@ func writeCoverageBatchCommandFixture(t *testing.T, root string, coverageTotal i
 
 func writeCheckpointCommandFixture(t *testing.T, root string, coverageTotal int) {
 	t.Helper()
-	currentPath := "flightdeck/work/aep-understanding-generation/current.json"
-	coveragePath := "flightdeck/work/aep-understanding-generation/coverage.json"
+	currentPath := "registry/workflows/aep-understanding-generation/current.json"
+	coveragePath := "registry/workflows/aep-understanding-generation/coverage.json"
 	writeFile(t, root, "examples/recipes/text-basic.json", "{}\n")
 	writeJSON(t, root, coveragePath, map[string]any{
 		"schema_version":   1,
@@ -2155,7 +2155,7 @@ func writeCheckpointCommandFixture(t *testing.T, root string, coverageTotal int)
 	})
 	writeFile(t, root, "tmp/matrix/text/ledger.md", "# ledger\n")
 	writeFile(t, root, "scripts/migration/tool.ps1", "")
-	writeFile(t, root, "flightdeck/work/aep-understanding-generation/frozen.md", "# frozen\n")
+	writeFile(t, root, "registry/workflows/aep-understanding-generation/frozen.md", "# frozen\n")
 	writeJSON(t, root, currentPath, map[string]any{
 		"truth_sources": map[string]any{
 			"current":  currentPath,
@@ -2167,7 +2167,7 @@ func writeCheckpointCommandFixture(t *testing.T, root string, coverageTotal int)
 				"totals":   map[string]any{"total": 2, "pass": 2, "blocked": 0, "failed": 0, "skipped": 0},
 			},
 		},
-		"frozen_markdown": []map[string]any{{"path": "flightdeck/work/aep-understanding-generation/frozen.md"}},
+		"frozen_markdown": []map[string]any{{"path": "registry/workflows/aep-understanding-generation/frozen.md"}},
 		"tooling":         []map[string]any{{"id": "tool", "script": "scripts/migration/tool.ps1"}},
 		"coverage_batches": []map[string]any{
 			{
@@ -2190,8 +2190,8 @@ func writeCheckpointCommandFixture(t *testing.T, root string, coverageTotal int)
 
 func addCheckpointBoundaryContractGate(t *testing.T, root string) {
 	t.Helper()
-	currentPath := "flightdeck/work/aep-understanding-generation/current.json"
-	coveragePath := "flightdeck/work/aep-understanding-generation/coverage.json"
+	currentPath := "registry/workflows/aep-understanding-generation/current.json"
+	coveragePath := "registry/workflows/aep-understanding-generation/coverage.json"
 	var current map[string]any
 	if err := readJSONFile(filepath.Join(root, filepath.FromSlash(currentPath)), &current); err != nil {
 		t.Fatal(err)
@@ -2265,7 +2265,7 @@ func addCheckpointBoundaryContractGate(t *testing.T, root string) {
 
 func addCommandBoundaryContractGate(t *testing.T, root string) {
 	t.Helper()
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", map[string]any{
 		"schema_version":   1,
 		"host_open_policy": validHostOpenPolicyFixture(),
 		"contract_gates": []map[string]any{

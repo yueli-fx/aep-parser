@@ -9,7 +9,7 @@ import (
 
 func TestRunCoverageMDWritesMarkdown(t *testing.T) {
 	root := newRegistryRoot(t)
-	coveragePath := "flightdeck/work/aep-understanding-generation/coverage.json"
+	coveragePath := "registry/workflows/aep-understanding-generation/coverage.json"
 	writeJSON(t, root, coveragePath, map[string]any{
 		"schema_version": 1,
 		"host_open_policy": map[string]any{

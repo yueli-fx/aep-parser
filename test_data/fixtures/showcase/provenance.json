@@ -1,0 +1,26 @@
+{
+  "description": "Self-generated regression inputs for profile, technique, slice, and self-hosted tests. No AE or external project input used during generation.",
+  "files": [
+    {
+      "file": "text.aep",
+      "generator": "showcase/text/gen.go",
+      "command": "go run ./showcase/text",
+      "sha256": "cc9527e1a584ea1b8a38c843a3c7029aa7c5fe5cc52029c8059252cd93e72bd5",
+      "bytes": 75409
+    },
+    {
+      "file": "effects.aep",
+      "generator": "showcase/effects/gen.go",
+      "command": "go run ./showcase/effects",
+      "sha256": "f0254108df1158f0397138d50fda952796b01b0bf454691dba5236b3f4478200",
+      "bytes": 291433
+    },
+    {
+      "file": "pseudo_default.aep",
+      "generator": "showcase/pseudo-effect/gen.go",
+      "command": "go run ./showcase/pseudo-effect",
+      "sha256": "68e6f6e110fa50031009245a368d7254c4a99800fe60181638eac216bb32ec3a",
+      "bytes": 68783
+    }
+  ]
+}

@@ -1948,10 +1948,15 @@ func AnimateTextStrokeColor(layer *Layer, tickRate float64, kfs []VectorKeyframe
 }
 
 // @summary    Set an effect parameter's static value by match-name
-// @description Sets an effect parameter's static value by full parameter match-name
+// @description Sets an effect parameter's static value by parameter name
 //
-//	(e.g. "ADBE Gaussian Blur 2-0001") and returns the parameter's Property. It is
+//	(e.g. "Blurriness" or "模糊度") and returns the parameter's Property. It is
 //	the typed-parameter entry for AddEffect workflows.
+//	Names are case-insensitive and resolved from the current effect's definitions
+//	and bundled English/Chinese dictionary aliases, including default-elided params.
+//	Unknown or ambiguous names and raw match-names fail before mutation.
+//	Dictionary aliases are accepted only for parameters actually
+//	present in this effect's definitions or materialized properties.
 //
 //	AE persists an effect parameter only while its value differs from the default,
 //	so on a default instance the tunable params have no value stream at all. When
@@ -1977,7 +1982,7 @@ func AnimateTextStrokeColor(layer *Layer, tickRate float64, kfs []VectorKeyframe
 //
 // @param      layer           the parsed layer carrying the effect
 // @param      fx              the effect whose parameter to set
-// @param      paramMatchName  the full parameter match-name
+// @param      paramName       an unambiguous parameter name
 // @param      value           the value, in the parameter's on-disk encoding
 // @returns    the parameter Property
 // @domain     effect
@@ -1988,8 +1993,12 @@ func AnimateTextStrokeColor(layer *Layer, tickRate float64, kfs []VectorKeyframe
 // @boundary   scalar/enum/bool/angle/color/2D·3D-point/slider materialize generically; curve and layer-reference types are refused when default-elided
 // @incident   effect-param-elision-synthesis-lite
 // @alias      effect param,效果参数,设参数,blurriness
-func SetEffectParam(layer *Layer, fx *Effect, paramMatchName string, value any) (*Property, error) {
-	return serializer.SetEffectParam(layer, fx, paramMatchName, value)
+func SetEffectParam(layer *Layer, fx *Effect, paramName string, value any) (*Property, error) {
+	matchName, err := serializer.ResolveEffectParamName(layer, fx, paramName)
+	if err != nil {
+		return nil, err
+	}
+	return serializer.SetEffectParam(layer, fx, matchName, value)
 }
 
 // @summary    List parameter match-names with a dedicated template
@@ -2025,7 +2034,7 @@ func SupportedEffectParams() []string { return serializer.SupportedEffectParams(
 //
 // @param      layer           the parsed layer carrying the effect
 // @param      fx              the effect whose parameter to animate
-// @param      paramMatchName  the full parameter match-name (1D scalar)
+// @param      paramName       an unambiguous parameter name (1D scalar)
 // @param      kfs             the scalar keyframes (>= 2)
 // @returns    the animated Property
 // @domain     effect
@@ -2035,8 +2044,12 @@ func SupportedEffectParams() []string { return serializer.SupportedEffectParams(
 // @since      AE2020
 // @boundary   1D scalar only (use AnimateEffectParamVec for color/point); fx must be on a parsed layer (Reopen)
 // @alias      animate effect,效果关键帧,动画模糊,slider rig
-func AnimateEffectParam(layer *Layer, fx *Effect, paramMatchName string, kfs []ScalarKeyframe) (*Property, error) {
-	return serializer.AnimateEffectParam(layer, fx, paramMatchName, kfs)
+func AnimateEffectParam(layer *Layer, fx *Effect, paramName string, kfs []ScalarKeyframe) (*Property, error) {
+	matchName, err := serializer.ResolveEffectParamName(layer, fx, paramName)
+	if err != nil {
+		return nil, err
+	}
+	return serializer.AnimateEffectParam(layer, fx, matchName, kfs)
 }
 
 // @summary    Keyframe a multi-component effect parameter over time
@@ -2056,7 +2069,7 @@ func AnimateEffectParam(layer *Layer, fx *Effect, paramMatchName string, kfs []S
 //
 // @param      layer           the parsed layer carrying the effect
 // @param      fx              the effect whose parameter to animate
-// @param      paramMatchName  the full parameter match-name (color / 2D / 3D point)
+// @param      paramName       an unambiguous parameter name (color / 2D / 3D point)
 // @param      kfs             the vector keyframes (>= 2)
 // @returns    the animated Property
 // @domain     effect
@@ -2066,8 +2079,12 @@ func AnimateEffectParam(layer *Layer, fx *Effect, paramMatchName string, kfs []S
 // @since      AE2020
 // @boundary   2/3/4 components (color/point); use AnimateEffectParam for 1D; fx must be on a parsed layer (Reopen)
 // @alias      animate effect color,效果颜色关键帧,point 动画
-func AnimateEffectParamVec(layer *Layer, fx *Effect, paramMatchName string, kfs []VectorKeyframe) (*Property, error) {
-	return serializer.AnimateEffectParamVec(layer, fx, paramMatchName, kfs)
+func AnimateEffectParamVec(layer *Layer, fx *Effect, paramName string, kfs []VectorKeyframe) (*Property, error) {
+	matchName, err := serializer.ResolveEffectParamName(layer, fx, paramName)
+	if err != nil {
+		return nil, err
+	}
+	return serializer.AnimateEffectParamVec(layer, fx, matchName, kfs)
 }
 
 // @summary    Point a layer-reference effect parameter at a target layer

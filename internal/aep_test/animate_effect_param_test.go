@@ -38,7 +38,7 @@ func TestAnimateEffectParam_RoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("AddEffect: %v", err)
 	}
-	prop, err := aep.AnimateEffectParam(l, fx, "ADBE Gaussian Blur 2-0001",
+	prop, err := aep.AnimateEffectParam(l, fx, "Blurriness",
 		[]aep.ScalarKeyframe{{Time: 0, Value: 0}, {Time: 2, Value: 100}})
 	if err != nil {
 		t.Fatalf("AnimateEffectParam: %v", err)
@@ -91,7 +91,7 @@ func TestAnimateEffectParam_RefuseTooFew(t *testing.T) {
 	rp, _ := aep.Reopen(p)
 	l := rp.Compositions[0].LayerByName("SQ")
 	fx, _ := aep.AddEffect(l, "ADBE Gaussian Blur 2")
-	if _, err := aep.AnimateEffectParam(l, fx, "ADBE Gaussian Blur 2-0001",
+	if _, err := aep.AnimateEffectParam(l, fx, "Blurriness",
 		[]aep.ScalarKeyframe{{Time: 0, Value: 0}}); err == nil {
 		t.Error("AnimateEffectParam with 1 keyframe: want error, got nil")
 	}

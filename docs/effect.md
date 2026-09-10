@@ -206,14 +206,14 @@ embedded template.
 ### SetEffectParam
 
 ```go
-func SetEffectParam(layer *Layer, fx *Effect, paramMatchName string, value any) (*Property, error)
+func SetEffectParam(layer *Layer, fx *Effect, paramName string, value any) (*Property, error)
 ```
 
 Set an effect parameter's static value by match-name
 
-Sets an effect parameter's static value by full parameter match-name
+Sets an effect parameter's static value by parameter name
 
-(e.g. "ADBE Gaussian Blur 2-0001") and returns the parameter's Property. It is the typed-parameter entry for AddEffect workflows.
+(e.g. "Blurriness" or "模糊度") and returns the parameter's Property. It is the typed-parameter entry for AddEffect workflows. Names are case-insensitive and resolved from the current effect's definitions and bundled English/Chinese dictionary aliases, including default-elided params. Unknown or ambiguous names and raw match-names fail before mutation. Dictionary aliases are accepted only for parameters actually present in this effect's definitions or materialized properties.
 
 AE persists an effect parameter only while its value differs from the default, so on a default instance the tunable params have no value stream at all. When the parameter is already present, SetEffectParam is exactly a static-value write; when it is default-elided, the parameter's value stream is first materialized from an embedded AE-native template (patched from the host effect's own definition), then the value is written — matching what AE itself persists for a touched parameter. Any scalar / enum / boolean / angle / color / 2D-point / 3D-point / slider parameter materializes via the generic path; rarer control types (curve, layer, …) return an error when elided, but params already present on the effect are settable regardless.
 
@@ -225,7 +225,7 @@ Atomic (snapshot + rollback on any parser warning or encode failure).
 |---|---|
 | `layer` | the parsed layer carrying the effect |
 | `fx` | the effect whose parameter to set |
-| `paramMatchName` | the full parameter match-name |
+| `paramName` | an unambiguous parameter name |
 | `value` | the value, in the parameter's on-disk encoding |
 
 **Returns:** the parameter Property
@@ -247,7 +247,7 @@ per-parameter template. SetEffectParam is not limited to this list — scalar / 
 ### AnimateEffectParam
 
 ```go
-func AnimateEffectParam(layer *Layer, fx *Effect, paramMatchName string, kfs []ScalarKeyframe) (*Property, error)
+func AnimateEffectParam(layer *Layer, fx *Effect, paramName string, kfs []ScalarKeyframe) (*Property, error)
 ```
 
 Keyframe a 1D-scalar effect parameter over time
@@ -262,7 +262,7 @@ Drives the classic motion-graphics rigs — an animated blur amount, or a slider
 |---|---|
 | `layer` | the parsed layer carrying the effect |
 | `fx` | the effect whose parameter to animate |
-| `paramMatchName` | the full parameter match-name (1D scalar) |
+| `paramName` | an unambiguous parameter name (1D scalar) |
 | `kfs` | the scalar keyframes (>= 2) |
 
 **Returns:** the animated Property
@@ -270,7 +270,7 @@ Drives the classic motion-graphics rigs — an animated blur amount, or a slider
 ### AnimateEffectParamVec
 
 ```go
-func AnimateEffectParamVec(layer *Layer, fx *Effect, paramMatchName string, kfs []VectorKeyframe) (*Property, error)
+func AnimateEffectParamVec(layer *Layer, fx *Effect, paramName string, kfs []VectorKeyframe) (*Property, error)
 ```
 
 Keyframe a multi-component effect parameter over time
@@ -285,7 +285,7 @@ Like the scalar form it materializes the parameter if default-elided, then repla
 |---|---|
 | `layer` | the parsed layer carrying the effect |
 | `fx` | the effect whose parameter to animate |
-| `paramMatchName` | the full parameter match-name (color / 2D / 3D point) |
+| `paramName` | an unambiguous parameter name (color / 2D / 3D point) |
 | `kfs` | the vector keyframes (>= 2) |
 
 **Returns:** the animated Property

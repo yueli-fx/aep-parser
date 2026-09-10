@@ -6,7 +6,7 @@ func TestCheckVersionBoundariesMatchesCoverageAxisTotals(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeBoundaryCheckFixture(t, root, CoverageTotals{Total: 3, Pass: 1, Blocked: 1, Failed: 0, Skipped: 1}, boundaryCheckCases("blocked"))
 
-	report, err := CheckVersionBoundaries(root, "flightdeck/work/aep-understanding-generation/coverage.json", []string{"AE2020", "AE2024", "AE2025"})
+	report, err := CheckVersionBoundaries(root, "registry/workflows/aep-understanding-generation/coverage.json", []string{"AE2020", "AE2024", "AE2025"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -28,7 +28,7 @@ func TestCheckVersionBoundariesReportsCoverageDrift(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeBoundaryCheckFixture(t, root, CoverageTotals{Total: 3, Pass: 1, Blocked: 0, Failed: 0, Skipped: 2}, boundaryCheckCases("blocked"))
 
-	report, err := CheckVersionBoundaries(root, "flightdeck/work/aep-understanding-generation/coverage.json", []string{"AE2020", "AE2024", "AE2025"})
+	report, err := CheckVersionBoundaries(root, "registry/workflows/aep-understanding-generation/coverage.json", []string{"AE2020", "AE2024", "AE2025"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -47,7 +47,7 @@ func TestCheckVersionBoundariesReportsCellPolicyDrift(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeBoundaryCheckFixture(t, root, CoverageTotals{Total: 3, Pass: 2, Blocked: 0, Failed: 0, Skipped: 1}, boundaryCheckCases("pass"))
 
-	report, err := CheckVersionBoundaries(root, "flightdeck/work/aep-understanding-generation/coverage.json", []string{"AE2020", "AE2024", "AE2025"})
+	report, err := CheckVersionBoundaries(root, "registry/workflows/aep-understanding-generation/coverage.json", []string{"AE2020", "AE2024", "AE2025"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -69,7 +69,7 @@ func TestCheckVersionBoundariesReportsCellPolicyDrift(t *testing.T) {
 func TestCheckVersionBoundariesDoesNotRequireExistingContractGateArtifact(t *testing.T) {
 	root := newTestRegistryRoot(t)
 	writeBoundaryCheckFixture(t, root, CoverageTotals{Total: 3, Pass: 1, Blocked: 1, Failed: 0, Skipped: 1}, boundaryCheckCases("blocked"))
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", map[string]any{
 		"schema_version": 1,
 		"contract_gates": []map[string]any{
 			{
@@ -94,7 +94,7 @@ func TestCheckVersionBoundariesDoesNotRequireExistingContractGateArtifact(t *tes
 		},
 	})
 
-	boundaries, err := CheckVersionBoundaries(root, "flightdeck/work/aep-understanding-generation/coverage.json", []string{"AE2020", "AE2024", "AE2025"})
+	boundaries, err := CheckVersionBoundaries(root, "registry/workflows/aep-understanding-generation/coverage.json", []string{"AE2020", "AE2024", "AE2025"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -102,7 +102,7 @@ func TestCheckVersionBoundariesDoesNotRequireExistingContractGateArtifact(t *tes
 		t.Fatalf("boundary status = %q, want pass; issues: %+v", boundaries.Status, boundaries.Issues)
 	}
 
-	coverage, err := ValidateCoverage(root, "flightdeck/work/aep-understanding-generation/coverage.json")
+	coverage, err := ValidateCoverage(root, "registry/workflows/aep-understanding-generation/coverage.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -114,7 +114,7 @@ func TestCheckVersionBoundariesDoesNotRequireExistingContractGateArtifact(t *tes
 
 func writeBoundaryCheckFixture(t *testing.T, root string, expected CoverageTotals, cases []map[string]any) {
 	t.Helper()
-	writeJSON(t, root, "flightdeck/work/aep-understanding-generation/coverage.json", map[string]any{
+	writeJSON(t, root, "registry/workflows/aep-understanding-generation/coverage.json", map[string]any{
 		"schema_version": 1,
 		"coverage": []map[string]any{
 			{
