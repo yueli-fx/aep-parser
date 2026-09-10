@@ -1,5 +1,4 @@
 {
-  "go_version": "go1.25.12",
   "symbols": {
     "AddEffect": {
       "kind": "func",

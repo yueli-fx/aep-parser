@@ -86,7 +86,7 @@ go run ./examples/authoring -out tmp/hello.aep
 go run ./cmd/aep inspect -in tmp/hello.aep
 ```
 
-Go 1.25.12、または同系列の新しいパッチバージョンが必要です。上記の作成・編集 API はリポジトリ内のプログラム向けです。自分の Go モジュールに組み込む場合は、[公開 SDK のサンプル](examples/sdk/README.md)にある `Open`、`Export`、`Compile` などを使ってください。
+Go 1.25.13、または同系列の新しいパッチバージョンが必要です。上記の作成・編集 API はリポジトリ内のプログラム向けです。自分の Go モジュールに組み込む場合は、[公開 SDK のサンプル](examples/sdk/README.md)にある `Open`、`Export`、`Compile` などを使ってください。
 
 ## ほかにも、こんなプロジェクトを生成できます
 

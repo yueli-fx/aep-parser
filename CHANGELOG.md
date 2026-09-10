@@ -22,12 +22,14 @@
 
 ### Fixed
 
+- 文档生成不再记录构建工具链版本，避免 Go 安全补丁升级造成快照和索引无关漂移。
 - 测试与自托管验证改用带生成来源的固定 fixture，不再依赖本地 showcase 输出；文档换行统一为 LF。
 
 - ShapeLayer recipe transform 现在写入 runtime stream，并在版本迁移时保留静态值和关键帧。
 
 ### Security
 
+- 最低 Go 版本提升至 1.25.13，修复 CI 检出的四个可达标准库漏洞（GO-2026-6090、GO-2026-6089、GO-2026-6088、GO-2026-5972）；CI 与发布构建继续统一读取 go.mod。
 - chunk 声明尺寸在分配前与输入、父容器和资源预算核对。
 - path input 默认关闭；启用时拒绝目录和 symlink 逃逸。
 

@@ -84,7 +84,7 @@ go run ./examples/authoring -out tmp/hello.aep
 go run ./cmd/aep inspect -in tmp/hello.aep
 ```
 
-需要 Go 1.25.12 或同系列更新补丁版本。上面的创作 API 用于仓库内程序；接入自己的 Go module 时，使用[公开 SDK 示例](examples/sdk/README.md)中的 `Open`、`Export`、`Compile` 等入口。
+需要 Go 1.25.13 或同系列更新补丁版本。上面的创作 API 用于仓库内程序；接入自己的 Go module 时，使用[公开 SDK 示例](examples/sdk/README.md)中的 `Open`、`Export`、`Compile` 等入口。
 
 ## 不止一个模糊色块
 

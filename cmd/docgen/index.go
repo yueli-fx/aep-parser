@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"runtime"
 	"strings"
 )
 
@@ -13,8 +12,7 @@ import (
 // line summary without scanning the generated markdown. json.Marshal sorts map
 // keys, so output is deterministic (drift-gate friendly).
 type docIndex struct {
-	GoVersion string                `json:"go_version"`
-	Symbols   map[string]indexEntry `json:"symbols"`
+	Symbols map[string]indexEntry `json:"symbols"`
 }
 
 type indexEntry struct {
@@ -32,7 +30,7 @@ type indexEntry struct {
 // the JSON index. It loads each file's package independently (cheap, mirrors
 // generateFile) so the index always reflects the exact symbols rendered.
 func buildIndex(m *manifest) (string, error) {
-	idx := docIndex{GoVersion: runtime.Version(), Symbols: map[string]indexEntry{}}
+	idx := docIndex{Symbols: map[string]indexEntry{}}
 	dirs := m.pkgDirs()
 	lps, err := loadPackages(dirs)
 	if err != nil {

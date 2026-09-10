@@ -84,7 +84,7 @@ go run ./examples/authoring -out tmp/hello.aep
 go run ./cmd/aep inspect -in tmp/hello.aep
 ```
 
-Requires Go 1.25.12 or a newer patch in the same series. The authoring API above is for programs within this repository. For your own Go module, use workflows such as `Open`, `Export`, and `Compile` from the [public SDK examples](examples/sdk/README.md).
+Requires Go 1.25.13 or a newer patch in the same series. The authoring API above is for programs within this repository. For your own Go module, use workflows such as `Open`, `Export`, and `Compile` from the [public SDK examples](examples/sdk/README.md).
 
 ## Go beyond a blurred rectangle
 
